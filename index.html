@@ -701,6 +701,23 @@
   }
   @keyframes flawlessShine{ 0%{background-position:0 0;} 100%{background-position:200% 0;} }
   .combo-line{ margin:10px auto 0;max-width:460px;font-weight:800;font-size:13.5px;color:#B45309;text-align:center; }
+
+  /* ============ 🎯 DÉFIS DU JOUR ============ */
+  .quests-card{ background:#fff;border:1px solid #EEF1F6;border-radius:18px;padding:14px 16px;margin:0 0 14px;box-shadow:0 6px 18px -14px rgba(15,23,42,0.4); }
+  .quests-head{ display:flex;align-items:center;justify-content:space-between;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:15px;color:var(--ink);margin-bottom:10px; }
+  .quests-xp{ background:#FEF3C7;color:#B45309;font-size:12.5px;padding:4px 11px;border-radius:999px; }
+  .quests-alldone{ background:#D1FAE5;color:var(--green-dark);font-weight:800;font-size:13px;text-align:center;padding:8px;border-radius:12px;margin-bottom:10px; }
+  .quest-row{ display:flex;align-items:center;gap:12px;padding:7px 0; }
+  .quest-ic{ font-size:22px;width:30px;text-align:center;flex:none; }
+  .quest-main{ flex:1;min-width:0; }
+  .quest-label{ font-weight:800;font-size:13px;color:var(--text);margin-bottom:5px; }
+  .quest-bar{ position:relative;height:20px;border-radius:999px;background:#EEF1F6;overflow:hidden; }
+  .quest-bar-fill{ height:100%;border-radius:999px;background:linear-gradient(90deg,var(--green),#5EEAD4);transition:width .5s cubic-bezier(.34,1.56,.64,1); }
+  .quest-bar-txt{ position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:var(--ink); }
+
+  .recap-meta{ display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:12px; }
+  .recap-meta-pill{ background:#F1F5F9;color:var(--text);font-weight:800;font-size:13px;padding:7px 15px;border-radius:999px; }
+  .recap-meta-pill.xp{ background:#FEF3C7;color:#B45309; }
 </style>
 </head>
 <body>
@@ -898,6 +915,59 @@ function recordDailyActivity(){
 }
 function goalMetOn(dateKey){ return (dailyLog[dateKey] || 0) >= DAILY_GOAL; }
 
+/* ---- Stats quotidiennes détaillées : temps, réussites ≥90%, points (XP) ---- */
+const DAILY_STATS_KEY = 'lexiqueQuiz::dailyStats';
+const XP_TOTAL_KEY = 'lexiqueQuiz::xpTotal';
+const QUEST_TIME_GOAL = 300;   // 5 minutes
+const QUEST_PASS_GOAL = 2;     // 2 leçons ≥90%
+const QUEST_LESSON_GOAL = 1;   // 1 leçon
+
+function loadDailyStats(){
+  try{ const raw = localStorage.getItem(DAILY_STATS_KEY); return raw ? JSON.parse(raw) : {}; }
+  catch(e){ return {}; }
+}
+function saveDailyStats(){
+  try{ localStorage.setItem(DAILY_STATS_KEY, JSON.stringify(dailyStats)); }catch(e){}
+}
+let dailyStats = loadDailyStats();
+
+function loadXpTotal(){ try{ return parseInt(localStorage.getItem(XP_TOTAL_KEY),10) || 0; }catch(e){ return 0; } }
+function saveXpTotal(){ try{ localStorage.setItem(XP_TOTAL_KEY, String(xpTotal)); }catch(e){} }
+let xpTotal = loadXpTotal();
+
+function todayStats(){
+  const k = todayKey();
+  if(!dailyStats[k]) dailyStats[k] = { seconds:0, passed:0, xp:0 };
+  return dailyStats[k];
+}
+/* Enregistre le temps, une éventuelle réussite ≥90%, et les points gagnés pour aujourd'hui. */
+function recordDailyStats(seconds, passed90, xpEarned){
+  const s = todayStats();
+  s.seconds += Math.min(seconds, 900); // borne anti-triche (15 min max par bloc)
+  if(passed90) s.passed += 1;
+  s.xp += xpEarned;
+  saveDailyStats();
+  xpTotal += xpEarned;
+  saveXpTotal();
+}
+
+/* Les 3 défis du jour, à la Duolingo. */
+function getDailyQuests(){
+  const lessons = dailyLog[todayKey()] || 0;
+  const s = dailyStats[todayKey()] || { seconds:0, passed:0, xp:0 };
+  return [
+    { icon:'📗', label:'Termine 1 bloc', cur:Math.min(lessons, QUEST_LESSON_GOAL), goal:QUEST_LESSON_GOAL },
+    { icon:'⏱️', label:'Passe 5 min à apprendre', cur:Math.min(s.seconds, QUEST_TIME_GOAL), goal:QUEST_TIME_GOAL, isTime:true },
+    { icon:'🏆', label:'Réussis 90%+ dans 2 blocs', cur:Math.min(s.passed, QUEST_PASS_GOAL), goal:QUEST_PASS_GOAL },
+  ];
+}
+function questsAllDone(){ return getDailyQuests().every(q => q.cur >= q.goal); }
+function fmtDuration(sec){
+  const m = Math.floor(sec/60), s = Math.round(sec%60);
+  if(m === 0) return `${s} s`;
+  return `${m} min ${String(s).padStart(2,'0')} s`;
+}
+
 /* Série de jours consécutifs jusqu'à aujourd'hui (ou hier si pas encore fait aujourd'hui). */
 function computeStreak(){
   let streak = 0;
@@ -975,6 +1045,7 @@ let gameMode = 'classic'; // 'classic' | 'blank' | 'chrono'
 let chronoStreak = 0;
 let comboStreak = 0;   // bonnes réponses d'affilée dans le bloc en cours
 let bestCombo = 0;
+let blockStartTime = 0;
 function bumpCombo(isCorrect){
   if(isCorrect){ comboStreak++; if(comboStreak > bestCombo) bestCombo = comboStreak; }
   else { comboStreak = 0; }
@@ -1534,6 +1605,7 @@ function buildDeck(blockIndex){
   comboStreak = 0;
   bestCombo = 0;
   micContinuous = false;
+  blockStartTime = Date.now();
 }
 
 function renderScoreboard(){
@@ -1847,6 +1919,8 @@ function renderBlockSelect(){
   const bestStreak = computeBestStreak();
   const activeDays = daysActiveTotal();
   const goalToday = goalMetOn(todayKey());
+  const quests = getDailyQuests();
+  const allQuestsDone = quests.every(q => q.cur >= q.goal);
 
   let motto;
   if(seenCount === 0){ motto = '✨ Prêt·e ? Lance ton premier bloc !'; }
@@ -1894,6 +1968,27 @@ function renderBlockSelect(){
       </div>
       ${buildWeekStripHtml()}
       <div class="goal-foot">${bestStreak > 0 ? `🏅 Record : ${bestStreak} jour${bestStreak>1?'s':''} · ` : ''}${activeDays} jour${activeDays>1?'s':''} d'apprentissage au total</div>
+    </div>
+
+    <div class="quests-card">
+      <div class="quests-head">
+        <span>🎯 Défis du jour</span>
+        <span class="quests-xp">⭐ ${xpTotal} pts</span>
+      </div>
+      ${allQuestsDone ? `<div class="quests-alldone">🎉 Tu as terminé tous les défis du jour !</div>` : ''}
+      ${quests.map(q => {
+        const done = q.cur >= q.goal;
+        const pctq = Math.round((q.cur / q.goal) * 100);
+        const curTxt = q.isTime ? fmtDuration(q.cur) : q.cur;
+        const goalTxt = q.isTime ? fmtDuration(q.goal) : q.goal;
+        return `<div class="quest-row">
+          <div class="quest-ic ${done ? 'done' : ''}">${done ? '✅' : q.icon}</div>
+          <div class="quest-main">
+            <div class="quest-label">${q.label}</div>
+            <div class="quest-bar"><div class="quest-bar-fill" style="width:${pctq}%;"></div><span class="quest-bar-txt">${curTxt} / ${goalTxt}</span></div>
+          </div>
+        </div>`;
+      }).join('')}
     </div>
 
     <div class="stats-strip">
@@ -2761,6 +2856,10 @@ function renderRecapView(blockIndex, result, justFinished){
       <div class="cat-tag">${justFinished ? 'Bloc ' + (blockIndex+1) + ' terminé' : 'Récapitulatif — Bloc ' + (blockIndex+1)} · ${modeLabel} — ${history.length || result.total} mots</div>
       <div class="big">${result.correct} / ${result.total}</div>
       <div class="sub" style="color:#6B6552;">${pct}% de bonnes réponses au total${errorCount > 0 ? ` · ${errorCount} mot${errorCount>1?'s':''} eu${errorCount>1?'rent':''} au moins une erreur` : ' · sans erreur, bravo !'}</div>
+      ${(result.durationSec || result.xp) ? `<div class="recap-meta">
+        ${result.durationSec ? `<span class="recap-meta-pill">⏱️ ${fmtDuration(result.durationSec)}</span>` : ''}
+        ${result.xp ? `<span class="recap-meta-pill xp">⭐ +${result.xp} points</span>` : ''}
+      </div>` : ''}
       ${passBanner}
       ${modeSummary}
       <div style="display:flex;gap:12px;justify-content:center;margin-top:20px;flex-wrap:wrap;">
@@ -2778,9 +2877,20 @@ function renderRecapView(blockIndex, result, justFinished){
 }
 
 function renderEndScreen(){
-  const result = { correct: score.correct, total: score.total, history: sessionHistory.slice(), mode: gameMode, finishedAt: Date.now(), bestCombo: bestCombo };
+  const durationSec = blockStartTime ? Math.max(1, Math.round((Date.now() - blockStartTime)/1000)) : 0;
+  const pctVal = score.total ? Math.round((score.correct/score.total)*100) : 0;
+  const passed90 = pctVal >= PASS_THRESHOLD;
+  const flawless = score.total > 0 && score.correct === score.total;
+  // Points : 10 par bonne réponse + bonus combo + bonus vitesse/sans-faute
+  const xpEarned = (score.correct * 10) + (bestCombo >= 5 ? 15 : 0) + (flawless ? 25 : 0) + (passed90 ? 15 : 0);
+
+  const result = { correct: score.correct, total: score.total, history: sessionHistory.slice(), mode: gameMode, finishedAt: Date.now(), bestCombo: bestCombo, durationSec: durationSec, xp: xpEarned };
   saveBlockResult(currentBlock, gameMode, result);
   const goalJustMet = recordDailyActivity();
+  const questsBefore = questsAllDone();
+  recordDailyStats(durationSec, passed90, xpEarned);
+  const questsJustDone = !questsBefore && questsAllDone();
+
   renderRecapView(currentBlock, result, true);
   cloudAutoPush();
   // grande fête de fin de bloc 🎉
@@ -2790,15 +2900,19 @@ function renderEndScreen(){
   setTimeout(() => burstStars(window.innerWidth/2, window.innerHeight*0.35), 150);
   if(pct === 1){ setTimeout(() => burstStars(window.innerWidth*0.3, window.innerHeight*0.4), 400); setTimeout(() => burstStars(window.innerWidth*0.7, window.innerHeight*0.4), 550); }
   if(goalJustMet){ setTimeout(showGoalToast, 650); }
+  if(questsJustDone){ setTimeout(() => showGoalToast('🎉 Tous les défis du jour terminés !', 'Bravo, reviens demain pour de nouveaux défis !'), goalJustMet ? 4200 : 650); }
 }
 
-function showGoalToast(){
+function showGoalToast(customTitle, customSub, customIcon){
   const streak = computeStreak();
+  const title = customTitle || 'Objectif du jour atteint !';
+  const sub = customSub || `Série de ${streak} jour${streak>1?'s':''} · reviens demain pour continuer !`;
+  const icon = customIcon || '🔥';
   const toast = document.createElement('div');
   toast.className = 'goal-toast';
-  toast.innerHTML = `<div class="goal-toast-fire">🔥</div>
-    <div><div class="goal-toast-title">Objectif du jour atteint !</div>
-    <div class="goal-toast-sub">Série de ${streak} jour${streak>1?'s':''} · reviens demain pour continuer !</div></div>`;
+  toast.innerHTML = `<div class="goal-toast-fire">${icon}</div>
+    <div><div class="goal-toast-title">${title}</div>
+    <div class="goal-toast-sub">${sub}</div></div>`;
   document.body.appendChild(toast);
   requestAnimationFrame(() => toast.classList.add('show'));
   setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 3800);
@@ -2884,6 +2998,25 @@ function mergeRemoteData(remote){
       }
       if(m){ saveDailyLog(); changed = true; }
 
+    } else if(key === DAILY_STATS_KEY){
+      const remoteStats = safeParse(rv, {});
+      let m = false;
+      for(const day of Object.keys(remoteStats)){
+        const r = remoteStats[day] || {};
+        const l = dailyStats[day] || { seconds:0, passed:0, xp:0 };
+        const merged = {
+          seconds: Math.max(l.seconds||0, r.seconds||0),
+          passed: Math.max(l.passed||0, r.passed||0),
+          xp: Math.max(l.xp||0, r.xp||0),
+        };
+        if(JSON.stringify(merged) !== JSON.stringify(l)){ dailyStats[day] = merged; m = true; }
+      }
+      if(m){ saveDailyStats(); changed = true; }
+
+    } else if(key === XP_TOTAL_KEY){
+      const rx = parseInt(rv,10) || 0;
+      if(rx > xpTotal){ xpTotal = rx; saveXpTotal(); changed = true; }
+
     } else if(key === WORD_STATS_KEY){
       const remoteStats = safeParse(rv, {});
       let m = false;
@@ -2936,6 +3069,8 @@ function mergeRemoteData(remote){
     quizTimerSeconds = loadTimerSetting();
     autoSpeak = loadAutoSpeak();
     dailyLog = loadDailyLog();
+    dailyStats = loadDailyStats();
+    xpTotal = loadXpTotal();
     if(typeof updateAutoSpeakBtn === 'function'){ updateAutoSpeakBtn(); }
     try{ const dv = localStorage.getItem('lexiqueQuiz::dictView'); if(dv==='list'||dv==='cards') dictView = dv; }catch(e){}
     rebuildBlocks();
