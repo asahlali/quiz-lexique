@@ -1,0 +1,19 @@
+{
+  "name": "VocabVISION — Vocabulaire FR ↔ AR",
+  "short_name": "VocabVISION",
+  "description": "Apprends le vocabulaire français-arabe avec des quiz, du chrono, la prononciation et des défis quotidiens.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1E1B4B",
+  "theme_color": "#4F46E5",
+  "lang": "fr",
+  "dir": "ltr",
+  "categories": ["education", "productivity"],
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
