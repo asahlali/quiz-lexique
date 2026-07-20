@@ -651,6 +651,56 @@
   .pm-score{ font-weight:800; }
   .pm-score.ok{ color:var(--green-dark); }
   .pm-score.todo{ color:#B45309; }
+
+  /* ============ ⏳ INDICATEUR DE SYNCHRO VocabVISION ============ */
+  .sync-overlay{
+    position:fixed;inset:0;z-index:3000;display:none;align-items:center;justify-content:center;
+    background:radial-gradient(600px 400px at 50% 40%, rgba(49,46,129,0.96), rgba(15,23,42,0.98));
+    backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+  }
+  .sync-overlay.show{ display:flex;animation:syncFade .3s ease; }
+  .sync-overlay.hide{ animation:syncFadeOut .4s ease forwards; }
+  @keyframes syncFade{ from{opacity:0;} to{opacity:1;} }
+  @keyframes syncFadeOut{ from{opacity:1;} to{opacity:0;} }
+  .sync-box{ display:flex;flex-direction:column;align-items:center;gap:14px; }
+  .sync-logo{ position:relative;width:92px;height:92px;display:flex;align-items:center;justify-content:center; }
+  .sync-logo > svg:first-child{ position:absolute;animation:syncBob 2s ease-in-out infinite;filter:drop-shadow(0 6px 14px rgba(0,0,0,0.4)); }
+  .sync-ring{ position:absolute;animation:syncSpin 1s linear infinite; }
+  @keyframes syncSpin{ to{ transform:rotate(360deg); } }
+  @keyframes syncBob{ 0%,100%{ transform:translateY(0) scale(1);} 50%{ transform:translateY(-4px) scale(1.04);} }
+  .sync-pupil{ animation:syncBlink 2.4s infinite; transform-origin:center; }
+  @keyframes syncBlink{ 0%,92%,100%{ transform:scaleY(1);} 96%{ transform:scaleY(0.1);} }
+  .sync-word{ font-family:'Baloo 2',sans-serif;font-weight:800;font-size:24px;color:#fff;letter-spacing:.01em; }
+  .sync-msg{ font-family:'Nunito',sans-serif;font-weight:700;font-size:13.5px;color:rgba(255,255,255,0.75); }
+  .sync-msg::after{ content:'';animation:syncDots 1.4s steps(4,end) infinite; }
+  @keyframes syncDots{ 0%{content:'';} 25%{content:'.';} 50%{content:'..';} 75%{content:'...';} }
+
+  /* ============ 🧩 JEU DE PAIRES ============ */
+  .pairs-grid{ display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px; }
+  .pairs-col{ display:flex;flex-direction:column;gap:10px; }
+  .pair-tile{
+    border:none;border-radius:14px;padding:16px 12px;cursor:pointer;
+    background:#F1F5F9;color:var(--text);font-family:'Nunito',sans-serif;font-weight:800;font-size:15px;
+    box-shadow:0 4px 0 #E2E8F0;transition:transform .1s,background .15s,box-shadow .1s;min-height:56px;
+    display:flex;align-items:center;justify-content:center;text-align:center;
+  }
+  .pair-tile.ar{ font-family:'Changa',sans-serif;direction:rtl;font-size:19px;color:var(--purple); }
+  .pair-tile:hover:not(.matched){ transform:translateY(-1px);background:#E8EDFF; }
+  .pair-tile:active:not(.matched){ transform:translateY(2px);box-shadow:0 2px 0 #E2E8F0; }
+  .pair-tile.selected{ background:var(--purple);color:#fff;box-shadow:0 4px 0 var(--purple-dark); }
+  .pair-tile.selected.ar{ color:#fff; }
+  .pair-tile.matched{ background:#D1FAE5;color:var(--green-dark);box-shadow:0 4px 0 #6EE7B7;opacity:.6;pointer-events:none; }
+  .pair-tile.matched.ar{ color:var(--green-dark); }
+  .pair-tile.pair-wrong{ background:#FEE2E2;color:var(--red-dark);box-shadow:0 4px 0 #FCA5A5;animation:pairShake .4s ease; }
+  @keyframes pairShake{ 0%,100%{transform:translateX(0);} 25%{transform:translateX(-6px);} 75%{transform:translateX(6px);} }
+
+  .combo-chip{ background:linear-gradient(135deg,#FEF3C7,#FDE68A);color:#B45309; }
+  .pass-banner.flawless{
+    background:linear-gradient(135deg,#FDE68A,#FCA5A5,#C4B5FD);background-size:200% 100%;
+    color:#7C2D12;animation:flawlessShine 3s linear infinite;
+  }
+  @keyframes flawlessShine{ 0%{background-position:0 0;} 100%{background-position:200% 0;} }
+  .combo-line{ margin:10px auto 0;max-width:460px;font-weight:800;font-size:13.5px;color:#B45309;text-align:center; }
 </style>
 </head>
 <body>
@@ -725,6 +775,29 @@
   <div class="footer-note" id="footerNote"></div>
 </div>
 <div class="menu-backdrop" id="menuBackdrop"></div>
+<div class="sync-overlay" id="syncOverlay">
+  <div class="sync-box">
+    <div class="sync-logo" aria-hidden="true">
+      <svg viewBox="0 0 48 48" width="64" height="64">
+        <defs>
+          <linearGradient id="slg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#4F46E5"/><stop offset="1" stop-color="#0EA5A4"/>
+          </linearGradient>
+        </defs>
+        <rect x="3" y="3" width="42" height="42" rx="13" fill="url(#slg)"/>
+        <path d="M9 24 C15 14, 33 14, 39 24 C33 34, 15 34, 9 24 Z" fill="#fff"/>
+        <circle cx="24" cy="24" r="7.5" fill="#38BDF8"/>
+        <circle class="sync-pupil" cx="24" cy="24" r="3.4" fill="#0F172A"/>
+      </svg>
+      <svg class="sync-ring" viewBox="0 0 80 80" width="92" height="92">
+        <circle cx="40" cy="40" r="36" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="5"/>
+        <circle cx="40" cy="40" r="36" fill="none" stroke="#5EEAD4" stroke-width="5" stroke-linecap="round" stroke-dasharray="60 200"/>
+      </svg>
+    </div>
+    <div class="sync-word">Vocab<span class="brand-accent">VISION</span></div>
+    <div class="sync-msg" id="syncOverlayMsg">Synchronisation…</div>
+  </div>
+</div>
 <nav class="menu" id="menu" aria-label="Menu principal">
   <div class="menu-head">
     <div class="menu-head-brand">
@@ -900,6 +973,12 @@ if(savedCustom){ WORDS = savedCustom; }
 
 let gameMode = 'classic'; // 'classic' | 'blank' | 'chrono'
 let chronoStreak = 0;
+let comboStreak = 0;   // bonnes réponses d'affilée dans le bloc en cours
+let bestCombo = 0;
+function bumpCombo(isCorrect){
+  if(isCorrect){ comboStreak++; if(comboStreak > bestCombo) bestCombo = comboStreak; }
+  else { comboStreak = 0; }
+}
 let chronoBestStreak = 0;
 let questionTimer = null;
 
@@ -974,7 +1053,7 @@ function loadBlockResult(blockIndex, mode){
   }catch(e){ return null; }
 }
 
-const GAME_MODES = ['classic', 'blank', 'chrono', 'speak'];
+const GAME_MODES = ['classic', 'blank', 'chrono', 'speak', 'pairs'];
 
 function rebuildBlocks(){
   datasetHash = hashWords(WORDS);
@@ -1284,25 +1363,38 @@ document.getElementById('csvFileInput').addEventListener('change', (e) => {
 });
 
 function commitImport(words){
+  // dédoublonnage contre le lexique existant
   const existingKeys = new Set(WORDS.map(w => w.fr.toLowerCase()));
-  const merged = WORDS.slice();
-  let added = 0, alreadyPresent = 0;
+  const toAdd = [];
+  let alreadyPresent = 0;
   words.forEach(w => {
     const key = w.fr.toLowerCase();
     if(existingKeys.has(key)){ alreadyPresent++; return; }
     existingKeys.add(key);
-    merged.push(w);
-    added++;
+    toAdd.push(w);
   });
-  WORDS = merged;
+  const added = toAdd.length;
+
+  // On calcule la position d'insertion : juste APRÈS les blocs déjà terminés,
+  // pour que les nouveaux mots deviennent les prochains à étudier sans toucher aux blocs finis.
   activeFilterCat = null;
+  rebuildBlocks(); // BLOCKS sur le lexique complet actuel
+  let lastDone = -1;
+  for(let i=0;i<BLOCKS.length;i++){ if(blockHasResult(i)) lastDone = i; }
+  const insertAt = Math.min((lastDone + 1) * BLOCK_SIZE, WORDS.length);
+
+  const merged = WORDS.slice();
+  merged.splice(insertAt, 0, ...toAdd);
+  WORDS = merged;
+
   saveCustomWords(WORDS);
   rebuildBlocks();
   cloudAutoPush();
   const parts = [];
   if(added > 0) parts.push(`${added} nouveau${added>1?'x':''} mot${added>1?'s':''} ajouté${added>1?'s':''}`);
   if(alreadyPresent > 0) parts.push(`${alreadyPresent} déjà présent${alreadyPresent>1?'s':''} ignoré${alreadyPresent>1?'s':''}`);
-  const msg = parts.length ? `✓ ${parts.join(' · ')} — ${WORDS.length} mots au total` : 'Aucun mot importé.';
+  const posInfo = (added > 0 && lastDone >= 0) ? ` · placés dès le bloc ${lastDone+2}` : '';
+  const msg = parts.length ? `✓ ${parts.join(' · ')}${posInfo} — ${WORDS.length} mots au total` : 'Aucun mot importé.';
   setStatus(msg, added > 0 ? 'ok' : 'err');
   renderBlockSelect();
 }
@@ -1439,6 +1531,8 @@ function buildDeck(blockIndex){
   sessionHistory = [];
   attemptsByFr = {};
   chronoStreak = 0;
+  comboStreak = 0;
+  bestCombo = 0;
   micContinuous = false;
 }
 
@@ -1446,6 +1540,9 @@ function renderScoreboard(){
   const el = document.getElementById('scoreboard');
   if(currentBlock === null){ el.innerHTML = ''; return; }
   let html = `<div class="chip total">Bloc ${currentBlock+1} <b>${score.correct}/${score.total}</b></div>`;
+  if(comboStreak >= 2){
+    html += `<div class="chip combo-chip" id="comboChip">🔥 ${comboStreak} d'affilée</div>`;
+  }
   if(gameMode === 'chrono'){
     html += `<div class="chip streak-chip" id="streakChip">🔥 Série <b>${chronoStreak}</b></div>`;
   }
@@ -1456,6 +1553,8 @@ function renderScoreboard(){
   html += `<button class="chip" id="changeBlockBtn" style="cursor:pointer;">← Changer de bloc</button>`;
   el.innerHTML = html;
   document.getElementById('changeBlockBtn').addEventListener('click', renderBlockSelect);
+  const cc = document.getElementById('comboChip');
+  if(cc){ cc.classList.remove('streak-up'); void cc.offsetWidth; cc.classList.add('streak-up'); }
   if(window.__streakJustUp){
     window.__streakJustUp = false;
     const sc = document.getElementById('streakChip');
@@ -1815,6 +1914,7 @@ function renderBlockSelect(){
     { id: 'blank', label: '🕳️ Phrase à trous' },
     { id: 'chrono', label: '⚡ Chrono Vrai/Faux' },
     { id: 'speak', label: '🎤 Prononciation' },
+    { id: 'pairs', label: '🧩 Paires chrono' },
   ];
   const modeRow = document.getElementById('modeRow');
   modes.forEach(m => {
@@ -1855,7 +1955,7 @@ function renderBlockSelect(){
   });
 
   const grid = document.getElementById('blockGrid');
-  const modeEmoji = { classic: '🎯', blank: '🕳️', chrono: '⚡', speak: '🎤' };
+  const modeEmoji = { classic: '🎯', blank: '🕳️', chrono: '⚡', speak: '🎤', pairs: '🧩' };
   grid.innerHTML = BLOCKS.map((b,i) => {
     const perMode = blockResults[i] || {};
     const unlocked = isBlockUnlocked(i);
@@ -1924,6 +2024,7 @@ function renderCard(){
   if(gameMode === 'blank'){ renderBlankCard(); return; }
   if(gameMode === 'chrono'){ renderChronoCard(); return; }
   if(gameMode === 'speak'){ renderSpeakCard(); return; }
+  if(gameMode === 'pairs'){ renderPairsRound(); return; }
   renderClassicCard();
 }
 
@@ -2106,6 +2207,7 @@ function handleSpeakResult(isCorrect, word, info){
     queue.push(w);
   }
   recordWordStat(word.fr, isCorrect);
+  bumpCombo(isCorrect);
 
   const micBtn = document.getElementById('micBtn');
   if(micBtn){ micBtn.classList.add('disabled'); }
@@ -2141,6 +2243,161 @@ function handleSpeakResult(isCorrect, word, info){
   document.getElementById('speakFrBtn').addEventListener('click', () => speak(word.fr, 'fr-FR'));
   document.getElementById('nextBtn').addEventListener('click', () => { renderCard(); });
   autoSpeakWord(word.fr, 'fr-FR');
+  focusReveal(revealWrap);
+}
+
+/* ============ 🧩 JEU DE PAIRES CHRONOMÉTRÉ ============ */
+const PAIRS_PER_ROUND = 5;
+const PAIRS_SECONDS = 30;
+let pairsState = null;
+
+function renderPairsRound(){
+  answered = false;
+  // Prend les prochains mots de la file pour ce round
+  const roundWords = queue.slice(0, Math.min(PAIRS_PER_ROUND, queue.length));
+  if(roundWords.length === 0){ renderEndScreen(); return; }
+
+  // colonnes : français (gauche) et arabe (droite), mélangées indépendamment
+  const left = shuffle(roundWords.map(w => ({ id:w.fr, txt:w.fr, side:'fr' })));
+  const right = shuffle(roundWords.map(w => ({ id:w.fr, txt:w.ar, side:'ar' })));
+  pairsState = { roundWords, matched:0, selected:null, wrongIds:new Set(), done:false };
+
+  const totalRounds = Math.ceil(initialLength / PAIRS_PER_ROUND);
+  const curRound = Math.floor((initialLength - queue.length) / PAIRS_PER_ROUND) + 1;
+
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="cat-tag">🧩 Paires chrono · manche ${curRound}/${totalRounds}</div>
+    <div class="chrono-timer-track"><div class="chrono-timer-fill" id="quizTimerFill"></div></div>
+    <div class="question-line" style="text-align:center;">Associe chaque mot français à sa traduction arabe avant la fin du temps !</div>
+    <div class="pairs-grid">
+      <div class="pairs-col" id="pairsLeft">
+        ${left.map(c => `<button class="pair-tile" data-id="${escapeHtml(c.id)}" data-side="fr">${escapeHtml(c.txt)}</button>`).join('')}
+      </div>
+      <div class="pairs-col" id="pairsRight">
+        ${right.map(c => `<button class="pair-tile ar" data-id="${escapeHtml(c.id)}" data-side="ar">${escapeHtml(c.txt)}</button>`).join('')}
+      </div>
+    </div>
+    <div class="reveal" id="revealWrap"></div>
+  `;
+
+  card.querySelectorAll('.pair-tile').forEach(t => {
+    t.addEventListener('click', () => onPairTileClick(t));
+  });
+  renderProgress();
+  startQuestionTimer(() => onPairsTimeout(), PAIRS_SECONDS);
+}
+
+function onPairTileClick(tile){
+  if(pairsState.done) return;
+  if(tile.classList.contains('matched')) return;
+  const side = tile.dataset.side;
+  const id = tile.dataset.id;
+
+  const sel = pairsState.selected;
+  if(!sel){
+    // première sélection
+    clearPairSelection();
+    tile.classList.add('selected');
+    pairsState.selected = { id, side, el: tile };
+    return;
+  }
+
+  // clic sur la même tuile → désélectionne
+  if(sel.el === tile){ tile.classList.remove('selected'); pairsState.selected = null; return; }
+
+  // il faut une tuile de l'autre colonne
+  if(sel.side === side){
+    sel.el.classList.remove('selected');
+    tile.classList.add('selected');
+    pairsState.selected = { id, side, el: tile };
+    return;
+  }
+
+  // comparaison
+  if(sel.id === id){
+    // bonne paire !
+    sel.el.classList.remove('selected'); sel.el.classList.add('matched');
+    tile.classList.add('matched');
+    pairsState.selected = null;
+    pairsState.matched++;
+    playCorrectSound();
+    // stat mot : correct si pas d'erreur préalable sur ce mot ce round
+    recordWordStat(id, !pairsState.wrongIds.has(id));
+    bumpCombo(true);
+    if(pairsState.matched === pairsState.roundWords.length){
+      finishPairsRound();
+    }
+  } else {
+    // mauvaise paire
+    const a = sel.el, b = tile;
+    a.classList.remove('selected'); a.classList.add('pair-wrong'); b.classList.add('pair-wrong');
+    pairsState.wrongIds.add(sel.id); pairsState.wrongIds.add(id);
+    pairsState.selected = null;
+    playWrongSound();
+    reactMascot('ko');
+    bumpCombo(false);
+    setTimeout(() => { a.classList.remove('pair-wrong'); b.classList.remove('pair-wrong'); }, 500);
+  }
+}
+
+function clearPairSelection(){
+  document.querySelectorAll('.pair-tile.selected').forEach(t => t.classList.remove('selected'));
+}
+
+function finishPairsRound(){
+  pairsState.done = true;
+  clearQuestionTimer();
+  celebrate();
+  reactMascot('ok');
+
+  // comptabilise le round dans le score global
+  pairsState.roundWords.forEach(w => {
+    score.total++;
+    if(!catScore[w.cat]) catScore[w.cat] = { c:0, t:0 };
+    catScore[w.cat].t++;
+    const clean = !pairsState.wrongIds.has(w.fr);
+    if(clean){ score.correct++; catScore[w.cat].c++; }
+    sessionHistory.push({ fr:w.fr, ar:w.ar, def:w.def, cat:w.cat, attempts: clean ? 1 : 2 });
+  });
+  // retire ces mots de la file
+  queue.splice(0, pairsState.roundWords.length);
+  masteredCount = initialLength - queue.length;
+  renderScoreboard();
+
+  setTimeout(() => {
+    if(queue.length === 0){ renderEndScreen(); }
+    else { renderPairsRound(); }
+  }, 700);
+}
+
+function onPairsTimeout(){
+  if(pairsState.done) return;
+  pairsState.done = true;
+  playWrongSound();
+  reactMascot('ko');
+  // les paires non trouvées comptent comme erreurs
+  pairsState.roundWords.forEach(w => {
+    score.total++;
+    if(!catScore[w.cat]) catScore[w.cat] = { c:0, t:0 };
+    catScore[w.cat].t++;
+    const matched = document.querySelector(`.pair-tile.matched[data-id="${CSS.escape(w.fr)}"][data-side="fr"]`);
+    const clean = matched && !pairsState.wrongIds.has(w.fr);
+    if(clean){ score.correct++; catScore[w.cat].c++; recordWordStat(w.fr, true); }
+    else { recordWordStat(w.fr, false); }
+    sessionHistory.push({ fr:w.fr, ar:w.ar, def:w.def, cat:w.cat, attempts: clean ? 1 : 2 });
+  });
+  queue.splice(0, pairsState.roundWords.length);
+  masteredCount = initialLength - queue.length;
+  renderScoreboard();
+
+  const revealWrap = document.getElementById('revealWrap');
+  revealWrap.classList.add('show');
+  revealWrap.innerHTML = `<div class="big-feedback ko">⏱️ Temps écoulé pour cette manche !</div>
+    <button class="next-btn" id="nextBtn">Continuer →</button>`;
+  document.getElementById('nextBtn').addEventListener('click', () => {
+    if(queue.length === 0){ renderEndScreen(); } else { renderPairsRound(); }
+  });
   focusReveal(revealWrap);
 }
 
@@ -2243,16 +2500,17 @@ function renderChronoCard(){
   startQuestionTimer(() => handleChronoAnswer(null));
 }
 
-function startQuestionTimer(onTimeout){
+function startQuestionTimer(onTimeout, seconds){
   clearQuestionTimer();
+  const secs = seconds || quizTimerSeconds;
   const fill = document.getElementById('quizTimerFill');
   if(!fill) return;
   fill.style.transition = 'none';
   fill.style.width = '100%';
   void fill.offsetWidth;
-  fill.style.transition = `width ${quizTimerSeconds}s linear`;
+  fill.style.transition = `width ${secs}s linear`;
   fill.style.width = '0%';
-  questionTimer = setTimeout(onTimeout, quizTimerSeconds * 1000);
+  questionTimer = setTimeout(onTimeout, secs * 1000);
 }
 function clearQuestionTimer(){
   if(questionTimer){ clearTimeout(questionTimer); questionTimer = null; }
@@ -2292,6 +2550,7 @@ function handleChronoAnswer(playerSaysTrue){
   }
 
   recordWordStat(word.fr, isCorrect);
+  bumpCombo(isCorrect);
 
   const trueBtn = document.getElementById('chronoTrueBtn');
   const falseBtn = document.getElementById('chronoFalseBtn');
@@ -2377,6 +2636,7 @@ function handleAnswer(i){
   });
 
   recordWordStat(word.fr, isCorrect);
+  bumpCombo(isCorrect);
 
   if(isCorrect){
     celebrate();
@@ -2456,7 +2716,7 @@ function attachRecapSpeakHandlers(){
   });
 }
 
-const MODE_LABELS = { classic: '🎯 Classique', blank: '🕳️ Phrase à trous', chrono: '⚡ Chrono Vrai/Faux', speak: '🎤 Prononciation' };
+const MODE_LABELS = { classic: '🎯 Classique', blank: '🕳️ Phrase à trous', chrono: '⚡ Chrono Vrai/Faux', speak: '🎤 Prononciation', pairs: '🧩 Paires chrono' };
 
 function renderRecapView(blockIndex, result, justFinished){
   clearQuestionTimer();
@@ -2467,13 +2727,23 @@ function renderRecapView(blockIndex, result, justFinished){
   const errorCount = history.filter(w => w.attempts > 1).length;
   const modeLabel = MODE_LABELS[result.mode || gameMode] || '';
   const passed = pct >= PASS_THRESHOLD;
+  const flawless = result.total > 0 && result.correct === result.total;
+  const combo = result.bestCombo || 0;
   const nextUnlocked = blockIndex + 1 < BLOCKS.length;
+  const flawlessBanner = flawless
+    ? `<div class="pass-banner flawless">🏆 Bloc terminé <b>SANS FAUTE</b> ! Parfait du premier coup 🎉</div>`
+    : '';
+  const comboLine = (justFinished && combo >= 3)
+    ? `<div class="combo-line">🔥 Meilleure série : <b>${combo}</b> bonnes réponses d'affilée</div>`
+    : '';
   const passBanner = `
+    ${flawlessBanner}
     <div class="pass-banner ${passed ? 'ok' : 'todo'}">
       ${passed
         ? `✅ Bloc validé à ${pct}% !${nextUnlocked ? ' Bloc ' + (blockIndex+2) + ' débloqué 🔓' : ''}`
         : `🎯 ${pct}% — il te faut au moins ${PASS_THRESHOLD}% pour valider ce bloc${nextUnlocked ? ' et débloquer le suivant' : ''}. Réessaie !`}
-    </div>`;
+    </div>
+    ${comboLine}`;
 
   // récap de tous les modes déjà faits sur ce bloc
   const perMode = blockResults[blockIndex] || {};
@@ -2508,16 +2778,17 @@ function renderRecapView(blockIndex, result, justFinished){
 }
 
 function renderEndScreen(){
-  const result = { correct: score.correct, total: score.total, history: sessionHistory.slice(), mode: gameMode, finishedAt: Date.now() };
+  const result = { correct: score.correct, total: score.total, history: sessionHistory.slice(), mode: gameMode, finishedAt: Date.now(), bestCombo: bestCombo };
   saveBlockResult(currentBlock, gameMode, result);
   const goalJustMet = recordDailyActivity();
   renderRecapView(currentBlock, result, true);
   cloudAutoPush();
   // grande fête de fin de bloc 🎉
   const pct = result.total ? (result.correct / result.total) : 0;
-  let bursts = pct === 1 ? 4 : (pct >= 0.8 ? 3 : 2);
-  for(let i=0;i<bursts;i++){ setTimeout(launchConfetti, i*260); }
+  let bursts = pct === 1 ? 6 : (pct >= 0.8 ? 3 : 2);
+  for(let i=0;i<bursts;i++){ setTimeout(launchConfetti, i*230); }
   setTimeout(() => burstStars(window.innerWidth/2, window.innerHeight*0.35), 150);
+  if(pct === 1){ setTimeout(() => burstStars(window.innerWidth*0.3, window.innerHeight*0.4), 400); setTimeout(() => burstStars(window.innerWidth*0.7, window.innerHeight*0.4), 550); }
   if(goalJustMet){ setTimeout(showGoalToast, 650); }
 }
 
@@ -2681,8 +2952,24 @@ function cloudAutoPush(){
     .finally(() => { syncBusy = false; });
 }
 
+function showSyncOverlay(msg){
+  const ov = document.getElementById('syncOverlay');
+  if(!ov) return;
+  const m = document.getElementById('syncOverlayMsg');
+  if(m && msg) m.textContent = msg;
+  ov.classList.remove('hide');
+  ov.classList.add('show');
+}
+function hideSyncOverlay(){
+  const ov = document.getElementById('syncOverlay');
+  if(!ov) return;
+  ov.classList.add('hide');
+  setTimeout(() => { ov.classList.remove('show','hide'); }, 420);
+}
+
 async function autoSyncOnLoad(){
-  if(!getSyncUrl()) return;
+  if(!getSyncUrl()){ hideSyncOverlay(); return; }
+  showSyncOverlay('Chargement de tes données…');
   try{
     setStatus('☁️ Synchronisation...', 'ok');
     const changed = await cloudPull();
@@ -2691,6 +2978,8 @@ async function autoSyncOnLoad(){
     if(changed && currentBlock === null){ renderBlockSelect(); }
   }catch(e){
     setStatus('☁️ Synchro impossible — mode local.', 'err');
+  }finally{
+    hideSyncOverlay();
   }
 }
 
@@ -2857,6 +3146,7 @@ function renderSyncView(){
 rebuildBlocks();
 if(savedCustom){ setStatus(`↺ Lexique personnalisé restauré (${WORDS.length} mots).`, 'ok'); }
 renderBlockSelect();
+if(getSyncUrl()){ showSyncOverlay('Chargement de tes données…'); }
 autoSyncOnLoad();
 
 // Clignement périodique des yeux de la mascotte
