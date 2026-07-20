@@ -2,8 +2,19 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>VocabVISION — Vocabulaire Français ↔ Arabe</title>
+
+<!-- PWA : installation depuis le navigateur -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#4F46E5">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="VocabVISION">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&family=Changa:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
@@ -846,6 +857,7 @@
   <div class="menu-group">
     <div class="menu-label">Réglages</div>
     <button class="menu-item" id="autoSpeakBtn"><span class="mi-ic">🔊</span> Voix : ON</button>
+    <button class="menu-item" id="installBtn" style="display:none;"><span class="mi-ic">📲</span> Installer l'application</button>
   </div>
   <input type="file" id="csvFileInput" accept=".csv,text/csv" style="display:none;">
 </nav>
@@ -3283,6 +3295,57 @@ if(savedCustom){ setStatus(`↺ Lexique personnalisé restauré (${WORDS.length}
 renderBlockSelect();
 if(getSyncUrl()){ showSyncOverlay('Chargement de tes données…'); }
 autoSyncOnLoad();
+
+/* ============ 📲 PWA : installation depuis le navigateur ============ */
+(function setupPWA(){
+  // Enregistrement du service worker (nécessaire pour l'installation + hors-ligne)
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    });
+  }
+
+  let deferredPrompt = null;
+  const installBtn = document.getElementById('installBtn');
+
+  // Détecte si déjà installé (mode standalone)
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    if(installBtn && !isStandalone){ installBtn.style.display = 'flex'; }
+  });
+
+  if(installBtn){
+    installBtn.addEventListener('click', async () => {
+      if(deferredPrompt){
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        deferredPrompt = null;
+        installBtn.style.display = 'none';
+        if(outcome === 'accepted'){ setStatus('✅ VocabVISION installé !', 'ok'); }
+      } else {
+        // iOS / navigateurs sans beforeinstallprompt : instructions manuelles
+        const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+        if(isIOS){
+          alert("Pour installer VocabVISION sur iPhone/iPad :\n\n1. Appuie sur le bouton Partager (carré avec une flèche) en bas de Safari\n2. Choisis « Sur l'écran d'accueil »\n3. Appuie sur « Ajouter »");
+        } else {
+          alert("Pour installer VocabVISION :\n\nOuvre le menu de ton navigateur (⋮) et choisis « Installer l'application » ou « Ajouter à l'écran d'accueil ».");
+        }
+      }
+    });
+  }
+
+  window.addEventListener('appinstalled', () => {
+    if(installBtn){ installBtn.style.display = 'none'; }
+    deferredPrompt = null;
+  });
+
+  // Sur iOS (pas de beforeinstallprompt), on montre quand même le bouton avec instructions
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  if(isIOS && !isStandalone && installBtn){ installBtn.style.display = 'flex'; }
+})();
 
 // Clignement périodique des yeux de la mascotte
 setInterval(() => {
