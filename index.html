@@ -593,6 +593,64 @@
   .goal-toast-fire{ font-size:34px;line-height:1;animation:mascotJump .7s ease; }
   .goal-toast-title{ font-family:'Baloo 2',sans-serif;font-weight:800;font-size:15px;color:var(--ink); }
   .goal-toast-sub{ font-size:12.5px;font-weight:700;color:var(--text-dim);margin-top:2px; }
+
+  /* ============ 🎤 MODE PRONONCIATION ============ */
+  .speak-arabic{
+    font-family:'Changa',sans-serif;direction:rtl;text-align:center;color:var(--purple);
+    font-size:clamp(40px,10vw,64px);font-weight:700;margin:10px 0 4px;line-height:1.2;
+  }
+  .speak-ar-btn{
+    display:block;margin:0 auto 10px;border:none;background:#EEF2FF;color:var(--purple);
+    font-family:'Nunito',sans-serif;font-weight:800;font-size:13px;padding:8px 16px;border-radius:999px;cursor:pointer;
+    transition:background .15s;
+  }
+  .speak-ar-btn:hover{ background:#E0E7FF; }
+  .mic-zone{ display:flex;flex-direction:column;align-items:center;gap:10px;margin:18px 0 8px; }
+  .mic-btn{
+    width:88px;height:88px;border-radius:50%;border:none;cursor:pointer;
+    background:linear-gradient(135deg,var(--purple),var(--pink));
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 10px 26px -8px rgba(79,70,229,0.6);transition:transform .15s;
+    position:relative;
+  }
+  .mic-btn:hover{ transform:scale(1.05); }
+  .mic-btn:active{ transform:scale(.96); }
+  .mic-btn.disabled{ opacity:.5;pointer-events:none; }
+  .mic-btn.listening{ animation:micPulse 1.1s ease-in-out infinite; }
+  .mic-btn.listening::after{
+    content:"";position:absolute;inset:-6px;border-radius:50%;border:3px solid rgba(14,165,164,0.6);
+    animation:micRing 1.1s ease-out infinite;
+  }
+  @keyframes micPulse{ 0%,100%{ box-shadow:0 10px 26px -8px rgba(79,70,229,0.6);} 50%{ box-shadow:0 10px 34px -6px rgba(14,165,164,0.85);} }
+  @keyframes micRing{ 0%{ transform:scale(1);opacity:.8;} 100%{ transform:scale(1.35);opacity:0;} }
+  .mic-hint{ font-weight:800;font-size:13.5px;color:var(--text-dim);text-align:center; }
+  .mic-transcript{ font-weight:700;font-size:13px;color:var(--purple);min-height:18px;text-align:center; }
+  .speak-actions{ display:flex;gap:10px;justify-content:center;margin-top:6px;flex-wrap:wrap; }
+
+  /* Notes par mode sur les tuiles de bloc */
+  .bmodes{ display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-top:8px; }
+  .bmode{
+    display:inline-flex;align-items:center;gap:2px;font-size:11px;font-weight:800;color:var(--text-dim);
+    background:#F1F5F9;padding:2px 6px;border-radius:7px;
+  }
+  .bmode b{ color:var(--text);font-weight:800; }
+  .bmode.ok{ background:#D1FAE5;color:var(--green-dark); }
+  .bmode.ok b{ color:var(--green-dark); }
+  .block-pass{ font-size:11.5px;font-weight:800;margin-top:4px; }
+  .block-pass.ok{ color:var(--green-dark); }
+  .block-pass.todo{ color:#B45309; }
+  .block-locked{ background:#F8FAFC !important; }
+
+  .pass-banner{ margin:16px auto 4px;max-width:460px;padding:12px 16px;border-radius:14px;font-weight:800;font-size:14px; }
+  .pass-banner.ok{ background:#D1FAE5;color:var(--green-dark); }
+  .pass-banner.todo{ background:#FEF3C7;color:#B45309; }
+  .pm-summary{ max-width:420px;margin:16px auto 0;text-align:left;background:#F8FAFC;border-radius:14px;padding:12px 16px; }
+  .pm-title{ font-family:'Baloo 2',sans-serif;font-weight:800;font-size:14px;color:var(--ink);margin-bottom:8px;text-align:center; }
+  .pm-row{ display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #EEF1F6;font-weight:700;font-size:13.5px;color:var(--text); }
+  .pm-row:last-child{ border-bottom:none; }
+  .pm-score{ font-weight:800; }
+  .pm-score.ok{ color:var(--green-dark); }
+  .pm-score.todo{ color:#B45309; }
 </style>
 </head>
 <body>
@@ -916,7 +974,7 @@ function loadBlockResult(blockIndex, mode){
   }catch(e){ return null; }
 }
 
-const GAME_MODES = ['classic', 'blank', 'chrono'];
+const GAME_MODES = ['classic', 'blank', 'chrono', 'speak'];
 
 function rebuildBlocks(){
   datasetHash = hashWords(WORDS);
@@ -1381,6 +1439,7 @@ function buildDeck(blockIndex){
   sessionHistory = [];
   attemptsByFr = {};
   chronoStreak = 0;
+  micContinuous = false;
 }
 
 function renderScoreboard(){
@@ -1645,8 +1704,32 @@ function renderHistoryView(){
   });
 }
 
+const PASS_THRESHOLD = 90; // % requis pour valider un bloc et débloquer le suivant
+
+function blockBestPct(i){
+  const perMode = blockResults[i] || {};
+  let best = 0;
+  GAME_MODES.forEach(m => {
+    const r = perMode[m];
+    if(r && r.total){ best = Math.max(best, (r.correct / r.total) * 100); }
+  });
+  return best;
+}
+function isBlockPassed(i){ return blockBestPct(i) >= PASS_THRESHOLD; }
+function blockHasResult(i){
+  const perMode = blockResults[i] || {};
+  return GAME_MODES.some(m => perMode[m]);
+}
+/* Bloc débloqué : le 1er toujours ; sinon si le précédent est validé ; ou s'il a déjà un résultat (progression existante). */
+function isBlockUnlocked(i){
+  if(i === 0) return true;
+  if(blockHasResult(i)) return true;
+  return isBlockPassed(i - 1);
+}
+
 function renderBlockSelect(){
   clearQuestionTimer();
+  if(typeof stopRecognition === 'function'){ stopRecognition(); }
   document.body.classList.remove('quiz-active');
   currentBlock = null;
   document.getElementById('scoreboard').innerHTML = '';
@@ -1731,6 +1814,7 @@ function renderBlockSelect(){
     { id: 'classic', label: '🎯 Classique' },
     { id: 'blank', label: '🕳️ Phrase à trous' },
     { id: 'chrono', label: '⚡ Chrono Vrai/Faux' },
+    { id: 'speak', label: '🎤 Prononciation' },
   ];
   const modeRow = document.getElementById('modeRow');
   modes.forEach(m => {
@@ -1771,25 +1855,44 @@ function renderBlockSelect(){
   });
 
   const grid = document.getElementById('blockGrid');
-  const modeEmoji = { classic: '🎯', blank: '🕳️', chrono: '⚡' };
+  const modeEmoji = { classic: '🎯', blank: '🕳️', chrono: '⚡', speak: '🎤' };
   grid.innerHTML = BLOCKS.map((b,i) => {
     const perMode = blockResults[i] || {};
-    const res = perMode[gameMode];
-    const label = res ? `${res.correct}/${res.total} ✓` : `${b.length} mots`;
-    const dots = GAME_MODES.map(m => {
-      const done = perMode[m];
-      const opacity = done ? '1' : '0.25';
-      return `<span title="${modeEmoji[m]}" style="opacity:${opacity};">${modeEmoji[m]}</span>`;
-    }).join(' ');
-    return `<button class="opt" data-block="${i}" style="text-align:center;${res ? 'background:#D1FAE5;box-shadow:0 4px 0 #6EE7B7;' : ''}">
+    const unlocked = isBlockUnlocked(i);
+    const passed = isBlockPassed(i);
+    const bestPct = Math.round(blockBestPct(i));
+
+    // notes par mode /total (ex : 🎯28 🕳️30 ⚡— 🎤25)
+    const notes = GAME_MODES.map(m => {
+      const r = perMode[m];
+      const val = r ? `${r.correct}` : '·';
+      const ok = r && (r.correct / r.total) * 100 >= PASS_THRESHOLD;
+      return `<span class="bmode ${ok ? 'ok' : ''}" title="${modeEmoji[m]} ${r ? r.correct + '/' + r.total : 'non fait'}">${modeEmoji[m]}<b>${val}</b></span>`;
+    }).join('');
+
+    if(!unlocked){
+      return `<button class="opt block-locked" disabled style="text-align:center;opacity:.55;cursor:not-allowed;">
+        <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:18px;">🔒 Bloc ${i+1}</div>
+        <div style="font-size:11.5px;color:var(--text-dim);margin-top:4px;">Validez le bloc ${i} (≥${PASS_THRESHOLD}%)</div>
+      </button>`;
+    }
+
+    const topStyle = passed ? 'background:#D1FAE5;box-shadow:0 4px 0 #6EE7B7;' : '';
+    const statusLine = blockHasResult(i)
+      ? (passed ? `<div class="block-pass ok">✅ Validé · ${bestPct}%</div>` : `<div class="block-pass todo">${bestPct}% · vise ${PASS_THRESHOLD}%</div>`)
+      : `<div style="font-size:11.5px;color:var(--text-dim);margin-top:4px;">${b.length} mots</div>`;
+
+    return `<button class="opt" data-block="${i}" style="text-align:center;${topStyle}">
       <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:18px;">Bloc ${i+1}</div>
-      <div style="font-size:12.5px;color:#6B6552;margin-top:4px;">${label}</div>
-      <div style="font-size:12px;margin-top:6px;">${dots}</div>
+      ${statusLine}
+      <div class="bmodes">${notes}</div>
     </button>`;
   }).join('');
-  grid.querySelectorAll('.opt').forEach(btn => {
+
+  grid.querySelectorAll('.opt[data-block]').forEach(btn => {
     btn.addEventListener('click', () => {
       const i = parseInt(btn.dataset.block);
+      if(!isBlockUnlocked(i)) return;
       const res = (blockResults[i] || {})[gameMode];
       if(res){
         currentBlock = i;
@@ -1820,7 +1923,225 @@ function renderCard(){
   hideMascotBubble();
   if(gameMode === 'blank'){ renderBlankCard(); return; }
   if(gameMode === 'chrono'){ renderChronoCard(); return; }
+  if(gameMode === 'speak'){ renderSpeakCard(); return; }
   renderClassicCard();
+}
+
+/* ============ 🎤 MODE PRONONCIATION (reconnaissance vocale) ============ */
+const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+const speechRecoAvailable = !!SpeechRec;
+let recognition = null;
+let recoActive = false;
+let micContinuous = false; // une fois le micro activé dans un bloc, il se relance à chaque mot
+
+function levenshtein(a, b){
+  const m = a.length, n = b.length;
+  const dp = Array.from({length:m+1}, (_,i)=>[i, ...Array(n).fill(0)]);
+  for(let j=0;j<=n;j++) dp[0][j]=j;
+  for(let i=1;i<=m;i++){
+    for(let j=1;j<=n;j++){
+      dp[i][j] = Math.min(
+        dp[i-1][j]+1, dp[i][j-1]+1,
+        dp[i-1][j-1] + (a[i-1]===b[j-1]?0:1)
+      );
+    }
+  }
+  return dp[m][n];
+}
+
+/* Le mot prononcé correspond-il au mot attendu ? (tolérant aux accents et petites variations) */
+function speechMatches(transcript, expected){
+  const clean = s => normalizeForSearch(s).replace(/[^a-z\s]/g,'').trim();
+  const t = clean(transcript);
+  const e = clean(expected);
+  if(!t || !e) return false;
+  if(t === e) return true;
+  // le mot attendu apparaît dans la phrase reconnue
+  const words = t.split(/\s+/);
+  if(words.includes(e)) return true;
+  // tolérance : distance de Levenshtein courte sur le meilleur mot
+  for(const w of words){
+    const dist = levenshtein(w, e);
+    const tol = e.length <= 4 ? 1 : (e.length <= 7 ? 2 : 3);
+    if(dist <= tol) return true;
+  }
+  // ou distance courte sur la phrase entière (mots composés)
+  if(levenshtein(t, e) <= (e.length <= 7 ? 2 : 3)) return true;
+  return false;
+}
+
+function renderSpeakCard(){
+  const word = queue[0];
+  answered = false;
+  window.__currentWord = word;
+
+  const card = document.getElementById('quizCard');
+
+  if(!speechRecoAvailable){
+    card.innerHTML = `
+      <div class="cat-tag">🎤 Prononciation</div>
+      <div class="word-fr" style="font-size:clamp(22px,4.5vw,30px);">Micro non disponible ici</div>
+      <div class="result-card" style="margin-top:14px;">
+        <div class="result-def">La reconnaissance vocale n'est pas prise en charge par ce navigateur. Utilise <b>Google Chrome</b> ou <b>Microsoft Edge</b> (sur PC ou Android) pour ce mode. Sur iPhone, ce mode n'est pas encore supporté.</div>
+      </div>
+      <button class="next-btn" id="backSpeakBtn" style="margin-top:18px;">← Choisir un autre mode</button>
+    `;
+    document.getElementById('backSpeakBtn').addEventListener('click', renderBlockSelect);
+    renderProgress();
+    return;
+  }
+
+  card.innerHTML = `
+    <div class="cat-tag">${escapeHtml(word.cat)} · 🎤 Prononciation</div>
+    <div class="question-line" style="text-align:center;margin-bottom:6px;">Lis ce mot arabe, puis prononce-le <b>en français</b> :</div>
+    <div class="speak-arabic" id="speakArabic">${escapeHtml(word.ar)}</div>
+    <button class="speak-ar-btn" id="hearArBtn" title="Écouter l'arabe">🔊 Écouter</button>
+    <div class="mic-zone">
+      <button class="mic-btn" id="micBtn" aria-label="Parler">
+        <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/>
+        </svg>
+      </button>
+      <div class="mic-hint" id="micHint">Appuie et prononce le mot</div>
+      <div class="mic-transcript" id="micTranscript"></div>
+    </div>
+    <div class="speak-actions">
+      <button class="mode-chip ${micContinuous ? 'active' : ''}" id="continuousBtn">${micContinuous ? '🎙️ Micro continu : ON' : '🎙️ Activer micro continu'}</button>
+      <button class="mode-chip" id="revealSpeakBtn">👁 Voir la réponse</button>
+      <button class="mode-chip" id="skipSpeakBtn">⏭ Passer</button>
+    </div>
+    <div class="reveal" id="revealWrap"></div>
+  `;
+
+  document.getElementById('hearArBtn').addEventListener('click', () => speak(word.ar, 'ar-SA'));
+  document.getElementById('micBtn').addEventListener('click', () => startRecognition(word));
+  document.getElementById('revealSpeakBtn').addEventListener('click', () => handleSpeakResult(false, word, { revealed:true }));
+  document.getElementById('skipSpeakBtn').addEventListener('click', () => handleSpeakResult(false, word, { skipped:true }));
+  document.getElementById('continuousBtn').addEventListener('click', () => {
+    micContinuous = !micContinuous;
+    if(micContinuous){ startRecognition(word); }
+    else { stopRecognition(); }
+    const b = document.getElementById('continuousBtn');
+    b.classList.toggle('active', micContinuous);
+    b.textContent = micContinuous ? '🎙️ Micro continu : ON' : '🎙️ Activer micro continu';
+  });
+  renderProgress();
+
+  // Micro continu : relance automatiquement l'écoute pour ce mot
+  if(micContinuous && speechRecoAvailable){
+    setTimeout(() => { if(!answered){ startRecognition(word); } }, 500);
+  }
+}
+
+function startRecognition(word){
+  if(!speechRecoAvailable || recoActive || answered) return;
+  try{
+    recognition = new SpeechRec();
+    recognition.lang = 'fr-FR';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 3;
+  }catch(e){ return; }
+
+  const micBtn = document.getElementById('micBtn');
+  const micHint = document.getElementById('micHint');
+  const micTr = document.getElementById('micTranscript');
+
+  recoActive = true;
+  micContinuous = true;
+  micBtn.classList.add('listening');
+  micHint.textContent = '🎧 J\'écoute... prononce le mot !';
+  micTr.textContent = '';
+
+  recognition.onresult = (ev) => {
+    let alts = [];
+    for(let i=0;i<ev.results[0].length;i++){ alts.push(ev.results[0][i].transcript); }
+    const heard = alts[0] || '';
+    micTr.textContent = `Tu as dit : « ${heard} »`;
+    const ok = alts.some(a => speechMatches(a, word.fr));
+    setTimeout(() => handleSpeakResult(ok, word, { heard }), 250);
+  };
+  recognition.onerror = (ev) => {
+    recoActive = false;
+    micBtn.classList.remove('listening');
+    if(ev.error === 'not-allowed' || ev.error === 'service-not-allowed'){
+      micHint.textContent = '🚫 Micro refusé — autorise le micro dans ton navigateur.';
+    } else if(ev.error === 'no-speech'){
+      micHint.textContent = '🤫 Rien entendu — réappuie et parle plus fort.';
+    } else {
+      micHint.textContent = 'Réappuie pour réessayer.';
+    }
+  };
+  recognition.onend = () => {
+    recoActive = false;
+    micBtn.classList.remove('listening');
+  };
+
+  try{ recognition.start(); }
+  catch(e){ recoActive = false; micBtn.classList.remove('listening'); }
+}
+
+function stopRecognition(){
+  if(recognition && recoActive){ try{ recognition.stop(); }catch(e){} }
+  recoActive = false;
+}
+
+function handleSpeakResult(isCorrect, word, info){
+  if(answered) return;
+  answered = true;
+  stopRecognition();
+  info = info || {};
+
+  score.total++;
+  if(!catScore[word.cat]) catScore[word.cat] = { c:0, t:0 };
+  catScore[word.cat].t++;
+  attemptsByFr[word.fr] = (attemptsByFr[word.fr] || 0) + 1;
+
+  if(isCorrect){
+    score.correct++; catScore[word.cat].c++;
+    masteredCount++;
+    queue.shift();
+    sessionHistory.push({ fr: word.fr, ar: word.ar, def: word.def, cat: word.cat, attempts: attemptsByFr[word.fr] });
+  } else {
+    const w = queue.shift();
+    queue.push(w);
+  }
+  recordWordStat(word.fr, isCorrect);
+
+  const micBtn = document.getElementById('micBtn');
+  if(micBtn){ micBtn.classList.add('disabled'); }
+
+  if(isCorrect){ celebrate(); reactMascot('ok'); playCorrectSound(); }
+  else {
+    const cardEl = document.getElementById('quizCard');
+    cardEl.classList.remove('shake'); void cardEl.offsetWidth; cardEl.classList.add('shake');
+    reactMascot('ko'); playWrongSound();
+  }
+  renderScoreboard();
+
+  const headline = isCorrect ? '🎉 Bien prononcé !'
+    : (info.skipped ? '⏭ Mot passé — voici la réponse :'
+      : (info.revealed ? '👁 Voici la réponse :' : '💛 Pas tout à fait — voici la réponse :'));
+
+  const revealWrap = document.getElementById('revealWrap');
+  revealWrap.classList.add('show');
+  revealWrap.innerHTML = `
+    <div class="big-feedback ${isCorrect ? 'ok' : 'ko'}">${headline}</div>
+    <div class="seal">
+      <div class="seal-badge"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#2A2107" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="arabic-word">${escapeHtml(word.ar)}</div>
+    </div>
+    <div class="def-text"><strong>${escapeHtml(word.fr)}</strong> — ${escapeHtml(word.def)}
+      <button class="speak-btn small" id="speakFrBtn" title="Écouter" style="margin-left:6px;vertical-align:middle;">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>
+      </button>
+    </div>
+    <div class="ex-text">${renderExample(word.ex)}</div>
+    <button class="next-btn" id="nextBtn">Suivant →</button>
+  `;
+  document.getElementById('speakFrBtn').addEventListener('click', () => speak(word.fr, 'fr-FR'));
+  document.getElementById('nextBtn').addEventListener('click', () => { renderCard(); });
+  autoSpeakWord(word.fr, 'fr-FR');
+  focusReveal(revealWrap);
 }
 
 function renderClassicCard(){
@@ -2135,7 +2456,7 @@ function attachRecapSpeakHandlers(){
   });
 }
 
-const MODE_LABELS = { classic: '🎯 Classique', blank: '🕳️ Phrase à trous', chrono: '⚡ Chrono Vrai/Faux' };
+const MODE_LABELS = { classic: '🎯 Classique', blank: '🕳️ Phrase à trous', chrono: '⚡ Chrono Vrai/Faux', speak: '🎤 Prononciation' };
 
 function renderRecapView(blockIndex, result, justFinished){
   clearQuestionTimer();
@@ -2145,6 +2466,24 @@ function renderRecapView(blockIndex, result, justFinished){
   const history = result.history || [];
   const errorCount = history.filter(w => w.attempts > 1).length;
   const modeLabel = MODE_LABELS[result.mode || gameMode] || '';
+  const passed = pct >= PASS_THRESHOLD;
+  const nextUnlocked = blockIndex + 1 < BLOCKS.length;
+  const passBanner = `
+    <div class="pass-banner ${passed ? 'ok' : 'todo'}">
+      ${passed
+        ? `✅ Bloc validé à ${pct}% !${nextUnlocked ? ' Bloc ' + (blockIndex+2) + ' débloqué 🔓' : ''}`
+        : `🎯 ${pct}% — il te faut au moins ${PASS_THRESHOLD}% pour valider ce bloc${nextUnlocked ? ' et débloquer le suivant' : ''}. Réessaie !`}
+    </div>`;
+
+  // récap de tous les modes déjà faits sur ce bloc
+  const perMode = blockResults[blockIndex] || {};
+  const modeRows = GAME_MODES.filter(m => perMode[m]).map(m => {
+    const r = perMode[m];
+    const p = r.total ? Math.round((r.correct/r.total)*100) : 0;
+    const cls = p >= PASS_THRESHOLD ? 'ok' : 'todo';
+    return `<div class="pm-row"><span>${MODE_LABELS[m]}</span><span class="pm-score ${cls}">${r.correct}/${r.total} · ${p}%</span></div>`;
+  }).join('');
+  const modeSummary = modeRows ? `<div class="pm-summary"><div class="pm-title">📊 Tes notes sur ce bloc</div>${modeRows}</div>` : '';
 
   const card = document.getElementById('quizCard');
   card.innerHTML = `
@@ -2152,6 +2491,8 @@ function renderRecapView(blockIndex, result, justFinished){
       <div class="cat-tag">${justFinished ? 'Bloc ' + (blockIndex+1) + ' terminé' : 'Récapitulatif — Bloc ' + (blockIndex+1)} · ${modeLabel} — ${history.length || result.total} mots</div>
       <div class="big">${result.correct} / ${result.total}</div>
       <div class="sub" style="color:#6B6552;">${pct}% de bonnes réponses au total${errorCount > 0 ? ` · ${errorCount} mot${errorCount>1?'s':''} eu${errorCount>1?'rent':''} au moins une erreur` : ' · sans erreur, bravo !'}</div>
+      ${passBanner}
+      ${modeSummary}
       <div style="display:flex;gap:12px;justify-content:center;margin-top:20px;flex-wrap:wrap;">
         <button class="restart-btn" id="restartBtn">Refaire ce bloc (${modeLabel})</button>
         <button class="restart-btn" id="blocksBtn" style="background:var(--purple);color:#fff;box-shadow:0 4px 0 var(--purple-dark);">← Choisir un autre bloc</button>
@@ -2353,6 +2694,50 @@ async function autoSyncOnLoad(){
   }
 }
 
+/* ---------- 💾 Sauvegarde complète (fichier local, garantie ultime) ---------- */
+function dataSummary(){
+  let blockRes = 0;
+  (blockResults || []).forEach(r => { if(r) GAME_MODES.forEach(m => { if(r[m]) blockRes++; }); });
+  return {
+    streak: computeStreak(),
+    activeDays: daysActiveTotal(),
+    blockResults: blockRes,
+    wordStats: Object.keys(wordStats).length,
+    words: WORDS.length,
+  };
+}
+
+function exportFullBackup(){
+  const data = collectLocalData();
+  const backup = { app:'VocabVISION', version:1, exportedAt:new Date().toISOString(), data };
+  const blob = new Blob([JSON.stringify(backup, null, 2)], { type:'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const d = new Date();
+  a.download = `vocabvision-sauvegarde-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}.json`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function importFullBackup(text){
+  let obj;
+  try{ obj = JSON.parse(text); }catch(e){ return { ok:false, error:'Fichier illisible.' }; }
+  const data = obj && obj.data ? obj.data : obj;
+  if(!data || typeof data !== 'object') return { ok:false, error:'Format de sauvegarde non reconnu.' };
+  // fusionne dans localStorage puis via la logique de fusion cloud pour ne rien écraser bêtement
+  const remoteLike = {};
+  let count = 0;
+  for(const k of Object.keys(data)){
+    if(!k.startsWith('lexiqueQuiz::')) continue;
+    if(k === SYNC_URL_KEY) continue;
+    remoteLike[k] = { v: data[k], t: 0 };
+    count++;
+  }
+  mergeRemoteData(remoteLike);
+  return { ok:true, count };
+}
+
 function formatLastSync(){
   try{
     const t = parseInt(localStorage.getItem(LAST_SYNC_KEY), 10);
@@ -2371,6 +2756,7 @@ function renderSyncView(){
 
   const card = document.getElementById('quizCard');
   const hasUrl = !!getSyncUrl();
+  const summary = dataSummary();
   card.innerHTML = `
     <div class="cat-tag">☁️ Synchro Google Sheets</div>
     <div class="word-fr" style="font-size:clamp(24px,4.5vw,32px);">Tes scores, partout</div>
@@ -2384,14 +2770,59 @@ function renderSyncView(){
       <button class="mode-chip" id="pullSyncBtn" ${hasUrl?'':'disabled style="opacity:.5;"'}>⇣ Récupérer du cloud</button>
     </div>
     <div class="question-line" id="syncStatusLine" style="margin-top:6px;">Dernière synchro : <b>${formatLastSync()}</b>${hasUrl ? ' · synchro auto au démarrage et après chaque bloc ✅' : ''}</div>
+
+    <div class="pm-summary" style="margin-top:14px;">
+      <div class="pm-title">💾 Ce qui est sauvegardé</div>
+      <div class="pm-row"><span>🔥 Série en cours</span><span class="pm-score ok">${summary.streak} j</span></div>
+      <div class="pm-row"><span>📅 Jours d'apprentissage</span><span class="pm-score">${summary.activeDays}</span></div>
+      <div class="pm-row"><span>🏆 Tests de bloc enregistrés</span><span class="pm-score">${summary.blockResults}</span></div>
+      <div class="pm-row"><span>📊 Mots avec historique</span><span class="pm-score">${summary.wordStats}</span></div>
+      <div class="pm-row"><span>📖 Mots dans le lexique</span><span class="pm-score">${summary.words}</span></div>
+    </div>
+
+    <div style="font-weight:800;color:var(--purple);margin:18px 0 6px;">Sauvegarde de secours (fichier)</div>
+    <div class="mode-row" style="justify-content:flex-start;">
+      <button class="mode-chip" id="backupBtn">💾 Télécharger ma sauvegarde</button>
+      <button class="mode-chip" id="restoreBtn">📂 Restaurer une sauvegarde</button>
+      <input type="file" id="restoreFileInput" accept=".json,application/json" style="display:none;">
+    </div>
+
+    <div class="result-card" style="margin-top:12px;">
+      <div class="result-def">✅ <b>Tout est conservé automatiquement</b> — série de jours, notes des blocs, historique de chaque mot et lexique. Ces données restent dans ton navigateur <b>même si tu déploies une nouvelle version</b> sur GitHub, et sont copiées dans ta feuille Google. Ajouter des mots ne supprime jamais l'historique des mots existants.</div>
+    </div>
     <div class="result-card" style="margin-top:10px;">
-      <div class="result-def"><b>Pas encore de script ?</b> Ouvre le fichier <b>apps-script-sync.gs</b> que je t'ai fourni : les 6 étapes d'installation sont en haut du fichier (5 minutes, gratuit, sans carte bancaire).</div>
+      <div class="result-def"><b>Pas encore de script ?</b> Ouvre le fichier <b>apps-script-sync.gs</b> : les 6 étapes d'installation sont en haut (5 minutes, gratuit).</div>
     </div>
   `;
   document.getElementById('backFromSyncBtn').addEventListener('click', renderBlockSelect);
 
   const statusLine = document.getElementById('syncStatusLine');
   const setSyncMsg = (msg, ok) => { statusLine.innerHTML = `<span style="color:${ok?'var(--green-dark)':'var(--red-dark)'};font-weight:800;">${msg}</span>`; };
+
+  document.getElementById('backupBtn').addEventListener('click', () => {
+    exportFullBackup();
+    setSyncMsg('💾 Sauvegarde téléchargée ! Garde ce fichier en lieu sûr.', true);
+  });
+  document.getElementById('restoreBtn').addEventListener('click', () => {
+    document.getElementById('restoreFileInput').click();
+  });
+  document.getElementById('restoreFileInput').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const res = importFullBackup(reader.result);
+      if(res.ok){
+        setSyncMsg(`✓ Sauvegarde restaurée (${res.count} éléments fusionnés) !`, true);
+        cloudAutoPush();
+        setTimeout(renderSyncView, 900);
+      } else {
+        setSyncMsg('✗ ' + res.error, false);
+      }
+    };
+    reader.readAsText(file, 'UTF-8');
+    e.target.value = '';
+  });
 
   document.getElementById('saveSyncBtn').addEventListener('click', () => {
     const u = document.getElementById('syncUrlInput').value.trim();
