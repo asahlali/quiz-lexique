@@ -2682,30 +2682,6 @@ const DIALOGUE_INTROS = [
   { a:'Utilise ce mot dans une phrase, tu veux bien ?', name:'Karim' },
 ];
 
-/* Récupère une vraie phrase d'exemple sur le web (API gratuite compatible CORS).
-   Renvoie une phrase contenant le mot, ou null. Échoue silencieusement (hors-ligne, etc.). */
-async function fetchWebSentence(word){
-  try{
-    const ctrl = new AbortController();
-    const to = setTimeout(() => ctrl.abort(), 4000);
-    const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/fr/${encodeURIComponent(word.toLowerCase())}`, { signal: ctrl.signal });
-    clearTimeout(to);
-    if(!res.ok) return null;
-    const data = await res.json();
-    const wnorm = normalizeForSearch(word);
-    for(const entry of (Array.isArray(data) ? data : [])){
-      for(const meaning of (entry.meanings || [])){
-        for(const def of (meaning.definitions || [])){
-          if(def.example && normalizeForSearch(def.example).includes(wnorm)){
-            return def.example;
-          }
-        }
-      }
-    }
-    return null;
-  }catch(e){ return null; }
-}
-
 function renderDialogueCard(){
   const word = queue[0];
   answered = false;
@@ -3013,31 +2989,12 @@ function handleAnswer(i){
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
       </button>
     </div>
-    ${gameMode === 'dialogue' ? `<button class="mode-chip" id="webExBtn" style="margin-top:10px;">🌐 Voir un exemple réel du web</button><div class="web-ex" id="webEx"></div>` : ''}
     <button class="next-btn" id="nextBtn">Mot suivant →</button>
   `;
   document.getElementById('speakExBtn').addEventListener('click', () => {
     const fullSentence = word.ex.replace(/~/g, word.fr);
     speak(fullSentence, 'fr-FR');
   });
-  const webBtn = document.getElementById('webExBtn');
-  if(webBtn){
-    webBtn.addEventListener('click', async () => {
-      const box = document.getElementById('webEx');
-      webBtn.disabled = true;
-      box.innerHTML = '<span style="color:var(--text-dim);font-weight:700;">🔎 Recherche d\'un exemple sur le web…</span>';
-      const sentence = await fetchWebSentence(word.fr);
-      if(sentence){
-        box.innerHTML = `<div class="web-ex-card">🌐 <b>Exemple trouvé :</b> « ${escapeHtml(sentence)} » <button class="speak-btn small" id="webSpeak"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg></button></div>`;
-        const ws = document.getElementById('webSpeak');
-        if(ws) ws.addEventListener('click', () => speak(sentence, 'fr-FR'));
-        webBtn.style.display = 'none';
-      } else {
-        box.innerHTML = '<span style="color:var(--text-dim);font-weight:700;">Aucun exemple web trouvé pour ce mot (ou hors-ligne). La phrase ci-dessus reste ta référence.</span>';
-        webBtn.disabled = false;
-      }
-    });
-  }
   document.getElementById('nextBtn').addEventListener('click', () => { renderCard(); });
   if(gameMode !== 'classic'){ autoSpeakWord(word.fr, 'fr-FR'); }
   focusReveal(revealWrap);
