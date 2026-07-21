@@ -729,6 +729,47 @@
   .recap-meta{ display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:12px; }
   .recap-meta-pill{ background:#F1F5F9;color:var(--text);font-weight:800;font-size:13px;padding:7px 15px;border-radius:999px; }
   .recap-meta-pill.xp{ background:#FEF3C7;color:#B45309; }
+
+  .replay-modes{ display:flex;flex-wrap:wrap;gap:8px;justify-content:center; }
+  .replay-mode-btn{
+    border:none;background:#F1F5F9;color:var(--text);font-family:'Nunito',sans-serif;font-weight:800;font-size:13px;
+    padding:11px 16px;border-radius:12px;cursor:pointer;box-shadow:0 3px 0 #E2E8F0;transition:transform .1s,background .15s;
+    display:inline-flex;align-items:center;gap:7px;
+  }
+  .replay-mode-btn:hover{ transform:translateY(-2px);background:#E8EDFF; }
+  .replay-mode-btn:active{ transform:translateY(1px);box-shadow:0 2px 0 #E2E8F0; }
+  .replay-mode-btn.current{ background:#EEF2FF;box-shadow:0 3px 0 #C7D2FE; }
+  .rp-score{ font-size:11px;color:var(--green-dark);background:#D1FAE5;padding:2px 7px;border-radius:999px; }
+  .rp-new{ font-size:11px;color:var(--text-dim);background:#F1F5F9;padding:2px 7px;border-radius:999px; }
+
+  .mult-chip{ background:linear-gradient(135deg,#FDE68A,#FBBF24);color:#7C2D12;animation:multPulse 1.4s ease-in-out infinite; }
+  @keyframes multPulse{ 0%,100%{ transform:scale(1);} 50%{ transform:scale(1.06);} }
+  .mult-banner{ background:linear-gradient(135deg,#FEF3C7,#FDE68A);color:#B45309;font-weight:800;font-size:12.5px;text-align:center;padding:8px 12px;border-radius:12px;margin-bottom:10px; }
+
+  /* Mascotte plus vivante */
+  .mascot{ animation:mascotIdle 2.6s ease-in-out infinite; }
+  @keyframes mascotIdle{
+    0%,100%{ transform:translateY(0) rotate(0deg); }
+    25%{ transform:translateY(-5px) rotate(-2.5deg); }
+    50%{ transform:translateY(-2px) rotate(0deg); }
+    75%{ transform:translateY(-5px) rotate(2.5deg); }
+  }
+  .mascot.wave{ animation:mascotWave .8s ease; }
+  @keyframes mascotWave{ 0%,100%{ transform:rotate(0);} 20%{ transform:rotate(-12deg);} 50%{ transform:rotate(10deg);} 70%{ transform:rotate(-6deg);} }
+
+  /* ============ 💬 MODE DIALOGUE ============ */
+  .dlg{ display:flex;flex-direction:column;gap:12px;margin:8px 0 16px; }
+  .dlg-line{ display:flex;align-items:flex-end;gap:8px; }
+  .dlg-line.right{ flex-direction:row-reverse; }
+  .dlg-avatar{ width:40px;height:40px;border-radius:50%;background:#EEF2FF;display:flex;align-items:center;justify-content:center;font-size:22px;flex:none; }
+  .dlg-line.right .dlg-avatar{ background:#D1FAE5; }
+  .dlg-bubble{
+    background:#F1F5F9;color:var(--text);padding:12px 15px;border-radius:16px 16px 16px 4px;
+    font-weight:700;font-size:15px;max-width:78%;line-height:1.5;
+  }
+  .dlg-bubble.you{ background:linear-gradient(135deg,#EEF2FF,#E0E7FF);border-radius:16px 16px 4px 16px;color:var(--ink); }
+  .web-ex{ margin-top:8px; }
+  .web-ex-card{ background:#EFF6FF;border:1px solid #BFDBFE;border-radius:12px;padding:12px 14px;font-weight:700;font-size:14px;color:#1E3A8A;display:flex;align-items:center;gap:8px;flex-wrap:wrap; }
 </style>
 </head>
 <body>
@@ -974,6 +1015,20 @@ function getDailyQuests(){
   ];
 }
 function questsAllDone(){ return getDailyQuests().every(q => q.cur >= q.goal); }
+
+/* Multiplicateur de points selon l'assiduité (série de jours). */
+function xpMultiplier(){
+  const s = computeStreak();
+  if(s >= 7) return 3;
+  if(s >= 3) return 2;
+  return 1;
+}
+function multiplierLabel(){
+  const mult = xpMultiplier();
+  if(mult === 1) return null;
+  const s = computeStreak();
+  return `⚡ Bonus points ×${mult} · série de ${s} jours !`;
+}
 function fmtDuration(sec){
   const m = Math.floor(sec/60), s = Math.round(sec%60);
   if(m === 0) return `${s} s`;
@@ -1059,7 +1114,11 @@ let comboStreak = 0;   // bonnes réponses d'affilée dans le bloc en cours
 let bestCombo = 0;
 let blockStartTime = 0;
 function bumpCombo(isCorrect){
-  if(isCorrect){ comboStreak++; if(comboStreak > bestCombo) bestCombo = comboStreak; }
+  if(isCorrect){
+    comboStreak++;
+    if(comboStreak > bestCombo) bestCombo = comboStreak;
+    if([3,5,10,15,20,30].includes(comboStreak)){ mascotMilestone(comboStreak); }
+  }
   else { comboStreak = 0; }
 }
 let chronoBestStreak = 0;
@@ -1136,7 +1195,7 @@ function loadBlockResult(blockIndex, mode){
   }catch(e){ return null; }
 }
 
-const GAME_MODES = ['classic', 'blank', 'chrono', 'speak', 'pairs'];
+const GAME_MODES = ['classic', 'blank', 'chrono', 'speak', 'pairs', 'dialogue'];
 
 function rebuildBlocks(){
   datasetHash = hashWords(WORDS);
@@ -1160,13 +1219,64 @@ function renderExample(ex){
 }
 
 const speechAvailable = ('speechSynthesis' in window);
+
+/* ---- Sélection de voix : qualité pro + alternance homme/femme aléatoire ---- */
+let _voices = [];
+function refreshVoices(){ try{ _voices = window.speechSynthesis.getVoices() || []; }catch(e){ _voices = []; } }
+if(speechAvailable){
+  refreshVoices();
+  try{ window.speechSynthesis.onvoiceschanged = refreshVoices; }catch(e){}
+}
+
+const FEMALE_HINTS = ['female','femme','amelie','amélie','audrey','aurelie','aurélie','hortense','julie','marie','virginie','denise','celine','céline','charline','brigitte','elise','léa','lea','eloise','éloise','sabrina','vlasta','zariyah','salma','laila','layla','amina','hoda','naira','sana','fatima','google français','google arabic','samira'];
+const MALE_HINTS = ['male','homme','thomas','paul','nicolas','henri','claude','mathieu','guillaume','jacques','daniel','tarik','hamed','maged','naayf','nizar','omar','ahmed','yassin','rachid'];
+
+function classifyGender(v){
+  const n = (v.name || '').toLowerCase();
+  for(const h of FEMALE_HINTS){ if(n.includes(h)) return 'f'; }
+  for(const h of MALE_HINTS){ if(n.includes(h)) return 'm'; }
+  return null;
+}
+function voiceQuality(v){
+  const n = (v.name || '').toLowerCase();
+  let s = 0;
+  if(n.includes('natural') || n.includes('neural')) s += 100; // voix neurales (Edge) = top qualité
+  if(n.includes('online')) s += 40;
+  if(n.includes('google')) s += 30;
+  if(n.includes('microsoft')) s += 15;
+  if(v.localService === false) s += 10;
+  return s;
+}
+function getVoicesFor(langPrefix){
+  if(!_voices.length) refreshVoices();
+  return _voices
+    .filter(v => (v.lang || '').toLowerCase().startsWith(langPrefix))
+    .sort((a,b) => voiceQuality(b) - voiceQuality(a));
+}
+/* Choisit une voix pour la langue, en préférant un genre donné (ou aléatoire). */
+function pickVoice(langPrefix, gender){
+  const voices = getVoicesFor(langPrefix);
+  if(!voices.length) return null;
+  const g = gender || (Math.random() < 0.5 ? 'f' : 'm');
+  const sameGender = voices.filter(v => classifyGender(v) === g);
+  if(sameGender.length) return sameGender[0];       // meilleure voix du genre voulu
+  const otherGender = voices.filter(v => classifyGender(v) === (g === 'f' ? 'm' : 'f'));
+  if(otherGender.length) return otherGender[0];      // sinon l'autre genre
+  return voices[0];                                  // sinon la meilleure dispo
+}
+
 function speak(text, lang){
   if(!speechAvailable || !text) return;
   try{
     window.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
-    u.lang = lang || 'fr-FR';
-    u.rate = 0.95;
+    const langCode = lang || 'fr-FR';
+    u.lang = langCode;
+    const prefix = langCode.slice(0,2).toLowerCase();
+    const v = pickVoice(prefix); // genre aléatoire à chaque fois
+    if(v){ u.voice = v; u.lang = v.lang; }
+    u.rate = 0.96;
+    u.pitch = 1.0;
     window.speechSynthesis.speak(u);
   }catch(e){}
 }
@@ -1250,6 +1360,48 @@ function launchConfetti(){
 
 /* ---------- 🦉 Mascotte + éclats ---------- */
 const MASCOT_OK = ['Bravo ! 🎉', 'Parfait !', 'Excellent !', 'Trop fort ! 💪', 'En feu ! 🔥', 'Continue !', 'Superbe !', 'Génial ! ✨'];
+const MASCOT_CHEER = ['Tu gères ! 💪', 'Reste concentré·e 🎯', 'Encore un ! 🚀', 'Tu progresses ! 📈', 'Allez, allez ! 🔥', 'Champion·ne ! 🏆'];
+
+function mascotWave(){
+  const m = document.getElementById('mascot');
+  if(!m) return;
+  m.classList.remove('wave'); void m.offsetWidth; m.classList.add('wave');
+}
+function mascotCheer(){
+  if(!document.body.classList.contains('quiz-active')) return;
+  const bubble = document.getElementById('mascotBubble');
+  if(!bubble || bubble.classList.contains('show')) return; // ne coupe pas un message en cours
+  const msg = MASCOT_CHEER[Math.floor(Math.random()*MASCOT_CHEER.length)];
+  bubble.textContent = msg;
+  bubble.className = 'mascot-bubble show';
+  mascotWave();
+  setTimeout(() => bubble.classList.remove('show'), 1800);
+}
+
+/* Célébration spéciale sur les paliers de bonnes réponses d'affilée (3, 5, 10...). */
+function mascotMilestone(n){
+  const bubble = document.getElementById('mascotBubble');
+  const m = document.getElementById('mascot');
+  const messages = {
+    3: '🔥 3 d\'affilée !',
+    5: '🔥🔥 5 d\'affilée, en feu !',
+    10: '🌟 10 d\'affilée, incroyable !',
+    15: '🚀 15 sans faute, un monstre !',
+    20: '👑 20 d\'affilée, légendaire !',
+    30: '🏆 30 d\'affilée, imbattable !'
+  };
+  if(bubble){
+    bubble.textContent = messages[n] || `🔥 ${n} d'affilée !`;
+    bubble.className = 'mascot-bubble show ok';
+    window.__mascotLockUntil = Date.now() + 2200;
+    setTimeout(() => bubble.classList.remove('show'), 2200);
+  }
+  if(m){ m.classList.remove('happy'); void m.offsetWidth; m.classList.add('happy'); }
+  // petite pluie d'étoiles sur la mascotte
+  if(m){ const r = m.getBoundingClientRect(); burstStars(r.left + r.width/2, r.top + r.height/2); }
+  if(n >= 5){ launchConfetti(); }
+}
+
 const MASCOT_KO = ['Presque !', 'On réessaie !', 'Pas grave 💛', 'Tu vas y arriver !', 'Courage !', 'La prochaine !'];
 let mascotTimer = null;
 
@@ -1260,6 +1412,8 @@ function reactMascot(kind){
   m.classList.remove('happy','sad');
   void m.offsetWidth;
   m.classList.add(kind === 'ok' ? 'happy' : 'sad');
+  // un message de palier (combo) reste prioritaire
+  if(window.__mascotLockUntil && Date.now() < window.__mascotLockUntil){ return; }
   const msg = kind === 'ok'
     ? MASCOT_OK[Math.floor(Math.random()*MASCOT_OK.length)]
     : MASCOT_KO[Math.floor(Math.random()*MASCOT_KO.length)];
@@ -1624,6 +1778,9 @@ function renderScoreboard(){
   const el = document.getElementById('scoreboard');
   if(currentBlock === null){ el.innerHTML = ''; return; }
   let html = `<div class="chip total">Bloc ${currentBlock+1} <b>${score.correct}/${score.total}</b></div>`;
+  if(xpMultiplier() > 1){
+    html += `<div class="chip mult-chip">⚡ ×${xpMultiplier()} points</div>`;
+  }
   if(comboStreak >= 2){
     html += `<div class="chip combo-chip" id="comboChip">🔥 ${comboStreak} d'affilée</div>`;
   }
@@ -1987,6 +2144,7 @@ function renderBlockSelect(){
         <span>🎯 Défis du jour</span>
         <span class="quests-xp">⭐ ${xpTotal} pts</span>
       </div>
+      ${xpMultiplier() > 1 ? `<div class="mult-banner">⚡ Bonus points <b>×${xpMultiplier()}</b> actif — série de ${curStreak} jours ! Joue pour en profiter.</div>` : ''}
       ${allQuestsDone ? `<div class="quests-alldone">🎉 Tu as terminé tous les défis du jour !</div>` : ''}
       ${quests.map(q => {
         const done = q.cur >= q.goal;
@@ -2022,6 +2180,7 @@ function renderBlockSelect(){
     { id: 'chrono', label: '⚡ Chrono Vrai/Faux' },
     { id: 'speak', label: '🎤 Prononciation' },
     { id: 'pairs', label: '🧩 Paires chrono' },
+    { id: 'dialogue', label: '💬 Dialogue' },
   ];
   const modeRow = document.getElementById('modeRow');
   modes.forEach(m => {
@@ -2062,7 +2221,7 @@ function renderBlockSelect(){
   });
 
   const grid = document.getElementById('blockGrid');
-  const modeEmoji = { classic: '🎯', blank: '🕳️', chrono: '⚡', speak: '🎤', pairs: '🧩' };
+  const modeEmoji = { classic: '🎯', blank: '🕳️', chrono: '⚡', speak: '🎤', pairs: '🧩', dialogue: '💬' };
   grid.innerHTML = BLOCKS.map((b,i) => {
     const perMode = blockResults[i] || {};
     const unlocked = isBlockUnlocked(i);
@@ -2126,12 +2285,18 @@ function focusReveal(revealWrap){
 
 function renderCard(){
   if(queue.length === 0){ document.body.classList.remove('quiz-active'); renderEndScreen(); return; }
+  const isFirstCard = (masteredCount === 0 && score.total === 0 && queue.length === initialLength);
   document.body.classList.add('quiz-active');
   hideMascotBubble();
+  if(isFirstCard){
+    const ml = multiplierLabel();
+    if(ml){ setTimeout(() => showGoalToast(ml, 'Ces points comptent double·triple, profite-en !', '⚡'), 400); }
+  }
   if(gameMode === 'blank'){ renderBlankCard(); return; }
   if(gameMode === 'chrono'){ renderChronoCard(); return; }
   if(gameMode === 'speak'){ renderSpeakCard(); return; }
   if(gameMode === 'pairs'){ renderPairsRound(); return; }
+  if(gameMode === 'dialogue'){ renderDialogueCard(); return; }
   renderClassicCard();
 }
 
@@ -2508,6 +2673,76 @@ function onPairsTimeout(){
   focusReveal(revealWrap);
 }
 
+/* ============ 💬 MODE DIALOGUE (mot en contexte) ============ */
+const DIALOGUE_INTROS = [
+  { a:'Salut ! Comment décrirais-tu la situation ?', name:'Amine' },
+  { a:'Explique-moi ce que tu ressens.', name:'Sara' },
+  { a:'Raconte, qu\'est-ce qui s\'est passé ?', name:'Yassine' },
+  { a:'Donne-moi un exemple concret.', name:'Lina' },
+  { a:'Utilise ce mot dans une phrase, tu veux bien ?', name:'Karim' },
+];
+
+/* Récupère une vraie phrase d'exemple sur le web (API gratuite compatible CORS).
+   Renvoie une phrase contenant le mot, ou null. Échoue silencieusement (hors-ligne, etc.). */
+async function fetchWebSentence(word){
+  try{
+    const ctrl = new AbortController();
+    const to = setTimeout(() => ctrl.abort(), 4000);
+    const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/fr/${encodeURIComponent(word.toLowerCase())}`, { signal: ctrl.signal });
+    clearTimeout(to);
+    if(!res.ok) return null;
+    const data = await res.json();
+    const wnorm = normalizeForSearch(word);
+    for(const entry of (Array.isArray(data) ? data : [])){
+      for(const meaning of (entry.meanings || [])){
+        for(const def of (meaning.definitions || [])){
+          if(def.example && normalizeForSearch(def.example).includes(wnorm)){
+            return def.example;
+          }
+        }
+      }
+    }
+    return null;
+  }catch(e){ return null; }
+}
+
+function renderDialogueCard(){
+  const word = queue[0];
+  answered = false;
+  const options = makeOptions(word);
+  window.__currentOptions = options;
+  window.__currentWord = word;
+
+  const intro = DIALOGUE_INTROS[Math.floor(Math.random()*DIALOGUE_INTROS.length)];
+  const sentenceBlanked = renderBlankSentence(word.ex);
+
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="cat-tag">${escapeHtml(word.cat)} · 💬 Dialogue</div>
+    <div class="chrono-timer-track"><div class="chrono-timer-fill" id="quizTimerFill"></div></div>
+    <div class="dlg">
+      <div class="dlg-line left">
+        <div class="dlg-avatar">🧑</div>
+        <div class="dlg-bubble">${escapeHtml(intro.a)}</div>
+      </div>
+      <div class="dlg-line right">
+        <div class="dlg-bubble you">${sentenceBlanked}</div>
+        <div class="dlg-avatar">🙂</div>
+      </div>
+    </div>
+    <div class="question-line" style="text-align:center;">Complète ta réponse avec le bon mot :</div>
+    <div class="options" id="optionsWrap">
+      ${options.map((o,i) => `<button class="opt" data-i="${i}">${escapeHtml(o.fr)}</button>`).join('')}
+    </div>
+    <div class="reveal" id="revealWrap"></div>
+  `;
+  document.querySelectorAll('.opt').forEach(btn => {
+    btn.addEventListener('click', () => handleAnswer(parseInt(btn.dataset.i)));
+  });
+  renderProgress();
+  startQuestionTimer(() => handleAnswer(null));
+}
+
 function renderClassicCard(){
   const word = queue[0];
   answered = false;
@@ -2778,12 +3013,31 @@ function handleAnswer(i){
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
       </button>
     </div>
+    ${gameMode === 'dialogue' ? `<button class="mode-chip" id="webExBtn" style="margin-top:10px;">🌐 Voir un exemple réel du web</button><div class="web-ex" id="webEx"></div>` : ''}
     <button class="next-btn" id="nextBtn">Mot suivant →</button>
   `;
   document.getElementById('speakExBtn').addEventListener('click', () => {
     const fullSentence = word.ex.replace(/~/g, word.fr);
     speak(fullSentence, 'fr-FR');
   });
+  const webBtn = document.getElementById('webExBtn');
+  if(webBtn){
+    webBtn.addEventListener('click', async () => {
+      const box = document.getElementById('webEx');
+      webBtn.disabled = true;
+      box.innerHTML = '<span style="color:var(--text-dim);font-weight:700;">🔎 Recherche d\'un exemple sur le web…</span>';
+      const sentence = await fetchWebSentence(word.fr);
+      if(sentence){
+        box.innerHTML = `<div class="web-ex-card">🌐 <b>Exemple trouvé :</b> « ${escapeHtml(sentence)} » <button class="speak-btn small" id="webSpeak"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg></button></div>`;
+        const ws = document.getElementById('webSpeak');
+        if(ws) ws.addEventListener('click', () => speak(sentence, 'fr-FR'));
+        webBtn.style.display = 'none';
+      } else {
+        box.innerHTML = '<span style="color:var(--text-dim);font-weight:700;">Aucun exemple web trouvé pour ce mot (ou hors-ligne). La phrase ci-dessus reste ta référence.</span>';
+        webBtn.disabled = false;
+      }
+    });
+  }
   document.getElementById('nextBtn').addEventListener('click', () => { renderCard(); });
   if(gameMode !== 'classic'){ autoSpeakWord(word.fr, 'fr-FR'); }
   focusReveal(revealWrap);
@@ -2823,7 +3077,7 @@ function attachRecapSpeakHandlers(){
   });
 }
 
-const MODE_LABELS = { classic: '🎯 Classique', blank: '🕳️ Phrase à trous', chrono: '⚡ Chrono Vrai/Faux', speak: '🎤 Prononciation', pairs: '🧩 Paires chrono' };
+const MODE_LABELS = { classic: '🎯 Classique', blank: '🕳️ Phrase à trous', chrono: '⚡ Chrono Vrai/Faux', speak: '🎤 Prononciation', pairs: '🧩 Paires chrono', dialogue: '💬 Dialogue' };
 
 function renderRecapView(blockIndex, result, justFinished){
   clearQuestionTimer();
@@ -2870,12 +3124,13 @@ function renderRecapView(blockIndex, result, justFinished){
       <div class="sub" style="color:#6B6552;">${pct}% de bonnes réponses au total${errorCount > 0 ? ` · ${errorCount} mot${errorCount>1?'s':''} eu${errorCount>1?'rent':''} au moins une erreur` : ' · sans erreur, bravo !'}</div>
       ${(result.durationSec || result.xp) ? `<div class="recap-meta">
         ${result.durationSec ? `<span class="recap-meta-pill">⏱️ ${fmtDuration(result.durationSec)}</span>` : ''}
-        ${result.xp ? `<span class="recap-meta-pill xp">⭐ +${result.xp} points</span>` : ''}
+        ${result.xp ? `<span class="recap-meta-pill xp">⭐ +${result.xp} points${result.xpMult > 1 ? ` <b>×${result.xpMult}</b>` : ''}</span>` : ''}
       </div>` : ''}
       ${passBanner}
       ${modeSummary}
-      <div style="display:flex;gap:12px;justify-content:center;margin-top:20px;flex-wrap:wrap;">
-        <button class="restart-btn" id="restartBtn">Refaire ce bloc (${modeLabel})</button>
+      <div style="font-family:'Baloo 2',sans-serif;font-weight:800;color:var(--purple);margin:20px 0 8px;font-size:15px;">🔁 Refaire ce bloc dans le mode :</div>
+      <div class="replay-modes" id="replayModes"></div>
+      <div style="display:flex;gap:12px;justify-content:center;margin-top:14px;flex-wrap:wrap;">
         <button class="restart-btn" id="blocksBtn" style="background:var(--purple);color:#fff;box-shadow:0 4px 0 var(--purple-dark);">← Choisir un autre bloc</button>
       </div>
       ${history.length ? buildRecapTableHtml(history) : '<div class="sub" style="margin-top:20px;color:#8A8266;">Détail mot par mot indisponible pour cette session (ancienne version).</div>'}
@@ -2883,7 +3138,19 @@ function renderRecapView(blockIndex, result, justFinished){
   `;
   document.getElementById('footerNote').textContent = justFinished ? 'Terminé' : '';
   document.getElementById('progressFill').style.width = '100%';
-  document.getElementById('restartBtn').addEventListener('click', () => { buildDeck(blockIndex); renderScoreboard(); renderCard(); });
+
+  // Boutons de choix de mode pour rejouer
+  const replayWrap = document.getElementById('replayModes');
+  GAME_MODES.forEach(mid => {
+    const r = perMode[mid];
+    const p = r && r.total ? Math.round((r.correct/r.total)*100) : null;
+    const btn = document.createElement('button');
+    btn.className = 'replay-mode-btn' + (mid === (result.mode || gameMode) ? ' current' : '');
+    btn.innerHTML = `${MODE_LABELS[mid]}${p !== null ? ` <span class="rp-score">${p}%</span>` : ' <span class="rp-new">nouveau</span>'}`;
+    btn.addEventListener('click', () => { gameMode = mid; buildDeck(blockIndex); renderScoreboard(); renderCard(); });
+    replayWrap.appendChild(btn);
+  });
+
   document.getElementById('blocksBtn').addEventListener('click', renderBlockSelect);
   attachRecapSpeakHandlers();
 }
@@ -2894,9 +3161,11 @@ function renderEndScreen(){
   const passed90 = pctVal >= PASS_THRESHOLD;
   const flawless = score.total > 0 && score.correct === score.total;
   // Points : 10 par bonne réponse + bonus combo + bonus vitesse/sans-faute
-  const xpEarned = (score.correct * 10) + (bestCombo >= 5 ? 15 : 0) + (flawless ? 25 : 0) + (passed90 ? 15 : 0);
+  const baseXp = (score.correct * 10) + (bestCombo >= 5 ? 15 : 0) + (flawless ? 25 : 0) + (passed90 ? 15 : 0);
+  const mult = xpMultiplier();
+  const xpEarned = baseXp * mult;
 
-  const result = { correct: score.correct, total: score.total, history: sessionHistory.slice(), mode: gameMode, finishedAt: Date.now(), bestCombo: bestCombo, durationSec: durationSec, xp: xpEarned };
+  const result = { correct: score.correct, total: score.total, history: sessionHistory.slice(), mode: gameMode, finishedAt: Date.now(), bestCombo: bestCombo, durationSec: durationSec, xp: xpEarned, xpMult: mult };
   saveBlockResult(currentBlock, gameMode, result);
   const goalJustMet = recordDailyActivity();
   const questsBefore = questsAllDone();
@@ -3354,6 +3623,11 @@ setInterval(() => {
   pupils.forEach(p => { p.style.transition = 'transform .08s'; p.style.transform = 'scaleY(0.1)'; });
   setTimeout(() => pupils.forEach(p => { p.style.transform = 'scaleY(1)'; }), 130);
 }, 4200);
+
+// Encouragements aléatoires de la mascotte pendant le jeu (toutes ~18 s)
+setInterval(() => {
+  if(Math.random() < 0.5){ mascotCheer(); }
+}, 18000);
 </script>
 </body>
 </html>
