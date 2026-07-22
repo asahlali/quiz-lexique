@@ -784,6 +784,7 @@
   .repeat-sentence.hidden{ letter-spacing:.3em;color:var(--purple);font-size:26px; }
   .rw{ transition:background .2s,color .2s;border-radius:6px;padding:0 2px; }
   .rw.spoken{ background:#D1FAE5;color:var(--green-dark);font-weight:800;animation:rwPop .3s ease; }
+  .rw.missed{ background:#FEE2E2;color:var(--red-dark);font-weight:800; }
   .rw-hidden{ color:var(--purple);letter-spacing:.15em; }
   @keyframes rwPop{ 0%{ transform:scale(1);} 50%{ transform:scale(1.12);} 100%{ transform:scale(1);} }
 
@@ -1963,8 +1964,12 @@ function renderProgress(){
   const pct = initialLength ? Math.min(100, (masteredCount / initialLength) * 100) : 0;
   document.getElementById('progressFill').style.width = pct + '%';
   const errors = score.total - score.correct;
-  document.getElementById('footerNote').textContent =
-    `Maîtrisés ${masteredCount}/${initialLength}` + (errors > 0 ? ` · ${errors} erreur${errors>1?'s':''} à repasser` : '');
+  const noRequeueModes = (gameMode === 'speak' || gameMode === 'repeat');
+  const label = noRequeueModes ? 'Traités' : 'Maîtrisés';
+  const hint = noRequeueModes
+    ? (errors > 0 ? ` · ${errors} erreur${errors>1?'s':''} (comptée${errors>1?'s':''}, non repassée${errors>1?'s':''})` : '')
+    : (errors > 0 ? ` · ${errors} erreur${errors>1?'s':''} à repasser` : '');
+  document.getElementById('footerNote').textContent = `${label} ${masteredCount}/${initialLength}${hint}`;
 }
 
 function normalizeForSearch(s){
@@ -2507,6 +2512,7 @@ let recoActive = false;
 let micContinuous = false; // une fois le micro activé dans un bloc, il se relance à chaque mot
 let speakAttemptCount = 0;   // 🔁 nombre d'essais sur le mot en cours (mode Prononciation)
 let repeatAttemptCount = 0;  // 🔁 nombre d'essais sur la phrase en cours (mode Répétition)
+let repeatHeardUnion = '';   // cumul de tout ce qui a été entendu sur cette phrase (pour le surlignage final)
 
 function levenshtein(a, b){
   const m = a.length, n = b.length;
@@ -2692,8 +2698,9 @@ function handleSpeakResult(isCorrect, word, info){
     queue.shift();
     sessionHistory.push({ fr: word.fr, ar: word.ar, def: word.def, cat: word.cat, attempts: attemptsByFr[word.fr] });
   } else {
-    const w = queue.shift();
-    queue.push(w);
+    // 2 essais épuisés (ou passé/révélé) : le mot est compté faux et retiré définitivement, pas de boucle infinie
+    queue.shift();
+    masteredCount++;
   }
   recordWordStat(word.fr, isCorrect);
   bumpCombo(isCorrect);
@@ -2721,7 +2728,7 @@ function handleSpeakResult(isCorrect, word, info){
       <div class="seal-badge"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#2A2107" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       <div class="arabic-word">${escapeHtml(word.ar)}</div>
     </div>
-    <div class="def-text"><strong>${escapeHtml(word.fr)}</strong> — ${escapeHtml(word.def)}
+    <div class="def-text"><strong><span class="rw ${isCorrect ? 'spoken' : 'missed'}" style="padding:2px 8px;">${escapeHtml(word.fr)}</span></strong> — ${escapeHtml(word.def)}
       <button class="speak-btn small" id="speakFrBtn" title="Écouter" style="margin-left:6px;vertical-align:middle;">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>
       </button>
@@ -2955,10 +2962,28 @@ function highlightSpokenWords(transcript){
   });
 }
 
+/* Reconstruit la phrase avec surlignage définitif : vert = mot bien prononcé, rouge = mot manqué. */
+function buildScoredSentenceHtml(sentence, heardText){
+  const heardWords = normalizeForSearch(heardText || '').replace(/[^a-z\s]/g,' ').split(/\s+/).filter(Boolean);
+  const pool = heardWords.slice();
+  const tokens = sentence.split(/(\s+)/);
+  return tokens.map(tok => {
+    if(/^\s+$/.test(tok)) return ' ';
+    const norm = normalizeForSearch(tok).replace(/[^a-z]/g,'');
+    if(!norm) return escapeHtml(tok);
+    let idx = pool.indexOf(norm);
+    if(idx < 0){ idx = pool.findIndex(w => levenshtein(w, norm) <= (norm.length <= 4 ? 1 : 2)); }
+    const ok = idx >= 0;
+    if(ok){ pool.splice(idx, 1); }
+    return `<span class="rw ${ok ? 'spoken' : 'missed'}">${escapeHtml(tok)}</span>`;
+  }).join('');
+}
+
 function renderRepeatCard(){
   const word = queue[0];
   answered = false;
   repeatAttemptCount = 0;
+  repeatHeardUnion = '';
   window.__currentWord = word;
   const sentence = word.ex.replace(/~/g, word.fr);
   window.__repeatSentence = sentence;
@@ -3085,6 +3110,7 @@ function handleRepeatResult(similarity, info){
   const sentence = window.__repeatSentence;
   const pctSaid = Math.round(similarity * 100);
   const isCorrect = similarity >= 0.67; // au moins 67% de la phrase correctement répétée
+  if(info.heard){ repeatHeardUnion += ' ' + info.heard; }
 
   // 🔁 Première erreur : seconde chance avant de compter la phrase comme ratée
   if(!isCorrect && !info.skipped && !info.revealed && repeatAttemptCount === 0){
@@ -3112,7 +3138,9 @@ function handleRepeatResult(similarity, info){
     queue.shift();
     sessionHistory.push({ fr: word.fr, ar: word.ar, def: word.def, cat: word.cat, attempts: attemptsByFr[word.fr] });
   } else {
-    const w = queue.shift(); queue.push(w);
+    // 2 essais épuisés (ou passé/révélé) : la phrase est comptée fausse et retirée définitivement, pas de boucle infinie
+    queue.shift();
+    masteredCount++;
   }
   recordWordStat(word.fr, isCorrect);
   bumpCombo(isCorrect);
@@ -3135,12 +3163,13 @@ function handleRepeatResult(similarity, info){
   const revealWrap = document.getElementById('revealWrap');
   // révèle la phrase (surtout si elle était cachée)
   const rs = document.getElementById('repeatSentence');
-  if(rs){ rs.classList.remove('hidden'); rs.textContent = sentence; }
+  if(rs){ rs.classList.remove('hidden'); rs.innerHTML = buildScoredSentenceHtml(sentence, repeatHeardUnion); }
 
   revealWrap.classList.add('show');
   revealWrap.innerHTML = `
     <div class="big-feedback ${isCorrect ? 'ok' : 'ko'}">${headline}</div>
-    <div class="def-text" style="text-align:center;font-size:18px;margin:8px 0;">« ${escapeHtml(sentence)} »
+    <div class="def-text" style="text-align:center;font-size:13px;color:var(--text-dim);margin:0 0 10px;">
+      <span class="rw spoken" style="padding:2px 8px;">bien dit</span> &nbsp; <span class="rw missed" style="padding:2px 8px;">manqué</span>
       <button class="speak-btn small" id="repSpeakBtn" style="margin-left:6px;vertical-align:middle;"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg></button>
     </div>
     <div class="seal">
@@ -4010,20 +4039,28 @@ document.addEventListener('keydown', (e) => {
   }
   if(!document.body.classList.contains('quiz-active')) return;
 
+  // Digit1..Digit4 (et pavé numérique) : indépendant du clavier (fonctionne aussi en AZERTY, sans Shift)
+  const digitCodeMap = {'Digit1':0,'Digit2':1,'Digit3':2,'Digit4':3,'Numpad1':0,'Numpad2':1,'Numpad3':2,'Numpad4':3};
+  const letterCodeMap = {'KeyA':0,'KeyB':1,'KeyC':2,'KeyD':3};
+  const numMap = {'1':0,'2':1,'3':2,'4':3};
+  const letterMap = {'a':0,'b':1,'c':2,'d':3};
+
   const optButtons = document.querySelectorAll('#optionsWrap .opt');
   if(optButtons.length && !answered){
-    const numMap = {'1':0,'2':1,'3':2,'4':3};
-    const letterMap = {'a':0,'b':1,'c':2,'d':3};
-    let idx = numMap.hasOwnProperty(e.key) ? numMap[e.key] : (letterMap.hasOwnProperty(e.key.toLowerCase()) ? letterMap[e.key.toLowerCase()] : null);
+    let idx = null;
+    if(digitCodeMap.hasOwnProperty(e.code)) idx = digitCodeMap[e.code];
+    else if(letterCodeMap.hasOwnProperty(e.code)) idx = letterCodeMap[e.code];
+    else if(numMap.hasOwnProperty(e.key)) idx = numMap[e.key];
+    else if(letterMap.hasOwnProperty(e.key.toLowerCase())) idx = letterMap[e.key.toLowerCase()];
     if(idx !== null && optButtons[idx]){ e.preventDefault(); optButtons[idx].click(); return; }
   }
   const trueBtn = document.getElementById('chronoTrueBtn'), falseBtn = document.getElementById('chronoFalseBtn');
   if(trueBtn && falseBtn && !answered){
-    if(['1','v','V','ArrowLeft'].includes(e.key)){ e.preventDefault(); trueBtn.click(); return; }
-    if(['2','f','F','ArrowRight'].includes(e.key)){ e.preventDefault(); falseBtn.click(); return; }
+    if(e.code === 'Digit1' || e.code === 'Numpad1' || e.key === '1' || e.key.toLowerCase() === 'v' || e.key === 'ArrowLeft'){ e.preventDefault(); trueBtn.click(); return; }
+    if(e.code === 'Digit2' || e.code === 'Numpad2' || e.key === '2' || e.key.toLowerCase() === 'f' || e.key === 'ArrowRight'){ e.preventDefault(); falseBtn.click(); return; }
   }
   const micBtn = document.getElementById('micBtn');
-  if(micBtn && e.key === ' '){ e.preventDefault(); micBtn.click(); }
+  if(micBtn && (e.code === 'Space' || e.key === ' ')){ e.preventDefault(); micBtn.click(); }
 });
 
 rebuildBlocks();
