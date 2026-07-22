@@ -756,6 +756,24 @@
   }
   .mascot.wave{ animation:mascotWave .8s ease; }
   @keyframes mascotWave{ 0%,100%{ transform:rotate(0);} 20%{ transform:rotate(-12deg);} 50%{ transform:rotate(10deg);} 70%{ transform:rotate(-6deg);} }
+  .mascot.talking{ animation:mascotTalkA .35s ease-in-out infinite; }
+  @keyframes mascotTalkA{ 0%,100%{ transform:translateY(0) scale(1,1);} 50%{ transform:translateY(-2px) scale(1.03,0.97);} }
+  .mascot.dance{ animation:mascotDanceA 1.3s ease; }
+  @keyframes mascotDanceA{
+    0%{ transform:rotate(0) translateY(0);} 15%{ transform:rotate(-10deg) translateY(-6px);}
+    30%{ transform:rotate(10deg) translateY(0);} 45%{ transform:rotate(-8deg) translateY(-5px);}
+    60%{ transform:rotate(8deg) translateY(0);} 75%{ transform:rotate(-4deg) translateY(-3px);}
+    100%{ transform:rotate(0) translateY(0);}
+  }
+  .mascot.talking .m-smile{ animation:mouthTalk .3s ease-in-out infinite;transform-origin:center; }
+  @keyframes mouthTalk{ 0%,100%{ transform:scaleY(1);} 50%{ transform:scaleY(1.7);} }
+
+  /* ============ 🗣️ MODE RÉPÉTITION ============ */
+  .repeat-sentence{
+    font-family:'Baloo 2',sans-serif;font-weight:700;font-size:clamp(20px,4.6vw,28px);text-align:center;
+    color:var(--ink);background:#F1F5F9;border-radius:16px;padding:22px 18px;margin:6px 0 10px;line-height:1.5;
+  }
+  .repeat-sentence.hidden{ letter-spacing:.3em;color:var(--purple);font-size:26px; }
 
   /* ============ 💬 MODE DIALOGUE ============ */
   .dlg{ display:flex;flex-direction:column;gap:12px;margin:8px 0 16px; }
@@ -1195,7 +1213,7 @@ function loadBlockResult(blockIndex, mode){
   }catch(e){ return null; }
 }
 
-const GAME_MODES = ['classic', 'blank', 'chrono', 'speak', 'pairs', 'dialogue'];
+const GAME_MODES = ['classic', 'blank', 'chrono', 'speak', 'pairs', 'dialogue', 'repeat'];
 
 function rebuildBlocks(){
   datasetHash = hashWords(WORDS);
@@ -1293,7 +1311,7 @@ function saveAutoSpeak(on){
 }
 let autoSpeak = loadAutoSpeak();
 function autoSpeakWord(text, lang){
-  if(autoSpeak){ speak(text, lang); }
+  if(autoSpeak){ if(typeof mascotTalk==='function') mascotTalk(); speak(text, lang); }
 }
 
 let audioCtx = null;
@@ -1366,6 +1384,18 @@ function mascotWave(){
   const m = document.getElementById('mascot');
   if(!m) return;
   m.classList.remove('wave'); void m.offsetWidth; m.classList.add('wave');
+}
+function mascotTalk(){
+  const m = document.getElementById('mascot');
+  if(!m) return;
+  m.classList.add('talking');
+  setTimeout(() => m.classList.remove('talking'), 2200);
+}
+function mascotDance(){
+  const m = document.getElementById('mascot');
+  if(!m || !document.body.classList.contains('quiz-active')) return;
+  m.classList.remove('dance'); void m.offsetWidth; m.classList.add('dance');
+  setTimeout(() => m.classList.remove('dance'), 1400);
 }
 function mascotCheer(){
   if(!document.body.classList.contains('quiz-active')) return;
@@ -1771,6 +1801,7 @@ function buildDeck(blockIndex){
   comboStreak = 0;
   bestCombo = 0;
   micContinuous = false;
+  repeatContinuous = false;
   blockStartTime = Date.now();
 }
 
@@ -2181,6 +2212,7 @@ function renderBlockSelect(){
     { id: 'speak', label: '🎤 Prononciation' },
     { id: 'pairs', label: '🧩 Paires chrono' },
     { id: 'dialogue', label: '💬 Dialogue' },
+    { id: 'repeat', label: '🗣️ Répétition' },
   ];
   const modeRow = document.getElementById('modeRow');
   modes.forEach(m => {
@@ -2221,7 +2253,7 @@ function renderBlockSelect(){
   });
 
   const grid = document.getElementById('blockGrid');
-  const modeEmoji = { classic: '🎯', blank: '🕳️', chrono: '⚡', speak: '🎤', pairs: '🧩', dialogue: '💬' };
+  const modeEmoji = { classic: '🎯', blank: '🕳️', chrono: '⚡', speak: '🎤', pairs: '🧩', dialogue: '💬', repeat: '🗣️' };
   grid.innerHTML = BLOCKS.map((b,i) => {
     const perMode = blockResults[i] || {};
     const unlocked = isBlockUnlocked(i);
@@ -2297,6 +2329,7 @@ function renderCard(){
   if(gameMode === 'speak'){ renderSpeakCard(); return; }
   if(gameMode === 'pairs'){ renderPairsRound(); return; }
   if(gameMode === 'dialogue'){ renderDialogueCard(); return; }
+  if(gameMode === 'repeat'){ renderRepeatCard(); return; }
   renderClassicCard();
 }
 
@@ -2682,6 +2715,198 @@ const DIALOGUE_INTROS = [
   { a:'Utilise ce mot dans une phrase, tu veux bien ?', name:'Karim' },
 ];
 
+/* ============ 🗣️ MODE RÉPÉTITION (écoute & répète la phrase) ============ */
+let repeatContinuous = false;
+
+/* Similarité entre la phrase dite et la phrase cible : fraction de mots retrouvés. */
+function sentenceSimilarity(said, target){
+  const norm = s => normalizeForSearch(s).replace(/[^a-z\s]/g,' ').split(/\s+/).filter(Boolean);
+  const a = norm(said), b = norm(target);
+  if(!b.length) return 0;
+  const bset = [...b];
+  let hit = 0;
+  a.forEach(w => {
+    const idx = bset.indexOf(w);
+    if(idx >= 0){ hit++; bset.splice(idx,1); }
+    else {
+      // tolérance orthographique
+      const near = bset.findIndex(x => levenshtein(x, w) <= (x.length <= 4 ? 1 : 2));
+      if(near >= 0){ hit++; bset.splice(near,1); }
+    }
+  });
+  return hit / b.length;
+}
+
+function renderRepeatCard(){
+  const word = queue[0];
+  answered = false;
+  window.__currentWord = word;
+  const sentence = word.ex.replace(/~/g, word.fr);
+  window.__repeatSentence = sentence;
+
+  const card = document.getElementById('quizCard');
+
+  if(!speechRecoAvailable){
+    card.innerHTML = `
+      <div class="cat-tag">🗣️ Répétition</div>
+      <div class="word-fr" style="font-size:clamp(22px,4.5vw,30px);">Micro non disponible ici</div>
+      <div class="result-card" style="margin-top:14px;">
+        <div class="result-def">Ce mode a besoin de la reconnaissance vocale. Utilise <b>Chrome</b> ou <b>Edge</b> (PC ou Android). Sur iPhone, ce mode n'est pas supporté.</div>
+      </div>
+      <button class="next-btn" id="backRepeatBtn" style="margin-top:18px;">← Choisir un autre mode</button>
+    `;
+    document.getElementById('backRepeatBtn').addEventListener('click', renderBlockSelect);
+    renderProgress();
+    return;
+  }
+
+  // Aléatoire : phrase cachée (écoute seule) ou visible (lecture)
+  const hidden = Math.random() < 0.5;
+  window.__repeatHidden = hidden;
+
+  card.innerHTML = `
+    <div class="cat-tag">${escapeHtml(word.cat)} · 🗣️ Répétition</div>
+    <div class="question-line" style="text-align:center;margin-bottom:8px;">
+      ${hidden ? '👂 Écoute la phrase, puis répète-la au micro' : '📖 Lis la phrase à voix haute au micro'}
+    </div>
+    <div class="repeat-sentence ${hidden ? 'hidden' : ''}" id="repeatSentence">
+      ${hidden ? '🔊 ● ● ● ● ●' : escapeHtml(sentence)}
+    </div>
+    <button class="speak-ar-btn" id="hearSentenceBtn">🔊 ${hidden ? 'Réécouter' : 'Écouter'} la phrase</button>
+    <div class="mic-zone">
+      <button class="mic-btn" id="micBtn" aria-label="Parler">
+        <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/>
+        </svg>
+      </button>
+      <div class="mic-hint" id="micHint">Appuie et répète la phrase</div>
+      <div class="mic-transcript" id="micTranscript"></div>
+    </div>
+    <div class="speak-actions">
+      <button class="mode-chip ${repeatContinuous ? 'active' : ''}" id="repeatContBtn">${repeatContinuous ? '🎙️ Micro continu : ON' : '🎙️ Activer micro continu'}</button>
+      <button class="mode-chip" id="revealRepeatBtn">👁 Voir la phrase</button>
+      <button class="mode-chip" id="skipRepeatBtn">⏭ Passer</button>
+    </div>
+    <div class="reveal" id="revealWrap"></div>
+  `;
+
+  const playSentence = () => { mascotTalk(); speak(sentence, 'fr-FR'); };
+  document.getElementById('hearSentenceBtn').addEventListener('click', playSentence);
+  document.getElementById('micBtn').addEventListener('click', () => startRepeatRecognition(sentence));
+  document.getElementById('revealRepeatBtn').addEventListener('click', () => handleRepeatResult(0, { revealed:true }));
+  document.getElementById('skipRepeatBtn').addEventListener('click', () => handleRepeatResult(0, { skipped:true }));
+  document.getElementById('repeatContBtn').addEventListener('click', () => {
+    repeatContinuous = !repeatContinuous;
+    const b = document.getElementById('repeatContBtn');
+    b.classList.toggle('active', repeatContinuous);
+    b.textContent = repeatContinuous ? '🎙️ Micro continu : ON' : '🎙️ Activer micro continu';
+    if(repeatContinuous){ startRepeatRecognition(sentence); }
+  });
+  renderProgress();
+
+  // Lecture auto de la phrase à l'affichage (surtout si cachée)
+  if(hidden || autoSpeak){ setTimeout(playSentence, 400); }
+  // Micro continu : relance l'écoute automatiquement
+  if(repeatContinuous){ setTimeout(() => { if(!answered){ startRepeatRecognition(sentence); } }, hidden ? 2600 : 900); }
+}
+
+function startRepeatRecognition(sentence){
+  if(!speechRecoAvailable || recoActive || answered) return;
+  try{
+    recognition = new SpeechRec();
+    recognition.lang = 'fr-FR';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+  }catch(e){ return; }
+
+  const micBtn = document.getElementById('micBtn');
+  const micHint = document.getElementById('micHint');
+  const micTr = document.getElementById('micTranscript');
+  recoActive = true;
+  micBtn.classList.add('listening');
+  micHint.textContent = '🎧 J\'écoute... répète la phrase !';
+  micTr.textContent = '';
+
+  recognition.onresult = (ev) => {
+    const heard = ev.results[0][0].transcript || '';
+    micTr.textContent = `Tu as dit : « ${heard} »`;
+    const sim = sentenceSimilarity(heard, sentence);
+    setTimeout(() => handleRepeatResult(sim, { heard }), 250);
+  };
+  recognition.onerror = (ev) => {
+    recoActive = false; micBtn.classList.remove('listening');
+    if(ev.error === 'not-allowed' || ev.error === 'service-not-allowed'){ micHint.textContent = '🚫 Micro refusé — autorise le micro.'; }
+    else if(ev.error === 'no-speech'){ micHint.textContent = '🤫 Rien entendu — réappuie et parle.'; }
+    else { micHint.textContent = 'Réappuie pour réessayer.'; }
+  };
+  recognition.onend = () => { recoActive = false; micBtn.classList.remove('listening'); };
+  try{ recognition.start(); }catch(e){ recoActive = false; micBtn.classList.remove('listening'); }
+}
+
+function handleRepeatResult(similarity, info){
+  if(answered) return;
+  answered = true;
+  stopRecognition();
+  info = info || {};
+  const word = window.__currentWord;
+  const sentence = window.__repeatSentence;
+  const pctSaid = Math.round(similarity * 100);
+  const isCorrect = similarity >= 0.7; // au moins 70% de la phrase correctement répétée
+
+  score.total++;
+  if(!catScore[word.cat]) catScore[word.cat] = { c:0, t:0 };
+  catScore[word.cat].t++;
+  attemptsByFr[word.fr] = (attemptsByFr[word.fr] || 0) + 1;
+
+  if(isCorrect){
+    score.correct++; catScore[word.cat].c++;
+    masteredCount++;
+    queue.shift();
+    sessionHistory.push({ fr: word.fr, ar: word.ar, def: word.def, cat: word.cat, attempts: attemptsByFr[word.fr] });
+  } else {
+    const w = queue.shift(); queue.push(w);
+  }
+  recordWordStat(word.fr, isCorrect);
+  bumpCombo(isCorrect);
+
+  const micBtn = document.getElementById('micBtn');
+  if(micBtn){ micBtn.classList.add('disabled'); }
+
+  if(isCorrect){ celebrate(); reactMascot('ok'); playCorrectSound(); }
+  else {
+    const cardEl = document.getElementById('quizCard');
+    cardEl.classList.remove('shake'); void cardEl.offsetWidth; cardEl.classList.add('shake');
+    reactMascot('ko'); playWrongSound();
+  }
+  renderScoreboard();
+
+  const headline = info.skipped ? '⏭ Phrase passée :'
+    : (info.revealed ? '👁 Voici la phrase :'
+      : (isCorrect ? `🎉 Bravo ! Tu as répété ${pctSaid}% de la phrase` : `💛 ${pctSaid}% — réécoute et réessaie. Voici la phrase :`));
+
+  const revealWrap = document.getElementById('revealWrap');
+  // révèle la phrase (surtout si elle était cachée)
+  const rs = document.getElementById('repeatSentence');
+  if(rs){ rs.classList.remove('hidden'); rs.textContent = sentence; }
+
+  revealWrap.classList.add('show');
+  revealWrap.innerHTML = `
+    <div class="big-feedback ${isCorrect ? 'ok' : 'ko'}">${headline}</div>
+    <div class="def-text" style="text-align:center;font-size:18px;margin:8px 0;">« ${escapeHtml(sentence)} »
+      <button class="speak-btn small" id="repSpeakBtn" style="margin-left:6px;vertical-align:middle;"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg></button>
+    </div>
+    <div class="seal">
+      <div class="seal-badge"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#2A2107" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="arabic-word">${escapeHtml(word.ar)}</div>
+    </div>
+    <div class="def-text"><strong>${escapeHtml(word.fr)}</strong> — ${escapeHtml(word.def)}</div>
+    <button class="next-btn" id="nextBtn">Suivant →</button>
+  `;
+  document.getElementById('repSpeakBtn').addEventListener('click', () => { mascotTalk(); speak(sentence, 'fr-FR'); });
+  document.getElementById('nextBtn').addEventListener('click', () => { renderCard(); });
+  focusReveal(revealWrap);
+}
+
 function renderDialogueCard(){
   const word = queue[0];
   answered = false;
@@ -3034,7 +3259,7 @@ function attachRecapSpeakHandlers(){
   });
 }
 
-const MODE_LABELS = { classic: '🎯 Classique', blank: '🕳️ Phrase à trous', chrono: '⚡ Chrono Vrai/Faux', speak: '🎤 Prononciation', pairs: '🧩 Paires chrono', dialogue: '💬 Dialogue' };
+const MODE_LABELS = { classic: '🎯 Classique', blank: '🕳️ Phrase à trous', chrono: '⚡ Chrono Vrai/Faux', speak: '🎤 Prononciation', pairs: '🧩 Paires chrono', dialogue: '💬 Dialogue', repeat: '🗣️ Répétition' };
 
 function renderRecapView(blockIndex, result, justFinished){
   clearQuestionTimer();
@@ -3585,6 +3810,11 @@ setInterval(() => {
 setInterval(() => {
   if(Math.random() < 0.5){ mascotCheer(); }
 }, 18000);
+
+// Petite danse surprise de temps en temps
+setInterval(() => {
+  if(document.body.classList.contains('quiz-active') && Math.random() < 0.35){ mascotDance(); }
+}, 25000);
 </script>
 </body>
 </html>
