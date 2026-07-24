@@ -220,6 +220,7 @@
   .recap-table .rc-status{white-space:nowrap;font-weight:800;font-family:'Baloo 2',sans-serif;font-size:12.5px;}
   .recap-table .rc-status.first{color:var(--green-dark);}
   .recap-table .rc-status.retry{color:#C97A00;}
+  .recap-table .rc-status.fail{color:var(--red-dark);}
   .recap-table .rc-speak{
     width:26px;height:26px;border-radius:50%;border:none;background:var(--blue);
     display:inline-flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 0 #0E7490;
@@ -798,6 +799,33 @@
     50%{ transform:rotate(180deg) scale(.85);}
     100%{ transform:rotate(360deg) scale(1);}
   }
+
+  /* ============ 🎉 GRANDE CÉLÉBRATION DE FIN DE BLOC ============ */
+  .celebrate-wrap{ display:flex;flex-direction:column;align-items:center;margin:0 0 16px; }
+  .celebrate-mascot{
+    animation:mascotEpicEntrance .9s cubic-bezier(.22,1.4,.4,1), mascotEpicLoop 2.4s ease-in-out .9s infinite;
+    filter:drop-shadow(0 10px 16px rgba(0,0,0,0.22));
+  }
+  .celebrate-mascot svg{ width:96px;height:96px; }
+  @keyframes mascotEpicEntrance{
+    0%{ transform:translateY(-180px) scale(.3) rotate(-30deg); opacity:0; }
+    55%{ transform:translateY(16px) scale(1.2) rotate(10deg); opacity:1; }
+    75%{ transform:translateY(-10px) scale(.95) rotate(-5deg); }
+    100%{ transform:translateY(0) scale(1) rotate(0); }
+  }
+  @keyframes mascotEpicLoop{
+    0%,100%{ transform:translateY(0) rotate(0); }
+    25%{ transform:translateY(-7px) rotate(-3deg); }
+    50%{ transform:translateY(0) rotate(0); }
+    75%{ transform:translateY(-7px) rotate(3deg); }
+  }
+  .celebrate-bubble{
+    margin-top:12px;background:linear-gradient(135deg,#FDE68A,#FCA5A5,#C4B5FD);background-size:200% 100%;
+    animation:flawlessShine 3s linear infinite, bubblePop .5s cubic-bezier(.28,1.6,.5,1) .7s backwards;
+    color:#7C2D12;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:clamp(16px,4vw,20px);
+    padding:11px 24px;border-radius:999px;box-shadow:0 6px 0 rgba(0,0,0,0.14);text-align:center;
+  }
+  @keyframes bubblePop{ 0%{ transform:scale(.4);opacity:0;} 60%{ transform:scale(1.1);opacity:1;} 100%{ transform:scale(1);opacity:1;} }
 
   /* ============ 🗣️ MODE RÉPÉTITION ============ */
   .repeat-sentence{
@@ -1556,6 +1584,32 @@ function launchConfetti(){
 
 /* ---------- 🦉 Mascotte + éclats ---------- */
 const MASCOT_OK = ['Bravo ! 🎉', 'Parfait !', 'Excellent !', 'Trop fort ! 💪', 'En feu ! 🔥', 'Continue !', 'Superbe !', 'Génial ! ✨'];
+const MASCOT_BIG_CELEBRATE = [
+  '🤩 INCROYABLE !!', '🚀 Tu déchires TOUT !', '👑 Quelle performance !', '🏆 Un vrai champion·ne !',
+  '🔥 T\'es en feu aujourd\'hui !', '💥 Complètement OUF !', '🌟 Niveau légendaire !', '🎉 Bloc validé haut la main !'
+];
+/* Markup SVG de la mascotte, réutilisé pour la grande célébration de fin de bloc. */
+const MASCOT_SVG_INNER = `<svg viewBox="0 0 120 120" width="82" height="82">
+  <ellipse class="m-shadow" cx="60" cy="112" rx="30" ry="6"/>
+  <g class="m-body">
+    <defs><linearGradient id="mbodyCeleb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9B5CFF"/><stop offset="1" stop-color="#7C3AED"/></linearGradient></defs>
+    <ellipse cx="60" cy="68" rx="40" ry="42" fill="url(#mbodyCeleb)"/>
+    <ellipse cx="60" cy="74" rx="28" ry="30" fill="#B98BFF" opacity="0.55"/>
+    <circle cx="30" cy="30" r="7" fill="#7C3AED"/><circle cx="90" cy="30" r="7" fill="#7C3AED"/>
+    <circle cx="30" cy="30" r="3" fill="#FFD23F"/><circle cx="90" cy="30" r="3" fill="#FFD23F"/>
+    <g class="m-glasses">
+      <circle cx="46" cy="60" r="17" fill="#fff" stroke="#0F172A" stroke-width="3"/>
+      <circle cx="76" cy="60" r="17" fill="#fff" stroke="#0F172A" stroke-width="3"/>
+      <line x1="61" y1="60" x2="63" y2="60" stroke="#0F172A" stroke-width="3"/>
+      <circle class="m-pupil" cx="46" cy="61" r="7" fill="#0F172A"/>
+      <circle class="m-pupil" cx="76" cy="61" r="7" fill="#0F172A"/>
+      <circle cx="49" cy="58" r="2.4" fill="#fff"/><circle cx="79" cy="58" r="2.4" fill="#fff"/>
+    </g>
+    <path class="m-smile" d="M50 84 Q60 94 70 84" fill="none" stroke="#0F172A" stroke-width="3.4" stroke-linecap="round"/>
+    <ellipse class="m-cheek" cx="34" cy="76" rx="6" ry="4" fill="#FF9EC4" opacity="0.65"/>
+    <ellipse class="m-cheek" cx="86" cy="76" rx="6" ry="4" fill="#FF9EC4" opacity="0.65"/>
+  </g>
+</svg>`;
 const MASCOT_CHEER = ['Tu gères ! 💪', 'Reste concentré·e 🎯', 'Encore un ! 🚀', 'Tu progresses ! 📈', 'Allez, allez ! 🔥', 'Champion·ne ! 🏆'];
 
 function mascotWave(){
@@ -2135,6 +2189,51 @@ function renderDictResults(){
   }
 }
 
+/* Vue filtrée depuis les statistiques d'accueil : mots vus / maîtrisés / à revoir. */
+function renderWordListView(kind){
+  clearQuestionTimer();
+  document.body.classList.remove('quiz-active');
+  currentBlock = null;
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromListBtn" style="cursor:pointer;">← Retour aux blocs</button>`;
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('footerNote').textContent = '';
+
+  const meta = {
+    seen:      { title: '👀 Mots vus', emoji: '👀', empty: 'Tu n\'as encore vu aucun mot — lance un premier bloc !' },
+    mastered:  { title: '⭐ Mots maîtrisés', emoji: '⭐', empty: 'Aucun mot maîtrisé pour l\'instant — continue à t\'entraîner !' },
+    review:    { title: '⚠️ Mots à revoir', emoji: '⚠️', empty: 'Rien à revoir — tous les mots vus sont maîtrisés, bravo ! 🎉' },
+  }[kind] || { title: 'Mots', emoji: '📖', empty: 'Aucun mot.' };
+
+  let matches = WORDS.filter(w => {
+    const s = wordStats[w.fr.toLowerCase()];
+    if(!s) return false;
+    if(kind === 'seen') return (s.correct + s.wrong) > 0;
+    if(kind === 'mastered') return s.correct > 0 && s.wrong === 0;
+    if(kind === 'review') return s.wrong > 0;
+    return false;
+  });
+
+  if(kind === 'review'){
+    matches.sort((a,b) => (wordStats[b.fr.toLowerCase()].wrong) - (wordStats[a.fr.toLowerCase()].wrong));
+  } else {
+    matches.sort((a,b) => a.fr.localeCompare(b.fr, 'fr'));
+  }
+
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="cat-tag">${meta.emoji} ${matches.length} mot${matches.length>1?'s':''}</div>
+    <div class="word-fr" style="font-size:clamp(24px,4.5vw,32px);">${meta.title}</div>
+    <div class="search-results" id="wordListResults" style="max-height:560px;margin-top:14px;">
+      ${matches.length ? matches.map(buildWordCardHtml).join('') : `<div class="no-results">${meta.empty}</div>`}
+    </div>
+  `;
+  document.getElementById('backFromListBtn').addEventListener('click', renderBlockSelect);
+  document.getElementById('wordListResults').addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-speak-fr]');
+    if(btn){ speak(btn.dataset.speakFr, 'fr-FR'); }
+  });
+}
+
 function renderDictionaryView(){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
@@ -2319,6 +2418,10 @@ function renderHistoryView(){
         document.getElementById('changeBlockBtn').addEventListener('click', renderHistoryView);
         renderRecapView(e.blockIndex, e.res, false);
       } else if(act === 'retake'){
+        if(!isBlockUnlocked(e.blockIndex)){
+          setStatus(`🔒 Le bloc ${e.blockIndex+1} est verrouillé — valide d'abord le bloc ${e.blockIndex} à ${PASS_THRESHOLD}%.`, 'err');
+          return;
+        }
         gameMode = e.mode;
         buildDeck(e.blockIndex);
         renderScoreboard();
@@ -2349,10 +2452,9 @@ function blockHasResult(i){
   const perMode = blockResults[i] || {};
   return GAME_MODES.some(m => perMode[m]);
 }
-/* Bloc débloqué : le 1er toujours ; sinon si le précédent est validé ; ou s'il a déjà un résultat (progression existante). */
+/* Bloc débloqué : le 1er toujours ; sinon uniquement si le bloc précédent est validé à ≥90%. */
 function isBlockUnlocked(i){
   if(i === 0) return true;
-  if(blockHasResult(i)) return true;
   return isBlockPassed(i - 1);
 }
 
@@ -2451,10 +2553,10 @@ function renderBlockSelect(){
     </div>
 
     <div class="stats-strip">
-      <div class="stat-box"><div class="stat-num">${testsDone}</div><div class="stat-lbl">tests finis</div></div>
-      <div class="stat-box"><div class="stat-num">${seenCount}</div><div class="stat-lbl">mots vus</div></div>
-      <div class="stat-box gold"><div class="stat-num">${masteredCount2}</div><div class="stat-lbl">maîtrisés ⭐</div></div>
-      <div class="stat-box warn"><div class="stat-num">${toReviewCount}</div><div class="stat-lbl">à revoir</div></div>
+      <div class="stat-box" id="statTestsBox"><div class="stat-num">${testsDone}</div><div class="stat-lbl">tests finis</div></div>
+      <div class="stat-box" id="statSeenBox" style="cursor:pointer;"><div class="stat-num">${seenCount}</div><div class="stat-lbl">mots vus</div></div>
+      <div class="stat-box gold" id="statMasteredBox" style="cursor:pointer;"><div class="stat-num">${masteredCount2}</div><div class="stat-lbl">maîtrisés ⭐</div></div>
+      <div class="stat-box warn" id="statReviewBox" style="cursor:pointer;"><div class="stat-num">${toReviewCount}</div><div class="stat-lbl">à revoir</div></div>
     </div>
     <div style="font-family:'Baloo 2',sans-serif;font-weight:800;color:var(--purple);margin:20px 0 4px;font-size:18px;text-align:center;">Choisis ton mode & ton bloc</div>
     <div class="mode-row" id="modeRow"></div>
@@ -2462,6 +2564,10 @@ function renderBlockSelect(){
     <div class="filter-row" id="filterRow"></div>
     <div class="options" id="blockGrid" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr));"></div>
   `;
+
+  document.getElementById('statSeenBox').addEventListener('click', () => renderWordListView('seen'));
+  document.getElementById('statMasteredBox').addEventListener('click', () => renderWordListView('mastered'));
+  document.getElementById('statReviewBox').addEventListener('click', () => renderWordListView('review'));
 
   const modes = [
     { id: 'classic', label: '🎯 Classique' },
@@ -2789,6 +2895,7 @@ function handleSpeakResult(isCorrect, word, info){
     // 2 essais épuisés (ou passé/révélé) : le mot est compté faux et retiré définitivement, pas de boucle infinie
     queue.shift();
     masteredCount++;
+    sessionHistory.push({ fr: word.fr, ar: word.ar, def: word.def, cat: word.cat, attempts: attemptsByFr[word.fr], failed: true });
   }
   recordWordStat(word.fr, isCorrect);
   bumpCombo(isCorrect);
@@ -3183,6 +3290,15 @@ function startRepeatRecognition(sentence){
     const running = (finalTranscript + ' ' + interim).trim();
     micTr.textContent = running ? `Tu dis : « ${running} »` : '';
     highlightSpokenWords(running);           // 🔴 surlignage en temps réel
+
+    // 🆕 Dès que tous les mots de la phrase ont été reconnus, on arrête d'écouter
+    // immédiatement au lieu d'attendre le silence détecté par le navigateur (souvent plusieurs secondes).
+    const allWords = document.querySelectorAll('#repeatSentence .rw');
+    const spokenWords = document.querySelectorAll('#repeatSentence .rw.spoken');
+    if(allWords.length > 0 && spokenWords.length === allWords.length){
+      micHint.textContent = '✅ Phrase complète, vérification...';
+      try{ recognition.stop(); }catch(e){}
+    }
   };
   recognition.onerror = (ev) => {
     recoActive = false; micBtn.classList.remove('listening');
@@ -3240,6 +3356,7 @@ function handleRepeatResult(similarity, info){
     // 2 essais épuisés (ou passé/révélé) : la phrase est comptée fausse et retirée définitivement, pas de boucle infinie
     queue.shift();
     masteredCount++;
+    sessionHistory.push({ fr: word.fr, ar: word.ar, def: word.def, cat: word.cat, attempts: attemptsByFr[word.fr], failed: true });
   }
   recordWordStat(word.fr, isCorrect);
   bumpCombo(isCorrect);
@@ -3717,10 +3834,15 @@ function handleAnswer(i){
 
 function buildRecapTableHtml(history){
   const rows = history.map(w => {
-    const isRetry = w.attempts > 1;
-    const statusHtml = isRetry
-      ? `<span class="rc-status retry">⚠ ${w.attempts}e essai</span>`
-      : `<span class="rc-status first">✓ 1er essai</span>`;
+    let statusHtml;
+    if(w.failed){
+      statusHtml = `<span class="rc-status fail">✗ raté</span>`;
+    } else {
+      const isRetry = w.attempts > 1;
+      statusHtml = isRetry
+        ? `<span class="rc-status retry">⚠ ${w.attempts}e essai</span>`
+        : `<span class="rc-status first">✓ 1er essai</span>`;
+    }
     return `<tr>
       <td><strong>${escapeHtml(w.fr)}</strong></td>
       <td class="rc-ar">${escapeHtml(w.ar)}</td>
@@ -3757,7 +3879,7 @@ function renderRecapView(blockIndex, result, justFinished){
   const pct = result.total ? Math.round((result.correct/result.total)*100) : 0;
   const errors = result.total - result.correct;
   const history = result.history || [];
-  const errorCount = history.filter(w => w.attempts > 1).length;
+  const errorCount = history.filter(w => w.failed || w.attempts > 1).length;
   const modeLabel = MODE_LABELS[result.mode || gameMode] || '';
   const passed = pct >= PASS_THRESHOLD;
   const flawless = result.total > 0 && result.correct === result.total;
@@ -3788,9 +3910,17 @@ function renderRecapView(blockIndex, result, justFinished){
   }).join('');
   const modeSummary = modeRows ? `<div class="pm-summary"><div class="pm-title">📊 Tes notes sur ce bloc</div>${modeRows}</div>` : '';
 
+  const celebrateMsg = MASCOT_BIG_CELEBRATE[Math.floor(Math.random() * MASCOT_BIG_CELEBRATE.length)];
+  const celebrationHtml = (justFinished && passed) ? `
+    <div class="celebrate-wrap" id="celebrateWrap">
+      <div class="celebrate-mascot" id="celebrateMascot" aria-hidden="true">${MASCOT_SVG_INNER}</div>
+      <div class="celebrate-bubble">${celebrateMsg}</div>
+    </div>` : '';
+
   const card = document.getElementById('quizCard');
   card.innerHTML = `
     <div class="end-screen">
+      ${celebrationHtml}
       <div class="cat-tag">${justFinished ? 'Bloc ' + (blockIndex+1) + ' terminé' : 'Récapitulatif — Bloc ' + (blockIndex+1)} · ${modeLabel} — ${history.length || result.total} mots</div>
       <div class="big">${result.correct} / ${result.total}</div>
       <div class="sub" style="color:#6B6552;">${pct}% de bonnes réponses au total${errorCount > 0 ? ` · ${errorCount} mot${errorCount>1?'s':''} eu${errorCount>1?'rent':''} au moins une erreur` : ' · sans erreur, bravo !'}</div>
@@ -3825,6 +3955,16 @@ function renderRecapView(blockIndex, result, justFinished){
 
   document.getElementById('blocksBtn').addEventListener('click', renderBlockSelect);
   attachRecapSpeakHandlers();
+
+  // 🎉 Petite pluie d'étoiles centrée sur la mascotte en grande célébration
+  const celebrateEl = document.getElementById('celebrateMascot');
+  if(celebrateEl){
+    setTimeout(() => {
+      const r = celebrateEl.getBoundingClientRect();
+      burstStars(r.left + r.width/2, r.top + r.height/2);
+      setTimeout(() => burstStars(r.left + r.width/2, r.top + r.height/2), 500);
+    }, 350);
+  }
 }
 
 function renderEndScreen(){
