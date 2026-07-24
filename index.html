@@ -1109,7 +1109,70 @@ ensureDefaultUserAndMigrate();
 const BLOCK_SIZE = 30;
 
 const CUSTOM_WORDS_KEY = 'lexiqueQuiz::customWords';
+const CUSTOM_BLOCKS_KEY = 'lexiqueQuiz::customBlocks';
 const WORD_STATS_KEY = 'lexiqueQuiz::wordStats';
+
+/* ============ 🧩 BLOCS PERSONNALISÉS (mots choisis par l'utilisateur, positionnés librement) ============ */
+function loadCustomBlocks(){
+  try{
+    const raw = localStorage.getItem(nsKey(CUSTOM_BLOCKS_KEY));
+    const list = raw ? JSON.parse(raw) : [];
+    return Array.isArray(list) ? list : [];
+  }catch(e){ return []; }
+}
+function saveCustomBlocks(list){
+  try{ localStorage.setItem(nsKey(CUSTOM_BLOCKS_KEY), JSON.stringify(list)); }catch(e){}
+}
+let customBlocks = loadCustomBlocks();
+
+function createCustomBlock(title, words, afterBlockIndex){
+  const block = {
+    id: 'cb_' + Date.now().toString(36) + Math.random().toString(36).slice(2,6),
+    title: (title || '').trim() || 'Bloc personnalisé',
+    words: words.slice(),
+    afterBlockIndex: afterBlockIndex, // 0 = tout au début ; N = juste après le bloc N
+    createdAt: Date.now(),
+    results: {}
+  };
+  customBlocks.push(block);
+  saveCustomBlocks(customBlocks);
+  cloudAutoPush();
+  return block;
+}
+function deleteCustomBlock(id){
+  customBlocks = customBlocks.filter(b => b.id !== id);
+  saveCustomBlocks(customBlocks);
+  cloudAutoPush();
+}
+function getCustomBlock(id){ return customBlocks.find(b => b.id === id) || null; }
+function getCustomBlocksAt(afterBlockIndex){ return customBlocks.filter(b => b.afterBlockIndex === afterBlockIndex); }
+
+function customBlockBestPct(block){
+  let best = 0;
+  GAME_MODES.forEach(m => {
+    const r = block.results[m];
+    if(r && r.total){ best = Math.max(best, (r.correct / r.total) * 100); }
+  });
+  return best;
+}
+function customBlockHasResult(block){ return GAME_MODES.some(m => block.results[m]); }
+
+function saveCustomBlockResult(blockId, mode, result){
+  const block = getCustomBlock(blockId);
+  if(!block) return;
+  block.results[mode] = result;
+  saveCustomBlocks(customBlocks);
+  cloudAutoPush();
+}
+
+function buildCustomDeck(blockId){
+  const block = getCustomBlock(blockId);
+  if(!block) return;
+  currentBlock = blockId;
+  window.__reviewSession = false;
+  window.__customBlockId = blockId;
+  setupDeckFromWords(block.words);
+}
 
 function loadWordStats(){
   try{
@@ -2089,6 +2152,7 @@ function setupDeckFromWords(words){
 function buildDeck(blockIndex){
   currentBlock = blockIndex;
   window.__reviewSession = false;
+  window.__customBlockId = null;
   setupDeckFromWords(BLOCKS[blockIndex]);
 }
 
@@ -2115,6 +2179,7 @@ function startReviewBlock(chunkIndex){
   currentBlock = null;
   gameMode = 'speak';
   window.__reviewSession = true;
+  window.__customBlockId = null;
   window.__reviewChunkIndex = chunkIndex;
   window.__reviewGraduated = [];
   window.__reviewTotalWords = all.length;
@@ -2203,13 +2268,132 @@ function renderReviewEndScreen(){
   attachRecapSpeakHandlers();
 }
 
+/* ============ 🧩 FIN DE SESSION / RÉCAP D'UN BLOC PERSONNALISÉ ============ */
+function renderCustomBlockEndScreen(){
+  const blockId = window.__customBlockId;
+  const block = getCustomBlock(blockId);
+  if(!block){ renderBlockSelect(); return; }
+
+  const durationSec = blockStartTime ? Math.max(1, Math.round((Date.now() - blockStartTime)/1000)) : 0;
+  const pctVal = score.total ? Math.round((score.correct/score.total)*100) : 0;
+  const passed90 = pctVal >= PASS_THRESHOLD;
+  const flawless = score.total > 0 && score.correct === score.total;
+  const baseXp = (score.correct * 10) + (bestCombo >= 5 ? 15 : 0) + (flawless ? 25 : 0) + (passed90 ? 15 : 0);
+  const mult = xpMultiplier();
+  const xpEarned = baseXp * mult;
+
+  const result = { correct: score.correct, total: score.total, history: sessionHistory.slice(), mode: gameMode, finishedAt: Date.now(), bestCombo: bestCombo, durationSec: durationSec, xp: xpEarned, xpMult: mult };
+  saveCustomBlockResult(blockId, gameMode, result);
+  recordDailyActivity();
+  recordDailyStats(durationSec, passed90, xpEarned);
+
+  renderCustomBlockRecapView(blockId, result, true);
+  const pct = result.total ? (result.correct / result.total) : 0;
+  let bursts = pct === 1 ? 6 : (pct >= 0.8 ? 3 : 2);
+  for(let i=0;i<bursts;i++){ setTimeout(launchConfetti, i*230); }
+  setTimeout(() => burstStars(window.innerWidth/2, window.innerHeight*0.35), 150);
+}
+
+function renderCustomBlockRecapView(blockId, result, justFinished){
+  clearQuestionTimer();
+  document.body.classList.remove('quiz-active');
+  const block = getCustomBlock(blockId);
+  if(!block){ renderBlockSelect(); return; }
+
+  const pct = result.total ? Math.round((result.correct/result.total)*100) : 0;
+  const history = result.history || [];
+  const errorCount = history.filter(w => w.failed || w.attempts > 1).length;
+  const modeLabel = MODE_LABELS[result.mode || gameMode] || '';
+  const passed = pct >= PASS_THRESHOLD;
+  const flawless = result.total > 0 && result.correct === result.total;
+  const combo = result.bestCombo || 0;
+
+  const celebrateMsg = MASCOT_BIG_CELEBRATE[Math.floor(Math.random() * MASCOT_BIG_CELEBRATE.length)];
+  const celebrationHtml = (justFinished && passed) ? `
+    <div class="celebrate-wrap" id="celebrateWrap">
+      <div class="celebrate-mascot" id="celebrateMascot" aria-hidden="true">${MASCOT_SVG_INNER}</div>
+      <div class="celebrate-bubble">${celebrateMsg}</div>
+    </div>` : '';
+
+  const modeRows = GAME_MODES.filter(m => block.results[m]).map(m => {
+    const r = block.results[m];
+    const p = r.total ? Math.round((r.correct/r.total)*100) : 0;
+    const cls = p >= PASS_THRESHOLD ? 'ok' : 'todo';
+    return `<div class="pm-row"><span>${MODE_LABELS[m]}</span><span class="pm-score ${cls}">${r.correct}/${r.total} · ${p}%</span></div>`;
+  }).join('');
+  const modeSummary = modeRows ? `<div class="pm-summary"><div class="pm-title">📊 Tes notes sur ce bloc</div>${modeRows}</div>` : '';
+
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="end-screen">
+      ${celebrationHtml}
+      <div class="cat-tag">🧩 ${escapeHtml(block.title)} · ${modeLabel} — ${history.length || result.total} mots</div>
+      <div class="big">${result.correct} / ${result.total}</div>
+      <div class="sub" style="color:#6B6552;">${pct}% de bonnes réponses${errorCount > 0 ? ` · ${errorCount} mot${errorCount>1?'s':''} eu${errorCount>1?'rent':''} au moins une erreur` : ' · sans erreur, bravo !'}</div>
+      ${(result.durationSec || result.xp) ? `<div class="recap-meta">
+        ${result.durationSec ? `<span class="recap-meta-pill">⏱️ ${fmtDuration(result.durationSec)}</span>` : ''}
+        ${result.xp ? `<span class="recap-meta-pill xp">⭐ +${result.xp} points${result.xpMult > 1 ? ` <b>×${result.xpMult}</b>` : ''}</span>` : ''}
+      </div>` : ''}
+      <div class="pass-banner ${passed ? 'ok' : 'todo'}">${passed ? `✅ Bloc validé à ${pct}% !` : `🎯 ${pct}% — vise ${PASS_THRESHOLD}% pour valider ce bloc.`}</div>
+      ${(justFinished && combo >= 3) ? `<div class="combo-line">🔥 Meilleure série : <b>${combo}</b> bonnes réponses d'affilée</div>` : ''}
+      ${modeSummary}
+      <div style="font-family:'Baloo 2',sans-serif;font-weight:800;color:var(--purple);margin:20px 0 8px;font-size:15px;">🔁 Refaire ce bloc dans le mode :</div>
+      <div class="replay-modes" id="replayModes"></div>
+      <div style="display:flex;gap:12px;justify-content:center;margin-top:14px;flex-wrap:wrap;">
+        <button class="restart-btn" id="blocksBtn" style="background:var(--purple);color:#fff;box-shadow:0 4px 0 var(--purple-dark);">← Choisir un autre bloc</button>
+        <button class="restart-btn" id="deleteCustomBlockBtn" style="background:#FEE2E2;color:var(--red-dark);box-shadow:0 4px 0 #FCA5A5;">🗑 Supprimer ce bloc</button>
+      </div>
+      ${history.length ? buildRecapTableHtml(history) : ''}
+    </div>
+  `;
+  document.getElementById('footerNote').textContent = justFinished ? 'Terminé' : '';
+  document.getElementById('progressFill').style.width = '100%';
+
+  const replayWrap = document.getElementById('replayModes');
+  GAME_MODES.forEach(mid => {
+    const r = block.results[mid];
+    const p = r && r.total ? Math.round((r.correct/r.total)*100) : null;
+    const btn = document.createElement('button');
+    btn.className = 'replay-mode-btn' + (mid === (result.mode || gameMode) ? ' current' : '');
+    btn.innerHTML = `${MODE_LABELS[mid]}${p !== null ? ` <span class="rp-score">${p}%</span>` : ' <span class="rp-new">nouveau</span>'}`;
+    btn.addEventListener('click', () => { gameMode = mid; buildCustomDeck(blockId); renderScoreboard(); renderCard(); });
+    replayWrap.appendChild(btn);
+  });
+
+  document.getElementById('blocksBtn').addEventListener('click', renderBlockSelect);
+  document.getElementById('deleteCustomBlockBtn').addEventListener('click', () => {
+    if(confirm(`Supprimer définitivement le bloc "${block.title}" ? Cette action est irréversible.`)){
+      deleteCustomBlock(blockId);
+      setStatus('🗑 Bloc personnalisé supprimé.', 'ok');
+      renderBlockSelect();
+    }
+  });
+  attachRecapSpeakHandlers();
+
+  const celebrateEl = document.getElementById('celebrateMascot');
+  if(celebrateEl){
+    setTimeout(() => {
+      const r = celebrateEl.getBoundingClientRect();
+      burstStars(r.left + r.width/2, r.top + r.height/2);
+      setTimeout(() => burstStars(r.left + r.width/2, r.top + r.height/2), 500);
+    }, 350);
+  }
+}
+
+
 
 function renderScoreboard(){
   const el = document.getElementById('scoreboard');
-  if(currentBlock === null && !window.__reviewSession){ el.innerHTML = ''; return; }
-  const titleChip = window.__reviewSession
-    ? `<div class="chip total">🔁 Révision <b>${score.correct}/${score.total}</b></div>`
-    : `<div class="chip total">Bloc ${currentBlock+1} <b>${score.correct}/${score.total}</b></div>`;
+  if(currentBlock === null && !window.__reviewSession && !window.__customBlockId){ el.innerHTML = ''; return; }
+  let titleChip;
+  if(window.__reviewSession){
+    titleChip = `<div class="chip total">🔁 Révision <b>${score.correct}/${score.total}</b></div>`;
+  } else if(window.__customBlockId){
+    const cb = getCustomBlock(window.__customBlockId);
+    titleChip = `<div class="chip total">🧩 ${escapeHtml(cb ? cb.title : 'Bloc personnalisé')} <b>${score.correct}/${score.total}</b></div>`;
+  } else {
+    titleChip = `<div class="chip total">Bloc ${currentBlock+1} <b>${score.correct}/${score.total}</b></div>`;
+  }
   let html = titleChip;
   if(xpMultiplier() > 1){
     html += `<div class="chip mult-chip">⚡ ×${xpMultiplier()} points</div>`;
@@ -2333,6 +2517,135 @@ function renderDictResults(){
 }
 
 /* Vue filtrée depuis les statistiques d'accueil : mots vus / maîtrisés / à revoir. */
+/* ============ 🧩 CRÉATEUR DE BLOC PERSONNALISÉ ============ */
+let customBlockDraftWords = []; // mots sélectionnés pendant la création (avant sauvegarde)
+let customBlockDraftQuery = '';
+
+function renderCustomBlockBuilder(){
+  clearQuestionTimer();
+  document.body.classList.remove('quiz-active');
+  currentBlock = null;
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromBuilderBtn" style="cursor:pointer;">← Retour aux blocs</button>`;
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('footerNote').textContent = '';
+
+  const totalUnfilteredBlocks = Math.ceil(WORDS.length / BLOCK_SIZE);
+  const positionOptions = [`<option value="0">Tout au début</option>`]
+    .concat(Array.from({length: totalUnfilteredBlocks}, (_, i) => `<option value="${i+1}">Après le bloc ${i+1}</option>`))
+    .join('');
+
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="cat-tag">🧩 Nouveau bloc personnalisé</div>
+    <div class="word-fr" style="font-size:clamp(24px,4.5vw,32px);">Choisis tes mots</div>
+    <div class="question-line">Cherche des mots et ajoute-les à ton bloc. Il sera jouable dans tous les modes, comme un bloc normal.</div>
+
+    <div class="search-box-wrap" style="margin-top:14px;">
+      <input type="text" id="cbSearchInput" class="search-input" placeholder="Cherche un mot en français, arabe, ou dans la définition..." autocomplete="off" value="${escapeHtml(customBlockDraftQuery)}">
+      <span class="search-icon">🔎</span>
+    </div>
+    <div class="search-results" id="cbSearchResults" style="max-height:260px;margin-bottom:16px;"></div>
+
+    <div style="font-weight:800;color:var(--purple);margin:6px 0 8px;">✅ Mots sélectionnés (<span id="cbSelectedCount">${customBlockDraftWords.length}</span>)</div>
+    <div class="order-pool" id="cbSelectedList" style="justify-content:flex-start;min-height:44px;background:#F1F5F9;border-radius:14px;padding:12px;"></div>
+
+    <div style="font-weight:800;color:var(--purple);margin:20px 0 8px;">📝 Nom du bloc</div>
+    <input type="text" id="cbTitleInput" class="search-input" placeholder="ex : Vocabulaire réunion, Verbes irréguliers..." autocomplete="off">
+
+    <div style="font-weight:800;color:var(--purple);margin:16px 0 8px;">📍 Où le placer ?</div>
+    <select id="cbPositionSelect" class="search-input" style="cursor:pointer;">
+      ${positionOptions}
+      <option value="${totalUnfilteredBlocks + 1}">À la toute fin</option>
+    </select>
+
+    <button class="restart-btn" id="cbCreateBtn" style="margin-top:22px;" ${customBlockDraftWords.length === 0 ? 'disabled' : ''}>
+      ✓ Créer ce bloc (${customBlockDraftWords.length} mot${customBlockDraftWords.length>1?'s':''})
+    </button>
+  `;
+  document.getElementById('backFromBuilderBtn').addEventListener('click', () => {
+    customBlockDraftWords = []; customBlockDraftQuery = '';
+    renderBlockSelect();
+  });
+
+  const searchInput = document.getElementById('cbSearchInput');
+  searchInput.addEventListener('input', () => { customBlockDraftQuery = searchInput.value; renderCbSearchResults(); });
+  renderCbSearchResults();
+  renderCbSelectedList();
+
+  document.getElementById('cbCreateBtn').addEventListener('click', () => {
+    if(customBlockDraftWords.length === 0) return;
+    const title = document.getElementById('cbTitleInput').value;
+    const afterIdx = parseInt(document.getElementById('cbPositionSelect').value, 10);
+    createCustomBlock(title, customBlockDraftWords, afterIdx);
+    customBlockDraftWords = []; customBlockDraftQuery = '';
+    setStatus('✅ Bloc personnalisé créé !', 'ok');
+    renderBlockSelect();
+  });
+  if(!('ontouchstart' in window)){ searchInput.focus(); }
+}
+
+function renderCbSearchResults(){
+  const resultsEl = document.getElementById('cbSearchResults');
+  if(!resultsEl) return;
+  const q = customBlockDraftQuery.trim();
+  if(!q){ resultsEl.innerHTML = `<div class="no-results" style="padding:14px;">Tape un mot pour commencer ta recherche…</div>`; return; }
+  const qNorm = normalizeForSearch(q);
+  const selectedFrs = new Set(customBlockDraftWords.map(w => w.fr));
+  const matches = WORDS.filter(w =>
+    normalizeForSearch(w.fr).includes(qNorm) || w.ar.includes(q) || normalizeForSearch(w.def).includes(qNorm)
+  ).slice(0, 40);
+
+  if(matches.length === 0){ resultsEl.innerHTML = `<div class="no-results" style="padding:14px;">Aucun mot trouvé.</div>`; return; }
+
+  resultsEl.innerHTML = matches.map(w => {
+    const already = selectedFrs.has(w.fr);
+    return `
+    <div class="result-card" style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;">
+      <div>
+        <div class="result-fr" style="font-size:16px;">${escapeHtml(w.fr)} <span class="result-ar" style="font-size:15px;margin:0;">${escapeHtml(w.ar)}</span></div>
+        <div class="result-def" style="font-size:12.5px;font-weight:600;">${escapeHtml(w.def)}</div>
+      </div>
+      <button class="hist-btn ${already ? '' : ''}" data-add="${escapeHtml(w.fr)}" ${already ? 'disabled style="opacity:.5;"' : ''}>${already ? '✓ Ajouté' : '➕ Ajouter'}</button>
+    </div>`;
+  }).join('');
+
+  resultsEl.querySelectorAll('[data-add]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const w = WORDS.find(x => x.fr === btn.dataset.add);
+      if(w && !customBlockDraftWords.some(x => x.fr === w.fr)){
+        customBlockDraftWords.push(w);
+        renderCbSearchResults();
+        renderCbSelectedList();
+        updateCbCreateBtn();
+      }
+    });
+  });
+}
+
+function renderCbSelectedList(){
+  const el = document.getElementById('cbSelectedList');
+  const countEl = document.getElementById('cbSelectedCount');
+  if(!el) return;
+  if(countEl){ countEl.textContent = customBlockDraftWords.length; }
+  el.innerHTML = customBlockDraftWords.length
+    ? customBlockDraftWords.map(w => `<button class="order-chip placed" data-remove="${escapeHtml(w.fr)}">${escapeHtml(w.fr)} ✕</button>`).join('')
+    : `<span class="order-placeholder">Aucun mot sélectionné pour l'instant</span>`;
+  el.querySelectorAll('[data-remove]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      customBlockDraftWords = customBlockDraftWords.filter(w => w.fr !== btn.dataset.remove);
+      renderCbSelectedList();
+      renderCbSearchResults();
+      updateCbCreateBtn();
+    });
+  });
+}
+function updateCbCreateBtn(){
+  const btn = document.getElementById('cbCreateBtn');
+  if(!btn) return;
+  btn.disabled = customBlockDraftWords.length === 0;
+  btn.textContent = `✓ Créer ce bloc (${customBlockDraftWords.length} mot${customBlockDraftWords.length>1?'s':''})`;
+}
+
 function renderWordListView(kind){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
@@ -2715,9 +3028,13 @@ function renderBlockSelect(){
     <div class="mode-row" id="modeRow"></div>
     <div class="mode-row" id="timerRow"></div>
     <div class="filter-row" id="filterRow"></div>
+    <div class="mode-row" style="margin-top:0;">
+      <button class="mode-chip" id="createCustomBlockBtn" style="background:#EEF2FF;color:var(--purple);">🧩 Créer un bloc personnalisé</button>
+    </div>
     <div class="options" id="blockGrid" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr));"></div>
   `;
 
+  document.getElementById('createCustomBlockBtn').addEventListener('click', () => renderCustomBlockBuilder());
   if(toReviewCount > 0){
     document.getElementById('startReviewBtn').addEventListener('click', () => renderReviewIntro());
   }
@@ -2774,38 +3091,59 @@ function renderBlockSelect(){
 
   const grid = document.getElementById('blockGrid');
   const modeEmoji = { classic: '🎯', blank: '🕳️', chrono: '⚡', speak: '🎤', pairs: '🧩', dialogue: '🔀', repeat: '🗣️' };
-  grid.innerHTML = BLOCKS.map((b,i) => {
-    const perMode = blockResults[i] || {};
-    const unlocked = isBlockUnlocked(i);
-    const passed = isBlockPassed(i);
-    const bestPct = Math.round(blockBestPct(i));
 
-    // notes par mode /total (ex : 🎯28 🕳️30 ⚡— 🎤25)
-    const notes = GAME_MODES.map(m => {
+  function buildNotesHtml(perMode){
+    return GAME_MODES.map(m => {
       const r = perMode[m];
       const val = r ? `${r.correct}` : '·';
       const ok = r && (r.correct / r.total) * 100 >= PASS_THRESHOLD;
       return `<span class="bmode ${ok ? 'ok' : ''}" title="${modeEmoji[m]} ${r ? r.correct + '/' + r.total : 'non fait'}">${modeEmoji[m]}<b>${val}</b></span>`;
     }).join('');
-
+  }
+  function buildCustomTileHtml(block){
+    const passed = customBlockBestPct(block) >= PASS_THRESHOLD;
+    const bestPct = Math.round(customBlockBestPct(block));
+    const hasResult = customBlockHasResult(block);
+    const topStyle = passed ? 'background:#D1FAE5;box-shadow:0 4px 0 #6EE7B7;' : 'background:#F5F0FF;box-shadow:0 4px 0 #DDD2FF;';
+    const statusLine = hasResult
+      ? (passed ? `<div class="block-pass ok">✅ Validé · ${bestPct}%</div>` : `<div class="block-pass todo">${bestPct}% · vise ${PASS_THRESHOLD}%</div>`)
+      : `<div style="font-size:11.5px;color:var(--text-dim);margin-top:4px;">${block.words.length} mots</div>`;
+    return `<button class="opt" data-custom-block="${block.id}" style="text-align:center;${topStyle}">
+      <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:15px;">🧩 ${escapeHtml(block.title)}</div>
+      ${statusLine}
+      <div class="bmodes">${buildNotesHtml(block.results)}</div>
+    </button>`;
+  }
+  function buildNormalTileHtml(b, i){
+    const perMode = blockResults[i] || {};
+    const unlocked = isBlockUnlocked(i);
+    const passed = isBlockPassed(i);
+    const bestPct = Math.round(blockBestPct(i));
     if(!unlocked){
       return `<button class="opt block-locked" disabled style="text-align:center;opacity:.55;cursor:not-allowed;">
         <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:18px;">🔒 Bloc ${i+1}</div>
         <div style="font-size:11.5px;color:var(--text-dim);margin-top:4px;">Validez le bloc ${i} (≥${PASS_THRESHOLD}%)</div>
       </button>`;
     }
-
     const topStyle = passed ? 'background:#D1FAE5;box-shadow:0 4px 0 #6EE7B7;' : '';
     const statusLine = blockHasResult(i)
       ? (passed ? `<div class="block-pass ok">✅ Validé · ${bestPct}%</div>` : `<div class="block-pass todo">${bestPct}% · vise ${PASS_THRESHOLD}%</div>`)
       : `<div style="font-size:11.5px;color:var(--text-dim);margin-top:4px;">${b.length} mots</div>`;
-
     return `<button class="opt" data-block="${i}" style="text-align:center;${topStyle}">
       <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:18px;">Bloc ${i+1}</div>
       ${statusLine}
-      <div class="bmodes">${notes}</div>
+      <div class="bmodes">${buildNotesHtml(perMode)}</div>
     </button>`;
-  }).join('');
+  }
+
+  let gridHtml = '';
+  const showCustomBlocks = !activeFilterCat;
+  if(showCustomBlocks){ getCustomBlocksAt(0).forEach(b => { gridHtml += buildCustomTileHtml(b); }); }
+  BLOCKS.forEach((b, i) => {
+    gridHtml += buildNormalTileHtml(b, i);
+    if(showCustomBlocks){ getCustomBlocksAt(i + 1).forEach(cb => { gridHtml += buildCustomTileHtml(cb); }); }
+  });
+  grid.innerHTML = gridHtml;
 
   grid.querySelectorAll('.opt[data-block]').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -2819,6 +3157,26 @@ function renderBlockSelect(){
         renderRecapView(i, res, false);
       } else {
         buildDeck(i);
+        renderScoreboard();
+        renderCard();
+      }
+    });
+  });
+
+  grid.querySelectorAll('.opt[data-custom-block]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.customBlock;
+      const block = getCustomBlock(id);
+      if(!block) return;
+      const res = block.results[gameMode];
+      if(res){
+        currentBlock = id;
+        window.__customBlockId = id;
+        document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="changeBlockBtn" style="cursor:pointer;">← Retour aux blocs</button>`;
+        document.getElementById('changeBlockBtn').addEventListener('click', renderBlockSelect);
+        renderCustomBlockRecapView(id, res, false);
+      } else {
+        buildCustomDeck(id);
         renderScoreboard();
         renderCard();
       }
@@ -2838,7 +3196,9 @@ function focusReveal(revealWrap){
 function renderCard(){
   if(queue.length === 0){
     document.body.classList.remove('quiz-active');
-    if(window.__reviewSession){ renderReviewEndScreen(); } else { renderEndScreen(); }
+    if(window.__reviewSession){ renderReviewEndScreen(); }
+    else if(window.__customBlockId){ renderCustomBlockEndScreen(); }
+    else { renderEndScreen(); }
     return;
   }
   const isFirstCard = (masteredCount === 0 && score.total === 0 && queue.length === initialLength);
