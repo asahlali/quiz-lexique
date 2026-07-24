@@ -801,9 +801,9 @@
   }
 
   /* ============ 🎉 GRANDE CÉLÉBRATION DE FIN DE BLOC ============ */
-  .celebrate-wrap{ display:flex;flex-direction:column;align-items:center;margin:0 0 16px; }
+  .celebrate-wrap{ display:flex;flex-direction:column;align-items:center;margin:0 0 16px;position:relative;z-index:3; }
   .celebrate-mascot{
-    animation:mascotEpicEntrance .9s cubic-bezier(.22,1.4,.4,1), mascotEpicLoop 2.4s ease-in-out .9s infinite;
+    animation:mascotEpicEntrance .9s cubic-bezier(.22,1.4,.4,1) both, mascotEpicLoop 2.4s ease-in-out .9s infinite;
     filter:drop-shadow(0 10px 16px rgba(0,0,0,0.22));
   }
   .celebrate-mascot svg{ width:96px;height:96px; }
@@ -3284,6 +3284,21 @@ function startRepeatRecognition(sentence){
   micTr.textContent = '';
   let finalTranscript = '';
   let autoFinalizeScheduled = false; // évite de programmer la validation plusieurs fois
+  let silenceTimer = null;
+
+  const finalizeNow = (heardText) => {
+    if(autoFinalizeScheduled || answered) return;
+    autoFinalizeScheduled = true;
+    if(silenceTimer){ clearTimeout(silenceTimer); silenceTimer = null; }
+    try{ recognition.stop(); }catch(e){}
+    setTimeout(() => {
+      if(answered) return;
+      recoActive = false;
+      micBtn.classList.remove('listening');
+      const sim = sentenceSimilarity(heardText, sentence);
+      handleRepeatResult(sim, { heard: heardText });
+    }, 300);
+  };
 
   recognition.onresult = (ev) => {
     let interim = '';
@@ -3298,31 +3313,36 @@ function startRepeatRecognition(sentence){
     highlightSpokenWords(running);           // 🔴 surlignage en temps réel
 
     // 🆕 Dès que tous les mots de la phrase ont été reconnus, on valide directement
-    // à partir du texte déjà capté, sans attendre l'événement "fin" du navigateur
-    // (qui peut parfois ne jamais arriver et bloquer le micro indéfiniment).
+    // sans attendre l'événement "fin" du navigateur (peu fiable en mode continu).
     const allWords = document.querySelectorAll('#repeatSentence .rw');
     const spokenWords = document.querySelectorAll('#repeatSentence .rw.spoken');
-    if(!autoFinalizeScheduled && allWords.length > 0 && spokenWords.length === allWords.length){
-      autoFinalizeScheduled = true;
+    if(allWords.length > 0 && spokenWords.length === allWords.length){
       micHint.textContent = '✅ Phrase complète, vérification...';
-      try{ recognition.stop(); }catch(e){}
-      setTimeout(() => {
-        if(answered) return;
-        recoActive = false;
-        micBtn.classList.remove('listening');
-        const sim = sentenceSimilarity(running, sentence);
-        handleRepeatResult(sim, { heard: running });
-      }, 350);
+      finalizeNow(running);
+      return;
+    }
+
+    // 🆕 Filet de sécurité : le navigateur peut ne jamais signaler la fin en mode continu
+    // (surtout si un mot a été mal reconnu). On détecte donc nous-mêmes le silence :
+    // si rien de nouveau n'est capté pendant ~1,6s après avoir parlé, on valide avec ce qu'on a.
+    if(silenceTimer){ clearTimeout(silenceTimer); }
+    if(running){
+      silenceTimer = setTimeout(() => {
+        micHint.textContent = '✅ Vérification...';
+        finalizeNow(running);
+      }, 1600);
     }
   };
   recognition.onerror = (ev) => {
     recoActive = false; micBtn.classList.remove('listening');
+    if(silenceTimer){ clearTimeout(silenceTimer); silenceTimer = null; }
     if(ev.error === 'not-allowed' || ev.error === 'service-not-allowed'){ micHint.textContent = '🚫 Micro refusé — autorise le micro.'; }
     else if(ev.error === 'no-speech'){ micHint.textContent = '🤫 Rien entendu — réappuie et parle.'; }
     else { micHint.textContent = 'Réappuie pour réessayer.'; }
   };
   recognition.onend = () => {
     recoActive = false; micBtn.classList.remove('listening');
+    if(silenceTimer){ clearTimeout(silenceTimer); silenceTimer = null; }
     if(answered || autoFinalizeScheduled) return; // déjà géré (ou en cours) via la validation directe ci-dessus
     const said = finalTranscript.trim() || (micTr.textContent.replace(/^Tu dis : « /, '').replace(/ »$/, ''));
     if(said){
