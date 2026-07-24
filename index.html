@@ -85,6 +85,15 @@
     height:16px;border-radius:999px;background:rgba(255,255,255,0.25);margin:20px 0 34px;overflow:hidden;
     box-shadow:inset 0 2px 5px rgba(0,0,0,0.2);border:2px solid rgba(255,255,255,0.4);
   }
+  .progress-label{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    color:#fff;font-family:'Baloo 2',sans-serif;font-weight:700;font-size:13px;
+    margin:0 2px 6px;min-height:18px;
+  }
+  .progress-label .pl-pct{ opacity:.95; }
+  .progress-label .pl-streak{
+    background:rgba(255,255,255,0.18);padding:2px 10px;border-radius:999px;font-size:12px;
+  }
   .progress-fill{
     height:100%;border-radius:999px;width:0%;transition:width .5s cubic-bezier(.34,1.56,.64,1);
     background:repeating-linear-gradient(45deg, var(--green), var(--green) 10px, var(--green-dark) 10px, var(--green-dark) 20px);
@@ -339,6 +348,7 @@
   body.quiz-active{ padding-top:14px; }
   body.quiz-active .scoreboard{ margin:6px 0 8px; }
   body.quiz-active .progress-track{ margin:10px 0 14px; }
+  body.quiz-active .progress-label{ margin:0 2px 4px; }
   body.quiz-active .card{
     max-height:calc(100dvh - 130px);
     overflow-y:auto;
@@ -911,6 +921,7 @@
   <div class="csv-status" id="csvStatus"></div>
 
   <div class="scoreboard" id="scoreboard"></div>
+  <div class="progress-label" id="progressLabel"></div>
   <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
 
   <div class="mascot-zone" id="mascotZone">
@@ -2059,9 +2070,8 @@ function makeOptions(word){
   return options;
 }
 
-function buildDeck(blockIndex){
-  currentBlock = blockIndex;
-  queue = shuffle(groupDuplicateWords(BLOCKS[blockIndex]));
+function setupDeckFromWords(words){
+  queue = shuffle(groupDuplicateWords(words));
   initialLength = queue.length;
   masteredCount = 0;
   answered = false;
@@ -2076,11 +2086,131 @@ function buildDeck(blockIndex){
   repeatContinuous = false;
   blockStartTime = Date.now();
 }
+function buildDeck(blockIndex){
+  currentBlock = blockIndex;
+  window.__reviewSession = false;
+  setupDeckFromWords(BLOCKS[blockIndex]);
+}
+
+/* ============ 🔁 SESSION DE RÉVISION (mots à revoir, par blocs de 30) ============ */
+const REVIEW_BLOCK_SIZE = 30;
+function getReviewWordsSorted(){
+  return WORDS.filter(w => {
+    const s = wordStats[w.fr.toLowerCase()];
+    return s && s.wrong > 0;
+  }).sort((a,b) => (wordStats[b.fr.toLowerCase()].wrong) - (wordStats[a.fr.toLowerCase()].wrong));
+}
+/* Un mot réussi du premier coup en révision est "gracié" : son historique d'erreurs est effacé,
+   il devient immédiatement un mot maîtrisé et sort de la liste "à revoir". */
+function graduateWordFromReview(fr){
+  const key = fr.toLowerCase();
+  const prev = wordStats[key] || { correct:0, wrong:0 };
+  wordStats[key] = { correct: prev.correct + 1, wrong: 0 };
+  saveWordStats();
+}
+function startReviewBlock(chunkIndex){
+  const all = getReviewWordsSorted();
+  const chunk = all.slice(chunkIndex * REVIEW_BLOCK_SIZE, (chunkIndex + 1) * REVIEW_BLOCK_SIZE);
+  if(chunk.length === 0){ renderBlockSelect(); return; }
+  currentBlock = null;
+  gameMode = 'speak';
+  window.__reviewSession = true;
+  window.__reviewChunkIndex = chunkIndex;
+  window.__reviewGraduated = [];
+  window.__reviewTotalWords = all.length;
+  setupDeckFromWords(chunk);
+  renderScoreboard();
+  renderCard();
+}
+
+function renderReviewIntro(){
+  clearQuestionTimer();
+  document.body.classList.remove('quiz-active');
+  currentBlock = null;
+  window.__reviewSession = false;
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromReviewBtn" style="cursor:pointer;">← Retour aux blocs</button>`;
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('footerNote').textContent = '';
+
+  const words = getReviewWordsSorted();
+  const nbChunks = Math.ceil(words.length / REVIEW_BLOCK_SIZE);
+  const card = document.getElementById('quizCard');
+
+  if(words.length === 0){
+    card.innerHTML = `
+      <div class="cat-tag">🔁 Révision</div>
+      <div class="word-fr" style="font-size:clamp(24px,4.5vw,32px);">Rien à réviser ! 🎉</div>
+      <div class="question-line">Tous les mots que tu as vus sont maîtrisés. Continue à découvrir de nouveaux blocs !</div>
+    `;
+    document.getElementById('backFromReviewBtn').addEventListener('click', renderBlockSelect);
+    return;
+  }
+
+  card.innerHTML = `
+    <div class="cat-tag">🔁 Révision · 🎤 Prononciation</div>
+    <div class="word-fr" style="font-size:clamp(24px,4.5vw,32px);">${words.length} mot${words.length>1?'s':''} à revoir</div>
+    <div class="question-line">Répartis en ${nbChunks} bloc${nbChunks>1?'s':''} de ${REVIEW_BLOCK_SIZE} mots max. Réponds juste <b>du premier coup</b> pour qu'un mot passe définitivement en "maîtrisé" et sorte de cette liste.</div>
+    <div class="options" id="reviewChunkGrid" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr));margin-top:18px;"></div>
+  `;
+  document.getElementById('backFromReviewBtn').addEventListener('click', renderBlockSelect);
+
+  const grid = document.getElementById('reviewChunkGrid');
+  grid.innerHTML = Array.from({length: nbChunks}).map((_, i) => {
+    const count = Math.min(REVIEW_BLOCK_SIZE, words.length - i * REVIEW_BLOCK_SIZE);
+    return `<button class="opt" data-chunk="${i}" style="text-align:center;">
+      <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:18px;">Révision ${i+1}</div>
+      <div style="font-size:11.5px;color:var(--text-dim);margin-top:4px;">${count} mot${count>1?'s':''}</div>
+    </button>`;
+  }).join('');
+  grid.querySelectorAll('[data-chunk]').forEach(btn => {
+    btn.addEventListener('click', () => startReviewBlock(parseInt(btn.dataset.chunk)));
+  });
+}
+
+function renderReviewEndScreen(){
+  document.body.classList.remove('quiz-active');
+  const graduated = window.__reviewGraduated || [];
+  const stillToReview = getReviewWordsSorted().length;
+  const durationSec = blockStartTime ? Math.max(1, Math.round((Date.now() - blockStartTime)/1000)) : 0;
+  recordDailyActivity();
+  recordDailyStats(durationSec, false, 0);
+  window.__reviewSession = false;
+
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromReviewEndBtn" style="cursor:pointer;">← Retour aux blocs</button>`;
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('footerNote').textContent = 'Terminé';
+
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="end-screen">
+      <div class="cat-tag">🔁 Révision terminée · 🎤 Prononciation — ${score.total} mot${score.total>1?'s':''}</div>
+      <div class="big">${score.correct} / ${score.total}</div>
+      <div class="sub" style="color:#6B6552;">${graduated.length} mot${graduated.length>1?'s':''} maîtrisé${graduated.length>1?'s':''} du premier coup 🎉 · il reste ${stillToReview} mot${stillToReview>1?'s':''} à revoir</div>
+      ${graduated.length ? `
+      <div class="pass-banner ok">✅ ${graduated.length} mot${graduated.length>1?'s':''} retiré${graduated.length>1?'s':''} de ta liste "à revoir" !</div>` : ''}
+      <div style="display:flex;gap:12px;justify-content:center;margin-top:20px;flex-wrap:wrap;">
+        ${stillToReview > 0 ? `<button class="restart-btn" id="reviewAgainBtn">🔁 Continuer la révision</button>` : ''}
+        <button class="restart-btn" id="reviewBlocksBtn" style="background:var(--purple);color:#fff;box-shadow:0 4px 0 var(--purple-dark);">← Choisir un autre bloc</button>
+      </div>
+      ${sessionHistory.length ? buildRecapTableHtml(sessionHistory) : ''}
+    </div>
+  `;
+  if(graduated.length >= 5){ launchConfetti(); }
+  document.getElementById('backFromReviewEndBtn').addEventListener('click', renderBlockSelect);
+  document.getElementById('reviewBlocksBtn').addEventListener('click', renderBlockSelect);
+  const againBtn = document.getElementById('reviewAgainBtn');
+  if(againBtn){ againBtn.addEventListener('click', () => renderReviewIntro()); }
+  attachRecapSpeakHandlers();
+}
+
 
 function renderScoreboard(){
   const el = document.getElementById('scoreboard');
-  if(currentBlock === null){ el.innerHTML = ''; return; }
-  let html = `<div class="chip total">Bloc ${currentBlock+1} <b>${score.correct}/${score.total}</b></div>`;
+  if(currentBlock === null && !window.__reviewSession){ el.innerHTML = ''; return; }
+  const titleChip = window.__reviewSession
+    ? `<div class="chip total">🔁 Révision <b>${score.correct}/${score.total}</b></div>`
+    : `<div class="chip total">Bloc ${currentBlock+1} <b>${score.correct}/${score.total}</b></div>`;
+  let html = titleChip;
   if(xpMultiplier() > 1){
     html += `<div class="chip mult-chip">⚡ ×${xpMultiplier()} points</div>`;
   }
@@ -2094,7 +2224,7 @@ function renderScoreboard(){
     const s = catScore[c];
     html += `<div class="chip">${escapeHtml(c)} <b>${s.c}/${s.t}</b></div>`;
   }
-  html += `<button class="chip" id="changeBlockBtn" style="cursor:pointer;">← Changer de bloc</button>`;
+  html += `<button class="chip" id="changeBlockBtn" style="cursor:pointer;">← ${window.__reviewSession ? 'Quitter la révision' : 'Changer de bloc'}</button>`;
   el.innerHTML = html;
   document.getElementById('changeBlockBtn').addEventListener('click', renderBlockSelect);
   const cc = document.getElementById('comboChip');
@@ -2108,7 +2238,15 @@ function renderScoreboard(){
 
 function renderProgress(){
   const pct = initialLength ? Math.min(100, (masteredCount / initialLength) * 100) : 0;
+  const pctRounded = Math.round(pct);
   document.getElementById('progressFill').style.width = pct + '%';
+
+  const progressLabel = document.getElementById('progressLabel');
+  if(progressLabel){
+    const streakChip = comboStreak >= 2 ? `<span class="pl-streak">🔥 ${comboStreak} d'affilée</span>` : '<span></span>';
+    progressLabel.innerHTML = `<span class="pl-pct">📊 ${pctRounded}% du bloc terminé</span>${streakChip}`;
+  }
+
   const errors = score.total - score.correct;
   const noRequeueModes = (gameMode === 'speak' || gameMode === 'repeat');
   const label = noRequeueModes ? 'Traités' : 'Maîtrisés';
@@ -2225,14 +2363,20 @@ function renderWordListView(kind){
   }
 
   const card = document.getElementById('quizCard');
+  const reviewCta = (kind === 'review' && matches.length > 0)
+    ? `<button class="restart-btn" id="listReviewBtn" style="display:flex;align-items:center;gap:8px;margin:14px auto;width:fit-content;">🎤 Réviser ces mots (Prononciation)</button>`
+    : '';
   card.innerHTML = `
     <div class="cat-tag">${meta.emoji} ${matches.length} mot${matches.length>1?'s':''}</div>
     <div class="word-fr" style="font-size:clamp(24px,4.5vw,32px);">${meta.title}</div>
+    ${reviewCta}
     <div class="search-results" id="wordListResults" style="max-height:560px;margin-top:14px;">
       ${matches.length ? matches.map(buildWordCardHtml).join('') : `<div class="no-results">${meta.empty}</div>`}
     </div>
   `;
   document.getElementById('backFromListBtn').addEventListener('click', renderBlockSelect);
+  const listReviewBtn = document.getElementById('listReviewBtn');
+  if(listReviewBtn){ listReviewBtn.addEventListener('click', () => renderReviewIntro()); }
   document.getElementById('wordListResults').addEventListener('click', (e) => {
     const btn = e.target.closest('[data-speak-fr]');
     if(btn){ speak(btn.dataset.speakFr, 'fr-FR'); }
@@ -2563,6 +2707,10 @@ function renderBlockSelect(){
       <div class="stat-box gold" id="statMasteredBox" style="cursor:pointer;"><div class="stat-num">${masteredCount2}</div><div class="stat-lbl">maîtrisés ⭐</div></div>
       <div class="stat-box warn" id="statReviewBox" style="cursor:pointer;"><div class="stat-num">${toReviewCount}</div><div class="stat-lbl">à revoir</div></div>
     </div>
+    ${toReviewCount > 0 ? `
+    <button class="restart-btn" id="startReviewBtn" style="display:flex;align-items:center;gap:8px;margin:4px auto 6px;width:fit-content;">
+      🔁 Réviser mes ${toReviewCount} mot${toReviewCount>1?'s':''} à revoir (🎤 Prononciation)
+    </button>` : ''}
     <div style="font-family:'Baloo 2',sans-serif;font-weight:800;color:var(--purple);margin:20px 0 4px;font-size:18px;text-align:center;">Choisis ton mode & ton bloc</div>
     <div class="mode-row" id="modeRow"></div>
     <div class="mode-row" id="timerRow"></div>
@@ -2570,6 +2718,9 @@ function renderBlockSelect(){
     <div class="options" id="blockGrid" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr));"></div>
   `;
 
+  if(toReviewCount > 0){
+    document.getElementById('startReviewBtn').addEventListener('click', () => renderReviewIntro());
+  }
   document.getElementById('statSeenBox').addEventListener('click', () => renderWordListView('seen'));
   document.getElementById('statMasteredBox').addEventListener('click', () => renderWordListView('mastered'));
   document.getElementById('statReviewBox').addEventListener('click', () => renderWordListView('review'));
@@ -2685,7 +2836,11 @@ function focusReveal(revealWrap){
 }
 
 function renderCard(){
-  if(queue.length === 0){ document.body.classList.remove('quiz-active'); renderEndScreen(); return; }
+  if(queue.length === 0){
+    document.body.classList.remove('quiz-active');
+    if(window.__reviewSession){ renderReviewEndScreen(); } else { renderEndScreen(); }
+    return;
+  }
   const isFirstCard = (masteredCount === 0 && score.total === 0 && queue.length === initialLength);
   document.body.classList.add('quiz-active');
   hideMascotBubble();
@@ -2789,6 +2944,7 @@ function renderSpeakCard(){
       <button class="mode-chip" id="revealSpeakBtn">👁 Voir la réponse</button>
       <button class="mode-chip" id="skipSpeakBtn">⏭ Passer</button>
     </div>
+    <div class="kbd-hint">⌨️ Espace = micro (ou suivant une fois la réponse révélée) · Entrée = suivant</div>
     <div class="reveal" id="revealWrap"></div>
   `;
 
@@ -2884,6 +3040,7 @@ function handleSpeakResult(isCorrect, word, info){
   }
 
   answered = true;
+  const isFirstTry = speakAttemptCount === 0;
   stopRecognition();
 
   score.total++;
@@ -2902,7 +3059,13 @@ function handleSpeakResult(isCorrect, word, info){
     masteredCount++;
     sessionHistory.push({ fr: word.fr, ar: word.ar, def: word.def, cat: word.cat, attempts: attemptsByFr[word.fr], failed: true });
   }
-  recordWordStat(word.fr, isCorrect);
+  // 🔁 En session de révision : juste du premier coup = le mot est gracié et sort de "à revoir".
+  if(window.__reviewSession && isCorrect && isFirstTry){
+    graduateWordFromReview(word.fr);
+    window.__reviewGraduated.push(word.fr);
+  } else {
+    recordWordStat(word.fr, isCorrect);
+  }
   bumpCombo(isCorrect);
 
   const micBtn = document.getElementById('micBtn');
@@ -2915,6 +3078,7 @@ function handleSpeakResult(isCorrect, word, info){
     reactMascot('ko'); playWrongSound();
   }
   renderScoreboard();
+  renderProgress();
 
   const headline = isCorrect ? '🎉 Bien prononcé !'
     : (info.skipped ? '⏭ Mot passé — voici la réponse :'
@@ -3061,6 +3225,7 @@ function finishPairsRound(){
   queue.splice(0, pairsState.roundWords.length);
   masteredCount = initialLength - queue.length;
   renderScoreboard();
+  renderProgress();
 
   setTimeout(() => {
     if(queue.length === 0){ renderEndScreen(); }
@@ -3087,6 +3252,7 @@ function onPairsTimeout(){
   queue.splice(0, pairsState.roundWords.length);
   masteredCount = initialLength - queue.length;
   renderScoreboard();
+  renderProgress();
 
   const revealWrap = document.getElementById('revealWrap');
   revealWrap.classList.add('show');
@@ -3237,6 +3403,7 @@ function renderRepeatCard(){
       <button class="mode-chip" id="revealRepeatBtn">👁 Voir la phrase</button>
       <button class="mode-chip" id="skipRepeatBtn">⏭ Passer</button>
     </div>
+    <div class="kbd-hint">⌨️ Espace = micro (ou suivant une fois la réponse révélée) · Entrée = suivant</div>
     <div class="reveal" id="revealWrap"></div>
   `;
 
@@ -3406,6 +3573,7 @@ function handleRepeatResult(similarity, info){
     reactMascot('ko'); playWrongSound();
   }
   renderScoreboard();
+  renderProgress();
 
   const headline = info.skipped ? '⏭ Phrase passée :'
     : (info.revealed ? '👁 Voici la phrase :'
@@ -3598,6 +3766,7 @@ function handleOrderAnswer(timedOut){
     reactMascot('ko'); playWrongSound();
   }
   renderScoreboard();
+  renderProgress();
 
   const headline = isCorrect ? '🎉 Phrase reconstituée !' : (timedOut ? '⏱️ Temps écoulé — voici la phrase :' : '💛 Pas tout à fait — voici la phrase :');
   const revealWrap = document.getElementById('revealWrap');
@@ -3793,6 +3962,7 @@ function handleChronoAnswer(playerSaysTrue){
   }
 
   renderScoreboard();
+  renderProgress();
 
   const revealWrap = document.getElementById('revealWrap');
   revealWrap.classList.add('show');
@@ -3874,6 +4044,7 @@ function handleAnswer(i){
   }
 
   renderScoreboard();
+  renderProgress();
 
   const revealWrap = document.getElementById('revealWrap');
   revealWrap.classList.add('show');
@@ -4454,7 +4625,9 @@ document.addEventListener('keydown', (e) => {
   const tag = (e.target && e.target.tagName) || '';
   if(tag === 'INPUT' || tag === 'TEXTAREA') return;
 
-  if(e.key === 'Enter'){
+  // Entrée ET Espace = "passer au mot suivant" dès qu'une réponse est révélée, dans TOUS les modes
+  // (Classique, Phrase à trous, Chrono, Prononciation, Paires, Mots en ordre, Répétition...).
+  if(e.key === 'Enter' || e.code === 'Space' || e.key === ' '){
     const nextBtn = document.getElementById('nextBtn');
     if(nextBtn){ e.preventDefault(); nextBtn.click(); return; }
   }
@@ -4480,6 +4653,7 @@ document.addEventListener('keydown', (e) => {
     if(e.code === 'Digit1' || e.code === 'Numpad1' || e.key === '1' || e.key.toLowerCase() === 'v' || e.key === 'ArrowLeft'){ e.preventDefault(); trueBtn.click(); return; }
     if(e.code === 'Digit2' || e.code === 'Numpad2' || e.key === '2' || e.key.toLowerCase() === 'f' || e.key === 'ArrowRight'){ e.preventDefault(); falseBtn.click(); return; }
   }
+  // Espace ne démarre le micro que s'il n'y a pas déjà une réponse à valider (voir le retour anticipé plus haut)
   const micBtn = document.getElementById('micBtn');
   if(micBtn && (e.code === 'Space' || e.key === ' ')){ e.preventDefault(); micBtn.click(); }
 });
