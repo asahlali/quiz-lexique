@@ -776,6 +776,29 @@
   .mascot.talking .m-smile{ animation:mouthTalk .3s ease-in-out infinite;transform-origin:center; }
   @keyframes mouthTalk{ 0%,100%{ transform:scaleY(1);} 50%{ transform:scaleY(1.7);} }
 
+  .mascot.roam{ animation:mascotRoam 2.3s ease-in-out; }
+  @keyframes mascotRoam{
+    0%{ transform:translateX(0) rotate(0);}
+    22%{ transform:translateX(-42px) rotate(-6deg);}
+    50%{ transform:translateX(34px) rotate(5deg);}
+    78%{ transform:translateX(-16px) rotate(-3deg);}
+    100%{ transform:translateX(0) rotate(0);}
+  }
+  .mascot.peekaboo{ animation:mascotPeekaboo 1.7s ease-in-out; }
+  @keyframes mascotPeekaboo{
+    0%{ opacity:1; transform:translateY(0) scale(1) rotate(0);}
+    32%{ opacity:0; transform:translateY(34px) scale(.4) rotate(-8deg);}
+    54%{ opacity:0; transform:translateY(34px) scale(.4) rotate(-8deg);}
+    78%{ opacity:1; transform:translateY(-8px) scale(1.1) rotate(4deg);}
+    100%{ opacity:1; transform:translateY(0) scale(1) rotate(0);}
+  }
+  .mascot.spin{ animation:mascotSpin 1s ease-in-out; }
+  @keyframes mascotSpin{
+    0%{ transform:rotate(0) scale(1);}
+    50%{ transform:rotate(180deg) scale(.85);}
+    100%{ transform:rotate(360deg) scale(1);}
+  }
+
   /* ============ 🗣️ MODE RÉPÉTITION ============ */
   .repeat-sentence{
     font-family:'Baloo 2',sans-serif;font-weight:700;font-size:clamp(20px,4.6vw,28px);text-align:center;
@@ -801,6 +824,30 @@
   .dlg-bubble.you{ background:linear-gradient(135deg,#EEF2FF,#E0E7FF);border-radius:16px 16px 4px 16px;color:var(--ink); }
   .web-ex{ margin-top:8px; }
   .web-ex-card{ background:#EFF6FF;border:1px solid #BFDBFE;border-radius:12px;padding:12px 14px;font-weight:700;font-size:14px;color:#1E3A8A;display:flex;align-items:center;gap:8px;flex-wrap:wrap; }
+
+  /* ============ 🔀 MODE MOTS EN ORDRE ============ */
+  .order-hint{
+    text-align:center;font-size:13.5px;font-weight:700;color:var(--text-dim);
+    background:#F1F5F9;border-radius:12px;padding:9px 14px;margin:2px 0 16px;
+  }
+  .order-hint-ar{ font-family:'Changa',sans-serif;direction:rtl;color:var(--purple);font-weight:700;font-size:16px;margin-left:4px; }
+  .order-answer-zone{
+    min-height:64px;display:flex;flex-wrap:wrap;align-content:flex-start;gap:8px;
+    padding:14px;background:#F1F5F9;border-radius:16px;margin:0 0 16px;border:2px dashed #E2E8F0;
+  }
+  .order-placeholder{ font-size:13.5px;font-weight:700;color:var(--text-dim);align-self:center; }
+  .order-pool{ display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:6px; }
+  .order-chip{
+    border:none;border-radius:12px;padding:10px 16px;font-weight:800;font-family:'Nunito',sans-serif;
+    font-size:15px;cursor:pointer;box-shadow:0 3px 0 #E2E8F0;color:var(--text);background:#fff;
+    transition:transform .1s,background .15s;
+  }
+  .order-chip:hover:not(.disabled){ transform:translateY(-2px); }
+  .order-chip:active:not(.disabled){ transform:translateY(1px); }
+  .order-chip.placed{ background:var(--purple);color:#fff;box-shadow:0 3px 0 var(--purple-dark); }
+  .order-chip.correct{ background:var(--green);color:#fff;box-shadow:0 3px 0 var(--green-dark);cursor:default; }
+  .order-chip.wrong{ background:var(--red);color:#fff;box-shadow:0 3px 0 var(--red-dark);cursor:default; }
+  .order-chip.disabled{ pointer-events:none; }
 </style>
 </head>
 <body>
@@ -1397,9 +1444,21 @@ function pickVoice(langPrefix, gender){
   return voices[0];                                  // sinon la meilleure dispo
 }
 
-function speak(text, lang){
-  if(!speechAvailable || !text) return;
+let ttsSpeaking = false; // vrai tant que la synthèse vocale (TTS) est en train de parler
+
+function updateMicButtonUI(){
+  const micBtn = document.getElementById('micBtn');
+  if(!micBtn) return;
+  if(ttsSpeaking){ micBtn.classList.add('disabled'); }
+  else if(!answered){ micBtn.classList.remove('disabled'); }
+  const micHint = document.getElementById('micHint');
+  if(micHint && ttsSpeaking){ micHint.textContent = '🔊 Écoute...'; }
+}
+
+function speak(text, lang, onEnd){
+  if(!speechAvailable || !text){ if(onEnd) onEnd(); return; }
   try{
+    stopRecognition(); // le micro ne doit JAMAIS écouter pendant que l'app parle (sinon il s'entend lui-même)
     window.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
     const langCode = lang || 'fr-FR';
@@ -1409,8 +1468,13 @@ function speak(text, lang){
     if(v){ u.voice = v; u.lang = v.lang; }
     u.rate = 0.96;
     u.pitch = 1.0;
+    ttsSpeaking = true;
+    updateMicButtonUI();
+    const finish = () => { ttsSpeaking = false; updateMicButtonUI(); if(onEnd) onEnd(); };
+    u.onend = finish;
+    u.onerror = finish;
     window.speechSynthesis.speak(u);
-  }catch(e){}
+  }catch(e){ ttsSpeaking = false; updateMicButtonUI(); if(onEnd) onEnd(); }
 }
 
 const AUTOSPEAK_KEY = 'lexiqueQuiz::autoSpeak';
@@ -1510,6 +1574,29 @@ function mascotDance(){
   if(!m || !document.body.classList.contains('quiz-active')) return;
   m.classList.remove('dance'); void m.offsetWidth; m.classList.add('dance');
   setTimeout(() => m.classList.remove('dance'), 1400);
+}
+/* Se déplace aléatoirement d'un côté à l'autre de sa zone. */
+function mascotRoam(){
+  const m = document.getElementById('mascot');
+  if(!m || !document.body.classList.contains('quiz-active')) return;
+  m.classList.remove('roam'); void m.offsetWidth; m.classList.add('roam');
+  setTimeout(() => m.classList.remove('roam'), 2400);
+}
+/* Disparaît un instant puis réapparaît (façon "coucou"). */
+function mascotPeekaboo(){
+  const m = document.getElementById('mascot');
+  const bubble = document.getElementById('mascotBubble');
+  if(!m || !document.body.classList.contains('quiz-active')) return;
+  if(bubble){ bubble.classList.remove('show'); }
+  m.classList.remove('peekaboo'); void m.offsetWidth; m.classList.add('peekaboo');
+  setTimeout(() => m.classList.remove('peekaboo'), 1800);
+}
+/* Petit tour sur elle-même, façon toupie. */
+function mascotSpin(){
+  const m = document.getElementById('mascot');
+  if(!m || !document.body.classList.contains('quiz-active')) return;
+  m.classList.remove('spin'); void m.offsetWidth; m.classList.add('spin');
+  setTimeout(() => m.classList.remove('spin'), 1100);
 }
 function mascotCheer(){
   if(!document.body.classList.contains('quiz-active')) return;
@@ -2382,7 +2469,7 @@ function renderBlockSelect(){
     { id: 'chrono', label: '⚡ Chrono Vrai/Faux' },
     { id: 'speak', label: '🎤 Prononciation' },
     { id: 'pairs', label: '🧩 Paires chrono' },
-    { id: 'dialogue', label: '💬 Dialogue' },
+    { id: 'dialogue', label: '🔀 Mots en ordre' },
     { id: 'repeat', label: '🗣️ Répétition' },
   ];
   const modeRow = document.getElementById('modeRow');
@@ -2424,7 +2511,7 @@ function renderBlockSelect(){
   });
 
   const grid = document.getElementById('blockGrid');
-  const modeEmoji = { classic: '🎯', blank: '🕳️', chrono: '⚡', speak: '🎤', pairs: '🧩', dialogue: '💬', repeat: '🗣️' };
+  const modeEmoji = { classic: '🎯', blank: '🕳️', chrono: '⚡', speak: '🎤', pairs: '🧩', dialogue: '🔀', repeat: '🗣️' };
   grid.innerHTML = BLOCKS.map((b,i) => {
     const perMode = blockResults[i] || {};
     const unlocked = isBlockUnlocked(i);
@@ -2616,6 +2703,7 @@ function renderSpeakCard(){
 
 function startRecognition(word){
   if(!speechRecoAvailable || recoActive || answered) return;
+  if(ttsSpeaking){ setTimeout(() => { if(!answered){ startRecognition(word); } }, 250); return; }
   try{
     recognition = new SpeechRec();
     recognition.lang = 'fr-FR';
@@ -2898,6 +2986,12 @@ function onPairsTimeout(){
   focusReveal(revealWrap);
 }
 
+/* ============ 🔀 MODE MOTS EN ORDRE (reconstituer la phrase) ============ */
+/* Découpe une phrase en mots cliquables (la ponctuation finale reste attachée au dernier mot). */
+function tokenizeSentenceForOrder(sentence){
+  return sentence.trim().split(/\s+/).filter(Boolean);
+}
+
 /* ============ 💬 MODE DIALOGUE (mot en contexte) ============ */
 const DIALOGUE_INTROS = [
   { a:'Salut ! Comment décrirais-tu la situation ?', name:'Amine' },
@@ -3034,8 +3128,8 @@ function renderRepeatCard(){
     <div class="reveal" id="revealWrap"></div>
   `;
 
-  const playSentence = () => { mascotTalk(); speak(sentence, 'fr-FR'); };
-  document.getElementById('hearSentenceBtn').addEventListener('click', playSentence);
+  const playSentence = (onDone) => { mascotTalk(); speak(sentence, 'fr-FR', onDone); };
+  document.getElementById('hearSentenceBtn').addEventListener('click', () => playSentence());
   document.getElementById('micBtn').addEventListener('click', () => startRepeatRecognition(sentence));
   document.getElementById('revealRepeatBtn').addEventListener('click', () => handleRepeatResult(0, { revealed:true }));
   document.getElementById('skipRepeatBtn').addEventListener('click', () => handleRepeatResult(0, { skipped:true }));
@@ -3044,18 +3138,23 @@ function renderRepeatCard(){
     const b = document.getElementById('repeatContBtn');
     b.classList.toggle('active', repeatContinuous);
     b.textContent = repeatContinuous ? '🎙️ Micro continu : ON' : '🎙️ Activer micro continu';
-    if(repeatContinuous){ startRepeatRecognition(sentence); }
+    if(repeatContinuous && !ttsSpeaking){ startRepeatRecognition(sentence); }
   });
   renderProgress();
 
-  // Lecture auto de la phrase à l'affichage (surtout si cachée)
-  if(hidden || autoSpeak){ setTimeout(playSentence, 400); }
-  // Micro continu : relance l'écoute automatiquement
-  if(repeatContinuous){ setTimeout(() => { if(!answered){ startRepeatRecognition(sentence); } }, hidden ? 2600 : 900); }
+  // Lecture auto de la phrase à l'affichage (surtout si cachée) — le micro n'écoute qu'une fois le TTS terminé
+  if(hidden || autoSpeak){
+    setTimeout(() => playSentence(() => {
+      if(repeatContinuous && !answered){ startRepeatRecognition(sentence); }
+    }), 400);
+  } else if(repeatContinuous){
+    setTimeout(() => { if(!answered){ startRepeatRecognition(sentence); } }, 500);
+  }
 }
 
 function startRepeatRecognition(sentence){
   if(!speechRecoAvailable || recoActive || answered) return;
+  if(ttsSpeaking){ setTimeout(() => { if(!answered){ startRepeatRecognition(sentence); } }, 250); return; }
   try{
     recognition = new SpeechRec();
     recognition.lang = 'fr-FR';
@@ -3188,39 +3287,146 @@ function handleRepeatResult(similarity, info){
 function renderDialogueCard(){
   const word = queue[0];
   answered = false;
-  const options = makeOptions(word);
-  window.__currentOptions = options;
   window.__currentWord = word;
 
-  const intro = DIALOGUE_INTROS[Math.floor(Math.random()*DIALOGUE_INTROS.length)];
-  const sentenceBlanked = renderBlankSentence(word.ex);
+  const sentence = word.ex.replace(/~/g, word.fr);
+  const targetWords = tokenizeSentenceForOrder(sentence);
+  const pool = targetWords.map((w, i) => ({ word: w, uid: i }));
+  window.__orderTarget = targetWords;
+  window.__orderPool = shuffle(pool);
+  window.__orderPlaced = [];
 
   const card = document.getElementById('quizCard');
   card.innerHTML = `
-    <div class="cat-tag">${escapeHtml(word.cat)} · 💬 Dialogue</div>
+    <div class="cat-tag">${escapeHtml(word.cat)} · 🔀 Mots en ordre</div>
     <div class="chrono-timer-track"><div class="chrono-timer-fill" id="quizTimerFill"></div></div>
-    <div class="dlg">
-      <div class="dlg-line left">
-        <div class="dlg-avatar">🧑</div>
-        <div class="dlg-bubble">${escapeHtml(intro.a)}</div>
-      </div>
-      <div class="dlg-line right">
-        <div class="dlg-bubble you">${sentenceBlanked}</div>
-        <div class="dlg-avatar">🙂</div>
-      </div>
+    <div class="question-line" style="text-align:center;">Reconstitue la phrase en cliquant les mots dans le bon ordre :</div>
+    <div class="order-hint">💡 indice : le mot clé se traduit par <span class="order-hint-ar">${escapeHtml(word.ar)}</span></div>
+    <div class="order-answer-zone" id="orderAnswerZone"></div>
+    <div class="order-pool" id="orderPool"></div>
+    <div class="mode-row" style="margin-top:10px;">
+      <button class="mode-chip" id="orderClearBtn">↺ Effacer</button>
     </div>
-    <div class="question-line" style="text-align:center;">Complète ta réponse avec le bon mot :</div>
-    <div class="options" id="optionsWrap">
-      ${options.map((o,i) => `<button class="opt" data-i="${i}"><span class="opt-key">${i+1}</span>${escapeHtml(o.fr)}</button>`).join('')}
-    </div>
-    <div class="kbd-hint">⌨️ Touches 1-4 ou A-D pour répondre plus vite</div>
     <div class="reveal" id="revealWrap"></div>
   `;
-  document.querySelectorAll('.opt').forEach(btn => {
-    btn.addEventListener('click', () => handleAnswer(parseInt(btn.dataset.i)));
-  });
+  document.getElementById('orderClearBtn').addEventListener('click', resetOrderSelection);
+  renderOrderZones();
   renderProgress();
-  startQuestionTimer(() => handleAnswer(null));
+  startQuestionTimer(() => handleOrderAnswer(true), Math.max(quizTimerSeconds * 3, 20));
+}
+
+function renderOrderZones(){
+  const answerZone = document.getElementById('orderAnswerZone');
+  const poolZone = document.getElementById('orderPool');
+  if(!answerZone || !poolZone) return;
+  const placed = window.__orderPlaced;
+  const pool = window.__orderPool;
+  const usedUids = new Set(placed.map(p => p.uid));
+
+  answerZone.innerHTML = placed.length
+    ? placed.map(p => `<button class="order-chip placed" data-uid="${p.uid}">${escapeHtml(p.word)}</button>`).join('')
+    : `<span class="order-placeholder">Touche les mots ci-dessous pour construire la phrase…</span>`;
+
+  poolZone.innerHTML = pool
+    .filter(p => !usedUids.has(p.uid))
+    .map(p => `<button class="order-chip" data-uid="${p.uid}">${escapeHtml(p.word)}</button>`).join('');
+
+  answerZone.querySelectorAll('.order-chip').forEach(btn => {
+    btn.addEventListener('click', () => removeFromOrder(parseInt(btn.dataset.uid)));
+  });
+  poolZone.querySelectorAll('.order-chip').forEach(btn => {
+    btn.addEventListener('click', () => addToOrder(parseInt(btn.dataset.uid)));
+  });
+}
+
+function addToOrder(uid){
+  if(answered) return;
+  const tile = window.__orderPool.find(p => p.uid === uid);
+  if(!tile) return;
+  window.__orderPlaced.push(tile);
+  renderOrderZones();
+  if(window.__orderPlaced.length === window.__orderTarget.length){
+    setTimeout(() => { if(!answered){ handleOrderAnswer(false); } }, 250);
+  }
+}
+function removeFromOrder(uid){
+  if(answered) return;
+  window.__orderPlaced = window.__orderPlaced.filter(p => p.uid !== uid);
+  renderOrderZones();
+}
+function resetOrderSelection(){
+  if(answered) return;
+  window.__orderPlaced = [];
+  renderOrderZones();
+}
+
+function handleOrderAnswer(timedOut){
+  if(answered) return;
+  answered = true;
+  clearQuestionTimer();
+  const word = window.__currentWord;
+  const target = window.__orderTarget.join(' ');
+  const placedText = window.__orderPlaced.map(p => p.word).join(' ');
+  const isCorrect = !timedOut && normalizeForSearch(placedText) === normalizeForSearch(target);
+
+  score.total++;
+  if(!catScore[word.cat]) catScore[word.cat] = { c:0, t:0 };
+  catScore[word.cat].t++;
+  attemptsByFr[word.fr] = (attemptsByFr[word.fr] || 0) + 1;
+
+  if(isCorrect){
+    score.correct++; catScore[word.cat].c++;
+    masteredCount++;
+    queue.shift();
+    sessionHistory.push({ fr: word.fr, ar: word.ar, def: word.def, cat: word.cat, attempts: attemptsByFr[word.fr] });
+  } else {
+    const w = queue.shift();
+    queue.push(w);
+  }
+  recordWordStat(word.fr, isCorrect);
+  bumpCombo(isCorrect);
+
+  const answerZone = document.getElementById('orderAnswerZone');
+  if(answerZone){
+    answerZone.innerHTML = window.__orderTarget.map((w2, i) => {
+      const placedWord = window.__orderPlaced[i] ? window.__orderPlaced[i].word : null;
+      const ok = placedWord && normalizeForSearch(placedWord) === normalizeForSearch(w2);
+      return `<span class="order-chip disabled ${ok ? 'correct' : 'wrong'}">${escapeHtml(placedWord || '…')}</span>`;
+    }).join('');
+  }
+  const poolZone = document.getElementById('orderPool');
+  if(poolZone){ poolZone.innerHTML = ''; }
+  const clearBtn = document.getElementById('orderClearBtn');
+  if(clearBtn){ clearBtn.style.display = 'none'; }
+
+  if(isCorrect){ celebrate(); reactMascot('ok'); playCorrectSound(); }
+  else {
+    const cardEl = document.getElementById('quizCard');
+    cardEl.classList.remove('shake'); void cardEl.offsetWidth; cardEl.classList.add('shake');
+    reactMascot('ko'); playWrongSound();
+  }
+  renderScoreboard();
+
+  const headline = isCorrect ? '🎉 Phrase reconstituée !' : (timedOut ? '⏱️ Temps écoulé — voici la phrase :' : '💛 Pas tout à fait — voici la phrase :');
+  const revealWrap = document.getElementById('revealWrap');
+  revealWrap.classList.add('show');
+  revealWrap.innerHTML = `
+    <div class="big-feedback ${isCorrect ? 'ok' : 'ko'}">${headline}</div>
+    <div class="def-text" style="text-align:center;font-size:17px;margin:8px 0;">« ${escapeHtml(target)} »
+      <button class="speak-btn small" id="orderSpeakBtn" style="margin-left:6px;vertical-align:middle;"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg></button>
+    </div>
+    <div class="seal">
+      <div class="seal-badge"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#2A2107" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="arabic-word">${escapeHtml(word.ar)}</div>
+    </div>
+    <div class="def-text"><strong>${escapeHtml(word.fr)}</strong> — ${escapeHtml(word.def)}</div>
+    ${renderVariantsExtra(word)}
+    <button class="next-btn" id="nextBtn">Suivant →</button>
+  `;
+  document.getElementById('orderSpeakBtn').addEventListener('click', () => speak(target, 'fr-FR'));
+  document.getElementById('nextBtn').addEventListener('click', () => { renderCard(); });
+  autoSpeakWord(word.fr, 'fr-FR');
+  focusReveal(revealWrap);
 }
 
 function renderClassicCard(){
@@ -3543,7 +3749,7 @@ function attachRecapSpeakHandlers(){
   });
 }
 
-const MODE_LABELS = { classic: '🎯 Classique', blank: '🕳️ Phrase à trous', chrono: '⚡ Chrono Vrai/Faux', speak: '🎤 Prononciation', pairs: '🧩 Paires chrono', dialogue: '💬 Dialogue', repeat: '🗣️ Répétition' };
+const MODE_LABELS = { classic: '🎯 Classique', blank: '🕳️ Phrase à trous', chrono: '⚡ Chrono Vrai/Faux', speak: '🎤 Prononciation', pairs: '🧩 Paires chrono', dialogue: '🔀 Mots en ordre', repeat: '🗣️ Répétition' };
 
 function renderRecapView(blockIndex, result, justFinished){
   clearQuestionTimer();
@@ -4129,15 +4335,23 @@ setInterval(() => {
   setTimeout(() => pupils.forEach(p => { p.style.transform = 'scaleY(1)'; }), 130);
 }, 4200);
 
-// Encouragements aléatoires de la mascotte pendant le jeu (toutes ~18 s)
-setInterval(() => {
-  if(Math.random() < 0.5){ mascotCheer(); }
-}, 18000);
-
-// Petite danse surprise de temps en temps
-setInterval(() => {
-  if(document.body.classList.contains('quiz-active') && Math.random() < 0.35){ mascotDance(); }
-}, 25000);
+// Encouragements et animations aléatoires de la mascotte pendant le jeu
+function scheduleMascotAntics(){
+  const delay = 6000 + Math.random() * 9000; // entre 6 et 15 secondes, jamais deux fois pareil
+  setTimeout(() => {
+    if(document.body.classList.contains('quiz-active') && !ttsSpeaking){
+      const r = Math.random();
+      if(r < 0.20) mascotDance();
+      else if(r < 0.42) mascotRoam();
+      else if(r < 0.60) mascotPeekaboo();
+      else if(r < 0.72) mascotSpin();
+      else if(r < 0.92) mascotCheer();
+      else mascotWave();
+    }
+    scheduleMascotAntics();
+  }, delay);
+}
+scheduleMascotAntics();
 </script>
 </body>
 </html>
