@@ -876,6 +876,11 @@
   .order-chip.correct{ background:var(--green);color:#fff;box-shadow:0 3px 0 var(--green-dark);cursor:default; }
   .order-chip.wrong{ background:var(--red);color:#fff;box-shadow:0 3px 0 var(--red-dark);cursor:default; }
   .order-chip.disabled{ pointer-events:none; }
+  .order-chip.placed.selected{
+    background:var(--yellow);color:#5A3E00;box-shadow:0 3px 0 #B45309;
+    outline:3px solid #FCD34D;outline-offset:2px;transform:translateY(-2px);
+  }
+  .order-swap-hint{ text-align:center;font-size:12.5px;font-weight:700;color:var(--purple);margin:-8px 0 12px; }
 </style>
 </head>
 <body>
@@ -3278,6 +3283,7 @@ function startRepeatRecognition(sentence){
   micHint.textContent = '🎧 J\'écoute... répète la phrase !';
   micTr.textContent = '';
   let finalTranscript = '';
+  let autoFinalizeScheduled = false; // évite de programmer la validation plusieurs fois
 
   recognition.onresult = (ev) => {
     let interim = '';
@@ -3291,13 +3297,22 @@ function startRepeatRecognition(sentence){
     micTr.textContent = running ? `Tu dis : « ${running} »` : '';
     highlightSpokenWords(running);           // 🔴 surlignage en temps réel
 
-    // 🆕 Dès que tous les mots de la phrase ont été reconnus, on arrête d'écouter
-    // immédiatement au lieu d'attendre le silence détecté par le navigateur (souvent plusieurs secondes).
+    // 🆕 Dès que tous les mots de la phrase ont été reconnus, on valide directement
+    // à partir du texte déjà capté, sans attendre l'événement "fin" du navigateur
+    // (qui peut parfois ne jamais arriver et bloquer le micro indéfiniment).
     const allWords = document.querySelectorAll('#repeatSentence .rw');
     const spokenWords = document.querySelectorAll('#repeatSentence .rw.spoken');
-    if(allWords.length > 0 && spokenWords.length === allWords.length){
+    if(!autoFinalizeScheduled && allWords.length > 0 && spokenWords.length === allWords.length){
+      autoFinalizeScheduled = true;
       micHint.textContent = '✅ Phrase complète, vérification...';
       try{ recognition.stop(); }catch(e){}
+      setTimeout(() => {
+        if(answered) return;
+        recoActive = false;
+        micBtn.classList.remove('listening');
+        const sim = sentenceSimilarity(running, sentence);
+        handleRepeatResult(sim, { heard: running });
+      }, 350);
     }
   };
   recognition.onerror = (ev) => {
@@ -3308,7 +3323,7 @@ function startRepeatRecognition(sentence){
   };
   recognition.onend = () => {
     recoActive = false; micBtn.classList.remove('listening');
-    if(answered) return;
+    if(answered || autoFinalizeScheduled) return; // déjà géré (ou en cours) via la validation directe ci-dessus
     const said = finalTranscript.trim() || (micTr.textContent.replace(/^Tu dis : « /, '').replace(/ »$/, ''));
     if(said){
       const sim = sentenceSimilarity(said, sentence);
@@ -3412,6 +3427,7 @@ function renderDialogueCard(){
   window.__orderTarget = targetWords;
   window.__orderPool = shuffle(pool);
   window.__orderPlaced = [];
+  window.__orderSelectedUid = null;
 
   const card = document.getElementById('quizCard');
   card.innerHTML = `
@@ -3420,28 +3436,34 @@ function renderDialogueCard(){
     <div class="question-line" style="text-align:center;">Reconstitue la phrase en cliquant les mots dans le bon ordre :</div>
     <div class="order-hint">💡 indice : le mot clé se traduit par <span class="order-hint-ar">${escapeHtml(word.ar)}</span></div>
     <div class="order-answer-zone" id="orderAnswerZone"></div>
+    <div class="order-swap-hint" id="orderSwapHint" style="display:none;">👆 Touche un autre mot pour échanger sa place, ou touche-le à nouveau pour le retirer</div>
     <div class="order-pool" id="orderPool"></div>
     <div class="mode-row" style="margin-top:10px;">
       <button class="mode-chip" id="orderClearBtn">↺ Effacer</button>
+      <button class="mode-chip" id="orderValidateBtn" style="display:none;background:var(--purple);color:#fff;box-shadow:0 3px 0 var(--purple-dark);">✓ Valider ma phrase</button>
     </div>
     <div class="reveal" id="revealWrap"></div>
   `;
   document.getElementById('orderClearBtn').addEventListener('click', resetOrderSelection);
+  document.getElementById('orderValidateBtn').addEventListener('click', () => handleOrderAnswer(false));
   renderOrderZones();
   renderProgress();
-  startQuestionTimer(() => handleOrderAnswer(true), Math.max(quizTimerSeconds * 3, 20));
+  startQuestionTimer(() => handleOrderAnswer(true), Math.max(quizTimerSeconds * 4, 25));
 }
 
 function renderOrderZones(){
   const answerZone = document.getElementById('orderAnswerZone');
   const poolZone = document.getElementById('orderPool');
+  const validateBtn = document.getElementById('orderValidateBtn');
+  const swapHint = document.getElementById('orderSwapHint');
   if(!answerZone || !poolZone) return;
   const placed = window.__orderPlaced;
   const pool = window.__orderPool;
   const usedUids = new Set(placed.map(p => p.uid));
+  const selectedUid = window.__orderSelectedUid;
 
   answerZone.innerHTML = placed.length
-    ? placed.map(p => `<button class="order-chip placed" data-uid="${p.uid}">${escapeHtml(p.word)}</button>`).join('')
+    ? placed.map(p => `<button class="order-chip placed ${p.uid === selectedUid ? 'selected' : ''}" data-uid="${p.uid}">${escapeHtml(p.word)}</button>`).join('')
     : `<span class="order-placeholder">Touche les mots ci-dessous pour construire la phrase…</span>`;
 
   poolZone.innerHTML = pool
@@ -3449,31 +3471,64 @@ function renderOrderZones(){
     .map(p => `<button class="order-chip" data-uid="${p.uid}">${escapeHtml(p.word)}</button>`).join('');
 
   answerZone.querySelectorAll('.order-chip').forEach(btn => {
-    btn.addEventListener('click', () => removeFromOrder(parseInt(btn.dataset.uid)));
+    btn.addEventListener('click', () => onPlacedChipClick(parseInt(btn.dataset.uid)));
   });
   poolZone.querySelectorAll('.order-chip').forEach(btn => {
     btn.addEventListener('click', () => addToOrder(parseInt(btn.dataset.uid)));
   });
+
+  if(swapHint){ swapHint.style.display = selectedUid !== null ? 'block' : 'none'; }
+  if(validateBtn){
+    const complete = placed.length === window.__orderTarget.length;
+    validateBtn.style.display = complete ? 'inline-flex' : 'none';
+  }
 }
 
 function addToOrder(uid){
   if(answered) return;
   const tile = window.__orderPool.find(p => p.uid === uid);
   if(!tile) return;
+  window.__orderSelectedUid = null; // ajouter un mot annule toute sélection d'échange en cours
   window.__orderPlaced.push(tile);
   renderOrderZones();
-  if(window.__orderPlaced.length === window.__orderTarget.length){
-    setTimeout(() => { if(!answered){ handleOrderAnswer(false); } }, 250);
-  }
 }
+
+/* Clic sur un mot déjà placé : 1er clic = sélection, 2e clic sur le même = le retire, clic sur un autre = échange les deux places. */
+function onPlacedChipClick(uid){
+  if(answered) return;
+  const idx = window.__orderPlaced.findIndex(p => p.uid === uid);
+  if(idx < 0) return;
+
+  if(window.__orderSelectedUid === null){
+    window.__orderSelectedUid = uid;
+    renderOrderZones();
+    return;
+  }
+  if(window.__orderSelectedUid === uid){
+    window.__orderSelectedUid = null;
+    removeFromOrder(uid);
+    return;
+  }
+  const otherIdx = window.__orderPlaced.findIndex(p => p.uid === window.__orderSelectedUid);
+  if(otherIdx >= 0){
+    const tmp = window.__orderPlaced[idx];
+    window.__orderPlaced[idx] = window.__orderPlaced[otherIdx];
+    window.__orderPlaced[otherIdx] = tmp;
+  }
+  window.__orderSelectedUid = null;
+  renderOrderZones();
+}
+
 function removeFromOrder(uid){
   if(answered) return;
   window.__orderPlaced = window.__orderPlaced.filter(p => p.uid !== uid);
+  if(window.__orderSelectedUid === uid){ window.__orderSelectedUid = null; }
   renderOrderZones();
 }
 function resetOrderSelection(){
   if(answered) return;
   window.__orderPlaced = [];
+  window.__orderSelectedUid = null;
   renderOrderZones();
 }
 
@@ -3542,7 +3597,7 @@ function handleOrderAnswer(timedOut){
   `;
   document.getElementById('orderSpeakBtn').addEventListener('click', () => speak(target, 'fr-FR'));
   document.getElementById('nextBtn').addEventListener('click', () => { renderCard(); });
-  autoSpeakWord(word.fr, 'fr-FR');
+  autoSpeakWord(target, 'fr-FR');
   focusReveal(revealWrap);
 }
 
