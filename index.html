@@ -2371,6 +2371,129 @@ function renderReviewEndScreen(){
 }
 
 /* ============ 🧩 FIN DE SESSION / RÉCAP D'UN BLOC PERSONNALISÉ ============ */
+/* ============ ⚙️ GESTION D'UN BLOC PERSONNALISÉ (toujours accessible, même sans avoir joué) ============ */
+function renderCustomBlockManage(blockId){
+  clearQuestionTimer();
+  document.body.classList.remove('quiz-active');
+  currentBlock = null;
+  window.__customBlockId = null;
+  const block = getCustomBlock(blockId);
+  if(!block){ renderBlockSelect(); return; }
+
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromManageBtn" style="cursor:pointer;">← Retour aux blocs</button>`;
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('footerNote').textContent = '';
+
+  const modeRowsHtml = GAME_MODES.map(m => {
+    const r = block.results[m];
+    const p = r && r.total ? Math.round((r.correct/r.total)*100) : null;
+    return `<div class="pm-row">
+      <span>${MODE_LABELS[m]}</span>
+      <span style="display:flex;align-items:center;gap:10px;">
+        ${p !== null ? `<span class="pm-score ${p >= PASS_THRESHOLD ? 'ok' : 'todo'}">${r.correct}/${r.total} · ${p}%</span>` : `<span class="rp-new">jamais joué</span>`}
+        <button class="hist-btn" data-play-mode="${m}">${p !== null ? '🔁 Rejouer' : '▶ Jouer'}</button>
+      </span>
+    </div>`;
+  }).join('');
+
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="cat-tag">⚙️ Gérer le bloc</div>
+    <div class="word-fr" style="font-size:clamp(24px,4.5vw,32px);">🧩 ${escapeHtml(block.title)}</div>
+    <div class="question-line">${block.words.length} mot${block.words.length>1?'s':''} · créé le ${formatDateFr(block.createdAt)}</div>
+
+    <div style="display:flex;gap:12px;justify-content:center;margin:18px 0;flex-wrap:wrap;">
+      <button class="restart-btn" id="mgPeekBtn" style="background:#EEF2FF;color:var(--purple);box-shadow:0 4px 0 #C7D2FE;">👁 Voir les mots</button>
+      <button class="restart-btn" id="mgRenameBtn" style="background:#F1F5F9;color:var(--text);box-shadow:0 4px 0 #E2E8F0;">✏️ Renommer</button>
+      <button class="restart-btn" id="mgMoveBtn" style="background:#FEF3C7;color:#B45309;box-shadow:0 4px 0 #FCD34D;">↕️ Déplacer</button>
+      <button class="restart-btn" id="mgDeleteBtn" style="background:#FEE2E2;color:var(--red-dark);box-shadow:0 4px 0 #FCA5A5;">🗑 Supprimer</button>
+    </div>
+    <div class="order-answer-zone" id="mgMovePanel" style="display:none;"></div>
+
+    <div class="pm-summary" style="margin-top:8px;">
+      <div class="pm-title">📊 Tes scores par mode</div>
+      ${modeRowsHtml}
+    </div>
+  `;
+  document.getElementById('backFromManageBtn').addEventListener('click', renderBlockSelect);
+
+  document.getElementById('mgPeekBtn').addEventListener('click', () => {
+    renderBlockWordsPeek(block.words, block.title, () => renderCustomBlockManage(blockId));
+  });
+
+  document.getElementById('mgRenameBtn').addEventListener('click', () => {
+    const newTitle = prompt('Nouveau nom pour ce bloc :', block.title);
+    if(newTitle === null) return;
+    const t = newTitle.trim();
+    if(!t) return;
+    if(t.toLowerCase() !== block.title.trim().toLowerCase()){
+      const dup = customBlocks.some(cb => cb.id !== block.id && cb.title.trim().toLowerCase() === t.toLowerCase())
+        || (!activeFilterCat && isBlockTitleTaken(t, null));
+      if(dup){
+        alert(`⚠️ Le nom « ${t} » est déjà utilisé par un autre bloc. Choisis un nom différent.`);
+        return;
+      }
+    }
+    block.title = t;
+    saveCustomBlocks(customBlocks);
+    cloudAutoPush();
+    setStatus('✏️ Bloc renommé.', 'ok');
+    renderCustomBlockManage(blockId);
+  });
+
+  document.getElementById('mgMoveBtn').addEventListener('click', () => {
+    const panel = document.getElementById('mgMovePanel');
+    const opening = panel.style.display === 'none';
+    panel.style.display = opening ? 'flex' : 'none';
+    if(opening){
+      panel.style.flexDirection = 'column';
+      panel.style.alignItems = 'center';
+      panel.style.gap = '10px';
+      panel.innerHTML = `
+        <select id="mgMoveSelect" class="search-input" style="cursor:pointer;">
+          ${buildPositionOptionsHtml(block.afterBlockIndex)}
+        </select>
+        <div style="font-size:12px;color:var(--text-dim);">🔒 Impossible de le placer après un bloc verrouillé.</div>
+        <button class="mode-chip" id="mgMoveConfirmBtn" style="background:var(--purple);color:#fff;">✓ Confirmer le déplacement</button>
+      `;
+      document.getElementById('mgMoveConfirmBtn').addEventListener('click', () => {
+        const newPos = parseInt(document.getElementById('mgMoveSelect').value, 10);
+        block.afterBlockIndex = newPos;
+        saveCustomBlocks(customBlocks);
+        cloudAutoPush();
+        setStatus('↕️ Bloc déplacé.', 'ok');
+        renderCustomBlockManage(blockId);
+      });
+    }
+  });
+
+  document.getElementById('mgDeleteBtn').addEventListener('click', () => {
+    if(confirm(`Supprimer définitivement le bloc "${block.title}" ? Cette action est irréversible.`)){
+      deleteCustomBlock(blockId);
+      setStatus('🗑 Bloc personnalisé supprimé.', 'ok');
+      renderBlockSelect();
+    }
+  });
+
+  card.querySelectorAll('[data-play-mode]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      gameMode = btn.dataset.playMode;
+      const r = block.results[gameMode];
+      if(r){
+        currentBlock = blockId;
+        window.__customBlockId = blockId;
+        document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="changeBlockBtn" style="cursor:pointer;">← Retour aux blocs</button>`;
+        document.getElementById('changeBlockBtn').addEventListener('click', renderBlockSelect);
+        renderCustomBlockRecapView(blockId, r, false);
+      } else {
+        buildCustomDeck(blockId);
+        renderScoreboard();
+        renderCard();
+      }
+    });
+  });
+}
+
 function renderCustomBlockEndScreen(){
   const blockId = window.__customBlockId;
   const block = getCustomBlock(blockId);
@@ -2461,8 +2584,10 @@ function renderCustomBlockRecapView(blockId, result, justFinished){
     const newTitle = prompt('Nouveau nom pour ce bloc :', block.title);
     if(newTitle !== null && newTitle.trim()){
       const t = newTitle.trim();
-      const dup = customBlocks.some(cb => cb.id !== block.id && cb.title.trim().toLowerCase() === t.toLowerCase())
-        || (!activeFilterCat && isBlockTitleTaken(t, null));
+      const dup = t.toLowerCase() !== block.title.trim().toLowerCase() && (
+        customBlocks.some(cb => cb.id !== block.id && cb.title.trim().toLowerCase() === t.toLowerCase())
+        || (!activeFilterCat && isBlockTitleTaken(t, null))
+      );
       if(dup){
         alert(`⚠️ Le nom « ${t} » est déjà utilisé par un autre bloc. Choisis un nom différent.`);
         return;
@@ -2735,10 +2860,10 @@ décider;يقرر;faire un choix;Il faut ~ rapidement."></textarea>
     if(customBlockDraftWords.length === 0) return;
     const title = document.getElementById('cbTitleInput').value;
     const afterIdx = parseInt(document.getElementById('cbPositionSelect').value, 10);
-    createCustomBlock(title, customBlockDraftWords, afterIdx);
+    const newBlock = createCustomBlock(title, customBlockDraftWords, afterIdx);
     customBlockDraftWords = []; customBlockDraftQuery = '';
     setStatus('✅ Bloc personnalisé créé !', 'ok');
-    renderBlockSelect();
+    renderCustomBlockManage(newBlock.id);
   });
   if(!('ontouchstart' in window)){ searchInput.focus(); }
 }
@@ -3332,6 +3457,7 @@ function renderBlockSelect(){
         ${statusLine}
         <div class="bmodes">${buildNotesHtml(block.results)}</div>
       </button>
+      <button class="tile-peek" data-manage-custom="${block.id}" title="Gérer ce bloc" style="right:40px;">⚙️</button>
       <button class="tile-peek" data-peek-custom="${block.id}" title="Voir les mots">👁</button>
     </div>`;
   }
@@ -3419,6 +3545,12 @@ function renderBlockSelect(){
       e.stopPropagation();
       const block = getCustomBlock(btn.dataset.peekCustom);
       if(block){ renderBlockWordsPeek(block.words, block.title, () => renderBlockSelect()); }
+    });
+  });
+  grid.querySelectorAll('[data-manage-custom]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      renderCustomBlockManage(btn.dataset.manageCustom);
     });
   });
 }
