@@ -881,25 +881,28 @@
   .order-answer-zone{
     min-height:64px;display:flex;flex-wrap:wrap;align-content:flex-start;gap:8px;
     padding:14px;background:#F1F5F9;border-radius:16px;margin:0 0 16px;border:2px dashed #E2E8F0;
+    transition:background .15s,border-color .15s;
   }
+  .order-answer-zone.drag-over{ background:#EEF2FF;border-color:var(--purple); }
   .order-placeholder{ font-size:13.5px;font-weight:700;color:var(--text-dim);align-self:center; }
   .order-pool{ display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:6px; }
   .order-chip{
     border:none;border-radius:12px;padding:10px 16px;font-weight:800;font-family:'Nunito',sans-serif;
-    font-size:15px;cursor:pointer;box-shadow:0 3px 0 #E2E8F0;color:var(--text);background:#fff;
-    transition:transform .1s,background .15s;
+    font-size:15px;cursor:grab;box-shadow:0 3px 0 #E2E8F0;color:var(--text);background:#fff;
+    transition:transform .12s,background .15s,box-shadow .15s;
+    touch-action:none; user-select:none; -webkit-user-select:none;
   }
   .order-chip:hover:not(.disabled){ transform:translateY(-2px); }
-  .order-chip:active:not(.disabled){ transform:translateY(1px); }
+  .order-chip:active:not(.disabled){ cursor:grabbing; }
   .order-chip.placed{ background:var(--purple);color:#fff;box-shadow:0 3px 0 var(--purple-dark); }
   .order-chip.correct{ background:var(--green);color:#fff;box-shadow:0 3px 0 var(--green-dark);cursor:default; }
   .order-chip.wrong{ background:var(--red);color:#fff;box-shadow:0 3px 0 var(--red-dark);cursor:default; }
   .order-chip.disabled{ pointer-events:none; }
-  .order-chip.placed.selected{
-    background:var(--yellow);color:#5A3E00;box-shadow:0 3px 0 #B45309;
-    outline:3px solid #FCD34D;outline-offset:2px;transform:translateY(-2px);
+  .order-chip-ghost{
+    position:fixed;z-index:5000;pointer-events:none;display:flex;align-items:center;justify-content:center;
+    background:var(--purple);color:#fff;box-shadow:0 12px 24px -8px rgba(76,29,149,0.5);
+    cursor:grabbing;opacity:.96;transition:none;
   }
-  .order-swap-hint{ text-align:center;font-size:12.5px;font-weight:700;color:var(--purple);margin:-8px 0 12px; }
 </style>
 </head>
 <body>
@@ -4354,16 +4357,15 @@ function renderDialogueCard(){
   window.__orderTarget = targetWords;
   window.__orderPool = shuffle(pool);
   window.__orderPlaced = [];
-  window.__orderSelectedUid = null;
+  orderDrag = null;
 
   const card = document.getElementById('quizCard');
   card.innerHTML = `
     <div class="cat-tag">${escapeHtml(word.cat)} · 🔀 Mots en ordre</div>
     <div class="chrono-timer-track"><div class="chrono-timer-fill" id="quizTimerFill"></div></div>
-    <div class="question-line" style="text-align:center;">Reconstitue la phrase en cliquant les mots dans le bon ordre :</div>
+    <div class="question-line" style="text-align:center;">👆 Glisse les mots pour reconstituer la phrase, dans l'ordre :</div>
     <div class="order-hint">💡 indice : le mot clé se traduit par <span class="order-hint-ar">${escapeHtml(word.ar)}</span></div>
     <div class="order-answer-zone" id="orderAnswerZone"></div>
-    <div class="order-swap-hint" id="orderSwapHint" style="display:none;">👆 Touche un autre mot pour échanger sa place, ou touche-le à nouveau pour le retirer</div>
     <div class="order-pool" id="orderPool"></div>
     <div class="mode-row" style="margin-top:10px;">
       <button class="mode-chip" id="orderClearBtn">↺ Effacer</button>
@@ -4378,84 +4380,136 @@ function renderDialogueCard(){
   startQuestionTimer(() => handleOrderAnswer(true), Math.max(quizTimerSeconds * 4, 25));
 }
 
+let orderDrag = null; // état du glisser-déposer en cours (mode Mots en ordre)
+
 function renderOrderZones(){
   const answerZone = document.getElementById('orderAnswerZone');
   const poolZone = document.getElementById('orderPool');
   const validateBtn = document.getElementById('orderValidateBtn');
-  const swapHint = document.getElementById('orderSwapHint');
   if(!answerZone || !poolZone) return;
   const placed = window.__orderPlaced;
   const pool = window.__orderPool;
   const usedUids = new Set(placed.map(p => p.uid));
-  const selectedUid = window.__orderSelectedUid;
 
   answerZone.innerHTML = placed.length
-    ? placed.map(p => `<button class="order-chip placed ${p.uid === selectedUid ? 'selected' : ''}" data-uid="${p.uid}">${escapeHtml(p.word)}</button>`).join('')
-    : `<span class="order-placeholder">Touche les mots ci-dessous pour construire la phrase…</span>`;
+    ? placed.map(p => `<button type="button" class="order-chip placed" data-uid="${p.uid}" data-kind="placed">${escapeHtml(p.word)}</button>`).join('')
+    : `<span class="order-placeholder">👆 Glisse un mot ici pour commencer…</span>`;
 
   poolZone.innerHTML = pool
     .filter(p => !usedUids.has(p.uid))
-    .map(p => `<button class="order-chip" data-uid="${p.uid}">${escapeHtml(p.word)}</button>`).join('');
+    .map(p => `<button type="button" class="order-chip" data-uid="${p.uid}" data-kind="pool">${escapeHtml(p.word)}</button>`).join('');
 
-  answerZone.querySelectorAll('.order-chip').forEach(btn => {
-    btn.addEventListener('click', () => onPlacedChipClick(parseInt(btn.dataset.uid)));
-  });
-  poolZone.querySelectorAll('.order-chip').forEach(btn => {
-    btn.addEventListener('click', () => addToOrder(parseInt(btn.dataset.uid)));
-  });
+  answerZone.querySelectorAll('.order-chip').forEach(el => attachOrderDrag(el));
+  poolZone.querySelectorAll('.order-chip').forEach(el => attachOrderDrag(el));
 
-  if(swapHint){ swapHint.style.display = selectedUid !== null ? 'block' : 'none'; }
   if(validateBtn){
     const complete = placed.length === window.__orderTarget.length;
     validateBtn.style.display = complete ? 'inline-flex' : 'none';
   }
 }
 
-function addToOrder(uid){
-  if(answered) return;
-  const tile = window.__orderPool.find(p => p.uid === uid);
-  if(!tile) return;
-  window.__orderSelectedUid = null; // ajouter un mot annule toute sélection d'échange en cours
-  window.__orderPlaced.push(tile);
+function attachOrderDrag(el){
+  el.addEventListener('pointerdown', (e) => startOrderDrag(e, el));
+}
+
+function startOrderDrag(e, el){
+  if(answered || orderDrag) return;
+  e.preventDefault();
+  const uid = parseInt(el.dataset.uid, 10);
+  const kind = el.dataset.kind;
+  let item;
+  if(kind === 'placed'){
+    const idx = window.__orderPlaced.findIndex(p => p.uid === uid);
+    if(idx < 0) return;
+    item = window.__orderPlaced[idx];
+    window.__orderPlaced.splice(idx, 1); // retiré tout de suite : la liste se réorganise en direct
+  } else {
+    item = window.__orderPool.find(p => p.uid === uid);
+    if(!item) return;
+  }
+
+  const rect = el.getBoundingClientRect();
+  const ghost = document.createElement('div');
+  ghost.className = 'order-chip order-chip-ghost';
+  ghost.textContent = item.word;
+  ghost.style.left = rect.left + 'px';
+  ghost.style.top = rect.top + 'px';
+  ghost.style.width = rect.width + 'px';
+  ghost.style.height = rect.height + 'px';
+  document.body.appendChild(ghost);
+
+  orderDrag = {
+    uid, kind, item, ghost,
+    startX: e.clientX, startY: e.clientY,
+    moved: false, lastIdx: null, lastOverZone: null,
+  };
+
+  renderOrderZones(); // reflow immédiat sans l'élément en cours de glissement
+
+  document.addEventListener('pointermove', onOrderDragMove);
+  document.addEventListener('pointerup', onOrderDragEnd);
+}
+
+function computeInsertIndex(clientX, clientY, excludeUid){
+  const tiles = Array.from(document.querySelectorAll('#orderAnswerZone .order-chip.placed'))
+    .filter(t => parseInt(t.dataset.uid, 10) !== excludeUid);
+  for(let i=0;i<tiles.length;i++){
+    const r = tiles[i].getBoundingClientRect();
+    if(clientY < r.top) return i; // ligne au-dessus → s'insère avant
+    if(clientY >= r.top && clientY <= r.bottom && clientX < r.left + r.width/2) return i;
+  }
+  return tiles.length;
+}
+
+function onOrderDragMove(e){
+  if(!orderDrag) return;
+  const dx = e.clientX - orderDrag.startX, dy = e.clientY - orderDrag.startY;
+  if(Math.abs(dx) > 5 || Math.abs(dy) > 5){ orderDrag.moved = true; }
+  orderDrag.ghost.style.transform = `translate(${dx}px, ${dy}px) scale(1.08) rotate(-2deg)`;
+
+  const answerZone = document.getElementById('orderAnswerZone');
+  if(!answerZone) return;
+  const zoneRect = answerZone.getBoundingClientRect();
+  const pad = 28;
+  const overZone = e.clientX >= zoneRect.left - pad && e.clientX <= zoneRect.right + pad &&
+                    e.clientY >= zoneRect.top - pad && e.clientY <= zoneRect.bottom + pad;
+
+  const targetIdx = overZone ? computeInsertIndex(e.clientX, e.clientY, orderDrag.uid) : null;
+  if(targetIdx === orderDrag.lastIdx && overZone === orderDrag.lastOverZone) return;
+  orderDrag.lastIdx = targetIdx;
+  orderDrag.lastOverZone = overZone;
+  answerZone.classList.toggle('drag-over', overZone);
+
+  const curIdx = window.__orderPlaced.findIndex(p => p.uid === orderDrag.uid);
+  if(curIdx >= 0){ window.__orderPlaced.splice(curIdx, 1); }
+  if(overZone && targetIdx !== null){ window.__orderPlaced.splice(targetIdx, 0, orderDrag.item); }
   renderOrderZones();
 }
 
-/* Clic sur un mot déjà placé : 1er clic = sélection, 2e clic sur le même = le retire, clic sur un autre = échange les deux places. */
-function onPlacedChipClick(uid){
-  if(answered) return;
-  const idx = window.__orderPlaced.findIndex(p => p.uid === uid);
-  if(idx < 0) return;
+function onOrderDragEnd(){
+  if(!orderDrag) return;
+  document.removeEventListener('pointermove', onOrderDragMove);
+  document.removeEventListener('pointerup', onOrderDragEnd);
+  const answerZone = document.getElementById('orderAnswerZone');
+  if(answerZone){ answerZone.classList.remove('drag-over'); }
 
-  if(window.__orderSelectedUid === null){
-    window.__orderSelectedUid = uid;
-    renderOrderZones();
-    return;
+  if(!orderDrag.moved){
+    // simple tap sans glissement :
+    if(orderDrag.kind === 'pool'){
+      // ajout rapide en fin de phrase
+      if(!window.__orderPlaced.some(p => p.uid === orderDrag.uid)){ window.__orderPlaced.push(orderDrag.item); }
+    }
+    // pour un mot déjà placé, un tap sans glissement le retire simplement (déjà fait au pointerdown)
   }
-  if(window.__orderSelectedUid === uid){
-    window.__orderSelectedUid = null;
-    removeFromOrder(uid);
-    return;
-  }
-  const otherIdx = window.__orderPlaced.findIndex(p => p.uid === window.__orderSelectedUid);
-  if(otherIdx >= 0){
-    const tmp = window.__orderPlaced[idx];
-    window.__orderPlaced[idx] = window.__orderPlaced[otherIdx];
-    window.__orderPlaced[otherIdx] = tmp;
-  }
-  window.__orderSelectedUid = null;
+
+  if(orderDrag.ghost && orderDrag.ghost.parentNode){ orderDrag.ghost.parentNode.removeChild(orderDrag.ghost); }
+  orderDrag = null;
   renderOrderZones();
 }
 
-function removeFromOrder(uid){
-  if(answered) return;
-  window.__orderPlaced = window.__orderPlaced.filter(p => p.uid !== uid);
-  if(window.__orderSelectedUid === uid){ window.__orderSelectedUid = null; }
-  renderOrderZones();
-}
 function resetOrderSelection(){
   if(answered) return;
   window.__orderPlaced = [];
-  window.__orderSelectedUid = null;
   renderOrderZones();
 }
 
