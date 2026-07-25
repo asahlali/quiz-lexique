@@ -3564,12 +3564,18 @@ function focusReveal(revealWrap){
   });
 }
 
+/* Route vers le bon écran de fin selon le type de session en cours (normal, révision, ou bloc personnalisé).
+   Utilisé partout où une session peut se terminer, pour ne jamais perdre le résultat d'un bloc personnalisé. */
+function goToEndScreen(){
+  document.body.classList.remove('quiz-active');
+  if(window.__reviewSession){ renderReviewEndScreen(); }
+  else if(window.__customBlockId){ renderCustomBlockEndScreen(); }
+  else { renderEndScreen(); }
+}
+
 function renderCard(){
   if(queue.length === 0){
-    document.body.classList.remove('quiz-active');
-    if(window.__reviewSession){ renderReviewEndScreen(); }
-    else if(window.__customBlockId){ renderCustomBlockEndScreen(); }
-    else { renderEndScreen(); }
+    goToEndScreen();
     return;
   }
   const isFirstCard = (masteredCount === 0 && score.total === 0 && queue.length === initialLength);
@@ -3847,7 +3853,7 @@ function renderPairsRound(){
   answered = false;
   // Prend les prochains mots de la file pour ce round
   const roundWords = queue.slice(0, Math.min(PAIRS_PER_ROUND, queue.length));
-  if(roundWords.length === 0){ renderEndScreen(); return; }
+  if(roundWords.length === 0){ goToEndScreen(); return; }
 
   // colonnes : français (gauche) et arabe (droite), mélangées indépendamment
   const left = shuffle(roundWords.map(w => ({ id:w.fr, txt:w.fr, side:'fr' })));
@@ -3885,6 +3891,8 @@ function onPairTileClick(tile){
   if(tile.classList.contains('matched')) return;
   const side = tile.dataset.side;
   const id = tile.dataset.id;
+
+  if(side === 'fr'){ speak(id, 'fr-FR'); } // id = le mot français lui-même sur ce côté
 
   const sel = pairsState.selected;
   if(!sel){
@@ -3959,7 +3967,7 @@ function finishPairsRound(){
   renderProgress();
 
   setTimeout(() => {
-    if(queue.length === 0){ renderEndScreen(); }
+    if(queue.length === 0){ goToEndScreen(); }
     else { renderPairsRound(); }
   }, 700);
 }
@@ -3990,7 +3998,7 @@ function onPairsTimeout(){
   revealWrap.innerHTML = `<div class="big-feedback ko">⏱️ Temps écoulé pour cette manche !</div>
     <button class="next-btn" id="nextBtn">Continuer →</button>`;
   document.getElementById('nextBtn').addEventListener('click', () => {
-    if(queue.length === 0){ renderEndScreen(); } else { renderPairsRound(); }
+    if(queue.length === 0){ goToEndScreen(); } else { renderPairsRound(); }
   });
   focusReveal(revealWrap);
 }
