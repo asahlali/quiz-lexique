@@ -4576,8 +4576,8 @@ function renderDialogueCard(){
 
   window.__orderFullTarget = fullWords;
   window.__orderBlankIndices = blankIndices;
-  window.__orderSlotFill = {}; // index de trou -> { word, uid }
-  window.__orderPool = shuffle(blankIndices.map((idx, i) => ({ word: fullWords[idx], uid: i, targetIndex: idx })));
+  window.__orderBlankSlots = new Array(blankIndices.length).fill(null); // état ORDONNÉ des trous, dans l'ordre de la phrase
+  window.__orderPool = shuffle(blankIndices.map((idx, i) => ({ word: fullWords[idx], uid: i })));
   orderDrag = null;
 
   const allBlank = blankIndices.length === fullWords.length;
@@ -4614,12 +4614,194 @@ function renderDialogueCard(){
   document.getElementById('orderValidateBtn').addEventListener('click', () => handleOrderAnswer(false));
   const orderMicBtn = document.getElementById('orderMicBtn');
   if(orderMicBtn){ orderMicBtn.addEventListener('click', () => startOrderVoiceInput()); }
-  renderOrderZones();
+  renderOrderZones(false);
   renderProgress();
   startQuestionTimer(() => handleOrderAnswer(true), Math.max(quizTimerSeconds * 4, 25));
 }
 
 let orderDrag = null; // état du glisser-déposer en cours (mode Mots en ordre)
+
+/* Choisit jusqu'à maxBlanks positions à transformer en trous, réparties dans la phrase,
+   en gardant si possible le tout premier et le tout dernier mot visibles comme repères. */
+function pickBlankIndices(words, maxBlanks){
+  const n = words.length;
+  if(n <= maxBlanks) return words.map((_, i) => i);
+  const usable = Array.from({length: n}, (_, i) => i).filter(i => i !== 0 && i !== n - 1);
+  const pool = usable.length >= maxBlanks ? usable : Array.from({length: n}, (_, i) => i);
+  const step = pool.length / maxBlanks;
+  const picked = [];
+  for(let k = 0; k < maxBlanks; k++){
+    picked.push(pool[Math.floor(k * step)]);
+  }
+  return Array.from(new Set(picked)).sort((a, b) => a - b);
+}
+
+/* Insère "item" à la position blankPos parmi les trous, EN DÉCALANT les mots entre l'ancienne et
+   la nouvelle position (comme dans une vraie liste) — au lieu de simplement écraser une case. */
+function insertIntoBlankSlots(item, blankPos){
+  const slots = window.__orderBlankSlots;
+  const curPos = slots.findIndex(f => f && f.uid === item.uid);
+  if(curPos >= 0){ slots.splice(curPos, 1); }
+  const target = Math.max(0, Math.min(blankPos, slots.length));
+  slots.splice(target, 0, item);
+  if(slots.length > window.__orderBlankIndices.length){
+    slots.pop(); // le mot évincé en bout de liste retourne simplement au pool (il n'est plus dans les trous)
+  }
+}
+function removeFromBlankSlots(uid){
+  const slots = window.__orderBlankSlots;
+  const curPos = slots.findIndex(f => f && f.uid === uid);
+  if(curPos >= 0){ slots.splice(curPos, 1); slots.push(null); }
+}
+
+function renderOrderZones(animate){
+  const sentenceEl = document.getElementById('orderSentence');
+  const poolZone = document.getElementById('orderPool');
+  const validateBtn = document.getElementById('orderValidateBtn');
+  if(!sentenceEl || !poolZone) return;
+
+  // FLIP : on mesure la position actuelle de chaque mot AVANT de re-générer le HTML
+  const firstRects = {};
+  if(animate){
+    sentenceEl.querySelectorAll('[data-uid]').forEach(el => { firstRects[el.dataset.uid] = el.getBoundingClientRect(); });
+  }
+
+  const fullWords = window.__orderFullTarget;
+  const blankIndices = window.__orderBlankIndices;
+  const blankSet = new Set(blankIndices);
+  const slots = window.__orderBlankSlots;
+
+  sentenceEl.innerHTML = fullWords.map((w, i) => {
+    if(!blankSet.has(i)){ return `<span class="order-fixed-word">${escapeHtml(w)}</span>`; }
+    const blankPos = blankIndices.indexOf(i);
+    const f = slots[blankPos];
+    if(f){
+      return `<button type="button" class="order-chip placed order-slot-filled" data-blankpos="${blankPos}" data-uid="${f.uid}">${escapeHtml(f.word)}</button>`;
+    }
+    return `<span class="order-slot-empty" data-blankpos="${blankPos}">…</span>`;
+  }).join(' ');
+
+  const usedUids = new Set(slots.filter(Boolean).map(f => f.uid));
+  poolZone.innerHTML = window.__orderPool
+    .filter(p => !usedUids.has(p.uid))
+    .map(p => `<button type="button" class="order-chip" data-uid="${p.uid}" data-kind="pool">${escapeHtml(p.word)}</button>`).join('');
+
+  sentenceEl.querySelectorAll('.order-slot-filled').forEach(el => attachOrderDrag(el));
+  poolZone.querySelectorAll('.order-chip').forEach(el => attachOrderDrag(el));
+
+  // FLIP : on anime chaque mot depuis sa position précédente vers sa nouvelle position (glissement visible)
+  if(animate){
+    sentenceEl.querySelectorAll('[data-uid]').forEach(el => {
+      const first = firstRects[el.dataset.uid];
+      if(!first) return;
+      const last = el.getBoundingClientRect();
+      const dx = first.left - last.left, dy = first.top - last.top;
+      if(dx || dy){
+        el.style.transition = 'none';
+        el.style.transform = `translate(${dx}px, ${dy}px)`;
+        requestAnimationFrame(() => {
+          el.style.transition = 'transform .28s cubic-bezier(.22,1,.36,1)';
+          el.style.transform = '';
+        });
+      }
+    });
+  }
+
+  if(validateBtn){
+    const complete = slots.every(Boolean);
+    validateBtn.style.display = complete ? 'inline-flex' : 'none';
+  }
+}
+
+function attachOrderDrag(el){
+  el.addEventListener('pointerdown', (e) => startOrderDrag(e, el));
+}
+
+function startOrderDrag(e, el){
+  if(answered || orderDrag) return;
+  e.preventDefault();
+  let item, fromBlankPos = null;
+  if(el.classList.contains('order-slot-filled')){
+    fromBlankPos = parseInt(el.dataset.blankpos, 10);
+    const f = window.__orderBlankSlots[fromBlankPos];
+    if(!f) return;
+    item = f;
+  } else {
+    const uid = parseInt(el.dataset.uid, 10);
+    item = window.__orderPool.find(p => p.uid === uid);
+    if(!item) return;
+  }
+  speak(item.word, 'fr-FR'); // 🔊 on entend le mot dès qu'on le touche
+
+  const rect = el.getBoundingClientRect();
+  const ghost = document.createElement('div');
+  ghost.className = 'order-chip order-chip-ghost';
+  ghost.textContent = item.word;
+  ghost.style.left = rect.left + 'px';
+  ghost.style.top = rect.top + 'px';
+  ghost.style.width = rect.width + 'px';
+  ghost.style.height = rect.height + 'px';
+  document.body.appendChild(ghost);
+
+  orderDrag = { item, fromBlankPos, ghost, startX: e.clientX, startY: e.clientY, moved: false, lastBlankPos: null };
+
+  document.addEventListener('pointermove', onOrderDragMove);
+  document.addEventListener('pointerup', onOrderDragEnd);
+}
+
+function onOrderDragMove(e){
+  if(!orderDrag) return;
+  const dx = e.clientX - orderDrag.startX, dy = e.clientY - orderDrag.startY;
+  if(Math.abs(dx) > 5 || Math.abs(dy) > 5){ orderDrag.moved = true; }
+  orderDrag.ghost.style.transform = `translate(${dx}px, ${dy}px) scale(1.08) rotate(-2deg)`;
+
+  document.querySelectorAll('.order-slot-empty.drag-over, .order-slot-filled.drag-over').forEach(x => x.classList.remove('drag-over'));
+  const elAtPoint = document.elementFromPoint(e.clientX, e.clientY);
+  const slotEl = elAtPoint ? elAtPoint.closest('[data-blankpos]') : null;
+  const blankPos = slotEl ? parseInt(slotEl.dataset.blankpos, 10) : null;
+
+  if(blankPos !== orderDrag.lastBlankPos){
+    orderDrag.lastBlankPos = blankPos;
+    if(blankPos !== null){
+      // 🔁 aperçu en direct : les mots se décalent déjà pendant le survol, pas seulement au lâcher
+      insertIntoBlankSlots(orderDrag.item, blankPos);
+      renderOrderZones(true);
+    } else {
+      removeFromBlankSlots(orderDrag.item.uid);
+      renderOrderZones(true);
+    }
+  }
+  if(slotEl){ slotEl.classList.add('drag-over'); }
+}
+
+function onOrderDragEnd(){
+  if(!orderDrag) return;
+  document.removeEventListener('pointermove', onOrderDragMove);
+  document.removeEventListener('pointerup', onOrderDragEnd);
+  document.querySelectorAll('.drag-over').forEach(x => x.classList.remove('drag-over'));
+
+  if(!orderDrag.moved){
+    if(orderDrag.fromBlankPos === null){
+      // simple tap sur un mot du pool : remplit le premier trou vide
+      const emptyPos = window.__orderBlankSlots.findIndex(f => !f);
+      if(emptyPos >= 0){ insertIntoBlankSlots(orderDrag.item, emptyPos); }
+    } else {
+      // simple tap sur un mot déjà placé : le retire
+      removeFromBlankSlots(orderDrag.item.uid);
+    }
+  }
+  // si glissé (moved=true), le placement a déjà été appliqué en direct par onOrderDragMove
+
+  if(orderDrag.ghost && orderDrag.ghost.parentNode){ orderDrag.ghost.parentNode.removeChild(orderDrag.ghost); }
+  orderDrag = null;
+  renderOrderZones(true);
+}
+
+function resetOrderSelection(){
+  if(answered) return;
+  window.__orderBlankSlots = new Array(window.__orderBlankIndices.length).fill(null);
+  renderOrderZones(true);
+}
 
 /* 🎤 Entrée vocale : dire la phrase place automatiquement chaque mot reconnu dans son bon trou. */
 function startOrderVoiceInput(){
@@ -4652,7 +4834,7 @@ function startOrderVoiceInput(){
     let anyMatch = false;
     spoken.forEach(sw => {
       if(!sw) return;
-      const usedUids = new Set(Object.values(window.__orderSlotFill).map(f => f.uid));
+      const usedUids = new Set(window.__orderBlankSlots.filter(Boolean).map(f => f.uid));
       const candidate = window.__orderPool.find(p => {
         if(usedUids.has(p.uid)) return false;
         const norm = normalizeForSearch(p.word).replace(/[^a-z]/g,'');
@@ -4661,11 +4843,13 @@ function startOrderVoiceInput(){
         return levenshtein(norm, sw) <= (norm.length <= 4 ? 1 : 2);
       });
       if(candidate){
-        window.__orderSlotFill[candidate.targetIndex] = candidate; // le mot se place tout seul dans SON trou
+        const emptyPos = window.__orderBlankSlots.findIndex(f => !f);
+        const targetPos = emptyPos >= 0 ? emptyPos : window.__orderBlankSlots.length;
+        insertIntoBlankSlots(candidate, targetPos);
         anyMatch = true;
       }
     });
-    if(anyMatch){ renderOrderZones(); }
+    if(anyMatch){ renderOrderZones(true); }
   };
 
   rec.onresult = (ev) => {
@@ -4679,7 +4863,7 @@ function startOrderVoiceInput(){
     if(micTr){ micTr.textContent = running ? `Tu dis : « ${running} »` : ''; }
     tryPlaceSpokenWords(running);
 
-    const allFilled = window.__orderBlankIndices.every(idx => window.__orderSlotFill[idx]);
+    const allFilled = window.__orderBlankSlots.every(Boolean);
     if(allFilled && !autoStopScheduled){
       autoStopScheduled = true;
       if(micHint){ micHint.textContent = '✅ Tous les trous sont remplis !'; }
@@ -4705,134 +4889,6 @@ function startOrderVoiceInput(){
   try{ rec.start(); }catch(e){ recoActive = false; if(micBtn){ micBtn.classList.remove('listening'); } }
 }
 
-/* Choisit jusqu'à maxBlanks positions à transformer en trous, réparties dans la phrase,
-   en gardant si possible le tout premier et le tout dernier mot visibles comme repères. */
-function pickBlankIndices(words, maxBlanks){
-  const n = words.length;
-  if(n <= maxBlanks) return words.map((_, i) => i);
-  const usable = Array.from({length: n}, (_, i) => i).filter(i => i !== 0 && i !== n - 1);
-  const pool = usable.length >= maxBlanks ? usable : Array.from({length: n}, (_, i) => i);
-  const step = pool.length / maxBlanks;
-  const picked = [];
-  for(let k = 0; k < maxBlanks; k++){
-    picked.push(pool[Math.floor(k * step)]);
-  }
-  return Array.from(new Set(picked)).sort((a, b) => a - b);
-}
-
-function renderOrderZones(){
-  const sentenceEl = document.getElementById('orderSentence');
-  const poolZone = document.getElementById('orderPool');
-  const validateBtn = document.getElementById('orderValidateBtn');
-  if(!sentenceEl || !poolZone) return;
-
-  const fullWords = window.__orderFullTarget;
-  const blankSet = new Set(window.__orderBlankIndices);
-  const fill = window.__orderSlotFill;
-
-  sentenceEl.innerHTML = fullWords.map((w, i) => {
-    if(!blankSet.has(i)){ return `<span class="order-fixed-word">${escapeHtml(w)}</span>`; }
-    const f = fill[i];
-    if(f){
-      return `<button type="button" class="order-chip placed order-slot-filled" data-slot="${i}" data-uid="${f.uid}">${escapeHtml(f.word)}</button>`;
-    }
-    return `<span class="order-slot-empty" data-slot="${i}">…</span>`;
-  }).join(' ');
-
-  const usedUids = new Set(Object.values(fill).map(f => f.uid));
-  poolZone.innerHTML = window.__orderPool
-    .filter(p => !usedUids.has(p.uid))
-    .map(p => `<button type="button" class="order-chip" data-uid="${p.uid}" data-kind="pool">${escapeHtml(p.word)}</button>`).join('');
-
-  sentenceEl.querySelectorAll('.order-slot-filled').forEach(el => attachOrderDrag(el));
-  poolZone.querySelectorAll('.order-chip').forEach(el => attachOrderDrag(el));
-
-  if(validateBtn){
-    const complete = Object.keys(fill).length === window.__orderBlankIndices.length;
-    validateBtn.style.display = complete ? 'inline-flex' : 'none';
-  }
-}
-
-function attachOrderDrag(el){
-  el.addEventListener('pointerdown', (e) => startOrderDrag(e, el));
-}
-
-function startOrderDrag(e, el){
-  if(answered || orderDrag) return;
-  e.preventDefault();
-  let item, fromSlot = null;
-  if(el.classList.contains('order-slot-filled')){
-    fromSlot = parseInt(el.dataset.slot, 10);
-    const f = window.__orderSlotFill[fromSlot];
-    if(!f) return;
-    item = f;
-    delete window.__orderSlotFill[fromSlot];
-  } else {
-    const uid = parseInt(el.dataset.uid, 10);
-    item = window.__orderPool.find(p => p.uid === uid);
-    if(!item) return;
-  }
-  speak(item.word, 'fr-FR'); // 🔊 on entend le mot dès qu'on le touche
-
-  const rect = el.getBoundingClientRect();
-  const ghost = document.createElement('div');
-  ghost.className = 'order-chip order-chip-ghost';
-  ghost.textContent = item.word;
-  ghost.style.left = rect.left + 'px';
-  ghost.style.top = rect.top + 'px';
-  ghost.style.width = rect.width + 'px';
-  ghost.style.height = rect.height + 'px';
-  document.body.appendChild(ghost);
-
-  orderDrag = { item, fromSlot, ghost, startX: e.clientX, startY: e.clientY, moved: false, lastSlot: null };
-  renderOrderZones();
-
-  document.addEventListener('pointermove', onOrderDragMove);
-  document.addEventListener('pointerup', onOrderDragEnd);
-}
-
-function onOrderDragMove(e){
-  if(!orderDrag) return;
-  const dx = e.clientX - orderDrag.startX, dy = e.clientY - orderDrag.startY;
-  if(Math.abs(dx) > 5 || Math.abs(dy) > 5){ orderDrag.moved = true; }
-  orderDrag.ghost.style.transform = `translate(${dx}px, ${dy}px) scale(1.08) rotate(-2deg)`;
-
-  document.querySelectorAll('.order-slot-empty.drag-over, .order-slot-filled.drag-over').forEach(x => x.classList.remove('drag-over'));
-  const elAtPoint = document.elementFromPoint(e.clientX, e.clientY);
-  const slotEl = elAtPoint ? elAtPoint.closest('[data-slot]') : null;
-  if(slotEl){ slotEl.classList.add('drag-over'); }
-  orderDrag.lastSlot = slotEl ? parseInt(slotEl.dataset.slot, 10) : null;
-}
-
-function onOrderDragEnd(){
-  if(!orderDrag) return;
-  document.removeEventListener('pointermove', onOrderDragMove);
-  document.removeEventListener('pointerup', onOrderDragEnd);
-  document.querySelectorAll('.drag-over').forEach(x => x.classList.remove('drag-over'));
-
-  const targetSlot = orderDrag.lastSlot;
-  const isValidBlank = targetSlot !== null && window.__orderBlankIndices.includes(targetSlot);
-
-  if(orderDrag.moved && isValidBlank){
-    window.__orderSlotFill[targetSlot] = orderDrag.item; // écrase l'ancien occupant, qui revient au pool automatiquement
-  } else if(!orderDrag.moved && orderDrag.fromSlot === null){
-    // simple tap sur un mot du pool : remplit le premier trou vide
-    const emptySlot = window.__orderBlankIndices.find(idx => !window.__orderSlotFill[idx]);
-    if(emptySlot !== undefined){ window.__orderSlotFill[emptySlot] = orderDrag.item; }
-  }
-  // sinon (glissé hors d'un trou valide, ou tap sur un trou déjà rempli) : le mot reste retiré → retourne au pool
-
-  if(orderDrag.ghost && orderDrag.ghost.parentNode){ orderDrag.ghost.parentNode.removeChild(orderDrag.ghost); }
-  orderDrag = null;
-  renderOrderZones();
-}
-
-function resetOrderSelection(){
-  if(answered) return;
-  window.__orderSlotFill = {};
-  renderOrderZones();
-}
-
 function handleOrderAnswer(timedOut){
   if(answered) return;
   answered = true;
@@ -4841,11 +4897,11 @@ function handleOrderAnswer(timedOut){
   const word = window.__currentWord;
   const fullWords = window.__orderFullTarget;
   const blankIndices = window.__orderBlankIndices;
-  const fill = window.__orderSlotFill;
+  const slots = window.__orderBlankSlots;
   const target = fullWords.join(' ');
 
-  const allFilled = blankIndices.every(idx => fill[idx]);
-  const allCorrect = allFilled && blankIndices.every(idx => normalizeForSearch(fill[idx].word) === normalizeForSearch(fullWords[idx]));
+  const allFilled = slots.every(Boolean);
+  const allCorrect = allFilled && blankIndices.every((sentIdx, blankPos) => normalizeForSearch(slots[blankPos].word) === normalizeForSearch(fullWords[sentIdx]));
   const isCorrect = !timedOut && allCorrect;
 
   score.total++;
@@ -4870,7 +4926,8 @@ function handleOrderAnswer(timedOut){
     const blankSet = new Set(blankIndices);
     sentenceEl.innerHTML = fullWords.map((w2, i) => {
       if(!blankSet.has(i)){ return `<span class="order-fixed-word">${escapeHtml(w2)}</span>`; }
-      const f = fill[i];
+      const blankPos = blankIndices.indexOf(i);
+      const f = slots[blankPos];
       const ok = f && normalizeForSearch(f.word) === normalizeForSearch(w2);
       return `<span class="order-chip disabled ${ok ? 'correct' : 'wrong'}">${escapeHtml(f ? f.word : '…')}</span>`;
     }).join(' ');
@@ -4879,6 +4936,8 @@ function handleOrderAnswer(timedOut){
   if(poolZone){ poolZone.innerHTML = ''; }
   const clearBtn = document.getElementById('orderClearBtn');
   if(clearBtn){ clearBtn.style.display = 'none'; }
+  const micBtnEl = document.getElementById('orderMicBtn');
+  if(micBtnEl){ micBtnEl.classList.add('disabled'); }
 
   if(isCorrect){ celebrate(); reactMascot('ok'); playCorrectSound(); }
   else {
