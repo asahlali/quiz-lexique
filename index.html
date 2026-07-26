@@ -1288,10 +1288,13 @@ function loadWordStats(){
 function saveWordStats(){
   try{ localStorage.setItem(nsKey(WORD_STATS_KEY), JSON.stringify(wordStats)); }catch(e){}
 }
+const MASTERY_STREAK = 5; // un mot est "maîtrisé" après 5 bonnes réponses D'AFFILÉE, sans erreur entre les deux
 function recordWordStat(fr, isCorrect){
   const key = fr.toLowerCase();
-  if(!wordStats[key]) wordStats[key] = { correct:0, wrong:0 };
-  if(isCorrect){ wordStats[key].correct++; } else { wordStats[key].wrong++; }
+  if(!wordStats[key]) wordStats[key] = { correct:0, wrong:0, streak:0 };
+  if(typeof wordStats[key].streak !== 'number') wordStats[key].streak = 0;
+  if(isCorrect){ wordStats[key].correct++; wordStats[key].streak++; }
+  else { wordStats[key].wrong++; wordStats[key].streak = 0; }
   saveWordStats();
 }
 function getWordBadge(fr){
@@ -1299,12 +1302,28 @@ function getWordBadge(fr){
   if(!s || (s.correct === 0 && s.wrong === 0)){
     return `<span class="rc-status" style="color:var(--text-dim);">nouveau</span>`;
   }
-  const total = s.correct + s.wrong;
-  return s.wrong === 0
-    ? `<span class="rc-status first">✓ ${s.correct}/${total}</span>`
-    : `<span class="rc-status retry">⚠ ${s.correct}/${total}</span>`;
+  const streak = s.streak || 0;
+  if(streak >= MASTERY_STREAK){
+    return `<span class="rc-status first">✓ maîtrisé (${streak})</span>`;
+  }
+  return s.wrong > 0
+    ? `<span class="rc-status retry">⚠ ${streak}/${MASTERY_STREAK} d'affilée</span>`
+    : `<span class="rc-status" style="color:var(--purple);font-weight:800;">🔥 ${streak}/${MASTERY_STREAK}</span>`;
 }
 let wordStats = loadWordStats();
+/* Migration : pour les mots sans "streak" enregistré, si aucune erreur n'a jamais été faite,
+   toutes les bonnes réponses passées comptaient forcément comme une série ininterrompue. */
+(function migrateWordStatsStreaks(){
+  let changed = false;
+  Object.keys(wordStats).forEach(k => {
+    const s = wordStats[k];
+    if(s && typeof s.streak !== 'number'){
+      s.streak = (s.wrong === 0 && s.correct > 0) ? s.correct : 0;
+      changed = true;
+    }
+  });
+  if(changed){ saveWordStats(); }
+})();
 
 /* ============ 🔥 OBJECTIF QUOTIDIEN & SÉRIE (streak) ============ */
 const DAILY_LOG_KEY = 'lexiqueQuiz::dailyLog';
@@ -1339,9 +1358,24 @@ function goalMetOn(dateKey){ return (dailyLog[dateKey] || 0) >= DAILY_GOAL; }
 /* ---- Stats quotidiennes détaillées : temps, réussites ≥90%, points (XP) ---- */
 const DAILY_STATS_KEY = 'lexiqueQuiz::dailyStats';
 const XP_TOTAL_KEY = 'lexiqueQuiz::xpTotal';
-const QUEST_TIME_GOAL = 300;   // 5 minutes
-const QUEST_PASS_GOAL = 2;     // 2 leçons ≥90%
-const QUEST_LESSON_GOAL = 1;   // 1 leçon
+const QUEST_TIME_GOAL_DEFAULT = 300;   // 5 minutes
+const QUEST_PASS_GOAL_DEFAULT = 2;     // 2 leçons ≥90%
+const QUEST_LESSON_GOAL_DEFAULT = 1;   // 1 leçon
+const QUEST_SETTINGS_KEY = 'lexiqueQuiz::questSettings';
+function loadQuestSettings(){
+  try{
+    const raw = localStorage.getItem(nsKey(QUEST_SETTINGS_KEY));
+    const s = raw ? JSON.parse(raw) : {};
+    return {
+      timeGoalMin: s.timeGoalMin || 5,
+      passGoal: s.passGoal || QUEST_PASS_GOAL_DEFAULT,
+      lessonGoal: s.lessonGoal || QUEST_LESSON_GOAL_DEFAULT,
+      modesGoal: s.modesGoal || 0, // 0 = défi désactivé
+    };
+  }catch(e){ return { timeGoalMin:5, passGoal:QUEST_PASS_GOAL_DEFAULT, lessonGoal:QUEST_LESSON_GOAL_DEFAULT, modesGoal:0 }; }
+}
+function saveQuestSettings(){ try{ localStorage.setItem(nsKey(QUEST_SETTINGS_KEY), JSON.stringify(questSettings)); }catch(e){} }
+let questSettings = loadQuestSettings();
 
 function loadDailyStats(){
   try{ const raw = localStorage.getItem(nsKey(DAILY_STATS_KEY)); return raw ? JSON.parse(raw) : {}; }
@@ -1358,29 +1392,37 @@ let xpTotal = loadXpTotal();
 
 function todayStats(){
   const k = todayKey();
-  if(!dailyStats[k]) dailyStats[k] = { seconds:0, passed:0, xp:0 };
+  if(!dailyStats[k]) dailyStats[k] = { seconds:0, passed:0, xp:0, modesPlayed:[] };
+  if(!dailyStats[k].modesPlayed) dailyStats[k].modesPlayed = [];
   return dailyStats[k];
 }
-/* Enregistre le temps, une éventuelle réussite ≥90%, et les points gagnés pour aujourd'hui. */
-function recordDailyStats(seconds, passed90, xpEarned){
+/* Enregistre le temps, une éventuelle réussite ≥90%, les points gagnés, et le mode joué pour aujourd'hui. */
+function recordDailyStats(seconds, passed90, xpEarned, mode){
   const s = todayStats();
   s.seconds += Math.min(seconds, 900); // borne anti-triche (15 min max par bloc)
   if(passed90) s.passed += 1;
   s.xp += xpEarned;
+  if(mode && !s.modesPlayed.includes(mode)){ s.modesPlayed.push(mode); }
   saveDailyStats();
   xpTotal += xpEarned;
   saveXpTotal();
 }
 
-/* Les 3 défis du jour, à la Duolingo. */
+/* Les défis du jour, à la Duolingo — objectifs personnalisables via renderQuestSettings(). */
 function getDailyQuests(){
   const lessons = dailyLog[todayKey()] || 0;
-  const s = dailyStats[todayKey()] || { seconds:0, passed:0, xp:0 };
-  return [
-    { icon:'📗', label:'Termine 1 bloc', cur:Math.min(lessons, QUEST_LESSON_GOAL), goal:QUEST_LESSON_GOAL },
-    { icon:'⏱️', label:'Passe 5 min à apprendre', cur:Math.min(s.seconds, QUEST_TIME_GOAL), goal:QUEST_TIME_GOAL, isTime:true },
-    { icon:'🏆', label:'Réussis 90%+ dans 2 blocs', cur:Math.min(s.passed, QUEST_PASS_GOAL), goal:QUEST_PASS_GOAL },
+  const s = dailyStats[todayKey()] || { seconds:0, passed:0, xp:0, modesPlayed:[] };
+  const timeGoalSec = questSettings.timeGoalMin * 60;
+  const quests = [
+    { icon:'📗', label:`Termine ${questSettings.lessonGoal} bloc${questSettings.lessonGoal>1?'s':''}`, cur:Math.min(lessons, questSettings.lessonGoal), goal:questSettings.lessonGoal },
+    { icon:'⏱️', label:`Passe ${questSettings.timeGoalMin} min à apprendre`, cur:Math.min(s.seconds, timeGoalSec), goal:timeGoalSec, isTime:true },
+    { icon:'🏆', label:`Réussis 90%+ dans ${questSettings.passGoal} bloc${questSettings.passGoal>1?'s':''}`, cur:Math.min(s.passed, questSettings.passGoal), goal:questSettings.passGoal },
   ];
+  if(questSettings.modesGoal > 0){
+    const modesCount = (s.modesPlayed || []).length;
+    quests.push({ icon:'🎭', label:`Complète ${questSettings.modesGoal} modes différents`, cur:Math.min(modesCount, questSettings.modesGoal), goal:questSettings.modesGoal });
+  }
+  return quests;
 }
 function questsAllDone(){ return getDailyQuests().every(q => q.cur >= q.goal); }
 
@@ -2261,29 +2303,41 @@ function buildDeck(blockIndex){
   setupDeckFromWords(BLOCKS[blockIndex]);
 }
 
-/* ============ 🔁 SESSION DE RÉVISION (mots à revoir, par blocs de 30) ============ */
+/* ============ 🎓 CENTRE D'ENTRAÎNEMENT (mots déjà vus, par blocs de 30) ============ */
 const REVIEW_BLOCK_SIZE = 30;
-function getReviewWordsSorted(){
-  return WORDS.filter(w => {
+const TRAINING_TYPES = {
+  speak:   { emoji:'🎤', label:'Prononciation', mode:'speak',  pool:'all' },
+  errors:  { emoji:'⚠️', label:'Erreurs',       mode:'speak',  pool:'errors' },
+  pairs:   { emoji:'🧩', label:'Paires',         mode:'pairs',  pool:'all' },
+  repeat:  { emoji:'🎧', label:'Écoute',         mode:'repeat', pool:'all' },
+};
+function getTrainingWords(poolType){
+  const words = WORDS.filter(w => {
     const s = wordStats[w.fr.toLowerCase()];
-    return s && s.wrong > 0;
-  }).sort((a,b) => (wordStats[b.fr.toLowerCase()].wrong) - (wordStats[a.fr.toLowerCase()].wrong));
+    if(!s || (s.correct + s.wrong) === 0) return false;
+    if(poolType === 'errors'){ return s.wrong > 0 && (s.streak || 0) < MASTERY_STREAK; }
+    return true; // 'all' : tous les mots déjà vus
+  });
+  if(poolType === 'errors'){
+    words.sort((a,b) => (wordStats[b.fr.toLowerCase()].wrong) - (wordStats[a.fr.toLowerCase()].wrong));
+  } else {
+    words.sort((a,b) => a.fr.localeCompare(b.fr, 'fr'));
+  }
+  return words;
 }
-/* Un mot réussi du premier coup en révision est "gracié" : son historique d'erreurs est effacé,
-   il devient immédiatement un mot maîtrisé et sort de la liste "à revoir". */
-function graduateWordFromReview(fr){
-  const key = fr.toLowerCase();
-  const prev = wordStats[key] || { correct:0, wrong:0 };
-  wordStats[key] = { correct: prev.correct + 1, wrong: 0 };
-  saveWordStats();
-}
-function startReviewBlock(chunkIndex){
-  const all = getReviewWordsSorted();
+/* Rétrocompatibilité : l'ancien raccourci "mots à revoir" pointe vers le pool 'errors'. */
+function getReviewWordsSorted(){ return getTrainingWords('errors'); }
+
+function startTrainingBlock(typeKey, chunkIndex){
+  const type = TRAINING_TYPES[typeKey];
+  if(!type) return;
+  const all = getTrainingWords(type.pool);
   const chunk = all.slice(chunkIndex * REVIEW_BLOCK_SIZE, (chunkIndex + 1) * REVIEW_BLOCK_SIZE);
   if(chunk.length === 0){ renderBlockSelect(); return; }
   currentBlock = null;
-  gameMode = 'speak';
+  gameMode = type.mode;
   window.__reviewSession = true;
+  window.__trainingType = typeKey;
   window.__customBlockId = null;
   window.__reviewChunkIndex = chunkIndex;
   window.__reviewGraduated = [];
@@ -2292,58 +2346,154 @@ function startReviewBlock(chunkIndex){
   renderScoreboard();
   renderCard();
 }
+/* Raccourci pour le bouton "Réviser mes mots à revoir" existant sur l'accueil. */
+function startReviewBlock(chunkIndex){ startTrainingBlock('errors', chunkIndex); }
 
-function renderReviewIntro(){
+/* ============ 🎯 PERSONNALISATION DES OBJECTIFS QUOTIDIENS ============ */
+function renderQuestSettings(){
+  clearQuestionTimer();
+  document.body.classList.remove('quiz-active');
+  currentBlock = null;
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromQSBtn" style="cursor:pointer;">← Retour aux blocs</button>`;
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('footerNote').textContent = '';
+
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="cat-tag">🎯 Objectifs du jour</div>
+    <div class="word-fr" style="font-size:clamp(24px,4.5vw,32px);">Personnalise tes défis</div>
+    <div class="question-line">Ajuste les objectifs selon ton rythme. Une fois enregistrés, ils s'appliquent directement, sans redemander à chaque fois.</div>
+
+    <div class="pm-summary" style="margin-top:18px;">
+      <div class="pm-row" style="flex-direction:column;align-items:flex-start;gap:8px;">
+        <span>📗 Nombre de blocs à terminer</span>
+        <input type="number" id="qsLesson" class="search-input" min="1" max="20" value="${questSettings.lessonGoal}" style="max-width:120px;">
+      </div>
+      <div class="pm-row" style="flex-direction:column;align-items:flex-start;gap:8px;">
+        <span>⏱️ Minutes d'apprentissage</span>
+        <input type="number" id="qsTime" class="search-input" min="1" max="180" value="${questSettings.timeGoalMin}" style="max-width:120px;">
+      </div>
+      <div class="pm-row" style="flex-direction:column;align-items:flex-start;gap:8px;">
+        <span>🏆 Nombre de blocs à réussir ≥90%</span>
+        <input type="number" id="qsPass" class="search-input" min="1" max="20" value="${questSettings.passGoal}" style="max-width:120px;">
+      </div>
+      <div class="pm-row" style="flex-direction:column;align-items:flex-start;gap:8px;">
+        <span>🎭 Nombre de modes différents à compléter (0 = désactivé)</span>
+        <input type="number" id="qsModes" class="search-input" min="0" max="7" value="${questSettings.modesGoal}" style="max-width:120px;">
+      </div>
+    </div>
+
+    <div style="display:flex;gap:12px;justify-content:center;margin-top:20px;flex-wrap:wrap;">
+      <button class="restart-btn" id="qsSaveBtn">✓ Enregistrer</button>
+      <button class="restart-btn" id="qsResetBtn" style="background:#F1F5F9;color:var(--text);box-shadow:0 4px 0 #E2E8F0;">↺ Valeurs par défaut</button>
+    </div>
+  `;
+  document.getElementById('backFromQSBtn').addEventListener('click', renderBlockSelect);
+  document.getElementById('qsSaveBtn').addEventListener('click', () => {
+    const lesson = Math.max(1, parseInt(document.getElementById('qsLesson').value, 10) || 1);
+    const time = Math.max(1, parseInt(document.getElementById('qsTime').value, 10) || 5);
+    const pass = Math.max(1, parseInt(document.getElementById('qsPass').value, 10) || 2);
+    const modes = Math.max(0, parseInt(document.getElementById('qsModes').value, 10) || 0);
+    questSettings = { lessonGoal: lesson, timeGoalMin: time, passGoal: pass, modesGoal: modes };
+    saveQuestSettings();
+    cloudAutoPush();
+    setStatus('🎯 Objectifs mis à jour !', 'ok');
+    renderBlockSelect();
+  });
+  document.getElementById('qsResetBtn').addEventListener('click', () => {
+    questSettings = { lessonGoal: QUEST_LESSON_GOAL_DEFAULT, timeGoalMin: 5, passGoal: QUEST_PASS_GOAL_DEFAULT, modesGoal: 0 };
+    saveQuestSettings();
+    cloudAutoPush();
+    renderQuestSettings();
+  });
+}
+
+function renderTrainingCenter(){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
   currentBlock = null;
   window.__reviewSession = false;
-  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromReviewBtn" style="cursor:pointer;">← Retour aux blocs</button>`;
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromTCBtn" style="cursor:pointer;">← Retour aux blocs</button>`;
   document.getElementById('progressFill').style.width = '0%';
   document.getElementById('footerNote').textContent = '';
 
-  const words = getReviewWordsSorted();
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="cat-tag">🎓 Centre d'entraînement</div>
+    <div class="word-fr" style="font-size:clamp(24px,4.5vw,32px);">Entraîne-toi sur tes mots déjà vus</div>
+    <div class="question-line">Choisis un type d'entraînement. Un mot devient <b>maîtrisé</b> après ${MASTERY_STREAK} bonnes réponses d'affilée, tous modes confondus — la moindre erreur remet le compteur à zéro.</div>
+    <div class="options" id="tcTypeGrid" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr));margin-top:18px;"></div>
+  `;
+  document.getElementById('backFromTCBtn').addEventListener('click', renderBlockSelect);
+
+  const grid = document.getElementById('tcTypeGrid');
+  grid.innerHTML = Object.keys(TRAINING_TYPES).map(key => {
+    const t = TRAINING_TYPES[key];
+    const count = getTrainingWords(t.pool).length;
+    return `<button class="opt" data-type="${key}" style="text-align:center;" ${count===0?'disabled style="opacity:.5;cursor:not-allowed;"':''}>
+      <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:16px;">${t.emoji} ${t.label}</div>
+      <div style="font-size:11.5px;color:var(--text-dim);margin-top:4px;">${count} mot${count>1?'s':''}</div>
+    </button>`;
+  }).join('');
+  grid.querySelectorAll('[data-type]:not([disabled])').forEach(btn => {
+    btn.addEventListener('click', () => renderTrainingChunkPicker(btn.dataset.type));
+  });
+}
+
+function renderTrainingChunkPicker(typeKey){
+  clearQuestionTimer();
+  document.body.classList.remove('quiz-active');
+  const type = TRAINING_TYPES[typeKey];
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromTCPickerBtn" style="cursor:pointer;">← Retour</button>`;
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('footerNote').textContent = '';
+
+  const words = getTrainingWords(type.pool);
   const nbChunks = Math.ceil(words.length / REVIEW_BLOCK_SIZE);
   const card = document.getElementById('quizCard');
 
   if(words.length === 0){
     card.innerHTML = `
-      <div class="cat-tag">🔁 Révision</div>
-      <div class="word-fr" style="font-size:clamp(24px,4.5vw,32px);">Rien à réviser ! 🎉</div>
-      <div class="question-line">Tous les mots que tu as vus sont maîtrisés. Continue à découvrir de nouveaux blocs !</div>
+      <div class="cat-tag">${type.emoji} ${type.label}</div>
+      <div class="word-fr" style="font-size:clamp(24px,4.5vw,32px);">Rien à entraîner ici ! 🎉</div>
+      <div class="question-line">Reviens plus tard, ou choisis un autre type d'entraînement.</div>
     `;
-    document.getElementById('backFromReviewBtn').addEventListener('click', renderBlockSelect);
+    document.getElementById('backFromTCPickerBtn').addEventListener('click', renderTrainingCenter);
     return;
   }
 
   card.innerHTML = `
-    <div class="cat-tag">🔁 Révision · 🎤 Prononciation</div>
-    <div class="word-fr" style="font-size:clamp(24px,4.5vw,32px);">${words.length} mot${words.length>1?'s':''} à revoir</div>
-    <div class="question-line">Répartis en ${nbChunks} bloc${nbChunks>1?'s':''} de ${REVIEW_BLOCK_SIZE} mots max. Réponds juste <b>du premier coup</b> pour qu'un mot passe définitivement en "maîtrisé" et sorte de cette liste.</div>
-    <div class="options" id="reviewChunkGrid" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr));margin-top:18px;"></div>
+    <div class="cat-tag">${type.emoji} ${type.label}</div>
+    <div class="word-fr" style="font-size:clamp(24px,4.5vw,32px);">${words.length} mot${words.length>1?'s':''} disponible${words.length>1?'s':''}</div>
+    <div class="question-line">Répartis en ${nbChunks} bloc${nbChunks>1?'s':''} de ${REVIEW_BLOCK_SIZE} mots max.</div>
+    <div class="options" id="tcChunkGrid" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr));margin-top:18px;"></div>
   `;
-  document.getElementById('backFromReviewBtn').addEventListener('click', renderBlockSelect);
+  document.getElementById('backFromTCPickerBtn').addEventListener('click', renderTrainingCenter);
 
-  const grid = document.getElementById('reviewChunkGrid');
+  const grid = document.getElementById('tcChunkGrid');
   grid.innerHTML = Array.from({length: nbChunks}).map((_, i) => {
     const count = Math.min(REVIEW_BLOCK_SIZE, words.length - i * REVIEW_BLOCK_SIZE);
     return `<button class="opt" data-chunk="${i}" style="text-align:center;">
-      <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:18px;">Révision ${i+1}</div>
+      <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:18px;">${type.label} ${i+1}</div>
       <div style="font-size:11.5px;color:var(--text-dim);margin-top:4px;">${count} mot${count>1?'s':''}</div>
     </button>`;
   }).join('');
   grid.querySelectorAll('[data-chunk]').forEach(btn => {
-    btn.addEventListener('click', () => startReviewBlock(parseInt(btn.dataset.chunk)));
+    btn.addEventListener('click', () => startTrainingBlock(typeKey, parseInt(btn.dataset.chunk)));
   });
 }
 
+/* Conservé pour compatibilité : l'ancien écran "Réviser mes mots à revoir" pointe directement vers le pool erreurs. */
+function renderReviewIntro(){ renderTrainingChunkPicker('errors'); }
+
 function renderReviewEndScreen(){
   document.body.classList.remove('quiz-active');
+  const type = TRAINING_TYPES[window.__trainingType] || TRAINING_TYPES.errors;
   const graduated = window.__reviewGraduated || [];
-  const stillToReview = getReviewWordsSorted().length;
+  const stillLeft = getTrainingWords(type.pool).length;
   const durationSec = blockStartTime ? Math.max(1, Math.round((Date.now() - blockStartTime)/1000)) : 0;
   recordDailyActivity();
-  recordDailyStats(durationSec, false, 0);
+  recordDailyStats(durationSec, false, 0, gameMode);
   window.__reviewSession = false;
 
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromReviewEndBtn" style="cursor:pointer;">← Retour aux blocs</button>`;
@@ -2353,13 +2503,14 @@ function renderReviewEndScreen(){
   const card = document.getElementById('quizCard');
   card.innerHTML = `
     <div class="end-screen">
-      <div class="cat-tag">🔁 Révision terminée · 🎤 Prononciation — ${score.total} mot${score.total>1?'s':''}</div>
+      <div class="cat-tag">${type.emoji} ${type.label} terminé · ${score.total} mot${score.total>1?'s':''}</div>
       <div class="big">${score.correct} / ${score.total}</div>
-      <div class="sub" style="color:#6B6552;">${graduated.length} mot${graduated.length>1?'s':''} maîtrisé${graduated.length>1?'s':''} du premier coup 🎉 · il reste ${stillToReview} mot${stillToReview>1?'s':''} à revoir</div>
+      <div class="sub" style="color:#6B6552;">${graduated.length} mot${graduated.length>1?'s':''} passé${graduated.length>1?'s':''} maîtrisé${graduated.length>1?'s':''} (${MASTERY_STREAK} d'affilée) 🎉 · ${stillLeft} mot${stillLeft>1?'s':''} restant${stillLeft>1?'s':''} dans ce pool</div>
       ${graduated.length ? `
-      <div class="pass-banner ok">✅ ${graduated.length} mot${graduated.length>1?'s':''} retiré${graduated.length>1?'s':''} de ta liste "à revoir" !</div>` : ''}
+      <div class="pass-banner ok">✅ ${graduated.length} mot${graduated.length>1?'s':''} maîtrisé${graduated.length>1?'s':''} !</div>` : ''}
       <div style="display:flex;gap:12px;justify-content:center;margin-top:20px;flex-wrap:wrap;">
-        ${stillToReview > 0 ? `<button class="restart-btn" id="reviewAgainBtn">🔁 Continuer la révision</button>` : ''}
+        ${stillLeft > 0 ? `<button class="restart-btn" id="reviewAgainBtn">🔁 Continuer</button>` : ''}
+        <button class="restart-btn" id="reviewCenterBtn" style="background:#EEF2FF;color:var(--purple);box-shadow:0 4px 0 #C7D2FE;">🎓 Centre d'entraînement</button>
         <button class="restart-btn" id="reviewBlocksBtn" style="background:var(--purple);color:#fff;box-shadow:0 4px 0 var(--purple-dark);">← Choisir un autre bloc</button>
       </div>
       ${sessionHistory.length ? buildRecapTableHtml(sessionHistory) : ''}
@@ -2368,8 +2519,9 @@ function renderReviewEndScreen(){
   if(graduated.length >= 5){ launchConfetti(); }
   document.getElementById('backFromReviewEndBtn').addEventListener('click', renderBlockSelect);
   document.getElementById('reviewBlocksBtn').addEventListener('click', renderBlockSelect);
+  document.getElementById('reviewCenterBtn').addEventListener('click', renderTrainingCenter);
   const againBtn = document.getElementById('reviewAgainBtn');
-  if(againBtn){ againBtn.addEventListener('click', () => renderReviewIntro()); }
+  if(againBtn){ againBtn.addEventListener('click', () => renderTrainingChunkPicker(window.__trainingType || 'errors')); }
   attachRecapSpeakHandlers();
 }
 
@@ -2513,7 +2665,7 @@ function renderCustomBlockEndScreen(){
   const result = { correct: score.correct, total: score.total, history: sessionHistory.slice(), mode: gameMode, finishedAt: Date.now(), bestCombo: bestCombo, durationSec: durationSec, xp: xpEarned, xpMult: mult };
   saveCustomBlockResult(blockId, gameMode, result);
   recordDailyActivity();
-  recordDailyStats(durationSec, passed90, xpEarned);
+  recordDailyStats(durationSec, passed90, xpEarned, gameMode);
 
   renderCustomBlockRecapView(blockId, result, true);
   const pct = result.total ? (result.correct / result.total) : 0;
@@ -3010,8 +3162,8 @@ function renderWordListView(kind){
     const s = wordStats[w.fr.toLowerCase()];
     if(!s) return false;
     if(kind === 'seen') return (s.correct + s.wrong) > 0;
-    if(kind === 'mastered') return s.correct > 0 && s.wrong === 0;
-    if(kind === 'review') return s.wrong > 0;
+    if(kind === 'mastered') return (s.streak || 0) >= MASTERY_STREAK;
+    if(kind === 'review') return s.wrong > 0 && (s.streak || 0) < MASTERY_STREAK;
     return false;
   });
 
@@ -3280,8 +3432,8 @@ function renderBlockSelect(){
   const testsDone = blockResults.reduce((acc, r) => acc + (r ? GAME_MODES.filter(m => r[m]).length : 0), 0);
   const statsKeys = Object.keys(wordStats);
   const seenCount = statsKeys.length;
-  const masteredCount2 = statsKeys.filter(k => wordStats[k].correct > 0 && wordStats[k].wrong === 0).length;
-  const toReviewCount = statsKeys.filter(k => wordStats[k].wrong > 0).length;
+  const masteredCount2 = statsKeys.filter(k => (wordStats[k].streak || 0) >= MASTERY_STREAK).length;
+  const toReviewCount = statsKeys.filter(k => wordStats[k].wrong > 0 && (wordStats[k].streak || 0) < MASTERY_STREAK).length;
   const masteredPct = WORDS.length ? Math.round((masteredCount2 / WORDS.length) * 100) : 0;
   const curStreak = computeStreak();
   const bestStreak = computeBestStreak();
@@ -3341,7 +3493,10 @@ function renderBlockSelect(){
     <div class="quests-card">
       <div class="quests-head">
         <span>🎯 Défis du jour</span>
-        <span class="quests-xp">⭐ ${xpTotal} pts</span>
+        <span style="display:flex;align-items:center;gap:8px;">
+          <span class="quests-xp">⭐ ${xpTotal} pts</span>
+          <button id="questSettingsBtn" title="Personnaliser mes objectifs" style="border:none;background:#F1F5F9;color:var(--purple);width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:13px;">⚙️</button>
+        </span>
       </div>
       ${xpMultiplier() > 1 ? `<div class="mult-banner">⚡ Bonus points <b>×${xpMultiplier()}</b> actif — série de ${curStreak} jours ! Joue pour en profiter.</div>` : ''}
       ${allQuestsDone ? `<div class="quests-alldone">🎉 Tu as terminé tous les défis du jour !</div>` : ''}
@@ -3366,10 +3521,15 @@ function renderBlockSelect(){
       <div class="stat-box gold" id="statMasteredBox" style="cursor:pointer;"><div class="stat-num">${masteredCount2}</div><div class="stat-lbl">maîtrisés ⭐</div></div>
       <div class="stat-box warn" id="statReviewBox" style="cursor:pointer;"><div class="stat-num">${toReviewCount}</div><div class="stat-lbl">à revoir</div></div>
     </div>
-    ${toReviewCount > 0 ? `
-    <button class="restart-btn" id="startReviewBtn" style="display:flex;align-items:center;gap:8px;margin:4px auto 6px;width:fit-content;">
-      🔁 Réviser mes ${toReviewCount} mot${toReviewCount>1?'s':''} à revoir (🎤 Prononciation)
-    </button>` : ''}
+    <div style="display:flex;gap:10px;justify-content:center;margin:4px 0 6px;flex-wrap:wrap;">
+      <button class="restart-btn" id="trainingCenterBtn" style="display:flex;align-items:center;gap:8px;background:#EEF2FF;color:var(--purple);box-shadow:0 4px 0 #C7D2FE;">
+        🎓 Centre d'entraînement
+      </button>
+      ${toReviewCount > 0 ? `
+      <button class="restart-btn" id="startReviewBtn" style="display:flex;align-items:center;gap:8px;">
+        ⚠️ Réviser mes ${toReviewCount} mot${toReviewCount>1?'s':''} à revoir
+      </button>` : ''}
+    </div>
     <div style="font-family:'Baloo 2',sans-serif;font-weight:800;color:var(--purple);margin:20px 0 4px;font-size:18px;text-align:center;">Choisis ton mode & ton bloc</div>
     <div class="mode-row" id="modeRow"></div>
     <div class="mode-row" id="timerRow"></div>
@@ -3381,6 +3541,8 @@ function renderBlockSelect(){
   `;
 
   document.getElementById('createCustomBlockBtn').addEventListener('click', () => renderCustomBlockBuilder());
+  document.getElementById('trainingCenterBtn').addEventListener('click', () => renderTrainingCenter());
+  document.getElementById('questSettingsBtn').addEventListener('click', () => renderQuestSettings());
   if(toReviewCount > 0){
     document.getElementById('startReviewBtn').addEventListener('click', () => renderReviewIntro());
   }
@@ -3799,12 +3961,10 @@ function handleSpeakResult(isCorrect, word, info){
     masteredCount++;
     sessionHistory.push({ fr: word.fr, ar: word.ar, def: word.def, cat: word.cat, attempts: attemptsByFr[word.fr], failed: true });
   }
-  // 🔁 En session de révision : juste du premier coup = le mot est gracié et sort de "à revoir".
-  if(window.__reviewSession && isCorrect && isFirstTry){
-    graduateWordFromReview(word.fr);
-    window.__reviewGraduated.push(word.fr);
-  } else {
-    recordWordStat(word.fr, isCorrect);
+  recordWordStat(word.fr, isCorrect);
+  if(window.__reviewSession && isCorrect){
+    const s = wordStats[word.fr.toLowerCase()];
+    if(s && s.streak === MASTERY_STREAK){ window.__reviewGraduated.push(word.fr); }
   }
   bumpCombo(isCorrect);
 
@@ -3926,7 +4086,12 @@ function onPairTileClick(tile){
     pairsState.matched++;
     playCorrectSound();
     // stat mot : correct si pas d'erreur préalable sur ce mot ce round
-    recordWordStat(id, !pairsState.wrongIds.has(id));
+    const cleanMatch = !pairsState.wrongIds.has(id);
+    recordWordStat(id, cleanMatch);
+    if(window.__reviewSession && cleanMatch){
+      const s = wordStats[id.toLowerCase()];
+      if(s && s.streak === MASTERY_STREAK){ window.__reviewGraduated.push(id); }
+    }
     bumpCombo(true);
     if(pairsState.matched === pairsState.roundWords.length){
       finishPairsRound();
@@ -3987,7 +4152,13 @@ function onPairsTimeout(){
     catScore[w.cat].t++;
     const matched = document.querySelector(`.pair-tile.matched[data-id="${CSS.escape(w.fr)}"][data-side="fr"]`);
     const clean = matched && !pairsState.wrongIds.has(w.fr);
-    if(clean){ score.correct++; catScore[w.cat].c++; recordWordStat(w.fr, true); }
+    if(clean){
+      score.correct++; catScore[w.cat].c++; recordWordStat(w.fr, true);
+      if(window.__reviewSession){
+        const s = wordStats[w.fr.toLowerCase()];
+        if(s && s.streak === MASTERY_STREAK){ window.__reviewGraduated.push(w.fr); }
+      }
+    }
     else { recordWordStat(w.fr, false); }
     sessionHistory.push({ fr:w.fr, ar:w.ar, def:w.def, cat:w.cat, attempts: clean ? 1 : 2 });
   });
@@ -4007,9 +4178,12 @@ function onPairsTimeout(){
 }
 
 /* ============ 🔀 MODE MOTS EN ORDRE (reconstituer la phrase) ============ */
-/* Découpe une phrase en mots cliquables (la ponctuation finale reste attachée au dernier mot). */
+const ORDER_MODE_MAX_WORDS = 10;
+/* Découpe une phrase en mots cliquables (la ponctuation finale reste attachée au dernier mot).
+   Si la phrase est trop longue, on ne garde que les 10 premiers mots pour rester jouable. */
 function tokenizeSentenceForOrder(sentence){
-  return sentence.trim().split(/\s+/).filter(Boolean);
+  const words = sentence.trim().split(/\s+/).filter(Boolean);
+  return words.length > ORDER_MODE_MAX_WORDS ? words.slice(0, ORDER_MODE_MAX_WORDS) : words;
 }
 
 /* ============ 💬 MODE DIALOGUE (mot en contexte) ============ */
@@ -4303,6 +4477,10 @@ function handleRepeatResult(similarity, info){
     sessionHistory.push({ fr: word.fr, ar: word.ar, def: word.def, cat: word.cat, attempts: attemptsByFr[word.fr], failed: true });
   }
   recordWordStat(word.fr, isCorrect);
+  if(window.__reviewSession && isCorrect){
+    const s = wordStats[word.fr.toLowerCase()];
+    if(s && s.streak === MASTERY_STREAK){ window.__reviewGraduated.push(word.fr); }
+  }
   bumpCombo(isCorrect);
 
   const micBtn = document.getElementById('micBtn');
@@ -4427,6 +4605,7 @@ function startOrderDrag(e, el){
     item = window.__orderPool.find(p => p.uid === uid);
     if(!item) return;
   }
+  speak(item.word, 'fr-FR'); // 🔊 on entend le mot dès qu'on le touche
 
   const rect = el.getBoundingClientRect();
   const ghost = document.createElement('div');
@@ -5033,7 +5212,7 @@ function renderEndScreen(){
   saveBlockResult(currentBlock, gameMode, result);
   const goalJustMet = recordDailyActivity();
   const questsBefore = questsAllDone();
-  recordDailyStats(durationSec, passed90, xpEarned);
+  recordDailyStats(durationSec, passed90, xpEarned, gameMode);
   const questsJustDone = !questsBefore && questsAllDone();
 
   renderRecapView(currentBlock, result, true);
@@ -5151,11 +5330,13 @@ function mergeRemoteData(remote){
       let m = false;
       for(const day of Object.keys(remoteStats)){
         const r = remoteStats[day] || {};
-        const l = dailyStats[day] || { seconds:0, passed:0, xp:0 };
+        const l = dailyStats[day] || { seconds:0, passed:0, xp:0, modesPlayed:[] };
+        const mergedModes = Array.from(new Set([...(l.modesPlayed||[]), ...(r.modesPlayed||[])]));
         const merged = {
           seconds: Math.max(l.seconds||0, r.seconds||0),
           passed: Math.max(l.passed||0, r.passed||0),
           xp: Math.max(l.xp||0, r.xp||0),
+          modesPlayed: mergedModes,
         };
         if(JSON.stringify(merged) !== JSON.stringify(l)){ dailyStats[day] = merged; m = true; }
       }
