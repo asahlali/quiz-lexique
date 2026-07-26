@@ -903,6 +903,20 @@
     background:var(--purple);color:#fff;box-shadow:0 12px 24px -8px rgba(76,29,149,0.5);
     cursor:grabbing;opacity:.96;transition:none;
   }
+  .order-sentence{
+    font-family:'Baloo 2',sans-serif;font-weight:700;font-size:clamp(16px,3.6vw,21px);line-height:2.6;
+    color:var(--ink);background:#F8FAFC;border-radius:16px;padding:18px 16px;margin:0 0 16px;
+    text-align:center;
+  }
+  .order-fixed-word{ margin:0 3px;display:inline-block; }
+  .order-slot-empty{
+    display:inline-flex;align-items:center;justify-content:center;min-width:60px;height:34px;
+    margin:0 3px;padding:0 10px;border-radius:10px;border:2px dashed #CBD5E1;background:#fff;
+    color:#CBD5E1;font-size:15px;vertical-align:middle;transition:border-color .15s,background .15s;
+  }
+  .order-slot-empty.drag-over{ border-color:var(--purple);background:#EEF2FF;transform:scale(1.06); }
+  .order-sentence .order-chip{ margin:0 3px;vertical-align:middle;font-size:15px;padding:7px 14px; }
+  .order-sentence .order-slot-filled.drag-over{ outline:3px solid var(--purple);outline-offset:2px; }
 </style>
 </head>
 <body>
@@ -1414,7 +1428,7 @@ function getDailyQuests(){
   const s = dailyStats[todayKey()] || { seconds:0, passed:0, xp:0, modesPlayed:[] };
   const timeGoalSec = questSettings.timeGoalMin * 60;
   const quests = [
-    { icon:'📗', label:`Termine ${questSettings.lessonGoal} bloc${questSettings.lessonGoal>1?'s':''}`, cur:Math.min(lessons, questSettings.lessonGoal), goal:questSettings.lessonGoal },
+    { icon:'📗', label:`Termine ${questSettings.lessonGoal} exercice${questSettings.lessonGoal>1?'s':''} (tous modes)`, cur:Math.min(lessons, questSettings.lessonGoal), goal:questSettings.lessonGoal },
     { icon:'⏱️', label:`Passe ${questSettings.timeGoalMin} min à apprendre`, cur:Math.min(s.seconds, timeGoalSec), goal:timeGoalSec, isTime:true },
     { icon:'🏆', label:`Réussis 90%+ dans ${questSettings.passGoal} bloc${questSettings.passGoal>1?'s':''}`, cur:Math.min(s.passed, questSettings.passGoal), goal:questSettings.passGoal },
   ];
@@ -2366,7 +2380,7 @@ function renderQuestSettings(){
 
     <div class="pm-summary" style="margin-top:18px;">
       <div class="pm-row" style="flex-direction:column;align-items:flex-start;gap:8px;">
-        <span>📗 Nombre de blocs à terminer</span>
+        <span>📗 Nombre d'exercices à terminer (tous modes confondus)</span>
         <input type="number" id="qsLesson" class="search-input" min="1" max="20" value="${questSettings.lessonGoal}" style="max-width:120px;">
       </div>
       <div class="pm-row" style="flex-direction:column;align-items:flex-start;gap:8px;">
@@ -4530,20 +4544,30 @@ function renderDialogueCard(){
   window.__currentWord = word;
 
   const sentence = word.ex.replace(/~/g, word.fr);
-  const targetWords = tokenizeSentenceForOrder(sentence);
-  const pool = targetWords.map((w, i) => ({ word: w, uid: i }));
-  window.__orderTarget = targetWords;
-  window.__orderPool = shuffle(pool);
-  window.__orderPlaced = [];
+  const fullWords = sentence.trim().split(/\s+/).filter(Boolean);
+  const maxBlanks = ORDER_MODE_MAX_WORDS;
+  const blankIndices = fullWords.length <= maxBlanks
+    ? fullWords.map((_, i) => i)
+    : pickBlankIndices(fullWords, maxBlanks);
+
+  window.__orderFullTarget = fullWords;
+  window.__orderBlankIndices = blankIndices;
+  window.__orderSlotFill = {}; // index de trou -> { word, uid }
+  window.__orderPool = shuffle(blankIndices.map((idx, i) => ({ word: fullWords[idx], uid: i, targetIndex: idx })));
   orderDrag = null;
+
+  const allBlank = blankIndices.length === fullWords.length;
+  const instruction = allBlank
+    ? '👆 Glisse les mots pour reconstituer la phrase, dans l\'ordre :'
+    : `👆 Glisse les ${blankIndices.length} mots manquants dans les trous pour compléter la phrase :`;
 
   const card = document.getElementById('quizCard');
   card.innerHTML = `
     <div class="cat-tag">${escapeHtml(word.cat)} · 🔀 Mots en ordre</div>
     <div class="chrono-timer-track"><div class="chrono-timer-fill" id="quizTimerFill"></div></div>
-    <div class="question-line" style="text-align:center;">👆 Glisse les mots pour reconstituer la phrase, dans l'ordre :</div>
+    <div class="question-line" style="text-align:center;">${instruction}</div>
     <div class="order-hint">💡 indice : le mot clé se traduit par <span class="order-hint-ar">${escapeHtml(word.ar)}</span></div>
-    <div class="order-answer-zone" id="orderAnswerZone"></div>
+    <div class="order-sentence" id="orderSentence"></div>
     <div class="order-pool" id="orderPool"></div>
     <div class="mode-row" style="margin-top:10px;">
       <button class="mode-chip" id="orderClearBtn">↺ Effacer</button>
@@ -4560,28 +4584,50 @@ function renderDialogueCard(){
 
 let orderDrag = null; // état du glisser-déposer en cours (mode Mots en ordre)
 
+/* Choisit jusqu'à maxBlanks positions à transformer en trous, réparties dans la phrase,
+   en gardant si possible le tout premier et le tout dernier mot visibles comme repères. */
+function pickBlankIndices(words, maxBlanks){
+  const n = words.length;
+  if(n <= maxBlanks) return words.map((_, i) => i);
+  const usable = Array.from({length: n}, (_, i) => i).filter(i => i !== 0 && i !== n - 1);
+  const pool = usable.length >= maxBlanks ? usable : Array.from({length: n}, (_, i) => i);
+  const step = pool.length / maxBlanks;
+  const picked = [];
+  for(let k = 0; k < maxBlanks; k++){
+    picked.push(pool[Math.floor(k * step)]);
+  }
+  return Array.from(new Set(picked)).sort((a, b) => a - b);
+}
+
 function renderOrderZones(){
-  const answerZone = document.getElementById('orderAnswerZone');
+  const sentenceEl = document.getElementById('orderSentence');
   const poolZone = document.getElementById('orderPool');
   const validateBtn = document.getElementById('orderValidateBtn');
-  if(!answerZone || !poolZone) return;
-  const placed = window.__orderPlaced;
-  const pool = window.__orderPool;
-  const usedUids = new Set(placed.map(p => p.uid));
+  if(!sentenceEl || !poolZone) return;
 
-  answerZone.innerHTML = placed.length
-    ? placed.map(p => `<button type="button" class="order-chip placed" data-uid="${p.uid}" data-kind="placed">${escapeHtml(p.word)}</button>`).join('')
-    : `<span class="order-placeholder">👆 Glisse un mot ici pour commencer…</span>`;
+  const fullWords = window.__orderFullTarget;
+  const blankSet = new Set(window.__orderBlankIndices);
+  const fill = window.__orderSlotFill;
 
-  poolZone.innerHTML = pool
+  sentenceEl.innerHTML = fullWords.map((w, i) => {
+    if(!blankSet.has(i)){ return `<span class="order-fixed-word">${escapeHtml(w)}</span>`; }
+    const f = fill[i];
+    if(f){
+      return `<button type="button" class="order-chip placed order-slot-filled" data-slot="${i}" data-uid="${f.uid}">${escapeHtml(f.word)}</button>`;
+    }
+    return `<span class="order-slot-empty" data-slot="${i}">…</span>`;
+  }).join(' ');
+
+  const usedUids = new Set(Object.values(fill).map(f => f.uid));
+  poolZone.innerHTML = window.__orderPool
     .filter(p => !usedUids.has(p.uid))
     .map(p => `<button type="button" class="order-chip" data-uid="${p.uid}" data-kind="pool">${escapeHtml(p.word)}</button>`).join('');
 
-  answerZone.querySelectorAll('.order-chip').forEach(el => attachOrderDrag(el));
+  sentenceEl.querySelectorAll('.order-slot-filled').forEach(el => attachOrderDrag(el));
   poolZone.querySelectorAll('.order-chip').forEach(el => attachOrderDrag(el));
 
   if(validateBtn){
-    const complete = placed.length === window.__orderTarget.length;
+    const complete = Object.keys(fill).length === window.__orderBlankIndices.length;
     validateBtn.style.display = complete ? 'inline-flex' : 'none';
   }
 }
@@ -4593,15 +4639,15 @@ function attachOrderDrag(el){
 function startOrderDrag(e, el){
   if(answered || orderDrag) return;
   e.preventDefault();
-  const uid = parseInt(el.dataset.uid, 10);
-  const kind = el.dataset.kind;
-  let item;
-  if(kind === 'placed'){
-    const idx = window.__orderPlaced.findIndex(p => p.uid === uid);
-    if(idx < 0) return;
-    item = window.__orderPlaced[idx];
-    window.__orderPlaced.splice(idx, 1); // retiré tout de suite : la liste se réorganise en direct
+  let item, fromSlot = null;
+  if(el.classList.contains('order-slot-filled')){
+    fromSlot = parseInt(el.dataset.slot, 10);
+    const f = window.__orderSlotFill[fromSlot];
+    if(!f) return;
+    item = f;
+    delete window.__orderSlotFill[fromSlot];
   } else {
+    const uid = parseInt(el.dataset.uid, 10);
     item = window.__orderPool.find(p => p.uid === uid);
     if(!item) return;
   }
@@ -4617,27 +4663,11 @@ function startOrderDrag(e, el){
   ghost.style.height = rect.height + 'px';
   document.body.appendChild(ghost);
 
-  orderDrag = {
-    uid, kind, item, ghost,
-    startX: e.clientX, startY: e.clientY,
-    moved: false, lastIdx: null, lastOverZone: null,
-  };
-
-  renderOrderZones(); // reflow immédiat sans l'élément en cours de glissement
+  orderDrag = { item, fromSlot, ghost, startX: e.clientX, startY: e.clientY, moved: false, lastSlot: null };
+  renderOrderZones();
 
   document.addEventListener('pointermove', onOrderDragMove);
   document.addEventListener('pointerup', onOrderDragEnd);
-}
-
-function computeInsertIndex(clientX, clientY, excludeUid){
-  const tiles = Array.from(document.querySelectorAll('#orderAnswerZone .order-chip.placed'))
-    .filter(t => parseInt(t.dataset.uid, 10) !== excludeUid);
-  for(let i=0;i<tiles.length;i++){
-    const r = tiles[i].getBoundingClientRect();
-    if(clientY < r.top) return i; // ligne au-dessus → s'insère avant
-    if(clientY >= r.top && clientY <= r.bottom && clientX < r.left + r.width/2) return i;
-  }
-  return tiles.length;
 }
 
 function onOrderDragMove(e){
@@ -4646,40 +4676,30 @@ function onOrderDragMove(e){
   if(Math.abs(dx) > 5 || Math.abs(dy) > 5){ orderDrag.moved = true; }
   orderDrag.ghost.style.transform = `translate(${dx}px, ${dy}px) scale(1.08) rotate(-2deg)`;
 
-  const answerZone = document.getElementById('orderAnswerZone');
-  if(!answerZone) return;
-  const zoneRect = answerZone.getBoundingClientRect();
-  const pad = 28;
-  const overZone = e.clientX >= zoneRect.left - pad && e.clientX <= zoneRect.right + pad &&
-                    e.clientY >= zoneRect.top - pad && e.clientY <= zoneRect.bottom + pad;
-
-  const targetIdx = overZone ? computeInsertIndex(e.clientX, e.clientY, orderDrag.uid) : null;
-  if(targetIdx === orderDrag.lastIdx && overZone === orderDrag.lastOverZone) return;
-  orderDrag.lastIdx = targetIdx;
-  orderDrag.lastOverZone = overZone;
-  answerZone.classList.toggle('drag-over', overZone);
-
-  const curIdx = window.__orderPlaced.findIndex(p => p.uid === orderDrag.uid);
-  if(curIdx >= 0){ window.__orderPlaced.splice(curIdx, 1); }
-  if(overZone && targetIdx !== null){ window.__orderPlaced.splice(targetIdx, 0, orderDrag.item); }
-  renderOrderZones();
+  document.querySelectorAll('.order-slot-empty.drag-over, .order-slot-filled.drag-over').forEach(x => x.classList.remove('drag-over'));
+  const elAtPoint = document.elementFromPoint(e.clientX, e.clientY);
+  const slotEl = elAtPoint ? elAtPoint.closest('[data-slot]') : null;
+  if(slotEl){ slotEl.classList.add('drag-over'); }
+  orderDrag.lastSlot = slotEl ? parseInt(slotEl.dataset.slot, 10) : null;
 }
 
 function onOrderDragEnd(){
   if(!orderDrag) return;
   document.removeEventListener('pointermove', onOrderDragMove);
   document.removeEventListener('pointerup', onOrderDragEnd);
-  const answerZone = document.getElementById('orderAnswerZone');
-  if(answerZone){ answerZone.classList.remove('drag-over'); }
+  document.querySelectorAll('.drag-over').forEach(x => x.classList.remove('drag-over'));
 
-  if(!orderDrag.moved){
-    // simple tap sans glissement :
-    if(orderDrag.kind === 'pool'){
-      // ajout rapide en fin de phrase
-      if(!window.__orderPlaced.some(p => p.uid === orderDrag.uid)){ window.__orderPlaced.push(orderDrag.item); }
-    }
-    // pour un mot déjà placé, un tap sans glissement le retire simplement (déjà fait au pointerdown)
+  const targetSlot = orderDrag.lastSlot;
+  const isValidBlank = targetSlot !== null && window.__orderBlankIndices.includes(targetSlot);
+
+  if(orderDrag.moved && isValidBlank){
+    window.__orderSlotFill[targetSlot] = orderDrag.item; // écrase l'ancien occupant, qui revient au pool automatiquement
+  } else if(!orderDrag.moved && orderDrag.fromSlot === null){
+    // simple tap sur un mot du pool : remplit le premier trou vide
+    const emptySlot = window.__orderBlankIndices.find(idx => !window.__orderSlotFill[idx]);
+    if(emptySlot !== undefined){ window.__orderSlotFill[emptySlot] = orderDrag.item; }
   }
+  // sinon (glissé hors d'un trou valide, ou tap sur un trou déjà rempli) : le mot reste retiré → retourne au pool
 
   if(orderDrag.ghost && orderDrag.ghost.parentNode){ orderDrag.ghost.parentNode.removeChild(orderDrag.ghost); }
   orderDrag = null;
@@ -4688,7 +4708,7 @@ function onOrderDragEnd(){
 
 function resetOrderSelection(){
   if(answered) return;
-  window.__orderPlaced = [];
+  window.__orderSlotFill = {};
   renderOrderZones();
 }
 
@@ -4697,9 +4717,14 @@ function handleOrderAnswer(timedOut){
   answered = true;
   clearQuestionTimer();
   const word = window.__currentWord;
-  const target = window.__orderTarget.join(' ');
-  const placedText = window.__orderPlaced.map(p => p.word).join(' ');
-  const isCorrect = !timedOut && normalizeForSearch(placedText) === normalizeForSearch(target);
+  const fullWords = window.__orderFullTarget;
+  const blankIndices = window.__orderBlankIndices;
+  const fill = window.__orderSlotFill;
+  const target = fullWords.join(' ');
+
+  const allFilled = blankIndices.every(idx => fill[idx]);
+  const allCorrect = allFilled && blankIndices.every(idx => normalizeForSearch(fill[idx].word) === normalizeForSearch(fullWords[idx]));
+  const isCorrect = !timedOut && allCorrect;
 
   score.total++;
   if(!catScore[word.cat]) catScore[word.cat] = { c:0, t:0 };
@@ -4718,13 +4743,15 @@ function handleOrderAnswer(timedOut){
   recordWordStat(word.fr, isCorrect);
   bumpCombo(isCorrect);
 
-  const answerZone = document.getElementById('orderAnswerZone');
-  if(answerZone){
-    answerZone.innerHTML = window.__orderTarget.map((w2, i) => {
-      const placedWord = window.__orderPlaced[i] ? window.__orderPlaced[i].word : null;
-      const ok = placedWord && normalizeForSearch(placedWord) === normalizeForSearch(w2);
-      return `<span class="order-chip disabled ${ok ? 'correct' : 'wrong'}">${escapeHtml(placedWord || '…')}</span>`;
-    }).join('');
+  const sentenceEl = document.getElementById('orderSentence');
+  if(sentenceEl){
+    const blankSet = new Set(blankIndices);
+    sentenceEl.innerHTML = fullWords.map((w2, i) => {
+      if(!blankSet.has(i)){ return `<span class="order-fixed-word">${escapeHtml(w2)}</span>`; }
+      const f = fill[i];
+      const ok = f && normalizeForSearch(f.word) === normalizeForSearch(w2);
+      return `<span class="order-chip disabled ${ok ? 'correct' : 'wrong'}">${escapeHtml(f ? f.word : '…')}</span>`;
+    }).join(' ');
   }
   const poolZone = document.getElementById('orderPool');
   if(poolZone){ poolZone.innerHTML = ''; }
@@ -4740,7 +4767,7 @@ function handleOrderAnswer(timedOut){
   renderScoreboard();
   renderProgress();
 
-  const headline = isCorrect ? '🎉 Phrase reconstituée !' : (timedOut ? '⏱️ Temps écoulé — voici la phrase :' : '💛 Pas tout à fait — voici la phrase :');
+  const headline = isCorrect ? '🎉 Phrase complétée !' : (timedOut ? '⏱️ Temps écoulé — voici la phrase :' : '💛 Pas tout à fait — voici la phrase :');
   const revealWrap = document.getElementById('revealWrap');
   revealWrap.classList.add('show');
   revealWrap.innerHTML = `
@@ -5376,6 +5403,44 @@ function mergeRemoteData(remote){
         }
       }
 
+    } else if(baseKey === CUSTOM_BLOCKS_KEY){
+      // Fusion par id (jamais un simple écrasement) : un bloc créé sur un autre appareil est AJOUTÉ,
+      // jamais supprimé ; pour un bloc existant des deux côtés, chaque mode garde son résultat le plus récent.
+      const remoteBlocks = safeParse(rv, null);
+      if(Array.isArray(remoteBlocks)){
+        let m = false;
+        remoteBlocks.forEach(rb => {
+          if(!rb || !rb.id) return;
+          const local = customBlocks.find(b => b.id === rb.id);
+          if(!local){
+            customBlocks.push(rb);
+            m = true;
+          } else {
+            GAME_MODES.forEach(mode => {
+              const rr = rb.results && rb.results[mode];
+              const lr = local.results && local.results[mode];
+              if(rr && (!lr || (rr.finishedAt||0) > (lr.finishedAt||0))){
+                local.results[mode] = rr;
+                m = true;
+              }
+            });
+            // Un renommage/déplacement local plus récent ne doit pas être perdu ;
+            // on ne prend la version distante que si elle est manifestement plus riche (résultats en plus).
+          }
+        });
+        if(m){ saveCustomBlocks(customBlocks); changed = true; }
+      }
+
+    } else if(baseKey === BLOCK_TITLES_KEY){
+      // Union des titres personnalisés : un renommage fait sur un autre appareil vient compléter
+      // les nôtres, sans jamais écraser un titre déjà présent localement.
+      const remoteTitles = safeParse(rv, {});
+      let m = false;
+      Object.keys(remoteTitles).forEach(k => {
+        if(!(k in blockTitles)){ blockTitles[k] = remoteTitles[k]; m = true; }
+      });
+      if(m){ saveBlockTitles(); changed = true; }
+
     } else if(rv.includes('finishedAt')){
       // résultat de bloc : on garde le plus récent
       const remoteRes = safeParse(rv, null);
@@ -5400,6 +5465,7 @@ function mergeRemoteData(remote){
     dailyLog = loadDailyLog();
     dailyStats = loadDailyStats();
     xpTotal = loadXpTotal();
+    questSettings = loadQuestSettings();
     if(typeof updateAutoSpeakBtn === 'function'){ updateAutoSpeakBtn(); }
     try{ const dv = localStorage.getItem(nsKey('lexiqueQuiz::dictView')); if(dv==='list'||dv==='cards') dictView = dv; }catch(e){}
     rebuildBlocks();
