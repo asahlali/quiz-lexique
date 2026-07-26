@@ -1385,11 +1385,26 @@ function loadQuestSettings(){
       passGoal: s.passGoal || QUEST_PASS_GOAL_DEFAULT,
       lessonGoal: s.lessonGoal || QUEST_LESSON_GOAL_DEFAULT,
       modesGoal: s.modesGoal || 0, // 0 = défi désactivé
+      fullMasteryGoal: s.fullMasteryGoal !== undefined ? s.fullMasteryGoal : 7, // 0 = défi désactivé
     };
-  }catch(e){ return { timeGoalMin:5, passGoal:QUEST_PASS_GOAL_DEFAULT, lessonGoal:QUEST_LESSON_GOAL_DEFAULT, modesGoal:0 }; }
+  }catch(e){ return { timeGoalMin:5, passGoal:QUEST_PASS_GOAL_DEFAULT, lessonGoal:QUEST_LESSON_GOAL_DEFAULT, modesGoal:0, fullMasteryGoal:7 }; }
 }
 function saveQuestSettings(){ try{ localStorage.setItem(nsKey(QUEST_SETTINGS_KEY), JSON.stringify(questSettings)); }catch(e){} }
 let questSettings = loadQuestSettings();
+/* Nombre de blocs (normaux + personnalisés) déjà réussis à ≥90% dans TOUS les modes de jeu. */
+function countFullyMasteredBlocks(){
+  let count = 0;
+  for(let i=0;i<BLOCKS.length;i++){
+    const perMode = blockResults[i] || {};
+    const allPass = GAME_MODES.every(m => perMode[m] && perMode[m].total && (perMode[m].correct/perMode[m].total)*100 >= PASS_THRESHOLD);
+    if(allPass) count++;
+  }
+  customBlocks.forEach(b => {
+    const allPass = GAME_MODES.every(m => b.results[m] && b.results[m].total && (b.results[m].correct/b.results[m].total)*100 >= PASS_THRESHOLD);
+    if(allPass) count++;
+  });
+  return count;
+}
 
 function loadDailyStats(){
   try{ const raw = localStorage.getItem(nsKey(DAILY_STATS_KEY)); return raw ? JSON.parse(raw) : {}; }
@@ -1435,6 +1450,10 @@ function getDailyQuests(){
   if(questSettings.modesGoal > 0){
     const modesCount = (s.modesPlayed || []).length;
     quests.push({ icon:'🎭', label:`Complète ${questSettings.modesGoal} modes différents`, cur:Math.min(modesCount, questSettings.modesGoal), goal:questSettings.modesGoal });
+  }
+  if(questSettings.fullMasteryGoal > 0){
+    const masteredBlocks = countFullyMasteredBlocks();
+    quests.push({ icon:'🥇', label:`Maîtrise ${questSettings.fullMasteryGoal} blocs à 100% (≥90% dans les ${GAME_MODES.length} modes)`, cur:Math.min(masteredBlocks, questSettings.fullMasteryGoal), goal:questSettings.fullMasteryGoal });
   }
   return quests;
 }
@@ -2395,6 +2414,10 @@ function renderQuestSettings(){
         <span>🎭 Nombre de modes différents à compléter (0 = désactivé)</span>
         <input type="number" id="qsModes" class="search-input" min="0" max="7" value="${questSettings.modesGoal}" style="max-width:120px;">
       </div>
+      <div class="pm-row" style="flex-direction:column;align-items:flex-start;gap:8px;">
+        <span>🥇 Blocs à maîtriser à 100% — ≥90% dans les ${GAME_MODES.length} modes (0 = désactivé)</span>
+        <input type="number" id="qsFullMastery" class="search-input" min="0" max="50" value="${questSettings.fullMasteryGoal}" style="max-width:120px;">
+      </div>
     </div>
 
     <div style="display:flex;gap:12px;justify-content:center;margin-top:20px;flex-wrap:wrap;">
@@ -2408,14 +2431,15 @@ function renderQuestSettings(){
     const time = Math.max(1, parseInt(document.getElementById('qsTime').value, 10) || 5);
     const pass = Math.max(1, parseInt(document.getElementById('qsPass').value, 10) || 2);
     const modes = Math.max(0, parseInt(document.getElementById('qsModes').value, 10) || 0);
-    questSettings = { lessonGoal: lesson, timeGoalMin: time, passGoal: pass, modesGoal: modes };
+    const fullMastery = Math.max(0, parseInt(document.getElementById('qsFullMastery').value, 10) || 0);
+    questSettings = { lessonGoal: lesson, timeGoalMin: time, passGoal: pass, modesGoal: modes, fullMasteryGoal: fullMastery };
     saveQuestSettings();
     cloudAutoPush();
     setStatus('🎯 Objectifs mis à jour !', 'ok');
     renderBlockSelect();
   });
   document.getElementById('qsResetBtn').addEventListener('click', () => {
-    questSettings = { lessonGoal: QUEST_LESSON_GOAL_DEFAULT, timeGoalMin: 5, passGoal: QUEST_PASS_GOAL_DEFAULT, modesGoal: 0 };
+    questSettings = { lessonGoal: QUEST_LESSON_GOAL_DEFAULT, timeGoalMin: 5, passGoal: QUEST_PASS_GOAL_DEFAULT, modesGoal: 0, fullMasteryGoal: 7 };
     saveQuestSettings();
     cloudAutoPush();
     renderQuestSettings();
@@ -4562,6 +4586,16 @@ function renderDialogueCard(){
     : `👆 Glisse les ${blankIndices.length} mots manquants dans les trous pour compléter la phrase :`;
 
   const card = document.getElementById('quizCard');
+  const micSection = speechRecoAvailable ? `
+    <div class="mic-zone" style="margin:6px 0 14px;">
+      <button class="mic-btn" id="orderMicBtn" aria-label="Parler">
+        <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/>
+        </svg>
+      </button>
+      <div class="mic-hint" id="orderMicHint">🎤 Ou dis la phrase à voix haute — les mots se placeront tout seuls</div>
+      <div class="mic-transcript" id="orderMicTranscript"></div>
+    </div>` : '';
   card.innerHTML = `
     <div class="cat-tag">${escapeHtml(word.cat)} · 🔀 Mots en ordre</div>
     <div class="chrono-timer-track"><div class="chrono-timer-fill" id="quizTimerFill"></div></div>
@@ -4569,6 +4603,7 @@ function renderDialogueCard(){
     <div class="order-hint">💡 indice : le mot clé se traduit par <span class="order-hint-ar">${escapeHtml(word.ar)}</span></div>
     <div class="order-sentence" id="orderSentence"></div>
     <div class="order-pool" id="orderPool"></div>
+    ${micSection}
     <div class="mode-row" style="margin-top:10px;">
       <button class="mode-chip" id="orderClearBtn">↺ Effacer</button>
       <button class="mode-chip" id="orderValidateBtn" style="display:none;background:var(--purple);color:#fff;box-shadow:0 3px 0 var(--purple-dark);">✓ Valider ma phrase</button>
@@ -4577,12 +4612,98 @@ function renderDialogueCard(){
   `;
   document.getElementById('orderClearBtn').addEventListener('click', resetOrderSelection);
   document.getElementById('orderValidateBtn').addEventListener('click', () => handleOrderAnswer(false));
+  const orderMicBtn = document.getElementById('orderMicBtn');
+  if(orderMicBtn){ orderMicBtn.addEventListener('click', () => startOrderVoiceInput()); }
   renderOrderZones();
   renderProgress();
   startQuestionTimer(() => handleOrderAnswer(true), Math.max(quizTimerSeconds * 4, 25));
 }
 
 let orderDrag = null; // état du glisser-déposer en cours (mode Mots en ordre)
+
+/* 🎤 Entrée vocale : dire la phrase place automatiquement chaque mot reconnu dans son bon trou. */
+function startOrderVoiceInput(){
+  if(!speechRecoAvailable || answered) return;
+  if(recoActive){ try{ recognition.stop(); }catch(e){} return; } // re-clic = arrêter d'écouter
+
+  let rec;
+  try{
+    rec = new SpeechRec();
+    rec.lang = 'fr-FR';
+    rec.interimResults = true;
+    rec.continuous = true;
+    rec.maxAlternatives = 1;
+  }catch(e){ return; }
+  recognition = rec;
+
+  const micBtn = document.getElementById('orderMicBtn');
+  const micHint = document.getElementById('orderMicHint');
+  const micTr = document.getElementById('orderMicTranscript');
+  recoActive = true;
+  if(micBtn){ micBtn.classList.add('listening'); }
+  if(micHint){ micHint.textContent = '🎧 Je t\'écoute... dis la phrase complète !'; }
+  if(micTr){ micTr.textContent = ''; }
+
+  let silenceTimer = null;
+  let autoStopScheduled = false;
+
+  const tryPlaceSpokenWords = (transcriptText) => {
+    const spoken = normalizeForSearch(transcriptText).replace(/[^a-z\s]/g,' ').split(/\s+/).filter(Boolean);
+    let anyMatch = false;
+    spoken.forEach(sw => {
+      if(!sw) return;
+      const usedUids = new Set(Object.values(window.__orderSlotFill).map(f => f.uid));
+      const candidate = window.__orderPool.find(p => {
+        if(usedUids.has(p.uid)) return false;
+        const norm = normalizeForSearch(p.word).replace(/[^a-z]/g,'');
+        if(!norm) return false;
+        if(norm === sw) return true;
+        return levenshtein(norm, sw) <= (norm.length <= 4 ? 1 : 2);
+      });
+      if(candidate){
+        window.__orderSlotFill[candidate.targetIndex] = candidate; // le mot se place tout seul dans SON trou
+        anyMatch = true;
+      }
+    });
+    if(anyMatch){ renderOrderZones(); }
+  };
+
+  rec.onresult = (ev) => {
+    if(answered) return;
+    let interim = '', final = '';
+    for(let i=0;i<ev.results.length;i++){
+      const t = ev.results[i][0].transcript;
+      if(ev.results[i].isFinal){ final += t + ' '; } else { interim += t + ' '; }
+    }
+    const running = (final + ' ' + interim).trim();
+    if(micTr){ micTr.textContent = running ? `Tu dis : « ${running} »` : ''; }
+    tryPlaceSpokenWords(running);
+
+    const allFilled = window.__orderBlankIndices.every(idx => window.__orderSlotFill[idx]);
+    if(allFilled && !autoStopScheduled){
+      autoStopScheduled = true;
+      if(micHint){ micHint.textContent = '✅ Tous les trous sont remplis !'; }
+      try{ rec.stop(); }catch(e){}
+    }
+    if(silenceTimer){ clearTimeout(silenceTimer); }
+    silenceTimer = setTimeout(() => { try{ rec.stop(); }catch(e){} }, 1800);
+  };
+  rec.onerror = (ev) => {
+    recoActive = false;
+    if(micBtn){ micBtn.classList.remove('listening'); }
+    if(micHint){
+      micHint.textContent = (ev.error === 'not-allowed' || ev.error === 'service-not-allowed')
+        ? '🚫 Micro refusé — autorise le micro.' : '🎤 Ou dis la phrase à voix haute — les mots se placeront tout seuls';
+    }
+  };
+  rec.onend = () => {
+    recoActive = false;
+    if(micBtn){ micBtn.classList.remove('listening'); }
+    if(micHint && !answered){ micHint.textContent = '🎤 Ou dis la phrase à voix haute — les mots se placeront tout seuls'; }
+    if(silenceTimer){ clearTimeout(silenceTimer); }
+  };
+  try{ rec.start(); }catch(e){ recoActive = false; if(micBtn){ micBtn.classList.remove('listening'); } }
+}
 
 /* Choisit jusqu'à maxBlanks positions à transformer en trous, réparties dans la phrase,
    en gardant si possible le tout premier et le tout dernier mot visibles comme repères. */
@@ -4716,6 +4837,7 @@ function handleOrderAnswer(timedOut){
   if(answered) return;
   answered = true;
   clearQuestionTimer();
+  stopRecognition();
   const word = window.__currentWord;
   const fullWords = window.__orderFullTarget;
   const blankIndices = window.__orderBlankIndices;
