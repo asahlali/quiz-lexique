@@ -239,6 +239,17 @@
   .recap-table .rc-status.first{color:var(--green-dark);}
   .recap-table .rc-status.retry{color:#C97A00;}
   .recap-table .rc-status.fail{color:var(--red-dark);}
+  .streak-progress{
+    display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;
+    background:#F5F0FF;border-radius:999px;padding:8px 16px;margin:10px 0;font-family:'Nunito',sans-serif;
+  }
+  .streak-progress.mastered{ background:linear-gradient(135deg,#FDE68A,#FCA5A5,#C4B5FD);background-size:200% 100%;animation:flawlessShine 3s linear infinite; }
+  .streak-progress-label{ font-weight:800;font-size:12.5px;color:var(--purple); }
+  .streak-progress.mastered{ color:#7C2D12;font-weight:800;font-size:13.5px;justify-content:center; }
+  .streak-dots{ display:flex;gap:4px; }
+  .streak-dot{ width:10px;height:10px;border-radius:50%;background:#E2D9FA;display:inline-block; }
+  .streak-dot.on{ background:var(--purple);box-shadow:0 0 0 3px rgba(124,58,237,0.15); }
+  .streak-progress-count{ font-weight:800;font-size:12.5px;color:var(--purple); }
   .recap-table .rc-speak{
     width:26px;height:26px;border-radius:50%;border:none;background:var(--blue);
     display:inline-flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 0 #0E7490;
@@ -1323,6 +1334,17 @@ function getWordBadge(fr){
   return s.wrong > 0
     ? `<span class="rc-status retry">⚠ ${streak}/${MASTERY_STREAK} d'affilée</span>`
     : `<span class="rc-status" style="color:var(--purple);font-weight:800;">🔥 ${streak}/${MASTERY_STREAK}</span>`;
+}
+/* Petit badge affiché juste après chaque réponse : rend visible la progression vers la maîtrise
+   (5 bonnes réponses d'affilée, tous modes confondus) — pour que le système se voie vraiment. */
+function renderStreakProgressHtml(fr){
+  const s = wordStats[fr.toLowerCase()];
+  const streak = s ? (s.streak || 0) : 0;
+  if(streak >= MASTERY_STREAK){
+    return `<div class="streak-progress mastered">🏅 Mot maîtrisé ! (${streak} bonnes réponses d'affilée)</div>`;
+  }
+  const dots = Array.from({length: MASTERY_STREAK}, (_, i) => `<span class="streak-dot ${i < streak ? 'on' : ''}"></span>`).join('');
+  return `<div class="streak-progress"><span class="streak-progress-label">🔥 Série d'affilée</span><span class="streak-dots">${dots}</span><span class="streak-progress-count">${streak}/${MASTERY_STREAK}</span></div>`;
 }
 let wordStats = loadWordStats();
 /* Migration : pour les mots sans "streak" enregistré, si aucune erreur n'a jamais été faite,
@@ -4036,6 +4058,7 @@ function handleSpeakResult(isCorrect, word, info){
       </button>
     </div>
     <div class="ex-text">${renderExample(word.ex)}</div>
+    ${renderStreakProgressHtml(word.fr)}
     ${renderVariantsExtra(word)}
     <button class="next-btn" id="nextBtn">Suivant →</button>
   `;
@@ -4554,6 +4577,7 @@ function handleRepeatResult(similarity, info){
       <div class="arabic-word">${escapeHtml(word.ar)}</div>
     </div>
     <div class="def-text"><strong>${escapeHtml(word.fr)}</strong> — ${escapeHtml(word.def)}</div>
+    ${renderStreakProgressHtml(word.fr)}
     ${renderVariantsExtra(word)}
     <button class="next-btn" id="nextBtn">Suivant →</button>
   `;
@@ -4732,6 +4756,7 @@ function startOrderDrag(e, el){
     if(!item) return;
   }
   speak(item.word, 'fr-FR'); // 🔊 on entend le mot dès qu'on le touche
+  el.style.visibility = 'hidden'; // masque l'original pendant le glissement (le fantôme le représente)
 
   const rect = el.getBoundingClientRect();
   const ghost = document.createElement('div');
@@ -4755,22 +4780,12 @@ function onOrderDragMove(e){
   if(Math.abs(dx) > 5 || Math.abs(dy) > 5){ orderDrag.moved = true; }
   orderDrag.ghost.style.transform = `translate(${dx}px, ${dy}px) scale(1.08) rotate(-2deg)`;
 
+  // Ici on se contente de repérer le trou survolé (surbrillance) — aucune mutation des données
+  // pendant le glissement, pour ne jamais interrompre le geste. Le décalage réel se joue au lâcher.
   document.querySelectorAll('.order-slot-empty.drag-over, .order-slot-filled.drag-over').forEach(x => x.classList.remove('drag-over'));
   const elAtPoint = document.elementFromPoint(e.clientX, e.clientY);
   const slotEl = elAtPoint ? elAtPoint.closest('[data-blankpos]') : null;
-  const blankPos = slotEl ? parseInt(slotEl.dataset.blankpos, 10) : null;
-
-  if(blankPos !== orderDrag.lastBlankPos){
-    orderDrag.lastBlankPos = blankPos;
-    if(blankPos !== null){
-      // 🔁 aperçu en direct : les mots se décalent déjà pendant le survol, pas seulement au lâcher
-      insertIntoBlankSlots(orderDrag.item, blankPos);
-      renderOrderZones(true);
-    } else {
-      removeFromBlankSlots(orderDrag.item.uid);
-      renderOrderZones(true);
-    }
-  }
+  orderDrag.lastBlankPos = slotEl ? parseInt(slotEl.dataset.blankpos, 10) : null;
   if(slotEl){ slotEl.classList.add('drag-over'); }
 }
 
@@ -4780,6 +4795,7 @@ function onOrderDragEnd(){
   document.removeEventListener('pointerup', onOrderDragEnd);
   document.querySelectorAll('.drag-over').forEach(x => x.classList.remove('drag-over'));
 
+  const targetPos = orderDrag.lastBlankPos;
   if(!orderDrag.moved){
     if(orderDrag.fromBlankPos === null){
       // simple tap sur un mot du pool : remplit le premier trou vide
@@ -4789,8 +4805,14 @@ function onOrderDragEnd(){
       // simple tap sur un mot déjà placé : le retire
       removeFromBlankSlots(orderDrag.item.uid);
     }
+  } else if(targetPos !== null){
+    // 🔁 Glissé jusqu'à un trou précis : insertion avec décalage de TOUS les mots entre l'ancienne
+    // et la nouvelle position, comme dans une vraie liste réordonnable.
+    insertIntoBlankSlots(orderDrag.item, targetPos);
+  } else {
+    // lâché en dehors de tout trou → retour au pool
+    removeFromBlankSlots(orderDrag.item.uid);
   }
-  // si glissé (moved=true), le placement a déjà été appliqué en direct par onOrderDragMove
 
   if(orderDrag.ghost && orderDrag.ghost.parentNode){ orderDrag.ghost.parentNode.removeChild(orderDrag.ghost); }
   orderDrag = null;
@@ -4830,26 +4852,30 @@ function startOrderVoiceInput(){
   let autoStopScheduled = false;
 
   const tryPlaceSpokenWords = (transcriptText) => {
+    // On reconstruit TOUT le placement à partir de zéro à chaque fois, dans l'ordre exact où les mots
+    // ont été prononcés (jamais "corrigé" vers le bon ordre) — ainsi, redire la phrase efface et remplace
+    // le placement précédent au lieu de s'accumuler par-dessus.
     const spoken = normalizeForSearch(transcriptText).replace(/[^a-z\s]/g,' ').split(/\s+/).filter(Boolean);
-    let anyMatch = false;
+    const newSlots = new Array(window.__orderBlankSlots.length).fill(null);
+    const usedThisPass = new Set();
+    let cursor = 0;
     spoken.forEach(sw => {
-      if(!sw) return;
-      const usedUids = new Set(window.__orderBlankSlots.filter(Boolean).map(f => f.uid));
+      if(!sw || cursor >= newSlots.length) return;
       const candidate = window.__orderPool.find(p => {
-        if(usedUids.has(p.uid)) return false;
+        if(usedThisPass.has(p.uid)) return false;
         const norm = normalizeForSearch(p.word).replace(/[^a-z]/g,'');
         if(!norm) return false;
         if(norm === sw) return true;
         return levenshtein(norm, sw) <= (norm.length <= 4 ? 1 : 2);
       });
       if(candidate){
-        const emptyPos = window.__orderBlankSlots.findIndex(f => !f);
-        const targetPos = emptyPos >= 0 ? emptyPos : window.__orderBlankSlots.length;
-        insertIntoBlankSlots(candidate, targetPos);
-        anyMatch = true;
+        newSlots[cursor] = candidate;
+        usedThisPass.add(candidate.uid);
+        cursor++;
       }
     });
-    if(anyMatch){ renderOrderZones(true); }
+    window.__orderBlankSlots = newSlots;
+    renderOrderZones(true);
   };
 
   rec.onresult = (ev) => {
@@ -4961,6 +4987,7 @@ function handleOrderAnswer(timedOut){
       <div class="arabic-word">${escapeHtml(word.ar)}</div>
     </div>
     <div class="def-text"><strong>${escapeHtml(word.fr)}</strong> — ${escapeHtml(word.def)}</div>
+    ${renderStreakProgressHtml(word.fr)}
     ${renderVariantsExtra(word)}
     <button class="next-btn" id="nextBtn">Suivant →</button>
   `;
@@ -5162,6 +5189,7 @@ function handleChronoAnswer(playerSaysTrue){
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
       </button>
     </div>
+    ${renderStreakProgressHtml(word.fr)}
     ${renderVariantsExtra(word)}
     <button class="next-btn" id="nextBtn">Suivant →</button>
   `;
@@ -5246,6 +5274,7 @@ function handleAnswer(i){
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
       </button>
     </div>
+    ${renderStreakProgressHtml(word.fr)}
     ${renderVariantsExtra(word)}
     <button class="next-btn" id="nextBtn">Mot suivant →</button>
   `;
