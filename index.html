@@ -153,6 +153,50 @@
     transition:transform .12s;
   }
   .tile-peek:hover{ transform:scale(1.1); background:#fff; }
+
+  /* ============ 🎧 RADIO — design dédié, sobre et pro ============ */
+  .radio-block-selected{ outline:3px solid var(--purple);outline-offset:2px;background:#EEF2FF !important; }
+  .card.radio-card{
+    background:radial-gradient(900px 500px at 20% -10%, rgba(56,189,248,0.18), transparent 60%),
+               radial-gradient(800px 500px at 100% 110%, rgba(139,92,246,0.22), transparent 55%),
+               linear-gradient(160deg, #0F172A 0%, #1E1B4B 55%, #2E1065 100%);
+    color:#fff;padding:40px 28px;border:1px solid rgba(255,255,255,0.08);
+  }
+  .radio-player{ display:flex;flex-direction:column;align-items:center;text-align:center; }
+  .radio-onair{
+    display:inline-flex;align-items:center;gap:7px;font-family:'Baloo 2',sans-serif;font-weight:800;
+    font-size:11.5px;letter-spacing:.08em;color:#F87171;background:rgba(248,113,113,0.12);
+    padding:6px 14px;border-radius:999px;margin-bottom:22px;border:1px solid rgba(248,113,113,0.3);
+  }
+  .radio-dot{ width:7px;height:7px;border-radius:50%;background:#F87171;box-shadow:0 0 8px #F87171;animation:radioBlink 1.4s ease-in-out infinite; }
+  @keyframes radioBlink{ 0%,100%{opacity:1;} 50%{opacity:.25;} }
+  .radio-eq{ display:flex;align-items:flex-end;gap:4px;height:34px;margin-bottom:18px; }
+  .radio-eq span{ width:5px;border-radius:3px;background:linear-gradient(180deg,#5EEAD4,#38BDF8);height:8px;transition:height .2s; }
+  .radio-eq.playing span{ animation:radioEqBar 1s ease-in-out infinite; }
+  .radio-eq span:nth-child(1){ animation-delay:0s; } .radio-eq span:nth-child(2){ animation-delay:.15s; }
+  .radio-eq span:nth-child(3){ animation-delay:.3s; } .radio-eq span:nth-child(4){ animation-delay:.1s; }
+  .radio-eq span:nth-child(5){ animation-delay:.25s; }
+  @keyframes radioEqBar{ 0%,100%{ height:8px; } 50%{ height:32px; } }
+  .radio-stage-label{ font-family:'Nunito',sans-serif;font-weight:800;font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;color:#A5B4FC;margin-bottom:10px; }
+  .radio-word{ font-family:'Baloo 2',sans-serif;font-weight:800;font-size:clamp(28px,7vw,44px);line-height:1.2;color:#fff;margin-bottom:8px;min-height:1.3em; }
+  .radio-word.radio-word-ar{ font-family:'Changa',sans-serif;direction:rtl; }
+  .radio-sub{ font-size:14px;font-weight:600;color:rgba(255,255,255,0.65);margin-bottom:22px;max-width:420px; }
+  .radio-progress-track{ width:100%;max-width:340px;height:6px;border-radius:999px;background:rgba(255,255,255,0.12);overflow:hidden;margin-bottom:10px; }
+  .radio-progress-fill{ height:100%;border-radius:999px;background:linear-gradient(90deg,#38BDF8,#8B5CF6);transition:width .4s ease; }
+  .radio-meta{ font-size:12px;font-weight:700;color:rgba(255,255,255,0.55);margin-bottom:26px; }
+  .radio-controls{ display:flex;align-items:center;gap:20px;margin-bottom:20px; }
+  .radio-ctrl-btn{
+    border:none;background:rgba(255,255,255,0.1);color:#fff;width:48px;height:48px;border-radius:50%;
+    font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    transition:transform .12s,background .15s;
+  }
+  .radio-ctrl-btn:hover{ background:rgba(255,255,255,0.18);transform:translateY(-2px); }
+  .radio-play-btn{
+    width:66px;height:66px;font-size:24px;background:linear-gradient(135deg,#38BDF8,#8B5CF6);
+    box-shadow:0 8px 24px -6px rgba(139,92,246,0.6);
+  }
+  .radio-play-btn:hover{ background:linear-gradient(135deg,#5EEAD4,#8B5CF6); }
+  .radio-timer{ font-size:12px;font-weight:700;color:rgba(255,255,255,0.5); }
   .opt-key{
     display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;
     padding:0 6px;border-radius:7px;background:#fff;color:var(--purple);
@@ -1570,8 +1614,26 @@ function clearCustomWords(){
   try{ localStorage.removeItem(nsKey(CUSTOM_WORDS_KEY)); }catch(e){}
 }
 
+/* 🔧 Garantit que "Bloc N" désigne TOUJOURS le même groupe de mots sur tous les appareils :
+   les mots du lexique par défaut restent dans leur ordre fixe (identique partout, gravé dans le
+   fichier), et tous les mots ajoutés par l'utilisateur sont replacés à la suite, triés par ordre
+   alphabétique — un ordre déterministe, peu importe l'appareil ou l'ordre d'ajout d'origine.
+   Corrige à la racine les blocs qui différaient entre PC/téléphone et les résultats qui ne se
+   synchronisaient pas (le calcul du bloc dépend de cet ordre). */
+function reconcileWordsOrder(){
+  const defaultKeys = new Set(DEFAULT_WORDS.map(w => w.fr.toLowerCase()));
+  const extra = WORDS.filter(w => !defaultKeys.has(w.fr.toLowerCase()));
+  extra.sort((a, b) => a.fr.localeCompare(b.fr, 'fr'));
+  const newWords = DEFAULT_WORDS.concat(extra);
+  const changed = newWords.length !== WORDS.length || newWords.some((w, i) => !WORDS[i] || w.fr !== WORDS[i].fr);
+  WORDS = newWords;
+  if(changed){ saveCustomWords(WORDS); }
+  return changed;
+}
+
 const savedCustom = loadCustomWords();
 if(savedCustom){ WORDS = savedCustom; }
+reconcileWordsOrder();
 
 let gameMode = 'classic'; // 'classic' | 'blank' | 'chrono'
 let chronoStreak = 0;
@@ -2190,26 +2252,18 @@ function commitImport(words){
   });
   const added = toAdd.length;
 
-  // On calcule la position d'insertion : juste APRÈS les blocs déjà terminés,
-  // pour que les nouveaux mots deviennent les prochains à étudier sans toucher aux blocs finis.
+  // ⚠️ Les mots ajoutés sont toujours mis à la SUITE du lexique (jamais insérés au milieu),
+  // puis réordonnés de façon déterministe (reconcileWordsOrder) — indispensable pour que
+  // "Bloc N" désigne exactement le même groupe de mots sur tous tes appareils une fois synchronisé.
+  WORDS = WORDS.concat(toAdd);
+  reconcileWordsOrder();
   activeFilterCat = null;
-  rebuildBlocks(); // BLOCKS sur le lexique complet actuel
-  let lastDone = -1;
-  for(let i=0;i<BLOCKS.length;i++){ if(blockHasResult(i)) lastDone = i; }
-  const insertAt = Math.min((lastDone + 1) * BLOCK_SIZE, WORDS.length);
-
-  const merged = WORDS.slice();
-  merged.splice(insertAt, 0, ...toAdd);
-  WORDS = merged;
-
-  saveCustomWords(WORDS);
   rebuildBlocks();
   cloudAutoPush();
   const parts = [];
   if(added > 0) parts.push(`${added} nouveau${added>1?'x':''} mot${added>1?'s':''} ajouté${added>1?'s':''}`);
   if(alreadyPresent > 0) parts.push(`${alreadyPresent} déjà présent${alreadyPresent>1?'s':''} ignoré${alreadyPresent>1?'s':''}`);
-  const posInfo = (added > 0 && lastDone >= 0) ? ` · placés dès le bloc ${lastDone+2}` : '';
-  const msg = parts.length ? `✓ ${parts.join(' · ')}${posInfo} — ${WORDS.length} mots au total` : 'Aucun mot importé.';
+  const msg = parts.length ? `✓ ${parts.join(' · ')} — ${WORDS.length} mots au total` : 'Aucun mot importé.';
   setStatus(msg, added > 0 ? 'ok' : 'err');
   renderBlockSelect();
 }
@@ -2466,6 +2520,272 @@ function renderQuestSettings(){
     cloudAutoPush();
     renderQuestSettings();
   });
+}
+
+/* ============ 🎧 RADIO — écoute passive, mains libres ============ */
+let radioState = null; // { playlist, idx, playing, stage, loop, accumSeconds, tickTimer }
+let radioSelectedBlocks = new Set(); // clés sélectionnées : "n:0","n:1",... pour normaux, "c:id" pour personnalisés
+
+function renderRadioSetup(){
+  clearQuestionTimer();
+  document.body.classList.remove('quiz-active');
+  currentBlock = null;
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromRadioSetupBtn" style="cursor:pointer;">← Retour aux blocs</button>`;
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('footerNote').textContent = '';
+
+  ensureAllCategoriesContext();
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="cat-tag">🎧 Radio</div>
+    <div class="word-fr" style="font-size:clamp(24px,4.5vw,32px);">Écoute passive, mains libres</div>
+    <div class="question-line">Choisis un ou plusieurs blocs. La radio lira chaque mot dans un ordre aléatoire : <b>le mot en français</b>, puis <b>sa traduction en arabe</b>, puis <b>la phrase complète</b>. Idéal pendant que tu travailles — ça compte dans ton objectif de minutes du jour.</div>
+
+    <div class="mode-row" style="margin-top:14px;">
+      <button class="mode-chip" id="radioSelectAllBtn">✓ Tout sélectionner</button>
+      <button class="mode-chip" id="radioSelectNoneBtn">✕ Tout désélectionner</button>
+    </div>
+
+    <div class="options" id="radioBlockGrid" style="grid-template-columns:repeat(auto-fill,minmax(140px,1fr));margin-top:10px;max-height:360px;overflow-y:auto;padding-right:4px;"></div>
+
+    <div class="mode-row" style="margin-top:16px;">
+      <button class="mode-chip" id="radioLoopToggle">🔁 Boucle continue : ON</button>
+    </div>
+
+    <button class="restart-btn" id="radioStartBtn" style="margin-top:18px;display:flex;align-items:center;gap:8px;">▶ Démarrer la radio</button>
+  `;
+  document.getElementById('backFromRadioSetupBtn').addEventListener('click', renderBlockSelect);
+
+  window.__radioLoop = window.__radioLoop === undefined ? true : window.__radioLoop;
+  const loopBtn = document.getElementById('radioLoopToggle');
+  const updateLoopBtn = () => { loopBtn.textContent = window.__radioLoop ? '🔁 Boucle continue : ON' : '🔁 Boucle continue : OFF'; loopBtn.classList.toggle('active', window.__radioLoop); };
+  updateLoopBtn();
+  loopBtn.addEventListener('click', () => { window.__radioLoop = !window.__radioLoop; updateLoopBtn(); });
+
+  const grid = document.getElementById('radioBlockGrid');
+  let gridHtml = '';
+  BLOCKS.forEach((b, i) => {
+    const key = 'n:' + i;
+    const on = radioSelectedBlocks.has(key);
+    gridHtml += `<button class="opt ${on ? 'radio-block-selected' : ''}" data-radio-key="${key}" style="text-align:center;">
+      <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:15px;">${on?'✅ ':''}${escapeHtml(getBlockTitle(i))}</div>
+      <div style="font-size:11px;color:var(--text-dim);margin-top:4px;">${b.length} mots</div>
+    </button>`;
+  });
+  customBlocks.forEach(cb => {
+    const key = 'c:' + cb.id;
+    const on = radioSelectedBlocks.has(key);
+    gridHtml += `<button class="opt ${on ? 'radio-block-selected' : ''}" data-radio-key="${key}" style="text-align:center;">
+      <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:15px;">${on?'✅ ':''}🧩 ${escapeHtml(cb.title)}</div>
+      <div style="font-size:11px;color:var(--text-dim);margin-top:4px;">${cb.words.length} mots</div>
+    </button>`;
+  });
+  grid.innerHTML = gridHtml;
+
+  function refreshGridVisuals(){
+    grid.querySelectorAll('[data-radio-key]').forEach(btn => {
+      const on = radioSelectedBlocks.has(btn.dataset.radioKey);
+      btn.classList.toggle('radio-block-selected', on);
+      const title = btn.querySelector('div');
+      if(title){ title.textContent = (on ? '✅ ' : '') + title.textContent.replace(/^✅ /, ''); }
+    });
+  }
+  grid.querySelectorAll('[data-radio-key]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.radioKey;
+      if(radioSelectedBlocks.has(key)){ radioSelectedBlocks.delete(key); } else { radioSelectedBlocks.add(key); }
+      refreshGridVisuals();
+    });
+  });
+  document.getElementById('radioSelectAllBtn').addEventListener('click', () => {
+    BLOCKS.forEach((_, i) => radioSelectedBlocks.add('n:' + i));
+    customBlocks.forEach(cb => radioSelectedBlocks.add('c:' + cb.id));
+    refreshGridVisuals();
+  });
+  document.getElementById('radioSelectNoneBtn').addEventListener('click', () => {
+    radioSelectedBlocks.clear();
+    refreshGridVisuals();
+  });
+
+  document.getElementById('radioStartBtn').addEventListener('click', () => {
+    const words = [];
+    const seen = new Set();
+    radioSelectedBlocks.forEach(key => {
+      let list = [];
+      if(key.startsWith('n:')){ list = BLOCKS[parseInt(key.slice(2), 10)] || []; }
+      else { const cb = getCustomBlock(key.slice(2)); if(cb){ list = cb.words; } }
+      list.forEach(w => { if(!seen.has(w.fr)){ seen.add(w.fr); words.push(w); } });
+    });
+    if(words.length === 0){ setStatus('🎧 Choisis au moins un bloc pour démarrer la radio.', 'err'); return; }
+    startRadio(words);
+  });
+}
+
+function startRadio(words){
+  radioState = {
+    playlist: shuffle(words),
+    idx: 0,
+    playing: false,
+    stage: 'fr',
+    loop: window.__radioLoop !== false,
+    accumSeconds: 0,
+    lastTickAt: Date.now(),
+  };
+  renderRadioPlayer();
+  radioToggleplay(true);
+}
+
+function renderRadioPlayer(){
+  document.body.classList.remove('quiz-active');
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="radioExitBtn" style="cursor:pointer;">← Quitter la radio</button>`;
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('footerNote').textContent = '';
+
+  const card = document.getElementById('quizCard');
+  card.className = 'card radio-card';
+  card.innerHTML = `
+    <div class="radio-player">
+      <div class="radio-onair"><span class="radio-dot"></span> RADIO EN DIRECT</div>
+      <div class="radio-eq" id="radioEq"><span></span><span></span><span></span><span></span><span></span></div>
+      <div class="radio-stage-label" id="radioStageLabel">🇫🇷 Français</div>
+      <div class="radio-word" id="radioWordDisplay">—</div>
+      <div class="radio-sub" id="radioSubDisplay"></div>
+      <div class="radio-progress-track"><div class="radio-progress-fill" id="radioProgressFill"></div></div>
+      <div class="radio-meta" id="radioMeta"></div>
+      <div class="radio-controls">
+        <button class="radio-ctrl-btn" id="radioPrevBtn" title="Précédent">⏮</button>
+        <button class="radio-ctrl-btn radio-play-btn" id="radioPlayBtn" title="Lecture / Pause">⏸</button>
+        <button class="radio-ctrl-btn" id="radioNextBtn" title="Suivant">⏭</button>
+      </div>
+      <div class="radio-timer" id="radioTimer">⏱️ 0 min 00 s écoutées</div>
+    </div>
+  `;
+  document.getElementById('radioExitBtn').addEventListener('click', () => stopRadio(true));
+  document.getElementById('radioPlayBtn').addEventListener('click', () => radioToggleplay());
+  document.getElementById('radioNextBtn').addEventListener('click', () => { window.speechSynthesis.cancel(); radioAdvance(); });
+  document.getElementById('radioPrevBtn').addEventListener('click', () => { window.speechSynthesis.cancel(); radioState.idx = Math.max(0, radioState.idx - 1); radioPlayWord(); });
+  updateRadioUI();
+}
+
+function updateRadioUI(){
+  if(!radioState) return;
+  const w = radioState.playlist[radioState.idx];
+  if(!w) return;
+  const stageLabel = document.getElementById('radioStageLabel');
+  const wordEl = document.getElementById('radioWordDisplay');
+  const subEl = document.getElementById('radioSubDisplay');
+  const metaEl = document.getElementById('radioMeta');
+  const playBtn = document.getElementById('radioPlayBtn');
+  const eq = document.getElementById('radioEq');
+  const progressFill = document.getElementById('radioProgressFill');
+
+  if(stageLabel){
+    stageLabel.textContent = radioState.stage === 'fr' ? '🇫🇷 Français' : radioState.stage === 'ar' ? '🕌 Arabe' : '💬 Phrase complète';
+  }
+  if(wordEl){
+    wordEl.textContent = radioState.stage === 'ar' ? w.ar : radioState.stage === 'ex' ? w.ex.replace(/~/g, w.fr) : w.fr;
+    wordEl.className = 'radio-word' + (radioState.stage === 'ar' ? ' radio-word-ar' : '');
+  }
+  if(subEl){ subEl.textContent = w.def || ''; }
+  if(metaEl){ metaEl.textContent = `${escapeHtml(w.cat)} · mot ${radioState.idx + 1} / ${radioState.playlist.length}`; }
+  if(playBtn){ playBtn.textContent = radioState.playing ? '⏸' : '▶'; }
+  if(eq){ eq.classList.toggle('playing', !!radioState.playing); }
+  if(progressFill){ progressFill.style.width = `${Math.round(((radioState.idx) / radioState.playlist.length) * 100)}%`; }
+  const timerEl = document.getElementById('radioTimer');
+  if(timerEl){ timerEl.textContent = `⏱️ ${fmtDuration(radioState.accumSeconds)} écoutées`; }
+}
+
+function radioToggleplay(forcePlay){
+  if(!radioState) return;
+  const shouldPlay = forcePlay !== undefined ? forcePlay : !radioState.playing;
+  radioState.playing = shouldPlay;
+  updateRadioUI();
+  if(shouldPlay){
+    radioState.lastTickAt = Date.now();
+    if(!radioState.tickTimer){
+      radioState.tickTimer = setInterval(radioTick, 5000);
+    }
+    radioPlayWord();
+  } else {
+    window.speechSynthesis.cancel();
+    radioFlushTime();
+  }
+}
+
+function radioTick(){
+  if(!radioState || !radioState.playing) return;
+  radioFlushTime();
+  updateRadioUI();
+}
+function radioFlushTime(){
+  if(!radioState) return;
+  const now = Date.now();
+  const delta = Math.max(0, Math.round((now - radioState.lastTickAt) / 1000));
+  if(delta > 0){
+    radioState.accumSeconds += delta;
+    recordDailyStats(delta, false, 0);
+  }
+  radioState.lastTickAt = now;
+}
+
+function radioPlayWord(){
+  if(!radioState || !radioState.playing) return;
+  const w = radioState.playlist[radioState.idx];
+  if(!w){ return; }
+  radioState.stage = 'fr';
+  updateRadioUI();
+  speak(w.fr, 'fr-FR', () => {
+    if(!radioState || !radioState.playing) return;
+    setTimeout(() => {
+      if(!radioState || !radioState.playing) return;
+      radioState.stage = 'ar';
+      updateRadioUI();
+      speak(w.ar, 'ar-SA', () => {
+        if(!radioState || !radioState.playing) return;
+        setTimeout(() => {
+          if(!radioState || !radioState.playing) return;
+          radioState.stage = 'ex';
+          updateRadioUI();
+          speak(w.ex.replace(/~/g, w.fr), 'fr-FR', () => {
+            if(!radioState || !radioState.playing) return;
+            setTimeout(() => { radioAdvance(); }, 1000);
+          });
+        }, 550);
+      });
+    }, 550);
+  });
+}
+
+function radioAdvance(){
+  if(!radioState) return;
+  radioState.idx++;
+  if(radioState.idx >= radioState.playlist.length){
+    if(radioState.loop){
+      radioState.idx = 0;
+      radioState.playlist = shuffle(radioState.playlist);
+    } else {
+      radioState.playing = false;
+      radioFlushTime();
+      updateRadioUI();
+      const wordEl = document.getElementById('radioWordDisplay');
+      if(wordEl){ wordEl.textContent = '🎉 Terminé !'; }
+      return;
+    }
+  }
+  radioPlayWord();
+}
+
+function stopRadio(goHome){
+  if(radioState){
+    radioState.playing = false;
+    radioFlushTime();
+    if(radioState.tickTimer){ clearInterval(radioState.tickTimer); }
+  }
+  window.speechSynthesis.cancel();
+  radioState = null;
+  const card = document.getElementById('quizCard');
+  if(card){ card.classList.remove('radio-card'); }
+  if(goHome){ renderBlockSelect(); }
 }
 
 function renderTrainingCenter(){
@@ -3184,7 +3504,7 @@ function addCsvLinesToCustomBlock(raw){
 
   if(newlyCreated.length){
     WORDS = WORDS.concat(newlyCreated);
-    saveCustomWords(WORDS);
+    reconcileWordsOrder();
     rebuildBlocks();
     cloudAutoPush();
   }
@@ -3585,6 +3905,9 @@ function renderBlockSelect(){
       <button class="restart-btn" id="trainingCenterBtn" style="display:flex;align-items:center;gap:8px;background:#EEF2FF;color:var(--purple);box-shadow:0 4px 0 #C7D2FE;">
         🎓 Centre d'entraînement
       </button>
+      <button class="restart-btn" id="radioBtn" style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#1E1B4B,#3730A3);color:#fff;box-shadow:0 4px 0 #0F172A;">
+        🎧 Radio (écoute passive)
+      </button>
       ${toReviewCount > 0 ? `
       <button class="restart-btn" id="startReviewBtn" style="display:flex;align-items:center;gap:8px;">
         ⚠️ Réviser mes ${toReviewCount} mot${toReviewCount>1?'s':''} à revoir
@@ -3602,6 +3925,7 @@ function renderBlockSelect(){
 
   document.getElementById('createCustomBlockBtn').addEventListener('click', () => renderCustomBlockBuilder());
   document.getElementById('trainingCenterBtn').addEventListener('click', () => renderTrainingCenter());
+  document.getElementById('radioBtn').addEventListener('click', () => renderRadioSetup());
   document.getElementById('questSettingsBtn').addEventListener('click', () => renderQuestSettings());
   if(toReviewCount > 0){
     document.getElementById('startReviewBtn').addEventListener('click', () => renderReviewIntro());
@@ -5607,8 +5931,8 @@ function mergeRemoteData(remote){
           if(!seen.has(k)){ seen.add(k); base.push(w); added++; }
         });
         if(added > 0 || !loadCustomWords()){
-          saveCustomWords(base);
           WORDS = base;
+          reconcileWordsOrder(); // ordre déterministe : "Bloc N" reste identique une fois synchronisé
           changed = true;
         }
       }
