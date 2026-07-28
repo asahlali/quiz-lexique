@@ -201,6 +201,14 @@
     box-shadow:0 8px 24px -6px rgba(139,92,246,0.6);
   }
   .radio-play-btn:hover{ background:linear-gradient(135deg,#5EEAD4,#8B5CF6); }
+  .radio-speed-row{ display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:18px; }
+  .radio-speed-label{ font-size:11.5px;font-weight:800;color:rgba(255,255,255,0.5);margin-right:4px; }
+  .radio-speed-btn{
+    border:none;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.75);padding:6px 12px;
+    border-radius:999px;font-size:12px;font-weight:800;cursor:pointer;transition:background .15s,color .15s,transform .12s;
+  }
+  .radio-speed-btn:hover{ background:rgba(255,255,255,0.16);transform:translateY(-1px); }
+  .radio-speed-btn.active{ background:linear-gradient(135deg,#38BDF8,#8B5CF6);color:#fff; }
   .radio-timer{ font-size:12px;font-weight:700;color:rgba(255,255,255,0.5); }
   .opt-key{
     display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;
@@ -1832,7 +1840,7 @@ function updateMicButtonUI(){
   if(micHint && ttsSpeaking){ micHint.textContent = '🔊 Écoute...'; }
 }
 
-function speak(text, lang, onEnd){
+function speak(text, lang, onEnd, rateOverride){
   if(!speechAvailable || !text){ if(onEnd) onEnd(); return; }
   try{
     stopRecognition(); // le micro ne doit JAMAIS écouter pendant que l'app parle (sinon il s'entend lui-même)
@@ -1843,8 +1851,8 @@ function speak(text, lang, onEnd){
     const prefix = langCode.slice(0,2).toLowerCase();
     const v = pickVoice(prefix); // genre aléatoire à chaque fois
     if(v){ u.voice = v; u.lang = v.lang; }
-    u.rate = 0.96;
-    u.pitch = 1.0;
+    u.rate = rateOverride || 0.96;
+    u.pitch = 1.0; // la hauteur ne change jamais avec la vitesse : le son reste clair, jamais "voix de tamia"
     ttsSpeaking = true;
     updateMicButtonUI();
     const finish = () => { ttsSpeaking = false; updateMicButtonUI(); if(onEnd) onEnd(); };
@@ -2529,6 +2537,15 @@ function renderQuestSettings(){
 }
 
 /* ============ 🎧 RADIO — écoute passive, mains libres ============ */
+const RADIO_SPEED_KEY = 'lexiqueQuiz::radioSpeed';
+const RADIO_SPEEDS = [0.75, 0.9, 1, 1.15, 1.3]; // paliers modérés : la voix reste naturelle et claire à chaque cran
+function loadRadioSpeed(){
+  try{ const v = parseFloat(localStorage.getItem(nsKey(RADIO_SPEED_KEY))); return RADIO_SPEEDS.includes(v) ? v : 1; }
+  catch(e){ return 1; }
+}
+function saveRadioSpeed(v){ try{ localStorage.setItem(nsKey(RADIO_SPEED_KEY), String(v)); }catch(e){} }
+let radioSpeed = loadRadioSpeed();
+
 let radioState = null; // { playlist, idx, playing, stage, loop, accumSeconds, tickTimer }
 let radioPlayToken = 0; // incrémenté à chaque nouvelle lecture : invalide toute chaîne précédente encore en vol
 let radioSelectedBlocks = new Set(); // clés sélectionnées : "n:0","n:1",... pour normaux, "c:id" pour personnalisés
@@ -2669,6 +2686,7 @@ function renderRadioPlayer(){
         <button class="radio-ctrl-btn radio-play-btn" id="radioPlayBtn" title="Lecture / Pause">⏸</button>
         <button class="radio-ctrl-btn" id="radioNextBtn" title="Suivant">⏭</button>
       </div>
+      <div class="radio-speed-row" id="radioSpeedRow"></div>
       <div class="radio-timer" id="radioTimer">⏱️ 0 min 00 s écoutées</div>
     </div>
   `;
@@ -2676,6 +2694,21 @@ function renderRadioPlayer(){
   document.getElementById('radioPlayBtn').addEventListener('click', () => radioToggleplay());
   document.getElementById('radioNextBtn').addEventListener('click', () => { window.speechSynthesis.cancel(); radioAdvance(); });
   document.getElementById('radioPrevBtn').addEventListener('click', () => { window.speechSynthesis.cancel(); radioState.idx = Math.max(0, radioState.idx - 1); radioPlayWord(); });
+
+  const speedRow = document.getElementById('radioSpeedRow');
+  speedRow.innerHTML = `<span class="radio-speed-label">🎚️ Vitesse</span>` + RADIO_SPEEDS.map(s =>
+    `<button class="radio-speed-btn ${s === radioSpeed ? 'active' : ''}" data-speed="${s}">${s}×</button>`
+  ).join('');
+  speedRow.querySelectorAll('[data-speed]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      radioSpeed = parseFloat(btn.dataset.speed);
+      saveRadioSpeed(radioSpeed);
+      speedRow.querySelectorAll('.radio-speed-btn').forEach(b => b.classList.toggle('active', b === btn));
+      // applique le changement immédiatement sur le mot en cours (redémarre proprement l'étape actuelle)
+      if(radioState && radioState.playing){ window.speechSynthesis.cancel(); radioPlayWord(); }
+    });
+  });
+
   updateRadioUI();
 }
 
@@ -2771,11 +2804,11 @@ function radioPlayWord(){
               if(myToken !== radioPlayToken) return;
               radioAdvance();
             }, 1000);
-          });
+          }, radioSpeed);
         }, arabicVoiceOk ? 550 : 1600); // pas de voix arabe : laisse le temps de LIRE le mot affiché avant de passer à la suite
-      });
+      }, radioSpeed);
     }, 550);
-  });
+  }, radioSpeed);
 }
 
 function radioAdvance(){
