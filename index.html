@@ -168,6 +168,11 @@
     font-size:11.5px;letter-spacing:.08em;color:#F87171;background:rgba(248,113,113,0.12);
     padding:6px 14px;border-radius:999px;margin-bottom:22px;border:1px solid rgba(248,113,113,0.3);
   }
+  .radio-voice-warning{
+    background:rgba(251,191,36,0.14);border:1px solid rgba(251,191,36,0.35);color:#FDE68A;
+    font-size:12.5px;font-weight:700;padding:10px 16px;border-radius:12px;max-width:440px;
+    margin:-8px 0 18px;line-height:1.5;
+  }
   .radio-dot{ width:7px;height:7px;border-radius:50%;background:#F87171;box-shadow:0 0 8px #F87171;animation:radioBlink 1.4s ease-in-out infinite; }
   @keyframes radioBlink{ 0%,100%{opacity:1;} 50%{opacity:.25;} }
   .radio-eq{ display:flex;align-items:flex-end;gap:4px;height:34px;margin-bottom:18px; }
@@ -1803,6 +1808,7 @@ function getVoicesFor(langPrefix){
     .filter(v => (v.lang || '').toLowerCase().startsWith(langPrefix))
     .sort((a,b) => voiceQuality(b) - voiceQuality(a));
 }
+function hasVoiceFor(langPrefix){ return getVoicesFor(langPrefix).length > 0; }
 /* Choisit une voix pour la langue, en préférant un genre donné (ou aléatoire). */
 function pickVoice(langPrefix, gender){
   const voices = getVoicesFor(langPrefix);
@@ -2641,11 +2647,16 @@ function renderRadioPlayer(){
   document.getElementById('progressFill').style.width = '0%';
   document.getElementById('footerNote').textContent = '';
 
+  const noArabicVoice = speechAvailable && !hasVoiceFor('ar');
+  const warningHtml = noArabicVoice ? `
+    <div class="radio-voice-warning">⚠️ Aucune voix arabe n'est installée sur cet appareil — le mot s'affichera en texte mais ne sera pas prononcé. Le français, lui, sera bien lu à voix haute.</div>` : '';
+
   const card = document.getElementById('quizCard');
   card.className = 'card radio-card';
   card.innerHTML = `
     <div class="radio-player">
       <div class="radio-onair"><span class="radio-dot"></span> RADIO EN DIRECT</div>
+      ${warningHtml}
       <div class="radio-eq" id="radioEq"><span></span><span></span><span></span><span></span><span></span></div>
       <div class="radio-stage-label" id="radioStageLabel">🇫🇷 Français</div>
       <div class="radio-word" id="radioWordDisplay">—</div>
@@ -2732,6 +2743,7 @@ function radioPlayWord(){
   if(!radioState || !radioState.playing) return;
   const w = radioState.playlist[radioState.idx];
   if(!w){ return; }
+  const arabicVoiceOk = !speechAvailable || hasVoiceFor('ar');
   radioState.stage = 'fr';
   updateRadioUI();
   speak(w.fr, 'fr-FR', () => {
@@ -2750,7 +2762,7 @@ function radioPlayWord(){
             if(!radioState || !radioState.playing) return;
             setTimeout(() => { radioAdvance(); }, 1000);
           });
-        }, 550);
+        }, arabicVoiceOk ? 550 : 1600); // pas de voix arabe : laisse le temps de LIRE le mot affiché avant de passer à la suite
       });
     }, 550);
   });
