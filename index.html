@@ -2530,6 +2530,7 @@ function renderQuestSettings(){
 
 /* ============ 🎧 RADIO — écoute passive, mains libres ============ */
 let radioState = null; // { playlist, idx, playing, stage, loop, accumSeconds, tickTimer }
+let radioPlayToken = 0; // incrémenté à chaque nouvelle lecture : invalide toute chaîne précédente encore en vol
 let radioSelectedBlocks = new Set(); // clés sélectionnées : "n:0","n:1",... pour normaux, "c:id" pour personnalisés
 
 function renderRadioSetup(){
@@ -2741,26 +2742,35 @@ function radioFlushTime(){
 
 function radioPlayWord(){
   if(!radioState || !radioState.playing) return;
+  const myToken = ++radioPlayToken; // nouvelle génération : toute chaîne précédente encore en vol s'auto-annule
   const w = radioState.playlist[radioState.idx];
   if(!w){ return; }
   const arabicVoiceOk = !speechAvailable || hasVoiceFor('ar');
   radioState.stage = 'fr';
   updateRadioUI();
   speak(w.fr, 'fr-FR', () => {
+    if(myToken !== radioPlayToken) return; // une navigation a eu lieu entre-temps : on abandonne cette chaîne
     if(!radioState || !radioState.playing) return;
     setTimeout(() => {
+      if(myToken !== radioPlayToken) return;
       if(!radioState || !radioState.playing) return;
       radioState.stage = 'ar';
       updateRadioUI();
       speak(w.ar, 'ar-SA', () => {
+        if(myToken !== radioPlayToken) return;
         if(!radioState || !radioState.playing) return;
         setTimeout(() => {
+          if(myToken !== radioPlayToken) return;
           if(!radioState || !radioState.playing) return;
           radioState.stage = 'ex';
           updateRadioUI();
           speak(w.ex.replace(/~/g, w.fr), 'fr-FR', () => {
+            if(myToken !== radioPlayToken) return;
             if(!radioState || !radioState.playing) return;
-            setTimeout(() => { radioAdvance(); }, 1000);
+            setTimeout(() => {
+              if(myToken !== radioPlayToken) return;
+              radioAdvance();
+            }, 1000);
           });
         }, arabicVoiceOk ? 550 : 1600); // pas de voix arabe : laisse le temps de LIRE le mot affiché avant de passer à la suite
       });
