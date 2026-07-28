@@ -339,7 +339,7 @@
     text-align:left;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-dim);
     padding:4px 11px;font-weight:800;
   }
-  .recap-table td{padding:10px 11px;background:#F8FAFC;vertical-align:middle;color:var(--text);font-weight:700;}
+  .recap-table td{padding:10px 11px;background:var(--surface-sunken);vertical-align:middle;color:var(--text);font-weight:700;}
   .recap-table tr td:first-child{border-radius:12px 0 0 12px;}
   .recap-table tr td:last-child{border-radius:0 12px 12px 0;}
   .recap-table .rc-ar{font-family:'Changa',sans-serif;font-size:17px;direction:rtl;color:var(--purple);}
@@ -367,15 +367,15 @@
 
   .search-box-wrap{position:relative;margin-bottom:22px;}
   .search-input{
-    width:100%;padding:15px 48px 15px 20px;border-radius:16px;border:none;
-    background:#F1F5F9;color:var(--text);font-size:15.5px;font-weight:700;font-family:'Inter',sans-serif;
+    width:100%;padding:15px 48px 15px 20px;border-radius:12px;border:1px solid var(--border);
+    background:var(--surface-sunken);color:var(--text);font-size:15.5px;font-weight:700;font-family:'Inter',sans-serif;
   }
-  .search-input:focus{outline:3px solid var(--purple);}
+  .search-input:focus{outline:2px solid var(--purple);}
   .search-input::placeholder{color:var(--text-dim);font-weight:600;}
   .search-icon{position:absolute;right:18px;top:50%;transform:translateY(-50%);font-size:18px;pointer-events:none;}
   .search-count{font-size:13px;color:var(--text-dim);margin:-12px 0 18px;font-weight:700;}
   .search-results{display:flex;flex-direction:column;gap:12px;max-height:520px;overflow-y:auto;padding-right:4px;}
-  .result-card{border:none;background:#F8FAFC;border-radius:18px;padding:18px 20px;}
+  .result-card{border:1px solid var(--border);background:var(--surface-sunken);border-radius:14px;padding:18px 20px;}
   .result-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:6px;}
   .result-fr{font-family:'Inter',sans-serif;font-weight:800;font-size:20px;color:var(--ink);display:flex;align-items:center;gap:10px;}
   .result-cat{font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;font-weight:800;color:#fff;background:var(--purple);padding:4px 12px;border-radius:999px;}
@@ -419,7 +419,7 @@
   .dict-list{display:flex;flex-direction:column;gap:6px;}
   .dict-row{
     display:grid;grid-template-columns:32px 1fr auto auto;gap:10px;align-items:center;
-    background:#F8FAFC;border-radius:12px;padding:8px 12px;
+    background:var(--surface-sunken);border:1px solid var(--border);border-radius:12px;padding:8px 12px;
   }
   .dict-row-fr{font-weight:800;color:var(--ink);font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .dict-row-ar{font-family:'Changa',sans-serif;direction:rtl;color:var(--purple);font-weight:700;font-size:15px;white-space:nowrap;}
@@ -428,7 +428,7 @@
   .hist-list{display:flex;flex-direction:column;gap:10px;margin-top:18px;text-align:left;}
   .hist-row{
     display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
-    background:#F8FAFC;border-radius:16px;padding:14px 18px;
+    background:var(--surface-sunken);border:1px solid var(--border);border-radius:16px;padding:14px 18px;
   }
   .hist-title{font-family:'Inter',sans-serif;font-weight:800;font-size:17px;color:var(--ink);}
   .hist-score{margin-left:8px;font-size:15px;}
@@ -438,18 +438,18 @@
   .hist-sub{font-size:12.5px;color:var(--text-dim);font-weight:700;margin-top:2px;}
   .hist-actions{display:flex;gap:8px;flex-wrap:wrap;}
   .hist-btn{
-    border:none;background:#fff;color:var(--purple-dark);padding:8px 13px;border-radius:999px;
-    font-weight:800;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;
-    box-shadow:0 3px 0 #E2E8F0;transition:all .12s ease;
+    border:1px solid var(--border);background:var(--surface);color:var(--purple);padding:8px 13px;border-radius:999px;
+    font-weight:700;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;
+    box-shadow:none;transition:all .12s ease;
   }
-  .hist-btn:hover{transform:translateY(-1px);}
-  .hist-btn:active{transform:translateY(2px);box-shadow:0 1px 0 #E2E8F0;}
+  .hist-btn:hover{transform:translateY(-1px);background:var(--surface-hover);}
+  .hist-btn:active{transform:translateY(0);}
   .hist-btn.danger{color:var(--red-dark);}
 
   .stats-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:16px 0 10px;}
-  .stat-box{background:#F1F5F9;border-radius:16px;padding:12px 8px;text-align:center;box-shadow:0 3px 0 #E2E8F0;}
-  .stat-box.gold{background:#FEF3C7;box-shadow:0 3px 0 #FCD34D;}
-  .stat-box.warn{background:#FEE2E2;box-shadow:0 3px 0 #FECACA;}
+  .stat-box{background:var(--surface-sunken);border:1px solid var(--border);border-radius:16px;padding:12px 8px;text-align:center;box-shadow:none;}
+  .stat-box.gold{background:rgba(251,191,36,0.12);border-color:rgba(251,191,36,0.3);box-shadow:none;}
+  .stat-box.warn{background:rgba(239,68,68,0.1);border-color:rgba(239,68,68,0.25);box-shadow:none;}
   .stat-num{font-family:'Inter',sans-serif;font-weight:800;font-size:22px;color:var(--ink);line-height:1.1;}
   .stat-lbl{font-size:11px;font-weight:800;color:var(--text-dim);text-transform:uppercase;letter-spacing:.03em;margin-top:2px;}
 
@@ -549,7 +549,7 @@
   .m-blink{ animation:blink 4s infinite; transform-origin:center; }
 
   .mascot-bubble{
-    background:#fff;color:var(--ink);font-family:'Inter',sans-serif;font-weight:800;font-size:14px;
+    background:#fff;color:#0F172A;font-family:'Inter',sans-serif;font-weight:800;font-size:14px;
     padding:8px 14px;border-radius:16px 16px 16px 4px;box-shadow:0 4px 0 rgba(0,0,0,0.12);
     max-width:210px;opacity:0;transform:translateY(8px) scale(.9);transition:all .25s cubic-bezier(.28,1.4,.5,1);
     position:relative;margin-bottom:16px;
@@ -711,8 +711,8 @@
   .hero{ text-align:center;padding:6px 0 4px; }
   .hero-badge{
     display:inline-block;font-family:'Inter',sans-serif;font-weight:800;font-size:11px;letter-spacing:.07em;
-    text-transform:uppercase;color:var(--purple);background:#EEF2FF;padding:6px 14px;border-radius:999px;
-    margin-bottom:14px;border:1px solid #E0E7FF;
+    text-transform:uppercase;color:var(--purple);background:var(--surface-sunken);padding:6px 14px;border-radius:999px;
+    margin-bottom:14px;border:1px solid var(--border);
   }
   .hero-title{
     font-family:'Inter',sans-serif;font-weight:800;font-size:clamp(30px,6.5vw,50px);line-height:1.03;
@@ -727,8 +727,8 @@
 
   /* ============ 🔥 OBJECTIF QUOTIDIEN ============ */
   .goal-card{
-    background:linear-gradient(135deg,#EEF2FF,#F0FDFA);
-    border:1px solid #E0E7FF;border-radius:18px;padding:16px 18px;margin:6px 0 14px;
+    background:var(--surface-sunken);
+    border:1px solid var(--border);border-radius:18px;padding:16px 18px;margin:6px 0 14px;
   }
   .goal-top{ display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px; }
   .goal-streak{ display:flex;align-items:baseline;gap:7px; }
@@ -736,14 +736,14 @@
   .goal-streak-num{ font-family:'Inter',sans-serif;font-weight:800;font-size:30px;color:var(--purple);line-height:1; }
   .goal-streak-lbl{ font-weight:800;font-size:13px;color:var(--text-dim); }
   .goal-status{ font-family:'Inter',sans-serif;font-weight:800;font-size:12.5px;padding:7px 13px;border-radius:999px;white-space:nowrap; }
-  .goal-status.done{ background:#D1FAE5;color:var(--green-dark); }
-  .goal-status.todo{ background:#FEF3C7;color:#B45309; }
+  .goal-status.done{ background:rgba(16,185,129,0.15);color:var(--green-dark); }
+  .goal-status.todo{ background:rgba(251,191,36,0.15);color:#B45309; }
   .week-strip{ display:grid;grid-template-columns:repeat(7,1fr);gap:6px; }
   .day-cell{
     display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 2px;border-radius:12px;
-    background:#fff;border:1px solid #EEF1F6;
+    background:var(--surface);border:1px solid var(--border);
   }
-  .day-cell.met{ background:linear-gradient(160deg,#FFF7ED,#FFEDD5);border-color:#FED7AA; }
+  .day-cell.met{ background:rgba(251,191,36,0.14);border-color:rgba(251,146,60,0.4); }
   .day-cell.today{ border:2px solid var(--purple); }
   .day-lbl{ font-size:10px;font-weight:800;color:var(--text-dim);text-transform:uppercase; }
   .day-dot{ font-size:15px;line-height:1;height:17px; }
@@ -753,8 +753,8 @@
   .goal-toast{
     position:fixed;left:50%;top:22px;transform:translateX(-50%) translateY(-140%);
     display:flex;align-items:center;gap:12px;z-index:2000;
-    background:#fff;border-radius:16px;padding:14px 20px;box-shadow:0 16px 40px -12px rgba(15,23,42,0.5);
-    border:1px solid #FED7AA;max-width:90vw;transition:transform .4s cubic-bezier(.28,1.4,.5,1);
+    background:var(--surface);border-radius:16px;padding:14px 20px;box-shadow:var(--shadow-lg);
+    border:1px solid var(--border);max-width:90vw;transition:transform .4s cubic-bezier(.28,1.4,.5,1);
   }
   .goal-toast.show{ transform:translateX(-50%) translateY(0); }
   .goal-toast-fire{ font-size:34px;line-height:1;animation:mascotJump .7s ease; }
@@ -767,7 +767,7 @@
     font-size:clamp(40px,10vw,64px);font-weight:700;margin:10px 0 4px;line-height:1.2;
   }
   .speak-ar-btn{
-    display:block;margin:0 auto 10px;border:none;background:#EEF2FF;color:var(--purple);
+    display:block;margin:0 auto 10px;border:1px solid var(--border);background:var(--surface-sunken);color:var(--purple);
     font-family:'Inter',sans-serif;font-weight:800;font-size:13px;padding:8px 16px;border-radius:999px;cursor:pointer;
     transition:background .15s;
   }
@@ -811,9 +811,9 @@
   .pass-banner{ margin:16px auto 4px;max-width:460px;padding:12px 16px;border-radius:14px;font-weight:800;font-size:14px; }
   .pass-banner.ok{ background:#D1FAE5;color:var(--green-dark); }
   .pass-banner.todo{ background:#FEF3C7;color:#B45309; }
-  .pm-summary{ max-width:420px;margin:16px auto 0;text-align:left;background:#F8FAFC;border-radius:14px;padding:12px 16px; }
+  .pm-summary{ max-width:420px;margin:16px auto 0;text-align:left;background:var(--surface-sunken);border:1px solid var(--border);border-radius:14px;padding:12px 16px; }
   .pm-title{ font-family:'Inter',sans-serif;font-weight:800;font-size:14px;color:var(--ink);margin-bottom:8px;text-align:center; }
-  .pm-row{ display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #EEF1F6;font-weight:700;font-size:13.5px;color:var(--text); }
+  .pm-row{ display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-weight:700;font-size:13.5px;color:var(--text); }
   .pm-row:last-child{ border-bottom:none; }
   .pm-score{ font-weight:800; }
   .pm-score.ok{ color:var(--green-dark); }
@@ -870,33 +870,33 @@
   .combo-line{ margin:10px auto 0;max-width:460px;font-weight:800;font-size:13.5px;color:#B45309;text-align:center; }
 
   /* ============ 🎯 DÉFIS DU JOUR ============ */
-  .quests-card{ background:#fff;border:1px solid #EEF1F6;border-radius:18px;padding:14px 16px;margin:0 0 14px;box-shadow:0 6px 18px -14px rgba(15,23,42,0.4); }
+  .quests-card{ background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:14px 16px;margin:0 0 14px;box-shadow:var(--shadow-sm); }
   .quests-head{ display:flex;align-items:center;justify-content:space-between;font-family:'Inter',sans-serif;font-weight:800;font-size:15px;color:var(--ink);margin-bottom:10px; }
-  .quests-xp{ background:#FEF3C7;color:#B45309;font-size:12.5px;padding:4px 11px;border-radius:999px; }
-  .quests-alldone{ background:#D1FAE5;color:var(--green-dark);font-weight:800;font-size:13px;text-align:center;padding:8px;border-radius:12px;margin-bottom:10px; }
+  .quests-xp{ background:rgba(251,191,36,0.15);color:#B45309;font-size:12.5px;padding:4px 11px;border-radius:999px; }
+  .quests-alldone{ background:rgba(16,185,129,0.15);color:var(--green-dark);font-weight:800;font-size:13px;text-align:center;padding:8px;border-radius:12px;margin-bottom:10px; }
   .quest-row{ display:flex;align-items:center;gap:12px;padding:7px 0; }
   .quest-ic{ font-size:22px;width:30px;text-align:center;flex:none; }
   .quest-main{ flex:1;min-width:0; }
   .quest-label{ font-weight:800;font-size:13px;color:var(--text);margin-bottom:5px; }
-  .quest-bar{ position:relative;height:20px;border-radius:999px;background:#EEF1F6;overflow:hidden; }
+  .quest-bar{ position:relative;height:20px;border-radius:999px;background:var(--surface-sunken);border:1px solid var(--border);overflow:hidden; }
   .quest-bar-fill{ height:100%;border-radius:999px;background:linear-gradient(90deg,var(--green),#5EEAD4);transition:width .5s cubic-bezier(.34,1.56,.64,1); }
-  .quest-bar-txt{ position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:var(--ink); }
+  .quest-bar-txt{ position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:var(--ink);text-shadow:0 1px 2px rgba(0,0,0,0.15); }
 
   .recap-meta{ display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:12px; }
-  .recap-meta-pill{ background:#F1F5F9;color:var(--text);font-weight:800;font-size:13px;padding:7px 15px;border-radius:999px; }
-  .recap-meta-pill.xp{ background:#FEF3C7;color:#B45309; }
+  .recap-meta-pill{ background:var(--surface-sunken);border:1px solid var(--border);color:var(--text);font-weight:800;font-size:13px;padding:7px 15px;border-radius:999px; }
+  .recap-meta-pill.xp{ background:rgba(251,191,36,0.15);border-color:rgba(251,191,36,0.3);color:#B45309; }
 
   .replay-modes{ display:flex;flex-wrap:wrap;gap:8px;justify-content:center; }
   .replay-mode-btn{
-    border:none;background:#F1F5F9;color:var(--text);font-family:'Inter',sans-serif;font-weight:800;font-size:13px;
-    padding:11px 16px;border-radius:12px;cursor:pointer;box-shadow:0 3px 0 #E2E8F0;transition:transform .1s,background .15s;
+    border:1px solid var(--border);background:var(--surface-sunken);color:var(--text);font-family:'Inter',sans-serif;font-weight:700;font-size:13px;
+    padding:11px 16px;border-radius:12px;cursor:pointer;box-shadow:none;transition:transform .1s,background .15s;
     display:inline-flex;align-items:center;gap:7px;
   }
-  .replay-mode-btn:hover{ transform:translateY(-2px);background:#E8EDFF; }
-  .replay-mode-btn:active{ transform:translateY(1px);box-shadow:0 2px 0 #E2E8F0; }
-  .replay-mode-btn.current{ background:#EEF2FF;box-shadow:0 3px 0 #C7D2FE; }
-  .rp-score{ font-size:11px;color:var(--green-dark);background:#D1FAE5;padding:2px 7px;border-radius:999px; }
-  .rp-new{ font-size:11px;color:var(--text-dim);background:#F1F5F9;padding:2px 7px;border-radius:999px; }
+  .replay-mode-btn:hover{ transform:translateY(-2px);background:var(--surface-hover); }
+  .replay-mode-btn:active{ transform:translateY(0); }
+  .replay-mode-btn.current{ background:rgba(80,70,229,0.1);border-color:var(--purple); }
+  .rp-score{ font-size:11px;color:var(--green-dark);background:rgba(16,185,129,0.15);padding:2px 7px;border-radius:999px; }
+  .rp-new{ font-size:11px;color:var(--text-dim);background:var(--surface-sunken);border:1px solid var(--border);padding:2px 7px;border-radius:999px; }
 
   .mult-chip{ background:linear-gradient(135deg,#FDE68A,#FBBF24);color:#7C2D12;animation:multPulse 1.4s ease-in-out infinite; }
   @keyframes multPulse{ 0%,100%{ transform:scale(1);} 50%{ transform:scale(1.06);} }
@@ -2573,7 +2573,7 @@ function renderQuestSettings(){
 
     <div style="display:flex;gap:12px;justify-content:center;margin-top:20px;flex-wrap:wrap;">
       <button class="restart-btn" id="qsSaveBtn">✓ Enregistrer</button>
-      <button class="restart-btn" id="qsResetBtn" style="background:#F1F5F9;color:var(--text);box-shadow:0 4px 0 #E2E8F0;">↺ Valeurs par défaut</button>
+      <button class="restart-btn" id="qsResetBtn" style="background:var(--surface-sunken);border:1px solid var(--border);color:var(--text);box-shadow:none;">↺ Valeurs par défaut</button>
     </div>
   `;
   document.getElementById('backFromQSBtn').addEventListener('click', renderBlockSelect);
@@ -3006,7 +3006,7 @@ function renderReviewEndScreen(){
       <div class="pass-banner ok">✅ ${graduated.length} mot${graduated.length>1?'s':''} maîtrisé${graduated.length>1?'s':''} !</div>` : ''}
       <div style="display:flex;gap:12px;justify-content:center;margin-top:20px;flex-wrap:wrap;">
         ${stillLeft > 0 ? `<button class="restart-btn" id="reviewAgainBtn">🔁 Continuer</button>` : ''}
-        <button class="restart-btn" id="reviewCenterBtn" style="background:#EEF2FF;color:var(--purple);box-shadow:0 4px 0 #C7D2FE;">🎓 Centre d'entraînement</button>
+        <button class="restart-btn" id="reviewCenterBtn" style="background:var(--surface-sunken);border:1px solid var(--border);color:var(--purple);box-shadow:none;">🎓 Centre d'entraînement</button>
         <button class="restart-btn" id="reviewBlocksBtn" style="background:var(--purple);color:#fff;box-shadow:0 4px 0 var(--purple-dark);">← Choisir un autre bloc</button>
       </div>
       ${sessionHistory.length ? buildRecapTableHtml(sessionHistory) : ''}
@@ -3054,8 +3054,8 @@ function renderCustomBlockManage(blockId){
     <div class="question-line">${block.words.length} mot${block.words.length>1?'s':''} · créé le ${formatDateFr(block.createdAt)}</div>
 
     <div style="display:flex;gap:12px;justify-content:center;margin:18px 0;flex-wrap:wrap;">
-      <button class="restart-btn" id="mgPeekBtn" style="background:#EEF2FF;color:var(--purple);box-shadow:0 4px 0 #C7D2FE;">👁 Voir les mots</button>
-      <button class="restart-btn" id="mgRenameBtn" style="background:#F1F5F9;color:var(--text);box-shadow:0 4px 0 #E2E8F0;">✏️ Renommer</button>
+      <button class="restart-btn" id="mgPeekBtn" style="background:var(--surface-sunken);border:1px solid var(--border);color:var(--purple);box-shadow:none;">👁 Voir les mots</button>
+      <button class="restart-btn" id="mgRenameBtn" style="background:var(--surface-sunken);border:1px solid var(--border);color:var(--text);box-shadow:none;">✏️ Renommer</button>
       <button class="restart-btn" id="mgMoveBtn" style="background:#FEF3C7;color:#B45309;box-shadow:0 4px 0 #FCD34D;">↕️ Déplacer</button>
       <button class="restart-btn" id="mgDeleteBtn" style="background:#FEE2E2;color:var(--red-dark);box-shadow:0 4px 0 #FCA5A5;">🗑 Supprimer</button>
     </div>
@@ -3217,8 +3217,8 @@ function renderCustomBlockRecapView(blockId, result, justFinished){
       <div class="replay-modes" id="replayModes"></div>
       <div style="display:flex;gap:12px;justify-content:center;margin-top:14px;flex-wrap:wrap;">
         <button class="restart-btn" id="blocksBtn" style="background:var(--purple);color:#fff;box-shadow:0 4px 0 var(--purple-dark);">← Choisir un autre bloc</button>
-        <button class="restart-btn" id="peekWordsBtn" style="background:#EEF2FF;color:var(--purple);box-shadow:0 4px 0 #C7D2FE;">👁 Voir les mots</button>
-        <button class="restart-btn" id="renameCustomBlockBtn" style="background:#F1F5F9;color:var(--text);box-shadow:0 4px 0 #E2E8F0;">✏️ Renommer</button>
+        <button class="restart-btn" id="peekWordsBtn" style="background:var(--surface-sunken);border:1px solid var(--border);color:var(--purple);box-shadow:none;">👁 Voir les mots</button>
+        <button class="restart-btn" id="renameCustomBlockBtn" style="background:var(--surface-sunken);border:1px solid var(--border);color:var(--text);box-shadow:none;">✏️ Renommer</button>
         <button class="restart-btn" id="moveCustomBlockBtn" style="background:#FEF3C7;color:#B45309;box-shadow:0 4px 0 #FCD34D;">↕️ Déplacer</button>
         <button class="restart-btn" id="deleteCustomBlockBtn" style="background:#FEE2E2;color:var(--red-dark);box-shadow:0 4px 0 #FCA5A5;">🗑 Supprimer ce bloc</button>
       </div>
@@ -3474,7 +3474,7 @@ function renderCustomBlockBuilder(){
     <div class="question-line" style="text-align:left;font-size:12.5px;margin:0 0 8px;">Une ligne par mot, format : <code style="background:#F0ECFF;padding:2px 6px;border-radius:6px;">Français;Arabe;Définition;Exemple</code> — colle-en plusieurs à la fois si tu veux.</div>
     <textarea id="cbCsvInput" class="search-input" rows="4" style="resize:vertical;font-family:monospace;font-size:13px;line-height:1.5;" placeholder="opportunité;فرصة;occasion favorable;Il a saisi cette ~.
 décider;يقرر;faire un choix;Il faut ~ rapidement."></textarea>
-    <button class="mode-chip" id="cbCsvAddBtn" style="background:#EEF2FF;color:var(--purple);margin:10px 0 4px;">➕ Ajouter ces lignes au bloc</button>
+    <button class="mode-chip" id="cbCsvAddBtn" style="background:var(--surface-sunken);border:1px solid var(--border);color:var(--purple);margin:10px 0 4px;">➕ Ajouter ces lignes au bloc</button>
     <div class="csv-status" id="cbCsvStatus" style="min-height:16px;margin-bottom:12px;"></div>
 
     <div style="font-weight:800;color:var(--purple);margin:6px 0 8px;">✅ Mots sélectionnés (<span id="cbSelectedCount">${customBlockDraftWords.length}</span>)</div>
@@ -3991,7 +3991,7 @@ function renderBlockSelect(){
         <span>🎯 Défis du jour</span>
         <span style="display:flex;align-items:center;gap:8px;">
           <span class="quests-xp">⭐ ${xpTotal} pts</span>
-          <button id="questSettingsBtn" title="Personnaliser mes objectifs" style="border:none;background:#F1F5F9;color:var(--purple);width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:13px;">⚙️</button>
+          <button id="questSettingsBtn" title="Personnaliser mes objectifs" style="border:1px solid var(--border);background:var(--surface-sunken);color:var(--purple);width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:13px;">⚙️</button>
         </span>
       </div>
       ${xpMultiplier() > 1 ? `<div class="mult-banner">⚡ Bonus points <b>×${xpMultiplier()}</b> actif — série de ${curStreak} jours ! Joue pour en profiter.</div>` : ''}
@@ -4018,7 +4018,7 @@ function renderBlockSelect(){
       <div class="stat-box warn" id="statReviewBox" style="cursor:pointer;"><div class="stat-num">${toReviewCount}</div><div class="stat-lbl">à revoir</div></div>
     </div>
     <div style="display:flex;gap:10px;justify-content:center;margin:4px 0 6px;flex-wrap:wrap;">
-      <button class="restart-btn" id="trainingCenterBtn" style="display:flex;align-items:center;gap:8px;background:#EEF2FF;color:var(--purple);box-shadow:0 4px 0 #C7D2FE;">
+      <button class="restart-btn" id="trainingCenterBtn" style="display:flex;align-items:center;gap:8px;background:var(--surface-sunken);border:1px solid var(--border);color:var(--purple);box-shadow:none;">
         🎓 Centre d'entraînement
       </button>
       <button class="restart-btn" id="radioBtn" style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#1E1B4B,#3730A3);color:#fff;box-shadow:0 4px 0 #0F172A;">
@@ -4034,7 +4034,7 @@ function renderBlockSelect(){
     <div class="mode-row" id="timerRow"></div>
     <div class="filter-row" id="filterRow"></div>
     <div class="mode-row" style="margin-top:0;">
-      <button class="mode-chip" id="createCustomBlockBtn" style="background:#EEF2FF;color:var(--purple);">🧩 Créer un bloc personnalisé</button>
+      <button class="mode-chip" id="createCustomBlockBtn" style="background:var(--surface-sunken);border:1px solid var(--border);color:var(--purple);">🧩 Créer un bloc personnalisé</button>
     </div>
     <div class="options" id="blockGrid" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr));"></div>
   `;
@@ -5829,8 +5829,8 @@ function renderRecapView(blockIndex, result, justFinished){
       <div class="replay-modes" id="replayModes"></div>
       <div style="display:flex;gap:12px;justify-content:center;margin-top:14px;flex-wrap:wrap;">
         <button class="restart-btn" id="blocksBtn" style="background:var(--purple);color:#fff;box-shadow:0 4px 0 var(--purple-dark);">← Choisir un autre bloc</button>
-        <button class="restart-btn" id="peekWordsBtn" style="background:#EEF2FF;color:var(--purple);box-shadow:0 4px 0 #C7D2FE;">👁 Voir les mots</button>
-        <button class="restart-btn" id="renameBlockBtn" style="background:#F1F5F9;color:var(--text);box-shadow:0 4px 0 #E2E8F0;">✏️ Renommer</button>
+        <button class="restart-btn" id="peekWordsBtn" style="background:var(--surface-sunken);border:1px solid var(--border);color:var(--purple);box-shadow:none;">👁 Voir les mots</button>
+        <button class="restart-btn" id="renameBlockBtn" style="background:var(--surface-sunken);border:1px solid var(--border);color:var(--text);box-shadow:none;">✏️ Renommer</button>
       </div>
       ${history.length ? buildRecapTableHtml(history) : '<div class="sub" style="margin-top:20px;color:#8A8266;">Détail mot par mot indisponible pour cette session (ancienne version).</div>'}
     </div>
