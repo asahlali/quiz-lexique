@@ -2692,6 +2692,66 @@ function loadRadioSpeed(){
 function saveRadioSpeed(v){ try{ localStorage.setItem(nsKey(RADIO_SPEED_KEY), String(v)); }catch(e){} }
 let radioSpeed = loadRadioSpeed();
 
+/* ============ 🎵 MUSIQUE D'AMBIANCE DE LA RADIO (générée, jamais de fichier protégé) ============ */
+const RADIO_MUSIC_KEY = 'lexiqueQuiz::radioMusic';
+function loadRadioMusicPref(){ try{ return localStorage.getItem(RADIO_MUSIC_KEY) !== '0'; }catch(e){ return true; } }
+function saveRadioMusicPref(v){ try{ localStorage.setItem(RADIO_MUSIC_KEY, v ? '1' : '0'); }catch(e){} }
+let radioMusicOn = loadRadioMusicPref();
+let radioAudioCtx = null;
+let radioMusicNodes = null; // { masterGain, filter, timer }
+const RADIO_AMBIENT_SCALE = [130.81, 146.83, 164.81, 196.00, 220.00, 261.63]; // gamme pentatonique douce, grave
+
+function startRadioMusic(){
+  if(!radioMusicOn || radioMusicNodes) return;
+  try{
+    if(!radioAudioCtx){ radioAudioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    if(radioAudioCtx.state === 'suspended'){ radioAudioCtx.resume(); }
+  }catch(e){ return; }
+
+  const ctx = radioAudioCtx;
+  const masterGain = ctx.createGain();
+  masterGain.gain.value = 0;
+  const filter = ctx.createBiquadFilter();
+  filter.type = 'lowpass'; filter.frequency.value = 900;
+  masterGain.connect(filter); filter.connect(ctx.destination);
+  masterGain.gain.linearRampToValueAtTime(0.05, ctx.currentTime + 3); // fade-in très doux, ne couvre jamais la voix
+
+  function playRandomNote(){
+    if(!radioMusicNodes) return;
+    const freq = RADIO_AMBIENT_SCALE[Math.floor(Math.random() * RADIO_AMBIENT_SCALE.length)];
+    const osc = ctx.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    const noteGain = ctx.createGain();
+    noteGain.gain.value = 0;
+    osc.connect(noteGain); noteGain.connect(masterGain);
+    const now = ctx.currentTime;
+    noteGain.gain.linearRampToValueAtTime(0.55, now + 2.2); // attaque lente, façon nappe
+    noteGain.gain.linearRampToValueAtTime(0, now + 7.5);    // longue résorption
+    osc.start(now); osc.stop(now + 7.7);
+    osc.onended = () => { try{ osc.disconnect(); noteGain.disconnect(); }catch(e){} };
+  }
+
+  radioMusicNodes = { masterGain, filter, timer: null };
+  playRandomNote();
+  radioMusicNodes.timer = setInterval(() => {
+    if(!radioMusicNodes) return;
+    playRandomNote();
+    if(Math.random() < 0.45){ setTimeout(playRandomNote, 1100); } // parfois deux notes entrelacées, façon accord
+  }, 3400);
+}
+function stopRadioMusic(){
+  if(!radioMusicNodes) return;
+  const nodes = radioMusicNodes;
+  radioMusicNodes = null;
+  try{
+    nodes.masterGain.gain.cancelScheduledValues(radioAudioCtx.currentTime);
+    nodes.masterGain.gain.linearRampToValueAtTime(0, radioAudioCtx.currentTime + 1);
+  }catch(e){}
+  clearInterval(nodes.timer);
+  setTimeout(() => { try{ nodes.masterGain.disconnect(); nodes.filter.disconnect(); }catch(e){} }, 1200);
+}
+
 let radioState = null; // { playlist, idx, playing, stage, loop, accumSeconds, tickTimer }
 let radioPlayToken = 0; // incrémenté à chaque nouvelle lecture : invalide toute chaîne précédente encore en vol
 let radioSelectedBlocks = new Set(); // clés sélectionnées : "n:0","n:1",... pour normaux, "c:id" pour personnalisés
@@ -2833,6 +2893,9 @@ function renderRadioPlayer(){
         <button class="radio-ctrl-btn" id="radioNextBtn" title="Suivant">⏭</button>
       </div>
       <div class="radio-speed-row" id="radioSpeedRow"></div>
+      <div class="radio-speed-row" style="margin-top:-8px;">
+        <button class="radio-speed-btn ${radioMusicOn ? 'active' : ''}" id="radioMusicToggle">🎵 Musique de fond : ${radioMusicOn ? 'ON' : 'OFF'}</button>
+      </div>
       <div class="radio-timer" id="radioTimer">⏱️ 0 min 00 s écoutées</div>
     </div>
   `;
@@ -2840,6 +2903,13 @@ function renderRadioPlayer(){
   document.getElementById('radioPlayBtn').addEventListener('click', () => radioToggleplay());
   document.getElementById('radioNextBtn').addEventListener('click', () => { window.speechSynthesis.cancel(); radioAdvance(); });
   document.getElementById('radioPrevBtn').addEventListener('click', () => { window.speechSynthesis.cancel(); radioState.idx = Math.max(0, radioState.idx - 1); radioPlayWord(); });
+  document.getElementById('radioMusicToggle').addEventListener('click', (e) => {
+    radioMusicOn = !radioMusicOn;
+    saveRadioMusicPref(radioMusicOn);
+    e.target.classList.toggle('active', radioMusicOn);
+    e.target.textContent = `🎵 Musique de fond : ${radioMusicOn ? 'ON' : 'OFF'}`;
+    if(radioMusicOn && radioState && radioState.playing){ startRadioMusic(); } else { stopRadioMusic(); }
+  });
 
   const speedRow = document.getElementById('radioSpeedRow');
   speedRow.innerHTML = `<span class="radio-speed-label">🎚️ Vitesse</span>` + RADIO_SPEEDS.map(s =>
@@ -2896,10 +2966,12 @@ function radioToggleplay(forcePlay){
     if(!radioState.tickTimer){
       radioState.tickTimer = setInterval(radioTick, 5000);
     }
+    startRadioMusic();
     radioPlayWord();
   } else {
     window.speechSynthesis.cancel();
     radioFlushTime();
+    stopRadioMusic();
   }
 }
 
@@ -2983,6 +3055,7 @@ function stopRadio(goHome){
     if(radioState.tickTimer){ clearInterval(radioState.tickTimer); }
   }
   window.speechSynthesis.cancel();
+  stopRadioMusic();
   radioState = null;
   const card = document.getElementById('quizCard');
   if(card){ card.classList.remove('radio-card'); }
