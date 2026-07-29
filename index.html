@@ -129,7 +129,7 @@
     box-shadow:var(--shadow-sm);
   }
   .chip b{color:var(--purple);font-family:'Inter',sans-serif;font-weight:800;}
-  .chip.total{background:var(--purple);color:#fff;border-color:var(--purple-dark);}
+  .chip.total{background:var(--purple);color:#fff;border-color:var(--purple-dark);animation:pop .3s ease;}
 
   .progress-track{
     height:16px;border-radius:999px;background:rgba(255,255,255,0.25);margin:20px 0 34px;overflow:hidden;
@@ -185,7 +185,7 @@
     font-family:'Inter',sans-serif;box-shadow:none;
   }
   .opt:hover:not(.disabled){background:var(--surface-hover);border-color:var(--border-strong);transform:translateY(-1px);}
-  .opt:active:not(.disabled){transform:translateY(0);}
+  .opt:active:not(.disabled){transform:scale(.97);}
   .opt.correct{
     background:var(--green);color:#fff;font-weight:700;border-color:var(--green-dark);
     animation:pop .35s ease;
@@ -358,7 +358,7 @@
     font-family:'Inter',sans-serif;box-shadow:var(--shadow-sm);transition:all .12s ease;
   }
   .restart-btn:hover{transform:translateY(-1px);box-shadow:var(--shadow-md);}
-  .restart-btn:active{transform:translateY(0);}
+  .restart-btn:active{transform:scale(.96);}
 
   .filter-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:18px 0 24px;}
   .filter-chip{
@@ -366,6 +366,7 @@
     font-size:12.5px;font-weight:700;cursor:pointer;transition:all .15s ease;font-family:'Inter',sans-serif;
     box-shadow:none;
   }
+  .filter-chip:active{transform:scale(.94);}
   .filter-chip.active{background:var(--purple);color:#fff;border-color:var(--purple-dark);}
 
   .recap-wrap{margin-top:26px;text-align:left;}
@@ -425,6 +426,7 @@
     font-weight:700;font-family:'Inter',sans-serif;font-size:13px;cursor:pointer;
     box-shadow:none;transition:all .15s ease;
   }
+  .mode-chip:active{transform:scale(.95);}
   .mode-chip.active{background:var(--purple);color:#fff;border-color:var(--purple-dark);}
 
   .blank-slot{display:inline-block;min-width:78px;height:1.05em;border-bottom:5px solid var(--pink);vertical-align:middle;margin:0 4px;}
@@ -595,6 +597,11 @@
 
   /* Carte qui entre en glissant, façon deck de cartes */
   .card{ animation:cardIn .38s cubic-bezier(.22,1.2,.4,1); }
+  .card-pop{ animation:cardContentPop .34s cubic-bezier(.22,1.2,.4,1); }
+  @keyframes cardContentPop{
+    0%{ opacity:.3; transform:translateY(8px) scale(.98); }
+    100%{ opacity:1; transform:translateY(0) scale(1); }
+  }
   body.quiz-active #quizCard{ animation:cardSwap .34s cubic-bezier(.22,1.2,.4,1); }
   @keyframes cardIn{ from{ opacity:0; transform:translateY(16px) scale(.97);} to{ opacity:1; transform:translateY(0) scale(1);} }
   @keyframes cardSwap{ from{ opacity:0; transform:translateX(28px) rotate(1.5deg);} to{ opacity:1; transform:translateX(0) rotate(0);} }
@@ -984,6 +991,12 @@
     0%{ transform:rotate(0) scale(1);}
     50%{ transform:rotate(180deg) scale(.85);}
     100%{ transform:rotate(360deg) scale(1);}
+  }
+  .mascot.sparkle{ animation:mascotSparkle .9s ease-in-out; }
+  @keyframes mascotSparkle{
+    0%,100%{ transform:scale(1); filter:none; }
+    30%{ transform:scale(1.12) rotate(-4deg); filter:drop-shadow(0 0 10px rgba(251,191,36,0.8)) brightness(1.15); }
+    60%{ transform:scale(1.05) rotate(3deg); filter:drop-shadow(0 0 6px rgba(251,191,36,0.6)) brightness(1.08); }
   }
 
   /* ============ 🎉 GRANDE CÉLÉBRATION DE FIN DE BLOC ============ */
@@ -7176,6 +7189,25 @@ document.getElementById('themeToggle').addEventListener('click', () => {
 
 if(savedCustom){ setStatus(`↺ Lexique personnalisé restauré (${WORDS.length} mots).`, 'ok'); }
 autoApplyStreakFreeze();
+
+/* ============ ✨ ANIMATION AUTOMATIQUE À CHAQUE CHANGEMENT D'ÉCRAN ============ */
+/* Observe la carte principale : dès que son contenu change (n'importe quel écran, partout dans
+   l'app), rejoue une petite animation d'entrée — sans avoir à modifier chaque fonction d'affichage. */
+(function(){
+  const quizCard = document.getElementById('quizCard');
+  if(!quizCard || !window.MutationObserver) return;
+  let raf = null;
+  const observer = new MutationObserver(() => {
+    if(raf){ return; } // évite les doublons si plusieurs mutations arrivent dans la même frame
+    raf = requestAnimationFrame(() => {
+      raf = null;
+      quizCard.classList.remove('card-pop');
+      void quizCard.offsetWidth;
+      quizCard.classList.add('card-pop');
+    });
+  });
+  observer.observe(quizCard, { childList: true });
+})();
 renderBlockSelect();
 if(getSyncUrl()){ showSyncOverlay('Chargement de tes données…'); }
 autoSyncOnLoad();
@@ -7241,19 +7273,27 @@ setInterval(() => {
 
 // Encouragements et animations aléatoires de la mascotte pendant le jeu
 function scheduleMascotAntics(){
-  const delay = 6000 + Math.random() * 9000; // entre 6 et 15 secondes, jamais deux fois pareil
+  const delay = 3500 + Math.random() * 6000; // entre 3,5 et 9,5 secondes : la mascotte est bien plus vivante
   setTimeout(() => {
     if(document.body.classList.contains('quiz-active') && !ttsSpeaking){
       const r = Math.random();
-      if(r < 0.20) mascotDance();
-      else if(r < 0.42) mascotRoam();
-      else if(r < 0.60) mascotPeekaboo();
-      else if(r < 0.72) mascotSpin();
-      else if(r < 0.92) mascotCheer();
+      if(r < 0.18) mascotDance();
+      else if(r < 0.36) mascotRoam();
+      else if(r < 0.52) mascotPeekaboo();
+      else if(r < 0.66) mascotSpin();
+      else if(r < 0.80) mascotSparkle();
+      else if(r < 0.94) mascotCheer();
       else mascotWave();
     }
     scheduleMascotAntics();
   }, delay);
+}
+/* Petit scintillement joyeux — variante rapide entre deux autres animations. */
+function mascotSparkle(){
+  const m = document.getElementById('mascot');
+  if(!m || !document.body.classList.contains('quiz-active')) return;
+  m.classList.remove('sparkle'); void m.offsetWidth; m.classList.add('sparkle');
+  setTimeout(() => m.classList.remove('sparkle'), 900);
 }
 scheduleMascotAntics();
 </script>
