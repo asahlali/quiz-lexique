@@ -236,6 +236,7 @@
   .radio-stage-label{ font-family:'Inter',sans-serif;font-weight:800;font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;color:#A5B4FC;margin-bottom:10px; }
   .radio-word{ font-family:'Inter',sans-serif;font-weight:800;font-size:clamp(28px,7vw,44px);line-height:1.2;color:#fff;margin-bottom:8px;min-height:1.3em; }
   .radio-word.radio-word-ar{ font-family:'Changa',sans-serif;direction:rtl; }
+  .radio-word.radio-word-def{ font-size:clamp(18px,4.2vw,24px);font-weight:600;line-height:1.4;max-width:480px;margin:0 auto 8px; }
   .radio-sub{ font-size:14px;font-weight:600;color:rgba(255,255,255,0.65);margin-bottom:22px;max-width:420px; }
   .radio-progress-track{ width:100%;max-width:340px;height:6px;border-radius:999px;background:rgba(255,255,255,0.12);overflow:hidden;margin-bottom:10px; }
   .radio-progress-fill{ height:100%;border-radius:999px;background:linear-gradient(90deg,#38BDF8,#8B5CF6);transition:width .4s ease; }
@@ -2941,13 +2942,15 @@ function updateRadioUI(){
   const progressFill = document.getElementById('radioProgressFill');
 
   if(stageLabel){
-    stageLabel.textContent = radioState.stage === 'fr' ? '🇫🇷 Français' : radioState.stage === 'ar' ? '🕌 Arabe' : '💬 Phrase complète';
+    const labels = { fr:'🇫🇷 Français', def:'📖 Définition', ar:'🕌 Arabe', ex:'💬 Phrase complète' };
+    stageLabel.textContent = labels[radioState.stage] || labels.fr;
   }
   if(wordEl){
-    wordEl.textContent = radioState.stage === 'ar' ? w.ar : radioState.stage === 'ex' ? w.ex.replace(/~/g, w.fr) : w.fr;
-    wordEl.className = 'radio-word' + (radioState.stage === 'ar' ? ' radio-word-ar' : '');
+    const texts = { fr: w.fr, def: w.def, ar: w.ar, ex: w.ex.replace(/~/g, w.fr) };
+    wordEl.textContent = texts[radioState.stage] || w.fr;
+    wordEl.className = 'radio-word' + (radioState.stage === 'ar' ? ' radio-word-ar' : '') + (radioState.stage === 'def' ? ' radio-word-def' : '');
   }
-  if(subEl){ subEl.textContent = w.def || ''; }
+  if(subEl){ subEl.textContent = radioState.stage === 'def' ? '' : (w.def || ''); }
   if(metaEl){ metaEl.textContent = `${escapeHtml(w.cat)} · mot ${radioState.idx + 1} / ${radioState.playlist.length}`; }
   if(playBtn){ playBtn.textContent = radioState.playing ? '⏸' : '▶'; }
   if(eq){ eq.classList.toggle('playing', !!radioState.playing); }
@@ -3005,26 +3008,41 @@ function radioPlayWord(){
     setTimeout(() => {
       if(myToken !== radioPlayToken) return;
       if(!radioState || !radioState.playing) return;
-      radioState.stage = 'ar';
-      updateRadioUI();
-      speak(w.ar, 'ar-SA', () => {
+      const goToArabic = () => {
         if(myToken !== radioPlayToken) return;
         if(!radioState || !radioState.playing) return;
-        setTimeout(() => {
+        radioState.stage = 'ar';
+        updateRadioUI();
+        speak(w.ar, 'ar-SA', () => {
           if(myToken !== radioPlayToken) return;
           if(!radioState || !radioState.playing) return;
-          radioState.stage = 'ex';
-          updateRadioUI();
-          speak(w.ex.replace(/~/g, w.fr), 'fr-FR', () => {
+          setTimeout(() => {
             if(myToken !== radioPlayToken) return;
             if(!radioState || !radioState.playing) return;
-            setTimeout(() => {
+            radioState.stage = 'ex';
+            updateRadioUI();
+            speak(w.ex.replace(/~/g, w.fr), 'fr-FR', () => {
               if(myToken !== radioPlayToken) return;
-              radioAdvance();
-            }, 1000);
-          }, radioSpeed);
-        }, arabicVoiceOk ? 550 : 1600); // pas de voix arabe : laisse le temps de LIRE le mot affiché avant de passer à la suite
-      }, radioSpeed);
+              if(!radioState || !radioState.playing) return;
+              setTimeout(() => {
+                if(myToken !== radioPlayToken) return;
+                radioAdvance();
+              }, 1000);
+            }, radioSpeed);
+          }, arabicVoiceOk ? 550 : 1600); // pas de voix arabe : laisse le temps de LIRE le mot affiché avant de passer à la suite
+        }, radioSpeed);
+      };
+      if(w.def){
+        radioState.stage = 'def';
+        updateRadioUI();
+        speak(w.def, 'fr-FR', () => {
+          if(myToken !== radioPlayToken) return;
+          if(!radioState || !radioState.playing) return;
+          setTimeout(goToArabic, 550);
+        }, radioSpeed);
+      } else {
+        goToArabic();
+      }
     }, 550);
   }, radioSpeed);
 }
