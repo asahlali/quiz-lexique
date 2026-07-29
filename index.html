@@ -261,6 +261,41 @@
   .radio-speed-btn:hover{ background:rgba(255,255,255,0.16);transform:translateY(-1px); }
   .radio-speed-btn.active{ background:linear-gradient(135deg,#38BDF8,#8B5CF6);color:#fff; }
   .radio-timer{ font-size:12px;font-weight:700;color:rgba(255,255,255,0.5); }
+
+  /* ============ ⚡ BLITZ ============ */
+  .blitz-time-display{ text-align:center;font-family:'Inter',sans-serif;font-weight:800;font-size:15px;color:#EF4444;margin:6px 0 2px; }
+  .blitz-score-display{ text-align:center;font-family:'Inter',sans-serif;font-weight:800;font-size:13px;color:#F59E0B;margin-bottom:10px; }
+
+  /* ============ 👆 SWIPE & 🃏 FLASHCARDS ============ */
+  .swipe-zone{ position:relative;display:flex;justify-content:center;padding:10px 0 4px;touch-action:none; }
+  .swipe-card{
+    width:100%;max-width:340px;min-height:220px;border-radius:20px;background:var(--surface);
+    border:1px solid var(--border);box-shadow:var(--shadow-lg);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+    padding:24px;cursor:grab;user-select:none;-webkit-user-select:none;
+  }
+  .swipe-card:active{ cursor:grabbing; }
+  .swipe-card-fr{ font-family:'Inter',sans-serif;font-weight:800;font-size:clamp(24px,6vw,32px);color:var(--text);text-align:center; }
+  .swipe-card-ar{ font-family:'Changa',sans-serif;direction:rtl;color:var(--purple);font-weight:700;font-size:clamp(22px,5.5vw,30px);text-align:center; }
+  .flash-back{ display:flex;flex-direction:column;align-items:center;gap:10px; }
+  .flash-def{ font-size:13.5px;color:var(--text-dim);font-weight:600;text-align:center;max-width:280px; }
+  .swipe-stamp{
+    position:absolute;top:18px;font-family:'Inter',sans-serif;font-weight:900;font-size:20px;letter-spacing:.05em;
+    border:4px solid;border-radius:10px;padding:4px 14px;opacity:0;pointer-events:none;transform:rotate(-12deg);
+  }
+  .swipe-stamp-yes{ left:20px;color:var(--green);border-color:var(--green); }
+  .swipe-stamp-no{ right:20px;color:var(--red);border-color:var(--red);transform:rotate(12deg); }
+
+  /* ============ 🏅 BADGES ============ */
+  .badge-tile{
+    display:flex;flex-direction:column;align-items:center;gap:8px;padding:18px 10px;border-radius:14px;
+    border:1px solid var(--border);background:var(--surface-sunken);text-align:center;
+  }
+  .badge-tile.unlocked{ background:linear-gradient(160deg,rgba(251,191,36,0.14),rgba(245,158,11,0.08));border-color:rgba(245,158,11,0.35); }
+  .badge-tile.locked{ opacity:.55; }
+  .badge-icon{ font-size:32px;line-height:1; }
+  .badge-label{ font-family:'Inter',sans-serif;font-weight:700;font-size:12px;color:var(--text); }
+
   .opt-key{
     display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;
     padding:0 6px;border-radius:7px;background:#fff;color:var(--purple);
@@ -735,6 +770,10 @@
   .goal-fire{ font-size:26px;line-height:1;filter:drop-shadow(0 2px 3px rgba(0,0,0,0.15)); }
   .goal-streak-num{ font-family:'Inter',sans-serif;font-weight:800;font-size:30px;color:var(--purple);line-height:1; }
   .goal-streak-lbl{ font-weight:800;font-size:13px;color:var(--text-dim); }
+  .goal-freeze-badge{
+    font-size:12px;font-weight:800;color:#0EA5E9;background:rgba(14,165,233,0.12);
+    border:1px solid rgba(14,165,233,0.3);padding:3px 9px;border-radius:999px;margin-left:4px;
+  }
   .goal-status{ font-family:'Inter',sans-serif;font-weight:800;font-size:12.5px;padding:7px 13px;border-radius:999px;white-space:nowrap; }
   .goal-status.done{ background:rgba(16,185,129,0.15);color:var(--green-dark); }
   .goal-status.todo{ background:rgba(251,191,36,0.15);color:#B45309; }
@@ -1505,14 +1544,47 @@ function recordDailyActivity(){
   const before = dailyLog[k] || 0;
   dailyLog[k] = before + 1;
   saveDailyLog();
-  return before < DAILY_GOAL && dailyLog[k] >= DAILY_GOAL;
+  const justMet = before < DAILY_GOAL && dailyLog[k] >= DAILY_GOAL;
+  if(justMet){ grantStreakFreezeIfMilestone(computeStreak()); }
+  return justMet;
 }
-function goalMetOn(dateKey){ return (dailyLog[dateKey] || 0) >= DAILY_GOAL; }
+const STREAK_FREEZE_KEY = 'lexiqueQuiz::streakFreezes';
+const FROZEN_DAYS_KEY = 'lexiqueQuiz::frozenDays';
+function loadStreakFreezes(){ try{ const v = parseInt(localStorage.getItem(nsKey(STREAK_FREEZE_KEY)), 10); return isNaN(v) ? 2 : v; }catch(e){ return 2; } }
+function saveStreakFreezes(){ try{ localStorage.setItem(nsKey(STREAK_FREEZE_KEY), String(streakFreezes)); }catch(e){} }
+function loadFrozenDays(){ try{ const raw = localStorage.getItem(nsKey(FROZEN_DAYS_KEY)); return raw ? JSON.parse(raw) : {}; }catch(e){ return {}; } }
+function saveFrozenDays(){ try{ localStorage.setItem(nsKey(FROZEN_DAYS_KEY), JSON.stringify(frozenDays)); }catch(e){} }
+let streakFreezes = loadStreakFreezes();
+let frozenDays = loadFrozenDays();
+function goalMetOn(dateKey){ return (dailyLog[dateKey] || 0) >= DAILY_GOAL || !!frozenDays[dateKey]; }
+/* ❄️ Gèle automatiquement un jour manqué (hier) si une série était en cours et qu'il reste des vies,
+   pour ne pas perdre la série d'affilée. Appelé une fois au chargement de l'app. */
+function autoApplyStreakFreeze(){
+  const y = new Date(); y.setDate(y.getDate() - 1);
+  const yKey = todayKey(y);
+  if(goalMetOn(yKey)) return; // hier était déjà bon (ou déjà gelé)
+  const beforeY = new Date(y); beforeY.setDate(beforeY.getDate() - 1);
+  if(!goalMetOn(todayKey(beforeY))) return; // pas de série active à protéger avant-hier
+  if(streakFreezes <= 0) return;
+  frozenDays[yKey] = true;
+  streakFreezes--;
+  saveFrozenDays();
+  saveStreakFreezes();
+  cloudAutoPush();
+}
+/* 🎁 Gagne une nouvelle vie tous les 7 jours d'affilée (une seule fois par palier). */
+function grantStreakFreezeIfMilestone(streak){
+  const lastGranted = parseInt(localStorage.getItem(nsKey('lexiqueQuiz::lastFreezeGrant')) || '0', 10);
+  if(streak > 0 && streak % 7 === 0 && streak > lastGranted){
+    streakFreezes++;
+    saveStreakFreezes();
+    try{ localStorage.setItem(nsKey('lexiqueQuiz::lastFreezeGrant'), String(streak)); }catch(e){}
+    cloudAutoPush();
+    return true;
+  }
+  return false;
+}
 
-/* ---- Stats quotidiennes détaillées : temps, réussites ≥90%, points (XP) ---- */
-const DAILY_STATS_KEY = 'lexiqueQuiz::dailyStats';
-const XP_TOTAL_KEY = 'lexiqueQuiz::xpTotal';
-const QUEST_TIME_GOAL_DEFAULT = 300;   // 5 minutes
 const QUEST_PASS_GOAL_DEFAULT = 2;     // 2 leçons ≥90%
 const QUEST_LESSON_GOAL_DEFAULT = 1;   // 1 leçon
 const QUEST_SETTINGS_KEY = 'lexiqueQuiz::questSettings';
@@ -2904,6 +2976,706 @@ function stopRadio(goHome){
   if(goHome){ renderBlockSelect(); }
 }
 
+/* ============ ⚡ BLITZ 60 SECONDES ============ */
+const BLITZ_BEST_KEY = 'lexiqueQuiz::blitzBest';
+function loadBlitzBest(){ try{ return parseInt(localStorage.getItem(nsKey(BLITZ_BEST_KEY)), 10) || 0; }catch(e){ return 0; } }
+function saveBlitzBest(v){ try{ localStorage.setItem(nsKey(BLITZ_BEST_KEY), String(v)); }catch(e){} }
+let blitzBest = loadBlitzBest();
+let blitzState = null; // { pool, idx, score, combo, bestCombo, timeLeft, timerId, answered }
+
+function renderBlitzIntro(){
+  clearQuestionTimer();
+  document.body.classList.remove('quiz-active');
+  currentBlock = null;
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromBlitzBtn" style="cursor:pointer;">← Retour aux blocs</button>`;
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('footerNote').textContent = '';
+
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="cat-tag">⚡ Blitz</div>
+    <div class="word-fr" style="font-size:clamp(24px,4.5vw,32px);">60 secondes, le plus de bonnes réponses possible !</div>
+    <div class="question-line">Un mot, 4 choix, réponds le plus vite possible — ça enchaîne automatiquement. Ton record : <b>${blitzBest}</b> bonnes réponses.</div>
+    <button class="restart-btn" id="blitzStartBtn" style="margin-top:20px;background:linear-gradient(135deg,#F59E0B,#EF4444);border-color:#B45309;">▶ Démarrer le Blitz</button>
+  `;
+  document.getElementById('backFromBlitzBtn').addEventListener('click', renderBlockSelect);
+  document.getElementById('blitzStartBtn').addEventListener('click', startBlitz);
+}
+
+function startBlitz(){
+  const pool = shuffle(WORDS.slice());
+  blitzState = { pool, idx: 0, score: 0, combo: 0, bestCombo: 0, timeLeft: 60, answered: false };
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="blitzExitBtn" style="cursor:pointer;">← Quitter le Blitz</button>`;
+  document.getElementById('blitzExitBtn') && document.getElementById('blitzExitBtn').addEventListener('click', () => { stopBlitz(); renderBlockSelect(); });
+  blitzState.timerId = setInterval(() => {
+    blitzState.timeLeft--;
+    updateBlitzTimerUI();
+    if(blitzState.timeLeft <= 0){ endBlitz(); }
+  }, 1000);
+  renderBlitzCard();
+}
+
+function updateBlitzTimerUI(){
+  const el = document.getElementById('blitzTimeLeft');
+  if(el){ el.textContent = blitzState.timeLeft; }
+  const fill = document.getElementById('blitzTimeFill');
+  if(fill){ fill.style.width = Math.max(0, (blitzState.timeLeft / 60) * 100) + '%'; }
+}
+
+function renderBlitzCard(){
+  if(!blitzState) return;
+  if(blitzState.idx >= blitzState.pool.length){ blitzState.pool = blitzState.pool.concat(shuffle(WORDS.slice())); }
+  const word = blitzState.pool[blitzState.idx];
+  blitzState.answered = false;
+  const options = makeOptions(word);
+  blitzState.currentOptions = options;
+
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="cat-tag">⚡ Blitz · 🔥 combo ${blitzState.combo}</div>
+    <div class="chrono-timer-track"><div class="chrono-timer-fill" id="blitzTimeFill" style="background:linear-gradient(90deg,#F59E0B,#EF4444);"></div></div>
+    <div class="blitz-time-display">⏱️ <span id="blitzTimeLeft">${blitzState.timeLeft}</span>s</div>
+    <div class="blitz-score-display">⭐ ${blitzState.score}</div>
+    <div class="word-fr" style="text-align:center;">${escapeHtml(word.fr)}</div>
+    <div class="options" id="optionsWrap">
+      ${options.map((o,i) => `<button class="opt" data-i="${i}"><span class="opt-key">${i+1}</span>${escapeHtml(o.ar)}</button>`).join('')}
+    </div>
+  `;
+  document.querySelectorAll('#optionsWrap .opt').forEach(btn => {
+    btn.addEventListener('click', () => handleBlitzAnswer(parseInt(btn.dataset.i)));
+  });
+  updateBlitzTimerUI();
+}
+
+function handleBlitzAnswer(i){
+  if(!blitzState || blitzState.answered) return;
+  blitzState.answered = true;
+  const word = blitzState.pool[blitzState.idx];
+  const options = blitzState.currentOptions;
+  const isCorrect = options[i].fr === word.fr;
+  const btns = document.querySelectorAll('#optionsWrap .opt');
+  btns.forEach((b, idx) => { b.classList.add('disabled'); if(options[idx].fr === word.fr){ b.classList.add('correct'); } });
+  if(!isCorrect && btns[i]){ btns[i].classList.add('wrong'); }
+
+  if(isCorrect){
+    blitzState.score++;
+    blitzState.combo++;
+    if(blitzState.combo > blitzState.bestCombo){ blitzState.bestCombo = blitzState.combo; }
+    playCorrectSound(); reactMascot('ok');
+  } else {
+    blitzState.combo = 0;
+    playWrongSound(); reactMascot('ko');
+  }
+  recordWordStat(word.fr, isCorrect);
+  blitzState.idx++;
+  setTimeout(() => { if(blitzState){ renderBlitzCard(); } }, 380); // enchaîne vite, esprit arcade
+}
+
+function stopBlitz(){
+  if(blitzState && blitzState.timerId){ clearInterval(blitzState.timerId); }
+  blitzState = null;
+}
+
+function endBlitz(){
+  const score = blitzState ? blitzState.score : 0;
+  const bestCombo = blitzState ? blitzState.bestCombo : 0;
+  stopBlitz();
+  const isNewBest = score > blitzBest;
+  if(isNewBest){ blitzBest = score; saveBlitzBest(blitzBest); cloudAutoPush(); }
+  recordDailyActivity();
+  recordDailyStats(60, false, score * 2);
+
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="blitzBackBtn" style="cursor:pointer;">← Retour aux blocs</button>`;
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="end-screen">
+      <div class="cat-tag">⚡ Blitz terminé !</div>
+      <div class="big">${score}</div>
+      <div class="sub" style="color:var(--text-dim);">bonne${score>1?'s':''} réponse${score>1?'s':''} en 60 secondes · meilleur combo : ${bestCombo}</div>
+      ${isNewBest ? `<div class="pass-banner ok">🏆 Nouveau record !</div>` : `<div class="pass-banner todo">Record actuel : ${blitzBest}</div>`}
+      <div style="display:flex;gap:12px;justify-content:center;margin-top:20px;flex-wrap:wrap;">
+        <button class="restart-btn" id="blitzAgainBtn" style="background:linear-gradient(135deg,#F59E0B,#EF4444);border-color:#B45309;">⚡ Rejouer</button>
+        <button class="restart-btn" id="blitzHomeBtn" style="background:var(--surface-sunken);border:1px solid var(--border);color:var(--text);">← Choisir un autre bloc</button>
+      </div>
+    </div>
+  `;
+  if(isNewBest){ launchConfetti(); }
+  document.getElementById('blitzBackBtn').addEventListener('click', renderBlockSelect);
+  document.getElementById('blitzHomeBtn').addEventListener('click', renderBlockSelect);
+  document.getElementById('blitzAgainBtn').addEventListener('click', startBlitz);
+}
+
+/* ============ 👆 MODE SWIPE ============ */
+const SWIPE_SESSION_SIZE = 20;
+let swipeState = null; // { cards, idx, score, dragging... }
+
+function renderSwipeIntro(){
+  clearQuestionTimer();
+  document.body.classList.remove('quiz-active');
+  currentBlock = null;
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromSwipeBtn" style="cursor:pointer;">← Retour aux blocs</button>`;
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('footerNote').textContent = '';
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="cat-tag">👆 Swipe</div>
+    <div class="word-fr" style="font-size:clamp(24px,4.5vw,32px);">Vrai ou faux, en un geste</div>
+    <div class="question-line">Un mot + une traduction. Glisse à <b>droite</b> si c'est juste, à <b>gauche</b> si c'est faux — ${SWIPE_SESSION_SIZE} cartes, le plus vite possible.</div>
+    <button class="restart-btn" id="swipeStartBtn" style="margin-top:20px;background:linear-gradient(135deg,#EC4899,#8B5CF6);border-color:#6D28D9;">▶ Démarrer</button>
+  `;
+  document.getElementById('backFromSwipeBtn').addEventListener('click', renderBlockSelect);
+  document.getElementById('swipeStartBtn').addEventListener('click', startSwipe);
+}
+
+function startSwipe(){
+  const pool = shuffle(WORDS.slice()).slice(0, SWIPE_SESSION_SIZE);
+  const cards = pool.map(w => {
+    const isTrue = Math.random() < 0.5;
+    let shownAr = w.ar;
+    if(!isTrue){
+      const other = WORDS[Math.floor(Math.random() * WORDS.length)];
+      shownAr = (other.fr !== w.fr) ? other.ar : w.ar;
+    }
+    return { word: w, shownAr, isTrue: shownAr === w.ar };
+  });
+  swipeState = { cards, idx: 0, score: 0, startTime: Date.now() };
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="swipeExitBtn" style="cursor:pointer;">← Quitter</button>`;
+  document.getElementById('swipeExitBtn').addEventListener('click', renderBlockSelect);
+  renderSwipeCard();
+}
+
+function renderSwipeCard(){
+  if(!swipeState) return;
+  if(swipeState.idx >= swipeState.cards.length){ endSwipe(); return; }
+  const c = swipeState.cards[swipeState.idx];
+  document.getElementById('progressFill').style.width = `${Math.round((swipeState.idx/swipeState.cards.length)*100)}%`;
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="cat-tag">👆 Swipe · ${swipeState.idx+1}/${swipeState.cards.length} · ⭐ ${swipeState.score}</div>
+    <div class="swipe-zone" id="swipeZone">
+      <div class="swipe-card" id="swipeCard">
+        <div class="swipe-card-fr">${escapeHtml(c.word.fr)}</div>
+        <div class="swipe-card-ar">${escapeHtml(c.shownAr)}</div>
+      </div>
+      <div class="swipe-stamp swipe-stamp-yes" id="swipeStampYes">JUSTE</div>
+      <div class="swipe-stamp swipe-stamp-no" id="swipeStampNo">FAUX</div>
+    </div>
+    <div class="mode-row" style="margin-top:16px;">
+      <button class="mode-chip" id="swipeNoBtn" style="background:rgba(239,68,68,0.12);color:var(--red-dark);border-color:rgba(239,68,68,0.3);">❌ Faux</button>
+      <button class="mode-chip" id="swipeYesBtn" style="background:rgba(16,185,129,0.12);color:var(--green-dark);border-color:rgba(16,185,129,0.3);">✅ Juste</button>
+    </div>
+  `;
+  document.getElementById('swipeYesBtn').addEventListener('click', () => resolveSwipe(true));
+  document.getElementById('swipeNoBtn').addEventListener('click', () => resolveSwipe(false));
+  attachSwipeGesture(document.getElementById('swipeCard'), null);
+}
+
+function attachSwipeGesture(el, onTap){
+  if(!el) return;
+  let startX = 0, startY = 0, dragging = false, resolved = false, moved = false;
+  el.addEventListener('pointerdown', (e) => {
+    startX = e.clientX; startY = e.clientY; dragging = true; resolved = false; moved = false;
+    el.style.transition = 'none';
+  });
+  el.addEventListener('pointermove', (e) => {
+    if(!dragging) return;
+    const dx = e.clientX - startX, dy = e.clientY - startY;
+    if(Math.abs(dx) > 6 || Math.abs(dy) > 6){ moved = true; }
+    el.style.transform = `translate(${dx}px, ${dy}px) rotate(${dx/18}deg)`;
+    const yesStamp = document.getElementById('swipeStampYes'), noStamp = document.getElementById('swipeStampNo');
+    if(yesStamp){ yesStamp.style.opacity = Math.max(0, Math.min(1, dx/80)); }
+    if(noStamp){ noStamp.style.opacity = Math.max(0, Math.min(1, -dx/80)); }
+  });
+  const endDrag = (e) => {
+    if(!dragging) return;
+    dragging = false;
+    const dx = (e.clientX || startX) - startX;
+    el.style.transition = 'transform .25s ease';
+    if(Math.abs(dx) > 90 && !resolved){
+      resolved = true;
+      el.style.transform = `translate(${dx > 0 ? 500 : -500}px, 0) rotate(${dx > 0 ? 30 : -30}deg)`;
+      setTimeout(() => resolveSwipe(dx > 0), 150);
+    } else if(!moved && onTap){
+      el.style.transform = '';
+      onTap();
+    } else {
+      el.style.transform = '';
+      const yesStamp = document.getElementById('swipeStampYes'), noStamp = document.getElementById('swipeStampNo');
+      if(yesStamp){ yesStamp.style.opacity = 0; }
+      if(noStamp){ noStamp.style.opacity = 0; }
+    }
+  };
+  el.addEventListener('pointerup', endDrag);
+  el.addEventListener('pointerleave', () => { if(dragging && !resolved){ dragging = false; } });
+}
+
+function resolveSwipe(userSaysTrue){
+  if(!swipeState) return;
+  const c = swipeState.cards[swipeState.idx];
+  if(!c || c.__resolved) return;
+  c.__resolved = true;
+  const isCorrect = userSaysTrue === c.isTrue;
+  if(isCorrect){ swipeState.score++; playCorrectSound(); reactMascot('ok'); }
+  else { playWrongSound(); reactMascot('ko'); }
+  recordWordStat(c.word.fr, isCorrect);
+  swipeState.idx++;
+  renderSwipeCard();
+}
+
+function endSwipe(){
+  const score = swipeState.score, total = swipeState.cards.length;
+  const durationSec = Math.max(1, Math.round((Date.now() - swipeState.startTime)/1000));
+  swipeState = null;
+  recordDailyActivity();
+  recordDailyStats(durationSec, false, score * 2);
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="swipeBackBtn" style="cursor:pointer;">← Retour aux blocs</button>`;
+  document.getElementById('progressFill').style.width = '100%';
+  const card = document.getElementById('quizCard');
+  const pct = Math.round((score/total)*100);
+  card.innerHTML = `
+    <div class="end-screen">
+      <div class="cat-tag">👆 Swipe terminé !</div>
+      <div class="big">${score} / ${total}</div>
+      <div class="sub" style="color:var(--text-dim);">${pct}% de bonnes réponses</div>
+      <div style="display:flex;gap:12px;justify-content:center;margin-top:20px;flex-wrap:wrap;">
+        <button class="restart-btn" id="swipeAgainBtn" style="background:linear-gradient(135deg,#EC4899,#8B5CF6);border-color:#6D28D9;">👆 Rejouer</button>
+        <button class="restart-btn" id="swipeHomeBtn" style="background:var(--surface-sunken);border:1px solid var(--border);color:var(--text);">← Choisir un autre bloc</button>
+      </div>
+    </div>
+  `;
+  if(pct >= 80){ launchConfetti(); }
+  document.getElementById('swipeBackBtn').addEventListener('click', renderBlockSelect);
+  document.getElementById('swipeHomeBtn').addEventListener('click', renderBlockSelect);
+  document.getElementById('swipeAgainBtn').addEventListener('click', startSwipe);
+}
+
+/* ============ 🃏 FLASHCARDS ============ */
+const FLASHCARD_SESSION_SIZE = 20;
+let flashState = null;
+
+function renderFlashcardsIntro(){
+  clearQuestionTimer();
+  document.body.classList.remove('quiz-active');
+  currentBlock = null;
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromFlashBtn" style="cursor:pointer;">← Retour aux blocs</button>`;
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('footerNote').textContent = '';
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="cat-tag">🃏 Flashcards</div>
+    <div class="word-fr" style="font-size:clamp(24px,4.5vw,32px);">Révision libre, à ton rythme</div>
+    <div class="question-line">Tape la carte pour la retourner. Glisse à droite si tu savais, à gauche si tu dois revoir — ${FLASHCARD_SESSION_SIZE} cartes.</div>
+    <button class="restart-btn" id="flashStartBtn" style="margin-top:20px;background:linear-gradient(135deg,#0EA5A4,#0891B2);border-color:#0E7490;">▶ Démarrer</button>
+  `;
+  document.getElementById('backFromFlashBtn').addEventListener('click', renderBlockSelect);
+  document.getElementById('flashStartBtn').addEventListener('click', startFlashcards);
+}
+
+function startFlashcards(){
+  const pool = shuffle(WORDS.slice()).slice(0, FLASHCARD_SESSION_SIZE);
+  flashState = { pool, idx: 0, known: 0, review: 0, flipped: false, startTime: Date.now() };
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="flashExitBtn" style="cursor:pointer;">← Quitter</button>`;
+  document.getElementById('flashExitBtn').addEventListener('click', renderBlockSelect);
+  renderFlashCard();
+}
+
+function renderFlashCard(){
+  if(!flashState) return;
+  if(flashState.idx >= flashState.pool.length){ endFlashcards(); return; }
+  const w = flashState.pool[flashState.idx];
+  flashState.flipped = false;
+  document.getElementById('progressFill').style.width = `${Math.round((flashState.idx/flashState.pool.length)*100)}%`;
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="cat-tag">🃏 Flashcards · ${flashState.idx+1}/${flashState.pool.length} · ✓ ${flashState.known} · ↺ ${flashState.review}</div>
+    <div class="swipe-zone" id="swipeZone">
+      <div class="swipe-card flash-card" id="flashCard">
+        <div class="swipe-card-fr" id="flashFront">${escapeHtml(w.fr)}</div>
+        <div class="flash-back" id="flashBack" style="display:none;">
+          <div class="swipe-card-ar" style="font-size:clamp(28px,7vw,42px);">${escapeHtml(w.ar)}</div>
+          <div class="flash-def">${escapeHtml(w.def)}</div>
+        </div>
+      </div>
+      <div class="swipe-stamp swipe-stamp-yes" id="swipeStampYes">SU</div>
+      <div class="swipe-stamp swipe-stamp-no" id="swipeStampNo">À REVOIR</div>
+    </div>
+    <div class="question-line" style="text-align:center;margin-top:10px;">👆 Tape pour retourner · glisse pour noter</div>
+    <div class="mode-row" style="margin-top:10px;">
+      <button class="mode-chip" id="flashReviewBtn" style="background:rgba(239,68,68,0.12);color:var(--red-dark);border-color:rgba(239,68,68,0.3);">↺ À revoir</button>
+      <button class="mode-chip" id="flashKnownBtn" style="background:rgba(16,185,129,0.12);color:var(--green-dark);border-color:rgba(16,185,129,0.3);">✓ Je savais</button>
+    </div>
+  `;
+  document.getElementById('flashKnownBtn').addEventListener('click', () => resolveFlashcard(true));
+  document.getElementById('flashReviewBtn').addEventListener('click', () => resolveFlashcard(false));
+  attachSwipeGesture(document.getElementById('flashCard'), toggleFlashFlip);
+}
+
+function toggleFlashFlip(){
+  if(!flashState) return;
+  flashState.flipped = !flashState.flipped;
+  const front = document.getElementById('flashFront');
+  const back = document.getElementById('flashBack');
+  if(front && back){
+    front.style.display = flashState.flipped ? 'none' : 'block';
+    back.style.display = flashState.flipped ? 'block' : 'none';
+  }
+}
+
+function resolveFlashcard(known){
+  if(!flashState) return;
+  const w = flashState.pool[flashState.idx];
+  if(known){ flashState.known++; } else { flashState.review++; }
+  recordWordStat(w.fr, known);
+  flashState.idx++;
+  renderFlashCard();
+}
+
+function endFlashcards(){
+  const known = flashState.known, review = flashState.review, total = flashState.pool.length;
+  const durationSec = Math.max(1, Math.round((Date.now() - flashState.startTime)/1000));
+  flashState = null;
+  recordDailyActivity();
+  recordDailyStats(durationSec, false, known * 2);
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="flashBackBtn" style="cursor:pointer;">← Retour aux blocs</button>`;
+  document.getElementById('progressFill').style.width = '100%';
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="end-screen">
+      <div class="cat-tag">🃏 Flashcards terminées !</div>
+      <div class="big">${known} / ${total}</div>
+      <div class="sub" style="color:var(--text-dim);">tu savais déjà · ${review} à revoir</div>
+      <div style="display:flex;gap:12px;justify-content:center;margin-top:20px;flex-wrap:wrap;">
+        <button class="restart-btn" id="flashAgainBtn" style="background:linear-gradient(135deg,#0EA5A4,#0891B2);border-color:#0E7490;">🃏 Rejouer</button>
+        <button class="restart-btn" id="flashHomeBtn" style="background:var(--surface-sunken);border:1px solid var(--border);color:var(--text);">← Choisir un autre bloc</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('flashBackBtn').addEventListener('click', renderBlockSelect);
+  document.getElementById('flashHomeBtn').addEventListener('click', renderBlockSelect);
+  document.getElementById('flashAgainBtn').addEventListener('click', startFlashcards);
+}
+
+/* ============ 📅 DÉFI DU JOUR ============ */
+const DAILY_CHALLENGE_SIZE = 10;
+const DAILY_CHALLENGE_KEY = 'lexiqueQuiz::dailyChallenge';
+function loadDailyChallengeLog(){ try{ const raw = localStorage.getItem(nsKey(DAILY_CHALLENGE_KEY)); return raw ? JSON.parse(raw) : {}; }catch(e){ return {}; } }
+function saveDailyChallengeLog(){ try{ localStorage.setItem(nsKey(DAILY_CHALLENGE_KEY), JSON.stringify(dailyChallengeLog)); }catch(e){} }
+let dailyChallengeLog = loadDailyChallengeLog();
+
+function seededRng(seed){
+  let s = seed % 2147483647; if(s <= 0) s += 2147483646;
+  return function(){ s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };
+}
+function seedFromString(str){
+  let h = 0;
+  for(let i=0;i<str.length;i++){ h = (h * 31 + str.charCodeAt(i)) | 0; }
+  return Math.abs(h) || 1;
+}
+function getDailyChallengeWords(){
+  const rng = seededRng(seedFromString(todayKey()));
+  const arr = WORDS.slice();
+  for(let i=arr.length-1;i>0;i--){
+    const j = Math.floor(rng() * (i+1));
+    const tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+  }
+  return arr.slice(0, DAILY_CHALLENGE_SIZE);
+}
+
+let dcState = null;
+
+function renderDailyChallenge(){
+  clearQuestionTimer();
+  document.body.classList.remove('quiz-active');
+  currentBlock = null;
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromDCBtn" style="cursor:pointer;">← Retour aux blocs</button>`;
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('footerNote').textContent = '';
+
+  const k = todayKey();
+  const done = dailyChallengeLog[k];
+  const streakDays = Object.keys(dailyChallengeLog).length;
+  const card = document.getElementById('quizCard');
+
+  if(done){
+    const pct = Math.round((done.correct/done.total)*100);
+    card.innerHTML = `
+      <div class="cat-tag">📅 Défi du jour</div>
+      <div class="word-fr" style="font-size:clamp(24px,4.5vw,32px);">Déjà fait aujourd'hui ✅</div>
+      <div class="question-line">Score : <b>${done.correct}/${done.total}</b> (${pct}%). Reviens demain pour un nouveau défi !</div>
+      <div class="pass-banner ${pct>=70?'ok':'todo'}" style="margin-top:14px;">${pct>=70 ? '🎉 Belle réussite !' : '💪 Reviens demain pour faire mieux !'}</div>
+      <div class="question-line" style="margin-top:14px;">📅 ${streakDays} défi${streakDays>1?'s':''} relevé${streakDays>1?'s':''} au total</div>
+    `;
+  } else {
+    card.innerHTML = `
+      <div class="cat-tag">📅 Défi du jour</div>
+      <div class="word-fr" style="font-size:clamp(24px,4.5vw,32px);">${DAILY_CHALLENGE_SIZE} mots, une seule chance aujourd'hui</div>
+      <div class="question-line">Un tirage unique de ${DAILY_CHALLENGE_SIZE} mots parmi tout le lexique, différent chaque jour. ${streakDays > 0 ? `Tu en as déjà relevé ${streakDays}.` : 'Ce sera ton premier !'}</div>
+      <button class="restart-btn" id="dcStartBtn" style="margin-top:20px;background:linear-gradient(135deg,#6366F1,#4F46E5);border-color:#3730A3;">▶ Relever le défi</button>
+    `;
+    document.getElementById('dcStartBtn').addEventListener('click', startDailyChallenge);
+  }
+  document.getElementById('backFromDCBtn').addEventListener('click', renderBlockSelect);
+}
+
+function startDailyChallenge(){
+  dcState = { words: getDailyChallengeWords(), idx: 0, score: 0, startTime: Date.now() };
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="dcExitBtn" style="cursor:pointer;">← Quitter</button>`;
+  document.getElementById('dcExitBtn').addEventListener('click', renderBlockSelect);
+  renderDCCard();
+}
+
+function renderDCCard(){
+  if(!dcState) return;
+  if(dcState.idx >= dcState.words.length){ finishDailyChallenge(); return; }
+  const word = dcState.words[dcState.idx];
+  const options = makeOptions(word);
+  dcState.currentOptions = options;
+  document.getElementById('progressFill').style.width = `${Math.round((dcState.idx/dcState.words.length)*100)}%`;
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="cat-tag">📅 Défi du jour · ${dcState.idx+1}/${dcState.words.length}</div>
+    <div class="word-fr" style="text-align:center;">${escapeHtml(word.fr)}</div>
+    <div class="options" id="optionsWrap">
+      ${options.map((o,i) => `<button class="opt" data-i="${i}"><span class="opt-key">${i+1}</span>${escapeHtml(o.ar)}</button>`).join('')}
+    </div>
+  `;
+  document.querySelectorAll('#optionsWrap .opt').forEach(btn => {
+    btn.addEventListener('click', () => handleDCAnswer(parseInt(btn.dataset.i)));
+  });
+}
+
+function handleDCAnswer(i){
+  if(!dcState) return;
+  const word = dcState.words[dcState.idx];
+  const options = dcState.currentOptions;
+  const isCorrect = options[i].fr === word.fr;
+  const btns = document.querySelectorAll('#optionsWrap .opt');
+  btns.forEach((b, idx) => { b.classList.add('disabled'); if(options[idx].fr === word.fr){ b.classList.add('correct'); } });
+  if(!isCorrect && btns[i]){ btns[i].classList.add('wrong'); }
+  if(isCorrect){ dcState.score++; playCorrectSound(); reactMascot('ok'); } else { playWrongSound(); reactMascot('ko'); }
+  recordWordStat(word.fr, isCorrect);
+  dcState.idx++;
+  setTimeout(() => { if(dcState){ renderDCCard(); } }, 600);
+}
+
+function finishDailyChallenge(){
+  const score = dcState.score, total = dcState.words.length;
+  const durationSec = Math.max(1, Math.round((Date.now() - dcState.startTime)/1000));
+  dcState = null;
+  const k = todayKey();
+  dailyChallengeLog[k] = { correct: score, total, ts: Date.now() };
+  saveDailyChallengeLog();
+  cloudAutoPush();
+  recordDailyActivity();
+  recordDailyStats(durationSec, false, score * 3);
+
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="dcBackBtn" style="cursor:pointer;">← Retour aux blocs</button>`;
+  document.getElementById('progressFill').style.width = '100%';
+  const pct = Math.round((score/total)*100);
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="end-screen">
+      <div class="cat-tag">📅 Défi du jour terminé !</div>
+      <div class="big">${score} / ${total}</div>
+      <div class="sub" style="color:var(--text-dim);">${pct}% — reviens demain pour un nouveau tirage</div>
+      <div style="display:flex;gap:12px;justify-content:center;margin-top:20px;flex-wrap:wrap;">
+        <button class="restart-btn" id="dcHomeBtn" style="background:var(--surface-sunken);border:1px solid var(--border);color:var(--text);">← Choisir un autre bloc</button>
+      </div>
+    </div>
+  `;
+  if(pct >= 70){ launchConfetti(); }
+  document.getElementById('dcBackBtn').addEventListener('click', renderBlockSelect);
+  document.getElementById('dcHomeBtn').addEventListener('click', renderBlockSelect);
+}
+
+/* ============ 🏅 BADGES ============ */
+const BADGES = [
+  { id:'streak7',    icon:'🔥', label:'Série de 7 jours',       check: () => computeStreak() >= 7 },
+  { id:'streak30',   icon:'🔥', label:'Série de 30 jours',      check: () => computeStreak() >= 30 },
+  { id:'streak100',  icon:'🔥', label:'Série de 100 jours',     check: () => computeStreak() >= 100 },
+  { id:'mastered50', icon:'⭐', label:'50 mots maîtrisés',      check: () => Object.values(wordStats).filter(s => (s.streak||0) >= MASTERY_STREAK).length >= 50 },
+  { id:'mastered200',icon:'🌟', label:'200 mots maîtrisés',     check: () => Object.values(wordStats).filter(s => (s.streak||0) >= MASTERY_STREAK).length >= 200 },
+  { id:'mastered500',icon:'💫', label:'500 mots maîtrisés',     check: () => Object.values(wordStats).filter(s => (s.streak||0) >= MASTERY_STREAK).length >= 500 },
+  { id:'blocks5',    icon:'📗', label:'5 blocs validés',        check: () => BLOCKS.filter((_,i) => isBlockPassed(i)).length >= 5 },
+  { id:'blocks20',   icon:'📘', label:'20 blocs validés',       check: () => BLOCKS.filter((_,i) => isBlockPassed(i)).length >= 20 },
+  { id:'blitz20',    icon:'⚡', label:'20+ mots en Blitz',      check: () => blitzBest >= 20 },
+  { id:'blitz40',    icon:'⚡', label:'40+ mots en Blitz',      check: () => blitzBest >= 40 },
+  { id:'customBlock',icon:'🧩', label:'Premier bloc perso',     check: () => customBlocks.length >= 1 },
+  { id:'dailyChal10',icon:'📅', label:'10 défis du jour',       check: () => Object.keys(dailyChallengeLog).length >= 10 },
+  { id:'xp1000',     icon:'💎', label:'1000 points gagnés',     check: () => xpTotal >= 1000 },
+  { id:'xp10000',    icon:'👑', label:'10 000 points gagnés',   check: () => xpTotal >= 10000 },
+  { id:'radio',      icon:'🎧', label:'10 min à la Radio',      check: () => { const s = dailyStats[todayKey()]; return Object.values(dailyStats).some(d => (d.seconds||0) >= 600); } },
+];
+
+function renderBadgesScreen(){
+  clearQuestionTimer();
+  document.body.classList.remove('quiz-active');
+  currentBlock = null;
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromBadgesBtn" style="cursor:pointer;">← Retour aux blocs</button>`;
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('footerNote').textContent = '';
+
+  const unlockedCount = BADGES.filter(b => { try{ return b.check(); }catch(e){ return false; } }).length;
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="cat-tag">🏅 Badges</div>
+    <div class="word-fr" style="font-size:clamp(24px,4.5vw,32px);">${unlockedCount} / ${BADGES.length} débloqués</div>
+    <div class="options" id="badgesGrid" style="grid-template-columns:repeat(auto-fill,minmax(140px,1fr));margin-top:18px;"></div>
+  `;
+  document.getElementById('backFromBadgesBtn').addEventListener('click', renderBlockSelect);
+  const grid = document.getElementById('badgesGrid');
+  grid.innerHTML = BADGES.map(b => {
+    let unlocked = false;
+    try{ unlocked = b.check(); }catch(e){}
+    return `<div class="badge-tile ${unlocked ? 'unlocked' : 'locked'}">
+      <div class="badge-icon">${unlocked ? b.icon : '🔒'}</div>
+      <div class="badge-label">${escapeHtml(b.label)}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ============ 🧠 ASSOCIATION EN CONTINU ============ */
+const ASSOC_VISIBLE_PAIRS = 4;
+const ASSOC_DURATION = 90;
+let assocState = null;
+
+function renderAssociationIntro(){
+  clearQuestionTimer();
+  document.body.classList.remove('quiz-active');
+  currentBlock = null;
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromAssocBtn" style="cursor:pointer;">← Retour aux blocs</button>`;
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('footerNote').textContent = '';
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="cat-tag">🧠 Association</div>
+    <div class="word-fr" style="font-size:clamp(24px,4.5vw,32px);">Relie en continu, sans pause</div>
+    <div class="question-line">Relie chaque mot français à sa traduction arabe. Dès qu'une paire est trouvée, une nouvelle apparaît aussitôt — ${ASSOC_DURATION} secondes pour en relier le plus possible.</div>
+    <button class="restart-btn" id="assocStartBtn" style="margin-top:20px;background:linear-gradient(135deg,#22C55E,#16A34A);border-color:#15803D;">▶ Démarrer</button>
+  `;
+  document.getElementById('backFromAssocBtn').addEventListener('click', renderBlockSelect);
+  document.getElementById('assocStartBtn').addEventListener('click', startAssociation);
+}
+
+function startAssociation(){
+  assocState = {
+    queue: shuffle(WORDS.slice()), queueIdx: 0, visible: [], selected: null,
+    matched: 0, wrongIds: new Set(), timeLeft: ASSOC_DURATION, startTime: Date.now(),
+  };
+  for(let i=0;i<ASSOC_VISIBLE_PAIRS;i++){ addNextPairToAssoc(); }
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="assocExitBtn" style="cursor:pointer;">← Quitter</button>`;
+  document.getElementById('assocExitBtn').addEventListener('click', stopAssociationAndExit);
+  assocState.timerId = setInterval(() => {
+    assocState.timeLeft--;
+    updateAssocTimerUI();
+    if(assocState.timeLeft <= 0){ endAssociation(); }
+  }, 1000);
+  renderAssociationBoard();
+}
+
+function addNextPairToAssoc(){
+  if(assocState.queueIdx >= assocState.queue.length){ assocState.queue = assocState.queue.concat(shuffle(WORDS.slice())); }
+  const w = assocState.queue[assocState.queueIdx++];
+  assocState.visible.push(w);
+}
+
+function updateAssocTimerUI(){
+  const el = document.getElementById('assocTimeLeft');
+  if(el){ el.textContent = assocState.timeLeft; }
+}
+
+function renderAssociationBoard(){
+  if(!assocState) return;
+  const left = shuffle(assocState.visible.map(w => ({ id:w.fr, txt:w.fr, side:'fr' })));
+  const right = shuffle(assocState.visible.map(w => ({ id:w.fr, txt:w.ar, side:'ar' })));
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="cat-tag">🧠 Association · ⭐ ${assocState.matched} · ⏱️ <span id="assocTimeLeft">${assocState.timeLeft}</span>s</div>
+    <div class="pairs-grid">
+      <div class="pairs-col" id="assocColFr">${left.map(t => `<button class="pair-tile" data-id="${escapeHtml(t.id)}" data-side="${t.side}">${escapeHtml(t.txt)}</button>`).join('')}</div>
+      <div class="pairs-col" id="assocColAr">${right.map(t => `<button class="pair-tile" data-id="${escapeHtml(t.id)}" data-side="${t.side}">${escapeHtml(t.txt)}</button>`).join('')}</div>
+    </div>
+  `;
+  card.querySelectorAll('.pair-tile').forEach(tile => {
+    tile.addEventListener('click', () => onAssocTileClick(tile));
+  });
+}
+
+function onAssocTileClick(tile){
+  if(!assocState) return;
+  if(tile.classList.contains('matched')) return;
+  const side = tile.dataset.side, id = tile.dataset.id;
+  if(side === 'fr'){ speak(id, 'fr-FR'); }
+
+  const sel = assocState.selected;
+  if(!sel){
+    document.querySelectorAll('.pair-tile.selected').forEach(t => t.classList.remove('selected'));
+    tile.classList.add('selected');
+    assocState.selected = { id, side, el: tile };
+    return;
+  }
+  if(sel.side === side){
+    sel.el.classList.remove('selected');
+    tile.classList.add('selected');
+    assocState.selected = { id, side, el: tile };
+    return;
+  }
+  if(sel.id === id){
+    sel.el.classList.remove('selected'); sel.el.classList.add('matched');
+    tile.classList.add('matched');
+    assocState.selected = null;
+    assocState.matched++;
+    playCorrectSound(); bumpCombo(true);
+    recordWordStat(id, !assocState.wrongIds.has(id));
+    assocState.wrongIds.delete(id);
+    assocState.visible = assocState.visible.filter(w => w.fr !== id);
+    addNextPairToAssoc();
+    setTimeout(() => { if(assocState){ renderAssociationBoard(); } }, 260);
+  } else {
+    assocState.wrongIds.add(sel.id); assocState.wrongIds.add(id);
+    tile.classList.add('wrong'); sel.el.classList.add('wrong');
+    playWrongSound(); bumpCombo(false);
+    setTimeout(() => {
+      tile.classList.remove('wrong'); sel.el.classList.remove('wrong', 'selected');
+      assocState.selected = null;
+    }, 420);
+  }
+}
+
+function stopAssociationAndExit(){
+  if(assocState && assocState.timerId){ clearInterval(assocState.timerId); }
+  assocState = null;
+  renderBlockSelect();
+}
+
+function endAssociation(){
+  const matched = assocState.matched;
+  const durationSec = Math.max(1, Math.round((Date.now() - assocState.startTime)/1000));
+  if(assocState.timerId){ clearInterval(assocState.timerId); }
+  assocState = null;
+  recordDailyActivity();
+  recordDailyStats(durationSec, false, matched * 2);
+
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="assocBackBtn" style="cursor:pointer;">← Retour aux blocs</button>`;
+  document.getElementById('progressFill').style.width = '100%';
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="end-screen">
+      <div class="cat-tag">🧠 Association terminée !</div>
+      <div class="big">${matched}</div>
+      <div class="sub" style="color:var(--text-dim);">paire${matched>1?'s':''} reliée${matched>1?'s':''} en ${ASSOC_DURATION} secondes</div>
+      <div style="display:flex;gap:12px;justify-content:center;margin-top:20px;flex-wrap:wrap;">
+        <button class="restart-btn" id="assocAgainBtn" style="background:linear-gradient(135deg,#22C55E,#16A34A);border-color:#15803D;">🧠 Rejouer</button>
+        <button class="restart-btn" id="assocHomeBtn" style="background:var(--surface-sunken);border:1px solid var(--border);color:var(--text);">← Choisir un autre bloc</button>
+      </div>
+    </div>
+  `;
+  if(matched >= 15){ launchConfetti(); }
+  document.getElementById('assocBackBtn').addEventListener('click', renderBlockSelect);
+  document.getElementById('assocHomeBtn').addEventListener('click', renderBlockSelect);
+  document.getElementById('assocAgainBtn').addEventListener('click', startAssociation);
+}
+
 function renderTrainingCenter(){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
@@ -3977,13 +4749,14 @@ function renderBlockSelect(){
           <span class="goal-fire">${curStreak > 0 ? '🔥' : '🎯'}</span>
           <span class="goal-streak-num">${curStreak}</span>
           <span class="goal-streak-lbl">jour${curStreak>1?'s':''} d'affilée</span>
+          <span class="goal-freeze-badge" title="Vies : protègent ta série si tu rates un jour">❄️ ${streakFreezes}</span>
         </div>
         <div class="goal-status ${goalToday ? 'done' : 'todo'}">
           ${goalToday ? '✅ Objectif du jour fait !' : '🎯 Objectif : 1 bloc aujourd\'hui'}
         </div>
       </div>
       ${buildWeekStripHtml()}
-      <div class="goal-foot">${bestStreak > 0 ? `🏅 Record : ${bestStreak} jour${bestStreak>1?'s':''} · ` : ''}${activeDays} jour${activeDays>1?'s':''} d'apprentissage au total</div>
+      <div class="goal-foot">${bestStreak > 0 ? `🏅 Record : ${bestStreak} jour${bestStreak>1?'s':''} · ` : ''}${activeDays} jour${activeDays>1?'s':''} d'apprentissage au total · ❄️ ${streakFreezes} vie${streakFreezes>1?'s':''} (1 gagnée tous les 7 jours d'affilée)</div>
     </div>
 
     <div class="quests-card">
@@ -4029,6 +4802,15 @@ function renderBlockSelect(){
         ⚠️ Réviser mes ${toReviewCount} mot${toReviewCount>1?'s':''} à revoir
       </button>` : ''}
     </div>
+    <div style="font-family:'Inter',sans-serif;font-weight:800;color:var(--purple);margin:16px 0 8px;font-size:14px;text-align:center;letter-spacing:.02em;text-transform:uppercase;">🎮 Jeux rapides</div>
+    <div style="display:flex;gap:10px;justify-content:center;margin:0 0 6px;flex-wrap:wrap;">
+      <button class="mode-chip" id="blitzBtn" style="background:linear-gradient(135deg,#F59E0B,#EF4444);color:#fff;border:none;">⚡ Blitz 60s</button>
+      <button class="mode-chip" id="swipeBtn" style="background:linear-gradient(135deg,#EC4899,#8B5CF6);color:#fff;border:none;">👆 Swipe</button>
+      <button class="mode-chip" id="flashcardsBtn" style="background:linear-gradient(135deg,#0EA5A4,#0891B2);color:#fff;border:none;">🃏 Flashcards</button>
+      <button class="mode-chip" id="associationBtn" style="background:linear-gradient(135deg,#22C55E,#16A34A);color:#fff;border:none;">🧠 Association</button>
+      <button class="mode-chip" id="dailyChallengeBtn" style="background:linear-gradient(135deg,#6366F1,#4F46E5);color:#fff;border:none;">📅 Défi du jour</button>
+      <button class="mode-chip" id="badgesBtn" style="background:linear-gradient(135deg,#FBBF24,#F59E0B);color:#fff;border:none;">🏅 Badges</button>
+    </div>
     <div style="font-family:'Inter',sans-serif;font-weight:800;color:var(--purple);margin:20px 0 4px;font-size:18px;text-align:center;">Choisis ton mode & ton bloc</div>
     <div class="mode-row" id="modeRow"></div>
     <div class="mode-row" id="timerRow"></div>
@@ -4042,6 +4824,12 @@ function renderBlockSelect(){
   document.getElementById('createCustomBlockBtn').addEventListener('click', () => renderCustomBlockBuilder());
   document.getElementById('trainingCenterBtn').addEventListener('click', () => renderTrainingCenter());
   document.getElementById('radioBtn').addEventListener('click', () => renderRadioSetup());
+  document.getElementById('blitzBtn').addEventListener('click', () => renderBlitzIntro());
+  document.getElementById('swipeBtn').addEventListener('click', () => renderSwipeIntro());
+  document.getElementById('flashcardsBtn').addEventListener('click', () => renderFlashcardsIntro());
+  document.getElementById('associationBtn').addEventListener('click', () => renderAssociationIntro());
+  document.getElementById('dailyChallengeBtn').addEventListener('click', () => renderDailyChallenge());
+  document.getElementById('badgesBtn').addEventListener('click', () => renderBadgesScreen());
   document.getElementById('questSettingsBtn').addEventListener('click', () => renderQuestSettings());
   if(toReviewCount > 0){
     document.getElementById('startReviewBtn').addEventListener('click', () => renderReviewIntro());
@@ -6387,6 +7175,7 @@ document.getElementById('themeToggle').addEventListener('click', () => {
 });
 
 if(savedCustom){ setStatus(`↺ Lexique personnalisé restauré (${WORDS.length} mots).`, 'ok'); }
+autoApplyStreakFreeze();
 renderBlockSelect();
 if(getSyncUrl()){ showSyncOverlay('Chargement de tes données…'); }
 autoSyncOnLoad();
