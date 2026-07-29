@@ -6848,12 +6848,29 @@ function collectLocalData(){
 async function cloudRequest(bodyObj){
   const url = getSyncUrl();
   if(!url) throw new Error('URL de synchro non configurée');
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify(bodyObj)
-  });
-  const out = await res.json();
+  let res;
+  try{
+    res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(bodyObj)
+    });
+  }catch(networkErr){
+    // Échec avant même d'avoir une réponse : hors ligne, ou la requête est bloquée (souvent un souci de CORS
+    // sur le déploiement du script — vérifier "Qui a accès : Tout le monde" et redéployer si besoin).
+    throw new Error('Requête réseau bloquée (hors ligne, ou CORS/déploiement du script à vérifier)');
+  }
+  if(!res.ok){
+    throw new Error(`Le script a répondu avec une erreur HTTP ${res.status}`);
+  }
+  let out;
+  try{
+    out = await res.json();
+  }catch(parseErr){
+    // Le script a répondu, mais pas avec du JSON (souvent une page d'erreur HTML Google : script mal
+    // déployé, doPost manquant, ou autorisation requise).
+    throw new Error('Réponse du script illisible (pas du JSON — vérifier que doPost existe et que le déploiement autorise "Tout le monde")');
+  }
   if(!out.ok) throw new Error(out.error || 'Réponse invalide du script');
   return out;
 }
@@ -7022,7 +7039,7 @@ function cloudAutoPush(){
   syncBusy = true;
   cloudPush()
     .then(() => { setStatus('☁️ Scores synchronisés.', 'ok'); })
-    .catch(() => { setStatus('☁️ Synchro impossible (hors ligne ?) — scores gardés en local.', 'err'); })
+    .catch((e) => { setStatus('☁️ Synchro impossible : ' + (e && e.message ? e.message : 'erreur inconnue'), 'err'); console.error('Sync push error:', e); })
     .finally(() => { syncBusy = false; });
 }
 
@@ -7053,7 +7070,8 @@ async function autoSyncOnLoad(){
     setStatus(changed ? '☁️ Synchronisé — nouvelles données récupérées !' : '☁️ Synchronisé.', 'ok');
     if(changed && currentBlock === null){ renderBlockSelect(); }
   }catch(e){
-    setStatus('☁️ Synchro impossible — mode local.', 'err');
+    setStatus('☁️ Synchro impossible : ' + (e && e.message ? e.message : 'erreur inconnue'), 'err');
+    console.error('Sync error:', e);
   }finally{
     syncBusy = false;
     hideSyncOverlay();
