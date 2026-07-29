@@ -1584,7 +1584,9 @@ function autoApplyStreakFreeze(){
   streakFreezes--;
   saveFrozenDays();
   saveStreakFreezes();
-  cloudAutoPush();
+  // ⚠️ Pas de cloudAutoPush() ici : cette fonction s'exécute juste avant autoSyncOnLoad() au
+  // démarrage, qui pousse déjà toutes les données locales (dont celles-ci) une seule fois.
+  // Un second envoi concurrent ici a pu provoquer des échecs de synchro (verrou du script Apps Script).
 }
 /* 🎁 Gagne une nouvelle vie tous les 7 jours d'affilée (une seule fois par palier). */
 function grantStreakFreezeIfMilestone(streak){
@@ -7041,6 +7043,8 @@ function hideSyncOverlay(){
 
 async function autoSyncOnLoad(){
   if(!getSyncUrl()){ hideSyncOverlay(); return; }
+  if(syncBusy){ hideSyncOverlay(); return; } // une autre synchro est déjà en cours : on évite les requêtes concurrentes
+  syncBusy = true;
   showSyncOverlay('Chargement de tes données…');
   try{
     setStatus('☁️ Synchronisation...', 'ok');
@@ -7051,6 +7055,7 @@ async function autoSyncOnLoad(){
   }catch(e){
     setStatus('☁️ Synchro impossible — mode local.', 'err');
   }finally{
+    syncBusy = false;
     hideSyncOverlay();
   }
 }
@@ -7197,19 +7202,25 @@ function renderSyncView(){
   });
 
   document.getElementById('pushSyncBtn').addEventListener('click', async () => {
+    if(syncBusy){ setSyncMsg('⏳ Une synchro est déjà en cours, patiente un instant...', true); return; }
+    syncBusy = true;
     setSyncMsg('⏳ Envoi en cours...', true);
     try{
       const n = await cloudPush();
       setSyncMsg(`✓ ${n} élément${n>1?'s':''} envoyé${n>1?'s':''} vers ta feuille Google !`, true);
     }catch(e){ setSyncMsg('✗ Échec de l\'envoi : ' + escapeHtml(e.message), false); }
+    finally{ syncBusy = false; }
   });
 
   document.getElementById('pullSyncBtn').addEventListener('click', async () => {
+    if(syncBusy){ setSyncMsg('⏳ Une synchro est déjà en cours, patiente un instant...', true); return; }
+    syncBusy = true;
     setSyncMsg('⏳ Récupération en cours...', true);
     try{
       const changed = await cloudPull();
       setSyncMsg(changed ? '✓ Données récupérées et fusionnées !' : '✓ Déjà à jour, rien de nouveau.', true);
     }catch(e){ setSyncMsg('✗ Échec de la récupération : ' + escapeHtml(e.message), false); }
+    finally{ syncBusy = false; }
   });
 }
 /* =================== fin module synchro =================== */
