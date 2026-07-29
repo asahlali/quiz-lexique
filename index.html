@@ -1634,6 +1634,7 @@ function countFullyMasteredBlocks(){
   return count;
 }
 
+const DAILY_STATS_KEY = 'lexiqueQuiz::dailyStats';
 function loadDailyStats(){
   try{ const raw = localStorage.getItem(nsKey(DAILY_STATS_KEY)); return raw ? JSON.parse(raw) : {}; }
   catch(e){ return {}; }
@@ -1643,6 +1644,7 @@ function saveDailyStats(){
 }
 let dailyStats = loadDailyStats();
 
+const XP_TOTAL_KEY = 'lexiqueQuiz::xpTotal';
 function loadXpTotal(){ try{ return parseInt(localStorage.getItem(nsKey(XP_TOTAL_KEY)),10) || 0; }catch(e){ return 0; } }
 function saveXpTotal(){ try{ localStorage.setItem(nsKey(XP_TOTAL_KEY), String(xpTotal)); }catch(e){} }
 let xpTotal = loadXpTotal();
