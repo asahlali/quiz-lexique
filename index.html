@@ -1125,9 +1125,10 @@
   }
   .order-sentence{
     font-family:'Inter',sans-serif;font-weight:700;font-size:clamp(16px,3.6vw,21px);line-height:2.6;
-    color:var(--ink);background:#F8FAFC;border-radius:16px;padding:18px 16px;margin:0 0 16px;
+    color:var(--ink);background:var(--surface-sunken);border-radius:16px;padding:18px 16px;margin:0 0 16px;
     text-align:center;
   }
+  .order-sentence.shake{ animation:shakeCard .45s ease; }
   .order-fixed-word{ margin:0 3px;display:inline-block; }
   .order-slot-empty{
     display:inline-flex;align-items:center;justify-content:center;min-width:60px;height:34px;
@@ -6023,6 +6024,7 @@ function renderDialogueCard(){
   const word = queue[0];
   answered = false;
   window.__currentWord = word;
+  window.__orderAttemptCount = 0; // pour la seconde chance avant échec définitif
 
   const sentence = word.ex.replace(/~/g, word.fr);
   const fullWords = sentence.trim().split(/\s+/).filter(Boolean);
@@ -6348,11 +6350,28 @@ function startOrderVoiceInput(){
   try{ rec.start(); }catch(e){ recoActive = false; if(micBtn){ micBtn.classList.remove('listening'); } }
 }
 
+/* 🔁 Feedback bref lors d'un 1er essai raté en "Mots en ordre" — invite à réessayer, sans finaliser. */
+function showOrderRetryFeedback(){
+  playWrongSound();
+  reactMascot('ko');
+  const sentenceEl = document.getElementById('orderSentence');
+  if(sentenceEl){
+    sentenceEl.classList.remove('shake');
+    void sentenceEl.offsetWidth;
+    sentenceEl.classList.add('shake');
+  }
+  const validateBtn = document.getElementById('orderValidateBtn');
+  if(validateBtn){
+    validateBtn.textContent = '❌ Pas encore... réarrange et réessaie !';
+    validateBtn.disabled = true;
+    setTimeout(() => {
+      if(validateBtn){ validateBtn.textContent = '✓ Valider ma phrase'; validateBtn.disabled = false; }
+    }, 1400);
+  }
+}
+
 function handleOrderAnswer(timedOut){
   if(answered) return;
-  answered = true;
-  clearQuestionTimer();
-  stopRecognition();
   const word = window.__currentWord;
   const fullWords = window.__orderFullTarget;
   const blankIndices = window.__orderBlankIndices;
@@ -6362,6 +6381,18 @@ function handleOrderAnswer(timedOut){
   const allFilled = slots.every(Boolean);
   const allCorrect = allFilled && blankIndices.every((sentIdx, blankPos) => normalizeForSearch(slots[blankPos].word) === normalizeForSearch(fullWords[sentIdx]));
   const isCorrect = !timedOut && allCorrect;
+
+  // 🔁 Seconde chance : faux au 1er essai, mais le temps n'est pas écoulé → une deuxième tentative
+  // avant de compter la réponse comme définitivement fausse (le minuteur continue de tourner).
+  if(!isCorrect && !timedOut && (window.__orderAttemptCount || 0) === 0){
+    window.__orderAttemptCount = 1;
+    showOrderRetryFeedback(allFilled);
+    return;
+  }
+
+  answered = true;
+  clearQuestionTimer();
+  stopRecognition();
 
   score.total++;
   if(!catScore[word.cat]) catScore[word.cat] = { c:0, t:0 };
@@ -7353,6 +7384,11 @@ document.addEventListener('keydown', (e) => {
   if(e.key === 'Enter' || e.code === 'Space' || e.key === ' '){
     const nextBtn = document.getElementById('nextBtn');
     if(nextBtn){ e.preventDefault(); nextBtn.click(); return; }
+  }
+  // Entrée = valider la phrase en mode "Mots en ordre", dès que tous les trous sont remplis
+  if(e.key === 'Enter'){
+    const orderValidateBtn = document.getElementById('orderValidateBtn');
+    if(orderValidateBtn && orderValidateBtn.style.display !== 'none'){ e.preventDefault(); orderValidateBtn.click(); return; }
   }
   if(!document.body.classList.contains('quiz-active')) return;
 
