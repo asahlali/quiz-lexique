@@ -169,6 +169,26 @@
     background:rgba(249,115,22,0.14);color:#C2410C;padding:3px 11px;border-radius:999px;font-size:12.5px;border:1px solid rgba(249,115,22,0.25);
   }
 
+  /* ============ 📚 PROGRESSION GLOBALE SUR TOUT LE LEXIQUE (accueil) ============ */
+  .lexicon-progress-card{
+    background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px 18px;margin:18px 0 6px;
+    box-shadow:var(--shadow-sm);
+  }
+  .lexicon-progress-head{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+    font-family:'Inter',sans-serif;font-weight:800;font-size:14px;color:var(--text);margin-bottom:10px;
+  }
+  .lexicon-progress-pct{ color:#16A34A;font-size:13px; }
+  .lexicon-progress-bar{
+    display:flex;height:16px;border-radius:999px;overflow:hidden;background:var(--surface-sunken);
+    border:1px solid var(--border);
+  }
+  .lexicon-progress-seg{ height:100%;transition:width .6s cubic-bezier(.34,1.56,.64,1); }
+  .lexicon-progress-legend{ display:flex;flex-wrap:wrap;gap:12px;margin-top:11px;justify-content:center; }
+  .lexicon-legend-item{ display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--text-dim); }
+  .lexicon-legend-item b{ color:var(--text);font-weight:800; }
+  .lexicon-legend-dot{ width:9px;height:9px;border-radius:50%;display:inline-block; }
+
   .card{
     background:var(--card);color:var(--text);border-radius:16px;padding:38px 32px;position:relative;
     box-shadow:var(--shadow-md);
@@ -4962,6 +4982,16 @@ function renderBlockSelect(){
       <button class="mode-chip" id="dailyChallengeBtn" style="background:linear-gradient(135deg,#6366F1,#4F46E5);color:#fff;border:none;">📅 Défi du jour</button>
       <button class="mode-chip" id="badgesBtn" style="background:linear-gradient(135deg,#FBBF24,#F59E0B);color:#fff;border:none;">🏅 Badges</button>
     </div>
+
+    <div class="lexicon-progress-card">
+      <div class="lexicon-progress-head">
+        <span>📚 Progression sur tout le lexique</span>
+        <span class="lexicon-progress-pct">${WORDS.length ? Math.round((masteredCount2/WORDS.length)*100) : 0}% maîtrisé</span>
+      </div>
+      <div class="lexicon-progress-bar" id="lexiconProgressBar"></div>
+      <div class="lexicon-progress-legend" id="lexiconProgressLegend"></div>
+    </div>
+
     <div style="font-family:'Inter',sans-serif;font-weight:800;color:var(--purple);margin:20px 0 4px;font-size:18px;text-align:center;">Choisis ton mode & ton bloc</div>
     <div class="mode-row" id="modeRow"></div>
     <div class="mode-row" id="timerRow"></div>
@@ -4973,6 +5003,30 @@ function renderBlockSelect(){
   `;
 
   document.getElementById('createCustomBlockBtn').addEventListener('click', () => renderCustomBlockBuilder());
+
+  // 📚 Barre de progression globale sur tout le lexique (maîtrisés / à revoir / en cours / pas encore vus)
+  (function renderLexiconProgressBar(){
+    const bar = document.getElementById('lexiconProgressBar');
+    const legend = document.getElementById('lexiconProgressLegend');
+    if(!bar || !legend) return;
+    const total = WORDS.length || 1;
+    const inProgress = Math.max(0, seenCount - masteredCount2 - toReviewCount);
+    const notSeen = Math.max(0, WORDS.length - seenCount);
+    const segments = [
+      { key:'mastered', label:'Maîtrisés',  count:masteredCount2, color:'#22C55E' },
+      { key:'review',   label:'À revoir',   count:toReviewCount,  color:'#F59E0B' },
+      { key:'progress', label:'En cours',   count:inProgress,     color:'#38BDF8' },
+      { key:'unseen',   label:'Pas encore vus', count:notSeen,    color:'var(--border-strong)' },
+    ];
+    bar.innerHTML = segments.map(s => {
+      const pct = (s.count / total) * 100;
+      if(pct <= 0) return '';
+      return `<div class="lexicon-progress-seg" style="width:${pct}%;background:${s.color};" title="${s.label} : ${s.count}"></div>`;
+    }).join('');
+    legend.innerHTML = segments.map(s =>
+      `<span class="lexicon-legend-item"><span class="lexicon-legend-dot" style="background:${s.color};"></span>${s.label} <b>${s.count}</b></span>`
+    ).join('');
+  })();
   document.getElementById('trainingCenterBtn').addEventListener('click', () => renderTrainingCenter());
   document.getElementById('radioBtn').addEventListener('click', () => renderRadioSetup());
   document.getElementById('blitzBtn').addEventListener('click', () => renderBlitzIntro());
