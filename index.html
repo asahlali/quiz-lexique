@@ -132,22 +132,41 @@
   .chip.total{background:var(--purple);color:#fff;border-color:var(--purple-dark);animation:pop .3s ease;}
 
   .progress-track{
-    height:16px;border-radius:999px;background:rgba(255,255,255,0.25);margin:20px 0 34px;overflow:hidden;
-    box-shadow:inset 0 2px 5px rgba(0,0,0,0.2);border:2px solid rgba(255,255,255,0.4);
-  }
-  .progress-label{
-    display:flex;align-items:center;justify-content:space-between;gap:10px;
-    color:#fff;font-family:'Inter',sans-serif;font-weight:700;font-size:13px;
-    margin:0 2px 6px;min-height:18px;
-  }
-  .progress-label .pl-pct{ opacity:.95; }
-  .progress-label .pl-streak{
-    background:rgba(255,255,255,0.18);padding:2px 10px;border-radius:999px;font-size:12px;
+    position:relative;height:26px;border-radius:999px;background:var(--surface-sunken);margin:22px 0 40px;overflow:visible;
+    box-shadow:inset 0 2px 5px rgba(0,0,0,0.08);border:1px solid var(--border);
   }
   .progress-fill{
-    height:100%;border-radius:999px;width:0%;transition:width .5s cubic-bezier(.34,1.56,.64,1);
-    background:repeating-linear-gradient(45deg, var(--green), var(--green) 10px, var(--green-dark) 10px, var(--green-dark) 20px);
-    box-shadow:0 0 14px rgba(34,197,94,0.7);
+    height:100%;border-radius:999px;width:0%;
+    background:linear-gradient(90deg,#FDBA74,#F97316,#EA580C);
+    background-size:200% 100%;
+    box-shadow:0 0 12px rgba(249,115,22,0.5);
+    transition:width .55s cubic-bezier(.34,1.56,.64,1);
+    position:relative;overflow:hidden;
+  }
+  .progress-fill::after{
+    content:'';position:absolute;inset:0;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,0.35),transparent);
+    width:40%;animation:progressShine 2.2s ease-in-out infinite;
+  }
+  @keyframes progressShine{ 0%{ transform:translateX(-120%);} 100%{ transform:translateX(340%);} }
+  .progress-marker{
+    position:absolute;top:50%;left:0%;transform:translate(-50%,-50%);font-size:22px;line-height:1;
+    transition:left .55s cubic-bezier(.34,1.56,.64,1);filter:drop-shadow(0 2px 3px rgba(0,0,0,0.25));
+    animation:progressMarkerBounce 1.6s ease-in-out infinite;pointer-events:none;
+  }
+  @keyframes progressMarkerBounce{ 0%,100%{ transform:translate(-50%,-50%) rotate(0);} 50%{ transform:translate(-50%,-62%) rotate(-6deg);} }
+  .progress-label{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    color:var(--text);font-family:'Inter',sans-serif;font-weight:800;font-size:14px;
+    margin:0 3px 8px;min-height:22px;
+  }
+  .progress-label .pl-count{
+    display:inline-flex;align-items:center;gap:6px;font-size:15px;color:var(--text);
+  }
+  .progress-label .pl-count b{ color:#EA580C;font-size:17px; }
+  .progress-label .pl-pct{ opacity:.65;font-weight:700;font-size:12.5px; }
+  .progress-label .pl-streak{
+    background:rgba(249,115,22,0.14);color:#C2410C;padding:3px 11px;border-radius:999px;font-size:12.5px;border:1px solid rgba(249,115,22,0.25);
   }
 
   .card{
@@ -621,7 +640,7 @@
   }
 
   /* Barre de progression rayée qui bouge, avec petit éclat */
-  .progress-track{ position:relative; overflow:hidden; }
+  .progress-track{ position:relative; overflow:visible; }
   .progress-fill{
     background-image:linear-gradient(45deg, rgba(255,255,255,.28) 25%, transparent 25%, transparent 50%, rgba(255,255,255,.28) 50%, rgba(255,255,255,.28) 75%, transparent 75%, transparent);
     background-size:22px 22px;
@@ -1130,7 +1149,10 @@
 
   <div class="scoreboard" id="scoreboard"></div>
   <div class="progress-label" id="progressLabel"></div>
-  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="progress-track" id="progressTrack">
+    <div class="progress-fill" id="progressFill"></div>
+    <div class="progress-marker" id="progressMarker">🦊</div>
+  </div>
 
   <div class="mascot-zone" id="mascotZone">
     <div class="mascot" id="mascot" aria-hidden="true">
@@ -4243,11 +4265,13 @@ function renderProgress(){
   const pct = initialLength ? Math.min(100, (masteredCount / initialLength) * 100) : 0;
   const pctRounded = Math.round(pct);
   document.getElementById('progressFill').style.width = pct + '%';
+  const marker = document.getElementById('progressMarker');
+  if(marker){ marker.style.left = pct + '%'; }
 
   const progressLabel = document.getElementById('progressLabel');
   if(progressLabel){
     const streakChip = comboStreak >= 2 ? `<span class="pl-streak">🔥 ${comboStreak} d'affilée</span>` : '<span></span>';
-    progressLabel.innerHTML = `<span class="pl-pct">📊 ${pctRounded}% du bloc terminé</span>${streakChip}`;
+    progressLabel.innerHTML = `<span class="pl-count">🦊 <b>${Math.min(masteredCount, initialLength)}</b> / ${initialLength}</span><span class="pl-pct">${pctRounded}%</span>${streakChip}`;
   }
 
   const errors = score.total - score.correct;
