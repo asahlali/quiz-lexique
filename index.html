@@ -385,7 +385,13 @@
   .next-btn:hover{transform:translateY(-2px);}
   .next-btn:active{transform:translateY(3px);box-shadow:0 1px 0 #3730A3;}
 
-  .footer-note{text-align:center;color:rgba(255,255,255,0.85);font-size:13px;margin-top:26px;font-weight:700;}
+  .footer-note{
+    text-align:center;color:var(--text-dim);font-size:13.5px;margin:24px auto 0;font-weight:700;
+    display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 16px;border-radius:999px;
+    background:var(--surface-sunken);border:1px solid var(--border);width:fit-content;max-width:90%;
+  }
+  .footer-note:empty{ display:none; }
+  .footer-note.has-errors{ color:#C2410C;background:rgba(249,115,22,0.12);border-color:rgba(249,115,22,0.3); }
 
   .end-screen{text-align:center;padding:40px 20px;}
   .end-screen .big{
@@ -4299,9 +4305,11 @@ function renderProgress(){
   const noRequeueModes = (gameMode === 'speak' || gameMode === 'repeat');
   const label = noRequeueModes ? 'Traités' : 'Maîtrisés';
   const hint = noRequeueModes
-    ? (errors > 0 ? ` · ${errors} erreur${errors>1?'s':''} (comptée${errors>1?'s':''}, non repassée${errors>1?'s':''})` : '')
-    : (errors > 0 ? ` · ${errors} erreur${errors>1?'s':''} à repasser` : '');
-  document.getElementById('footerNote').textContent = `${label} ${masteredCount}/${initialLength}${hint}`;
+    ? (errors > 0 ? ` · ⚠️ ${errors} erreur${errors>1?'s':''} (comptée${errors>1?'s':''}, non repassée${errors>1?'s':''})` : '')
+    : (errors > 0 ? ` · ⚠️ ${errors} erreur${errors>1?'s':''} à repasser` : '');
+  const footerNote = document.getElementById('footerNote');
+  footerNote.textContent = `${label} ${masteredCount}/${initialLength}${hint}`;
+  footerNote.classList.toggle('has-errors', errors > 0);
 }
 
 function normalizeForSearch(s){
