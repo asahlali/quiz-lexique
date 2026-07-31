@@ -2764,6 +2764,11 @@ const RADIO_MUSIC_KEY = 'lexiqueQuiz::radioMusic';
 function loadRadioMusicPref(){ try{ return localStorage.getItem(RADIO_MUSIC_KEY) !== '0'; }catch(e){ return true; } }
 function saveRadioMusicPref(v){ try{ localStorage.setItem(RADIO_MUSIC_KEY, v ? '1' : '0'); }catch(e){} }
 let radioMusicOn = loadRadioMusicPref();
+
+/* Repli/dépli de la carte "Défis du jour" sur l'accueil, mémorisé. */
+function loadQuestsCollapsed(){ try{ return localStorage.getItem('lexiqueQuiz::questsCollapsed') === '1'; }catch(e){ return false; } }
+function saveQuestsCollapsed(v){ try{ localStorage.setItem('lexiqueQuiz::questsCollapsed', v ? '1' : '0'); }catch(e){} }
+let questsCollapsed = loadQuestsCollapsed();
 let radioAudioCtx = null;
 let radioMusicNodes = null; // { masterGain, filter, timer }
 const RADIO_AMBIENT_SCALE = [130.81, 146.83, 164.81, 196.00, 220.00, 261.63]; // gamme pentatonique douce, grave
@@ -4940,13 +4945,15 @@ function renderBlockSelect(){
     </div>
 
     <div class="quests-card">
-      <div class="quests-head">
-        <span>🎯 Défis du jour</span>
+      <div class="quests-head" id="questsHead" style="cursor:pointer;">
+        <span>🎯 Défis du jour <span style="opacity:.6;font-weight:700;font-size:12px;">(${quests.filter(q=>q.cur>=q.goal).length}/${quests.length})</span></span>
         <span style="display:flex;align-items:center;gap:8px;">
           <span class="quests-xp">⭐ ${xpTotal} pts</span>
           <button id="questSettingsBtn" title="Personnaliser mes objectifs" style="border:1px solid var(--border);background:var(--surface-sunken);color:var(--purple);width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:13px;">⚙️</button>
+          <span id="questsChevron" style="transition:transform .2s;display:inline-block;color:var(--text-dim);">▾</span>
         </span>
       </div>
+      <div id="questsBody" style="display:${questsCollapsed ? 'none' : 'block'};">
       ${xpMultiplier() > 1 ? `<div class="mult-banner">⚡ Bonus points <b>×${xpMultiplier()}</b> actif — série de ${curStreak} jours ! Joue pour en profiter.</div>` : ''}
       ${allQuestsDone ? `<div class="quests-alldone">🎉 Tu as terminé tous les défis du jour !</div>` : ''}
       ${quests.map(q => {
@@ -4962,6 +4969,7 @@ function renderBlockSelect(){
           </div>
         </div>`;
       }).join('')}
+      </div>
     </div>
 
     <div class="stats-strip">
@@ -4970,20 +4978,18 @@ function renderBlockSelect(){
       <div class="stat-box gold" id="statMasteredBox" style="cursor:pointer;"><div class="stat-num">${masteredCount2}</div><div class="stat-lbl">maîtrisés ⭐</div></div>
       <div class="stat-box warn" id="statReviewBox" style="cursor:pointer;"><div class="stat-num">${toReviewCount}</div><div class="stat-lbl">à revoir</div></div>
     </div>
-    <div style="display:flex;gap:10px;justify-content:center;margin:4px 0 6px;flex-wrap:wrap;">
+    <div style="font-family:'Inter',sans-serif;font-weight:800;color:var(--purple);margin:16px 0 8px;font-size:14px;text-align:center;letter-spacing:.02em;text-transform:uppercase;">🎮 Entraînement & jeux</div>
+    <div style="display:flex;gap:10px;justify-content:center;margin:0 0 6px;flex-wrap:wrap;">
       <button class="restart-btn" id="trainingCenterBtn" style="display:flex;align-items:center;gap:8px;background:var(--surface-sunken);border:1px solid var(--border);color:var(--purple);box-shadow:none;">
         🎓 Centre d'entraînement
       </button>
       <button class="restart-btn" id="radioBtn" style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#1E1B4B,#3730A3);color:#fff;box-shadow:0 4px 0 #0F172A;">
-        🎧 Radio (écoute passive)
+        🎧 Radio
       </button>
       ${toReviewCount > 0 ? `
       <button class="restart-btn" id="startReviewBtn" style="display:flex;align-items:center;gap:8px;">
-        ⚠️ Réviser mes ${toReviewCount} mot${toReviewCount>1?'s':''} à revoir
+        ⚠️ ${toReviewCount} mot${toReviewCount>1?'s':''} à revoir
       </button>` : ''}
-    </div>
-    <div style="font-family:'Inter',sans-serif;font-weight:800;color:var(--purple);margin:16px 0 8px;font-size:14px;text-align:center;letter-spacing:.02em;text-transform:uppercase;">🎮 Jeux rapides</div>
-    <div style="display:flex;gap:10px;justify-content:center;margin:0 0 6px;flex-wrap:wrap;">
       <button class="mode-chip" id="blitzBtn" style="background:linear-gradient(135deg,#F59E0B,#EF4444);color:#fff;border:none;">⚡ Blitz 60s</button>
       <button class="mode-chip" id="swipeBtn" style="background:linear-gradient(135deg,#EC4899,#8B5CF6);color:#fff;border:none;">👆 Swipe</button>
       <button class="mode-chip" id="flashcardsBtn" style="background:linear-gradient(135deg,#0EA5A4,#0891B2);color:#fff;border:none;">🃏 Flashcards</button>
@@ -5037,6 +5043,19 @@ function renderBlockSelect(){
     ).join('');
   })();
   document.getElementById('trainingCenterBtn').addEventListener('click', () => renderTrainingCenter());
+  const questsHead = document.getElementById('questsHead');
+  const questsChevron = document.getElementById('questsChevron');
+  if(questsChevron){ questsChevron.style.transform = questsCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)'; }
+  if(questsHead){
+    questsHead.addEventListener('click', (e) => {
+      if(e.target && e.target.id === 'questSettingsBtn') return; // ne pas replier en cliquant sur ⚙️
+      questsCollapsed = !questsCollapsed;
+      saveQuestsCollapsed(questsCollapsed);
+      const body = document.getElementById('questsBody');
+      if(body){ body.style.display = questsCollapsed ? 'none' : 'block'; }
+      if(questsChevron){ questsChevron.style.transform = questsCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)'; }
+    });
+  }
   document.getElementById('radioBtn').addEventListener('click', () => renderRadioSetup());
   document.getElementById('blitzBtn').addEventListener('click', () => renderBlitzIntro());
   document.getElementById('swipeBtn').addEventListener('click', () => renderSwipeIntro());
