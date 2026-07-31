@@ -1936,6 +1936,13 @@ function shuffle(arr){
   }
   return a;
 }
+/* Répartition des catégories (Familier, Expression, Verbe...) parmi une liste de mots —
+   utilisé pour afficher la catégorie au survol des blocs, partout dans l'app. */
+function getBlockCategorySummary(words){
+  const counts = {};
+  words.forEach(w => { counts[w.cat] = (counts[w.cat] || 0) + 1; });
+  return Object.entries(counts).sort((a, b) => b[1] - a[1]);
+}
 
 /* 🧩 Regroupe les mots ayant exactement le même "fr" dans un bloc (homonymes / sens multiples) */
 function groupDuplicateWords(words){
@@ -2903,17 +2910,25 @@ function renderRadioSetup(){
   BLOCKS.forEach((b, i) => {
     const key = 'n:' + i;
     const on = radioSelectedBlocks.has(key);
-    gridHtml += `<button class="opt ${on ? 'radio-block-selected' : ''}" data-radio-key="${key}" style="text-align:center;">
+    const catSummary = getBlockCategorySummary(b);
+    const dominantCat = catSummary.length ? catSummary[0][0] : '';
+    const catTooltip = catSummary.map(([c,n]) => `${c} (${n})`).join(' · ');
+    gridHtml += `<button class="opt ${on ? 'radio-block-selected' : ''}" data-radio-key="${key}" title="${escapeHtml(catTooltip)}" style="text-align:center;">
       <div style="font-family:'Inter',sans-serif;font-weight:700;font-size:15px;">${on?'✅ ':''}${escapeHtml(getBlockTitle(i))}</div>
       <div style="font-size:11px;color:var(--text-dim);margin-top:4px;">${b.length} mots</div>
+      <div class="block-cat-tag">${escapeHtml(dominantCat)}${catSummary.length>1?` +${catSummary.length-1}`:''}</div>
     </button>`;
   });
   customBlocks.forEach(cb => {
     const key = 'c:' + cb.id;
     const on = radioSelectedBlocks.has(key);
-    gridHtml += `<button class="opt ${on ? 'radio-block-selected' : ''}" data-radio-key="${key}" style="text-align:center;">
+    const catSummary = getBlockCategorySummary(cb.words);
+    const dominantCat = catSummary.length ? catSummary[0][0] : '';
+    const catTooltip = catSummary.map(([c,n]) => `${c} (${n})`).join(' · ');
+    gridHtml += `<button class="opt ${on ? 'radio-block-selected' : ''}" data-radio-key="${key}" title="${escapeHtml(catTooltip)}" style="text-align:center;">
       <div style="font-family:'Inter',sans-serif;font-weight:700;font-size:15px;">${on?'✅ ':''}🧩 ${escapeHtml(cb.title)}</div>
       <div style="font-size:11px;color:var(--text-dim);margin-top:4px;">${cb.words.length} mots</div>
+      <div class="block-cat-tag">${escapeHtml(dominantCat)}${catSummary.length>1?` +${catSummary.length-1}`:''}</div>
     </button>`;
   });
   grid.innerHTML = gridHtml;
@@ -5184,11 +5199,6 @@ function renderBlockSelect(){
       <button class="tile-peek" data-manage-custom="${block.id}" title="Gérer ce bloc" style="right:40px;">⚙️</button>
       <button class="tile-peek" data-peek-custom="${block.id}" title="Voir les mots">👁</button>
     </div>`;
-  }
-  function getBlockCategorySummary(words){
-    const counts = {};
-    words.forEach(w => { counts[w.cat] = (counts[w.cat] || 0) + 1; });
-    return Object.entries(counts).sort((a, b) => b[1] - a[1]);
   }
 
   function buildNormalTileHtml(b, i){
