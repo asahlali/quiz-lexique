@@ -243,6 +243,10 @@
     transition:transform .12s;
   }
   .tile-peek:hover{ transform:scale(1.1); background:var(--surface-hover); }
+  .block-cat-tag{
+    display:inline-block;font-size:10.5px;font-weight:700;color:var(--purple);background:rgba(80,70,229,0.1);
+    padding:2px 8px;border-radius:999px;margin-top:5px;
+  }
 
   /* ============ 🎧 RADIO — design dédié, sobre et pro ============ */
   .radio-block-selected{ outline:3px solid var(--purple);outline-offset:2px;background:#EEF2FF !important; }
@@ -795,6 +799,34 @@
   }
   body.menu-open .menu-backdrop{ display:block;opacity:1; }
 
+  /* ============ 🔀 BASCULE D'APPLICATION (VocabVISION / QcmVISION) ============ */
+  .app-switch-grid{ display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:22px; }
+  @media (max-width:520px){ .app-switch-grid{ grid-template-columns:1fr; } }
+  .app-switch-card{
+    border:1px solid var(--border);background:var(--surface-sunken);border-radius:18px;padding:26px 18px;
+    cursor:pointer;text-align:center;transition:all .15s ease;font-family:'Inter',sans-serif;
+  }
+  .app-switch-card:hover{ transform:translateY(-3px);box-shadow:var(--shadow-md);border-color:var(--purple); }
+  .app-switch-card.qcm:hover{ border-color:#6366F1; }
+  .app-switch-icon{ font-size:42px;margin-bottom:10px; }
+  .app-switch-title{ font-weight:800;font-size:19px;color:var(--text);margin-bottom:8px; }
+  .app-switch-sub{ font-size:12.5px;color:var(--text-dim);line-height:1.5; }
+
+  /* ============ 📝 CRÉATEUR DE QCM ============ */
+  .qcm-add-form{
+    background:var(--surface-sunken);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-top:14px;
+  }
+  .qcm-correct-toggle{
+    flex:none;width:26px;height:26px;border-radius:6px;border:1px solid var(--border);background:var(--surface);
+    color:var(--text-dim);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  }
+  .qcm-correct-toggle.active{ background:var(--green);color:#fff;border-color:var(--green-dark); }
+  .qcm-remove-opt{
+    flex:none;width:26px;height:26px;border-radius:6px;border:1px solid var(--border);background:var(--surface);
+    color:var(--red-dark);cursor:pointer;
+  }
+  .opt.selected{ background:rgba(80,70,229,0.12);border-color:var(--purple); }
+
   /* ============ 🚀 HERO (écran d'accueil) ============ */
   .hero{ text-align:center;padding:6px 0 4px; }
   .hero-badge{
@@ -1271,6 +1303,7 @@
   </div>
   <div class="menu-group">
     <div class="menu-label">Navigation</div>
+    <button class="menu-item" id="switchAppBtn"><span class="mi-ic">🔀</span> Changer d'application</button>
     <button class="menu-item" id="homeBtn"><span class="mi-ic">🏠</span> Accueil</button>
     <button class="menu-item" id="dictBtn"><span class="mi-ic">📖</span> Mots &amp; recherche</button>
     <button class="menu-item" id="historyBtn"><span class="mi-ic">🏆</span> Historique</button>
@@ -2406,8 +2439,9 @@ document.addEventListener('keydown', (e) => { if(e.key === 'Escape'){ closeMenu(
 document.getElementById('menu').addEventListener('click', (e) => {
   if(e.target.closest('.menu-item')){ closeMenu(); }
 });
-document.getElementById('brandHome').addEventListener('click', () => { renderBlockSelect(); });
-document.getElementById('homeBtn').addEventListener('click', () => { renderBlockSelect(); });
+document.getElementById('brandHome').addEventListener('click', () => { if(appMode === 'qcm'){ renderQcmHome(); } else { renderBlockSelect(); } });
+document.getElementById('homeBtn').addEventListener('click', () => { if(appMode === 'qcm'){ renderQcmHome(); } else { renderBlockSelect(); } });
+document.getElementById('switchAppBtn').addEventListener('click', () => { renderAppSwitcher(); });
 
 document.getElementById('dictBtn').addEventListener('click', () => {
   renderDictionaryView();
@@ -5134,26 +5168,39 @@ function renderBlockSelect(){
     const bestPct = Math.round(customBlockBestPct(block));
     const hasResult = customBlockHasResult(block);
     const topStyle = passed ? 'background:#D1FAE5;box-shadow:0 4px 0 #6EE7B7;' : 'background:#F5F0FF;box-shadow:0 4px 0 #DDD2FF;';
+    const catSummary = getBlockCategorySummary(block.words);
+    const dominantCat = catSummary.length ? catSummary[0][0] : '';
+    const catTooltip = catSummary.map(([c,n]) => `${c} (${n})`).join(' · ');
     const statusLine = hasResult
       ? (passed ? `<div class="block-pass ok">✅ Validé · ${bestPct}%</div>` : `<div class="block-pass todo">${bestPct}% · vise ${PASS_THRESHOLD}%</div>`)
       : `<div style="font-size:11.5px;color:var(--text-dim);margin-top:4px;">${block.words.length} mots</div>`;
-    return `<div class="tile-wrap">
+    return `<div class="tile-wrap" title="${escapeHtml(catTooltip)}">
       <button class="opt" data-custom-block="${block.id}" style="text-align:center;${topStyle}">
         <div style="font-family:'Inter',sans-serif;font-weight:700;font-size:15px;">🧩 ${escapeHtml(block.title)}</div>
         ${statusLine}
+        <div class="block-cat-tag">${escapeHtml(dominantCat)}${catSummary.length>1?` +${catSummary.length-1}`:''}</div>
         <div class="bmodes">${buildNotesHtml(block.results)}</div>
       </button>
       <button class="tile-peek" data-manage-custom="${block.id}" title="Gérer ce bloc" style="right:40px;">⚙️</button>
       <button class="tile-peek" data-peek-custom="${block.id}" title="Voir les mots">👁</button>
     </div>`;
   }
+  function getBlockCategorySummary(words){
+    const counts = {};
+    words.forEach(w => { counts[w.cat] = (counts[w.cat] || 0) + 1; });
+    return Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  }
+
   function buildNormalTileHtml(b, i){
     const perMode = blockResults[i] || {};
     const unlocked = isBlockUnlocked(i);
     const passed = isBlockPassed(i);
     const bestPct = Math.round(blockBestPct(i));
+    const catSummary = getBlockCategorySummary(b);
+    const dominantCat = catSummary.length ? catSummary[0][0] : '';
+    const catTooltip = catSummary.map(([c,n]) => `${c} (${n})`).join(' · ');
     if(!unlocked){
-      return `<button class="opt block-locked" disabled style="text-align:center;opacity:.55;cursor:not-allowed;">
+      return `<button class="opt block-locked" disabled title="${escapeHtml(catTooltip)}" style="text-align:center;opacity:.55;cursor:not-allowed;">
         <div style="font-family:'Inter',sans-serif;font-weight:700;font-size:18px;">🔒 Bloc ${i+1}</div>
         <div style="font-size:11.5px;color:var(--text-dim);margin-top:4px;">Validez le bloc ${i} (≥${PASS_THRESHOLD}%)</div>
       </button>`;
@@ -5162,10 +5209,11 @@ function renderBlockSelect(){
     const statusLine = blockHasResult(i)
       ? (passed ? `<div class="block-pass ok">✅ Validé · ${bestPct}%</div>` : `<div class="block-pass todo">${bestPct}% · vise ${PASS_THRESHOLD}%</div>`)
       : `<div style="font-size:11.5px;color:var(--text-dim);margin-top:4px;">${b.length} mots</div>`;
-    return `<div class="tile-wrap">
+    return `<div class="tile-wrap" title="${escapeHtml(catTooltip)}">
       <button class="opt" data-block="${i}" style="text-align:center;${topStyle}">
         <div style="font-family:'Inter',sans-serif;font-weight:700;font-size:16px;">${escapeHtml(getBlockTitle(i))}</div>
         ${statusLine}
+        <div class="block-cat-tag">${escapeHtml(dominantCat)}${catSummary.length>1?` +${catSummary.length-1}`:''}</div>
         <div class="bmodes">${buildNotesHtml(perMode)}</div>
       </button>
       <button class="tile-peek" data-peek-block="${i}" title="Voir les mots">👁</button>
@@ -7490,7 +7538,549 @@ autoApplyStreakFreeze();
   });
   observer.observe(quizCard, { childList: true });
 })();
-renderBlockSelect();
+/* ============================================================
+   📝 QcmVISION — mode QCM pour préparation de certifications
+   (Azure, UiPath, etc.) — coexiste avec VocabVISION, bascule libre.
+   ============================================================ */
+
+/* ---- Bascule d'application ---- */
+const APP_MODE_KEY = 'lexiqueQuiz::appMode';
+function loadAppMode(){ try{ return localStorage.getItem(APP_MODE_KEY); }catch(e){ return null; } } // null = jamais choisi
+function saveAppMode(m){ try{ localStorage.setItem(APP_MODE_KEY, m); }catch(e){} }
+let appMode = loadAppMode(); // 'vocab' | 'qcm' | null
+
+function renderAppSwitcher(){
+  clearQuestionTimer();
+  document.body.classList.remove('quiz-active');
+  currentBlock = null;
+  document.getElementById('scoreboard').innerHTML = '';
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('footerNote').textContent = '';
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="cat-tag">👋 Bienvenue</div>
+    <div class="word-fr" style="font-size:clamp(24px,4.5vw,32px);">Quelle application veux-tu utiliser ?</div>
+    <div class="question-line">Tu peux changer d'application à tout moment depuis le menu ☰.</div>
+    <div class="app-switch-grid">
+      <button class="app-switch-card" id="chooseVocabBtn">
+        <div class="app-switch-icon">📚</div>
+        <div class="app-switch-title">VocabVISION</div>
+        <div class="app-switch-sub">Vocabulaire Français ↔ Arabe : blocs, quiz, Radio, jeux rapides...</div>
+      </button>
+      <button class="app-switch-card qcm" id="chooseQcmBtn">
+        <div class="app-switch-icon">📝</div>
+        <div class="app-switch-title">QcmVISION</div>
+        <div class="app-switch-sub">QCM personnalisés pour tes certifications (Azure, UiPath...) : choix unique, oui/non, choix multiple.</div>
+      </button>
+    </div>
+  `;
+  document.getElementById('chooseVocabBtn').addEventListener('click', () => { appMode = 'vocab'; saveAppMode('vocab'); renderBlockSelect(); });
+  document.getElementById('chooseQcmBtn').addEventListener('click', () => { appMode = 'qcm'; saveAppMode('qcm'); renderQcmHome(); });
+}
+
+/* ---- Stockage des jeux de questions QCM ---- */
+const QCM_SETS_KEY = 'lexiqueQuiz::qcmSets';
+function loadQcmSets(){
+  try{ const raw = localStorage.getItem(nsKey(QCM_SETS_KEY)); return raw ? JSON.parse(raw) : []; }catch(e){ return []; }
+}
+function saveQcmSets(){ try{ localStorage.setItem(nsKey(QCM_SETS_KEY), JSON.stringify(qcmSets)); cloudAutoPush(); }catch(e){} }
+let qcmSets = loadQcmSets();
+function getQcmSet(id){ return qcmSets.find(s => s.id === id) || null; }
+function qcmSetBestPct(s){
+  if(!s.attempts || !s.attempts.length) return null;
+  return Math.max(...s.attempts.map(a => Math.round((a.correct/a.total)*100)));
+}
+
+/* ---- 🏠 Accueil QcmVISION ---- */
+function renderQcmHome(){
+  clearQuestionTimer();
+  document.body.classList.remove('quiz-active');
+  currentBlock = null;
+  document.getElementById('scoreboard').innerHTML = '';
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('footerNote').textContent = '';
+
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="hero">
+      <div class="hero-badge">📝 QcmVISION · ${qcmSets.length} QCM</div>
+      <div class="hero-title">Prépare tes <span class="grad">certifications</span></div>
+      <div class="hero-sub">${qcmSets.length === 0 ? '✨ Crée ton premier QCM (Azure, UiPath, ou ce que tu veux) !' : '🎯 Choisis un QCM ou crées-en un nouveau.'}</div>
+    </div>
+    <button class="restart-btn" id="qcmCreateBtn" style="display:flex;align-items:center;gap:8px;margin:18px auto;background:linear-gradient(135deg,#6366F1,#4F46E5);border-color:#3730A3;">➕ Créer un nouveau QCM</button>
+    <div class="options" id="qcmSetGrid" style="grid-template-columns:repeat(auto-fill,minmax(160px,1fr));"></div>
+  `;
+  document.getElementById('qcmCreateBtn').addEventListener('click', () => renderQcmSetBuilder(null));
+
+  const grid = document.getElementById('qcmSetGrid');
+  if(qcmSets.length === 0){
+    grid.innerHTML = `<div class="no-results" style="grid-column:1/-1;">Aucun QCM pour l'instant — crée le premier avec le bouton ci-dessus.</div>`;
+    return;
+  }
+  grid.innerHTML = qcmSets.map(s => {
+    const best = qcmSetBestPct(s);
+    const nQ = s.questions.length;
+    const passed = best !== null && best >= 70;
+    const topStyle = passed ? 'background:#D1FAE5;box-shadow:0 4px 0 #6EE7B7;' : '';
+    return `<div class="tile-wrap">
+      <button class="opt" data-qcm-set="${s.id}" style="text-align:center;${topStyle}">
+        <div style="font-family:'Inter',sans-serif;font-weight:700;font-size:15px;">📝 ${escapeHtml(s.title)}</div>
+        ${s.category ? `<div class="block-cat-tag">${escapeHtml(s.category)}</div>` : ''}
+        <div style="font-size:11.5px;color:var(--text-dim);margin-top:5px;">${nQ} question${nQ>1?'s':''}${best !== null ? ` · meilleur score ${best}%` : ''}</div>
+      </button>
+      <button class="tile-peek" data-qcm-manage="${s.id}" title="Gérer ce QCM">⚙️</button>
+    </div>`;
+  }).join('');
+  grid.querySelectorAll('[data-qcm-set]').forEach(btn => {
+    btn.addEventListener('click', () => startQcmPractice(btn.dataset.qcmSet));
+  });
+  grid.querySelectorAll('[data-qcm-manage]').forEach(btn => {
+    btn.addEventListener('click', (e) => { e.stopPropagation(); renderQcmSetManage(btn.dataset.qcmManage); });
+  });
+}
+
+/* ---- ⚙️ Gestion d'un QCM (renommer, modifier, supprimer, voir les scores) ---- */
+function renderQcmSetManage(setId){
+  const s = getQcmSet(setId);
+  if(!s){ renderQcmHome(); return; }
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="qcmManageBackBtn" style="cursor:pointer;">← Retour</button>`;
+  const best = qcmSetBestPct(s);
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="cat-tag">⚙️ Gérer le QCM</div>
+    <div class="word-fr" style="font-size:clamp(24px,4.5vw,32px);">📝 ${escapeHtml(s.title)}</div>
+    <div class="question-line">${s.questions.length} question${s.questions.length>1?'s':''}${s.category ? ` · ${escapeHtml(s.category)}` : ''}${best !== null ? ` · meilleur score : ${best}%` : ' · jamais essayé'}</div>
+    <div style="display:flex;gap:12px;justify-content:center;margin:18px 0;flex-wrap:wrap;">
+      <button class="restart-btn" id="qcmPracticeBtn" style="background:linear-gradient(135deg,#6366F1,#4F46E5);border-color:#3730A3;">▶ Pratiquer</button>
+      <button class="restart-btn" id="qcmEditBtn" style="background:var(--surface-sunken);border:1px solid var(--border);color:var(--text);">✏️ Modifier les questions</button>
+      <button class="restart-btn" id="qcmDeleteBtn" style="background:#FEE2E2;color:var(--red-dark);border:1px solid #FCA5A5;">🗑 Supprimer</button>
+    </div>
+    ${s.attempts && s.attempts.length ? `
+    <div class="pm-summary">
+      <div class="pm-title">📊 Historique des tentatives</div>
+      ${s.attempts.slice().reverse().slice(0,8).map(a => `<div class="pm-row"><span>${new Date(a.ts).toLocaleDateString('fr-FR')}</span><span class="pm-score ${Math.round((a.correct/a.total)*100)>=70?'ok':'todo'}">${a.correct}/${a.total} · ${Math.round((a.correct/a.total)*100)}%</span></div>`).join('')}
+    </div>` : ''}
+  `;
+  document.getElementById('qcmManageBackBtn').addEventListener('click', renderQcmHome);
+  document.getElementById('qcmPracticeBtn').addEventListener('click', () => startQcmPractice(setId));
+  document.getElementById('qcmEditBtn').addEventListener('click', () => renderQcmSetBuilder(setId));
+  document.getElementById('qcmDeleteBtn').addEventListener('click', () => {
+    if(confirm(`Supprimer définitivement le QCM "${s.title}" et toutes ses questions ? Cette action est irréversible.`)){
+      qcmSets = qcmSets.filter(x => x.id !== setId);
+      saveQcmSets();
+      setStatus('🗑 QCM supprimé.', 'ok');
+      renderQcmHome();
+    }
+  });
+}
+
+/* ---- ✏️ Créateur / éditeur de QCM ---- */
+let qcmDraft = null; // { id, title, category, questions:[...] } en cours d'édition
+
+function renderQcmSetBuilder(existingSetId){
+  clearQuestionTimer();
+  document.body.classList.remove('quiz-active');
+  currentBlock = null;
+  const existing = existingSetId ? getQcmSet(existingSetId) : null;
+  qcmDraft = existing
+    ? { id: existing.id, title: existing.title, category: existing.category || '', questions: existing.questions.map(q => ({...q, options: q.options.slice(), correct: q.correct.slice()})), attempts: existing.attempts || [] }
+    : { id: null, title: '', category: '', questions: [], attempts: [] };
+
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="qcmBuilderBackBtn" style="cursor:pointer;">← Retour</button>`;
+  document.getElementById('progressFill').style.width = '0%';
+
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="cat-tag">${existing ? '✏️ Modifier' : '➕ Nouveau'} QCM</div>
+    <div class="word-fr" style="font-size:clamp(22px,4.5vw,28px);">Construis ton questionnaire</div>
+
+    <div style="font-weight:800;color:var(--purple);margin:14px 0 6px;">📝 Titre du QCM</div>
+    <input type="text" id="qcmTitleInput" class="search-input" placeholder="ex : AZ-900 Azure Fundamentals" value="${escapeHtml(qcmDraft.title)}">
+    <div style="font-weight:800;color:var(--purple);margin:14px 0 6px;">🏷️ Catégorie (optionnel)</div>
+    <input type="text" id="qcmCategoryInput" class="search-input" placeholder="ex : Azure, UiPath, RPA..." value="${escapeHtml(qcmDraft.category)}">
+
+    <div style="font-weight:800;color:var(--purple);margin:20px 0 8px;">❓ Questions (<span id="qcmQCount">${qcmDraft.questions.length}</span>)</div>
+    <div id="qcmQuestionList"></div>
+
+    <div class="qcm-add-form" id="qcmBulkForm">
+      <div style="font-weight:800;color:var(--text);margin-bottom:8px;">📋 Ajouter plusieurs questions d'un coup</div>
+      <div class="question-line" style="text-align:left;font-size:12.5px;margin:0 0 10px;">
+        Une question par ligne, séparée par des points-virgules <code style="background:var(--surface);padding:1px 5px;border-radius:5px;">;</code> :<br>
+        <code style="background:var(--surface);padding:2px 6px;border-radius:5px;display:inline-block;margin-top:4px;">Question ; *BonneRéponse ; MauvaiseRéponse ; MauvaiseRéponse ; ...</code><br>
+        • Mets une <b>*</b> devant chaque bonne réponse (une seule = choix unique, plusieurs = choix multiple)<br>
+        • Pour Oui/Non, mets juste 2 options : <code style="background:var(--surface);padding:1px 5px;border-radius:5px;">*Oui</code> et <code style="background:var(--surface);padding:1px 5px;border-radius:5px;">Non</code><br>
+        • Explication optionnelle : ajoute un dernier champ commençant par <code style="background:var(--surface);padding:1px 5px;border-radius:5px;">##</code>
+      </div>
+      <div class="question-line" style="text-align:left;font-size:12px;margin:0 0 10px;background:var(--surface);border-radius:8px;padding:10px 12px;">
+        Exemples :<br>
+        <code>Quelle est la capitale de la France ? ; *Paris ; Lyon ; Marseille ; ##Paris est la capitale depuis 508.</code><br>
+        <code>Le service Azure Blob Storage est-il un stockage objet ? ; *Oui ; Non</code><br>
+        <code>Quels services sont serverless ? ; *Azure Functions ; *Logic Apps ; Azure VM ; SQL Database</code>
+      </div>
+      <textarea id="qcmBulkText" class="search-input" rows="6" placeholder="Colle tes questions ici, une par ligne..." style="resize:vertical;font-family:monospace;font-size:13px;"></textarea>
+      <div style="display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap;">
+        <button class="mode-chip" id="qcmBulkFileBtn">📁 ...ou importer un fichier CSV</button>
+        <input type="file" id="qcmBulkFileInput" accept=".csv,.txt" style="display:none;">
+        <button class="restart-btn" id="qcmBulkAddBtn" style="background:var(--surface);border:1px solid var(--border);color:var(--purple);margin-top:0;">➕ Ajouter ces questions</button>
+      </div>
+      <div class="csv-status" id="qcmBulkStatus"></div>
+    </div>
+
+    <div class="qcm-add-form" id="qcmAddForm">
+      <div style="font-weight:800;color:var(--text);margin-bottom:8px;">➕ Ajouter une question à la main</div>
+      <div class="mode-row" style="margin:0 0 10px;justify-content:flex-start;">
+        <button class="mode-chip active" data-qtype="single">◉ Choix unique</button>
+        <button class="mode-chip" data-qtype="yesno">✅❌ Oui / Non</button>
+        <button class="mode-chip" data-qtype="multi">☑️ Choix multiple</button>
+      </div>
+      <textarea id="qcmQuestionText" class="search-input" rows="2" placeholder="Texte de la question..." style="resize:vertical;"></textarea>
+      <div id="qcmOptionsWrap" style="margin-top:10px;"></div>
+      <button class="mode-chip" id="qcmAddOptionBtn" style="margin-top:6px;">➕ Ajouter une option</button>
+      <textarea id="qcmExplainText" class="search-input" rows="2" placeholder="Explication affichée après la réponse (optionnel)" style="resize:vertical;margin-top:10px;"></textarea>
+      <button class="restart-btn" id="qcmAddQuestionBtn" style="margin-top:12px;background:var(--surface-sunken);border:1px solid var(--border);color:var(--purple);">✓ Ajouter cette question</button>
+    </div>
+
+    <button class="restart-btn" id="qcmSaveSetBtn" style="margin-top:22px;background:linear-gradient(135deg,#6366F1,#4F46E5);border-color:#3730A3;">💾 Enregistrer le QCM</button>
+  `;
+  document.getElementById('qcmBuilderBackBtn').addEventListener('click', () => { qcmDraft = null; renderQcmHome(); });
+
+  window.__qcmCurrentType = 'single';
+  window.__qcmDraftOptions = ['', ''];
+  window.__qcmDraftCorrect = [];
+
+  document.querySelectorAll('#qcmAddForm [data-qtype]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#qcmAddForm [data-qtype]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      window.__qcmCurrentType = btn.dataset.qtype;
+      if(window.__qcmCurrentType === 'yesno'){ window.__qcmDraftOptions = ['Oui', 'Non']; }
+      else if(window.__qcmDraftOptions.length < 2){ window.__qcmDraftOptions = ['', '']; }
+      window.__qcmDraftCorrect = [];
+      renderQcmOptionInputs();
+    });
+  });
+  document.getElementById('qcmAddOptionBtn').addEventListener('click', () => {
+    if(window.__qcmCurrentType === 'yesno') return;
+    window.__qcmDraftOptions.push('');
+    renderQcmOptionInputs();
+  });
+  document.getElementById('qcmAddQuestionBtn').addEventListener('click', addQcmQuestionFromForm);
+  document.getElementById('qcmSaveSetBtn').addEventListener('click', saveQcmDraftSet);
+
+  document.getElementById('qcmBulkAddBtn').addEventListener('click', () => {
+    const raw = document.getElementById('qcmBulkText').value;
+    addQcmBulkQuestions(raw);
+  });
+  document.getElementById('qcmBulkFileBtn').addEventListener('click', () => {
+    document.getElementById('qcmBulkFileInput').click();
+  });
+  document.getElementById('qcmBulkFileInput').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      document.getElementById('qcmBulkText').value = ev.target.result;
+      addQcmBulkQuestions(ev.target.result);
+    };
+    reader.readAsText(file, 'UTF-8');
+    e.target.value = '';
+  });
+
+  renderQcmOptionInputs();
+  renderQcmQuestionList();
+}
+
+function renderQcmOptionInputs(){
+  const wrap = document.getElementById('qcmOptionsWrap');
+  const addBtn = document.getElementById('qcmAddOptionBtn');
+  if(!wrap) return;
+  const isYesNo = window.__qcmCurrentType === 'yesno';
+  const isMulti = window.__qcmCurrentType === 'multi';
+  if(addBtn){ addBtn.style.display = isYesNo ? 'none' : 'inline-flex'; }
+  wrap.innerHTML = window.__qcmDraftOptions.map((opt, i) => `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+      <button type="button" class="qcm-correct-toggle ${window.__qcmDraftCorrect.includes(i) ? 'active' : ''}" data-opt-idx="${i}" title="Marquer comme bonne réponse">${isMulti ? '☐' : '◯'}</button>
+      <input type="text" class="search-input qcm-option-input" data-opt-input="${i}" value="${escapeHtml(opt)}" placeholder="Option ${i+1}" ${isYesNo ? 'readonly' : ''} style="padding:10px 14px;">
+      ${!isYesNo && window.__qcmDraftOptions.length > 2 ? `<button type="button" class="qcm-remove-opt" data-opt-remove="${i}">✕</button>` : ''}
+    </div>
+  `).join('');
+  wrap.querySelectorAll('[data-opt-input]').forEach(inp => {
+    inp.addEventListener('input', () => { window.__qcmDraftOptions[parseInt(inp.dataset.optInput,10)] = inp.value; });
+  });
+  wrap.querySelectorAll('[data-opt-idx]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.optIdx, 10);
+      if(isMulti){
+        const pos = window.__qcmDraftCorrect.indexOf(idx);
+        if(pos >= 0){ window.__qcmDraftCorrect.splice(pos,1); } else { window.__qcmDraftCorrect.push(idx); }
+      } else {
+        window.__qcmDraftCorrect = [idx];
+      }
+      renderQcmOptionInputs();
+    });
+  });
+  wrap.querySelectorAll('[data-opt-remove]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.optRemove, 10);
+      window.__qcmDraftOptions.splice(idx, 1);
+      window.__qcmDraftCorrect = window.__qcmDraftCorrect.filter(c => c !== idx).map(c => c > idx ? c - 1 : c);
+      renderQcmOptionInputs();
+    });
+  });
+}
+
+/* 📋 Parse et ajoute plusieurs questions collées ou importées d'un CSV.
+   Format par ligne : Question ; *BonneRéponse ; MauvaiseRéponse ; ... ; ##Explication(optionnel)
+   — Une "*" devant une option = bonne réponse (plusieurs "*" = choix multiple).
+   — Un champ commençant par "##" (n'importe où après les options) = explication. */
+function parseQcmBulkLine(line){
+  const parts = line.split(';').map(p => p.trim()).filter(p => p !== '');
+  if(parts.length < 3) return { error: 'il faut la question + au moins 2 options' };
+  const question = parts[0];
+  let explanation = '';
+  const optionParts = [];
+  parts.slice(1).forEach(p => {
+    if(p.startsWith('##')){ explanation = p.slice(2).trim(); }
+    else { optionParts.push(p); }
+  });
+  if(optionParts.length < 2) return { error: 'il faut au moins 2 options' };
+  const options = [];
+  const correct = [];
+  optionParts.forEach((p, i) => {
+    if(p.startsWith('*')){ correct.push(i); options.push(p.slice(1).trim()); }
+    else { options.push(p); }
+  });
+  if(correct.length === 0) return { error: 'aucune bonne réponse marquée avec *' };
+  if(options.some(o => !o)) return { error: 'une option est vide' };
+
+  let type = 'single';
+  if(correct.length > 1){ type = 'multi'; }
+  else if(options.length === 2){
+    const norm = options.map(o => o.toLowerCase());
+    const yesNoPairs = [['oui','non'],['vrai','faux'],['yes','no'],['true','false']];
+    if(yesNoPairs.some(pair => pair.every(w => norm.includes(w)))){ type = 'yesno'; }
+  }
+  return { question: { id: 'q_' + Date.now().toString(36) + Math.random().toString(36).slice(2,6), type, text: question, options, correct, explanation } };
+}
+
+function addQcmBulkQuestions(raw){
+  const statusEl = document.getElementById('qcmBulkStatus');
+  const lines = raw.split(/\r?\n/).map(l => l.trim()).filter(l => l && !l.startsWith('//'));
+  if(lines.length === 0){
+    if(statusEl){ statusEl.textContent = 'Colle au moins une ligne au format indiqué ci-dessus.'; statusEl.className = 'csv-status err'; }
+    return;
+  }
+  let added = 0;
+  const errors = [];
+  lines.forEach((line, i) => {
+    const result = parseQcmBulkLine(line);
+    if(result.error){ errors.push(`Ligne ${i+1} : ${result.error}`); }
+    else { qcmDraft.questions.push(result.question); added++; }
+  });
+
+  if(statusEl){
+    const parts = [];
+    if(added > 0) parts.push(`${added} question${added>1?'s':''} ajoutée${added>1?'s':''}`);
+    if(errors.length > 0) parts.push(`${errors.length} ligne${errors.length>1?'s':''} ignorée${errors.length>1?'s':''} (${errors.slice(0,3).join(' · ')}${errors.length>3?'...':''})`);
+    statusEl.textContent = parts.length ? '✓ ' + parts.join(' — ') : 'Aucune question valide trouvée.';
+    statusEl.className = 'csv-status ' + (added > 0 ? 'ok' : 'err');
+  }
+  if(added > 0){
+    document.getElementById('qcmBulkText').value = '';
+    renderQcmQuestionList();
+  }
+}
+
+function addQcmQuestionFromForm(){
+  const text = document.getElementById('qcmQuestionText').value.trim();
+  const explanation = document.getElementById('qcmExplainText').value.trim();
+  const options = window.__qcmDraftOptions.map(o => o.trim()).filter(Boolean);
+  if(!text){ setStatus('⚠️ Ajoute le texte de la question.', 'err'); return; }
+  if(options.length < 2){ setStatus('⚠️ Il faut au moins 2 options.', 'err'); return; }
+  if(window.__qcmDraftCorrect.length === 0){ setStatus('⚠️ Marque au moins une bonne réponse.', 'err'); return; }
+
+  qcmDraft.questions.push({
+    id: 'q_' + Date.now().toString(36) + Math.random().toString(36).slice(2,5),
+    type: window.__qcmCurrentType,
+    text, options, correct: window.__qcmDraftCorrect.slice(), explanation,
+  });
+
+  document.getElementById('qcmQuestionText').value = '';
+  document.getElementById('qcmExplainText').value = '';
+  window.__qcmDraftOptions = window.__qcmCurrentType === 'yesno' ? ['Oui','Non'] : ['', ''];
+  window.__qcmDraftCorrect = [];
+  renderQcmOptionInputs();
+  renderQcmQuestionList();
+  setStatus('✓ Question ajoutée.', 'ok');
+}
+
+function renderQcmQuestionList(){
+  const list = document.getElementById('qcmQuestionList');
+  const count = document.getElementById('qcmQCount');
+  if(count){ count.textContent = qcmDraft.questions.length; }
+  if(!list) return;
+  if(qcmDraft.questions.length === 0){
+    list.innerHTML = `<div class="no-results" style="padding:14px;">Aucune question ajoutée pour l'instant.</div>`;
+    return;
+  }
+  const typeLabels = { single:'◉ Choix unique', yesno:'✅❌ Oui/Non', multi:'☑️ Choix multiple' };
+  list.innerHTML = qcmDraft.questions.map((q, i) => `
+    <div class="result-card" style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px;">
+      <div>
+        <div style="font-size:11px;font-weight:800;color:var(--purple);margin-bottom:4px;">${typeLabels[q.type] || q.type}</div>
+        <div style="font-weight:700;font-size:14px;color:var(--text);">${i+1}. ${escapeHtml(q.text)}</div>
+        <div style="font-size:12px;color:var(--text-dim);margin-top:4px;">${q.options.map((o,oi) => q.correct.includes(oi) ? `<b style="color:var(--green-dark);">${escapeHtml(o)}</b>` : escapeHtml(o)).join(' · ')}</div>
+      </div>
+      <button class="hist-btn danger" data-remove-q="${i}">🗑</button>
+    </div>
+  `).join('');
+  list.querySelectorAll('[data-remove-q]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      qcmDraft.questions.splice(parseInt(btn.dataset.removeQ, 10), 1);
+      renderQcmQuestionList();
+    });
+  });
+}
+
+function saveQcmDraftSet(){
+  const title = document.getElementById('qcmTitleInput').value.trim();
+  const category = document.getElementById('qcmCategoryInput').value.trim();
+  if(!title){ setStatus('⚠️ Donne un titre à ton QCM.', 'err'); return; }
+  if(qcmDraft.questions.length === 0){ setStatus('⚠️ Ajoute au moins une question.', 'err'); return; }
+
+  if(qcmDraft.id){
+    const idx = qcmSets.findIndex(s => s.id === qcmDraft.id);
+    if(idx >= 0){ qcmSets[idx] = { ...qcmSets[idx], title, category, questions: qcmDraft.questions }; }
+  } else {
+    qcmSets.push({ id: 'qs_' + Date.now().toString(36) + Math.random().toString(36).slice(2,6), title, category, questions: qcmDraft.questions, attempts: [] });
+  }
+  saveQcmSets();
+  setStatus('✅ QCM enregistré !', 'ok');
+  qcmDraft = null;
+  renderQcmHome();
+}
+
+/* ---- ▶️ Session de pratique QCM ---- */
+let qcmPracticeState = null;
+
+function startQcmPractice(setId){
+  const s = getQcmSet(setId);
+  if(!s || !s.questions.length) return;
+  qcmPracticeState = { setId, questions: shuffle(s.questions.slice()), idx: 0, score: 0, answered: false, history: [] };
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="qcmPracExitBtn" style="cursor:pointer;">← Quitter</button>`;
+  document.getElementById('qcmPracExitBtn').addEventListener('click', renderQcmHome);
+  renderQcmQuestionCard();
+}
+
+function renderQcmQuestionCard(){
+  const st = qcmPracticeState;
+  if(!st) return;
+  if(st.idx >= st.questions.length){ finishQcmPractice(); return; }
+  const q = st.questions[st.idx];
+  st.answered = false;
+  st.selected = [];
+  document.getElementById('progressFill').style.width = `${Math.round((st.idx/st.questions.length)*100)}%`;
+
+  const isMulti = q.type === 'multi';
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="cat-tag">📝 Question ${st.idx+1} / ${st.questions.length} · ⭐ ${st.score}</div>
+    <div class="word-fr" style="font-size:clamp(19px,4vw,25px);text-align:center;line-height:1.4;">${escapeHtml(q.text)}</div>
+    <div class="options" id="qcmOptionsWrap2" style="margin-top:16px;"></div>
+    ${isMulti ? `<button class="restart-btn" id="qcmMultiValidateBtn" style="margin-top:14px;background:linear-gradient(135deg,#6366F1,#4F46E5);border-color:#3730A3;">✓ Valider ma réponse</button>` : ''}
+    <div class="reveal" id="revealWrap"></div>
+  `;
+  const optWrap = document.getElementById('qcmOptionsWrap2');
+  optWrap.innerHTML = q.options.map((opt, i) => `<button class="opt" data-i="${i}" style="text-align:left;">${isMulti ? '☐' : ''} ${escapeHtml(opt)}</button>`).join('');
+  optWrap.querySelectorAll('.opt').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const i = parseInt(btn.dataset.i, 10);
+      if(isMulti){
+        if(st.answered) return;
+        const pos = st.selected.indexOf(i);
+        if(pos >= 0){ st.selected.splice(pos,1); btn.classList.remove('selected'); btn.textContent = '☐ ' + q.options[i]; }
+        else { st.selected.push(i); btn.classList.add('selected'); btn.textContent = '☑️ ' + q.options[i]; }
+      } else {
+        handleQcmAnswer([i]);
+      }
+    });
+  });
+  const multiBtn = document.getElementById('qcmMultiValidateBtn');
+  if(multiBtn){ multiBtn.addEventListener('click', () => handleQcmAnswer(st.selected)); }
+}
+
+function handleQcmAnswer(selectedIndices){
+  const st = qcmPracticeState;
+  if(!st || st.answered) return;
+  st.answered = true;
+  const q = st.questions[st.idx];
+  const correctSet = new Set(q.correct);
+  const selSet = new Set(selectedIndices);
+  const isCorrect = correctSet.size === selSet.size && q.correct.every(c => selSet.has(c));
+
+  document.querySelectorAll('#qcmOptionsWrap2 .opt').forEach((btn, i) => {
+    btn.classList.add('disabled');
+    if(q.correct.includes(i)){ btn.classList.add('correct'); }
+    else if(selSet.has(i)){ btn.classList.add('wrong'); }
+  });
+  const multiBtn = document.getElementById('qcmMultiValidateBtn');
+  if(multiBtn){ multiBtn.style.display = 'none'; }
+
+  if(isCorrect){ st.score++; celebrate(); reactMascot('ok'); playCorrectSound(); }
+  else {
+    const cardEl = document.getElementById('quizCard');
+    cardEl.classList.remove('shake'); void cardEl.offsetWidth; cardEl.classList.add('shake');
+    reactMascot('ko'); playWrongSound();
+  }
+  st.history.push({ text: q.text, isCorrect });
+
+  const revealWrap = document.getElementById('revealWrap');
+  revealWrap.classList.add('show');
+  revealWrap.innerHTML = `
+    <div class="big-feedback ${isCorrect ? 'ok' : 'ko'}">${isCorrect ? '🎉 Bonne réponse !' : '💛 Pas tout à fait...'}</div>
+    ${q.explanation ? `<div class="def-text" style="text-align:center;">💡 ${escapeHtml(q.explanation)}</div>` : ''}
+    <button class="next-btn" id="nextBtn">Suivant →</button>
+  `;
+  document.getElementById('nextBtn').addEventListener('click', () => { st.idx++; renderQcmQuestionCard(); });
+  focusReveal(revealWrap);
+}
+
+function finishQcmPractice(){
+  const st = qcmPracticeState;
+  const s = getQcmSet(st.setId);
+  if(s){
+    s.attempts = s.attempts || [];
+    s.attempts.push({ correct: st.score, total: st.questions.length, ts: Date.now() });
+    saveQcmSets();
+  }
+  recordDailyActivity();
+  qcmPracticeState = null;
+
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="qcmResultsBackBtn" style="cursor:pointer;">← Retour</button>`;
+  document.getElementById('progressFill').style.width = '100%';
+  const pct = Math.round((st.score/st.questions.length)*100);
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="end-screen">
+      <div class="cat-tag">📝 QCM terminé !</div>
+      <div class="big">${st.score} / ${st.questions.length}</div>
+      <div class="sub" style="color:var(--text-dim);">${pct}% de bonnes réponses</div>
+      <div class="pass-banner ${pct>=70?'ok':'todo'}">${pct>=70 ? '✅ Objectif de réussite atteint !' : `🎯 Vise 70%+ — tu y es presque !`}</div>
+      <div style="display:flex;gap:12px;justify-content:center;margin-top:20px;flex-wrap:wrap;">
+        <button class="restart-btn" id="qcmRetryBtn" style="background:linear-gradient(135deg,#6366F1,#4F46E5);border-color:#3730A3;">🔁 Réessayer</button>
+        <button class="restart-btn" id="qcmHomeBtn2" style="background:var(--surface-sunken);border:1px solid var(--border);color:var(--text);">← Choisir un autre QCM</button>
+      </div>
+    </div>
+  `;
+  if(pct >= 70){ launchConfetti(); }
+  document.getElementById('qcmResultsBackBtn').addEventListener('click', renderQcmHome);
+  document.getElementById('qcmHomeBtn2').addEventListener('click', renderQcmHome);
+  document.getElementById('qcmRetryBtn').addEventListener('click', () => startQcmPractice(st.setId));
+}
+
+if(appMode === 'qcm'){ renderQcmHome(); }
+else if(appMode === 'vocab'){ renderBlockSelect(); }
+else { renderAppSwitcher(); }
 if(getSyncUrl()){ showSyncOverlay('Chargement de tes données…'); }
 autoSyncOnLoad();
 
