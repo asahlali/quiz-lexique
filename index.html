@@ -5502,6 +5502,18 @@ function stopRecognition(){
   recoActive = false;
 }
 
+/* 💡 Indice à lettres partielles (ex: "a___t_r") affiché lors de la seconde chance en Prononciation. */
+function buildWordHint(word){
+  const chars = word.split('');
+  const letterIdx = [];
+  chars.forEach((c, i) => { if(/[a-zA-ZÀ-ÿ]/.test(c)) letterIdx.push(i); });
+  if(letterIdx.length === 0) return word;
+  const revealCount = Math.max(2, Math.ceil(letterIdx.length * 0.4));
+  const revealed = new Set([letterIdx[0], letterIdx[letterIdx.length - 1]]); // 1ère et dernière lettre toujours visibles
+  shuffle(letterIdx).forEach(idx => { if(revealed.size < revealCount){ revealed.add(idx); } });
+  return chars.map((c, i) => (!/[a-zA-ZÀ-ÿ]/.test(c) || revealed.has(i)) ? c : '_').join('');
+}
+
 function handleSpeakResult(isCorrect, word, info){
   if(answered) return;
   info = info || {};
@@ -5514,9 +5526,9 @@ function handleSpeakResult(isCorrect, word, info){
     playWrongSound();
     const micHint = document.getElementById('micHint');
     const micTr = document.getElementById('micTranscript');
-    if(micHint) micHint.textContent = '🔁 Presque ! Réessaie...';
+    if(micHint) micHint.innerHTML = `🔁 Presque ! Indice : <b style="letter-spacing:2px;">${escapeHtml(buildWordHint(word.fr))}</b> — réessaie !`;
     if(micTr && info.heard) micTr.textContent = `Tu as dit : « ${info.heard} »`;
-    setTimeout(() => { if(!answered){ startRecognition(word); } }, 700);
+    setTimeout(() => { if(!answered){ startRecognition(word); } }, 900);
     return;
   }
 
