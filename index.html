@@ -88,7 +88,8 @@
     --card:#161616;
   }
   *{box-sizing:border-box;}
-  html{ color-scheme:light dark; }
+  html{ color-scheme:light dark;overflow-x:hidden;width:100%; }
+  *{ min-width:0; } /* évite qu'un enfant flex/grid force son parent à déborder */
   body{
     margin:0;min-height:100vh;color:var(--text);font-family:'Inter',sans-serif;
     padding:32px 16px 90px;
@@ -915,7 +916,13 @@
   @keyframes micPulse{ 0%,100%{ box-shadow:0 10px 26px -8px rgba(79,70,229,0.6);} 50%{ box-shadow:0 10px 34px -6px rgba(14,165,164,0.85);} }
   @keyframes micRing{ 0%{ transform:scale(1);opacity:.8;} 100%{ transform:scale(1.35);opacity:0;} }
   .mic-hint{ font-weight:800;font-size:13.5px;color:var(--text-dim);text-align:center; }
-  .mic-transcript{ font-weight:700;font-size:13px;color:var(--purple);min-height:18px;text-align:center; }
+  .mic-transcript{ font-weight:700;font-size:13px;color:var(--purple);min-height:18px;text-align:center;overflow-wrap:break-word;word-break:break-word; }
+  .speak-hint-persist{
+    text-align:center;font-size:16px;font-weight:700;color:#B45309;background:rgba(251,191,36,0.14);
+    border:1px solid rgba(251,191,36,0.35);border-radius:12px;padding:9px 16px;margin-top:8px;
+    min-height:0;display:none;overflow-wrap:break-word;word-break:break-word;max-width:100%;
+  }
+  .speak-hint-persist:not(:empty){ display:block; }
   .speak-actions{ display:flex;gap:10px;justify-content:center;margin-top:6px;flex-wrap:wrap; }
 
   /* Notes par mode sur les tuiles de bloc */
@@ -5419,6 +5426,7 @@ function renderSpeakCard(){
       </button>
       <div class="mic-hint" id="micHint">Appuie et prononce le mot</div>
       <div class="mic-transcript" id="micTranscript"></div>
+      <div class="speak-hint-persist" id="speakHintPersist"></div>
     </div>
     <div class="speak-actions">
       <button class="mode-chip ${micContinuous ? 'active' : ''}" id="continuousBtn">${micContinuous ? '🎙️ Micro continu : ON' : '🎙️ Activer micro continu'}</button>
@@ -5526,8 +5534,10 @@ function handleSpeakResult(isCorrect, word, info){
     playWrongSound();
     const micHint = document.getElementById('micHint');
     const micTr = document.getElementById('micTranscript');
-    if(micHint) micHint.innerHTML = `🔁 Presque ! Indice : <b style="letter-spacing:2px;">${escapeHtml(buildWordHint(word.fr))}</b> — réessaie !`;
+    const hintPersist = document.getElementById('speakHintPersist');
+    if(micHint) micHint.textContent = '🔁 Presque ! Réessaie...';
     if(micTr && info.heard) micTr.textContent = `Tu as dit : « ${info.heard} »`;
+    if(hintPersist){ hintPersist.innerHTML = `💡 Indice : <b style="letter-spacing:2px;">${escapeHtml(buildWordHint(word.fr))}</b>`; }
     setTimeout(() => { if(!answered){ startRecognition(word); } }, 900);
     return;
   }
