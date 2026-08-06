@@ -654,6 +654,89 @@
     100%{ opacity:1; transform:translateY(0) scale(1); }
   }
   body.quiz-active #quizCard{ animation:cardSwap .34s cubic-bezier(.22,1.2,.4,1); }
+
+  /* ============ 🦊 ÉCRAN DE DÉMARRAGE (splash) ============ */
+  .splash-screen{
+    position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;
+    background:
+      radial-gradient(900px 600px at 20% -10%, rgba(251,146,60,0.16), transparent 60%),
+      radial-gradient(800px 600px at 100% 110%, rgba(234,88,12,0.14), transparent 55%),
+      var(--bg-secondary);
+    transition:opacity .55s cubic-bezier(.4,0,.2,1), visibility .55s;
+  }
+  .splash-screen.hide{ opacity:0;visibility:hidden;pointer-events:none; }
+
+  /* ============ 🐺 BADGE MASCOTTE (emoji soigné, cohérent avec le style de la barre de progression) ============ */
+  .mascot-emoji-wrap, .hero-mascot-wrap, .celebrate-mascot-wrap, .splash-mascot-wrap{
+    display:flex;align-items:center;justify-content:center;border-radius:50%;
+    background:radial-gradient(circle at 34% 28%, #E2E8F0, #94A3B8 55%, #475569 100%);
+    box-shadow:0 10px 22px -8px rgba(15,23,42,0.4), inset 0 -6px 12px rgba(0,0,0,0.18), inset 0 4px 8px rgba(255,255,255,0.35);
+    border:3px solid rgba(255,255,255,0.55);
+  }
+  .mascot-emoji-wrap{ width:84px;height:84px; }
+  .mascot-emoji{ font-size:44px;line-height:1;filter:drop-shadow(0 3px 4px rgba(0,0,0,0.3)); }
+  .hero-mascot-wrap{ width:100px;height:100px; }
+  .hero-mascot-emoji{ font-size:52px;line-height:1;filter:drop-shadow(0 3px 5px rgba(0,0,0,0.3)); }
+  .celebrate-mascot-wrap{ width:90px;height:90px;margin:0 auto; }
+  .celebrate-mascot-emoji{ font-size:46px;line-height:1;filter:drop-shadow(0 3px 4px rgba(0,0,0,0.3)); }
+  .splash-mascot-wrap{ width:150px;height:150px; }
+  .splash-mascot-emoji{ font-size:78px;line-height:1;filter:drop-shadow(0 5px 8px rgba(0,0,0,0.3)); }
+
+  .splash-fox{
+    animation:splashEntrance .9s cubic-bezier(.16,1,.3,1) both, splashBreathe 3.4s ease-in-out .9s infinite;
+    filter:drop-shadow(0 14px 22px rgba(0,0,0,0.18));
+  }
+  @keyframes splashEntrance{
+    0%{ opacity:0;transform:translateY(26px) scale(.72) rotate(-6deg); }
+    55%{ opacity:1;transform:translateY(-6px) scale(1.05) rotate(2deg); }
+    78%{ transform:translateY(2px) scale(.99) rotate(-1deg); }
+    100%{ opacity:1;transform:translateY(0) scale(1) rotate(0); }
+  }
+  @keyframes splashBreathe{
+    0%,100%{ transform:translateY(0) scale(1); }
+    50%{ transform:translateY(-3px) scale(1.015); }
+  }
+  .splash-shadow{ fill:rgba(0,0,0,0.14);animation:splashShadowPulse 3.4s ease-in-out .9s infinite; }
+  @keyframes splashShadowPulse{ 0%,100%{ opacity:.5;transform:scaleX(1); } 50%{ opacity:.3;transform:scaleX(.88); } }
+
+  .splash-ear{ transform-origin:50% 100%; }
+  .splash-ear-l{ animation:splashEarTwitchL 3.4s ease-in-out .9s infinite; }
+  .splash-ear-r{ animation:splashEarTwitchR 3.4s ease-in-out 1.1s infinite; }
+  @keyframes splashEarTwitchL{ 0%,85%,100%{ transform:rotate(0); } 90%{ transform:rotate(-6deg); } 95%{ transform:rotate(2deg); } }
+  @keyframes splashEarTwitchR{ 0%,85%,100%{ transform:rotate(0); } 90%{ transform:rotate(6deg); } 95%{ transform:rotate(-2deg); } }
+
+  .splash-pupil{ animation:splashBlink 4.2s ease-in-out 1.3s infinite;transform-origin:center; }
+  @keyframes splashBlink{ 0%,92%,100%{ transform:scaleY(1); } 95%{ transform:scaleY(.12); } }
+
+  .splash-smile{ animation:splashSmile 3.4s ease-in-out .9s infinite;transform-origin:70px 60px; }
+  .splash-fang{ opacity:.96; }
+  .splash-fang-glint{
+    opacity:0;transform-origin:63px 63px;
+    animation:splashFangGlint 3.4s ease-in-out .9s infinite;
+  }
+  @keyframes splashFangGlint{
+    0%,55%,100%{ opacity:0;transform:scale(.4) rotate(0deg); }
+    60%{ opacity:1;transform:scale(1.3) rotate(20deg); }
+    68%{ opacity:0;transform:scale(.6) rotate(35deg); }
+  }
+  @keyframes splashSmile{ 0%,100%{ transform:scaleY(1); } 50%{ transform:scaleY(1.08); } }
+
+  .splash-brand{
+    font-family:'Inter',sans-serif;font-weight:800;font-size:26px;color:var(--text);letter-spacing:.01em;
+    opacity:0;animation:splashFadeUp .6s cubic-bezier(.22,1.2,.4,1) .55s forwards;
+  }
+  .splash-accent{ background:linear-gradient(90deg,#F97316,#EA580C);-webkit-background-clip:text;background-clip:text;color:transparent; }
+  @keyframes splashFadeUp{ 0%{ opacity:0;transform:translateY(10px); } 100%{ opacity:1;transform:translateY(0); } }
+
+  .splash-bar-track{
+    width:min(160px,60vw);height:5px;border-radius:999px;background:var(--surface-sunken);overflow:hidden;
+    opacity:0;animation:splashFadeUp .6s cubic-bezier(.22,1.2,.4,1) .75s forwards;
+  }
+  .splash-bar-fill{
+    height:100%;width:40%;border-radius:999px;background:linear-gradient(90deg,#FDBA74,#F97316,#EA580C);
+    animation:splashBarSlide 1.1s ease-in-out infinite;
+  }
+  @keyframes splashBarSlide{ 0%{ transform:translateX(-100%); } 100%{ transform:translateX(350%); } }
   @keyframes cardIn{ from{ opacity:0; transform:translateY(16px) scale(.97);} to{ opacity:1; transform:translateY(0) scale(1);} }
   @keyframes cardSwap{ from{ opacity:0; transform:translateX(28px) rotate(1.5deg);} to{ opacity:1; transform:translateX(0) rotate(0);} }
 
@@ -691,6 +774,30 @@
   @keyframes burstStar{
     0%{ transform:translate(0,0) scale(.4) rotate(0); opacity:1; }
     100%{ transform:translate(var(--bx,0), var(--by,0)) scale(1.2) rotate(var(--br,180deg)); opacity:0; }
+  }
+
+  /* 🥚 Éclats de coquille + poussin qui éclot (bloc jamais fait, ouvert pour la première fois) */
+  .egg-shell-piece{
+    position:fixed;z-index:9999;pointer-events:none;width:13px;height:15px;
+    background:linear-gradient(160deg,#FFFDF7,#FDE9C8);
+    box-shadow:inset 0 -2px 3px rgba(180,140,60,0.25);
+    clip-path:polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+    animation:eggShellFly .78s ease-out forwards;
+    transform:translate(-50%,-50%);
+  }
+  @keyframes eggShellFly{
+    0%{ transform:translate(-50%,-50%) scale(.6) rotate(0); opacity:1; }
+    100%{ transform:translate(calc(-50% + var(--bx,0)), calc(-50% + var(--by,0))) scale(1) rotate(var(--br,90deg)); opacity:0; }
+  }
+  .egg-hatch-chick{
+    position:fixed;z-index:10000;pointer-events:none;font-size:32px;
+    animation:eggHatchPop .72s cubic-bezier(.28,1.6,.5,1) forwards;
+  }
+  @keyframes eggHatchPop{
+    0%{ transform:translate(-50%,-50%) scale(.2) rotate(-8deg); opacity:0; }
+    40%{ transform:translate(-50%,-50%) scale(1.35) rotate(4deg); opacity:1; }
+    70%{ transform:translate(-50%,-55%) scale(1) rotate(0); opacity:1; }
+    100%{ transform:translate(-50%,-68%) scale(.75) rotate(0); opacity:0; }
   }
 
   /* Chip streak qui pulse quand elle monte */
@@ -1053,6 +1160,16 @@
     100%{ transform:rotate(0) translateY(0);}
   }
   .mascot.talking .m-smile{ animation:mouthTalk .3s ease-in-out infinite;transform-origin:center; }
+  .m-fang{ opacity:.96; }
+  .m-fang-glint{
+    opacity:0;transform-origin:63px 63px;
+    animation:mFangGlint 5.5s ease-in-out infinite;
+  }
+  @keyframes mFangGlint{
+    0%,40%,100%{ opacity:0;transform:scale(.4) rotate(0deg); }
+    45%{ opacity:1;transform:scale(1.3) rotate(20deg); }
+    52%{ opacity:0;transform:scale(.6) rotate(35deg); }
+  }
   @keyframes mouthTalk{ 0%,100%{ transform:scaleY(1);} 50%{ transform:scaleY(1.7);} }
 
   .mascot.roam{ animation:mascotRoam 2.3s ease-in-out; }
@@ -1186,6 +1303,15 @@
 </style>
 </head>
 <body>
+<div class="splash-screen" id="splashScreen">
+  <div class="splash-fox" id="splashFox">
+    <div class="splash-mascot-wrap">
+      <span class="splash-mascot-emoji">🐺</span>
+    </div>
+  </div>
+  <div class="splash-brand">Vocab<span class="splash-accent">VISION</span></div>
+  <div class="splash-bar-track"><div class="splash-bar-fill"></div></div>
+</div>
 <div class="wrap">
   <nav class="navbar">
     <div class="brand" id="brandHome" title="Accueil">
@@ -1217,50 +1343,14 @@
   <div class="progress-label" id="progressLabel"></div>
   <div class="progress-track" id="progressTrack">
     <div class="progress-fill" id="progressFill"></div>
-    <div class="progress-marker" id="progressMarker">🦊</div>
+    <div class="progress-marker" id="progressMarker">🐺</div>
   </div>
 
   <div class="mascot-zone" id="mascotZone">
     <div class="mascot" id="mascot" aria-hidden="true">
-      <svg viewBox="0 0 120 120" width="82" height="82">
-        <ellipse class="m-shadow" cx="60" cy="112" rx="30" ry="6"/>
-        <g class="m-body">
-          <!-- renard : dégradés roux/orangé -->
-          <defs>
-            <linearGradient id="mbody" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stop-color="#FB923C"/><stop offset="1" stop-color="#EA580C"/>
-            </linearGradient>
-            <linearGradient id="mear" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stop-color="#F97316"/><stop offset="1" stop-color="#B45309"/>
-            </linearGradient>
-          </defs>
-          <!-- oreilles pointues, intérieur clair -->
-          <path d="M20 36 L33 3 L45 38 Z" fill="url(#mear)"/>
-          <path d="M100 36 L87 3 L75 38 Z" fill="url(#mear)"/>
-          <path d="M26 31 L33 13 L39 32 Z" fill="#FFF7ED"/>
-          <path d="M94 31 L87 13 L81 32 Z" fill="#FFF7ED"/>
-          <!-- tête -->
-          <ellipse cx="60" cy="68" rx="40" ry="42" fill="url(#mbody)"/>
-          <!-- museau clair -->
-          <path d="M60 46 C78 46 88 62 84 82 C81 96 71 100 60 100 C49 100 39 96 36 82 C32 62 42 46 60 46 Z" fill="#FFF7ED" opacity="0.95"/>
-          <!-- grosses lunettes rondes (thème VISION) -->
-          <g class="m-glasses">
-            <circle cx="46" cy="60" r="17" fill="#fff" stroke="#431407" stroke-width="3"/>
-            <circle cx="76" cy="60" r="17" fill="#fff" stroke="#431407" stroke-width="3"/>
-            <line x1="61" y1="60" x2="63" y2="60" stroke="#431407" stroke-width="3"/>
-            <circle class="m-pupil" cx="46" cy="61" r="7" fill="#431407"/>
-            <circle class="m-pupil" cx="76" cy="61" r="7" fill="#431407"/>
-            <circle cx="49" cy="58" r="2.4" fill="#fff"/>
-            <circle cx="79" cy="58" r="2.4" fill="#fff"/>
-          </g>
-          <!-- truffe -->
-          <ellipse cx="60" cy="79" rx="5.5" ry="4" fill="#431407"/>
-          <!-- sourire -->
-          <path class="m-smile" d="M50 90 Q60 99 70 90" fill="none" stroke="#431407" stroke-width="3.2" stroke-linecap="round"/>
-          <ellipse class="m-cheek" cx="33" cy="82" rx="6" ry="4" fill="#FDBA74" opacity="0.75"/>
-          <ellipse class="m-cheek" cx="87" cy="82" rx="6" ry="4" fill="#FDBA74" opacity="0.75"/>
-        </g>
-      </svg>
+      <div class="mascot-emoji-wrap">
+        <span class="mascot-emoji">🐺</span>
+      </div>
     </div>
     <div class="mascot-bubble" id="mascotBubble"></div>
   </div>
@@ -2200,33 +2290,7 @@ const MASCOT_BIG_CELEBRATE = [
   '🔥 T\'es en feu aujourd\'hui !', '💥 Complètement OUF !', '🌟 Niveau légendaire !', '🎉 Bloc validé haut la main !'
 ];
 /* Markup SVG de la mascotte, réutilisé pour la grande célébration de fin de bloc. */
-const MASCOT_SVG_INNER = `<svg viewBox="0 0 120 120" width="82" height="82">
-  <ellipse class="m-shadow" cx="60" cy="112" rx="30" ry="6"/>
-  <g class="m-body">
-    <defs>
-      <linearGradient id="mbodyCeleb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FB923C"/><stop offset="1" stop-color="#EA580C"/></linearGradient>
-      <linearGradient id="mearCeleb" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F97316"/><stop offset="1" stop-color="#B45309"/></linearGradient>
-    </defs>
-    <path d="M20 36 L33 3 L45 38 Z" fill="url(#mearCeleb)"/>
-    <path d="M100 36 L87 3 L75 38 Z" fill="url(#mearCeleb)"/>
-    <path d="M26 31 L33 13 L39 32 Z" fill="#FFF7ED"/>
-    <path d="M94 31 L87 13 L81 32 Z" fill="#FFF7ED"/>
-    <ellipse cx="60" cy="68" rx="40" ry="42" fill="url(#mbodyCeleb)"/>
-    <path d="M60 46 C78 46 88 62 84 82 C81 96 71 100 60 100 C49 100 39 96 36 82 C32 62 42 46 60 46 Z" fill="#FFF7ED" opacity="0.95"/>
-    <g class="m-glasses">
-      <circle cx="46" cy="60" r="17" fill="#fff" stroke="#431407" stroke-width="3"/>
-      <circle cx="76" cy="60" r="17" fill="#fff" stroke="#431407" stroke-width="3"/>
-      <line x1="61" y1="60" x2="63" y2="60" stroke="#431407" stroke-width="3"/>
-      <circle class="m-pupil" cx="46" cy="61" r="7" fill="#431407"/>
-      <circle class="m-pupil" cx="76" cy="61" r="7" fill="#431407"/>
-      <circle cx="49" cy="58" r="2.4" fill="#fff"/><circle cx="79" cy="58" r="2.4" fill="#fff"/>
-    </g>
-    <ellipse cx="60" cy="79" rx="5.5" ry="4" fill="#431407"/>
-    <path class="m-smile" d="M50 90 Q60 99 70 90" fill="none" stroke="#431407" stroke-width="3.2" stroke-linecap="round"/>
-    <ellipse class="m-cheek" cx="33" cy="82" rx="6" ry="4" fill="#FDBA74" opacity="0.75"/>
-    <ellipse class="m-cheek" cx="87" cy="82" rx="6" ry="4" fill="#FDBA74" opacity="0.75"/>
-  </g>
-</svg>`;
+const MASCOT_SVG_INNER = `<div class="celebrate-mascot-wrap"><span class="celebrate-mascot-emoji">🐺</span></div>`;
 const MASCOT_CHEER = ['Tu gères ! 💪', 'Reste concentré·e 🎯', 'Encore un ! 🚀', 'Tu progresses ! 📈', 'Allez, allez ! 🔥', 'Champion·ne ! 🏆'];
 
 function mascotWave(){
@@ -2330,6 +2394,31 @@ function hideMascotBubble(){
   if(bubble) bubble.classList.remove('show');
 }
 
+/* 🥚 Petite explosion d'œuf qui éclot — jouée quand on ouvre un bloc jamais fait, pour marquer la découverte. */
+function burstEggCrack(x, y){
+  const n = 8;
+  for(let i=0;i<n;i++){
+    const el = document.createElement('div');
+    el.className = 'egg-shell-piece';
+    const ang = (Math.PI * 2 * i) / n + Math.random()*0.4;
+    const dist = 50 + Math.random()*60;
+    el.style.left = x + 'px';
+    el.style.top = y + 'px';
+    el.style.setProperty('--bx', Math.cos(ang)*dist + 'px');
+    el.style.setProperty('--by', (Math.sin(ang)*dist - 15) + 'px');
+    el.style.setProperty('--br', (Math.random()*360 - 180) + 'deg');
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 780);
+  }
+  const chick = document.createElement('div');
+  chick.className = 'egg-hatch-chick';
+  chick.textContent = '🐣';
+  chick.style.left = x + 'px';
+  chick.style.top = y + 'px';
+  document.body.appendChild(chick);
+  setTimeout(() => chick.remove(), 720);
+}
+
 function burstStars(x, y){
   const stars = ['⭐','🌟','✨','💫'];
   const n = 7;
@@ -2349,13 +2438,25 @@ function burstStars(x, y){
   }
 }
 
+/* 🎉 Célébration à chaque bonne réponse — plusieurs variantes tirées au hasard pour que ce ne soit
+   jamais deux fois pareil (confettis, étoiles, et parfois une petite animation surprise de la mascotte). */
 function celebrate(){
-  launchConfetti();
-  const m = document.getElementById('mascot');
-  if(m){
-    const r = m.getBoundingClientRect();
-    burstStars(r.left + r.width/2, r.top + r.height/2);
-  }
+  const burstAtMascot = () => {
+    const m = document.getElementById('mascot');
+    if(m){
+      const r = m.getBoundingClientRect();
+      burstStars(r.left + r.width/2, r.top + r.height/2);
+    }
+  };
+  const variants = [
+    () => { launchConfetti(); burstAtMascot(); },
+    () => { burstAtMascot(); mascotSpin(); },
+    () => { launchConfetti(); mascotSparkle(); },
+    () => { burstAtMascot(); mascotDance(); },
+    () => { launchConfetti(); burstAtMascot(); mascotSparkle(); },
+    () => { burstAtMascot(); setTimeout(burstAtMascot, 220); },
+  ];
+  variants[Math.floor(Math.random() * variants.length)]();
 }
 
 /* ---------- CSV parsing / export ---------- */
@@ -4198,9 +4299,11 @@ function renderCustomBlockRecapView(blockId, result, justFinished){
     const r = block.results[m];
     const p = r.total ? Math.round((r.correct/r.total)*100) : 0;
     const cls = p >= PASS_THRESHOLD ? 'ok' : 'todo';
-    return `<div class="pm-row"><span>${MODE_LABELS[m]}</span><span class="pm-score ${cls}">${r.correct}/${r.total} · ${p}%</span></div>`;
+    const timeTxt = r.durationSec ? ` · ⏱️ ${fmtDuration(r.durationSec)}` : '';
+    return `<div class="pm-row"><span>${MODE_LABELS[m]}</span><span class="pm-score ${cls}">${r.correct}/${r.total} · ${p}%${timeTxt}</span></div>`;
   }).join('');
-  const modeSummary = modeRows ? `<div class="pm-summary"><div class="pm-title">📊 Tes notes sur ce bloc</div>${modeRows}</div>` : '';
+  const totalBlockTime = GAME_MODES.reduce((sum, m) => sum + ((block.results[m] && block.results[m].durationSec) || 0), 0);
+  const modeSummary = modeRows ? `<div class="pm-summary"><div class="pm-title">📊 Tes notes sur ce bloc${totalBlockTime ? ` · ⏱️ ${fmtDuration(totalBlockTime)} au total` : ''}</div>${modeRows}</div>` : '';
 
   const card = document.getElementById('quizCard');
   card.innerHTML = `
@@ -4359,7 +4462,7 @@ function renderProgress(){
   const progressLabel = document.getElementById('progressLabel');
   if(progressLabel){
     const streakChip = comboStreak >= 2 ? `<span class="pl-streak">🔥 ${comboStreak} d'affilée</span>` : '<span></span>';
-    progressLabel.innerHTML = `<span class="pl-count">🦊 <b>${Math.min(masteredCount, initialLength)}</b> / ${initialLength}</span><span class="pl-pct">${pctRounded}%</span>${streakChip}`;
+    progressLabel.innerHTML = `<span class="pl-count">🐺 <b>${Math.min(masteredCount, initialLength)}</b> / ${initialLength}</span><span class="pl-pct">${pctRounded}%</span>${streakChip}`;
   }
 
   const errors = score.total - score.correct;
@@ -4956,28 +5059,9 @@ function renderBlockSelect(){
   card.innerHTML = `
     <div class="hero">
       <div class="hero-mascot" aria-hidden="true">
-        <svg viewBox="0 0 120 120" width="96" height="96">
-          <ellipse cx="60" cy="112" rx="30" ry="6" fill="rgba(0,0,0,0.10)"/>
-          <defs>
-            <linearGradient id="hbody" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FB923C"/><stop offset="1" stop-color="#EA580C"/></linearGradient>
-            <linearGradient id="hear" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F97316"/><stop offset="1" stop-color="#B45309"/></linearGradient>
-          </defs>
-          <path d="M20 36 L33 3 L45 38 Z" fill="url(#hear)"/>
-          <path d="M100 36 L87 3 L75 38 Z" fill="url(#hear)"/>
-          <path d="M26 31 L33 13 L39 32 Z" fill="#FFF7ED"/>
-          <path d="M94 31 L87 13 L81 32 Z" fill="#FFF7ED"/>
-          <ellipse cx="60" cy="68" rx="40" ry="42" fill="url(#hbody)"/>
-          <path d="M60 46 C78 46 88 62 84 82 C81 96 71 100 60 100 C49 100 39 96 36 82 C32 62 42 46 60 46 Z" fill="#FFF7ED" opacity="0.95"/>
-          <circle cx="46" cy="60" r="17" fill="#fff" stroke="#431407" stroke-width="3"/>
-          <circle cx="76" cy="60" r="17" fill="#fff" stroke="#431407" stroke-width="3"/>
-          <line x1="61" y1="60" x2="63" y2="60" stroke="#431407" stroke-width="3"/>
-          <circle cx="46" cy="61" r="7" fill="#431407"/><circle cx="76" cy="61" r="7" fill="#431407"/>
-          <circle cx="49" cy="58" r="2.4" fill="#fff"/><circle cx="79" cy="58" r="2.4" fill="#fff"/>
-          <ellipse cx="60" cy="79" rx="5.5" ry="4" fill="#431407"/>
-          <path d="M50 90 Q60 99 70 90" fill="none" stroke="#431407" stroke-width="3.2" stroke-linecap="round"/>
-          <ellipse cx="33" cy="82" rx="6" ry="4" fill="#FDBA74" opacity="0.75"/>
-          <ellipse cx="87" cy="82" rx="6" ry="4" fill="#FDBA74" opacity="0.75"/>
-        </svg>
+        <div class="hero-mascot-wrap">
+          <span class="hero-mascot-emoji">🐺</span>
+        </div>
       </div>
       <div class="hero-badge">Français ↔ Arabe · ${WORDS.length} mots</div>
       <div class="hero-title">Apprends avec <span class="grad">VocabVISION</span></div>
@@ -5257,6 +5341,10 @@ function renderBlockSelect(){
         document.getElementById('changeBlockBtn').addEventListener('click', renderBlockSelect);
         renderRecapView(i, res, false);
       } else {
+        if(!blockHasResult(i)){ // 🥚 bloc jamais fait, dans aucun mode : petite explosion d'œuf qui éclot !
+          const r = btn.getBoundingClientRect();
+          burstEggCrack(r.left + r.width/2, r.top + r.height/2);
+        }
         buildDeck(i);
         renderScoreboard();
         renderCard();
@@ -5277,6 +5365,10 @@ function renderBlockSelect(){
         document.getElementById('changeBlockBtn').addEventListener('click', renderBlockSelect);
         renderCustomBlockRecapView(id, res, false);
       } else {
+        if(!customBlockHasResult(block)){ // 🥚 bloc perso jamais fait non plus
+          const r = btn.getBoundingClientRect();
+          burstEggCrack(r.left + r.width/2, r.top + r.height/2);
+        }
         buildCustomDeck(id);
         renderScoreboard();
         renderCard();
@@ -6932,9 +7024,11 @@ function renderRecapView(blockIndex, result, justFinished){
     const r = perMode[m];
     const p = r.total ? Math.round((r.correct/r.total)*100) : 0;
     const cls = p >= PASS_THRESHOLD ? 'ok' : 'todo';
-    return `<div class="pm-row"><span>${MODE_LABELS[m]}</span><span class="pm-score ${cls}">${r.correct}/${r.total} · ${p}%</span></div>`;
+    const timeTxt = r.durationSec ? ` · ⏱️ ${fmtDuration(r.durationSec)}` : '';
+    return `<div class="pm-row"><span>${MODE_LABELS[m]}</span><span class="pm-score ${cls}">${r.correct}/${r.total} · ${p}%${timeTxt}</span></div>`;
   }).join('');
-  const modeSummary = modeRows ? `<div class="pm-summary"><div class="pm-title">📊 Tes notes sur ce bloc</div>${modeRows}</div>` : '';
+  const totalBlockTime = GAME_MODES.reduce((sum, m) => sum + ((perMode[m] && perMode[m].durationSec) || 0), 0);
+  const modeSummary = modeRows ? `<div class="pm-summary"><div class="pm-title">📊 Tes notes sur ce bloc${totalBlockTime ? ` · ⏱️ ${fmtDuration(totalBlockTime)} au total` : ''}</div>${modeRows}</div>` : '';
 
   const celebrateMsg = MASCOT_BIG_CELEBRATE[Math.floor(Math.random() * MASCOT_BIG_CELEBRATE.length)];
   const celebrationHtml = (justFinished && passed) ? `
@@ -8115,6 +8209,17 @@ else if(appMode === 'vocab'){ renderBlockSelect(); }
 else { renderAppSwitcher(); }
 if(getSyncUrl()){ showSyncOverlay('Chargement de tes données…'); }
 autoSyncOnLoad();
+
+/* Laisse l'écran de démarrage visible un minimum de temps pour un rendu soigné (ni flash, ni attente inutile). */
+(function hideSplashScreen(){
+  const splash = document.getElementById('splashScreen');
+  if(!splash) return;
+  const minDisplay = 1100;
+  setTimeout(() => {
+    splash.classList.add('hide');
+    setTimeout(() => { splash.remove(); }, 600);
+  }, minDisplay);
+})();
 
 /* ============ 📲 PWA : installation depuis le navigateur ============ */
 (function setupPWA(){
