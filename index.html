@@ -708,7 +708,7 @@
   .splash-pupil{ animation:splashBlink 4.2s ease-in-out 1.3s infinite;transform-origin:center; }
   @keyframes splashBlink{ 0%,92%,100%{ transform:scaleY(1); } 95%{ transform:scaleY(.12); } }
 
-  .splash-smile{ animation:splashSmile 3.4s ease-in-out .9s infinite;transform-origin:70px 60px; }
+  .splash-smile{ animation:splashSmile 3.4s ease-in-out .9s infinite;transform-origin:60px 88px; }
   .splash-fang{ opacity:.96; }
   .splash-fang-glint{
     opacity:0;transform-origin:63px 63px;
@@ -1305,9 +1305,33 @@
 <body>
 <div class="splash-screen" id="splashScreen">
   <div class="splash-fox" id="splashFox">
-    <div class="splash-mascot-wrap">
-      <span class="splash-mascot-emoji">🐺</span>
-    </div>
+    <svg viewBox="0 0 120 120" width="140" height="140">
+      <ellipse class="splash-shadow" cx="60" cy="112" rx="28" ry="6"/>
+      <g class="splash-fox-body">
+        <defs>
+          <linearGradient id="splashBody" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FB923C"/><stop offset="1" stop-color="#EA580C"/></linearGradient>
+          <linearGradient id="splashEar" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F97316"/><stop offset="1" stop-color="#B45309"/></linearGradient>
+        </defs>
+        <path class="splash-ear splash-ear-l" d="M20 36 L33 3 L45 38 Z" fill="url(#splashEar)"/>
+        <path class="splash-ear splash-ear-r" d="M100 36 L87 3 L75 38 Z" fill="url(#splashEar)"/>
+        <path d="M26 31 L33 13 L39 32 Z" fill="#FFF7ED"/>
+        <path d="M94 31 L87 13 L81 32 Z" fill="#FFF7ED"/>
+        <ellipse cx="60" cy="68" rx="40" ry="42" fill="url(#splashBody)"/>
+        <path d="M60 46 C78 46 88 62 84 82 C81 96 71 100 60 100 C49 100 39 96 36 82 C32 62 42 46 60 46 Z" fill="#FFF7ED" opacity="0.95"/>
+        <g class="splash-glasses">
+          <circle cx="46" cy="60" r="17" fill="#fff" stroke="#431407" stroke-width="3"/>
+          <circle cx="76" cy="60" r="17" fill="#fff" stroke="#431407" stroke-width="3"/>
+          <line x1="61" y1="60" x2="63" y2="60" stroke="#431407" stroke-width="3"/>
+          <circle class="splash-pupil" cx="46" cy="61" r="7" fill="#431407"/>
+          <circle class="splash-pupil" cx="76" cy="61" r="7" fill="#431407"/>
+          <circle cx="49" cy="58" r="2.4" fill="#fff"/><circle cx="79" cy="58" r="2.4" fill="#fff"/>
+        </g>
+        <ellipse cx="60" cy="79" rx="5.5" ry="4" fill="#431407"/>
+        <path class="splash-smile" d="M50 88 Q60 96 70 88" fill="none" stroke="#431407" stroke-width="3.2" stroke-linecap="round"/>
+        <ellipse cx="33" cy="82" rx="6" ry="4" fill="#FDBA74" opacity="0.75"/>
+        <ellipse cx="87" cy="82" rx="6" ry="4" fill="#FDBA74" opacity="0.75"/>
+      </g>
+    </svg>
   </div>
   <div class="splash-brand">Vocab<span class="splash-accent">VISION</span></div>
   <div class="splash-bar-track"><div class="splash-bar-fill"></div></div>
@@ -1348,9 +1372,38 @@
 
   <div class="mascot-zone" id="mascotZone">
     <div class="mascot" id="mascot" aria-hidden="true">
-      <div class="mascot-emoji-wrap">
-        <span class="mascot-emoji">🐺</span>
-      </div>
+      <svg viewBox="0 0 120 120" width="84" height="84">
+        <ellipse class="m-shadow" cx="60" cy="112" rx="30" ry="6"/>
+        <g class="m-body">
+          <defs>
+            <linearGradient id="mbody" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#FB923C"/><stop offset="1" stop-color="#EA580C"/>
+            </linearGradient>
+            <linearGradient id="mear" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#F97316"/><stop offset="1" stop-color="#B45309"/>
+            </linearGradient>
+          </defs>
+          <path d="M20 36 L33 3 L45 38 Z" fill="url(#mear)"/>
+          <path d="M100 36 L87 3 L75 38 Z" fill="url(#mear)"/>
+          <path d="M26 31 L33 13 L39 32 Z" fill="#FFF7ED"/>
+          <path d="M94 31 L87 13 L81 32 Z" fill="#FFF7ED"/>
+          <ellipse cx="60" cy="68" rx="40" ry="42" fill="url(#mbody)"/>
+          <path d="M60 46 C78 46 88 62 84 82 C81 96 71 100 60 100 C49 100 39 96 36 82 C32 62 42 46 60 46 Z" fill="#FFF7ED" opacity="0.95"/>
+          <g class="m-glasses">
+            <circle cx="46" cy="60" r="17" fill="#fff" stroke="#431407" stroke-width="3"/>
+            <circle cx="76" cy="60" r="17" fill="#fff" stroke="#431407" stroke-width="3"/>
+            <line x1="61" y1="60" x2="63" y2="60" stroke="#431407" stroke-width="3"/>
+            <circle class="m-pupil" cx="46" cy="61" r="7" fill="#431407"/>
+            <circle class="m-pupil" cx="76" cy="61" r="7" fill="#431407"/>
+            <circle cx="49" cy="58" r="2.4" fill="#fff"/>
+            <circle cx="79" cy="58" r="2.4" fill="#fff"/>
+          </g>
+          <ellipse cx="60" cy="79" rx="5.5" ry="4" fill="#431407"/>
+          <path class="m-smile" d="M50 88 Q60 96 70 88" fill="none" stroke="#431407" stroke-width="3.2" stroke-linecap="round"/>
+          <ellipse class="m-cheek" cx="33" cy="82" rx="6" ry="4" fill="#FDBA74" opacity="0.75"/>
+          <ellipse class="m-cheek" cx="87" cy="82" rx="6" ry="4" fill="#FDBA74" opacity="0.75"/>
+        </g>
+      </svg>
     </div>
     <div class="mascot-bubble" id="mascotBubble"></div>
   </div>
@@ -2290,7 +2343,33 @@ const MASCOT_BIG_CELEBRATE = [
   '🔥 T\'es en feu aujourd\'hui !', '💥 Complètement OUF !', '🌟 Niveau légendaire !', '🎉 Bloc validé haut la main !'
 ];
 /* Markup SVG de la mascotte, réutilisé pour la grande célébration de fin de bloc. */
-const MASCOT_SVG_INNER = `<div class="celebrate-mascot-wrap"><span class="celebrate-mascot-emoji">🐺</span></div>`;
+const MASCOT_SVG_INNER = `<svg viewBox="0 0 120 120" width="82" height="82">
+  <ellipse class="m-shadow" cx="60" cy="112" rx="30" ry="6"/>
+  <g class="m-body">
+    <defs>
+      <linearGradient id="mbodyCeleb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FB923C"/><stop offset="1" stop-color="#EA580C"/></linearGradient>
+      <linearGradient id="mearCeleb" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F97316"/><stop offset="1" stop-color="#B45309"/></linearGradient>
+    </defs>
+    <path d="M20 36 L33 3 L45 38 Z" fill="url(#mearCeleb)"/>
+    <path d="M100 36 L87 3 L75 38 Z" fill="url(#mearCeleb)"/>
+    <path d="M26 31 L33 13 L39 32 Z" fill="#FFF7ED"/>
+    <path d="M94 31 L87 13 L81 32 Z" fill="#FFF7ED"/>
+    <ellipse cx="60" cy="68" rx="40" ry="42" fill="url(#mbodyCeleb)"/>
+    <path d="M60 46 C78 46 88 62 84 82 C81 96 71 100 60 100 C49 100 39 96 36 82 C32 62 42 46 60 46 Z" fill="#FFF7ED" opacity="0.95"/>
+    <g class="m-glasses">
+      <circle cx="46" cy="60" r="17" fill="#fff" stroke="#431407" stroke-width="3"/>
+      <circle cx="76" cy="60" r="17" fill="#fff" stroke="#431407" stroke-width="3"/>
+      <line x1="61" y1="60" x2="63" y2="60" stroke="#431407" stroke-width="3"/>
+      <circle class="m-pupil" cx="46" cy="61" r="7" fill="#431407"/>
+      <circle class="m-pupil" cx="76" cy="61" r="7" fill="#431407"/>
+      <circle cx="49" cy="58" r="2.4" fill="#fff"/><circle cx="79" cy="58" r="2.4" fill="#fff"/>
+    </g>
+    <ellipse cx="60" cy="79" rx="5.5" ry="4" fill="#431407"/>
+    <path class="m-smile" d="M50 88 Q60 96 70 88" fill="none" stroke="#431407" stroke-width="3.2" stroke-linecap="round"/>
+    <ellipse class="m-cheek" cx="33" cy="82" rx="6" ry="4" fill="#FDBA74" opacity="0.75"/>
+    <ellipse class="m-cheek" cx="87" cy="82" rx="6" ry="4" fill="#FDBA74" opacity="0.75"/>
+  </g>
+</svg>`;
 const MASCOT_CHEER = ['Tu gères ! 💪', 'Reste concentré·e 🎯', 'Encore un ! 🚀', 'Tu progresses ! 📈', 'Allez, allez ! 🔥', 'Champion·ne ! 🏆'];
 
 function mascotWave(){
@@ -5059,9 +5138,28 @@ function renderBlockSelect(){
   card.innerHTML = `
     <div class="hero">
       <div class="hero-mascot" aria-hidden="true">
-        <div class="hero-mascot-wrap">
-          <span class="hero-mascot-emoji">🐺</span>
-        </div>
+        <svg viewBox="0 0 120 120" width="96" height="96">
+          <ellipse cx="60" cy="112" rx="30" ry="6" fill="rgba(0,0,0,0.10)"/>
+          <defs>
+            <linearGradient id="hbody" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FB923C"/><stop offset="1" stop-color="#EA580C"/></linearGradient>
+            <linearGradient id="hear" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F97316"/><stop offset="1" stop-color="#B45309"/></linearGradient>
+          </defs>
+          <path d="M20 36 L33 3 L45 38 Z" fill="url(#hear)"/>
+          <path d="M100 36 L87 3 L75 38 Z" fill="url(#hear)"/>
+          <path d="M26 31 L33 13 L39 32 Z" fill="#FFF7ED"/>
+          <path d="M94 31 L87 13 L81 32 Z" fill="#FFF7ED"/>
+          <ellipse cx="60" cy="68" rx="40" ry="42" fill="url(#hbody)"/>
+          <path d="M60 46 C78 46 88 62 84 82 C81 96 71 100 60 100 C49 100 39 96 36 82 C32 62 42 46 60 46 Z" fill="#FFF7ED" opacity="0.95"/>
+          <circle cx="46" cy="60" r="17" fill="#fff" stroke="#431407" stroke-width="3"/>
+          <circle cx="76" cy="60" r="17" fill="#fff" stroke="#431407" stroke-width="3"/>
+          <line x1="61" y1="60" x2="63" y2="60" stroke="#431407" stroke-width="3"/>
+          <circle cx="46" cy="61" r="7" fill="#431407"/><circle cx="76" cy="61" r="7" fill="#431407"/>
+          <circle cx="49" cy="58" r="2.4" fill="#fff"/><circle cx="79" cy="58" r="2.4" fill="#fff"/>
+          <ellipse cx="60" cy="79" rx="5.5" ry="4" fill="#431407"/>
+          <path d="M50 88 Q60 96 70 88" fill="none" stroke="#431407" stroke-width="3.2" stroke-linecap="round"/>
+          <ellipse cx="33" cy="82" rx="6" ry="4" fill="#FDBA74" opacity="0.75"/>
+          <ellipse cx="87" cy="82" rx="6" ry="4" fill="#FDBA74" opacity="0.75"/>
+        </svg>
       </div>
       <div class="hero-badge">Français ↔ Arabe · ${WORDS.length} mots</div>
       <div class="hero-title">Apprends avec <span class="grad">VocabVISION</span></div>
