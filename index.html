@@ -6286,9 +6286,23 @@ function renderRepeatCard(){
   }
 }
 
+/* Remet la phrase à zéro visuellement (aucun mot marqué "dit") avant chaque nouvelle tentative
+   d'écoute — sans ça, les mots surlignés lors d'un 1er essai raté restaient marqués pour le 2e essai,
+   ce qui coupait la reconnaissance trop tôt en pensant la phrase déjà complète. */
+function resetRepeatHighlight(){
+  document.querySelectorAll('#repeatSentence .rw').forEach(span => {
+    span.classList.remove('spoken');
+    if(window.__repeatHidden && span.dataset.word){
+      span.textContent = '▁'.repeat(Math.max(2, Math.min(span.dataset.word.length, 10)));
+      span.classList.add('rw-hidden');
+    }
+  });
+}
+
 function startRepeatRecognition(sentence){
   if(!speechRecoAvailable || recoActive || answered) return;
   if(ttsSpeaking){ setTimeout(() => { if(!answered){ startRepeatRecognition(sentence); } }, 250); return; }
+  resetRepeatHighlight();
   try{
     recognition = new SpeechRec();
     recognition.lang = 'fr-FR';
