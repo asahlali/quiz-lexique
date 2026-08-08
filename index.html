@@ -462,7 +462,24 @@
   .search-icon{position:absolute;right:18px;top:50%;transform:translateY(-50%);font-size:18px;pointer-events:none;}
   .search-count{font-size:13px;color:var(--text-dim);margin:-12px 0 18px;font-weight:700;}
   .search-results{display:flex;flex-direction:column;gap:12px;max-height:520px;overflow-y:auto;padding-right:4px;}
-  .result-card{border:1px solid var(--border);background:var(--surface-sunken);border-radius:14px;padding:18px 20px;}
+  .result-card{border:1px solid var(--border);background:var(--surface-sunken);border-radius:14px;padding:18px 20px;transition:background .2s,border-color .2s;}
+  .result-card.peek-playing{ border-color:var(--purple);background:rgba(80,70,229,0.08);box-shadow:0 0 0 2px rgba(80,70,229,0.15); }
+
+  /* ============ 🎧 MINI-LECTEUR "VOIR LES MOTS" (compact, distinct de la Radio) ============ */
+  .peek-player{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    background:var(--surface-sunken);border:1px solid var(--border);border-radius:14px;padding:12px 16px;margin:12px 0;
+  }
+  .peek-player-info{ display:flex;align-items:center;gap:10px;font-weight:700;font-size:14px;color:var(--text);min-width:0; }
+  .peek-player-info span:nth-child(2){ overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px; }
+  .peek-player-count{ font-size:12px;color:var(--text-dim);font-weight:700;flex:none; }
+  .peek-player-controls{ display:flex;gap:6px;flex:none; }
+  .peek-ctrl-btn{
+    border:1px solid var(--border);background:var(--surface);color:var(--text);width:32px;height:32px;border-radius:50%;
+    cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;transition:background .15s;
+  }
+  .peek-ctrl-btn:hover{ background:var(--surface-hover); }
+  .peek-ctrl-main{ background:var(--purple);color:#fff;border-color:var(--purple-dark); }
   .result-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:6px;}
   .result-fr{font-family:'Inter',sans-serif;font-weight:800;font-size:20px;color:var(--ink);display:flex;align-items:center;gap:10px;}
   .result-cat{font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;font-weight:800;color:#fff;background:var(--purple);padding:4px 12px;border-radius:999px;}
@@ -1054,6 +1071,7 @@
   .pm-row{ display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-weight:700;font-size:13.5px;color:var(--text); }
   .pm-row:last-child{ border-bottom:none; }
   .pm-score{ font-weight:800; }
+  .pm-wasted{ font-weight:700;color:var(--red-dark);font-size:11.5px;opacity:.85; }
   .pm-score.ok{ color:var(--green-dark); }
   .pm-score.todo{ color:#B45309; }
 
@@ -1633,6 +1651,7 @@ function customBlockHasResult(block){ return GAME_MODES.some(m => block.results[
 function saveCustomBlockResult(blockId, mode, result){
   const block = getCustomBlock(blockId);
   if(!block) return;
+  trackWastedTime(blockId + '::' + mode, result);
   block.results[mode] = result;
   saveCustomBlocks(customBlocks);
   cloudAutoPush();
@@ -1692,9 +1711,13 @@ function renameNormalBlock(i, title){
 }
 
 /* ============ 👁 APERÇU DES MOTS D'UN BLOC ============ */
+let peekPlayState = null; // { words, idx, playing, stage }
+let peekPlayToken = 0;
+
 function renderBlockWordsPeek(words, title, onBack){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
+  stopPeekPlay();
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromPeekBtn" style="cursor:pointer;">← Retour</button>`;
   document.getElementById('progressFill').style.width = '0%';
   document.getElementById('footerNote').textContent = '';
@@ -1703,15 +1726,113 @@ function renderBlockWordsPeek(words, title, onBack){
   card.innerHTML = `
     <div class="cat-tag">👁 Aperçu · ${words.length} mot${words.length>1?'s':''}</div>
     <div class="word-fr" style="font-size:clamp(24px,4.5vw,32px);">${escapeHtml(title)}</div>
+    <button class="mode-chip" id="peekListenBtn" style="display:flex;align-items:center;gap:8px;margin:12px auto;background:linear-gradient(135deg,#6366F1,#4F46E5);color:#fff;border:none;">🎧 Écouter cette liste (fr → ar → phrase)</button>
+    <div class="peek-player" id="peekPlayer" style="display:none;">
+      <div class="peek-player-info">
+        <span id="peekPlayerStage">🇫🇷</span>
+        <span id="peekPlayerWord">—</span>
+        <span class="peek-player-count" id="peekPlayerCount"></span>
+      </div>
+      <div class="peek-player-controls">
+        <button class="peek-ctrl-btn" id="peekPrevBtn" title="Précédent">⏮</button>
+        <button class="peek-ctrl-btn peek-ctrl-main" id="peekPlayPauseBtn" title="Lecture / Pause">⏸</button>
+        <button class="peek-ctrl-btn" id="peekNextBtn" title="Suivant">⏭</button>
+        <button class="peek-ctrl-btn" id="peekStopBtn" title="Arrêter">✕</button>
+      </div>
+    </div>
     <div class="search-results" id="peekResults" style="max-height:560px;margin-top:14px;">
-      ${words.map(buildWordCardHtml).join('')}
+      ${words.map((w,i) => buildWordCardHtml(w).replace('class="result-card"', `class="result-card" data-peek-idx="${i}"`)).join('')}
     </div>
   `;
-  document.getElementById('backFromPeekBtn').addEventListener('click', onBack);
+  document.getElementById('backFromPeekBtn').addEventListener('click', () => { stopPeekPlay(); onBack(); });
   document.getElementById('peekResults').addEventListener('click', (e) => {
     const btn = e.target.closest('[data-speak-fr]');
     if(btn){ speak(btn.dataset.speakFr, 'fr-FR'); }
   });
+  document.getElementById('peekListenBtn').addEventListener('click', () => startPeekPlay(words));
+  document.getElementById('peekPlayPauseBtn').addEventListener('click', togglePeekPlayPause);
+  document.getElementById('peekPrevBtn').addEventListener('click', () => { window.speechSynthesis.cancel(); if(peekPlayState){ peekPlayState.idx = Math.max(0, peekPlayState.idx - 1); playPeekCurrent(); } });
+  document.getElementById('peekNextBtn').addEventListener('click', () => { window.speechSynthesis.cancel(); advancePeekPlay(); });
+  document.getElementById('peekStopBtn').addEventListener('click', stopPeekPlay);
+}
+
+function startPeekPlay(words){
+  peekPlayState = { words, idx: 0, playing: true };
+  document.getElementById('peekListenBtn').style.display = 'none';
+  document.getElementById('peekPlayer').style.display = 'flex';
+  playPeekCurrent();
+}
+
+function playPeekCurrent(){
+  if(!peekPlayState) return;
+  const myToken = ++peekPlayToken;
+  const st = peekPlayState;
+  if(st.idx >= st.words.length){ stopPeekPlay(); return; }
+  const w = st.words[st.idx];
+  document.getElementById('peekPlayerCount').textContent = `${st.idx+1}/${st.words.length}`;
+  highlightPeekCard(st.idx);
+  updatePeekPlayPauseBtn();
+
+  const showStage = (emoji, text) => {
+    document.getElementById('peekPlayerStage').textContent = emoji;
+    document.getElementById('peekPlayerWord').textContent = text;
+  };
+  showStage('🇫🇷', w.fr);
+  speak(w.fr, 'fr-FR', () => {
+    if(myToken !== peekPlayToken || !peekPlayState || !peekPlayState.playing) return;
+    setTimeout(() => {
+      if(myToken !== peekPlayToken || !peekPlayState || !peekPlayState.playing) return;
+      showStage('🕌', w.ar);
+      speak(w.ar, 'ar-SA', () => {
+        if(myToken !== peekPlayToken || !peekPlayState || !peekPlayState.playing) return;
+        setTimeout(() => {
+          if(myToken !== peekPlayToken || !peekPlayState || !peekPlayState.playing) return;
+          const sentence = w.ex.replace(/~/g, w.fr);
+          showStage('💬', sentence);
+          speak(sentence, 'fr-FR', () => {
+            if(myToken !== peekPlayToken || !peekPlayState || !peekPlayState.playing) return;
+            setTimeout(() => { advancePeekPlay(); }, 700);
+          });
+        }, 450);
+      });
+    }, 450);
+  });
+}
+
+function advancePeekPlay(){
+  if(!peekPlayState) return;
+  peekPlayState.idx++;
+  if(peekPlayState.idx >= peekPlayState.words.length){ stopPeekPlay(); return; }
+  playPeekCurrent();
+}
+
+function togglePeekPlayPause(){
+  if(!peekPlayState) return;
+  peekPlayState.playing = !peekPlayState.playing;
+  if(peekPlayState.playing){ playPeekCurrent(); }
+  else { window.speechSynthesis.cancel(); peekPlayToken++; updatePeekPlayPauseBtn(); }
+}
+
+function updatePeekPlayPauseBtn(){
+  const btn = document.getElementById('peekPlayPauseBtn');
+  if(btn){ btn.textContent = (peekPlayState && peekPlayState.playing) ? '⏸' : '▶'; }
+}
+
+function highlightPeekCard(idx){
+  document.querySelectorAll('#peekResults .result-card').forEach(c => c.classList.remove('peek-playing'));
+  const el = document.querySelector(`#peekResults [data-peek-idx="${idx}"]`);
+  if(el){ el.classList.add('peek-playing'); el.scrollIntoView({ behavior:'smooth', block:'nearest' }); }
+}
+
+function stopPeekPlay(){
+  peekPlayToken++;
+  peekPlayState = null;
+  window.speechSynthesis.cancel();
+  const listenBtn = document.getElementById('peekListenBtn');
+  const player = document.getElementById('peekPlayer');
+  if(listenBtn){ listenBtn.style.display = 'flex'; }
+  if(player){ player.style.display = 'none'; }
+  document.querySelectorAll('#peekResults .result-card').forEach(c => c.classList.remove('peek-playing'));
 }
 
 function loadWordStats(){
@@ -2140,8 +2261,24 @@ function storageKey(blockIndex, mode){
   return `lexiqueQuiz::${activeFilterCat || 'all'}::${blockHash}::${mode}::u:${getCurrentUserId()}`;
 }
 
+/* ⏱️ Temps "perdu" : cumul du temps passé sur des tentatives qui n'ont PAS atteint l'objectif (90%).
+   Sans ça, retenter et réussir plus tard efface silencieusement le temps des essais précédents. */
+const BLOCK_WASTED_TIME_KEY = 'lexiqueQuiz::blockWastedTime';
+function loadBlockWastedTime(){ try{ const raw = localStorage.getItem(nsKey(BLOCK_WASTED_TIME_KEY)); return raw ? JSON.parse(raw) : {}; }catch(e){ return {}; } }
+function saveBlockWastedTimeStore(){ try{ localStorage.setItem(nsKey(BLOCK_WASTED_TIME_KEY), JSON.stringify(blockWastedTime)); cloudAutoPush(); }catch(e){} }
+let blockWastedTime = loadBlockWastedTime(); // clé "blocIndex::mode" ou "cb_id::mode" -> secondes cumulées
+function trackWastedTime(key, result){
+  const pct = result && result.total ? (result.correct / result.total) * 100 : 0;
+  if(pct < PASS_THRESHOLD && result && result.durationSec){
+    blockWastedTime[key] = (blockWastedTime[key] || 0) + result.durationSec;
+    saveBlockWastedTimeStore();
+  }
+}
+function getBlockWastedTime(key){ return blockWastedTime[key] || 0; }
+
 function saveBlockResult(blockIndex, mode, result){
   if(!blockResults[blockIndex]) blockResults[blockIndex] = {};
+  trackWastedTime(blockIndex + '::' + mode, result);
   blockResults[blockIndex][mode] = result;
   if(!storageAvailable) return;
   try{ localStorage.setItem(storageKey(blockIndex, mode), JSON.stringify(result)); }catch(e){}
@@ -2450,10 +2587,16 @@ function mascotMilestone(n){
 const MASCOT_KO = ['Presque !', 'On réessaie !', 'Pas grave 💛', 'Tu vas y arriver !', 'Courage !', 'La prochaine !'];
 let mascotTimer = null;
 
+/* 📳 Vibration légère sur mobile (Android/Chrome — iOS Safari ne supporte pas l'API, ignoré sans erreur). */
+function vibrate(pattern){
+  try{ if(navigator.vibrate){ navigator.vibrate(pattern); } }catch(e){}
+}
+
 function reactMascot(kind){
   const m = document.getElementById('mascot');
   const bubble = document.getElementById('mascotBubble');
   if(!m || !bubble) return;
+  vibrate(kind === 'ok' ? 35 : [40, 40, 40]);
   m.classList.remove('happy','sad');
   void m.offsetWidth;
   m.classList.add(kind === 'ok' ? 'happy' : 'sad');
@@ -4348,6 +4491,7 @@ function renderCustomBlockEndScreen(){
 
   renderCustomBlockRecapView(blockId, result, true);
   const pct = result.total ? (result.correct / result.total) : 0;
+  if(pct*100 >= PASS_THRESHOLD){ vibrate([40, 60, 40, 60, 90]); }
   let bursts = pct === 1 ? 6 : (pct >= 0.8 ? 3 : 2);
   for(let i=0;i<bursts;i++){ setTimeout(launchConfetti, i*230); }
   setTimeout(() => burstStars(window.innerWidth/2, window.innerHeight*0.35), 150);
@@ -4379,10 +4523,13 @@ function renderCustomBlockRecapView(blockId, result, justFinished){
     const p = r.total ? Math.round((r.correct/r.total)*100) : 0;
     const cls = p >= PASS_THRESHOLD ? 'ok' : 'todo';
     const timeTxt = r.durationSec ? ` · ⏱️ ${fmtDuration(r.durationSec)}` : '';
-    return `<div class="pm-row"><span>${MODE_LABELS[m]}</span><span class="pm-score ${cls}">${r.correct}/${r.total} · ${p}%${timeTxt}</span></div>`;
+    const wasted = getBlockWastedTime(blockId + '::' + m);
+    const wastedTxt = wasted > 0 ? ` <span class="pm-wasted" title="Temps cumulé sur des tentatives qui n'ont pas atteint ${PASS_THRESHOLD}%">😮‍💨 ${fmtDuration(wasted)} perdu${wasted>=60?'es':''}</span>` : '';
+    return `<div class="pm-row"><span>${MODE_LABELS[m]}</span><span class="pm-score ${cls}">${r.correct}/${r.total} · ${p}%${timeTxt}${wastedTxt}</span></div>`;
   }).join('');
   const totalBlockTime = GAME_MODES.reduce((sum, m) => sum + ((block.results[m] && block.results[m].durationSec) || 0), 0);
-  const modeSummary = modeRows ? `<div class="pm-summary"><div class="pm-title">📊 Tes notes sur ce bloc${totalBlockTime ? ` · ⏱️ ${fmtDuration(totalBlockTime)} au total` : ''}</div>${modeRows}</div>` : '';
+  const totalWasted = GAME_MODES.reduce((sum, m) => sum + getBlockWastedTime(blockId + '::' + m), 0);
+  const modeSummary = modeRows ? `<div class="pm-summary"><div class="pm-title">📊 Tes notes sur ce bloc${totalBlockTime ? ` · ⏱️ ${fmtDuration(totalBlockTime)} au total` : ''}${totalWasted > 0 ? ` · 😮‍💨 ${fmtDuration(totalWasted)} perdues` : ''}</div>${modeRows}</div>` : '';
 
   const card = document.getElementById('quizCard');
   card.innerHTML = `
@@ -7123,10 +7270,13 @@ function renderRecapView(blockIndex, result, justFinished){
     const p = r.total ? Math.round((r.correct/r.total)*100) : 0;
     const cls = p >= PASS_THRESHOLD ? 'ok' : 'todo';
     const timeTxt = r.durationSec ? ` · ⏱️ ${fmtDuration(r.durationSec)}` : '';
-    return `<div class="pm-row"><span>${MODE_LABELS[m]}</span><span class="pm-score ${cls}">${r.correct}/${r.total} · ${p}%${timeTxt}</span></div>`;
+    const wasted = getBlockWastedTime(blockIndex + '::' + m);
+    const wastedTxt = wasted > 0 ? ` <span class="pm-wasted" title="Temps cumulé sur des tentatives qui n'ont pas atteint ${PASS_THRESHOLD}%">😮‍💨 ${fmtDuration(wasted)} perdues</span>` : '';
+    return `<div class="pm-row"><span>${MODE_LABELS[m]}</span><span class="pm-score ${cls}">${r.correct}/${r.total} · ${p}%${timeTxt}${wastedTxt}</span></div>`;
   }).join('');
   const totalBlockTime = GAME_MODES.reduce((sum, m) => sum + ((perMode[m] && perMode[m].durationSec) || 0), 0);
-  const modeSummary = modeRows ? `<div class="pm-summary"><div class="pm-title">📊 Tes notes sur ce bloc${totalBlockTime ? ` · ⏱️ ${fmtDuration(totalBlockTime)} au total` : ''}</div>${modeRows}</div>` : '';
+  const totalWasted = GAME_MODES.reduce((sum, m) => sum + getBlockWastedTime(blockIndex + '::' + m), 0);
+  const modeSummary = modeRows ? `<div class="pm-summary"><div class="pm-title">📊 Tes notes sur ce bloc${totalBlockTime ? ` · ⏱️ ${fmtDuration(totalBlockTime)} au total` : ''}${totalWasted > 0 ? ` · 😮‍💨 ${fmtDuration(totalWasted)} perdues` : ''}</div>${modeRows}</div>` : '';
 
   const celebrateMsg = MASCOT_BIG_CELEBRATE[Math.floor(Math.random() * MASCOT_BIG_CELEBRATE.length)];
   const celebrationHtml = (justFinished && passed) ? `
@@ -7219,6 +7369,7 @@ function renderEndScreen(){
   cloudAutoPush();
   // grande fête de fin de bloc 🎉
   const pct = result.total ? (result.correct / result.total) : 0;
+  if(pct*100 >= PASS_THRESHOLD){ vibrate([40, 60, 40, 60, 90]); }
   let bursts = pct === 1 ? 6 : (pct >= 0.8 ? 3 : 2);
   for(let i=0;i<bursts;i++){ setTimeout(launchConfetti, i*230); }
   setTimeout(() => burstStars(window.innerWidth/2, window.innerHeight*0.35), 150);
