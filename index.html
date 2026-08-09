@@ -1108,6 +1108,14 @@
     display:flex;align-items:center;justify-content:center;text-align:center;
   }
   .pair-tile.ar{ font-family:'Changa',sans-serif;direction:rtl;font-size:19px;color:var(--purple); }
+  .pair-key{
+    display:inline-flex;align-items:center;justify-content:center;min-width:19px;height:19px;
+    padding:0 4px;border-radius:6px;background:var(--surface-sunken);border:1px solid var(--border);
+    color:var(--text-dim);font-family:'Inter',sans-serif;font-weight:800;font-size:10.5px;margin-right:7px;
+  }
+  .pair-tile.ar .pair-key{ margin-right:0;margin-left:7px; }
+  .pair-tile.selected .pair-key, .pair-tile.matched .pair-key{ background:rgba(255,255,255,0.3);color:inherit;border-color:transparent; }
+  .kbd-hint{ text-align:center;font-size:11.5px;color:var(--text-dim);font-weight:600;margin-top:10px; }
   .pair-tile:hover:not(.matched){ transform:translateY(-1px);background:#E8EDFF; }
   .pair-tile:active:not(.matched){ transform:translateY(2px);box-shadow:0 2px 0 #E2E8F0; }
   .pair-tile.selected{ background:var(--purple);color:#fff;box-shadow:0 4px 0 var(--purple-dark); }
@@ -2164,6 +2172,30 @@ let chronoStreak = 0;
 let comboStreak = 0;   // bonnes réponses d'affilée dans le bloc en cours
 let bestCombo = 0;
 let blockStartTime = 0;
+
+/* ⏱️ Ne compte que le temps où l'app est réellement active à l'écran — le temps passé en
+   arrière-plan (téléphone verrouillé, onglet caché, changement d'appli) est exclu du calcul,
+   pour éviter des durées absurdes (ex: "832 min" pour une session laissée en pause). */
+let totalHiddenMs = 0;
+let hiddenSince = document.hidden ? Date.now() : null;
+document.addEventListener('visibilitychange', () => {
+  if(document.hidden){
+    hiddenSince = Date.now();
+  } else if(hiddenSince){
+    totalHiddenMs += Date.now() - hiddenSince;
+    hiddenSince = null;
+  }
+});
+/* Calcule le temps activement passé depuis "startMs", en retirant le temps en arrière-plan.
+   Plafonné à 3h par sécurité, au cas où un cas limite échapperait quand même au calcul. */
+function computeActiveDurationSec(startMs){
+  if(!startMs) return 0;
+  let hiddenMs = totalHiddenMs;
+  if(hiddenSince){ hiddenMs += Date.now() - hiddenSince; } // toujours caché au moment du calcul (rare)
+  const activeMs = Math.max(0, (Date.now() - startMs) - hiddenMs);
+  return Math.max(1, Math.min(10800, Math.round(activeMs / 1000)));
+}
+
 function bumpCombo(isCorrect){
   if(isCorrect){
     comboStreak++;
@@ -3002,6 +3034,8 @@ function setupDeckFromWords(words){
   micContinuous = false;
   repeatContinuous = false;
   blockStartTime = Date.now();
+  totalHiddenMs = 0;
+  hiddenSince = document.hidden ? Date.now() : null;
 }
 function buildDeck(blockIndex){
   currentBlock = blockIndex;
@@ -3693,6 +3727,7 @@ function startSwipe(){
     return { word: w, shownAr, isTrue: shownAr === w.ar };
   });
   swipeState = { cards, idx: 0, score: 0, startTime: Date.now() };
+  totalHiddenMs = 0; hiddenSince = document.hidden ? Date.now() : null;
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="swipeExitBtn" style="cursor:pointer;">← Quitter</button>`;
   document.getElementById('swipeExitBtn').addEventListener('click', renderBlockSelect);
   renderSwipeCard();
@@ -3778,7 +3813,7 @@ function resolveSwipe(userSaysTrue){
 
 function endSwipe(){
   const score = swipeState.score, total = swipeState.cards.length;
-  const durationSec = Math.max(1, Math.round((Date.now() - swipeState.startTime)/1000));
+  const durationSec = computeActiveDurationSec(swipeState.startTime);
   swipeState = null;
   recordDailyActivity();
   recordDailyStats(durationSec, false, score * 2);
@@ -3828,6 +3863,7 @@ function renderFlashcardsIntro(){
 function startFlashcards(){
   const pool = shuffle(WORDS.slice()).slice(0, FLASHCARD_SESSION_SIZE);
   flashState = { pool, idx: 0, known: 0, review: 0, flipped: false, startTime: Date.now() };
+  totalHiddenMs = 0; hiddenSince = document.hidden ? Date.now() : null;
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="flashExitBtn" style="cursor:pointer;">← Quitter</button>`;
   document.getElementById('flashExitBtn').addEventListener('click', renderBlockSelect);
   renderFlashCard();
@@ -3886,7 +3922,7 @@ function resolveFlashcard(known){
 
 function endFlashcards(){
   const known = flashState.known, review = flashState.review, total = flashState.pool.length;
-  const durationSec = Math.max(1, Math.round((Date.now() - flashState.startTime)/1000));
+  const durationSec = computeActiveDurationSec(flashState.startTime);
   flashState = null;
   recordDailyActivity();
   recordDailyStats(durationSec, false, known * 2);
@@ -3973,6 +4009,7 @@ function renderDailyChallenge(){
 
 function startDailyChallenge(){
   dcState = { words: getDailyChallengeWords(), idx: 0, score: 0, startTime: Date.now() };
+  totalHiddenMs = 0; hiddenSince = document.hidden ? Date.now() : null;
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="dcExitBtn" style="cursor:pointer;">← Quitter</button>`;
   document.getElementById('dcExitBtn').addEventListener('click', renderBlockSelect);
   renderDCCard();
@@ -4014,7 +4051,7 @@ function handleDCAnswer(i){
 
 function finishDailyChallenge(){
   const score = dcState.score, total = dcState.words.length;
-  const durationSec = Math.max(1, Math.round((Date.now() - dcState.startTime)/1000));
+  const durationSec = computeActiveDurationSec(dcState.startTime);
   dcState = null;
   const k = todayKey();
   dailyChallengeLog[k] = { correct: score, total, ts: Date.now() };
@@ -4116,6 +4153,7 @@ function startAssociation(){
     queue: shuffle(WORDS.slice()), queueIdx: 0, visible: [], selected: null,
     matched: 0, wrongIds: new Set(), timeLeft: ASSOC_DURATION, startTime: Date.now(),
   };
+  totalHiddenMs = 0; hiddenSince = document.hidden ? Date.now() : null;
   for(let i=0;i<ASSOC_VISIBLE_PAIRS;i++){ addNextPairToAssoc(); }
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="assocExitBtn" style="cursor:pointer;">← Quitter</button>`;
   document.getElementById('assocExitBtn').addEventListener('click', stopAssociationAndExit);
@@ -4204,7 +4242,7 @@ function stopAssociationAndExit(){
 
 function endAssociation(){
   const matched = assocState.matched;
-  const durationSec = Math.max(1, Math.round((Date.now() - assocState.startTime)/1000));
+  const durationSec = computeActiveDurationSec(assocState.startTime);
   if(assocState.timerId){ clearInterval(assocState.timerId); }
   assocState = null;
   recordDailyActivity();
@@ -4313,7 +4351,7 @@ function renderReviewEndScreen(){
   const type = TRAINING_TYPES[window.__trainingType] || TRAINING_TYPES.errors;
   const graduated = window.__reviewGraduated || [];
   const stillLeft = getTrainingWords(type.pool).length;
-  const durationSec = blockStartTime ? Math.max(1, Math.round((Date.now() - blockStartTime)/1000)) : 0;
+  const durationSec = computeActiveDurationSec(blockStartTime);
   recordDailyActivity();
   recordDailyStats(durationSec, false, 0, gameMode);
   window.__reviewSession = false;
@@ -4476,7 +4514,7 @@ function renderCustomBlockEndScreen(){
   const block = getCustomBlock(blockId);
   if(!block){ renderBlockSelect(); return; }
 
-  const durationSec = blockStartTime ? Math.max(1, Math.round((Date.now() - blockStartTime)/1000)) : 0;
+  const durationSec = computeActiveDurationSec(blockStartTime);
   const pctVal = score.total ? Math.round((score.correct/score.total)*100) : 0;
   const passed90 = pctVal >= PASS_THRESHOLD;
   const flawless = score.total > 0 && score.correct === score.total;
@@ -5972,12 +6010,13 @@ function renderPairsRound(){
     <div class="question-line" style="text-align:center;">Associe chaque mot français à sa traduction arabe avant la fin du temps !</div>
     <div class="pairs-grid">
       <div class="pairs-col" id="pairsLeft">
-        ${left.map(c => `<button class="pair-tile" data-id="${escapeHtml(c.id)}" data-side="fr">${escapeHtml(c.txt)}</button>`).join('')}
+        ${left.map((c,i) => `<button class="pair-tile" data-id="${escapeHtml(c.id)}" data-side="fr"><span class="pair-key">${i+1}</span>${escapeHtml(c.txt)}</button>`).join('')}
       </div>
       <div class="pairs-col" id="pairsRight">
-        ${right.map(c => `<button class="pair-tile ar" data-id="${escapeHtml(c.id)}" data-side="ar">${escapeHtml(c.txt)}</button>`).join('')}
+        ${right.map((c,i) => `<button class="pair-tile ar" data-id="${escapeHtml(c.id)}" data-side="ar"><span class="pair-key">${String.fromCharCode(65+i)}</span>${escapeHtml(c.txt)}</button>`).join('')}
       </div>
     </div>
+    <div class="kbd-hint">⌨️ Chiffres 1-6 = mot français · Lettres A-F = traduction arabe</div>
     <div class="reveal" id="revealWrap"></div>
   `;
 
@@ -7363,7 +7402,7 @@ function renderRecapView(blockIndex, result, justFinished){
 }
 
 function renderEndScreen(){
-  const durationSec = blockStartTime ? Math.max(1, Math.round((Date.now() - blockStartTime)/1000)) : 0;
+  const durationSec = computeActiveDurationSec(blockStartTime);
   const pctVal = score.total ? Math.round((score.correct/score.total)*100) : 0;
   const passed90 = pctVal >= PASS_THRESHOLD;
   const flawless = score.total > 0 && score.correct === score.total;
@@ -7875,6 +7914,19 @@ document.addEventListener('keydown', (e) => {
   if(trueBtn && falseBtn && !answered){
     if(e.code === 'Digit1' || e.code === 'Numpad1' || e.key === '1' || e.key.toLowerCase() === 'v' || e.key === 'ArrowLeft'){ e.preventDefault(); trueBtn.click(); return; }
     if(e.code === 'Digit2' || e.code === 'Numpad2' || e.key === '2' || e.key.toLowerCase() === 'f' || e.key === 'ArrowRight'){ e.preventDefault(); falseBtn.click(); return; }
+  }
+  // 🧩 Paires : chiffres 1-6 = tuile française (colonne gauche), lettres A-F = traduction arabe (colonne droite)
+  const pairsLeftTiles = document.querySelectorAll('#pairsLeft .pair-tile');
+  const pairsRightTiles = document.querySelectorAll('#pairsRight .pair-tile');
+  if(pairsLeftTiles.length || pairsRightTiles.length){
+    const pairDigitMap = {'Digit1':0,'Digit2':1,'Digit3':2,'Digit4':3,'Digit5':4,'Digit6':5,'Numpad1':0,'Numpad2':1,'Numpad3':2,'Numpad4':3,'Numpad5':4,'Numpad6':5};
+    const pairLetterMap = {'KeyA':0,'KeyB':1,'KeyC':2,'KeyD':3,'KeyE':4,'KeyF':5};
+    if(pairDigitMap.hasOwnProperty(e.code) && pairsLeftTiles[pairDigitMap[e.code]] && !pairsLeftTiles[pairDigitMap[e.code]].classList.contains('matched')){
+      e.preventDefault(); pairsLeftTiles[pairDigitMap[e.code]].click(); return;
+    }
+    if(pairLetterMap.hasOwnProperty(e.code) && pairsRightTiles[pairLetterMap[e.code]] && !pairsRightTiles[pairLetterMap[e.code]].classList.contains('matched')){
+      e.preventDefault(); pairsRightTiles[pairLetterMap[e.code]].click(); return;
+    }
   }
   // Espace ne démarre le micro que s'il n'y a pas déjà une réponse à valider (voir le retour anticipé plus haut)
   const micBtn = document.getElementById('micBtn');
