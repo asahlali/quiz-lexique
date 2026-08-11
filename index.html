@@ -1487,6 +1487,7 @@
   </div>
   <div class="menu-group">
     <div class="menu-label">Données</div>
+    <button class="menu-item" id="addWordsBtn"><span class="mi-ic">➕</span> Ajouter des mots</button>
     <button class="menu-item" id="importBtn"><span class="mi-ic">⤒</span> Importer un CSV</button>
     <button class="menu-item" id="exportBtn"><span class="mi-ic">⤓</span> Exporter le CSV</button>
     <button class="menu-item" id="syncBtn"><span class="mi-ic">☁️</span> Synchro cloud</button>
@@ -2324,7 +2325,7 @@ function loadBlockResult(blockIndex, mode){
   }catch(e){ return null; }
 }
 
-const GAME_MODES = ['classic', 'blank', 'chrono', 'speak', 'pairs', 'dialogue', 'repeat'];
+const GAME_MODES = ['classic', 'blank', 'chrono', 'speak', 'pairs', 'dialogue', 'repeat', 'listen'];
 
 function rebuildBlocks(){
   datasetHash = hashWords(WORDS);
@@ -2849,6 +2850,7 @@ document.getElementById('autoSpeakBtn').addEventListener('click', () => {
 });
 updateAutoSpeakBtn();
 
+document.getElementById('addWordsBtn').addEventListener('click', () => renderAddWordsScreen());
 document.getElementById('importBtn').addEventListener('click', () => {
   document.getElementById('csvFileInput').click();
 });
@@ -2869,7 +2871,139 @@ document.getElementById('csvFileInput').addEventListener('change', (e) => {
   e.target.value = '';
 });
 
-function commitImport(words){
+/* ============ ➕ AJOUTER DES MOTS (un par un ou par lot, à la fin du lexique) ============ */
+function renderAddWordsScreen(){
+  clearQuestionTimer();
+  document.body.classList.remove('quiz-active');
+  currentBlock = null;
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromAddWordsBtn" style="cursor:pointer;">← Retour</button>`;
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('footerNote').textContent = '';
+
+  const nextBlockNum = Math.floor(WORDS.length / 30) + 1;
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="cat-tag">➕ Ajouter des mots</div>
+    <div class="word-fr" style="font-size:clamp(22px,4.5vw,28px);">Toujours ajoutés à la fin</div>
+    <div class="question-line">Les nouveaux mots rejoignent automatiquement le dernier bloc en cours de remplissage. Dès qu'un bloc atteint 30 mots, un nouveau démarre tout seul (actuellement : bloc ${nextBlockNum}, ${WORDS.length % 30}/30 rempli).</div>
+
+    <div class="qcm-add-form" style="margin-top:16px;">
+      <div style="font-weight:800;color:var(--text);margin-bottom:10px;">✏️ Ajouter un mot</div>
+      <input type="text" id="awFr" class="search-input" placeholder="Mot en français *" style="margin-bottom:8px;">
+      <input type="text" id="awAr" class="search-input" placeholder="Traduction en arabe" style="margin-bottom:8px;">
+      <input type="text" id="awDef" class="search-input" placeholder="Définition *" style="margin-bottom:8px;">
+      <input type="text" id="awEx" class="search-input" placeholder="Phrase d'exemple (mets ~ à la place du mot)" style="margin-bottom:8px;">
+      <input type="text" id="awCat" class="search-input" placeholder="Catégorie (ex : Verbe, Expression, Familier...)" style="margin-bottom:10px;">
+      <button class="restart-btn" id="awAddOneBtn" style="background:linear-gradient(135deg,#6366F1,#4F46E5);border-color:#3730A3;">➕ Ajouter ce mot</button>
+      <div class="csv-status" id="awOneStatus"></div>
+    </div>
+
+    <div class="qcm-add-form">
+      <div style="font-weight:800;color:var(--text);margin-bottom:8px;">📋 Ajouter plusieurs mots d'un coup</div>
+      <div class="question-line" style="text-align:left;font-size:12.5px;margin:0 0 10px;">
+        Un mot par ligne, séparé par des points-virgules <code style="background:var(--surface);padding:1px 5px;border-radius:5px;">;</code> :<br>
+        <code style="background:var(--surface);padding:2px 6px;border-radius:5px;display:inline-block;margin-top:4px;">français ; arabe ; définition ; phrase (~) ; catégorie</code><br>
+        Seuls le <b>français</b> et la <b>définition</b> sont obligatoires — le reste peut être laissé vide.
+      </div>
+      <div class="question-line" style="text-align:left;font-size:12px;margin:0 0 10px;background:var(--surface);border-radius:8px;padding:10px 12px;">
+        Exemple :<br>
+        <code>bibliothèque ; مكتبة ; lieu où l'on emprunte des livres ; je vais à la ~ ; Lieu</code><br>
+        <code>rapide ; سريع ; qui va vite ; il court très ~ ; Adjectif</code>
+      </div>
+      <textarea id="awBulkText" class="search-input" rows="6" placeholder="Colle tes mots ici, un par ligne..." style="resize:vertical;font-family:monospace;font-size:13px;"></textarea>
+      <div style="display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap;">
+        <button class="mode-chip" id="awBulkFileBtn">📁 ...ou importer un fichier</button>
+        <input type="file" id="awBulkFileInput" accept=".csv,.txt" style="display:none;">
+        <button class="restart-btn" id="awBulkAddBtn" style="background:var(--surface);border:1px solid var(--border);color:var(--purple);margin-top:0;">➕ Ajouter ces mots</button>
+      </div>
+      <div class="csv-status" id="awBulkStatus"></div>
+    </div>
+  `;
+  document.getElementById('backFromAddWordsBtn').addEventListener('click', renderBlockSelect);
+
+  document.getElementById('awAddOneBtn').addEventListener('click', () => {
+    const fr = document.getElementById('awFr').value.trim();
+    const ar = document.getElementById('awAr').value.trim();
+    const def = document.getElementById('awDef').value.trim();
+    const ex = document.getElementById('awEx').value.trim();
+    const cat = document.getElementById('awCat').value.trim() || 'Personnalisé';
+    const statusEl = document.getElementById('awOneStatus');
+    if(!fr || !def){
+      statusEl.textContent = '⚠️ Le mot français et la définition sont obligatoires.';
+      statusEl.className = 'csv-status err';
+      return;
+    }
+    const added = commitImport([{ fr, ar, def, ex: ex || '~', cat }], true);
+    ['awFr','awAr','awDef','awEx','awCat'].forEach(id => { document.getElementById(id).value = ''; });
+    if(added > 0){
+      statusEl.textContent = `✓ "${fr}" ajouté à la fin du lexique !`;
+      statusEl.className = 'csv-status ok';
+    } else {
+      statusEl.textContent = `⚠️ "${fr}" existe déjà dans le lexique, non ajouté.`;
+      statusEl.className = 'csv-status err';
+    }
+    document.getElementById('awFr').focus();
+  });
+
+  document.getElementById('awBulkAddBtn').addEventListener('click', () => {
+    addVocabBulkWords(document.getElementById('awBulkText').value);
+  });
+  document.getElementById('awBulkFileBtn').addEventListener('click', () => {
+    document.getElementById('awBulkFileInput').click();
+  });
+  document.getElementById('awBulkFileInput').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      document.getElementById('awBulkText').value = ev.target.result;
+      addVocabBulkWords(ev.target.result);
+    };
+    reader.readAsText(file, 'UTF-8');
+    e.target.value = '';
+  });
+}
+
+function parseVocabBulkLine(line){
+  const parts = line.split(';').map(p => p.trim());
+  const fr = parts[0] || '';
+  const ar = parts[1] || '';
+  const def = parts[2] || '';
+  const ex = parts[3] || '';
+  const cat = parts[4] || 'Personnalisé';
+  if(!fr) return { error: 'mot français manquant' };
+  if(!def) return { error: 'définition manquante' };
+  return { word: { fr, ar, def, ex: ex || '~', cat } };
+}
+
+function addVocabBulkWords(raw){
+  const statusEl = document.getElementById('awBulkStatus');
+  const lines = raw.split(/\r?\n/).map(l => l.trim()).filter(l => l && !l.startsWith('//'));
+  if(lines.length === 0){
+    statusEl.textContent = 'Colle au moins une ligne au format indiqué ci-dessus.';
+    statusEl.className = 'csv-status err';
+    return;
+  }
+  const toAdd = [];
+  const errors = [];
+  lines.forEach((line, i) => {
+    const result = parseVocabBulkLine(line);
+    if(result.error){ errors.push(`Ligne ${i+1} : ${result.error}`); }
+    else { toAdd.push(result.word); }
+  });
+  let addedCount = 0;
+  if(toAdd.length > 0){ addedCount = commitImport(toAdd, true); }
+  const parts = [];
+  if(addedCount > 0) parts.push(`${addedCount} mot${addedCount>1?'s':''} ajouté${addedCount>1?'s':''}`);
+  const dupCount = toAdd.length - addedCount;
+  if(dupCount > 0) parts.push(`${dupCount} déjà présent${dupCount>1?'s':''} ignoré${dupCount>1?'s':''}`);
+  if(errors.length > 0) parts.push(`${errors.length} ligne${errors.length>1?'s':''} ignorée${errors.length>1?'s':''} (${errors.slice(0,3).join(' · ')}${errors.length>3?'...':''})`);
+  statusEl.textContent = parts.length ? '✓ ' + parts.join(' — ') : 'Aucun mot valide trouvé.';
+  statusEl.className = 'csv-status ' + (addedCount > 0 ? 'ok' : 'err');
+  if(addedCount > 0){ document.getElementById('awBulkText').value = ''; }
+}
+
+function commitImport(words, skipNavigate){
   // dédoublonnage contre le lexique existant
   const existingKeys = new Set(WORDS.map(w => w.fr.toLowerCase()));
   const toAdd = [];
@@ -2890,6 +3024,7 @@ function commitImport(words){
   activeFilterCat = null;
   rebuildBlocks();
   cloudAutoPush();
+  if(skipNavigate) return added;
   const parts = [];
   if(added > 0) parts.push(`${added} nouveau${added>1?'x':''} mot${added>1?'s':''} ajouté${added>1?'s':''}`);
   if(alreadyPresent > 0) parts.push(`${alreadyPresent} déjà présent${alreadyPresent>1?'s':''} ignoré${alreadyPresent>1?'s':''}`);
@@ -5502,6 +5637,7 @@ function renderBlockSelect(){
     { id: 'pairs', label: '🧩 Paires chrono' },
     { id: 'dialogue', label: '🔀 Mots en ordre' },
     { id: 'repeat', label: '🗣️ Répétition' },
+    { id: 'listen', label: '🎧 Dictée' },
   ];
   const modeRow = document.getElementById('modeRow');
   modes.forEach(m => {
@@ -5515,7 +5651,7 @@ function renderBlockSelect(){
   const timerRow = document.getElementById('timerRow');
   const timerLabel = document.createElement('span');
   timerLabel.textContent = '⏱️ ';
-  timerLabel.style.cssText = 'align-self:center;color:rgba(255,255,255,0.85);font-weight:800;font-size:13px;';
+  timerLabel.style.cssText = 'align-self:center;color:var(--text-dim);font-weight:800;font-size:13px;';
   timerRow.appendChild(timerLabel);
   [5, 10, 15].forEach(sec => {
     const btn = document.createElement('button');
@@ -5717,6 +5853,7 @@ function renderCard(){
   if(gameMode === 'pairs'){ renderPairsRound(); return; }
   if(gameMode === 'dialogue'){ renderDialogueCard(); return; }
   if(gameMode === 'repeat'){ renderRepeatCard(); return; }
+  if(gameMode === 'listen'){ renderListenOrderCard(); return; }
   renderClassicCard();
 }
 
@@ -6517,6 +6654,63 @@ function handleRepeatResult(similarity, info){
   focusReveal(revealWrap);
 }
 
+/* ============ 🎧 DICTÉE — écoute la phrase, reconstruis-la (aucun texte visible avant) ============ */
+function renderListenOrderCard(){
+  const word = queue[0];
+  answered = false;
+  window.__currentWord = word;
+  window.__orderAttemptCount = 0;
+
+  const sentence = word.ex.replace(/~/g, word.fr);
+  const fullWords = sentence.trim().split(/\s+/).filter(Boolean);
+  const maxBlanks = ORDER_MODE_MAX_WORDS;
+  const blankIndices = fullWords.length <= maxBlanks
+    ? fullWords.map((_, i) => i)
+    : pickBlankIndices(fullWords, maxBlanks);
+
+  window.__orderFullTarget = fullWords;
+  window.__orderBlankIndices = blankIndices;
+  window.__orderBlankSlots = new Array(blankIndices.length).fill(null);
+  window.__orderPool = shuffle(blankIndices.map((idx, i) => ({ word: fullWords[idx], uid: i })));
+  orderDrag = null;
+
+  const card = document.getElementById('quizCard');
+  const micSection = speechRecoAvailable ? `
+    <div class="mic-zone" style="margin:6px 0 14px;">
+      <button class="mic-btn" id="orderMicBtn" aria-label="Parler">
+        <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/>
+        </svg>
+      </button>
+      <div class="mic-hint" id="orderMicHint">🎤 Ou redis la phrase que tu as entendue — les mots se placeront tout seuls</div>
+      <div class="mic-transcript" id="orderMicTranscript"></div>
+    </div>` : '';
+  card.innerHTML = `
+    <div class="cat-tag">${escapeHtml(word.cat)} · 🎧 Dictée</div>
+    <div class="chrono-timer-track"><div class="chrono-timer-fill" id="quizTimerFill"></div></div>
+    <div class="question-line" style="text-align:center;">🎧 Écoute bien, puis reconstitue la phrase avec les mots ci-dessous — aucun texte n'est affiché avant que tu répondes.</div>
+    <button class="restart-btn" id="listenReplayBtn" style="display:flex;align-items:center;gap:8px;margin:10px auto 16px;background:linear-gradient(135deg,#6366F1,#4F46E5);border-color:#3730A3;">🔊 Écouter la phrase</button>
+    <div class="order-sentence" id="orderSentence"></div>
+    <div class="order-pool" id="orderPool"></div>
+    ${micSection}
+    <div class="mode-row" style="margin-top:10px;">
+      <button class="mode-chip" id="orderClearBtn">↺ Effacer</button>
+      <button class="mode-chip" id="orderValidateBtn" style="display:none;background:var(--purple);color:#fff;box-shadow:0 3px 0 var(--purple-dark);">✓ Valider ma phrase</button>
+    </div>
+    <div class="reveal" id="revealWrap"></div>
+  `;
+  document.getElementById('orderClearBtn').addEventListener('click', resetOrderSelection);
+  document.getElementById('orderValidateBtn').addEventListener('click', () => handleOrderAnswer(false));
+  document.getElementById('listenReplayBtn').addEventListener('click', () => speak(sentence, 'fr-FR'));
+  const orderMicBtn = document.getElementById('orderMicBtn');
+  if(orderMicBtn){ orderMicBtn.addEventListener('click', () => startOrderVoiceInput()); }
+  renderOrderZones(false);
+  // 🔊 Lecture automatique de la phrase à l'arrivée sur la carte
+  setTimeout(() => { if(!answered && window.__currentWord === word){ speak(sentence, 'fr-FR'); } }, 350);
+  renderProgress();
+  startQuestionTimer(() => handleOrderAnswer(true), Math.max(quizTimerSeconds * 5, 30));
+}
+
 function renderDialogueCard(){
   const word = queue[0];
   answered = false;
@@ -7287,7 +7481,7 @@ function attachRecapSpeakHandlers(){
   });
 }
 
-const MODE_LABELS = { classic: '🎯 Classique', blank: '🕳️ Phrase à trous', chrono: '⚡ Chrono Vrai/Faux', speak: '🎤 Prononciation', pairs: '🧩 Paires chrono', dialogue: '🔀 Mots en ordre', repeat: '🗣️ Répétition' };
+const MODE_LABELS = { classic: '🎯 Classique', blank: '🕳️ Phrase à trous', chrono: '⚡ Chrono Vrai/Faux', speak: '🎤 Prononciation', pairs: '🧩 Paires chrono', dialogue: '🔀 Mots en ordre', repeat: '🗣️ Répétition', listen: '🎧 Dictée' };
 
 function renderRecapView(blockIndex, result, justFinished){
   clearQuestionTimer();
