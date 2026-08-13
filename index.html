@@ -235,7 +235,8 @@
   }
   .opt.disabled{cursor:default;}
   .opt.faded{opacity:.35;box-shadow:none;}
-  .tile-wrap{ position:relative; }
+  .tile-wrap{ position:relative;display:flex; }
+  .tile-wrap .opt{ width:100%;min-height:132px;display:flex;flex-direction:column;justify-content:center;align-items:center; }
   .tile-wrap .opt{ width:100%; }
   .tile-peek{
     position:absolute;top:8px;right:8px;width:28px;height:28px;border-radius:50%;border:1px solid var(--border);
@@ -860,6 +861,14 @@
     -webkit-background-clip:text;background-clip:text;color:transparent;
   }
 
+  /* ☁️ Petit indicateur discret de synchro en arrière-plan (jamais bloquant) */
+  .sync-indicator{
+    display:none;font-size:15px;margin-left:6px;flex:none;
+    animation:syncIndicatorPulse 1.2s ease-in-out infinite;
+  }
+  .sync-indicator.show{ display:inline-block; }
+  @keyframes syncIndicatorPulse{ 0%,100%{ opacity:.4;transform:scale(.9); } 50%{ opacity:1;transform:scale(1.08); } }
+
   /* Bascule de thème (clair/sombre) */
   .theme-toggle{
     display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--border);
@@ -1326,16 +1335,16 @@
   .order-placeholder{ font-size:13.5px;font-weight:700;color:var(--text-dim);align-self:center; }
   .order-pool{ display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:6px; }
   .order-chip{
-    border:none;border-radius:12px;padding:10px 16px;font-weight:800;font-family:'Inter',sans-serif;
-    font-size:15px;cursor:grab;box-shadow:0 3px 0 #E2E8F0;color:var(--text);background:#fff;
+    border:1px solid var(--border);border-radius:12px;padding:10px 16px;font-weight:800;font-family:'Inter',sans-serif;
+    font-size:15px;cursor:grab;box-shadow:var(--shadow-sm);color:var(--text);background:var(--surface);
     transition:transform .12s,background .15s,box-shadow .15s;
     touch-action:none; user-select:none; -webkit-user-select:none;
   }
-  .order-chip:hover:not(.disabled){ transform:translateY(-2px); }
+  .order-chip:hover:not(.disabled){ transform:translateY(-2px);background:var(--surface-hover); }
   .order-chip:active:not(.disabled){ cursor:grabbing; }
-  .order-chip.placed{ background:var(--purple);color:#fff;box-shadow:0 3px 0 var(--purple-dark); }
-  .order-chip.correct{ background:var(--green);color:#fff;box-shadow:0 3px 0 var(--green-dark);cursor:default; }
-  .order-chip.wrong{ background:var(--red);color:#fff;box-shadow:0 3px 0 var(--red-dark);cursor:default; }
+  .order-chip.placed{ background:var(--purple);color:#fff;box-shadow:0 3px 0 var(--purple-dark);border-color:var(--purple-dark); }
+  .order-chip.correct{ background:var(--green);color:#fff;box-shadow:0 3px 0 var(--green-dark);cursor:default;border-color:var(--green-dark); }
+  .order-chip.wrong{ background:var(--red);color:#fff;box-shadow:0 3px 0 var(--red-dark);cursor:default;border-color:var(--red-dark); }
   .order-chip.disabled{ pointer-events:none; }
   .order-chip-ghost{
     position:fixed;z-index:5000;pointer-events:none;display:flex;align-items:center;justify-content:center;
@@ -1351,10 +1360,10 @@
   .order-fixed-word{ margin:0 3px;display:inline-block; }
   .order-slot-empty{
     display:inline-flex;align-items:center;justify-content:center;min-width:60px;height:34px;
-    margin:0 3px;padding:0 10px;border-radius:10px;border:2px dashed #CBD5E1;background:#fff;
-    color:#CBD5E1;font-size:15px;vertical-align:middle;transition:border-color .15s,background .15s;
+    margin:0 3px;padding:0 10px;border-radius:10px;border:2px dashed var(--border-strong);background:var(--surface);
+    color:var(--text-faint);font-size:15px;vertical-align:middle;transition:border-color .15s,background .15s;
   }
-  .order-slot-empty.drag-over{ border-color:var(--purple);background:#EEF2FF;transform:scale(1.06); }
+  .order-slot-empty.drag-over{ border-color:var(--purple);background:rgba(80,70,229,0.12);transform:scale(1.06); }
   .order-sentence .order-chip{ margin:0 3px;vertical-align:middle;font-size:15px;padding:7px 14px; }
   .order-sentence .order-slot-filled.drag-over{ outline:3px solid var(--purple);outline-offset:2px; }
 </style>
@@ -1413,6 +1422,7 @@
       <span class="brand-word">Vocab<span class="brand-accent">VISION</span></span>
     </div>
     <button id="userChipBtn" style="margin-left:8px;border:1px solid var(--border);background:var(--surface-sunken);color:var(--text);padding:5px 12px;border-radius:999px;font-weight:700;font-size:12px;cursor:pointer;white-space:nowrap;">👤</button>
+    <span id="syncIndicator" class="sync-indicator" title="Synchronisation en cours..." aria-hidden="true">☁️</span>
     <button class="theme-toggle" id="themeToggle" aria-label="Changer de thème" title="Thème clair / sombre">🌙</button>
     <button class="menu-toggle" id="menuToggle" aria-label="Ouvrir le menu" aria-expanded="false">
       <span></span><span></span><span></span>
@@ -4888,10 +4898,15 @@ function renderScoreboard(){
     html += `<div class="chip">${escapeHtml(c)} <b>${s.c}/${s.t}</b></div>`;
   }
   html += `<button class="chip" id="peekSummaryBtn" style="cursor:pointer;">📊 Résumé</button>`;
+  if(score.total > 0){
+    html += `<button class="chip" id="finishNowBtn" style="cursor:pointer;color:var(--purple);font-weight:800;">🏁 Terminer</button>`;
+  }
   html += `<button class="chip" id="changeBlockBtn" style="cursor:pointer;">← ${window.__reviewSession ? 'Quitter la révision' : 'Changer de bloc'}</button>`;
   el.innerHTML = html;
   document.getElementById('changeBlockBtn').addEventListener('click', renderBlockSelect);
   document.getElementById('peekSummaryBtn').addEventListener('click', showBlockSummaryOverlay);
+  const finishNowBtn = document.getElementById('finishNowBtn');
+  if(finishNowBtn){ finishNowBtn.addEventListener('click', () => { clearQuestionTimer(); if(typeof stopRecognition === 'function'){ stopRecognition(); } goToEndScreen(); }); }
   const cc = document.getElementById('comboChip');
   if(cc){ cc.classList.remove('streak-up'); void cc.offsetWidth; cc.classList.add('streak-up'); }
   if(window.__streakJustUp){
@@ -7997,6 +8012,11 @@ function cloudAutoPush(){
     .finally(() => { syncBusy = false; });
 }
 
+function setSyncIndicator(on){
+  const el = document.getElementById('syncIndicator');
+  if(el){ el.classList.toggle('show', !!on); }
+}
+
 function showSyncOverlay(msg){
   const ov = document.getElementById('syncOverlay');
   if(!ov) return;
@@ -8013,12 +8033,12 @@ function hideSyncOverlay(){
 }
 
 async function autoSyncOnLoad(){
-  if(!getSyncUrl()){ hideSyncOverlay(); return; }
-  if(syncBusy){ hideSyncOverlay(); return; } // une autre synchro est déjà en cours : on évite les requêtes concurrentes
+  if(!getSyncUrl()){ return; }
+  if(syncBusy){ return; } // une autre synchro est déjà en cours : on évite les requêtes concurrentes
   syncBusy = true;
-  showSyncOverlay('Chargement de tes données…');
+  setSyncIndicator(true);
   try{
-    setStatus('☁️ Synchronisation...', 'ok');
+    setStatus('☁️ Synchronisation en arrière-plan...', 'ok');
     const changed = await cloudPull();
     await cloudPush();
     setStatus(changed ? '☁️ Synchronisé — nouvelles données récupérées !' : '☁️ Synchronisé.', 'ok');
@@ -8028,7 +8048,7 @@ async function autoSyncOnLoad(){
     console.error('Sync error:', e);
   }finally{
     syncBusy = false;
-    hideSyncOverlay();
+    setSyncIndicator(false);
   }
 }
 
@@ -8849,7 +8869,9 @@ function finishQcmPractice(){
 if(appMode === 'qcm'){ renderQcmHome(); }
 else if(appMode === 'vocab'){ renderBlockSelect(); }
 else { renderAppSwitcher(); }
-if(getSyncUrl()){ showSyncOverlay('Chargement de tes données…'); }
+// ⚡ On n'affiche plus de voile bloquant "Chargement de tes données…" au démarrage : l'app est
+// déjà utilisable avec les données locales, la synchro se fait discrètement en arrière-plan
+// (juste un petit message dans le statut) — sinon l'app semblait mettre trop de temps à s'ouvrir.
 autoSyncOnLoad();
 
 /* Laisse l'écran de démarrage visible un minimum de temps pour un rendu soigné (ni flash, ni attente inutile). */
