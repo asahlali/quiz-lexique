@@ -1086,6 +1086,31 @@
   @keyframes syncFade{ from{opacity:0;} to{opacity:1;} }
   @keyframes syncFadeOut{ from{opacity:1;} to{opacity:0;} }
   .sync-box{ display:flex;flex-direction:column;align-items:center;gap:14px; }
+
+  /* ============ 📊 RÉSUMÉ DU BLOC EN COURS (accessible pendant le jeu, sans quitter) ============ */
+  .summary-overlay{
+    position:fixed;inset:0;z-index:3500;display:none;align-items:flex-end;justify-content:center;
+    background:rgba(15,23,42,0.55);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
+  }
+  .summary-overlay.show{ display:flex;animation:syncFade .25s ease; }
+  .summary-box{
+    width:100%;max-width:520px;max-height:80vh;overflow-y:auto;background:var(--surface);
+    border-radius:20px 20px 0 0;padding:18px 20px 28px;box-shadow:0 -12px 40px -10px rgba(0,0,0,0.4);
+    animation:summarySlideUp .3s cubic-bezier(.22,1.2,.4,1);
+  }
+  @media (min-width:600px){
+    .summary-overlay{ align-items:center; }
+    .summary-box{ border-radius:20px;max-height:70vh; }
+  }
+  @keyframes summarySlideUp{ 0%{ transform:translateY(30px);opacity:0; } 100%{ transform:translateY(0);opacity:1; } }
+  .summary-box-head{
+    display:flex;align-items:center;justify-content:space-between;font-family:'Inter',sans-serif;
+    font-weight:800;font-size:16px;color:var(--ink);margin-bottom:12px;
+  }
+  .summary-box-head button{
+    border:1px solid var(--border);background:var(--surface-sunken);color:var(--text);width:30px;height:30px;
+    border-radius:50%;cursor:pointer;font-size:14px;
+  }
   .sync-logo{ position:relative;width:92px;height:92px;display:flex;align-items:center;justify-content:center; }
   .sync-logo > svg:first-child{ position:absolute;animation:syncBob 2s ease-in-out infinite;filter:drop-shadow(0 6px 14px rgba(0,0,0,0.4)); }
   .sync-ring{ position:absolute;animation:syncSpin 1s linear infinite; }
@@ -1460,6 +1485,15 @@
     </div>
     <div class="sync-word">Vocab<span class="brand-accent">VISION</span></div>
     <div class="sync-msg" id="syncOverlayMsg">Synchronisation…</div>
+  </div>
+</div>
+<div class="summary-overlay" id="summaryOverlay">
+  <div class="summary-box">
+    <div class="summary-box-head">
+      <span>📊 Résumé du bloc</span>
+      <button id="closeSummaryBtn" title="Fermer">✕</button>
+    </div>
+    <div id="summaryOverlayBody"></div>
   </div>
 </div>
 <nav class="menu" id="menu" aria-label="Menu principal">
@@ -2170,7 +2204,10 @@ reconcileWordsOrder();
 
 let gameMode = 'classic'; // 'classic' | 'blank' | 'chrono'
 let chronoStreak = 0;
-let comboStreak = 0;   // bonnes réponses d'affilée dans le bloc en cours
+const COMBO_STREAK_KEY = 'lexiqueQuiz::comboStreak';
+function loadComboStreak(){ try{ const v = parseInt(localStorage.getItem(nsKey(COMBO_STREAK_KEY)), 10); return isNaN(v) ? 0 : v; }catch(e){ return 0; } }
+function saveComboStreak(){ try{ localStorage.setItem(nsKey(COMBO_STREAK_KEY), String(comboStreak)); }catch(e){} }
+let comboStreak = loadComboStreak();   // 🔥 série de bonnes réponses d'affilée, GLOBALE : continue entre les blocs et les modes, mémorisée
 let bestCombo = 0;
 let blockStartTime = 0;
 
@@ -2201,9 +2238,10 @@ function bumpCombo(isCorrect){
   if(isCorrect){
     comboStreak++;
     if(comboStreak > bestCombo) bestCombo = comboStreak;
-    if([3,5,10,15,20,30].includes(comboStreak)){ mascotMilestone(comboStreak); }
+    if([3,5,10,15,20,30,50,75,100].includes(comboStreak) || (comboStreak > 100 && comboStreak % 50 === 0)){ mascotMilestone(comboStreak); }
   }
   else { comboStreak = 0; }
+  saveComboStreak();
 }
 let chronoBestStreak = 0;
 let questionTimer = null;
@@ -3164,8 +3202,8 @@ function setupDeckFromWords(words){
   sessionHistory = [];
   attemptsByFr = {};
   chronoStreak = 0;
-  comboStreak = 0;
-  bestCombo = 0;
+  // 🔥 comboStreak/bestCombo NE se réinitialisent PLUS ici : la série continue entre les blocs et
+  // les modes, elle ne tombe à zéro que sur une vraie erreur (voir bumpCombo).
   micContinuous = false;
   repeatContinuous = false;
   blockStartTime = Date.now();
@@ -3789,6 +3827,7 @@ function handleBlitzAnswer(i){
     blitzState.combo = 0;
     playWrongSound(); reactMascot('ko');
   }
+  bumpCombo(isCorrect);
   recordWordStat(word.fr, isCorrect);
   blitzState.idx++;
   setTimeout(() => { if(blitzState){ renderBlitzCard(); } }, 380); // enchaîne vite, esprit arcade
@@ -3941,6 +3980,7 @@ function resolveSwipe(userSaysTrue){
   const isCorrect = userSaysTrue === c.isTrue;
   if(isCorrect){ swipeState.score++; playCorrectSound(); reactMascot('ok'); }
   else { playWrongSound(); reactMascot('ko'); }
+  bumpCombo(isCorrect);
   recordWordStat(c.word.fr, isCorrect);
   swipeState.idx++;
   renderSwipeCard();
@@ -4050,6 +4090,7 @@ function resolveFlashcard(known){
   if(!flashState) return;
   const w = flashState.pool[flashState.idx];
   if(known){ flashState.known++; } else { flashState.review++; }
+  bumpCombo(known);
   recordWordStat(w.fr, known);
   flashState.idx++;
   renderFlashCard();
@@ -4179,6 +4220,7 @@ function handleDCAnswer(i){
   btns.forEach((b, idx) => { b.classList.add('disabled'); if(options[idx].fr === word.fr){ b.classList.add('correct'); } });
   if(!isCorrect && btns[i]){ btns[i].classList.add('wrong'); }
   if(isCorrect){ dcState.score++; playCorrectSound(); reactMascot('ok'); } else { playWrongSound(); reactMascot('ko'); }
+  bumpCombo(isCorrect);
   recordWordStat(word.fr, isCorrect);
   dcState.idx++;
   setTimeout(() => { if(dcState){ renderDCCard(); } }, 600);
@@ -4839,9 +4881,11 @@ function renderScoreboard(){
     const s = catScore[c];
     html += `<div class="chip">${escapeHtml(c)} <b>${s.c}/${s.t}</b></div>`;
   }
+  html += `<button class="chip" id="peekSummaryBtn" style="cursor:pointer;">📊 Résumé</button>`;
   html += `<button class="chip" id="changeBlockBtn" style="cursor:pointer;">← ${window.__reviewSession ? 'Quitter la révision' : 'Changer de bloc'}</button>`;
   el.innerHTML = html;
   document.getElementById('changeBlockBtn').addEventListener('click', renderBlockSelect);
+  document.getElementById('peekSummaryBtn').addEventListener('click', showBlockSummaryOverlay);
   const cc = document.getElementById('comboChip');
   if(cc){ cc.classList.remove('streak-up'); void cc.offsetWidth; cc.classList.add('streak-up'); }
   if(window.__streakJustUp){
@@ -4849,6 +4893,45 @@ function renderScoreboard(){
     const sc = document.getElementById('streakChip');
     if(sc){ sc.classList.remove('streak-up'); void sc.offsetWidth; sc.classList.add('streak-up'); }
   }
+}
+
+/* 📊 Affiche le résumé du bloc en cours dans une fenêtre par-dessus la question actuelle —
+   sans interrompre la session ni perdre la progression, contrairement à "Changer de bloc". */
+function showBlockSummaryOverlay(){
+  let perMode, title, wastedKeyPrefix;
+  if(window.__reviewSession){
+    perMode = {}; title = '🔁 Session de révision';
+  } else if(window.__customBlockId){
+    const cb = getCustomBlock(window.__customBlockId);
+    perMode = cb ? cb.results : {};
+    title = `🧩 ${escapeHtml(cb ? cb.title : 'Bloc personnalisé')}`;
+    wastedKeyPrefix = window.__customBlockId + '::';
+  } else {
+    perMode = blockResults[currentBlock] || {};
+    title = escapeHtml(getBlockTitle(currentBlock));
+    wastedKeyPrefix = currentBlock + '::';
+  }
+
+  const modeRows = GAME_MODES.filter(m => perMode[m]).map(m => {
+    const r = perMode[m];
+    const p = r.total ? Math.round((r.correct/r.total)*100) : 0;
+    const cls = p >= PASS_THRESHOLD ? 'ok' : 'todo';
+    const timeTxt = r.durationSec ? ` · ⏱️ ${fmtDuration(r.durationSec)}` : '';
+    const wasted = wastedKeyPrefix ? getBlockWastedTime(wastedKeyPrefix + m) : 0;
+    const wastedTxt = wasted > 0 ? ` <span class="pm-wasted">😮‍💨 ${fmtDuration(wasted)} perdues</span>` : '';
+    return `<div class="pm-row"><span>${MODE_LABELS[m]}</span><span class="pm-score ${cls}">${r.correct}/${r.total} · ${p}%${timeTxt}${wastedTxt}</span></div>`;
+  }).join('');
+
+  const body = document.getElementById('summaryOverlayBody');
+  body.innerHTML = `
+    <div style="font-weight:800;color:var(--purple);margin-bottom:10px;">${title}</div>
+    <div style="font-size:13px;color:var(--text-dim);margin-bottom:10px;">Mode actuel : <b style="color:var(--text);">${MODE_LABELS[gameMode] || gameMode}</b> — question ${Math.min(masteredCount+1, initialLength)} / ${initialLength}</div>
+    ${modeRows ? modeRows : `<div class="no-results" style="padding:14px;">Aucun autre mode terminé sur ce bloc pour l'instant.</div>`}
+  `;
+  document.getElementById('summaryOverlay').classList.add('show');
+}
+function hideBlockSummaryOverlay(){
+  document.getElementById('summaryOverlay').classList.remove('show');
 }
 
 function renderProgress(){
@@ -5423,6 +5506,15 @@ function isBlockUnlocked(i){
   return isBlockPassed(i - 1);
 }
 
+/* ▶ Trouve le premier bloc débloqué mais pas encore validé (≥90%) — pour sauter directement
+   dedans sans avoir à chercher/scroller dans la grille. Si tout est validé, reprend le tout dernier. */
+function findNextBlockToPlay(){
+  for(let i=0;i<BLOCKS.length;i++){
+    if(isBlockUnlocked(i) && !isBlockPassed(i)) return i;
+  }
+  return BLOCKS.length ? BLOCKS.length - 1 : null;
+}
+
 function renderBlockSelect(){
   clearQuestionTimer();
   if(typeof stopRecognition === 'function'){ stopRecognition(); }
@@ -5484,6 +5576,7 @@ function renderBlockSelect(){
       <div class="hero-badge">Français ↔ Arabe · ${WORDS.length} mots</div>
       <div class="hero-title">Apprends avec <span class="grad">VocabVISION</span></div>
       <div class="hero-sub">${motto}</div>
+      <button class="restart-btn" id="startNextBlockBtn" style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#F97316,#EA580C);border-color:#B45309;font-size:15px;padding:13px 30px;">▶ Commencer</button>
     </div>
 
     <div class="goal-card">
@@ -5576,6 +5669,17 @@ function renderBlockSelect(){
   `;
 
   document.getElementById('createCustomBlockBtn').addEventListener('click', () => renderCustomBlockBuilder());
+  const startNextBlockBtn = document.getElementById('startNextBlockBtn');
+  if(startNextBlockBtn){
+    startNextBlockBtn.addEventListener('click', () => {
+      const idx = findNextBlockToPlay();
+      if(idx === null){ return; }
+      if(!isBlockUnlocked(idx)) return;
+      buildDeck(idx);
+      renderScoreboard();
+      renderCard();
+    });
+  }
 
   // 📚 Barre de progression globale sur tout le lexique (maîtrisés / à revoir / en cours / pas encore vus)
   (function renderLexiconProgressBar(){
@@ -8147,6 +8251,11 @@ function applyTheme(theme){
 }
 let currentTheme = loadTheme();
 applyTheme(currentTheme);
+document.getElementById('closeSummaryBtn').addEventListener('click', hideBlockSummaryOverlay);
+document.getElementById('summaryOverlay').addEventListener('click', (e) => {
+  if(e.target.id === 'summaryOverlay'){ hideBlockSummaryOverlay(); }
+});
+
 document.getElementById('themeToggle').addEventListener('click', () => {
   currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
   applyTheme(currentTheme);
@@ -8667,6 +8776,7 @@ function handleQcmAnswer(selectedIndices){
     cardEl.classList.remove('shake'); void cardEl.offsetWidth; cardEl.classList.add('shake');
     reactMascot('ko'); playWrongSound();
   }
+  bumpCombo(isCorrect);
   st.history.push({ text: q.text, isCorrect });
 
   const revealWrap = document.getElementById('revealWrap');
