@@ -5675,6 +5675,7 @@ function renderBlockSelect(){
       const idx = findNextBlockToPlay();
       if(idx === null){ return; }
       if(!isBlockUnlocked(idx)) return;
+      gameMode = 'classic'; // départ toujours prévisible : direct dans le quiz, jamais un autre écran
       buildDeck(idx);
       renderScoreboard();
       renderCard();
