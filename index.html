@@ -5521,6 +5521,15 @@ function findNextBlockToPlay(){
   return BLOCKS.length ? BLOCKS.length - 1 : null;
 }
 
+/* 📍 Mémorise la position de défilement de l'accueil, pour y revenir exactement là où on était
+   (au lieu de toujours remonter en haut) quel que soit le bouton utilisé pour y retourner.
+   On ne suit le défilement QUE si on est vraiment sur la grille d'accueil (repéré via un élément
+   qui n'existe que sur cet écran) — pas sur le récap, l'aperçu des mots, la Radio, etc. */
+let homeScrollY = 0;
+window.addEventListener('scroll', () => {
+  if(document.getElementById('lexiconProgressBar')){ homeScrollY = window.scrollY; }
+}, { passive: true });
+
 function renderBlockSelect(){
   clearQuestionTimer();
   if(typeof stopRecognition === 'function'){ stopRecognition(); }
@@ -5930,6 +5939,9 @@ function renderBlockSelect(){
       renderCustomBlockManage(btn.dataset.manageCustom);
     });
   });
+
+  // Restaure la position de défilement où on était, au lieu de toujours remonter en haut.
+  requestAnimationFrame(() => { window.scrollTo(0, homeScrollY); });
 }
 
 function focusReveal(revealWrap){
