@@ -1053,15 +1053,21 @@
   .bmodes{ display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-top:8px; }
   .bmode{
     display:inline-flex;align-items:center;gap:2px;font-size:11px;font-weight:800;color:var(--text-dim);
-    background:#F1F5F9;padding:2px 6px;border-radius:7px;
+    background:var(--surface-sunken);border:1px solid var(--border);padding:2px 6px;border-radius:7px;
   }
   .bmode b{ color:var(--text);font-weight:800; }
-  .bmode.ok{ background:#D1FAE5;color:var(--green-dark); }
+  .bmode.ok{ background:rgba(34,197,94,0.14);border-color:rgba(34,197,94,0.35);color:var(--green-dark); }
   .bmode.ok b{ color:var(--green-dark); }
   .block-pass{ font-size:11.5px;font-weight:800;margin-top:4px; }
   .block-pass.ok{ color:var(--green-dark); }
   .block-pass.todo{ color:#B45309; }
-  .block-locked{ background:#F8FAFC !important; }
+  .block-locked{
+    background:var(--surface-sunken) !important;
+    border:1px dashed var(--border-strong) !important;
+    box-shadow:none !important;
+  }
+  .block-locked:hover{ background:var(--surface-sunken) !important;transform:none !important; }
+  .block-cat-tag-locked{ background:var(--surface) !important;color:var(--text-faint) !important; }
 
   .pass-banner{ margin:16px auto 4px;max-width:460px;padding:12px 16px;border-radius:14px;font-weight:800;font-size:14px; }
   .pass-banner.ok{ background:#D1FAE5;color:var(--green-dark); }
@@ -5825,12 +5831,16 @@ function renderBlockSelect(){
     const dominantCat = catSummary.length ? catSummary[0][0] : '';
     const catTooltip = catSummary.map(([c,n]) => `${c} (${n})`).join(' · ');
     if(!unlocked){
-      return `<button class="opt block-locked" disabled title="${escapeHtml(catTooltip)}" style="text-align:center;opacity:.55;cursor:not-allowed;">
-        <div style="font-family:'Inter',sans-serif;font-weight:700;font-size:18px;">🔒 Bloc ${i+1}</div>
-        <div style="font-size:11.5px;color:var(--text-dim);margin-top:4px;">Validez le bloc ${i} (≥${PASS_THRESHOLD}%)</div>
-      </button>`;
+      return `<div class="tile-wrap">
+        <button class="opt block-locked" disabled title="${escapeHtml(catTooltip)}" style="text-align:center;cursor:not-allowed;">
+          <div style="font-family:'Inter',sans-serif;font-weight:700;font-size:18px;">🔒 Bloc ${i+1}</div>
+          <div style="font-size:11.5px;color:var(--text-faint);margin-top:4px;">Validez le bloc ${i} (≥${PASS_THRESHOLD}%)</div>
+          <div class="block-cat-tag block-cat-tag-locked">${escapeHtml(dominantCat)}${catSummary.length>1?` +${catSummary.length-1}`:''}</div>
+        </button>
+        <button class="tile-peek" data-peek-block="${i}" title="Voir les mots (même verrouillé)">👁</button>
+      </div>`;
     }
-    const topStyle = passed ? 'background:#D1FAE5;box-shadow:0 4px 0 #6EE7B7;' : '';
+    const topStyle = passed ? 'background:rgba(34,197,94,0.12);border-color:rgba(34,197,94,0.35);' : '';
     const statusLine = blockHasResult(i)
       ? (passed ? `<div class="block-pass ok">✅ Validé · ${bestPct}%</div>` : `<div class="block-pass todo">${bestPct}% · vise ${PASS_THRESHOLD}%</div>`)
       : `<div style="font-size:11.5px;color:var(--text-dim);margin-top:4px;">${b.length} mots</div>`;
