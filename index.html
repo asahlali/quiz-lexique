@@ -13000,6 +13000,7 @@ function getTodaysReading(){
 /* ============ 📖 LEÇON DU JOUR — leçon interactive (dialogue + notes + vocabulaire + exercice) ============ */
 let lessonTranslitOn = true;
 let lessonOpenNotes = new Set();
+let lessonCurrentId = 1;
 
 const DAILY_LESSON_1 = {
   num: 1,
@@ -13032,20 +13033,23 @@ const DAILY_LESSON_1 = {
     6: "⑥ Les verbes comme « donner » ou « prêter » prennent deux compléments d'objet direct. Si ce sont des pronoms, le premier (le destinataire) se colle au verbe, et le second (la chose donnée) se place après la particule إِيَّا.",
     7: "⑦ Le futur antérieur en arabe se forme avec تَكُونُ + قَدْ + le verbe à l'accompli — littéralement « elle sera + déjà + a dit vrai » = « elle aura dit vrai ».",
   },
-  zodiac: [
-    { ar:'بُرْجُ الْحَمَلِ', tr:'bourjou al-ḥamali', fr:'Bélier' },
-    { ar:'الثَّوْرُ', tr:'ath-thawri', fr:'Taureau' },
-    { ar:'الْجَوْزَاءُ', tr:'al-jawzâʾi', fr:'Gémeaux' },
-    { ar:'السَّرَطَانُ', tr:'as-saraṭâni', fr:'Cancer' },
-    { ar:'الْأَسَدُ', tr:'al-asadi', fr:'Lion' },
-    { ar:'الْعَذْرَاءُ', tr:'al-ʿadhrâʾi', fr:'Vierge (aussi السنبلة)' },
-    { ar:'الْمِيزَانُ', tr:'al-mîzâni', fr:'Balance' },
-    { ar:'الْعَقْرَبُ', tr:'al-ʿaqrabi', fr:'Scorpion' },
-    { ar:'الْقَوْسُ', tr:'al-qawsi', fr:'Sagittaire (aussi الرامي)' },
-    { ar:'الْجَدْيُ', tr:'al-jadyi', fr:'Capricorne' },
-    { ar:'الدَّلْوُ', tr:'ad-dalwi', fr:'Verseau' },
-    { ar:'الْحُوتُ', tr:'al-ḥoûti', fr:'Poissons' },
-  ],
+  vocabBox: {
+    title: 'les signes du zodiaque',
+    items: [
+      { ar:'بُرْجُ الْحَمَلِ', tr:'bourjou al-ḥamali', fr:'Bélier' },
+      { ar:'الثَّوْرُ', tr:'ath-thawri', fr:'Taureau' },
+      { ar:'الْجَوْزَاءُ', tr:'al-jawzâʾi', fr:'Gémeaux' },
+      { ar:'السَّرَطَانُ', tr:'as-saraṭâni', fr:'Cancer' },
+      { ar:'الْأَسَدُ', tr:'al-asadi', fr:'Lion' },
+      { ar:'الْعَذْرَاءُ', tr:'al-ʿadhrâʾi', fr:'Vierge (aussi السنبلة)' },
+      { ar:'الْمِيزَانُ', tr:'al-mîzâni', fr:'Balance' },
+      { ar:'الْعَقْرَبُ', tr:'al-ʿaqrabi', fr:'Scorpion' },
+      { ar:'الْقَوْسُ', tr:'al-qawsi', fr:'Sagittaire (aussi الرامي)' },
+      { ar:'الْجَدْيُ', tr:'al-jadyi', fr:'Capricorne' },
+      { ar:'الدَّلْوُ', tr:'ad-dalwi', fr:'Verseau' },
+      { ar:'الْحُوتُ', tr:'al-ḥoûti', fr:'Poissons' },
+    ],
+  },
   exercise1: [
     { ar:'إِنَّهَا كَارِثَةٌ! اَلْيَوْمُ لَيْسَ يَوْمَ حَظٍّ بِالنِّسْبَةِ لَنَا!', tr:"Innahâ kârithatoun ! Al-yaouma laysa yaouma ḥazzin bi-an-nisbati lanâ !", fr:"Quelle catastrophe ! Aujourd'hui, ce n'est pas notre (le) jour de chance !" },
     { ar:'قَالَ الْمُحَصِّلُ إِنَّكُمْ أَخْطَأْتُمْ فِي تَحْرِيرِ بَيَانِ دُخُولِكُمْ.', tr:"Qâla al-mouḥaṣṣilou innakoum akhṭaʾtoum fî taḥrîri bayâni doukhoûlikoum.", fr:"Le percepteur a dit que vous vous êtes trompés dans votre déclaration de revenus." },
@@ -13072,6 +13076,70 @@ const DAILY_LESSON_1 = {
   ],
 };
 
+const DAILY_LESSON_2 = {
+  num: 2,
+  titleFr: "On a coupé l'eau !",
+  titleAr: 'قَطَعُوا الْمَاءَ !',
+  introFr: "Un enfant vient chercher son père, sous la douche, pour un plombier venu en urgence... et la raison de sa visite ne va pas plaire au papa savonné de la tête aux pieds !",
+  dialogue: [
+    { ar:'يَا بَابَا! هُنَاكَ سَيِّدٌ يُرِيدُ أَنْ يُكَلِّمَكَ!', tr:"Yà bàbà ! Hounàka sayyidoun youridou an youkallimaka !", fr:"Papa ! Il y a un monsieur [qui] veut te parler (que il-te-parle) !" },
+    { ar:'مَنْ هُوَ؟', tr:"Man houwa ?", fr:"Qui est-ce ?" },
+    { ar:'لَا أَدْرِي... قَالَ إِنَّهُ جَاءَ لِأَمْرٍ طَارِئٍ.', tr:"Là adrî... qàla innahou jà'a li-amrin tàri'in.", fr:"Je ne sais pas... il (a) dit qu'il est venu pour une affaire urgente." },
+    { ar:'أَنَا تَحْتَ الدُّشِّ... أُطْلُبْ مِنْهُ أَنْ يَعُودَ بَعْدَ نِصْفِ سَاعَةٍ!', tr:"Anà tahta ad-douchch... outloub minhou an ya'oùda ba'da nisfi sà'atin !", fr:"Je suis sous la douche... demande-lui de revenir dans (qu'il revienne après) une demi-heure !", note:1 },
+    { ar:'وَلَكِنْ، قَالَ إِنَّهُ لَا بُدَّ أَنْ يَرَاكَ فَوْرًا.', tr:"Wa lakin, qàla innahou là boudda an yaràka faouran.", fr:"Mais il a dit qu'il fallait (pas d'échappatoire que) qu'il te voie tout de suite." },
+    { ar:'مُسْتَحِيلٌ! أَلَا تَسْمَعُ الْمَاءَ يَسِيلُ؟', tr:"Moustahîloun ! Alà tasma'ou al-mà'a yasîlou ?", fr:"C'est impossible (impossible) ! (Est-ce que ne-pas) Tu n'entends pas l'eau [qui] coule ?" },
+    { ar:'لَا، لَمْ يَعُدْ سَائِلًا... إِنْقَطَعَ الْمَاءُ!', tr:"Là, lam ya'oud sà'ilan... inqata'a al-mà'ou !", fr:"Non, elle ne coule plus (il n'est pas revenu coulant)... l'eau a été coupée (s'est coupée) !", note:2 },
+    { ar:'آه! صَحِيحٌ!... مَا الْحَدَثُ؟ أَنَا مَدْفُونٌ تَحْتَ الصَّابُونِ!', tr:"Àh ! Sahîhoun !... Mà al-hadathou ? Anà madfoûnoun tahta as-sàbouni !", fr:"Mais oui (ah), [c'est] vrai ! Qu'est-ce qui se passe (quel [est] l'événement) ? Je suis tout plein de (enseveli sous le) savon !" },
+    { ar:'أُنْظُرْ فِي عَدَّادِ الْمَاءِ، بِالْقُرْبِ مِنْ بَابِ الْحَدِيقَةِ!', tr:"Ounzour fi 'addàdi al-mà'i, bil-qourbi min bàbi al-hadiqati !", fr:"[Va] voir (regarde = examine) le compteur d'eau, près de la porte du jardin.", note:3 },
+    { ar:'يَعُودُ الطِّفْلُ...', tr:"Ya'oùdou at-tiflou...", fr:"L'enfant revient..." },
+    { ar:'قَالَ السَّيِّدُ إِنَّهُ الرَّصَّاصُ... يُرِيدُ أَنْ يُعْلِمَكَ', tr:"Qàla as-sayyidou innahou ar-rassàsou... youridou an you'limaka", fr:"Le monsieur a dit qu'il était (certes-lui) le plombier… qu'il voulait te prévenir (il veut qu'il t'informe)" },
+    { ar:'بِأَنَّهُ سَيُضْطَرُّ إِلَى قَطْعِ الْمَاءِ عَنْكَ،', tr:"bi-annahou sa-youdtarrou ilà qat'i al-mà'i 'anka", fr:"qu'il sera obligé de te couper l'eau (à la coupure de l'eau de toi),", note:4 },
+    { ar:'لِأَنَّ مَاءَ حَوْضِنَا يَتَدَفَّقُ عَلَى سَطْحِ بَيْتِ الْجَارِي.', tr:"li'anna mà'a haoudinà yatadaffaqou 'alà sathi bayti al-jàri.", fr:"parce que l'eau de notre bassin se déverse sur la terrasse (de la maison) du voisin." },
+    { ar:'يَعْتَذِرُ إِلَيْكَ فَإِنَّهُ لَمْ يَتَمَكَّنْ مِنْ إِخْبَارِكَ بِذَلِكَ مُسْبَقًا!', tr:"Ya'tadhirou ilayka fa'innahou lam yatamakkan min ikhbàrika bi-dhalika mousbaqan !", fr:"Il te prie de l'excuser (il s'excuse vers toi) parce qu'il (car certes-lui) n'a pas pu t'en prévenir (de l'information-de-toi de-cela) auparavant (à l'avance) !", note:5 },
+    { ar:'لِيَذْهَبْ إِلَى الْجَحِيمِ!', tr:"Li-yadhhab ilà al-jahîmi !", fr:"Qu'il aille au diable (en enfer) !" },
+    { ar:'وَكَيْفَ أَتَخَلَّصُ الْآنَ مِنَ الصَّابُونِ؟', tr:"Wa kayfa atakhallasou al-àna min-a as-sàbouni ?", fr:"Et comment je vais me débarrasser (je me débarrasse) de mon (du) savon maintenant ?" },
+  ],
+  notes: {
+    1: "① أُطْلُبْ مِنْهُ أَنْ يَعُودَ = demande-lui de revenir. Pour traduire « demander à… de… », retiens la construction talaba min... an + subjonctif.",
+    2: "② لَمْ يَعُدْ سَائِلًا « elle (il) ne coule plus » : littéralement « il ne revient pas coulant ». Une construction particulière à l'arabe : lam ya‘oud + participe actif = « ne… plus », le participe s'accordant avec le sujet. Sur ce modèle : lam ta‘oud Khadija kâtibatan « Khadija n'écrit plus », ou lam na‘oud dâhikîna « nous ne rions plus ».",
+    3: "③ Le mot عَدَّاد « compteur » est formé, à partir de ‘adda, ya‘ouddou « compter, énumérer », sur le modèle fa‘‘âl qui indique la profession (comme rassâs « plombier ») ou l'instrument technique — c'est le cas ici.",
+    4: "④ يُضْطَرُّ « il est obligé » est le passif de idtarra (VIIIe forme de darra, yadourrou « faire du mal, nuire ») ; le tâ' du préfixe s'emphatise au contact de la lettre emphatique ḍâd. Même phénomène pour i‘tadhara « s'excuser », autre verbe de VIIIe forme, mais sans changement d'orthographe.",
+    5: "⑤ L'injonctif se construit avec li- suivi de l'apocopé : li-yadhhab « qu'il aille ». Ne confonds pas avec li- + subjonctif, qui signifie « pour que, afin que ».",
+  },
+  vocabBox: {
+    title: "le paradis et l'enfer",
+    items: [
+      { ar:'الْجَنَّةُ', tr:"al-janna(t)", fr:'Le Jardin (Paradis)' },
+      { ar:'جَنَّاتُ عَدْنٍ', tr:"jannàt 'adn", fr:"Les Jardins d'Éden" },
+      { ar:'الْفِرْدَوْسُ', tr:'al-firdaous', fr:'Paradis (mot persan)' },
+      { ar:'الْجَحِيمُ', tr:'al-jahîm', fr:"L'Enfer" },
+      { ar:'جَهَنَّمُ', tr:'jahannamou', fr:'La Géhenne' },
+      { ar:'النَّارُ', tr:"an-nàr", fr:'Le Feu' },
+    ],
+    proverb: {
+      ar:'مَا كُلُّ مَائِعٍ مَاءٌ',
+      tr:"Mà koullou mà'i'in mà'oun.",
+      fr:"Tout ce qui est fluide n'est pas de l'eau — c'est-à-dire : tout ce qui brille n'est pas or.",
+    },
+  },
+  exercise1: [
+    { ar:'هُنَاكَ رَصَّاصٌ يُرِيدُ أَنْ يَرَاكَ. هَلْ هَذَا مُمْكِنٌ؟', tr:"Hounàka rassàsoun youridou an yaràka. Hal hadhà moumkinoun ?", fr:"Il y a un plombier qui veut te voir. Est-ce possible ?" },
+    { ar:'لَمْ يَعُدِ الصَّابُونُ مَوْجُودًا. أُطْلُبِيهِ مِنْ أُمِّكِ وَأَعْطِينِي إِيَّاهُ.', tr:"Lam ya'oud-i as-sàbounou maoujoùdan. Outloubîhi min oummiki wa a'tini iyyàhou.", fr:"Il n'y a plus de savon. Demandes-en (sujet f.) à ta mère et donne-le-moi." },
+    { ar:'قَدْ قُطِعَ الْمَاءُ وَلَمْ يَعُدِ الْمَاءُ مَوْجُودًا فِي حَوْضِنَا.', tr:"Qad qata'a al-mà'ou wa lam ya'oud-i al-mà'ou maoujoùdan fi haoudinà.", fr:"L'eau vient d'être coupée et il n'y a plus d'eau dans notre bassin." },
+    { ar:'مَا الْحَدَثُ؟ – لَا أَدْرِي... لَا أَفْهَمُ مَا يَحْدُثُ.', tr:"Mà al-hadathou ? – Là adrî... Là afhamou mà yahdouthou.", fr:"Que se passe-t-il ? – Je ne sais pas... Je ne comprends pas ce qui se passe." },
+    { ar:'أَعْتَذِرُ إِلَيْكَ فَإِنِّي لَمْ أَتَمَكَّنْ مِنْ إِخْبَارِكَ بِهَذَا الْحَدَثِ مُسْبَقًا.', tr:"A'tadhirou ilayka fa'innî lam atamakkan min ikhbàrika bi-hadhà al-hadathi mousbaqan.", fr:"Je te (f.) prie de m'excuser car je n'ai pas pu te prévenir (de l'information-toi) de cet événement (à l'avance)." },
+  ],
+  exercise2: [
+    { fr:"Comment vais-je me débarrasser (je me débarrasse) de ce plombier ?", ar:'كَيْفَ أَتَخَلَّصُ مِنْ ذَلِكَ الرَّصَّاصِ؟', tr:"Kayfa atakhallasou min dhàlika ar-rassàsi ?" },
+    { fr:"Je veux te faire savoir que je serai obligé de revenir demain.", ar:'أُرِيدُ أَنْ أُعْلِمَكَ بِأَنَّنِي سَأَضْطَرُّ إِلَى الْعَوْدَةِ غَدًا.', tr:"Ourîdou an ou'limaka bi-annanî sa-oudtarrou ilà al-'awdati ghadan." },
+    { fr:"La voisine est venue pour une affaire urgente dont je ne connais pas la raison.", ar:'جَاءَتِ الْجَارَةُ لِأَمْرٍ طَارِئٍ لَا أَعْرِفُ سَبَبَهُ.', tr:"Jà'at-i al-jàratou li-amrin tàri'in là a'rifou sababahou." },
+    { fr:"Qu'il aille en enfer ce plombier qui coupe l'eau (coupeur d'eau) !", ar:'لِيَذْهَبْ إِلَى الْجَحِيمِ ذَلِكَ الرَّصَّاصُ الْقَاطِعُ لِلْمَاءِ!', tr:"Li-yadhhab ilà al-jahîmi dhàlika ar-rassàsou al-qàti'ou lil-mà'i !" },
+    { fr:"Est-ce que tu (f.) ne vois pas que je suis couverte de (enfouie sous le) savon ?", ar:'أَلَا تَرَيْنَ أَنَّنِي مَدْفُونَةٌ تَحْتَ الصَّابُونِ؟', tr:"Alà tarayna annanî madfoûnatoun tahta as-sàbouni ?" },
+  ],
+};
+
+const ALL_LESSONS = { 1: DAILY_LESSON_1, 2: DAILY_LESSON_2 };
+
 function renderDailyLesson(){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
@@ -13080,7 +13148,7 @@ function renderDailyLesson(){
   document.getElementById('progressFill').style.width = '0%';
   document.getElementById('footerNote').textContent = '';
 
-  const lesson = DAILY_LESSON_1;
+  const lesson = ALL_LESSONS[lessonCurrentId];
   const card = document.getElementById('quizCard');
   card.innerHTML = `
     <div class="cat-tag">📖 Leçon du jour · Leçon ${lesson.num}</div>
@@ -13090,9 +13158,12 @@ function renderDailyLesson(){
     </div>
     <div class="question-line">${escapeHtml(lesson.introFr)}</div>
 
-    <div class="mode-row" style="margin:14px 0;">
+    <div class="mode-row" style="margin:14px 0 6px;">
+      ${Object.keys(ALL_LESSONS).map(id => `<button class="mode-chip ${parseInt(id,10)===lessonCurrentId?'active':''}" data-lesson-tab="${id}">📖 Leçon ${id}</button>`).join('')}
+    </div>
+    <div class="mode-row" style="margin:0 0 14px;">
       <button class="mode-chip ${lessonTranslitOn ? 'active' : ''}" id="toggleTranslitBtn">${lessonTranslitOn ? '🙈 Masquer la translittération' : '👁 Afficher la translittération'}</button>
-      <button class="mode-chip" id="listenAllLessonBtn">🔊 Écouter tout le dialogue</button>
+      <button class="mode-chip" id="listenAllLessonBtn">🔊 Écouter tout le dialogue (arabe)</button>
     </div>
 
     <div id="lessonDialogueList" style="display:flex;flex-direction:column;gap:10px;text-align:left;"></div>
@@ -13100,20 +13171,36 @@ function renderDailyLesson(){
     <div style="font-weight:800;color:var(--purple);margin:24px 0 8px;">📝 Notes de grammaire</div>
     <div id="lessonNotesList" style="display:flex;flex-direction:column;gap:8px;text-align:left;"></div>
 
-    <div style="font-weight:800;color:var(--purple);margin:24px 0 4px;">🔮 Vocabulaire — les signes du zodiaque</div>
-    <div class="question-line" style="text-align:left;margin:0 0 10px;">Touche un signe pour l'entendre.</div>
+    <div style="font-weight:800;color:var(--purple);margin:24px 0 4px;">🔮 Vocabulaire — ${escapeHtml(lesson.vocabBox.title)}</div>
+    <div class="question-line" style="text-align:left;margin:0 0 10px;">Touche un mot pour l'entendre (🇸🇦 arabe · 🇫🇷 français).</div>
     <div class="options" id="zodiacGrid" style="grid-template-columns:repeat(auto-fill,minmax(130px,1fr));"></div>
+    ${lesson.vocabBox.proverb ? `<div class="result-card" style="margin-top:12px;text-align:center;">
+      <div style="font-family:'Changa',sans-serif;direction:rtl;font-size:18px;color:var(--purple);font-weight:700;">${escapeHtml(lesson.vocabBox.proverb.ar)}</div>
+      <div style="font-size:12px;color:var(--text-dim);font-style:italic;margin-top:4px;">${escapeHtml(lesson.vocabBox.proverb.tr)}</div>
+      <div style="font-size:13px;color:var(--text);margin-top:6px;">💬 ${escapeHtml(lesson.vocabBox.proverb.fr)}</div>
+      <div style="display:flex;gap:8px;justify-content:center;margin-top:8px;">
+        <button class="speak-btn small" id="proverbSpeakArBtn" title="Écouter en arabe">🇸🇦 ${SPEAK_SVG_SMALL}</button>
+        <button class="speak-btn small" id="proverbSpeakFrBtn" title="Écouter en français">🇫🇷 ${SPEAK_SVG_SMALL}</button>
+      </div>
+    </div>` : ''}
 
     <div style="font-weight:800;color:var(--purple);margin:24px 0 8px;">✍️ Exercice 1 — Traduis en français</div>
     <div id="lessonExercise1List" style="display:flex;flex-direction:column;gap:10px;"></div>
 
-    <div style="font-weight:800;color:var(--purple);margin:24px 0 8px;">🎯 Exercice 2 — Défi bonus : à toi de traduire en arabe !</div>
-    <div class="question-line" style="text-align:left;margin:0 0 8px;">Essaie d'abord à l'oral ou sur une feuille, sans regarder les notes — un corrigé est disponible pour chaque phrase.</div>
-    <div id="lessonExercise2List" style="display:flex;flex-direction:column;gap:8px;text-align:left;"></div>
+    <div style="font-weight:800;color:var(--purple);margin:24px 0 8px;">🎯 Exercice 2 — Traduis en arabe</div>
+    <div class="question-line" style="text-align:left;margin:0 0 8px;">Essaie d'abord tout seul, puis vérifie avec le bouton.</div>
+    <div id="lessonExercise2List" style="display:flex;flex-direction:column;gap:10px;"></div>
 
     <button class="restart-btn" id="finishLessonBtn" style="margin-top:24px;">✓ J'ai terminé cette leçon</button>
   `;
   document.getElementById('backFromLessonBtn').addEventListener('click', renderBlockSelect);
+  document.querySelectorAll('[data-lesson-tab]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      lessonCurrentId = parseInt(btn.dataset.lessonTab, 10);
+      lessonOpenNotes = new Set();
+      renderDailyLesson();
+    });
+  });
 
   document.getElementById('toggleTranslitBtn').addEventListener('click', () => {
     lessonTranslitOn = !lessonTranslitOn;
@@ -13121,21 +13208,27 @@ function renderDailyLesson(){
   });
   document.getElementById('listenAllLessonBtn').addEventListener('click', () => playLessonDialogueSequentially(lesson, 0));
 
-  // Dialogue
+  // Dialogue — écoute arabe ET française pour chaque réplique
   const dlgList = document.getElementById('lessonDialogueList');
   dlgList.innerHTML = lesson.dialogue.map((line, i) => `
     <div class="result-card" data-line-idx="${i}">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
         <div style="font-family:'Changa',sans-serif;direction:rtl;font-size:19px;color:var(--ink);font-weight:700;line-height:1.7;flex:1;">${escapeHtml(line.ar)}</div>
-        <button class="speak-btn small" data-speak-line="${i}" title="Écouter">${SPEAK_SVG_SMALL}</button>
+        <button class="speak-btn small" data-speak-line-ar="${i}" title="Écouter en arabe">🇸🇦</button>
       </div>
       ${lessonTranslitOn ? `<div style="font-size:12.5px;color:var(--purple);font-style:italic;margin-top:6px;">${escapeHtml(line.tr)}</div>` : ''}
-      <div style="font-size:13.5px;color:var(--text-dim);margin-top:6px;">${escapeHtml(line.fr)}</div>
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-top:6px;">
+        <div style="font-size:13.5px;color:var(--text-dim);flex:1;">${escapeHtml(line.fr)}</div>
+        <button class="speak-btn small" data-speak-line-fr="${i}" title="Écouter en français">🇫🇷</button>
+      </div>
       ${line.note ? `<button class="mode-chip" data-jump-note="${line.note}" style="margin-top:8px;padding:4px 10px;font-size:11px;">📌 Note ${line.note}</button>` : ''}
     </div>
   `).join('');
-  dlgList.querySelectorAll('[data-speak-line]').forEach(btn => {
-    btn.addEventListener('click', (e) => { e.stopPropagation(); speak(lesson.dialogue[parseInt(btn.dataset.speakLine,10)].ar, 'ar-SA'); });
+  dlgList.querySelectorAll('[data-speak-line-ar]').forEach(btn => {
+    btn.addEventListener('click', (e) => { e.stopPropagation(); speak(lesson.dialogue[parseInt(btn.dataset.speakLineAr,10)].ar, 'ar-SA'); });
+  });
+  dlgList.querySelectorAll('[data-speak-line-fr]').forEach(btn => {
+    btn.addEventListener('click', (e) => { e.stopPropagation(); speak(lesson.dialogue[parseInt(btn.dataset.speakLineFr,10)].fr, 'fr-FR'); });
   });
   dlgList.querySelectorAll('[data-jump-note]').forEach(btn => {
     btn.addEventListener('click', (e) => {
@@ -13150,72 +13243,98 @@ function renderDailyLesson(){
 
   renderLessonNotesList(lesson);
 
-  // Zodiaque
+  // Vocabulaire — écoute arabe ET française
   const zGrid = document.getElementById('zodiacGrid');
-  zGrid.innerHTML = lesson.zodiac.map((z, i) => `
-    <button class="opt" data-zodiac-idx="${i}" style="text-align:center;">
+  zGrid.innerHTML = lesson.vocabBox.items.map((z, i) => `
+    <div class="opt" data-zodiac-idx="${i}" style="text-align:center;cursor:default;">
       <div style="font-family:'Changa',sans-serif;direction:rtl;font-size:16px;color:var(--purple);font-weight:700;">${escapeHtml(z.ar)}</div>
       <div style="font-size:11px;color:var(--text-dim);margin-top:4px;">${escapeHtml(z.fr)}</div>
-    </button>
+      <div style="display:flex;gap:6px;justify-content:center;margin-top:6px;">
+        <button class="speak-btn small" data-zodiac-speak-ar="${i}" title="Écouter en arabe">🇸🇦</button>
+        <button class="speak-btn small" data-zodiac-speak-fr="${i}" title="Écouter en français">🇫🇷</button>
+      </div>
+    </div>
   `).join('');
-  zGrid.querySelectorAll('[data-zodiac-idx]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const z = lesson.zodiac[parseInt(btn.dataset.zodiacIdx,10)];
-      speak(z.ar, 'ar-SA');
-      btn.classList.remove('radio-block-selected'); void btn.offsetWidth; btn.classList.add('radio-block-selected');
-      setTimeout(() => btn.classList.remove('radio-block-selected'), 900);
+  zGrid.querySelectorAll('[data-zodiac-speak-ar]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      speak(lesson.vocabBox.items[parseInt(btn.dataset.zodiacSpeakAr,10)].ar, 'ar-SA');
+      const parent = btn.closest('[data-zodiac-idx]');
+      parent.classList.remove('radio-block-selected'); void parent.offsetWidth; parent.classList.add('radio-block-selected');
+      setTimeout(() => parent.classList.remove('radio-block-selected'), 900);
     });
   });
+  zGrid.querySelectorAll('[data-zodiac-speak-fr]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      speak(lesson.vocabBox.items[parseInt(btn.dataset.zodiacSpeakFr,10)].fr, 'fr-FR');
+    });
+  });
+  const proverbArBtn = document.getElementById('proverbSpeakArBtn');
+  if(proverbArBtn){ proverbArBtn.addEventListener('click', () => speak(lesson.vocabBox.proverb.ar, 'ar-SA')); }
+  const proverbFrBtn = document.getElementById('proverbSpeakFrBtn');
+  if(proverbFrBtn){ proverbFrBtn.addEventListener('click', () => speak(lesson.vocabBox.proverb.fr, 'fr-FR')); }
 
-  // Exercice 1
+  // Exercice 1 (arabe → français) — écoute arabe directement, écoute française après révélation
   const ex1List = document.getElementById('lessonExercise1List');
   ex1List.innerHTML = lesson.exercise1.map((ex, i) => `
     <div class="result-card">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
         <div style="font-family:'Changa',sans-serif;direction:rtl;font-size:16px;color:var(--ink);font-weight:700;line-height:1.7;flex:1;">${escapeHtml(ex.ar)}</div>
-        <button class="speak-btn small" data-speak-ex1="${i}" title="Écouter">${SPEAK_SVG_SMALL}</button>
+        <button class="speak-btn small" data-speak-ex1-ar="${i}" title="Écouter en arabe">🇸🇦</button>
       </div>
       ${lessonTranslitOn ? `<div style="font-size:12px;color:var(--purple);font-style:italic;margin-top:6px;">${escapeHtml(ex.tr)}</div>` : ''}
       <button class="mode-chip" data-reveal-ex1="${i}" style="margin-top:8px;">👁 Voir la traduction</button>
       <div class="reveal" id="ex1Reveal${i}" style="margin-top:8px;padding-top:8px;"></div>
     </div>
   `).join('');
-  ex1List.querySelectorAll('[data-speak-ex1]').forEach(btn => {
-    btn.addEventListener('click', () => speak(lesson.exercise1[parseInt(btn.dataset.speakEx1,10)].ar, 'ar-SA'));
+  ex1List.querySelectorAll('[data-speak-ex1-ar]').forEach(btn => {
+    btn.addEventListener('click', () => speak(lesson.exercise1[parseInt(btn.dataset.speakEx1Ar,10)].ar, 'ar-SA'));
   });
   ex1List.querySelectorAll('[data-reveal-ex1]').forEach(btn => {
     btn.addEventListener('click', () => {
       const i = parseInt(btn.dataset.revealEx1,10);
       const rev = document.getElementById('ex1Reveal' + i);
       rev.classList.add('show');
-      rev.innerHTML = `<div class="def-text" style="font-weight:700;">${escapeHtml(lesson.exercise1[i].fr)}</div>`;
+      rev.innerHTML = `
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+          <div class="def-text" style="font-weight:700;flex:1;">${escapeHtml(lesson.exercise1[i].fr)}</div>
+          <button class="speak-btn small" data-speak-ex1revealfr="${i}" title="Écouter en français">🇫🇷</button>
+        </div>
+      `;
+      document.getElementById('ex1Reveal' + i).querySelector('[data-speak-ex1revealfr]').addEventListener('click', () => speak(lesson.exercise1[i].fr, 'fr-FR'));
       btn.style.display = 'none';
     });
   });
 
-  // Exercice 2 (bonus, avec corrigé arabe révélable — vérifié sur le manuel)
+  // Exercice 2 (français → arabe) — écoute française directement, écoute arabe après révélation
   const ex2List = document.getElementById('lessonExercise2List');
   ex2List.innerHTML = lesson.exercise2.map((ex, i) => `
-    <div class="result-card" style="padding:10px 16px;">
-      <div style="font-size:13.5px;color:var(--text);">${i+1}. ${escapeHtml(ex.fr)}</div>
-      <button class="mode-chip" data-reveal-ex2="${i}" style="margin-top:8px;">👁 Voir le corrigé</button>
+    <div class="result-card">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+        <div style="font-size:13.5px;color:var(--text);flex:1;">${i+1}. ${escapeHtml(ex.fr)}</div>
+        <button class="speak-btn small" data-speak-ex2-fr="${i}" title="Écouter en français">🇫🇷</button>
+      </div>
+      <button class="mode-chip" data-reveal-ex2="${i}" style="margin-top:8px;">👁 Voir la traduction en arabe</button>
       <div class="reveal" id="ex2Reveal${i}" style="margin-top:8px;padding-top:8px;"></div>
     </div>
   `).join('');
+  ex2List.querySelectorAll('[data-speak-ex2-fr]').forEach(btn => {
+    btn.addEventListener('click', () => speak(lesson.exercise2[parseInt(btn.dataset.speakEx2Fr,10)].fr, 'fr-FR'));
+  });
   ex2List.querySelectorAll('[data-reveal-ex2]').forEach(btn => {
     btn.addEventListener('click', () => {
-      const i = parseInt(btn.dataset.revealEx2, 10);
-      const ex = lesson.exercise2[i];
+      const i = parseInt(btn.dataset.revealEx2,10);
       const rev = document.getElementById('ex2Reveal' + i);
       rev.classList.add('show');
       rev.innerHTML = `
         <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
-          <div style="font-family:'Changa',sans-serif;direction:rtl;font-size:17px;color:var(--purple);font-weight:700;line-height:1.8;flex:1;">${escapeHtml(ex.ar)}</div>
-          <button class="speak-btn small" data-speak-ex2ans="${i}" title="Écouter">${SPEAK_SVG_SMALL}</button>
+          <div style="font-family:'Changa',sans-serif;direction:rtl;font-size:17px;color:var(--purple);font-weight:700;flex:1;">${escapeHtml(lesson.exercise2[i].ar)}</div>
+          <button class="speak-btn small" data-speak-ex2revealar="${i}" title="Écouter en arabe">🇸🇦</button>
         </div>
-        ${lessonTranslitOn ? `<div style="font-size:12px;color:var(--text-dim);font-style:italic;margin-top:6px;">${escapeHtml(ex.tr)}</div>` : ''}
+        ${lessonTranslitOn ? `<div style="font-size:12px;color:var(--text-dim);font-style:italic;margin-top:4px;">${escapeHtml(lesson.exercise2[i].tr)}</div>` : ''}
       `;
-      document.getElementById('ex2Reveal' + i).querySelector('[data-speak-ex2ans]').addEventListener('click', () => speak(ex.ar, 'ar-SA'));
+      document.getElementById('ex2Reveal' + i).querySelector('[data-speak-ex2revealar]').addEventListener('click', () => speak(lesson.exercise2[i].ar, 'ar-SA'));
       btn.style.display = 'none';
     });
   });
@@ -13244,7 +13363,7 @@ function renderLessonNotesList(lesson){
     el.addEventListener('click', () => {
       const k = parseInt(el.dataset.toggleNote,10);
       if(lessonOpenNotes.has(k)){ lessonOpenNotes.delete(k); } else { lessonOpenNotes.add(k); }
-      renderLessonNotesList(DAILY_LESSON_1);
+      renderLessonNotesList(ALL_LESSONS[lessonCurrentId]);
     });
   });
 }
