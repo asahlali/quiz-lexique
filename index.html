@@ -987,6 +987,16 @@
 
   /* ============ 🔥 OBJECTIF QUOTIDIEN ============ */
   .srs-card{ margin-bottom:16px; }
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:500;
+    align-items:center;justify-content:center;padding:20px;
+  }
+  .modal-box{
+    background:var(--surface);border-radius:16px;padding:20px 22px;
+    max-width:90vw;max-height:80vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.3);
+    animation:modalPop .2s ease;
+  }
+  @keyframes modalPop{ from{ transform:scale(0.9); opacity:0; } to{ transform:scale(1); opacity:1; } }
   .difficult-word{
     color:var(--purple);font-weight:700;cursor:pointer;border-bottom:2px dotted var(--purple);
     padding:0 1px;transition:background .15s;
@@ -10025,7 +10035,7 @@ function renderBlockSelect(){
   document.getElementById('grammarBtn').addEventListener('click', () => renderGrammarHome());
   document.getElementById('orthoBtn').addEventListener('click', () => renderOrthoHome());
   document.getElementById('dailyReadingBtn').addEventListener('click', () => renderDailyReading());
-  document.getElementById('dailyLessonBtn').addEventListener('click', () => renderDailyLesson());
+  document.getElementById('dailyLessonBtn').addEventListener('click', () => renderLessonList());
   const questsHead = document.getElementById('questsHead');
   const questsChevron = document.getElementById('questsChevron');
   if(questsChevron){ questsChevron.style.transform = questsCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)'; }
@@ -13002,30 +13012,56 @@ let lessonTranslitOn = true;
 let lessonOpenNotes = new Set();
 let lessonCurrentId = 1;
 
+/* 🎧 Lecture audio : si une URL mp3 est fournie (ex: hébergée sur GitHub), on la joue ; sinon,
+   on utilise la voix de synthèse (TTS) comme solution de repli automatique et transparente.
+   Pour ajouter tes mp3 : dépose-les dans un dépôt GitHub public, puis colle l'URL "raw"
+   (https://raw.githubusercontent.com/TonCompte/TonRepo/main/dossier/fichier.mp3) dans le champ
+   audioUrl correspondant, ligne par ligne ou pour la leçon entière (fullAudioUrl).*/
+let currentLessonAudio = null;
+function playLineAudio(text, lang, audioUrl, onEnd){
+  if(currentLessonAudio){ try{ currentLessonAudio.pause(); }catch(e){} currentLessonAudio = null; }
+  if(audioUrl){
+    try{
+      const audio = new Audio(audioUrl);
+      currentLessonAudio = audio;
+      audio.onended = () => { currentLessonAudio = null; if(onEnd) onEnd(); };
+      audio.onerror = () => { currentLessonAudio = null; speak(text, lang, onEnd); };
+      audio.play().catch(() => { currentLessonAudio = null; speak(text, lang, onEnd); });
+      return;
+    }catch(e){ /* repli TTS ci-dessous */ }
+  }
+  speak(text, lang, onEnd);
+}
+function stopLessonAudio(){
+  if(currentLessonAudio){ try{ currentLessonAudio.pause(); }catch(e){} currentLessonAudio = null; }
+  window.speechSynthesis.cancel();
+}
+
 const DAILY_LESSON_1 = {
   num: 1,
   titleFr: "L'horoscope",
   titleAr: 'كَلامُ النُّجُومِ',
+  fullAudioUrl: null,
   introFr: "Un employé vient d'apprendre, par son percepteur, qu'il s'est trompé dans sa déclaration de revenus… alors que son horoscope du matin promettait justement une rentrée d'argent !",
   dialogue: [
-    { ar:'إِسْمَعِي! أَلْيَوْمَ هُوَ يَوْمُ حَظٍّ بِالنِّسْبَةِ لِي...', tr:"Isma‘î ! Al-yaouma houwa yaoumou ḥazzin bi-an-nisbati lî...", fr:"Écoute ! Aujourd'hui, c'est mon (un) jour de chance (pour ce qui est de moi)…", note:1 },
-    { ar:'صَحِيحٌ! عَلَيْكَ التَّوَجُّهُ إِلَى الْمُحَصِّلِ', tr:"Ṣaḥîḥoun ! ‘alayka at-tawajjouhou ilà al-mouḥaṣṣili", fr:"[Ça c'est] vrai ! Tu dois aller chez (sur-toi-le-fait-de-se-diriger vers) le percepteur," },
-    { ar:'حَيْثُ إِنَّكَ أَخْطَأْتَ فِي تَحْرِيرِ بَيَانِ دُخُولِكَ.', tr:"ḥaythou innaka akhṭaʾta fî taḥrîri bayâni doukhoûlika.", fr:"(où certes-toi=) étant donné que tu t'es trompé dans (la rédaction de) ta déclaration de revenus." },
-    { ar:'مُسْتَحِيلٌ! إِنَّهَا كَارِثَةٌ!', tr:"Moustaḥîloun ! Innahâ kârithatoun !", fr:"Ce n'est pas possible (impossible) ! Ah, c'est la tuile (certes-elle une catastrophe) !" },
-    { ar:'وَذَلِكَ فِي الْوَقْتِ الَّذِي تَقُولُ فِيهِ النُّجُومُ', tr:"Wa dhâlika fî al-waqti alladhî taqoûlou fîhi an-noujoûmou", fr:"Et cela alors que (au moment lequel dit-dans-lui) mon horoscope (les étoiles) dit" },
-    { ar:'إِنِّي سَأَقْبِضُ مَبْلَغًا كَبِيرًا خِلَالَ هَذِهِ الْأَيَّامِ!', tr:"innî sa-aqbiḍou mablaghan kabîran khilâla hâdhihi al-ayyâmi !", fr:"que je vais toucher une grosse somme [d'argent] (pendant) ces jours-ci !" },
-    { ar:'لَا تُصَدِّقْهَا فَلَا شَكَّ أَنَّهُ لَنْ يَرُدَّ لَكَ جُزْءًا مِنْ قِيمَةِ الضَّرَائِبِ', tr:"Lâ touṣaddiqhâ fa-lâ chakka annahou lan yarouddà laka jouzʾan min qîmati aḍ-ḍarâʾibi", fr:"Ne (les) crois pas cela ! Il ne va certainement pas te rendre (pas de doute qu'il ne rendra pas à toi) une partie (de la valeur) des impôts", note:2 },
-    { ar:'الَّتِي دَفَعْتَهَا... هَذَا أَمْرٌ مُؤَكَّدٌ!', tr:"allatî dafaʿtahâ... hâdhâ amroun mouʾakkadoun !", fr:"que tu as versés… ça c'est sûr (cela une-chose assurée) !" },
-    { ar:'وَلِمَ لَا، يَا مَشْؤُومَةُ؟', tr:"Wa lima lâ, yâ machʾoûmatou !", fr:"Et pourquoi pas, oiseau de malheur (femme de mauvais augure) !" },
-    { ar:'دَعْنِي أُكَمِّلْ... إِنَّهُ قَالَ أَيْضًا', tr:"Daʿnî oukammil... innahou qâla aydan", fr:"Laisse-moi terminer (que je complète)… (certes-lui) il a dit aussi", note:4 },
-    { ar:'إِنَّكَ أَهْمَلْتَ الْإِعْلَانَ عَنِ السَّاعَاتِ الْإِضَافِيَّةِ الَّتِي نَفَّذْتَهَا.', tr:"innaka ahmalta al-iʿlâna ʿan-i as-sâʿâti al-iḍâfiyyati allatî naffadhtahâ.", fr:"que tu avais (as) oublié (négligé) de déclarer (la déclaration) des heures supplémentaires que tu avais (as) faites (effectuées)." },
-    { ar:'يَا وَيْلِي! كَيْفَ وَقَفَ عَلَى ذَلِكَ؟', tr:"Yâ waylî ! Kayfa waqafa ʿalâ dhâlika ?", fr:"Ah, quelle poisse (malheur-à-moi) ! Comment l'a-t-il su (il-s'est-arrêté sur cela) ?" },
-    { ar:'طَيِّبٌ! سَأَطْلُبُ مِنْ صَدِيقِي أَحْمَدَ أَنْ يَرُدَّ لِي الْأَلْفَ دِينَارٍ', tr:"Tayyiboun !... sa-aṭloubou min ṣadîqî Aḥmad an yarouddà lî al-alfa dînârin", fr:"Bon… je vais demander à mon ami Ahmed de me rendre (qu'il-rende-à-moi) les mille dinars" },
-    { ar:'الَّتِي سَبَقَ أَنْ سَلَّفْتُهُ إِيَّاهَا قَبْلَ شَهْرَيْنِ.', tr:"allatî sabaqa an sallaftouhou iyyâhâ qabla chahrayni.", fr:"que je lui ai prêtés (laquelle il-a-précédé que j'ai-prêté-lui iyyà-elle) il y a (avant) deux mois.", note:5 },
-    { ar:'وَهَكَذَا تَكُونُ النُّجُومُ قَدْ صَدَقَتْ!', tr:"Wa hakadhâ takoûnou an-noujoûmou qad ṣadaqat !", fr:"Et ainsi l'horoscope (les étoiles) aura dit vrai !", note:7 },
+    { ar:'إِسْمَعِي! أَلْيَوْمَ هُوَ يَوْمُ حَظٍّ بِالنِّسْبَةِ لِي...', tr:"Isma\u2018\u00ee ! Al-yaouma houwa yaoumou hazzin bi-an-nisbati l\u00ee...", fr:"Écoute ! Aujourd'hui, c'est mon (un) jour de chance (pour ce qui est de moi)…", note:1, audioUrl:null },
+    { ar:'صَحِيحٌ! عَلَيْكَ التَّوَجُّهُ إِلَى الْمُحَصِّلِ', tr:"Sah\u00eehoun ! 'alayka at-tawajjouhou il\u00e0 al-mouhassili", fr:"[Ça c'est] vrai ! Tu dois aller chez (sur-toi-le-fait-de-se-diriger vers) le percepteur,", audioUrl:null },
+    { ar:'حَيْثُ إِنَّكَ أَخْطَأْتَ فِي تَحْرِيرِ بَيَانِ دُخُولِكَ.', tr:"haythou innaka akhta'ta f\u00ee tahr\u00eeri bay\u00e2ni doukho\u00fblika.", fr:"(où certes-toi=) étant donné que tu t'es trompé dans (la rédaction de) ta déclaration de revenus.", audioUrl:null },
+    { ar:'مُسْتَحِيلٌ! إِنَّهَا كَارِثَةٌ!', tr:"Moustah\u00eeloun ! Innah\u00e2 k\u00e2rithatoun !", fr:"Ce n'est pas possible (impossible) ! Ah, c'est la tuile (certes-elle une catastrophe) !", audioUrl:null },
+    { ar:'وَذَلِكَ فِي الْوَقْتِ الَّذِي تَقُولُ فِيهِ النُّجُومُ', tr:"Wa dh\u00e2lika f\u00ee al-waqti alladh\u00ee taqo\u00fblou f\u00eehi an-noujo\u00fbmou", fr:"Et cela alors que (au moment lequel dit-dans-lui) mon horoscope (les étoiles) dit", audioUrl:null },
+    { ar:'إِنِّي سَأَقْبِضُ مَبْلَغًا كَبِيرًا خِلَالَ هَذِهِ الْأَيَّامِ!', tr:"inn\u00ee sa-aqbidou mablaghan kab\u00eeran khil\u00e2la h\u00e2dhihi al-ayy\u00e2mi !", fr:"que je vais toucher une grosse somme [d'argent] (pendant) ces jours-ci !", audioUrl:null },
+    { ar:'لَا تُصَدِّقْهَا فَلَا شَكَّ أَنَّهُ لَنْ يَرُدَّ لَكَ جُزْءًا مِنْ قِيمَةِ الضَّرَائِبِ', tr:"L\u00e2 tousaddiqh\u00e2 fa-l\u00e2 chakka annahou lan yarodd\u00e0 laka jouz'an min q\u00eemati ad-dar\u00e2'ibi", fr:"Ne (les) crois pas cela ! Il ne va certainement pas te rendre (pas de doute qu'il ne rendra pas à toi) une partie (de la valeur) des impôts", note:2, audioUrl:null },
+    { ar:'الَّتِي دَفَعْتَهَا... هَذَا أَمْرٌ مُؤَكَّدٌ!', tr:"allat\u00ee dafa'tah\u00e2... h\u00e2dh\u00e2 amroun mou'akkadoun !", fr:"que tu as versés… ça c'est sûr (cela une-chose assurée) !", audioUrl:null },
+    { ar:'وَلِمَ لَا، يَا مَشْؤُومَةُ؟', tr:"Wa lima l\u00e2, y\u00e2 mach'o\u00fbmatou !", fr:"Et pourquoi pas, oiseau de malheur (femme de mauvais augure) !", audioUrl:null },
+    { ar:'دَعْنِي أُكَمِّلْ... إِنَّهُ قَالَ أَيْضًا', tr:"Da'n\u00ee oukammil... innahou q\u00e2la aydan", fr:"Laisse-moi terminer (que je complète)… (certes-lui) il a dit aussi", note:4, audioUrl:null },
+    { ar:'إِنَّكَ أَهْمَلْتَ الْإِعْلَانَ عَنِ السَّاعَاتِ الْإِضَافِيَّةِ الَّتِي نَفَّذْتَهَا.', tr:"innaka ahmalta al-i'l\u00e2na 'an-i as-s\u00e2'\u00e2ti al-id\u00e2fiyyati allat\u00ee naffadhtah\u00e2.", fr:"que tu avais (as) oublié (négligé) de déclarer (la déclaration) des heures supplémentaires que tu avais (as) faites (effectuées).", audioUrl:null },
+    { ar:'يَا وَيْلِي! كَيْفَ وَقَفَ عَلَى ذَلِكَ؟', tr:"Y\u00e2 wayl\u00ee ! Kayfa waqafa 'al\u00e2 dh\u00e2lika ?", fr:"Ah, quelle poisse (malheur-à-moi) ! Comment l'a-t-il su (il-s'est-arrêté sur cela) ?", audioUrl:null },
+    { ar:'طَيِّبٌ! سَأَطْلُبُ مِنْ صَدِيقِي أَحْمَدَ أَنْ يَرُدَّ لِي الْأَلْفَ دِينَارٍ', tr:"Tayyiboun !... sa-atloubou min sad\u00eeq\u00ee Ahmad an yarodd\u00e0 l\u00ee al-alfa d\u00een\u00e2rin", fr:"Bon… je vais demander à mon ami Ahmed de me rendre (qu'il-rende-à-moi) les mille dinars", audioUrl:null },
+    { ar:'الَّتِي سَبَقَ أَنْ سَلَّفْتُهُ إِيَّاهَا قَبْلَ شَهْرَيْنِ.', tr:"allat\u00ee sabaqa an sallaftouhou iyy\u00e2h\u00e2 qabla chahrayni.", fr:"que je lui ai prêtés (laquelle il-a-précédé que j'ai-prêté-lui iyyà-elle) il y a (avant) deux mois.", note:5, audioUrl:null },
+    { ar:'وَهَكَذَا تَكُونُ النُّجُومُ قَدْ صَدَقَتْ!', tr:"Wa hakadh\u00e2 tako\u00fbnou an-noujo\u00fbmou qad sadaqat !", fr:"Et ainsi l'horoscope (les étoiles) aura dit vrai !", note:7, audioUrl:null },
   ],
   notes: {
-    1: "① L'impératif féminin : اِسْمَعِي (« écoute », adressé à une femme). Les 3 schémas de l'impératif simple sont if‘al, if‘il, ouf‘oul ; au féminin, on ajoute toujours un -î final.",
+    1: "① L'impératif féminin : اِسْمَعِي (« écoute », adressé à une femme). Les 3 schémas de l'impératif simple sont if'al, if'il, ouf'oul ; au féminin, on ajoute toujours un -î final.",
     2: "② Attention à ne pas confondre deux verbes proches : صَدَّقَ / يُصَدِّقُ (croire, tenir pour vrai) et صَدَقَ / يَصْدُقُ (dire vrai — comme à la fin du dialogue). Ici, à l'impératif négatif, on emploie لا + le verbe à l'apocopé.",
     3: "③ لَنْ + inaccompli apocopé = le futur négatif (« il ne fera pas »). On ne fait jamais précéder لَنْ de سَوْفَ, contrairement à un usage parfois rencontré dans la presse.",
     4: "④ دَعْنِي أُكَمِّلْ = « laisse-moi terminer », littéralement « laisse-moi que je complète » : un impératif suivi d'un verbe à l'apocopé. Même construction dans دَعْنَا نَخْرُجْ (« laisse-nous sortir »).",
@@ -13036,43 +13072,43 @@ const DAILY_LESSON_1 = {
   vocabBox: {
     title: 'les signes du zodiaque',
     items: [
-      { ar:'بُرْجُ الْحَمَلِ', tr:'bourjou al-ḥamali', fr:'Bélier' },
+      { ar:'بُرْجُ الْحَمَلِ', tr:'bourjou al-hamali', fr:'Bélier' },
       { ar:'الثَّوْرُ', tr:'ath-thawri', fr:'Taureau' },
-      { ar:'الْجَوْزَاءُ', tr:'al-jawzâʾi', fr:'Gémeaux' },
-      { ar:'السَّرَطَانُ', tr:'as-saraṭâni', fr:'Cancer' },
+      { ar:'الْجَوْزَاءُ', tr:"al-jawz\u00e2'i", fr:'Gémeaux' },
+      { ar:'السَّرَطَانُ', tr:'as-sarat\u00e2ni', fr:'Cancer' },
       { ar:'الْأَسَدُ', tr:'al-asadi', fr:'Lion' },
-      { ar:'الْعَذْرَاءُ', tr:'al-ʿadhrâʾi', fr:'Vierge (aussi السنبلة)' },
-      { ar:'الْمِيزَانُ', tr:'al-mîzâni', fr:'Balance' },
-      { ar:'الْعَقْرَبُ', tr:'al-ʿaqrabi', fr:'Scorpion' },
+      { ar:'الْعَذْرَاءُ', tr:"al-'adhr\u00e2'i", fr:'Vierge (aussi السنبلة)' },
+      { ar:'الْمِيزَانُ', tr:'al-m\u00eez\u00e2ni', fr:'Balance' },
+      { ar:'الْعَقْرَبُ', tr:"al-'aqrabi", fr:'Scorpion' },
       { ar:'الْقَوْسُ', tr:'al-qawsi', fr:'Sagittaire (aussi الرامي)' },
       { ar:'الْجَدْيُ', tr:'al-jadyi', fr:'Capricorne' },
       { ar:'الدَّلْوُ', tr:'ad-dalwi', fr:'Verseau' },
-      { ar:'الْحُوتُ', tr:'al-ḥoûti', fr:'Poissons' },
+      { ar:'الْحُوتُ', tr:'al-ho\u00fbti', fr:'Poissons' },
     ],
   },
   exercise1: [
-    { ar:'إِنَّهَا كَارِثَةٌ! اَلْيَوْمُ لَيْسَ يَوْمَ حَظٍّ بِالنِّسْبَةِ لَنَا!', tr:"Innahâ kârithatoun ! Al-yaouma laysa yaouma ḥazzin bi-an-nisbati lanâ !", fr:"Quelle catastrophe ! Aujourd'hui, ce n'est pas notre (le) jour de chance !" },
-    { ar:'قَالَ الْمُحَصِّلُ إِنَّكُمْ أَخْطَأْتُمْ فِي تَحْرِيرِ بَيَانِ دُخُولِكُمْ.', tr:"Qâla al-mouḥaṣṣilou innakoum akhṭaʾtoum fî taḥrîri bayâni doukhoûlikoum.", fr:"Le percepteur a dit que vous vous êtes trompés dans votre déclaration de revenus." },
-    { ar:'سَبَقَ أَنْ قَبَضَ هَذَا الرَّجُلُ مَبْلَغًا كَبِيرًا. كَمْ هُوَ مَحْظُوظٌ!', tr:"Sabaqa an qabaḍa hâdhâ ar-rajoulou mablaghan kabîran. Kam houwa maḥẓoûzoun !", fr:"Cet homme a déjà touché une grosse somme [d'argent]. Quel (combien lui) chanceux !" },
-    { ar:'عِنْدَمَا تَكُونُ قَدْ وَقَفْتَ عَلَى مُسْتَقْبَلِكَ مِنْ خِلَالِ كَلَامِ النُّجُومِ فَأَخْبِرْنِي بِذَلِكَ!', tr:"ʿIndamà takoûnou qad waqafta ʿalà moustaqbalika min khilâli kalâmi an-noujoûmi fa-akhbirnî bi-dhâlika !", fr:"Quand tu auras découvert (connu) ton avenir dans (au moyen de) l'horoscope, informe-m'en (-moi-de-cela) !" },
-    { ar:'دَعْنَا نُنَفِّذُ هَذِهِ السَّاعَاتِ الْإِضَافِيَّةَ الَّتِي طَلَبَ مِنَّا مُدِيرُنَا أَنْ نُنَفِّذَهَا.', tr:"Daʿnà nounaffidhou hâdhihi as-sâʿâti al-iḍâfiyyati allatî ṭalaba minnà moudîrounà an nounaffidhahâ.", fr:"Laissons-nous faire (effectuer) ces heures supplémentaires que nous a demandé d'effectuer notre directeur." },
+    { ar:'إِنَّهَا كَارِثَةٌ! اَلْيَوْمُ لَيْسَ يَوْمَ حَظٍّ بِالنِّسْبَةِ لَنَا!', tr:"Innah\u00e2 k\u00e2rithatoun ! Al-yaouma laysa yaouma hazzin bi-an-nisbati lan\u00e2 !", fr:"Quelle catastrophe ! Aujourd'hui, ce n'est pas notre (le) jour de chance !" },
+    { ar:'قَالَ الْمُحَصِّلُ إِنَّكُمْ أَخْطَأْتُمْ فِي تَحْرِيرِ بَيَانِ دُخُولِكُمْ.', tr:"Q\u00e2la al-mouhassilou innakoum akhta'toum f\u00ee tahr\u00eeri bay\u00e2ni doukho\u00fblikoum.", fr:"Le percepteur a dit que vous vous êtes trompés dans votre déclaration de revenus." },
+    { ar:'سَبَقَ أَنْ قَبَضَ هَذَا الرَّجُلُ مَبْلَغًا كَبِيرًا. كَمْ هُوَ مَحْظُوظٌ!', tr:"Sabaqa an qabada h\u00e2dh\u00e2 ar-rajoulou mablaghan kab\u00eeran. Kam houwa mahzo\u00bbzoun !", fr:"Cet homme a déjà touché une grosse somme [d'argent]. Quel (combien lui) chanceux !" },
+    { ar:'عِنْدَمَا تَكُونُ قَدْ وَقَفْتَ عَلَى مُسْتَقْبَلِكَ مِنْ خِلَالِ كَلَامِ النُّجُومِ فَأَخْبِرْنِي بِذَلِكَ!', tr:"'Indam\u00e0 tako\u00fbnou qad waqafta 'al\u00e0 moustaqbalika min khil\u00e2li kal\u00e2mi an-noujo\u00fbmi fa-akhbirn\u00ee bi-dh\u00e2lika !", fr:"Quand tu auras découvert (connu) ton avenir dans (au moyen de) l'horoscope, informe-m'en (-moi-de-cela) !" },
+    { ar:'دَعْنَا نُنَفِّذُ هَذِهِ السَّاعَاتِ الْإِضَافِيَّةَ الَّتِي طَلَبَ مِنَّا مُدِيرُنَا أَنْ نُنَفِّذَهَا.', tr:"Da'n\u00e0 nounaffidhou h\u00e2dhihi as-s\u00e2'\u00e2ti al-id\u00e2fiyyati allat\u00ee talaba minn\u00e0 moud\u00eerouna\u0300 an nounaffidhah\u00e2.", fr:"Laissons-nous faire (effectuer) ces heures supplémentaires que nous a demandé d'effectuer notre directeur." },
   ],
   exercise2: [
     { fr:"Je n'irai pas [voir] le percepteur, parce que je me suis trompé dans la rédaction de ma déclaration de revenus.",
       ar:'لَنْ أَتَوَجَّهَ إِلَى الْمُحَصِّلِ لِأَنَّنِي أَخْطَأْتُ فِي تَحْرِيرِ بَيَانِ دُخُولِي',
-      tr:"Lan atawajjaha ilà al-mouḥaṣṣili li-annanî akhṭaʾtou fî taḥrîri bayâni doukhoûlî." },
+      tr:"Lan atawajjaha il\u00e0 al-mouhassili li-annan\u00ee akhta'tou f\u00ee tahr\u00eeri bay\u00e2ni doukho\u00fbl\u00ee." },
     { fr:"Alors, il faut que je la refasse.",
       ar:'فَعَلَيَّ تَحْرِيرُهُ مَرَّةً أُخْرَى',
-      tr:"Fa-ʿalayya taḥrîrouhou marratan oukhrà." },
+      tr:"Fa-'alayya tahr\u00eerouhou marratan oukhr\u00e0." },
     { fr:"Cette somme [d'argent] est celle que je lui avais prêtée.",
       ar:'هَذَا الْمَبْلَغُ مَبْلَغٌ كُنْتُ قَدْ سَلَّفْتُهُ إِيَّاهُ',
-      tr:"Hâdhâ al-mablaghou mablaghoun kountou qad sallaftouhou iyyâhou." },
+      tr:"H\u00e2dh\u00e2 al-mablaghou mablaghoun kountou qad sallaftouhou iyy\u00e2hou." },
     { fr:"Je te demande de me rendre tout l'argent que je t'ai prêté.",
       ar:'أَطْلُبُ مِنْكَ أَنْ تَرُدَّ لِي كُلَّ النُّقُودِ الَّتِي سَلَّفْتُكَ إِيَّاهَا',
-      tr:"Aṭloubou minka an tarouddà lî koulla an-nouqoûdi allatî sallaftouka iyyâhâ." },
+      tr:"Atloubou minka an tarodd\u00e0 l\u00ee koulla an-nouqo\u00fbdi allat\u00ee sallaftouka iyy\u00e2h\u00e2." },
     { fr:"Il n'y a pas de doute que j'ai négligé de déclarer des heures supplémentaires.",
       ar:'لَا شَكَّ أَنَّنِي نَفَّذْتُ سَاعَاتٍ إِضَافِيَّةً أَهْمَلْتُ إِعْلَانَهَا',
-      tr:"Lâ chakka annanî naffadhtou sâʿâtin iḍâfiyyatan ahmaltou iʿlânahâ." },
+      tr:"L\u00e2 chakka annan\u00ee naffadhtou s\u00e2'\u00e2tin id\u00e2fiyyatan ahmaltou i'l\u00e2nah\u00e2." },
   ],
 };
 
@@ -13080,90 +13116,421 @@ const DAILY_LESSON_2 = {
   num: 2,
   titleFr: "On a coupé l'eau !",
   titleAr: 'قَطَعُوا الْمَاءَ !',
+  fullAudioUrl: null,
   introFr: "Un enfant vient chercher son père, sous la douche, pour un plombier venu en urgence... et la raison de sa visite ne va pas plaire au papa savonné de la tête aux pieds !",
   dialogue: [
-    { ar:'يَا بَابَا! هُنَاكَ سَيِّدٌ يُرِيدُ أَنْ يُكَلِّمَكَ!', tr:"Yà bàbà ! Hounàka sayyidoun youridou an youkallimaka !", fr:"Papa ! Il y a un monsieur [qui] veut te parler (que il-te-parle) !" },
-    { ar:'مَنْ هُوَ؟', tr:"Man houwa ?", fr:"Qui est-ce ?" },
-    { ar:'لَا أَدْرِي... قَالَ إِنَّهُ جَاءَ لِأَمْرٍ طَارِئٍ.', tr:"Là adrî... qàla innahou jà'a li-amrin tàri'in.", fr:"Je ne sais pas... il (a) dit qu'il est venu pour une affaire urgente." },
-    { ar:'أَنَا تَحْتَ الدُّشِّ... أُطْلُبْ مِنْهُ أَنْ يَعُودَ بَعْدَ نِصْفِ سَاعَةٍ!', tr:"Anà tahta ad-douchch... outloub minhou an ya'oùda ba'da nisfi sà'atin !", fr:"Je suis sous la douche... demande-lui de revenir dans (qu'il revienne après) une demi-heure !", note:1 },
-    { ar:'وَلَكِنْ، قَالَ إِنَّهُ لَا بُدَّ أَنْ يَرَاكَ فَوْرًا.', tr:"Wa lakin, qàla innahou là boudda an yaràka faouran.", fr:"Mais il a dit qu'il fallait (pas d'échappatoire que) qu'il te voie tout de suite." },
-    { ar:'مُسْتَحِيلٌ! أَلَا تَسْمَعُ الْمَاءَ يَسِيلُ؟', tr:"Moustahîloun ! Alà tasma'ou al-mà'a yasîlou ?", fr:"C'est impossible (impossible) ! (Est-ce que ne-pas) Tu n'entends pas l'eau [qui] coule ?" },
-    { ar:'لَا، لَمْ يَعُدْ سَائِلًا... إِنْقَطَعَ الْمَاءُ!', tr:"Là, lam ya'oud sà'ilan... inqata'a al-mà'ou !", fr:"Non, elle ne coule plus (il n'est pas revenu coulant)... l'eau a été coupée (s'est coupée) !", note:2 },
-    { ar:'آه! صَحِيحٌ!... مَا الْحَدَثُ؟ أَنَا مَدْفُونٌ تَحْتَ الصَّابُونِ!', tr:"Àh ! Sahîhoun !... Mà al-hadathou ? Anà madfoûnoun tahta as-sàbouni !", fr:"Mais oui (ah), [c'est] vrai ! Qu'est-ce qui se passe (quel [est] l'événement) ? Je suis tout plein de (enseveli sous le) savon !" },
-    { ar:'أُنْظُرْ فِي عَدَّادِ الْمَاءِ، بِالْقُرْبِ مِنْ بَابِ الْحَدِيقَةِ!', tr:"Ounzour fi 'addàdi al-mà'i, bil-qourbi min bàbi al-hadiqati !", fr:"[Va] voir (regarde = examine) le compteur d'eau, près de la porte du jardin.", note:3 },
-    { ar:'يَعُودُ الطِّفْلُ...', tr:"Ya'oùdou at-tiflou...", fr:"L'enfant revient..." },
-    { ar:'قَالَ السَّيِّدُ إِنَّهُ الرَّصَّاصُ... يُرِيدُ أَنْ يُعْلِمَكَ', tr:"Qàla as-sayyidou innahou ar-rassàsou... youridou an you'limaka", fr:"Le monsieur a dit qu'il était (certes-lui) le plombier… qu'il voulait te prévenir (il veut qu'il t'informe)" },
-    { ar:'بِأَنَّهُ سَيُضْطَرُّ إِلَى قَطْعِ الْمَاءِ عَنْكَ،', tr:"bi-annahou sa-youdtarrou ilà qat'i al-mà'i 'anka", fr:"qu'il sera obligé de te couper l'eau (à la coupure de l'eau de toi),", note:4 },
-    { ar:'لِأَنَّ مَاءَ حَوْضِنَا يَتَدَفَّقُ عَلَى سَطْحِ بَيْتِ الْجَارِي.', tr:"li'anna mà'a haoudinà yatadaffaqou 'alà sathi bayti al-jàri.", fr:"parce que l'eau de notre bassin se déverse sur la terrasse (de la maison) du voisin." },
-    { ar:'يَعْتَذِرُ إِلَيْكَ فَإِنَّهُ لَمْ يَتَمَكَّنْ مِنْ إِخْبَارِكَ بِذَلِكَ مُسْبَقًا!', tr:"Ya'tadhirou ilayka fa'innahou lam yatamakkan min ikhbàrika bi-dhalika mousbaqan !", fr:"Il te prie de l'excuser (il s'excuse vers toi) parce qu'il (car certes-lui) n'a pas pu t'en prévenir (de l'information-de-toi de-cela) auparavant (à l'avance) !", note:5 },
-    { ar:'لِيَذْهَبْ إِلَى الْجَحِيمِ!', tr:"Li-yadhhab ilà al-jahîmi !", fr:"Qu'il aille au diable (en enfer) !" },
-    { ar:'وَكَيْفَ أَتَخَلَّصُ الْآنَ مِنَ الصَّابُونِ؟', tr:"Wa kayfa atakhallasou al-àna min-a as-sàbouni ?", fr:"Et comment je vais me débarrasser (je me débarrasse) de mon (du) savon maintenant ?" },
+    { ar:'يَا بَابَا! هُنَاكَ سَيِّدٌ يُرِيدُ أَنْ يُكَلِّمَكَ!', tr:"Y\u00e0 b\u00e0b\u00e0 ! Houn\u00e0ka sayyidoun youridou an youkallimaka !", fr:"Papa ! Il y a un monsieur [qui] veut te parler (que il-te-parle) !", audioUrl:null },
+    { ar:'مَنْ هُوَ؟', tr:"Man houwa ?", fr:"Qui est-ce ?", audioUrl:null },
+    { ar:'لَا أَدْرِي... قَالَ إِنَّهُ جَاءَ لِأَمْرٍ طَارِئٍ.', tr:"L\u00e0 adr\u00ee... q\u00e0la innahou j\u00e0'a li-amrin t\u00e0ri'in.", fr:"Je ne sais pas... il (a) dit qu'il est venu pour une affaire urgente.", audioUrl:null },
+    { ar:'أَنَا تَحْتَ الدُّشِّ... أُطْلُبْ مِنْهُ أَنْ يَعُودَ بَعْدَ نِصْفِ سَاعَةٍ!', tr:"An\u00e0 tahta ad-douchch... outloub minhou an ya'o\u00f9da ba'da nisfi s\u00e0'atin !", fr:"Je suis sous la douche... demande-lui de revenir dans (qu'il revienne après) une demi-heure !", note:1, audioUrl:null },
+    { ar:'وَلَكِنْ، قَالَ إِنَّهُ لَا بُدَّ أَنْ يَرَاكَ فَوْرًا.', tr:"Wa lakin, q\u00e0la innahou l\u00e0 boudda an yar\u00e0ka faouran.", fr:"Mais il a dit qu'il fallait (pas d'échappatoire que) qu'il te voie tout de suite.", audioUrl:null },
+    { ar:'مُسْتَحِيلٌ! أَلَا تَسْمَعُ الْمَاءَ يَسِيلُ؟', tr:"Moustah\u00eeloun ! Al\u00e0 tasma'ou al-m\u00e0'a yas\u00eelou ?", fr:"C'est impossible (impossible) ! (Est-ce que ne-pas) Tu n'entends pas l'eau [qui] coule ?", audioUrl:null },
+    { ar:'لَا، لَمْ يَعُدْ سَائِلًا... إِنْقَطَعَ الْمَاءُ!', tr:"L\u00e0, lam ya'oud s\u00e0'ilan... inqata'a al-m\u00e0'ou !", fr:"Non, elle ne coule plus (il n'est pas revenu coulant)... l'eau a été coupée (s'est coupée) !", note:2, audioUrl:null },
+    { ar:'آه! صَحِيحٌ!... مَا الْحَدَثُ؟ أَنَا مَدْفُونٌ تَحْتَ الصَّابُونِ!', tr:"\u00c0h ! Sah\u00eehoun !... M\u00e0 al-hadathou ? An\u00e0 madfo\u00fbnoun tahta as-s\u00e0bouni !", fr:"Mais oui (ah), [c'est] vrai ! Qu'est-ce qui se passe (quel [est] l'événement) ? Je suis tout plein de (enseveli sous le) savon !", audioUrl:null },
+    { ar:'أُنْظُرْ فِي عَدَّادِ الْمَاءِ، بِالْقُرْبِ مِنْ بَابِ الْحَدِيقَةِ!', tr:"Ounzour fi 'add\u00e0di al-m\u00e0'i, bil-qourbi min b\u00e0bi al-hadiqati !", fr:"[Va] voir (regarde = examine) le compteur d'eau, près de la porte du jardin.", note:3, audioUrl:null },
+    { ar:'يَعُودُ الطِّفْلُ...', tr:"Ya'o\u00f9dou at-tiflou...", fr:"L'enfant revient...", audioUrl:null },
+    { ar:'قَالَ السَّيِّدُ إِنَّهُ الرَّصَّاصُ... يُرِيدُ أَنْ يُعْلِمَكَ', tr:"Q\u00e0la as-sayyidou innahou ar-rass\u00e0sou... youridou an you'limaka", fr:"Le monsieur a dit qu'il était (certes-lui) le plombier… qu'il voulait te prévenir (il veut qu'il t'informe)", audioUrl:null },
+    { ar:'بِأَنَّهُ سَيُضْطَرُّ إِلَى قَطْعِ الْمَاءِ عَنْكَ،', tr:"bi-annahou sa-youdtarrou il\u00e0 qat'i al-m\u00e0'i 'anka", fr:"qu'il sera obligé de te couper l'eau (à la coupure de l'eau de toi),", note:4, audioUrl:null },
+    { ar:'لِأَنَّ مَاءَ حَوْضِنَا يَتَدَفَّقُ عَلَى سَطْحِ بَيْتِ الْجَارِي.', tr:"li'anna m\u00e0'a haoudin\u00e0 yatadaffaqou 'al\u00e0 sathi bayti al-j\u00e0ri.", fr:"parce que l'eau de notre bassin se déverse sur la terrasse (de la maison) du voisin.", audioUrl:null },
+    { ar:'يَعْتَذِرُ إِلَيْكَ فَإِنَّهُ لَمْ يَتَمَكَّنْ مِنْ إِخْبَارِكَ بِذَلِكَ مُسْبَقًا!', tr:"Ya'tadhirou ilayka fa'innahou lam yatamakkan min ikhb\u00e0rika bi-dhalika mousbaqan !", fr:"Il te prie de l'excuser (il s'excuse vers toi) parce qu'il (car certes-lui) n'a pas pu t'en prévenir (de l'information-de-toi de-cela) auparavant (à l'avance) !", note:5, audioUrl:null },
+    { ar:'لِيَذْهَبْ إِلَى الْجَحِيمِ!', tr:"Li-yadhhab il\u00e0 al-jah\u00eemi !", fr:"Qu'il aille au diable (en enfer) !", audioUrl:null },
+    { ar:'وَكَيْفَ أَتَخَلَّصُ الْآنَ مِنَ الصَّابُونِ؟', tr:"Wa kayfa atakhallasou al-\u00e0na min-a as-s\u00e0bouni ?", fr:"Et comment je vais me débarrasser (je me débarrasse) de mon (du) savon maintenant ?", audioUrl:null },
   ],
   notes: {
     1: "① أُطْلُبْ مِنْهُ أَنْ يَعُودَ = demande-lui de revenir. Pour traduire « demander à… de… », retiens la construction talaba min... an + subjonctif.",
-    2: "② لَمْ يَعُدْ سَائِلًا « elle (il) ne coule plus » : littéralement « il ne revient pas coulant ». Une construction particulière à l'arabe : lam ya‘oud + participe actif = « ne… plus », le participe s'accordant avec le sujet. Sur ce modèle : lam ta‘oud Khadija kâtibatan « Khadija n'écrit plus », ou lam na‘oud dâhikîna « nous ne rions plus ».",
-    3: "③ Le mot عَدَّاد « compteur » est formé, à partir de ‘adda, ya‘ouddou « compter, énumérer », sur le modèle fa‘‘âl qui indique la profession (comme rassâs « plombier ») ou l'instrument technique — c'est le cas ici.",
-    4: "④ يُضْطَرُّ « il est obligé » est le passif de idtarra (VIIIe forme de darra, yadourrou « faire du mal, nuire ») ; le tâ' du préfixe s'emphatise au contact de la lettre emphatique ḍâd. Même phénomène pour i‘tadhara « s'excuser », autre verbe de VIIIe forme, mais sans changement d'orthographe.",
+    2: "② لَمْ يَعُدْ سَائِلًا « elle (il) ne coule plus » : littéralement « il ne revient pas coulant ». Une construction particulière à l'arabe : lam ya'oud + participe actif = « ne… plus », le participe s'accordant avec le sujet.",
+    3: "③ Le mot عَدَّاد « compteur » est formé, à partir de 'adda, ya'ouddou « compter, énumérer », sur le modèle fa''âl qui indique la profession (comme rassâs « plombier ») ou l'instrument technique.",
+    4: "④ يُضْطَرُّ « il est obligé » est le passif de idtarra (VIIIe forme de darra « faire du mal ») ; le tâ' du préfixe s'emphatise au contact de la lettre emphatique dâd.",
     5: "⑤ L'injonctif se construit avec li- suivi de l'apocopé : li-yadhhab « qu'il aille ». Ne confonds pas avec li- + subjonctif, qui signifie « pour que, afin que ».",
   },
   vocabBox: {
     title: "le paradis et l'enfer",
     items: [
       { ar:'الْجَنَّةُ', tr:"al-janna(t)", fr:'Le Jardin (Paradis)' },
-      { ar:'جَنَّاتُ عَدْنٍ', tr:"jannàt 'adn", fr:"Les Jardins d'Éden" },
+      { ar:'جَنَّاتُ عَدْنٍ', tr:"jann\u00e0t 'adn", fr:"Les Jardins d'Éden" },
       { ar:'الْفِرْدَوْسُ', tr:'al-firdaous', fr:'Paradis (mot persan)' },
-      { ar:'الْجَحِيمُ', tr:'al-jahîm', fr:"L'Enfer" },
+      { ar:'الْجَحِيمُ', tr:'al-jah\u00eem', fr:"L'Enfer" },
       { ar:'جَهَنَّمُ', tr:'jahannamou', fr:'La Géhenne' },
-      { ar:'النَّارُ', tr:"an-nàr", fr:'Le Feu' },
+      { ar:'النَّارُ', tr:"an-n\u00e0r", fr:'Le Feu' },
     ],
     proverb: {
       ar:'مَا كُلُّ مَائِعٍ مَاءٌ',
-      tr:"Mà koullou mà'i'in mà'oun.",
+      tr:"M\u00e0 koullou m\u00e0'i'in m\u00e0'oun.",
       fr:"Tout ce qui est fluide n'est pas de l'eau — c'est-à-dire : tout ce qui brille n'est pas or.",
     },
   },
   exercise1: [
-    { ar:'هُنَاكَ رَصَّاصٌ يُرِيدُ أَنْ يَرَاكَ. هَلْ هَذَا مُمْكِنٌ؟', tr:"Hounàka rassàsoun youridou an yaràka. Hal hadhà moumkinoun ?", fr:"Il y a un plombier qui veut te voir. Est-ce possible ?" },
-    { ar:'لَمْ يَعُدِ الصَّابُونُ مَوْجُودًا. أُطْلُبِيهِ مِنْ أُمِّكِ وَأَعْطِينِي إِيَّاهُ.', tr:"Lam ya'oud-i as-sàbounou maoujoùdan. Outloubîhi min oummiki wa a'tini iyyàhou.", fr:"Il n'y a plus de savon. Demandes-en (sujet f.) à ta mère et donne-le-moi." },
-    { ar:'قَدْ قُطِعَ الْمَاءُ وَلَمْ يَعُدِ الْمَاءُ مَوْجُودًا فِي حَوْضِنَا.', tr:"Qad qata'a al-mà'ou wa lam ya'oud-i al-mà'ou maoujoùdan fi haoudinà.", fr:"L'eau vient d'être coupée et il n'y a plus d'eau dans notre bassin." },
-    { ar:'مَا الْحَدَثُ؟ – لَا أَدْرِي... لَا أَفْهَمُ مَا يَحْدُثُ.', tr:"Mà al-hadathou ? – Là adrî... Là afhamou mà yahdouthou.", fr:"Que se passe-t-il ? – Je ne sais pas... Je ne comprends pas ce qui se passe." },
-    { ar:'أَعْتَذِرُ إِلَيْكَ فَإِنِّي لَمْ أَتَمَكَّنْ مِنْ إِخْبَارِكَ بِهَذَا الْحَدَثِ مُسْبَقًا.', tr:"A'tadhirou ilayka fa'innî lam atamakkan min ikhbàrika bi-hadhà al-hadathi mousbaqan.", fr:"Je te (f.) prie de m'excuser car je n'ai pas pu te prévenir (de l'information-toi) de cet événement (à l'avance)." },
+    { ar:'هُنَاكَ رَصَّاصٌ يُرِيدُ أَنْ يَرَاكَ. هَلْ هَذَا مُمْكِنٌ؟', tr:"Houn\u00e0ka rass\u00e0soun youridou an yar\u00e0ka. Hal hadh\u00e0 moumkinoun ?", fr:"Il y a un plombier qui veut te voir. Est-ce possible ?" },
+    { ar:'لَمْ يَعُدِ الصَّابُونُ مَوْجُودًا. أُطْلُبِيهِ مِنْ أُمِّكِ وَأَعْطِينِي إِيَّاهُ.', tr:"Lam ya'oud-i as-s\u00e0bounou maoujo\u00f9dan. Outloub\u00eehi min oummiki wa a'tini iyy\u00e0hou.", fr:"Il n'y a plus de savon. Demandes-en (sujet f.) à ta mère et donne-le-moi." },
+    { ar:'قَدْ قُطِعَ الْمَاءُ وَلَمْ يَعُدِ الْمَاءُ مَوْجُودًا فِي حَوْضِنَا.', tr:"Qad qata'a al-m\u00e0'ou wa lam ya'oud-i al-m\u00e0'ou maoujo\u00f9dan fi haoudin\u00e0.", fr:"L'eau vient d'être coupée et il n'y a plus d'eau dans notre bassin." },
+    { ar:'مَا الْحَدَثُ؟ – لَا أَدْرِي... لَا أَفْهَمُ مَا يَحْدُثُ.', tr:"M\u00e0 al-hadathou ? – L\u00e0 adr\u00ee... L\u00e0 afhamou m\u00e0 yahdouthou.", fr:"Que se passe-t-il ? – Je ne sais pas... Je ne comprends pas ce qui se passe." },
+    { ar:'أَعْتَذِرُ إِلَيْكَ فَإِنِّي لَمْ أَتَمَكَّنْ مِنْ إِخْبَارِكَ بِهَذَا الْحَدَثِ مُسْبَقًا.', tr:"A'tadhirou ilayka fa'inn\u00ee lam atamakkan min ikhb\u00e0rika bi-hadh\u00e0 al-hadathi mousbaqan.", fr:"Je te (f.) prie de m'excuser car je n'ai pas pu te prévenir (de l'information-toi) de cet événement (à l'avance)." },
   ],
   exercise2: [
-    { fr:"Comment vais-je me débarrasser (je me débarrasse) de ce plombier ?", ar:'كَيْفَ أَتَخَلَّصُ مِنْ ذَلِكَ الرَّصَّاصِ؟', tr:"Kayfa atakhallasou min dhàlika ar-rassàsi ?" },
-    { fr:"Je veux te faire savoir que je serai obligé de revenir demain.", ar:'أُرِيدُ أَنْ أُعْلِمَكَ بِأَنَّنِي سَأَضْطَرُّ إِلَى الْعَوْدَةِ غَدًا.', tr:"Ourîdou an ou'limaka bi-annanî sa-oudtarrou ilà al-'awdati ghadan." },
-    { fr:"La voisine est venue pour une affaire urgente dont je ne connais pas la raison.", ar:'جَاءَتِ الْجَارَةُ لِأَمْرٍ طَارِئٍ لَا أَعْرِفُ سَبَبَهُ.', tr:"Jà'at-i al-jàratou li-amrin tàri'in là a'rifou sababahou." },
-    { fr:"Qu'il aille en enfer ce plombier qui coupe l'eau (coupeur d'eau) !", ar:'لِيَذْهَبْ إِلَى الْجَحِيمِ ذَلِكَ الرَّصَّاصُ الْقَاطِعُ لِلْمَاءِ!', tr:"Li-yadhhab ilà al-jahîmi dhàlika ar-rassàsou al-qàti'ou lil-mà'i !" },
-    { fr:"Est-ce que tu (f.) ne vois pas que je suis couverte de (enfouie sous le) savon ?", ar:'أَلَا تَرَيْنَ أَنَّنِي مَدْفُونَةٌ تَحْتَ الصَّابُونِ؟', tr:"Alà tarayna annanî madfoûnatoun tahta as-sàbouni ?" },
+    { fr:"Comment vais-je me débarrasser (je me débarrasse) de ce plombier ?", ar:'كَيْفَ أَتَخَلَّصُ مِنْ ذَلِكَ الرَّصَّاصِ؟', tr:"Kayfa atakhallasou min dh\u00e0lika ar-rass\u00e0si ?" },
+    { fr:"Je veux te faire savoir que je serai obligé de revenir demain.", ar:'أُرِيدُ أَنْ أُعْلِمَكَ بِأَنَّنِي سَأَضْطَرُّ إِلَى الْعَوْدَةِ غَدًا.', tr:"Our\u00eedou an ou'limaka bi-annan\u00ee sa-oudtarrou il\u00e0 al-'awdati ghadan." },
+    { fr:"La voisine est venue pour une affaire urgente dont je ne connais pas la raison.", ar:'جَاءَتِ الْجَارَةُ لِأَمْرٍ طَارِئٍ لَا أَعْرِفُ سَبَبَهُ.', tr:"J\u00e0'at-i al-j\u00e0ratou li-amrin t\u00e0ri'in l\u00e0 a'rifou sababahou." },
+    { fr:"Qu'il aille en enfer ce plombier qui coupe l'eau (coupeur d'eau) !", ar:'لِيَذْهَبْ إِلَى الْجَحِيمِ ذَلِكَ الرَّصَّاصُ الْقَاطِعُ لِلْمَاءِ!', tr:"Li-yadhhab il\u00e0 al-jah\u00eemi dh\u00e0lika ar-rass\u00e0sou al-q\u00e0ti'ou lil-m\u00e0'i !" },
+    { fr:"Est-ce que tu (f.) ne vois pas que je suis couverte de (enfouie sous le) savon ?", ar:'أَلَا تَرَيْنَ أَنَّنِي مَدْفُونَةٌ تَحْتَ الصَّابُونِ؟', tr:"Al\u00e0 tarayna annan\u00ee madfo\u00fbnatoun tahta as-s\u00e0bouni ?" },
   ],
 };
 
-const ALL_LESSONS = { 1: DAILY_LESSON_1, 2: DAILY_LESSON_2 };
+const DAILY_LESSON_3 = {
+  num: 3,
+  titleFr: 'La sociologie au café',
+  titleAr: 'عِلْمُ الاِجْتِمَاعِ فِي الْمَقَاهِي',
+  fullAudioUrl: null,
+  introFr: "Samir retrouve son ami au café pour fêter la sortie de son livre... mais découvre que le sujet des recherches de deux de ses étudiants ressemble beaucoup au sien !",
+  dialogue: [
+    { ar:'آهْ! سَمِيرٌ! يَا لِلْمُفَاجَأَةِ!', tr:"Àh ! Samîr ! Yà lil-moufàja'ati !", fr:"Ah, Samir ! Quelle surprise !", note:2, audioUrl:null },
+    { ar:'اَلسَّلاَمُ عَلَيْكَ، يَا عَزِيزِي! مَا هِيَ الْأَخْبَارُ؟', tr:"As-salàmou 'alayka, yà 'azìzì ! Mà hiya al-akhbàrou ?", fr:"Bonjour, mon cher ! Quelles sont les nouvelles ?", audioUrl:null },
+    { ar:'قَدْ صَدَرَ آخِرُ كُتُبِي مُؤَخَّرًا.', tr:"Qad sadara àkhirou koutoubì mou'akhkharan.", fr:"Mon dernier livre vient de sortir (déjà est-sorti le dernier de mes livres, dernièrement).", note:3, audioUrl:null },
+    { ar:'لِنَذْهَبْ نَحْتَفِلْ بِهَذَا الْحَدَثِ فِي مَقْهَى «النَّخِيلِ»', tr:"Li-nadhhab nahtafil bi-hadhà al-hadathi fî maqhà an-Nakhîli", fr:"Allons fêter cela (que nous allions fêter cet événement) au café de la Palmeraie", note:4, audioUrl:null },
+    { ar:'حَيْثُ نَلْتَقِي بِنَاشِرِي الْكِتَابِ', tr:"haythou naltaqî bi-nàchirî al-kitàbi", fr:"où nous rencontrerons les éditeurs (du livre)", audioUrl:null },
+    { ar:'وَسَنَجِدُ هُنَاكَ إِثْنَيْنِ مِنْ طُلاَّبِي فِي الْجَامِعَةِ', tr:"wa sa-najidou hounàka ithnayni min toullàbî fî al-jàmi'ati", fr:"et nous y [re]trouverons deux de mes étudiants de (dans) l'université", audioUrl:null },
+    { ar:'يُعَالِجَانِ مَوْضُوعًا قَرِيبًا مِمَّا جَاءَ فِي كِتَابِي.', tr:"you'àlijàni maoudoù'an qarîban mimmà jà'a fî kitàbî.", fr:"[qui] travaillent sur (traitent d') un sujet proche de celui qui est traité (de ce qui est venu) dans mon livre.", audioUrl:null },
+    { ar:'مَاذَا يَخُصُّ هَذَا الْمَوْضُوعُ تَحْدِيدًا؟', tr:"Màdhà yakhoussou hadhà al-maoudoù'ou tahdîdan ?", fr:"Quel est le domaine concerné (que concerne ce sujet) précisément ?", audioUrl:null },
+    { ar:'عِلْمُ الاِجْتِمَاعِ، كَالْعَادَةِ؟', tr:"'ilma al-ijtimà'i ka-al-'àdati ?", fr:"La sociologie (la science de la société), comme d'habitude ?", note:1, audioUrl:null },
+    { ar:'يَخُصُّ مُعَانَاةَ فَلاَّحِي مَنَاطِقِ الصَّحْرَاءِ الْجَنُوبِيَّةِ.', tr:"Yakhoussou mou'ànàti fallàhî manàtiqi as-sahrà'i al-janoùbiyyati.", fr:"Il s'agit des (il concerne les) difficultés (souffrances) rencontrées par les paysans des régions méridionales du désert.", note:5, audioUrl:null },
+    { ar:'يَا لِلْمَسَاكِينِ!', tr:"Yà lil-masàkîni !", fr:"Ah, les malheureux !", audioUrl:null },
+    { ar:'مَنْ هُمُ الْمَسَاكِينُ؟... اَلْفَلاَّحُونَ؟', tr:"Man houm-ou al-masàkînou ?... al-fallàhoùna ?", fr:"Qui, (eux) les malheureux ?... les paysans ?", note:6, audioUrl:null },
+    { ar:'لاَ، أَقْصِدُ الطَّلَبَةَ الْمُضْطَرِّينَ إِلَى الْبَقَاءِ مَحْبُوسِينَ فِي بَرَاثِنِ الْوَحْشَةِ وَالْحَرَارَةِ!', tr:"Là, aqsoudou at-talabata al-moudtarrîna ilà al-baqà'i mahboùsîna fî barathîni al-wahchati wa al-haràrati !", fr:"[Mais] non, je vise (je veux dire) les étudiants contraints de rester prisonniers de (dans les griffes de) la solitude et de la chaleur !", note:7, audioUrl:null },
+    { ar:'أَمَّا أَنَا فَلاَ يُمْكِنُنِي الاِسْتِغْنَاءُ عَنِ الْمَدِينَةِ', tr:"Ammà anà fa-là youmkinounî al-istighnà'ou 'an-i al-madînati", fr:"(Quant à) moi, je ne peux pas me passer de la ville", audioUrl:null },
+    { ar:'وَحَرَكَتِهَا وَخُصُوصًا عَنْ مَقَاهِيهَا!', tr:"wa harakatihà wa khousoùsan 'an maqàhîhà !", fr:"et de son animation, et en particulier de ses cafés !", audioUrl:null },
+    { ar:'أَدْرِي! أَنْتَ خَبِيرٌ بِعِلْمِ الاِجْتِمَاعِ وَأَنْتَ جَالِسٌ فِي الْمَقَاهِي', tr:"Adrî ! Anta khabîroun bi-'ilmi al-ijtimà'i wa anta jàlisoun fî al-maqàhî", fr:"Je sais ! Toi, tu es expert en sociologie à la terrasse des (et toi assis dans les) cafés,", audioUrl:null },
+    { ar:'حَيْثُ تَأْمَنُ مِنَ الْمَوْتِ عَطَشًا!', tr:"haythou ta'manou min-a al-mauti 'atachan !", fr:"où tu ne risques pas de mourir de soif (où tu es préservé de la mort en-matière-de-soif) !", audioUrl:null },
+  ],
+  notes: {
+    1: "① 'ilmou al-ijtimà'i = sociologie, littéralement « science de la société ». C'est avec le mot 'ilm (science) en annexion que se traduisent les mots français en -logie : 'ilmou an-nafsi (psychologie), 'ilmou al-falaki (astronomie), etc.",
+    2: "② Yà lil-moufàja'ati ! = Quelle surprise ! : yà lil- + nom précédé de l'article est une des façons d'exprimer l'exclamation. Autre exemple : yà lil-masàkîni ! = Ah, les malheureux !",
+    3: "③ Pour exprimer le passé immédiat (« venir de faire »), l'arabe fait précéder le verbe de qad (déjà), et ajoute pour plus de précision mou'akhkharan (dernièrement).",
+    4: "④ li-nadhhab nahtafil bi-... = allons fêter... : deux verbes à l'injonctif, avec omission du li- devant le second — correspond au français « allons » + infinitif. L'injonctif est la seule forme possible pour traduire l'impératif à la 1re personne du pluriel.",
+    5: "⑤ fallàhî manàtiqi = les paysans des régions... : le noûn final du pluriel externe disparaît lorsque le mot est en annexion.",
+    6: "⑥ Man houm-ou al-masàkînou ? Les voyelles d'appui sont au nombre de trois (a, i, ou). Le -ou apparaît notamment après les pronoms houm, antoum, les pronoms affixes -houm/-koum, et le suffixe -toum du verbe.",
+    7: "⑦ ilà al-baqà'i mahboùsîna = « vers le fait de rester prisonniers » : le participe passif est au cas direct, comme après kàna. Le masdar entraîne la même construction que le verbe conjugué.",
+  },
+  vocabBox: {
+    title: 'les sciences en « -logie »',
+    items: [
+      { ar:'عِلْمُ الاِجْتِمَاعِ', tr:"'ilmou al-ijtimà'i", fr:'Sociologie' },
+      { ar:'عِلْمُ النَّفْسِ', tr:"'ilmou an-nafsi", fr:'Psychologie' },
+      { ar:'عِلْمُ الْفَلَكِ', tr:"'ilmou al-falaki", fr:'Astronomie' },
+    ],
+    proverb: { ar:'خَيْرُ جَلِيسٍ فِي الزَّمَانِ كِتَابٌ', tr:"Khayrou jalîsin fi az-zamàni kitàboun.", fr:"Le meilleur compagnon dans la vie, c'est un livre." },
+  },
+  exercise1: [
+    { ar:'أَنَا لَسْتُ مُضْطَرًّا إِلَى الْبَقَاءِ مَحْبُوسًا فِي هَذِهِ الْمِنْطَقَةِ الْوَحْشِيَّةِ الْحَارَّةِ.', tr:"Anà lastou moudtarran ilà al-baqà'i mahboùsan fî hàdhihi al-mintaqati al-wahchiyyati al-hàrrati.", fr:"Je ne suis pas contraint (au fait de) de rester prisonnier de cette région sauvage [et] chaude." },
+    { ar:'لِنَحْتَفِلْ بِصُدُورِ كِتَابِي الَّذِي يَخُصُّ عِلْمَ النَّفْسِ.', tr:"Li-nahtafil bi-soudoùri kitàbî alladhî yakhoussou 'ilma an-nafsi.", fr:"Célébrons la sortie de mon livre qui traite de psychologie." },
+    { ar:'لَقَدْ عَادَ الطَّالِبَانِ مُؤَخَّرًا مِنْ مَنَاطِقِ الصَّحْرَاءِ.', tr:"Laqad 'àda at-tàlibàni mou'akhkharan min manàtiqi as-sahrà'i.", fr:"Les deux étudiants viennent de rentrer (sont rentrés dernièrement) des régions du désert." },
+    { ar:'لاَ يُمْكِنُنَا الاِسْتِغْنَاءُ عَنِ الْكُتُبِ الْخَاصَّةِ بِعِلْمِ الْفَلَكِ.', tr:"Là youmkinounà al-istighnà'ou 'an-i al-koutoubi al-khàssati bi-'ilmi al-falaki.", fr:"Il ne nous est pas possible de nous passer des livres concernant l'astronomie." },
+    { ar:'أَنْتُمُ الْفَلاَّحُونَ الْمَسَاكِينُ، عَلَيْكُمْ أَنْ تَرْفَعُوا شَكْوَى إِلَى الْحُكُومَةِ.', tr:"Antoum-ou al-fallàhoùna al-masàkînou, 'alaykoum an tarfa'où chakwà ilà al-houkoùmati.", fr:"Vous les malheureux paysans, vous devez vous plaindre (élever une plainte) auprès du gouvernement." },
+  ],
+  exercise2: [
+    { fr:"Ah, quelle surprise ! Quelles sont les nouvelles, mon cher ?", ar:'يَا لِلْمُفَاجَأَةِ! مَا هِيَ الْأَخْبَارُ، يَا عَزِيزِي؟', tr:"Yà lil-moufàja'ati ! Mà hiya al-akhbàrou, yà 'azìzî ?" },
+    { fr:"Sur quoi porte le livre qui vient de paraître ?", ar:'مَاذَا يَخُصُّ الْكِتَابُ الَّذِي قَدْ صَدَرَ مُؤَخَّرًا؟', tr:"Màdhà yakhoussou al-kitàbou alladhî qad sadara mou'akhkharan ?" },
+    { fr:"Allons au café de la Palmeraie retrouver vos étudiants !", ar:'لِنَذْهَبْ إِلَى مَقْهَى "النَّخِيلِ" نَجِدْ فِيهِ طُلاَّبَكَ!', tr:"Li-nadhhab ilà maqhà «an-Nakhîli» najid fîhi toullàbaka !" },
+    { fr:"Vous êtes assis au café selon votre habitude, alors que moi je travaille au bureau.", ar:'أَنْتُمْ جَالِسُونَ فِي الْمَقْهَى كَعَادَتِكُمْ. أَمَّا أَنَا فَأَعْمَلُ فِي الْمَكْتَبِ.', tr:"Antoum jàlisoùna fî al-maqhà ka-'àdatikoum. Ammà anà fa-a'malou fî al-maktabi." },
+    { fr:"Qu'il aille traiter ce sujet dans une autre université !", ar:'لِيَذْهَبْ إِلَى جَامِعَةٍ أُخْرَى يُعَالِجْ هَذَا الْمَوْضُوعَ!', tr:"Li-yadhhab ilà jàmi'atin oukhrà you'àlij hàdhà al-maoudoù'a !" },
+  ],
+};
+
+const DAILY_LESSON_4 = {
+  num: 4,
+  titleFr: "Je n'en peux plus !",
+  titleAr: 'وَاقِعٌ لاَ يُطَاقُ!',
+  fullAudioUrl: null,
+  introFr: "Une femme excédée appelle son amie pour se plaindre de son mari, obsédé par le football... et repart avec un conseil un peu particulier !",
+  dialogue: [
+    { ar:'آلُو! عَائِشَةُ! أَدْعُوكِ لِأَنِّي لَمْ أَعُدْ قَادِرَةً عَلَى تَحَمُّلِهِ!', tr:"Àloù ! 'À'icha ! Ad'oùki li'annî lam a'oud qàdiratan 'alà tahammoulihi !", fr:"Allô, Aïcha ! Je t'appelle parce que je ne peux plus le supporter (je ne suis pas revenue capable du fait de le supporter).", note:2, audioUrl:null },
+    { ar:'مَا الْحَدَثُ؟ هُنَاكَ أَمْرٌ خَطِرٌ؟', tr:"Mà al-hadathou ? Hounàka amroun khatiroun ?", fr:"Qu'est-ce qui t'arrive (quel est l'événement) ? Y a-t-il quelque chose de (une chose) grave ?", note:3, audioUrl:null },
+    { ar:'بِالتَّأْكِيدِ! خَطِرٌ جِدًّا!', tr:"Bi-at-ta'kîdi ! Khatiroun jiddan !", fr:"Assurément (avec certitude) ! Très grave !", audioUrl:null },
+    { ar:'يَنْظُرُ دَائِمًا إِلَى مُبَارَيَاتِ كُرَةِ الْقَدَمِ وَلاَ يُصْغِي إِلَيَّ إِطْلاَقًا!', tr:"Yanzourou dà'iman ilà moubàrayàti kourati al-qadami wa là yousghî ilayya itlàqan !", fr:"Il regarde constamment les matchs de football (balle du pied) et ne m'écoute pas du tout !", audioUrl:null },
+    { ar:'لاَ قِيمَةَ لِشَيْءٍ فِي نَظَرِهِ إِلاَّ لِكُرَةِ الْقَدَمِ!', tr:"Là qîmata li-chay'in fî nazarihi illà li-kourati al-qadami !", fr:"Il n'y en a que pour le foot (pas-de-valeur pour-une-chose dans son opinion sauf pour la balle de pied) !", note:4, audioUrl:null },
+    { ar:'عَلَيْهِ أَنْ يَخْتَارَ بَيْنِي وَبَيْنَهَا، بِشَكْلٍ قَاطِعٍ وَنِهَائِيٍّ!', tr:"'alayhi an yakhtàra bayni wa baynahà, bi-chaklin qàti'in wa nihà'iyyin !", fr:"Il faut (sur-lui) qu'il choisisse entre lui et moi (entre-moi et entre-elle) de façon décisive et définitive !", note:5, audioUrl:null },
+    { ar:'لاَ تَغْضَبِي! هَذَا أَمْرٌ بَسِيطٌ لاَ يَسْتَحِقُّ كُلَّ هَذَا الاِهْتِمَامِ.', tr:"Là taghdabî ! Hàdhà amroun basîtoun là yastahiqqou koulla hàdhà al-ihtimàmi.", fr:"Ne te fâche pas ! C'est quelque chose de simple [qui] ne mérite pas tout ce souci (la totalité de cet intérêt).", note:6, audioUrl:null },
+    { ar:'اَلرِّجَالُ كُلُّهُمْ عَلَى نَمَطٍ وَاحِدٍ!', tr:"Ar-rijàlou koullouhoum 'alà namatin wàhidin !", fr:"Les hommes sont tous pareils (sur un modèle unique) !", audioUrl:null },
+    { ar:'وَلَكِنْ... لاَ تَفْهَمِينَ! اَلْأَمْرُ جِدِّيٌّ فَأَنَا غَضْبَانَةٌ حَقًّا.', tr:"Wa làkin... là tafhamîna ! Al-amrou jiddiyyoun fa-anà ghadbànatoun haqqan.", fr:"Mais... tu ne comprends pas ! C'est sérieux (l'affaire une-sérieuse), (et) je suis vraiment en colère.", audioUrl:null },
+    { ar:'آهْ!... فِي هَذِهِ الْحَالَةِ، عِنْدِي حَلٌّ لِمُشْكِلَتِكِ.', tr:"Àh !... Fî hàdhihi al-hàlati, 'indî halloun li-mouchkilatiki.", fr:"Ah, dans ce cas (état), j'ai une solution à ton problème.", audioUrl:null },
+    { ar:'اِلْتَحِقِي مُبَاشَرَةً بِمَوْقِعِ الْإِنْتِرْنِتْ الْمُخَصَّصِ لِلنِّسَاءِ الْغَضِبَاتِ', tr:"Iltahiqî moubàcharatan bi-maouqi'i al-intarnat al-moukhassasi li-an-nisà'i al-ghadibàti", fr:"Connecte-toi directement sur (avec) le site internet consacré aux femmes en colère (courroucées)", audioUrl:null },
+    { ar:'حَيْثُ يُمْكِنُكِ صَبُّ جَامِ غَضَبِكِ.', tr:"haythou youmkinouki sabbou jàmi ghadabiki.", fr:"où tu pourras déverser le trop-plein (où il-te-sera-possible le déversement de la coupe) de ta colère.", audioUrl:null },
+    { ar:'وَلَكِنْ، أَعْذِرِينِي فَلاَ بُدَّ لِي أَنْ أُفَارِقَكِ', tr:"Wa làkin, ou'dhourînî fa-là boudda lî an oufàriqaki", fr:"Mais, excuse-moi, [car] je dois te quitter (pas d'échappatoire pour-moi [à ce] que je-te-quitte)", audioUrl:null },
+    { ar:'لِتَلَقِّي دَرْسِي الْجَمَاعِيِّ الْأُسْبُوعِيِّ فِي الْجُمْبَازِ...', tr:"li-talaqqî darsî al-jamà'iyyi al-ousboù'iyyi fî al-joumbàzi...", fr:"pour aller à (pour réception de) mon cours collectif hebdomadaire de (dans la) gymnastique...", audioUrl:null },
+    { ar:'يَا لِلصَّدِيقَةِ الْغَرِيبَةِ! مَا هَذِهِ الْأَنَانِيَّةُ؟', tr:"Yà li-as-sadîqati al-gharîbati ! Mà hàdhihi al-anàniyyatou ?", fr:"[Ah], quelle drôle d'amie (ô pour l'amie étrange) ! Quel égoïsme !", note:7, audioUrl:null },
+  ],
+  notes: {
+    1: "① Wàqi'oun là youtàqou = « une situation insupportable » (« une-réalité ne-pas elle-est-supportée »). On peut aussi dire hàdhà là youtàqou (« c'est insupportable »). De nombreuses expressions arabes qui se traduisent en français par un adjectif de sens négatif se construisent avec là + un verbe au passif — comme là touhsà (« innombrable »).",
+    2: "② lam a'oud qàdiratan 'alà tahammoulihi = « je ne peux plus le supporter » (« je-ne-reviens-pas capable sur[le fait de]-le-supporter »). Le verbe peut se mettre à toutes les personnes.",
+    3: "③ Hounàka amroun khatiroun ? = « Y a-t-il quelque chose de grave ? » : amr (affaire) ou chay' (chose) traduisent souvent « quelque chose ». Le pluriel d'amr, au sens d'affaire, est oumoùr ; et awàmir quand ce mot signifie « ordre ».",
+    4: "④ là qîmata... illà = « pas de valeur... sauf » : là + nom au cas direct suivi de illà sert à traduire la tournure « ne... que ».",
+    5: "⑤ bayni wa baynahà = « entre moi et entre elle » : les pronoms « moi » et « nous » sont toujours employés en premier en arabe, contrairement à l'usage du français.",
+    6: "⑥ koulla hàdhà al-ihtimàmi = « tout cet intérêt » aurait aussi pu se dire hàdhà al-ihtimàma koullahou — deux constructions possibles de koull selon qu'il est placé avant ou après le nom.",
+    7: "⑦ anàniyy = « égoïste » : formé sur le pronom anà (moi), tout comme « égoïste » dérive du latin ego. La terminaison -iyy/-iyya(t) permet à l'arabe de créer des néologismes, comme ijtimà'iyy (social) ou ichtiràkiyy (socialiste).",
+  },
+  vocabBox: {
+    title: 'les 5 piliers de la religion',
+    items: [
+      { ar:'صَلاَةٌ', tr:"salà(t)", fr:'Prière' },
+      { ar:'زَكَاةٌ', tr:"zakà(t)", fr:'Impôt purificateur (aumône)' },
+      { ar:'صَوْمُ رَمَضَانَ', tr:"saoumou ramadàn", fr:'Jeûne du Ramadan' },
+      { ar:'حَجٌّ', tr:"hajj", fr:'Pèlerinage (à La Mecque)' },
+    ],
+    proverb: { ar:'غَضَبُ الْجَاهِلِ فِي أَقْوَالِهِ وَغَضَبُ الْعَاقِلِ فِي أَعْمَالِهِ', tr:"Ghadabou al-jàhili fî aqwàlihi wa ghadabou al-'àqili fî a'màlihi.", fr:"La colère du sot se manifeste dans ses propos, et celle de l'homme sensé dans ses actes." },
+  },
+  exercise1: [
+    { ar:'لَمْ يَعُودُوا قَادِرِينَ عَلَى تَحَمُّلِكُمْ!', tr:"Lam ya'oùdoù qàdirîna 'alà tahammoulikoum !", fr:"Ils ne peuvent plus (ne sont plus capables sur le fait de) vous supporter." },
+    { ar:'لِمَاذَا تَنْظُرُ دَائِمًا إِلَى مُبَارَيَاتِ كُرَةِ الْقَدَمِ الَّتِي لاَ تَسْتَحِقُّ أَيَّ اهْتِمَامٍ؟', tr:"Limàdhà tanzourou dà'iman ilà moubàrayàtin li-kourati al-qadami là tastahiqqou ayya (i)htimàmin ?", fr:"Pourquoi regardes-tu constamment des matchs de football qui ne méritent aucun intérêt ?" },
+    { ar:'لاَ بُدَّ لَكَ أَنْ تَلْتَحِقَ بِمَوْقِعِ الْإِنْتِرْنِتْ الَّذِي تَشْكُو فِيهِ النِّسَاءُ الْغَضِبَاتُ.', tr:"Là boudda laka an taltahiqa bi-maouqi'i al-intarnat alladhî tachkoù fîhi an-nisà'ou al-ghadibàtou.", fr:"Il faut absolument que tu te connectes au site internet sur lequel se plaignent les femmes en colère." },
+    { ar:'لاَ قِيمَةَ لِشَيْءٍ فِي نَظَرِ ابْنَيَّ إِلاَّ لِكُرَةِ الْقَدَمِ.', tr:"Là qîmata li-chay'in fî nazari (i)bnayya illà li-kourati al-qadami.", fr:"Mes deux fils n'ont d'yeux (dans le regard de mes deux fils) que pour le foot." },
+    { ar:'عَلَيْكَ أَنْ تَخْتَارَ بَيْنِي وَبَيْنَهَا وَأَنَا جِدِّيَّةٌ حَقًّا!', tr:"'alayka an takhtàra bayni wa baynahà wa anà jiddiyyatoun haqqan !", fr:"Il faut que tu choisisses entre elle et moi, (et) je suis vraiment sérieuse !" },
+  ],
+  exercise2: [
+    { fr:"Cette affaire est très grave, crois-moi (f.) !", ar:'هَذَا الْأَمْرُ خَطِرٌ جِدًّا، صَدِّقِينِي!', tr:"Hàdhà al-amrou khatiroun jiddan, saddiqînî !" },
+    { fr:"Je n'ai pas de solution pour mon problème, bien qu'il [soit] simple.", ar:'لَيْسَ عِنْدِي حَلٌّ لِمُشْكِلَتِي رَغْمَ أَنَّهَا بَسِيطَةٌ.', tr:"Laysa 'indî halloun li-mouchkilatî raghma annahà basîtatoun." },
+    { fr:"Tu (f.) ne m'écoutes jamais. Écoute-moi aujourd'hui !", ar:'لاَ تُصْغِينَ إِلَيَّ أَبَدًا. أَصْغِي إِلَيَّ الْيَوْمَ!', tr:"Là tousghîna ilayya abadan. Asghî ilayya al-yaouma !" },
+    { fr:"C'est (ceci) une situation insupportable ! Ne le comprends-tu (f.) pas ?", ar:'هَذَا وَاقِعٌ لاَ يُطَاقُ! أَلاَ تُفْهَمِينَ ذَلِكَ؟', tr:"Hàdhà wàqi'oun là youtàqou ! Alà tafhamîna dhàlika ?" },
+    { fr:"Ah, quelle amie égoïste !", ar:'يَا لِلصَّدِيقَةِ الْأَنَانِيَّةِ!', tr:"Yà li-as-sadîqati al-anàniyyati !" },
+  ],
+};
+
+const DAILY_LESSON_5 = {
+  num: 5,
+  titleFr: 'Un bon tuyau (un conseil utile) !',
+  titleAr: 'نَصِيحَةٌ مُفِيدَةٌ!',
+  fullAudioUrl: null,
+  introFr: "Une femme a créé un site pour permettre aux femmes d'exprimer leur colère contre leurs proches — au grand dam des hommes concernés !",
+  dialogue: [
+    { ar:'بَادَرَتِ امْرَأَةٌ إِلَى تَشْكِيلِ مَوْقِعٍ عَلَى الْإِنْتِرْنِتْ', tr:"Bàdarat imra'atoun ilà tachkîli maouqi'in 'alà al-intarnat", fr:"Une femme a eu l'initiative de créer (vers la création d') un site (sur) internet,", audioUrl:null },
+    { ar:'يُمَكِّنُ النِّسَاءَ مِنَ التَّعْبِيرِ عَنْ غَضَبِهِنَّ', tr:"youmakkinou an-nisà'a min-a at-ta'bîri 'an ghadabihinna", fr:"[qui] permet [aux] femmes d'exprimer (de l'expression de) leur colère", audioUrl:null },
+    { ar:'بِسَبَبِ تَصَرُّفَاتِ أَصْدِقَائِهِنَّ أَوْ أَزْوَاجِهِنَّ.', tr:"bi-sababi tasarroufàti asdiqà'ihinna aou azwàjihinna.", fr:"concernant (à cause de) les agissements de leurs amis ou (leurs) maris.", audioUrl:null },
+    { ar:'حَظِيَتْ هَذِهِ الْمُبَادَرَةُ بِإِعْجَابِ النِّسَاءِ', tr:"Haziyat hàdhihi al-moubàdaratou bi-i'jàbi an-nisà'i", fr:"Cette initiative a recueilli l'adhésion (a joui de l'admiration) des femmes", audioUrl:null },
+    { ar:'وَأَثَارَتْ سُخْطَ الرِّجَالِ الَّذِينَ اعْتَبَرُوا', tr:"wa athàrat soukhta ar-rijàli allàdhîna (i)'tabaroù", fr:"et provoqué (soulevé) l'indignation des hommes qui ont considéré", audioUrl:null },
+    { ar:'أَنَّ الْمَرْأَةَ الْمَذْكُورَةَ ذَهَبَتْ بَعِيدًا.', tr:"anna al-mar'ata al-madhkoùrata dhahabat ba'îdan.", fr:"que la femme en question (mentionnée) était (est) allée [trop] loin.", note:1, audioUrl:null },
+    { ar:'فَتَجَاوَزَتِ الْحُدُودَ الْمَسْمُوحَةَ بِهَا.', tr:"fa-tajàwazat-i al-houdoùda al-masmoùha bi-hà.", fr:"et avait (a) dépassé les bornes (les limites permises avec-elles).", note:2, audioUrl:null },
+    { ar:'وَجَدِيرٌ بِالذِّكْرِ أَنَّ الْمَوْقِعَ يَقْصِدُ إِلَى الْقَوْلِ لِلرَّجُلِ:', tr:"Wa jadîroun bi-adh-dhikri anna al-maouqi'a yaqsoudou ilà al-qauli li-ar-rajouli :", fr:"Et il convient ([il est] digne de mentionner) de mentionner que le site vise à dire (le fait de dire) aux hommes que", note:3, audioUrl:null },
+    { ar:'«إِنْ كُنْتَ لاَ تُرِيدُ أَنْ يَعْرِفَ الْعَالَمُ شَيْئًا عَمَّا تَفْعَلُهُ،', tr:"«in kounta là tourîdou an ya'rifa al-'àlamou chay'an 'ammà taf'alouhou,", fr:"« s'ils ne veulent (si tu ne veux) pas que les gens (le monde) sachent (quelque chose de) ce qu'ils font (tu fais),", note:4, audioUrl:null },
+    { ar:'فَلاَ تَتَصَرَّفْ بِهَذَا الشَّكْلِ!»', tr:"fa-là tatasarraf bi-hàdhà ach-chakli !»", fr:"eh bien, qu'ils ne se conduisent (ne te conduis) pas de cette façon !»", audioUrl:null },
+    { ar:'وَيَسْمَحُ الْمَوْقِعُ لِلنِّسَاءِ فِي أَيِّ مَكَانٍ فِي الْعَالَمِ', tr:"Wa yasmahou al-maouqi'ou li-an-nisà'i fî ayyi makànin fî al-'àlami", fr:"Le site permet aux femmes partout (en tout lieu) dans le monde", audioUrl:null },
+    { ar:'بِإِرْسَالِ شَكْوَى عَنْ مُعَانَاتِهِنَّ', tr:"bi-irsàli chakwà 'an mou'ànàtihinna", fr:"d'adresser (l'envoi d') une plainte concernant leurs souffrances", note:5, audioUrl:null },
+    { ar:'وَتَعْرِيفِ هُوِيَّةِ الرِّجَالِ بِالْكَشْفِ عَنْ أَسْمَائِهِمْ وَمِهَنِهِمْ.', tr:"wa ta'rîfi houwiyyati ar-rijàli bi-al-kachfi 'an asmà'ihim wa mihanihim.", fr:"et de révéler (le-fait-de-faire-connaître) l'identité des hommes en donnant (avec la révélation de) leurs noms et professions.", audioUrl:null },
+    { ar:'وَقَالَتْ صَاحِبَةُ الْمَوْقِعِ إِنَّ الْفِكْرَةَ خَطَرَتْ لَهَا', tr:"Wa qàlat sàhibatou al-maouqi'i inna al-fikrata khatarat lahà", fr:"Et la propriétaire du site a dit que l'idée lui [en] était venue (-à-l'esprit)", audioUrl:null },
+    { ar:'عِنْدَمَا كَانَتْ تُصْغِي إِلَى صَدِيقَاتِهَا يَتَحَدَّثْنَ', tr:"'indamà kànat tousghî ilà sadîqàtihà yatahaddathna", fr:"lorsqu'elle écoutait parler ses amies (vers ses amies elles parlent)", note:6, audioUrl:null },
+    { ar:'عَنِ الْمَشَاكِلِ فِي حَيَاتِهِنَّ الْعَاطِفِيَّةِ.', tr:"'an-i al-machàkili fî hayàtihinna al-'àtifiyyati.", fr:"de leurs (des) difficultés (problèmes) dans leur vie sentimentale.", audioUrl:null },
+    { ar:'هَلْ مِنْ شَأْنِ ذَلِكَ أَنْ يُغَيِّرَ شَيْئًا؟ سَنَرَى...', tr:"Hal min cha'ni dhàlika an youghayyira chay'an ? Sa-narà...", fr:"Voyons voir si cela va changer quelque chose (est-ce-que du-fait-de cela qu'il change une-chose) ? Nous verrons...", note:7, audioUrl:null },
+  ],
+  notes: {
+    1: "① anna al-mar'ata al-madhkoùrata = « que la femme en question (mentionnée) », du verbe dhakara, yadhkourou (citer, mentionner), à rapprocher de dhàkira(t) (mémoire).",
+    2: "② fa-tajàwazat-i al-houdoùda al-masmoùha bi-hà = « elle a dépassé les bornes » (littéralement « les limites permises avec-elles ») ; masmoùh se construit avec bi- et hà reprend al-houdoùda.",
+    3: "③ jadîroun bi-adh-dhikri = « digne de mention » : à retenir. dhikr est à rapprocher de madhkoùrat (note 1) — le premier est le masdar du verbe dhakara, le second son participe passé.",
+    4: "④ Dans les phrases 9 et 10, le discours direct est toujours employé en arabe, même là où le français passerait au discours indirect : « le site vise à dire aux hommes que s'ils ne veulent pas... eh bien, qu'ils ne se conduisent pas... » En arabe, on emploie la 2e personne du singulier.",
+    5: "⑤ chakwà, pl. chakàwà = « plainte » : mot irrégulier, invariable au singulier comme au pluriel. Il provient du verbe défectueux chakà (comme da'à, yad'où — inviter).",
+    6: "⑥ kànat tousghî ilà sadîqàtihà yatahaddathna 'an... = « elle écoutait ses amies parler de... » : l'infinitif n'existant pas en arabe, il se traduit soit par un nom d'action, soit par l'inaccompli, comme ici.",
+    7: "⑦ Hal min cha'ni dhàlika an youghayyira... ? = « Est-ce que cela aura pour effet de changer... ? » : tournure à retenir, construite avec hal min cha'ni... an + subjonctif, ou un masdar.",
+  },
+  vocabBox: {
+    title: 'mysticisme et confréries soufies',
+    items: [
+      { ar:'ذِكْرٌ', tr:"dhikr", fr:'Mention, souvenir (répétition du nom de Dieu)' },
+      { ar:'سَمَاعٌ', tr:"samà'", fr:'Écoute (danse des derviches tourneurs)' },
+      { ar:'طَرِيقَةٌ', tr:"tarîqa(t)", fr:'Voie mystique (confrérie)' },
+      { ar:'زَاوِيَةٌ', tr:"zàwiya(t)", fr:"Angle, coin — maison mère d'une confrérie" },
+      { ar:'دَيْرٌ', tr:"dayr", fr:'Monastère (chrétien)' },
+    ],
+  },
+  exercise1: [
+    { ar:'بَادَرْتُ إِلَى تَشْكِيلِ مَوْقِعٍ عَلَى الْإِنْتِرْنِتْ يَتَوَجَّهُ إِلَى الْأَزْوَاجِ الْغَضِبِينَ.', tr:"Bàdartou ilà tachkîli maouqi'in 'alà al-internat yatawajjahou ilà al-azwàji al-ghadibîna.", fr:"J'ai pris l'initiative de créer un site internet [qui] s'adresse aux maris en colère." },
+    { ar:'إِذَا تَصَرَّفْتُمْ بِشَكْلٍ غَيْرِ مُنَاسِبٍ فَنَحْنُ سَنَكْشِفُ عَنْ هُوِيَّتِكُمْ فِي الْإِنْتِرْنِتْ.', tr:"Idhà tasarraftoum bi-chaklin ghayri mounàsibin fa-nahnou sa-nakchifou 'an houwiyyatikoum fî al-internat.", fr:"Si vous vous comportez d'une façon inconvenante, alors nous révélerons votre identité sur internet." },
+    { ar:'هَذِهِ الْمُبَادَرَةُ تَقْصِدُ إِلَى إِعْلاَمِ الرِّجَالِ بِأَنَّ النِّسَاءَ قَادِرَاتٌ عَلَى التَّعْبِيرِ عَنْ أَنْفُسِهِنَّ بِكُلِّ حُرِّيَّةٍ.', tr:"Hàdhihi al-moubàdaratou taqsoudou ilà i'làmi ar-rijàli bi-anna an-nisà'a qàdiràtoun 'alà at-ta'bîri 'an anfousihinna bi-koulli hourriyyatin.", fr:"Cette initiative vise à informer les hommes que les femmes peuvent s'exprimer en toute liberté." },
+    { ar:'خَطَرَتْ لِي هَذِهِ الْفِكْرَةُ عِنْدَمَا كُنْتُ أَنَا بِنَفْسِي غَارِقَةً فِي بَحْرٍ مِنَ الْمَشَاكِلِ الْعَاطِفِيَّةِ.', tr:"Khatarat lî hàdhihi al-fikratou 'indamà kountou anà bi-nafsî ghàriqatan fî bahrin min-a al-machàkili al-'àtifiyyati.", fr:"Cette idée m'est venue lorsque j'étais moi-même submergée par (noyée dans une mer de) problèmes sentimentaux." },
+    { ar:'عِنْدِي نَصِيحَةٌ مُفِيدَةٌ لَكَ وَلَكِنَّكَ لَنْ تَأْخُذَهَا بِعَيْنِ الاِعْتِبَارِ، كَالْعَادَةِ.', tr:"'indî nasîhatoun moufîdatoun laka wa lakinnaka lan ta'khoudhahà bi-'ayni al-i'tibàri, ka-al-'àdati.", fr:"J'ai un conseil utile pour toi, mais tu n'en tiendras pas compte, comme d'habitude." },
+  ],
+  exercise2: [
+    { fr:"Votre initiative a recueilli l'admiration de tout le monde.", ar:'حَظِيَتْ مُبَادَرَتُكُمْ بِإِعْجَابِ النَّاسِ كُلِّهِمْ.', tr:"Haziyat moubàdaratoukoum bi-i'jàbi an-nàsi koullihim." },
+    { fr:"Il convient de mentionner que tous les hommes ne se comportent pas ainsi.", ar:'جَدِيرٌ بِالذِّكْرِ أَنَّ الرِّجَالَ كُلَّهُمْ لاَ يَتَصَرَّفُونَ بِهَذَا الشَّكْلِ.', tr:"Jadîroun bi-adh-dhikri anna ar-rijàla koullahoum là yatasarrafoùna bi-hàdhà ach-chakli." },
+    { fr:"Il ne faut pas que je dépasse les limites permises sur ce site électronique.", ar:'عَلَيَّ أَلاَّ أَتَجَاوَزَ الْحُدُودَ الْمَسْمُوحَ بِهَا فِي هَذَا الْمَوْقِعِ الْإِلِكْتُرُونِيِّ.', tr:"'Alayya allà atajàwaza al-houdoùda al-masmoùha bihà fî hàdhà al-maouqi'i al-iliktroùniyyi." },
+    { fr:"L'initiative de ces femmes est digne de mention et d'intérêt.", ar:'مُبَادَرَةُ أُولَئِكَ النِّسَاءِ جَدِيرَةٌ بِالذِّكْرِ وَالْاِهْتِمَامِ.', tr:"Moubàdaratou oulà'ika an-nisà'i jadîratoun bi-adh-dhikri wa al-ihtimàmi." },
+    { fr:"Ce site me permet d'envoyer des nouvelles à tous mes amis.", ar:'يَسْمَحُ لِي هَذَا الْمَوْقِعُ بِإِرْسَالِ أَخْبَارٍ إِلَى أَصْدِقَائِي كُلِّهِمْ.', tr:"Yasmahou lî hàdhà al-maouqi'ou bi-irsàli akhbàrin ilà asdiqà'î koullihim." },
+  ],
+};
+
+const DAILY_LESSON_6 = {
+  num: 6,
+  titleFr: 'Les deux associés en affaires',
+  titleAr: 'شَرِيكَا الْأَعْمَالِ',
+  fullAudioUrl: null,
+  introFr: "Deux associés très différents physiquement, mais qui forment pourtant une équipe redoutable en affaires... et dont les épouses s'entendent à merveille, surtout pour commérer !",
+  dialogue: [
+    { ar:'لاَ يُمْكِنُ اعْتِبَارُهُمَا كَتَوْأَمَيْنِ!', tr:"Là youmkinou (i)'tibàrouhoumà ka-taou'amayni !", fr:"On ne peut pas les prendre pour (il n'est pas possible la considération-d'eux-deux comme) des jumeaux !", note:1, audioUrl:null },
+    { ar:'أَحَدُهُمَا ضَخْمٌ وَطَوِيلُ الْقَامَةِ وَالْآخَرُ قَصِيرٌ نَحِيلٌ.', tr:"Ahadouhoumà dakhmoun wa tawîlou al-qàmati wa al-àkharou qasîroun nahîloun.", fr:"L'un (-des-deux) est corpulent (énorme) et de haute taille et l'autre est petit [et] fluet.", audioUrl:null },
+    { ar:'عِنْدَمَا يُعَانِقُكَ الضَّخْمُ فَكَأَنَّهُ يَبْتَلِعُكَ', tr:"'indamà you'àniqouka ad-dakhmou fa-ka'annahou yabtali'ouka", fr:"Quand le gros vous (te) prend dans ses bras (t'étreint), on dirait qu'il va vous avaler", note:2, audioUrl:null },
+    { ar:'وَعِنْدَمَا تُصَافِحُ الْآخَرَ، تَحْبِسُ أَنْفَاسَكَ مَخَافَةَ أَنْ يَطِيرَ.', tr:"wa 'indamà tousàfihou al-àkhara, tahbisou anfàsaka makhàfata an yatîra.", fr:"et quand on serre (tu serres) la main de l'autre, on retient (tu retiens tes) souffle(s) de crainte qu'il ne s'envole.", audioUrl:null },
+    { ar:'غَيْرَ أَنَّ الْإِثْنَيْنِ يُعَدَّانِ مِنْ أَفْضَلِ الْخُبَرَاءِ فِي الْمُعَامَلاَتِ الْمَالِيَّةِ.', tr:"Ghayra anna al-ithnayni you'addàni min afdali al-khoubarà'i fî al-mou'àmalàti al-màliyyati.", fr:"Cependant tous les deux comptent parmi les meilleurs experts de la finance.", note:3, audioUrl:null },
+    { ar:'لاَ نَعْرِفُ أَبَدًا هَلْ يَتَحَدَّثَانِ بِالْهَزْلِ أَمْ بِالْجِدِّ', tr:"Là na'rifou abadan hal yatahaddathàni bil-hazli am bil-jiddi", fr:"On ne sait (nous ne savons) jamais s'ils parlent en plaisantant ou sérieusement", note:4, audioUrl:null },
+    { ar:'وَلَكِنْ، فِي نِهَايَةِ الْمَطَافِ، يَنْجَحَانِ دَائِمًا فِي تَحْقِيقِ هَدَفِهِمَا.', tr:"wa làkin, fî nihàyati al-matàfi, yanjahàni dà'iman fî tahqîqi hadafihimà.", fr:"mais au bout du compte, ils obtiennent toujours ce qu'ils veulent.", audioUrl:null },
+    { ar:'لَيْسَ بِإِسْتِطَاعَةِ أَحَدٍ أَنْ يَفْضَحَهُمَا', tr:"Laysa bi-(i)stità'ati ahadin an yafdahahoumà", fr:"Personne ne peut les prendre en défaut", audioUrl:null },
+    { ar:'فَإِذَا بَدَا الْأَوَّلُ مُتَرَدِّدًا فِي إِعْطَاءِ جَوَابٍ،', tr:"fa-idhà badà al-awwalou moutaraddidan fî i'tà'i jawàbin,", fr:"et si l'un (le premier) paraît hésiter à donner une réponse,", audioUrl:null },
+    { ar:'يَطِيرُ الثَّانِي لِنَجْدَتِهِ وَالْأَمْرُ مَقْضِيٌّ.', tr:"yatîrou ath-thànî li-najdatihi wa al-amrou maqdiyyoun.", fr:"l'autre (le second) vole à son secours et l'affaire est réglée.", note:5, audioUrl:null },
+    { ar:'مَا أَحْسَنَ هَذِهِ الشَّرَاكَةَ!', tr:"Mà ahsana hàdhihi ach-charàkata !", fr:"Quelle association réussie !", note:6, audioUrl:null },
+    { ar:'رَغْمَ عَدَمِ التَّجَانُسِ الظَّاهِرِيِّ فِيمَا بَيْنَهُمَا!', tr:"Raghma 'adami at-tajànousi az-zàhiriyyi fîmà baynahoumà !", fr:"malgré la différence d'apparence entre eux deux !", note:7, audioUrl:null },
+    { ar:'عِنْدَمَا تُصَادِفُ زَوْجَتَيِ الشَّرِيكَيْنِ، تَنْفَجِرُ ضَحِكًا', tr:"'indamà tousàdifou zaoujatay-i ach-charîkayni, tanfajirou dahkan", fr:"[Et] s'il vous arrive de rencontrer les femmes des deux associés, on éclate de rire", audioUrl:null },
+    { ar:'لِأَنَّهُمَا مُتَنَاقِضَتَانِ كُلَّ التَّنَاقُضِ مَعَ زَوْجَيْهِمَا', tr:"li'annahoumà moutanàqidatàni koulla at-tanàqoudi ma'a zaoujayhimà", fr:"parce qu'elles [sont] toutes deux exactement l'opposé de leurs (deux) maris", note:8, audioUrl:null },
+    { ar:'وَهُنَاكَ تَفَاهُمٌ تَامٌّ بَيْنَ الْمَرْأَتَيْنِ،', tr:"wa hounàka tafàhoumoun tàmmoun bayna al-mar'atayni,", fr:"et il y a une entente parfaite entre les deux femmes,", audioUrl:null },
+    { ar:'وَخَاصَّةً فِي فَنِّ «الْقِيلِ وَالْقَالِ».', tr:"wa khàssatan fî fanni «al-qîl wa al-qàl».", fr:"[et] surtout dans l'art du commérage.", audioUrl:null },
+  ],
+  notes: {
+    1: "① charìkà al-a'màli = « les associés en affaires » et, plus loin, zaoujatay ach-charìkayni = « les deux épouses des deux associés » : le noûn final du duel — comme du pluriel — disparaît quand le nom est en annexion.",
+    2: "② Dans les phrases 3 et 4, l'arabe utilise « tu » à la place du « vous » du français, et encore « tu » à la place du « on » : comme en français populaire.",
+    3: "③ khoubarà' est le pluriel de khabîr (expert), sur le modèle fa'îl, fou'alà' — comme wazîr, wouzarà' (ministre) ou ra'îs, rou'asà' (président). Ces pluriels sont diptotes : indéterminés, ils ne portent pas de tanwîn et n'ont que deux terminaisons (-ou / -a).",
+    4: "④ Là na'rifou hal...am... = « nous ne savons pas si... ou... » : on emploie en principe le discours direct en arabe. Dans la langue d'aujourd'hui, on remplace souvent hal par mà idhà.",
+    5: "⑤ maqdiyyoun = « réglé, exécuté » : de la racine défectueuse qadà (achever, exécuter). De la même famille, qàdìn signifie « juge, cadi » et qadà' signifie « jugement, verdict » ou « justice ».",
+    6: "⑥ mà ahsana hàdhihi ach-charàkata = « Quelle belle association ! » (« qu'il-a-fait-belle cette association ») : pour les phrases exclamatives, cette tournure utilise mà suivi d'un verbe de IVe forme et d'un complément d'objet direct.",
+    7: "⑦ raghma 'adami at-tajànousi = « malgré la non-homogénéité » : 'adamou + nom en annexion construit des termes de sens négatif, tout comme ghayrou + adjectif fabrique des adjectifs en « dés-, in- »...",
+    8: "⑧ li'annahoumà moutanàqidatàni koulla at-tanàqoudi ma'a zaoujayhimà : littéralement « parce-que-toutes-deux [sont] deux-opposées [avec] toute l'opposition avec leurs-deux-maris ». On traduit « exactement » avec un complément de manière (au cas direct) de la même racine que le participe actif.",
+  },
+  vocabBox: {
+    title: "l'art du commérage",
+    items: [
+      { ar:'اَلْقِيلُ وَالْقَالُ', tr:"al-qîl wa al-qàl", fr:"Le commérage (littéralement « le-il-a-été-dit et le-il-a-dit »)" },
+    ],
+  },
+  exercise1: [
+    { ar:'إِذَا أَرَدْتَ أَنْ تَنْجَحَ دَائِمًا فِي تَحْقِيقِ أَهْدَافِكَ فَأَصْغِ إِلَى نَصَائِحِي!', tr:"Idhà aradta an tanjaha dà'iman fî tahqîqi ahdàfika fa-asghi ilà nasà'ihî !", fr:"Si tu veux toujours réussir dans la réalisation de tes buts, eh bien, écoute mes conseils !" },
+    { ar:'عِنْدَمَا يُصَافِحُكَ بِشِدَّةٍ فَكَأَنَّهُ يَقْطَعُ مِنْكَ النَّفَسَ.', tr:"'indamà yousàfihouka bi-chiddatin fa-ka'annahou yaqta'ou minka an-nafasa.", fr:"Quand il vous serre la main avec force, on dirait qu'il vous coupe le souffle." },
+    { ar:'إِحْدَاهُمَا ضَخْمَةٌ وَالْأُخْرَى نَحِيلَةٌ فَلاَ يُمْكِنُ اعْتِبَارُهُمَا تَوْأَمَتَيْنِ.', tr:"Ihdàhoumà dakhmatoun wa al-oukhrà nahîlatoun fa-là youmkinou (i)'tibàrouhoumà taou'amatayni.", fr:"L'une des deux est énorme et l'autre fluette et on ne peut pas les prendre pour des jumelles." },
+    { ar:'هُنَّ مِنْ بَيْنِ الْخَبِيرَاتِ فِي الْمُعَامَلاَتِ الْعَاطِفِيَّةِ.', tr:"Hounna min bayni al-khabîràti fî al-mou'àmalàti al-'àtifiyyati.", fr:"Elles font partie des expertes en transactions sentimentales." },
+    { ar:'فِي نِهَايَةِ الْمَطَافِ، طَارَ شَرِيكِي لِنَجْدَتِي وَصَارَ الْأَمْرُ مَقْضِيًّا.', tr:"Fî nihàyati al-matàfi, tàra charîkî li-najdatî wa sàra al-amrou maqdiyyan.", fr:"En fin de compte, mon associé a volé à mon secours et l'affaire a été réglée." },
+  ],
+  exercise2: [
+    { fr:"Je ne sais pas s'il parle en plaisantant ou sérieusement.", ar:'لاَ أَعْرِفُ هَلْ يَتَحَدَّثُ بِالْهَزْلِ أَمْ بِالْجِدِّ.', tr:"Là a'rifou hal yatahaddathou bil-hazli am bil-jiddi." },
+    { fr:"Il n'est pas possible que je te donne une réponse convenable.", ar:'لَيْسَ بِاسْتِطَاعَتِي أَنْ أُعْطِيَكَ جَوَابًا مُنَاسِبًا.', tr:"Laysa bi-(i)stità'atî an ou'tiyaka jawàban mounàsiban." },
+    { fr:"Vous êtes hésitants ; il n'y a pas de doute que l'affaire n'est pas réglée.", ar:'أَنْتُمْ مُتَرَدِّدُونَ؛ لاَ شَكَّ أَنَّ الْأَمْرَ غَيْرُ مَقْضِيٍّ!', tr:"Antoum moutaraddidoùna ; là chakka anna al-amra ghayra maqdiyyin !" },
+    { fr:"Je ne sais pas s'il reviendra ou non.", ar:'لاَ أَدْرِي هَلْ سَيَعُودُ أَمْ لاَ.', tr:"Là adrî hal sa-ya'oùdou am là." },
+    { fr:"Malgré leur disparité, ce sont (eh bien-eux-deux) deux jumeaux.", ar:'رَغْمَ عَدَمِ التَّجَانُسِ بَيْنَهُمَا فَإِنَّهُمَا تَوْأَمَانِ.', tr:"Raghma 'adami at-tajànousi baynahoumà fa-innahoumà taou'amàni." },
+  ],
+};
+
+const DAILY_LESSON_7 = {
+  num: 7,
+  titleFr: 'Révision',
+  titleAr: 'مُرَاجَعَةٌ',
+  fullAudioUrl: null,
+  introFr: "Ce chapitre fait le point sur les leçons 1 à 6 : temps composés, impératif, défense et injonctif, VIIIe forme, traduction de « on »... Les phrases ci-dessous sont des exemples tirés des leçons précédentes — chacune illustre un point de grammaire (touche « Note » pour la revoir). L'exercice reprend le thème de l'horoscope de la leçon 1 !",
+  dialogue: [
+    { ar:'كَانَتْ تُصْغِي إِلَى صَدِيقَتِهَا', tr:"Kànat tousghî ilà sadîqatihà", fr:"Elle écoutait son amie (leçon 5, phrase 15)", note:1, audioUrl:null },
+    { ar:'...مَبْلَغٌ كُنْتُ قَدْ سَلَّفْتُهُ إِيَّاهُ', tr:"...mablaghoun kountou qad sallaftouhou iyyàhou", fr:"...une somme que je lui avais prêtée (leçon 1, exercice 2)", note:1, audioUrl:null },
+    { ar:'تَكُونُ النُّجُومُ قَدْ صَدَقَتْ', tr:"Takoùnou an-noujoùmou qad sadaqat", fr:"L'horoscope aura dit vrai (leçon 1, note 7)", note:1, audioUrl:null },
+    { ar:'إِسْمَعِي!', tr:"Isma'î !", fr:"Écoute (f.) ! (leçon 1)", note:2, audioUrl:null },
+    { ar:'إِجْلِسْ!', tr:"Ijlis !", fr:"Assieds-toi !", note:2, audioUrl:null },
+    { ar:'أُنْظُرْ!', tr:"Onzour !", fr:"Regarde ! (leçon 2, phrase 9)", note:2, audioUrl:null },
+    { ar:'لاَ تَتَصَرَّفْ بِهَذَا الشَّكْلِ!', tr:"Là tatasarraf bi-hàdhà ach-chakli !", fr:"Ne te comporte pas de cette façon ! (leçon 5, phrase 10)", note:3, audioUrl:null },
+    { ar:'لِيَذْهَبْ إِلَى الْجَحِيمِ!', tr:"Li-yadhhab ilà al-jahîmi !", fr:"Qu'il aille au diable ! (leçon 2, phrase 15)", note:3, audioUrl:null },
+    { ar:'لَمْ يَعُدْ.', tr:"Lam ya'oud.", fr:"Il n'est pas revenu.", note:4, audioUrl:null },
+    { ar:'لَنْ يَرُدَّ لَكَ...', tr:"Lan yarouddà laka...", fr:"Il ne te rendra pas... (leçon 1, phrase 7)", note:4, audioUrl:null },
+    { ar:'سَيُضْطَرُّ إِلَى قَطْعِ الْمَاءِ.', tr:"Sa-youdtarrou ilà qat'i al-mà'i.", fr:"Il va être contraint de couper l'eau. (leçon 2, note 4)", note:5, audioUrl:null },
+  ],
+  notes: {
+    1: "① Les temps composés : l'imparfait se forme avec kàna + l'inaccompli, le plus-que-parfait avec kàna + qad + l'accompli, et le futur antérieur avec yakoùnou + qad + l'accompli.",
+    2: "② L'impératif simple a 3 schémas selon la 2e lettre du verbe : if'al (comme isma'), if'il (comme ijlis), ouf'oul (comme onzour). Au féminin, on ajoute toujours un -î final.",
+    3: "③ La défense (interdiction) se forme avec là + l'apocopé. L'injonctif (pour la 3e personne ou le « nous » de politesse) se forme avec li- + l'apocopé. Attention à ne pas confondre li- + apocopé (injonctif) et li- + subjonctif (« pour que »).",
+    4: "④ lam + apocopé donne un passé à la forme négative (« il n'est pas... »). lan + subjonctif donne un futur à la forme négative (« il ne fera pas »).",
+    5: "⑤ À la VIIIe forme, l'infixe -ta- s'emphatise au contact d'une lettre emphatique de la racine (darra → idtarra). À l'inverse, i'tadhara (« s'excuser ») garde son orthographe normale malgré la même forme.",
+    6: "⑥ Pour traduire « on », l'arabe utilise la 3e personne du pluriel, le passif, ou « nous »/« tu » selon le contexte. Le discours direct est presque toujours utilisé en arabe, même là où le français passerait au discours indirect.",
+    7: "⑦ Le noûn final du duel et du pluriel externe disparaît quand le nom est en annexion (ex : fallâhî manâtiqi « les paysans des régions », charîkà al-a'màli « les deux associés en affaires »).",
+    8: "⑧ qad/laqad + accompli marque un passé récent (« déjà, vient de... »), renforcé par mou'akhkharan (« dernièrement »). sabaqa an + accompli traduit aussi « déjà » (« il s'est déjà produit que... »).",
+  },
+  vocabBox: {
+    title: 'expressions utiles à retenir',
+    items: [
+      { ar:'أَدْرِي / لاَ أَدْرِي', tr:"adrî / là adrî", fr:'Je sais / je ne sais pas' },
+      { ar:'وَلِمَ لاَ؟', tr:"wa lima là ?", fr:'Et pourquoi pas ?' },
+      { ar:'مَا الْحَدَثُ؟', tr:"mà al-hadathou ?", fr:"Que se passe-t-il ?" },
+      { ar:'اَلْمَذْكُورُ / اَلْمَذْكُورَةُ', tr:"al-madhkoùr(ou) / al-madhkoùra(tou)", fr:"Le/la mentionné(e)" },
+      { ar:'جَدِيرٌ بِالذِّكْرِ', tr:"jadîroun bi-adh-dhikri", fr:'Digne de mention' },
+      { ar:'مُسْتَحِيلٌ!', tr:"moustahîl(oun) !", fr:'Impossible !' },
+      { ar:'هَذَا أَمْرٌ مُؤَكَّدٌ!', tr:"hàdhà [amroun] mou'akkad(oun) !", fr:"Ça, c'est sûr !" },
+      { ar:'يَا وَيْلِي!', tr:"yà waylî !", fr:'Malheur à moi !' },
+      { ar:'يَا لِلْمُفَاجَأَةِ!', tr:"yà lil-moufàja'a(ti) !", fr:'Quelle surprise !' },
+      { ar:'لِيَذْهَبْ إِلَى الْجَحِيمِ!', tr:"li-yadhhab ilà al-jahîm(i) !", fr:"Qu'il aille au diable (en enfer) !" },
+    ],
+  },
+  exercise1: [
+    { ar:'بُرْجُ الْحَمَلِ: خِلاَلَ هَذِهِ الْأَيَّامِ، سَوْفَ تُضْطَرُّ إِلَى الْقِيَامِ بِسَفْرَةٍ غَيْرِ مُتَوَقَّعَةٍ.', tr:"Bourjou al-hamali : Khilàla hàdhihi al-ayyàmi, saoufa toudtarrou ilà al-qiyàmi bi-safratin ghayri moutawaqqa'atin.", fr:"Bélier : Ces jours-ci, tu seras contraint d'effectuer un voyage imprévu." },
+    { ar:'بُرْجُ الثَّوْرِ: سَيَقْبِضُ أَخُوكَ مَبْلَغًا كَبِيرًا، رُبَّمَا يُسَلِّفُكَ شَيْئًا مِنَ النُّقُودِ.', tr:"Bourjou ath-thawri : Sa-yaqbidou akhoùka mablaghan kabîran ; roubbamà yousallifouka chay'an min-a an-nouqoùdi.", fr:"Taureau : Ton frère va toucher une grosse somme ; peut-être te prêtera-t-il un peu d'argent." },
+    { ar:'بُرْجُ الْجَوْزَاءِ: سَبَقَ أَنْ لَقِيتَ صُعُوبَاتٍ كَثِيرَةً فِي حَيَاتِكَ الْعَاطِفِيَّةِ؛ وَلَكِنْ، مِنَ الْآنَ فَكُلُّ شَيْءٍ سَيَتِمُّ عَلَى مَا يُرَامُ.', tr:"Bourjou al-jawzà'i : Sabaqa an laqita sou'oùbàtin kathîratan fî hayàtika al-'àtifiyyati ; wa làkin, min-a al-àni fa-koullou chay'in sa-yatimmou 'alà mà yourâmou.", fr:"Gémeaux : Tu as déjà rencontré de nombreuses difficultés dans ta vie sentimentale ; mais, à partir de maintenant, tout va s'arranger." },
+    { ar:'بُرْجُ السَّرَطَانِ: أُطْلُبْ مِنْ مُدِيرِكَ أَنْ يُعْطِيَكَ سُلْفَةً فَقَدْ تَحْصُلُ عَلَيْهَا لِأَنَّ الْيَوْمَ هُوَ يَوْمُ حَظٍّ لَكَ.', tr:"Bourjou as-saratàni : Outloub min moudîrika an you'tiyaka soulfatan fa-qad tahsoulou 'alayhà li'anna al-yaouma houwa yaoumou hazzin laka.", fr:"Cancer : Demande à ton directeur de te donner une avance et peut-être l'obtiendras-tu, parce qu'aujourd'hui est ton jour de chance." },
+    { ar:'بُرْجُ الْأَسَدِ: دَعِي زَوْجَكِ يَذْهَبُ إِلَى الْمَقْهَى كُلَّ يَوْمٍ، تَسْتَرِيحِينَ خِلاَلَ سَاعَتَيْنِ فِي الْيَوْمِ عَلَى الْأَقَلِّ.', tr:"Bourjou al-asadi : Da'î zaoujaki yadhhab ilà al-maqhà koulla yaoumin, tastarîhîna khilàla sà'atayni fî al-yaoumi 'alà al-aqalli.", fr:"Lion : Laisse ton mari aller au café chaque jour, tu te reposeras au moins deux heures par jour." },
+    { ar:'بُرْجُ الْعَذْرَاءِ (السُّنْبُلَةِ): لاَ تَتَصَرَّفْ بِهَذَا الشَّكْلِ وَبِالتَّالِي لَنْ تُوَاجِهَ سُخْطَ النِّسَاءِ الْغَضِبَاتِ.', tr:"Bourjou al-'adhrà'i (as-sounboulati) : Là tatasarraf bi-hàdhà ach-chakli wa bi-at-tàlî lan touwàjiha soukhta an-nisà'i al-ghadibàti.", fr:"Vierge : Ne te comporte pas de cette façon, et ainsi tu n'auras pas à affronter l'indignation des femmes en colère." },
+  ],
+  exercise2: [],
+  isRevision: true,
+  revisionNote: "Cette leçon est une leçon de révision : il n'y a pas de nouvel exercice de traduction. Relis plutôt les points de grammaire ci-dessus, ainsi que le tableau d'expressions — et pourquoi pas les 6 leçons précédentes !",
+};
+
+const ALL_LESSONS = { 1: DAILY_LESSON_1, 2: DAILY_LESSON_2, 3: DAILY_LESSON_3, 4: DAILY_LESSON_4, 5: DAILY_LESSON_5, 6: DAILY_LESSON_6, 7: DAILY_LESSON_7 };
+
+function renderLessonList(){
+  clearQuestionTimer();
+  document.body.classList.remove('quiz-active');
+  currentBlock = null;
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromLessonListBtn" style="cursor:pointer;">← Retour</button>`;
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('footerNote').textContent = '';
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="cat-tag">📖 Leçon du jour</div>
+    <div class="word-fr" style="font-size:clamp(22px,4.5vw,28px);">Choisis une leçon</div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:16px;">
+      ${Object.values(ALL_LESSONS).map(l => `
+        <button class="opt" data-lesson-pick="${l.num}" style="text-align:left;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div style="font-size:11px;color:var(--text-dim);font-weight:700;">LEÇON ${l.num}</div>
+            <div style="font-weight:800;font-size:16px;color:var(--text);margin-top:2px;">${escapeHtml(l.titleFr)}</div>
+          </div>
+          <span style="font-family:'Changa',sans-serif;direction:rtl;color:var(--purple);font-weight:700;font-size:18px;">${escapeHtml(l.titleAr)}</span>
+        </button>
+      `).join('')}
+    </div>
+  `;
+  document.getElementById('backFromLessonListBtn').addEventListener('click', renderBlockSelect);
+  card.querySelectorAll('[data-lesson-pick]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      lessonCurrentId = parseInt(btn.dataset.lessonPick, 10);
+      lessonOpenNotes = new Set();
+      renderDailyLesson();
+    });
+  });
+}
 
 function renderDailyLesson(){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
   currentBlock = null;
-  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromLessonBtn" style="cursor:pointer;">← Retour</button>`;
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromLessonBtn" style="cursor:pointer;">← Liste des leçons</button>`;
   document.getElementById('progressFill').style.width = '0%';
   document.getElementById('footerNote').textContent = '';
 
   const lesson = ALL_LESSONS[lessonCurrentId];
   const card = document.getElementById('quizCard');
   card.innerHTML = `
-    <div class="cat-tag">📖 Leçon du jour · Leçon ${lesson.num}</div>
-    <div class="word-fr" style="font-size:clamp(20px,4.2vw,27px);display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+    <div class="cat-tag">📖 Leçon ${lesson.num} / ${Object.keys(ALL_LESSONS).length}</div>
+    <div class="word-fr" style="font-size:clamp(20px,4.2vw,27px);display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
       ${escapeHtml(lesson.titleFr)}
       <span style="font-family:'Changa',sans-serif;direction:rtl;color:var(--purple);font-weight:700;font-size:clamp(18px,4vw,24px);">${escapeHtml(lesson.titleAr)}</span>
+      <button class="speak-btn small" id="titleSpeakArBtn" title="Titre en arabe">🇸🇦</button>
+      <button class="speak-btn small" id="titleSpeakFrBtn" title="Titre en français">🇫🇷</button>
     </div>
     <div class="question-line">${escapeHtml(lesson.introFr)}</div>
 
     <div class="mode-row" style="margin:14px 0 6px;">
-      ${Object.keys(ALL_LESSONS).map(id => `<button class="mode-chip ${parseInt(id,10)===lessonCurrentId?'active':''}" data-lesson-tab="${id}">📖 Leçon ${id}</button>`).join('')}
-    </div>
-    <div class="mode-row" style="margin:0 0 14px;">
       <button class="mode-chip ${lessonTranslitOn ? 'active' : ''}" id="toggleTranslitBtn">${lessonTranslitOn ? '🙈 Masquer la translittération' : '👁 Afficher la translittération'}</button>
-      <button class="mode-chip" id="listenAllLessonBtn">🔊 Écouter tout le dialogue (arabe)</button>
+    </div>
+    <div style="background:var(--surface-sunken);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:14px;">
+      <div style="font-weight:700;font-size:12.5px;color:var(--text-dim);margin-bottom:8px;">🔊 Écouter tout le dialogue :</div>
+      <div class="mode-row">
+        <button class="mode-chip" data-listen-mode="ar">🇸🇦 Arabe</button>
+        <button class="mode-chip" data-listen-mode="fr">🇫🇷 Français</button>
+        <button class="mode-chip" data-listen-mode="both">🇸🇦+🇫🇷 Les deux</button>
+        ${lesson.fullAudioUrl ? `<button class="mode-chip" data-listen-mode="mp3">🎧 Enregistrement original</button>` : ''}
+      </div>
     </div>
 
     <div id="lessonDialogueList" style="display:flex;flex-direction:column;gap:10px;text-align:left;"></div>
@@ -13172,15 +13539,16 @@ function renderDailyLesson(){
     <div id="lessonNotesList" style="display:flex;flex-direction:column;gap:8px;text-align:left;"></div>
 
     <div style="font-weight:800;color:var(--purple);margin:24px 0 4px;">🔮 Vocabulaire — ${escapeHtml(lesson.vocabBox.title)}</div>
-    <div class="question-line" style="text-align:left;margin:0 0 10px;">Touche un mot pour l'entendre (🇸🇦 arabe · 🇫🇷 français).</div>
+    <div class="question-line" style="text-align:left;margin:0 0 10px;">Touche un mot pour l'entendre (🇸🇦 arabe · 🇫🇷 français), ou lance le jeu !</div>
+    <button class="restart-btn" id="vocabGameBtn" style="display:flex;align-items:center;gap:8px;margin-bottom:12px;background:linear-gradient(135deg,#F97316,#EA580C);border-color:#B45309;">🎮 Jeu de vocabulaire (paires)</button>
     <div class="options" id="zodiacGrid" style="grid-template-columns:repeat(auto-fill,minmax(130px,1fr));"></div>
     ${lesson.vocabBox.proverb ? `<div class="result-card" style="margin-top:12px;text-align:center;">
       <div style="font-family:'Changa',sans-serif;direction:rtl;font-size:18px;color:var(--purple);font-weight:700;">${escapeHtml(lesson.vocabBox.proverb.ar)}</div>
       <div style="font-size:12px;color:var(--text-dim);font-style:italic;margin-top:4px;">${escapeHtml(lesson.vocabBox.proverb.tr)}</div>
       <div style="font-size:13px;color:var(--text);margin-top:6px;">💬 ${escapeHtml(lesson.vocabBox.proverb.fr)}</div>
       <div style="display:flex;gap:8px;justify-content:center;margin-top:8px;">
-        <button class="speak-btn small" id="proverbSpeakArBtn" title="Écouter en arabe">🇸🇦 ${SPEAK_SVG_SMALL}</button>
-        <button class="speak-btn small" id="proverbSpeakFrBtn" title="Écouter en français">🇫🇷 ${SPEAK_SVG_SMALL}</button>
+        <button class="speak-btn small" id="proverbSpeakArBtn" title="Écouter en arabe">🇸🇦</button>
+        <button class="speak-btn small" id="proverbSpeakFrBtn" title="Écouter en français">🇫🇷</button>
       </div>
     </div>` : ''}
 
@@ -13192,23 +13560,21 @@ function renderDailyLesson(){
     <div id="lessonExercise2List" style="display:flex;flex-direction:column;gap:10px;"></div>
 
     <button class="restart-btn" id="finishLessonBtn" style="margin-top:24px;">✓ J'ai terminé cette leçon</button>
+
+    <div id="lessonNoteModal" class="modal-overlay" style="display:none;"></div>
   `;
-  document.getElementById('backFromLessonBtn').addEventListener('click', renderBlockSelect);
-  document.querySelectorAll('[data-lesson-tab]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      lessonCurrentId = parseInt(btn.dataset.lessonTab, 10);
-      lessonOpenNotes = new Set();
-      renderDailyLesson();
-    });
-  });
+  document.getElementById('backFromLessonBtn').addEventListener('click', renderLessonList);
+  document.getElementById('titleSpeakArBtn').addEventListener('click', () => playLineAudio(lesson.titleAr, 'ar-SA', null));
+  document.getElementById('titleSpeakFrBtn').addEventListener('click', () => playLineAudio(lesson.titleFr, 'fr-FR', null));
 
   document.getElementById('toggleTranslitBtn').addEventListener('click', () => {
     lessonTranslitOn = !lessonTranslitOn;
     renderDailyLesson();
   });
-  document.getElementById('listenAllLessonBtn').addEventListener('click', () => playLessonDialogueSequentially(lesson, 0));
+  card.querySelectorAll('[data-listen-mode]').forEach(btn => {
+    btn.addEventListener('click', () => playLessonDialogueSequentially(lesson, 0, btn.dataset.listenMode));
+  });
 
-  // Dialogue — écoute arabe ET française pour chaque réplique
   const dlgList = document.getElementById('lessonDialogueList');
   dlgList.innerHTML = lesson.dialogue.map((line, i) => `
     <div class="result-card" data-line-idx="${i}">
@@ -13221,29 +13587,21 @@ function renderDailyLesson(){
         <div style="font-size:13.5px;color:var(--text-dim);flex:1;">${escapeHtml(line.fr)}</div>
         <button class="speak-btn small" data-speak-line-fr="${i}" title="Écouter en français">🇫🇷</button>
       </div>
-      ${line.note ? `<button class="mode-chip" data-jump-note="${line.note}" style="margin-top:8px;padding:4px 10px;font-size:11px;">📌 Note ${line.note}</button>` : ''}
+      ${line.note ? `<button class="mode-chip" data-open-note="${line.note}" style="margin-top:8px;padding:4px 10px;font-size:11px;">📌 Note ${line.note}</button>` : ''}
     </div>
   `).join('');
   dlgList.querySelectorAll('[data-speak-line-ar]').forEach(btn => {
-    btn.addEventListener('click', (e) => { e.stopPropagation(); speak(lesson.dialogue[parseInt(btn.dataset.speakLineAr,10)].ar, 'ar-SA'); });
+    btn.addEventListener('click', (e) => { e.stopPropagation(); const i = parseInt(btn.dataset.speakLineAr,10); playLineAudio(lesson.dialogue[i].ar, 'ar-SA', lesson.dialogue[i].audioUrl); });
   });
   dlgList.querySelectorAll('[data-speak-line-fr]').forEach(btn => {
     btn.addEventListener('click', (e) => { e.stopPropagation(); speak(lesson.dialogue[parseInt(btn.dataset.speakLineFr,10)].fr, 'fr-FR'); });
   });
-  dlgList.querySelectorAll('[data-jump-note]').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const n = btn.dataset.jumpNote;
-      lessonOpenNotes.add(parseInt(n,10));
-      renderLessonNotesList(lesson);
-      const el = document.querySelector(`[data-note-idx="${n}"]`);
-      if(el){ el.scrollIntoView({ behavior:'smooth', block:'center' }); el.classList.add('radio-block-selected'); setTimeout(() => el.classList.remove('radio-block-selected'), 1400); }
-    });
+  dlgList.querySelectorAll('[data-open-note]').forEach(btn => {
+    btn.addEventListener('click', (e) => { e.stopPropagation(); openNotePopup(lesson, parseInt(btn.dataset.openNote,10)); });
   });
 
   renderLessonNotesList(lesson);
 
-  // Vocabulaire — écoute arabe ET française
   const zGrid = document.getElementById('zodiacGrid');
   zGrid.innerHTML = lesson.vocabBox.items.map((z, i) => `
     <div class="opt" data-zodiac-idx="${i}" style="text-align:center;cursor:default;">
@@ -13265,17 +13623,14 @@ function renderDailyLesson(){
     });
   });
   zGrid.querySelectorAll('[data-zodiac-speak-fr]').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      speak(lesson.vocabBox.items[parseInt(btn.dataset.zodiacSpeakFr,10)].fr, 'fr-FR');
-    });
+    btn.addEventListener('click', (e) => { e.stopPropagation(); speak(lesson.vocabBox.items[parseInt(btn.dataset.zodiacSpeakFr,10)].fr, 'fr-FR'); });
   });
+  document.getElementById('vocabGameBtn').addEventListener('click', () => startVocabMatchGame(lesson));
   const proverbArBtn = document.getElementById('proverbSpeakArBtn');
   if(proverbArBtn){ proverbArBtn.addEventListener('click', () => speak(lesson.vocabBox.proverb.ar, 'ar-SA')); }
   const proverbFrBtn = document.getElementById('proverbSpeakFrBtn');
   if(proverbFrBtn){ proverbFrBtn.addEventListener('click', () => speak(lesson.vocabBox.proverb.fr, 'fr-FR')); }
 
-  // Exercice 1 (arabe → français) — écoute arabe directement, écoute française après révélation
   const ex1List = document.getElementById('lessonExercise1List');
   ex1List.innerHTML = lesson.exercise1.map((ex, i) => `
     <div class="result-card">
@@ -13307,8 +13662,12 @@ function renderDailyLesson(){
     });
   });
 
-  // Exercice 2 (français → arabe) — écoute française directement, écoute arabe après révélation
   const ex2List = document.getElementById('lessonExercise2List');
+  if(lesson.isRevision && lesson.revisionNote){
+    ex2List.innerHTML = `<div class="result-card" style="text-align:left;background:var(--surface-sunken);">
+      <div style="font-size:13.5px;color:var(--text);line-height:1.6;">📚 ${escapeHtml(lesson.revisionNote)}</div>
+    </div>`;
+  } else {
   ex2List.innerHTML = lesson.exercise2.map((ex, i) => `
     <div class="result-card">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
@@ -13338,6 +13697,7 @@ function renderDailyLesson(){
       btn.style.display = 'none';
     });
   });
+  }
 
   document.getElementById('finishLessonBtn').addEventListener('click', () => {
     recordDailyActivity();
@@ -13352,33 +13712,131 @@ function renderLessonNotesList(lesson){
   const notesList = document.getElementById('lessonNotesList');
   if(!notesList) return;
   const keys = Object.keys(lesson.notes).map(k => parseInt(k,10)).sort((a,b)=>a-b);
-  notesList.innerHTML = keys.map(k => {
-    const open = lessonOpenNotes.has(k);
-    return `<div class="result-card" data-note-idx="${k}" style="padding:10px 16px;cursor:pointer;">
-      <div data-toggle-note="${k}" style="font-weight:700;color:var(--purple);font-size:13px;">📌 Note ${k} ${open ? '▾' : '▸'}</div>
-      ${open ? `<div style="font-size:12.5px;color:var(--text-dim);margin-top:6px;line-height:1.6;">${escapeHtml(lesson.notes[k])}</div>` : ''}
-    </div>`;
-  }).join('');
-  notesList.querySelectorAll('[data-toggle-note]').forEach(el => {
-    el.addEventListener('click', () => {
-      const k = parseInt(el.dataset.toggleNote,10);
-      if(lessonOpenNotes.has(k)){ lessonOpenNotes.delete(k); } else { lessonOpenNotes.add(k); }
-      renderLessonNotesList(ALL_LESSONS[lessonCurrentId]);
-    });
+  notesList.innerHTML = keys.map(k => `
+    <button class="mode-chip" data-open-note-list="${k}" style="text-align:left;">📌 Note ${k}</button>
+  `).join('');
+  notesList.querySelectorAll('[data-open-note-list]').forEach(el => {
+    el.addEventListener('click', () => openNotePopup(lesson, parseInt(el.dataset.openNoteList,10)));
   });
 }
 
+function openNotePopup(lesson, noteKey){
+  const modal = document.getElementById('lessonNoteModal');
+  if(!modal) return;
+  modal.style.display = 'flex';
+  modal.innerHTML = `
+    <div class="modal-box" style="max-width:420px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div style="font-weight:800;color:var(--purple);font-size:16px;">📌 Note ${noteKey}</div>
+        <button class="chip" id="closeNoteModalBtn" style="cursor:pointer;">✕</button>
+      </div>
+      <div style="font-size:14px;color:var(--text);line-height:1.7;text-align:left;">${escapeHtml(lesson.notes[noteKey])}</div>
+    </div>
+  `;
+  document.getElementById('closeNoteModalBtn').addEventListener('click', closeNotePopup);
+  modal.addEventListener('click', (e) => { if(e.target === modal){ closeNotePopup(); } });
+}
+function closeNotePopup(){
+  const modal = document.getElementById('lessonNoteModal');
+  if(modal){ modal.style.display = 'none'; modal.innerHTML = ''; }
+}
+
 let lessonPlayToken = 0;
-function playLessonDialogueSequentially(lesson, idx){
+function playLessonDialogueSequentially(lesson, idx, mode){
+  mode = mode || 'ar';
   const myToken = ++lessonPlayToken;
+  if(mode === 'mp3' && lesson.fullAudioUrl){
+    const cardEl = document.getElementById('lessonDialogueList');
+    if(cardEl){ cardEl.scrollIntoView({ behavior:'smooth', block:'start' }); }
+    playLineAudio(lesson.titleFr, 'fr-FR', lesson.fullAudioUrl);
+    return;
+  }
   if(idx >= lesson.dialogue.length) return;
+  const line = lesson.dialogue[idx];
   const cardEl = document.querySelector(`[data-line-idx="${idx}"]`);
   if(cardEl){ cardEl.scrollIntoView({ behavior:'smooth', block:'center' }); cardEl.classList.add('radio-block-selected'); }
-  speak(lesson.dialogue[idx].ar, 'ar-SA', () => {
+  const next = () => {
     if(myToken !== lessonPlayToken) return;
     if(cardEl){ cardEl.classList.remove('radio-block-selected'); }
-    setTimeout(() => playLessonDialogueSequentially(lesson, idx+1), 400);
+    setTimeout(() => playLessonDialogueSequentially(lesson, idx+1, mode), 350);
+  };
+  if(mode === 'fr'){
+    speak(line.fr, 'fr-FR', next);
+  } else if(mode === 'both'){
+    playLineAudio(line.ar, 'ar-SA', line.audioUrl, () => { if(myToken !== lessonPlayToken) return; setTimeout(() => speak(line.fr, 'fr-FR', next), 250); });
+  } else {
+    playLineAudio(line.ar, 'ar-SA', line.audioUrl, next);
+  }
+}
+
+let vocabGameState = null;
+function startVocabMatchGame(lesson){
+  clearQuestionTimer();
+  document.body.classList.add('quiz-active');
+  const items = shuffle(lesson.vocabBox.items.slice()).slice(0, 8);
+  const tiles = [];
+  items.forEach((it, i) => {
+    tiles.push({ pairId:i, side:'ar', text:it.ar, speak:it.ar, lang:'ar-SA' });
+    tiles.push({ pairId:i, side:'fr', text:it.fr, speak:it.fr, lang:'fr-FR' });
   });
+  vocabGameState = { lesson, tiles: shuffle(tiles), selected:[], matched:new Set(), startTime: Date.now(), tries:0 };
+  renderVocabMatchGame();
+}
+function renderVocabMatchGame(){
+  const st = vocabGameState;
+  document.getElementById('scoreboard').innerHTML = `<div class="chip">🔗 <b>${st.matched.size}</b>/${st.tiles.length/2}</div><button class="chip" id="vocabGameExitBtn" style="cursor:pointer;">← Quitter</button>`;
+  document.getElementById('vocabGameExitBtn').addEventListener('click', () => renderDailyLesson());
+  document.getElementById('progressFill').style.width = Math.round((st.matched.size / (st.tiles.length/2)) * 100) + '%';
+  document.getElementById('footerNote').textContent = `${st.tries} essai${st.tries>1?'s':''}`;
+
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="cat-tag">🎮 Jeu de vocabulaire — ${escapeHtml(st.lesson.vocabBox.title)}</div>
+    <div class="question-line">Touche une carte arabe puis sa traduction française — chaque carte se prononce au toucher.</div>
+    <div class="options" id="vocabGameGrid" style="grid-template-columns:repeat(auto-fill,minmax(120px,1fr));margin-top:14px;"></div>
+  `;
+  const grid = document.getElementById('vocabGameGrid');
+  grid.innerHTML = st.tiles.map((t, i) => {
+    const isMatched = st.matched.has(t.pairId);
+    const isSelected = st.selected.includes(i);
+    return `<button class="opt ${isMatched?'correct':''} ${isSelected?'radio-block-selected':''}" data-tile-idx="${i}" ${isMatched?'disabled style="opacity:.4;cursor:default;"':''} style="text-align:center;min-height:70px;${t.side==='ar'?"font-family:'Changa',sans-serif;direction:rtl;":''}font-size:${t.side==='ar'?'16px':'13px'};font-weight:700;color:${t.side==='ar'?'var(--purple)':'var(--text)'};">
+      ${escapeHtml(t.text)}
+    </button>`;
+  }).join('');
+  grid.querySelectorAll('[data-tile-idx]').forEach(btn => {
+    btn.addEventListener('click', () => handleVocabTileClick(parseInt(btn.dataset.tileIdx,10)));
+  });
+}
+function handleVocabTileClick(idx){
+  const st = vocabGameState;
+  const tile = st.tiles[idx];
+  if(st.matched.has(tile.pairId) || st.selected.includes(idx)) return;
+  speak(tile.speak, tile.lang);
+  st.selected.push(idx);
+  if(st.selected.length === 1){ renderVocabMatchGame(); return; }
+  st.tries++;
+  const [i1, i2] = st.selected;
+  const t1 = st.tiles[i1], t2 = st.tiles[i2];
+  const isMatch = t1.pairId === t2.pairId && t1.side !== t2.side;
+  if(isMatch){
+    st.matched.add(t1.pairId);
+    st.selected = [];
+    playCorrectSound(); reactMascot('ok'); vibrate(35);
+    renderVocabMatchGame();
+    if(st.matched.size === st.tiles.length/2){
+      setTimeout(() => {
+        celebrate(); launchConfetti();
+        recordDailyActivity();
+        const durationSec = computeActiveDurationSec(st.startTime);
+        recordDailyStats(durationSec, true, st.matched.size * 5, 'vocabulaire');
+        setStatus(`🎉 Toutes les paires trouvées en ${st.tries} essais !`, 'ok');
+      }, 300);
+    }
+  } else {
+    playWrongSound(); reactMascot('ko'); vibrate([40,40,40]);
+    renderVocabMatchGame();
+    setTimeout(() => { st.selected = []; renderVocabMatchGame(); }, 800);
+  }
 }
 
 function renderDailyReading(){
