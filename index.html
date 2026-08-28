@@ -1096,7 +1096,10 @@
   .bmode{
     display:inline-flex;align-items:center;gap:2px;font-size:11px;font-weight:800;color:var(--text-dim);
     background:var(--surface-sunken);border:1px solid var(--border);padding:2px 6px;border-radius:7px;
+    cursor:pointer;transition:transform .12s;
   }
+  .bmode:hover{ transform:scale(1.12); border-color:var(--purple); }
+  .bmode:active{ transform:scale(0.95); }
   .bmode b{ color:var(--text);font-weight:800; }
   .bmode.ok{ background:rgba(34,197,94,0.14);border-color:rgba(34,197,94,0.35);color:var(--green-dark); }
   .bmode.ok b{ color:var(--green-dark); }
@@ -4444,6 +4447,55 @@ let score = { correct:0, total:0 };
 let catScore = {};
 let datasetHash = '';
 let sessionHistory = []; // {fr, ar, def, attempts} for words mastered this session, in mastery order
+
+/* ============ ▶️ REPRISE DE SESSION — si on quitte un mode sans le terminer ============
+   Sauvegarde l'état complet du quiz en cours à chaque nouvelle carte, pour pouvoir reprendre
+   exactement là où on s'était arrêté, même après avoir fermé l'app ou changé d'écran. */
+const IN_PROGRESS_KEY = 'lexiqueQuiz::inProgressSession';
+function saveInProgressSession(){
+  if(!queue || queue.length === 0) return; // rien à sauver si la session est terminée
+  try{
+    const state = {
+      currentBlock, gameMode, customBlockId: window.__customBlockId || null,
+      reviewSession: !!window.__reviewSession,
+      queue, score, masteredCount, comboStreak, sessionHistory, initialLength,
+      blockStartTime, totalHiddenMs, savedAt: Date.now(),
+    };
+    localStorage.setItem(nsKey(IN_PROGRESS_KEY), JSON.stringify(state));
+  }catch(e){}
+}
+function loadInProgressSession(){
+  try{
+    const raw = localStorage.getItem(nsKey(IN_PROGRESS_KEY));
+    if(!raw) return null;
+    const state = JSON.parse(raw);
+    if(Date.now() - state.savedAt > 48 * 3600 * 1000){ clearInProgressSession(); return null; } // expire après 48h
+    return state;
+  }catch(e){ return null; }
+}
+function clearInProgressSession(){
+  try{ localStorage.removeItem(nsKey(IN_PROGRESS_KEY)); }catch(e){}
+}
+function resumeInProgressSession(){
+  const state = loadInProgressSession();
+  if(!state) return;
+  currentBlock = state.currentBlock;
+  gameMode = state.gameMode;
+  window.__customBlockId = state.customBlockId;
+  window.__reviewSession = state.reviewSession;
+  queue = state.queue;
+  score = state.score;
+  masteredCount = state.masteredCount;
+  comboStreak = state.comboStreak;
+  sessionHistory = state.sessionHistory;
+  initialLength = state.initialLength;
+  blockStartTime = state.blockStartTime;
+  totalHiddenMs = state.totalHiddenMs || 0;
+  hiddenSince = document.hidden ? Date.now() : null;
+  renderScoreboard();
+  renderCard();
+}
+
 let attemptsByFr = {};   // fr -> attempt count so far, current block session
 
 function shuffle(arr){
@@ -9857,6 +9909,7 @@ function renderBlockSelect(){
       <div class="hero-title">Apprends avec <span class="grad">VocabVISION</span></div>
       <div class="hero-sub">${motto}</div>
       <button class="restart-btn" id="startNextBlockBtn" style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#F97316,#EA580C);border-color:#B45309;font-size:15px;padding:13px 30px;">▶ Commencer</button>
+      <div id="resumeSessionSlot"></div>
     </div>
 
     <div class="srs-card" id="srsCard"></div>
@@ -9983,6 +10036,27 @@ function renderBlockSelect(){
       renderScoreboard();
       renderCard();
     });
+  }
+
+  // ▶️ Bandeau "Reprendre où tu en étais" si une session a été quittée sans être terminée
+  const resumeSlot = document.getElementById('resumeSessionSlot');
+  const savedSession = loadInProgressSession();
+  if(savedSession && resumeSlot){
+    const label = savedSession.customBlockId
+      ? '🧩 bloc perso'
+      : (savedSession.reviewSession ? '🧠 révision' : `Bloc ${(savedSession.currentBlock ?? 0) + 1}`);
+    resumeSlot.innerHTML = `
+      <div class="result-card" style="margin-top:12px;text-align:center;background:var(--surface-sunken);">
+        <div style="font-size:12.5px;color:var(--text-dim);">⏸️ Session en cours, non terminée</div>
+        <div style="font-weight:800;color:var(--text);margin-top:2px;">${escapeHtml(label)} · ${MODE_LABELS[savedSession.gameMode] || savedSession.gameMode} · ${savedSession.score.correct}/${savedSession.score.total}</div>
+        <div style="display:flex;gap:8px;justify-content:center;margin-top:10px;">
+          <button class="restart-btn" id="resumeSessionBtn" style="margin:0;">▶️ Reprendre</button>
+          <button class="mode-chip" id="discardSessionBtn">✕ Ignorer</button>
+        </div>
+      </div>
+    `;
+    document.getElementById('resumeSessionBtn').addEventListener('click', resumeInProgressSession);
+    document.getElementById('discardSessionBtn').addEventListener('click', () => { clearInProgressSession(); renderBlockSelect(); });
   }
 
   // 🧠 Carte de révision espacée : combien de mots sont dus aujourd'hui, tous blocs confondus
@@ -10115,12 +10189,12 @@ function renderBlockSelect(){
   const grid = document.getElementById('blockGrid');
   const modeEmoji = { classic: '🎯', blank: '🕳️', chrono: '⚡', speak: '🎤', pairs: '🧩', dialogue: '🔀', repeat: '🗣️', listen: '🎧' };
 
-  function buildNotesHtml(perMode){
+  function buildNotesHtml(perMode, blockType, blockRef){
     return GAME_MODES.map(m => {
       const r = perMode[m];
       const val = r ? `${r.correct}` : '·';
       const ok = r && (r.correct / r.total) * 100 >= PASS_THRESHOLD;
-      return `<span class="bmode ${ok ? 'ok' : ''}" title="${modeEmoji[m]} ${r ? r.correct + '/' + r.total : 'non fait'}">${modeEmoji[m]}<b>${val}</b></span>`;
+      return `<span class="bmode ${ok ? 'ok' : ''}" data-mode-icon="${m}" data-block-type="${blockType}" data-block-ref="${escapeHtml(String(blockRef))}" title="${modeEmoji[m]} ${MODE_LABELS[m]} — ${r ? r.correct + '/' + r.total : 'toucher pour commencer'}">${modeEmoji[m]}<b>${val}</b></span>`;
     }).join('');
   }
   function buildCustomTileHtml(block){
@@ -10139,7 +10213,7 @@ function renderBlockSelect(){
         <div style="font-family:'Inter',sans-serif;font-weight:700;font-size:15px;">🧩 ${escapeHtml(block.title)}</div>
         ${statusLine}
         <div class="block-cat-tag">${escapeHtml(dominantCat)}${catSummary.length>1?` +${catSummary.length-1}`:''}</div>
-        <div class="bmodes">${buildNotesHtml(block.results)}</div>
+        <div class="bmodes">${buildNotesHtml(block.results, 'custom', block.id)}</div>
       </button>
       <button class="tile-peek" data-manage-custom="${block.id}" title="Gérer ce bloc" style="right:40px;">⚙️</button>
       <button class="tile-peek" data-peek-custom="${block.id}" title="Voir les mots">👁</button>
@@ -10173,7 +10247,7 @@ function renderBlockSelect(){
         <div style="font-family:'Inter',sans-serif;font-weight:700;font-size:16px;">${escapeHtml(getBlockTitle(i))}</div>
         ${statusLine}
         <div class="block-cat-tag">${escapeHtml(dominantCat)}${catSummary.length>1?` +${catSummary.length-1}`:''}</div>
-        <div class="bmodes">${buildNotesHtml(perMode)}</div>
+        <div class="bmodes">${buildNotesHtml(perMode, 'normal', i)}</div>
       </button>
       <button class="tile-peek" data-peek-block="${i}" title="Voir les mots">👁</button>
     </div>`;
@@ -10187,6 +10261,53 @@ function renderBlockSelect(){
     if(showCustomBlocks){ getCustomBlocksAt(i + 1).forEach(cb => { gridHtml += buildCustomTileHtml(cb); }); }
   });
   grid.innerHTML = gridHtml;
+
+  // 🎯 Icônes de mode cliquables sur chaque tuile : va directement dans le mode choisi, sans
+  // remonter à un écran de sélection — ou affiche le résumé si ce mode a déjà été fait.
+  grid.querySelectorAll('[data-mode-icon]').forEach(icon => {
+    icon.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const m = icon.dataset.modeIcon;
+      const type = icon.dataset.blockType;
+      if(typeof stopPeekPlay === 'function'){ stopPeekPlay(); }
+      if(typeof window.speechSynthesis !== 'undefined'){ window.speechSynthesis.cancel(); }
+      window.__reviewSession = false;
+      if(type === 'custom'){
+        const id = icon.dataset.blockRef;
+        const block = getCustomBlock(id);
+        if(!block) return;
+        window.__customBlockId = id;
+        gameMode = m;
+        const res = block.results[m];
+        if(res){
+          currentBlock = id;
+          document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="changeBlockBtn" style="cursor:pointer;">← Retour aux blocs</button>`;
+          document.getElementById('changeBlockBtn').addEventListener('click', renderBlockSelect);
+          renderCustomBlockRecapView(id, res, false);
+        } else {
+          buildCustomDeck(id);
+          renderScoreboard();
+          renderCard();
+        }
+      } else {
+        const idx = parseInt(icon.dataset.blockRef, 10);
+        if(!isBlockUnlocked(idx)) return;
+        window.__customBlockId = null;
+        gameMode = m;
+        const res = (blockResults[idx] || {})[m];
+        if(res){
+          currentBlock = idx;
+          document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="changeBlockBtn" style="cursor:pointer;">← Retour aux blocs</button>`;
+          document.getElementById('changeBlockBtn').addEventListener('click', renderBlockSelect);
+          renderRecapView(idx, res, false);
+        } else {
+          buildDeck(idx);
+          renderScoreboard();
+          renderCard();
+        }
+      }
+    });
+  });
 
   grid.querySelectorAll('.opt[data-block]').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -10272,6 +10393,7 @@ function focusReveal(revealWrap){
    Utilisé partout où une session peut se terminer, pour ne jamais perdre le résultat d'un bloc personnalisé. */
 function goToEndScreen(){
   document.body.classList.remove('quiz-active');
+  clearInProgressSession(); // la session est terminée normalement, plus besoin de la sauvegarde
   if(window.__reviewSession){ renderReviewEndScreen(); }
   else if(window.__customBlockId){ renderCustomBlockEndScreen(); }
   else { renderEndScreen(); }
@@ -10285,6 +10407,7 @@ function renderCard(){
   const isFirstCard = (masteredCount === 0 && score.total === 0 && queue.length === initialLength);
   document.body.classList.add('quiz-active');
   hideMascotBubble();
+  saveInProgressSession(); // ▶️ mémorise l'état à chaque carte, pour pouvoir reprendre si on quitte
   if(isFirstCard){
     const ml = multiplierLabel();
     if(ml){ setTimeout(() => showGoalToast(ml, 'Ces points comptent double·triple, profite-en !', '⚡'), 400); }
