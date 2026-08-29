@@ -1570,6 +1570,7 @@
     <button class="menu-item" id="soundSettingsBtn"><span class="mi-ic">🔊</span> Personnaliser les sons</button>
     <button class="menu-item" id="authAccountBtn"><span class="mi-ic">🔐</span> Mon compte</button>
     <button class="menu-item" id="whatsNewBtn"><span class="mi-ic">🆕</span> Nouveautés</button>
+    <button class="menu-item" id="soundTestBtn"><span class="mi-ic">🔊</span> Tester le son</button>
     <button class="menu-item" id="timeBreakdownBtn"><span class="mi-ic">📊</span> Répartition du temps</button>
     <button class="menu-item" id="homeBtn"><span class="mi-ic">🏠</span> Accueil</button>
     <button class="menu-item" id="dictBtn"><span class="mi-ic">📖</span> Mots &amp; recherche</button>
@@ -4403,13 +4404,28 @@ document.addEventListener('visibilitychange', () => {
     hiddenSince = null;
   }
 });
+/* ⏱️ Idem pour l'inactivité SANS changer d'écran : si on reste longtemps sans rien toucher
+   (plus qu'une marge normale de réflexion), le temps au-delà de cette marge n'est pas compté. */
+const IDLE_GRACE_MS = 60000; // 60s de marge de réflexion tolérée entre deux actions
+let totalIdleMs = 0;
+let lastInteractionAt = Date.now();
+function markUserInteraction(){
+  const now = Date.now();
+  const gap = now - lastInteractionAt;
+  if(gap > IDLE_GRACE_MS){ totalIdleMs += (gap - IDLE_GRACE_MS); }
+  lastInteractionAt = now;
+}
+['click','keydown','touchstart'].forEach(evt => document.addEventListener(evt, markUserInteraction, { passive:true }));
 /* Calcule le temps activement passé depuis "startMs", en retirant le temps en arrière-plan.
    Plafonné à 3h par sécurité, au cas où un cas limite échapperait quand même au calcul. */
 function computeActiveDurationSec(startMs){
   if(!startMs) return 0;
   let hiddenMs = totalHiddenMs;
   if(hiddenSince){ hiddenMs += Date.now() - hiddenSince; } // toujours caché au moment du calcul (rare)
-  const activeMs = Math.max(0, (Date.now() - startMs) - hiddenMs);
+  let idleMs = totalIdleMs;
+  const currentGap = Date.now() - lastInteractionAt;
+  if(currentGap > IDLE_GRACE_MS){ idleMs += (currentGap - IDLE_GRACE_MS); } // inactif au moment du calcul
+  const activeMs = Math.max(0, (Date.now() - startMs) - hiddenMs - idleMs);
   return Math.max(1, Math.min(10800, Math.round(activeMs / 1000)));
 }
 
@@ -4656,10 +4672,18 @@ function pickVoice(langPrefix, gender){
   if(!voices.length) return null;
   const g = gender || (Math.random() < 0.5 ? 'f' : 'm');
   const sameGender = voices.filter(v => classifyGender(v) === g);
-  if(sameGender.length) return sameGender[0];       // meilleure voix du genre voulu
+  // Parmi les meilleures voix de ce genre (pas juste LA meilleure), on en tire une au hasard
+  // à chaque appel, pour varier réellement d'une phrase à l'autre — pas toujours la même voix.
+  const pickRandomAmongTop = (list) => {
+    if(!list.length) return null;
+    const bestScore = voiceQuality(list[0]);
+    const top = list.filter(v => voiceQuality(v) >= bestScore - 20); // toutes les voix de qualité proche du max
+    return top[Math.floor(Math.random() * top.length)];
+  };
+  if(sameGender.length) return pickRandomAmongTop(sameGender);
   const otherGender = voices.filter(v => classifyGender(v) === (g === 'f' ? 'm' : 'f'));
-  if(otherGender.length) return otherGender[0];      // sinon l'autre genre
-  return voices[0];                                  // sinon la meilleure dispo
+  if(otherGender.length) return pickRandomAmongTop(otherGender);
+  return pickRandomAmongTop(voices);
 }
 
 let ttsSpeaking = false; // vrai tant que la synthèse vocale (TTS) est en train de parler
@@ -5525,6 +5549,8 @@ function setupDeckFromWords(words){
   blockStartTime = Date.now();
   totalHiddenMs = 0;
   hiddenSince = document.hidden ? Date.now() : null;
+  totalIdleMs = 0;
+  lastInteractionAt = Date.now();
 }
 function buildDeck(blockIndex){
   currentBlock = blockIndex;
@@ -6219,7 +6245,7 @@ function startSwipe(){
     return { word: w, shownAr, isTrue: shownAr === w.ar };
   });
   swipeState = { cards, idx: 0, score: 0, startTime: Date.now() };
-  totalHiddenMs = 0; hiddenSince = document.hidden ? Date.now() : null;
+  totalHiddenMs = 0; hiddenSince = document.hidden ? Date.now() : null; totalIdleMs = 0; lastInteractionAt = Date.now();
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="swipeExitBtn" style="cursor:pointer;">← Quitter</button>`;
   document.getElementById('swipeExitBtn').addEventListener('click', renderBlockSelect);
   renderSwipeCard();
@@ -6356,7 +6382,7 @@ function renderFlashcardsIntro(){
 function startFlashcards(){
   const pool = shuffle(WORDS.slice()).slice(0, FLASHCARD_SESSION_SIZE);
   flashState = { pool, idx: 0, known: 0, review: 0, flipped: false, startTime: Date.now() };
-  totalHiddenMs = 0; hiddenSince = document.hidden ? Date.now() : null;
+  totalHiddenMs = 0; hiddenSince = document.hidden ? Date.now() : null; totalIdleMs = 0; lastInteractionAt = Date.now();
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="flashExitBtn" style="cursor:pointer;">← Quitter</button>`;
   document.getElementById('flashExitBtn').addEventListener('click', renderBlockSelect);
   renderFlashCard();
@@ -6503,7 +6529,7 @@ function renderDailyChallenge(){
 
 function startDailyChallenge(){
   dcState = { words: getDailyChallengeWords(), idx: 0, score: 0, startTime: Date.now() };
-  totalHiddenMs = 0; hiddenSince = document.hidden ? Date.now() : null;
+  totalHiddenMs = 0; hiddenSince = document.hidden ? Date.now() : null; totalIdleMs = 0; lastInteractionAt = Date.now();
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="dcExitBtn" style="cursor:pointer;">← Quitter</button>`;
   document.getElementById('dcExitBtn').addEventListener('click', renderBlockSelect);
   renderDCCard();
@@ -6655,7 +6681,7 @@ function startAssociation(){
     queue: shuffle(WORDS.slice()), queueIdx: 0, visible: [], selected: null,
     matched: 0, wrongIds: new Set(), timeLeft: ASSOC_DURATION, startTime: Date.now(),
   };
-  totalHiddenMs = 0; hiddenSince = document.hidden ? Date.now() : null;
+  totalHiddenMs = 0; hiddenSince = document.hidden ? Date.now() : null; totalIdleMs = 0; lastInteractionAt = Date.now();
   for(let i=0;i<ASSOC_VISIBLE_PAIRS;i++){ addNextPairToAssoc(); }
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="assocExitBtn" style="cursor:pointer;">← Quitter</button>`;
   document.getElementById('assocExitBtn').addEventListener('click', stopAssociationAndExit);
@@ -6945,7 +6971,7 @@ function startGrammarQuiz(categoryKey){
   const challenges = shuffle(buildGrammarChallenges(categoryKey));
   if(challenges.length === 0){ renderGrammarHome(); return; }
   grammarQuizState = { category: categoryKey, queue: challenges.slice(0, 30), idx: 0, score: { correct:0, total:0 }, startTime: Date.now() };
-  totalHiddenMs = 0; hiddenSince = document.hidden ? Date.now() : null;
+  totalHiddenMs = 0; hiddenSince = document.hidden ? Date.now() : null; totalIdleMs = 0; lastInteractionAt = Date.now();
   renderGrammarQuizCard();
 }
 
@@ -7900,7 +7926,7 @@ let orthoQuizState = null;
 function startOrthoQuiz(challenges){
   if(!challenges || challenges.length === 0){ renderOrthoHome(); return; }
   orthoQuizState = { queue: shuffle(challenges.slice()).slice(0,30), idx:0, score:{correct:0,total:0}, startTime: Date.now() };
-  totalHiddenMs = 0; hiddenSince = document.hidden ? Date.now() : null;
+  totalHiddenMs = 0; hiddenSince = document.hidden ? Date.now() : null; totalIdleMs = 0; lastInteractionAt = Date.now();
   renderOrthoQuizCard();
 }
 
@@ -8190,7 +8216,7 @@ function startConjugationQuiz(pool, tense, contextMode){
   const challenges = [];
   usable.forEach(v => PRONOUNS.forEach((p, pi) => challenges.push({ verb: v, pronounIdx: pi })));
   conjQuizState = { queue: shuffle(challenges).slice(0, 30), idx: 0, score: { correct:0, total:0 }, startTime: Date.now(), tense, contextMode: !!contextMode };
-  totalHiddenMs = 0; hiddenSince = document.hidden ? Date.now() : null;
+  totalHiddenMs = 0; hiddenSince = document.hidden ? Date.now() : null; totalIdleMs = 0; lastInteractionAt = Date.now();
   renderConjugationQuizCard();
 }
 
@@ -8355,7 +8381,7 @@ function startConjListenQuiz(verbs, tenses){
   });
   if(challenges.length === 0){ renderConjugationHome(); return; }
   conjListenState = { queue: shuffle(challenges).slice(0, 25), idx: 0, score: { correct:0, total:0 }, startTime: Date.now() };
-  totalHiddenMs = 0; hiddenSince = document.hidden ? Date.now() : null;
+  totalHiddenMs = 0; hiddenSince = document.hidden ? Date.now() : null; totalIdleMs = 0; lastInteractionAt = Date.now();
   renderConjListenCard();
 }
 
@@ -14919,6 +14945,47 @@ function renderTimeBreakdown(){
   document.getElementById('backFromTimeBtn').addEventListener('click', renderBlockSelect);
 }
 
+/* ============ 🔊 TEST DU SON — diagnostic visible en cas de problème audio ============ */
+function renderSoundTest(){
+  clearQuestionTimer();
+  document.body.classList.remove('quiz-active');
+  currentBlock = null;
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromSoundTestBtn" style="cursor:pointer;">← Retour</button>`;
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('footerNote').textContent = '';
+
+  const supported = ('speechSynthesis' in window);
+  const voicesFr = supported ? getVoicesFor('fr') : [];
+  const voicesAr = supported ? getVoicesFor('ar') : [];
+
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="cat-tag">🔊 Test du son</div>
+    <div class="word-fr" style="font-size:clamp(22px,4.5vw,28px);">Diagnostic audio</div>
+    <div style="text-align:left;background:var(--surface-sunken);border:1px solid var(--border);border-radius:14px;padding:16px 18px;margin-top:16px;font-size:13.5px;line-height:1.8;">
+      <div>🎙️ Synthèse vocale disponible sur cet appareil : <b>${supported ? '✅ Oui' : '❌ Non'}</b></div>
+      <div>🇫🇷 Voix françaises trouvées : <b>${voicesFr.length}</b>${voicesFr.length ? ' — ' + voicesFr.slice(0,3).map(v=>escapeHtml(v.name)).join(', ') + (voicesFr.length>3?'...':'') : ''}</div>
+      <div>🇸🇦 Voix arabes trouvées : <b>${voicesAr.length}</b>${voicesAr.length ? ' — ' + voicesAr.slice(0,3).map(v=>escapeHtml(v.name)).join(', ') + (voicesAr.length>3?'...':'') : ''}</div>
+    </div>
+    <button class="restart-btn" id="testSoundFrBtn" style="display:flex;align-items:center;gap:8px;margin:16px auto 0;">🇫🇷 Tester une voix française</button>
+    <button class="restart-btn" id="testSoundArBtn" style="display:flex;align-items:center;gap:8px;margin:10px auto 0;background:var(--surface-sunken);border:1px solid var(--border);color:var(--purple);box-shadow:none;">🇸🇦 Tester une voix arabe</button>
+    <div id="soundTestResult" style="margin-top:16px;font-size:13px;color:var(--text-dim);"></div>
+    ${!voicesFr.length ? `<div style="margin-top:16px;font-size:12.5px;color:var(--red);text-align:left;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:10px;padding:10px 14px;">⚠️ Aucune voix française trouvée sur cet appareil — c'est la cause la plus probable d'un silence total. Vérifie les paramètres de synthèse vocale de ton téléphone/navigateur (souvent dans Paramètres → Accessibilité, ou Paramètres du navigateur).</div>` : ''}
+  `;
+  document.getElementById('backFromSoundTestBtn').addEventListener('click', renderBlockSelect);
+  const resultEl = document.getElementById('soundTestResult');
+  document.getElementById('testSoundFrBtn').addEventListener('click', () => {
+    resultEl.textContent = '⏳ Lecture en cours...';
+    speak('Bonjour, ceci est un test du son en français.', 'fr-FR', () => { resultEl.textContent = '✅ Lecture terminée normalement.'; });
+    setTimeout(() => { if(resultEl.textContent === '⏳ Lecture en cours...'){ resultEl.textContent = '⚠️ Toujours en attente après 4 secondes — le son ne fonctionne probablement pas.'; } }, 4000);
+  });
+  document.getElementById('testSoundArBtn').addEventListener('click', () => {
+    resultEl.textContent = '⏳ Lecture en cours...';
+    speak('مرحبا، هذا اختبار للصوت باللغة العربية.', 'ar-SA', () => { resultEl.textContent = '✅ Lecture terminée normalement.'; });
+    setTimeout(() => { if(resultEl.textContent === '⏳ Lecture en cours...'){ resultEl.textContent = '⚠️ Toujours en attente après 4 secondes — le son ne fonctionne probablement pas.'; } }, 4000);
+  });
+}
+
 function renderWhatsNew(){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
@@ -15049,6 +15116,7 @@ document.getElementById('authAccountBtn').addEventListener('click', () => {
   renderAuthScreen(session ? 'login' : 'choice');
 });
 document.getElementById('whatsNewBtn').addEventListener('click', () => renderWhatsNew());
+document.getElementById('soundTestBtn').addEventListener('click', () => renderSoundTest());
 document.getElementById('timeBreakdownBtn').addEventListener('click', () => renderTimeBreakdown());
 
 document.getElementById('closeSummaryBtn').addEventListener('click', hideBlockSummaryOverlay);
