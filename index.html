@@ -465,6 +465,7 @@
   .search-results{display:flex;flex-direction:column;gap:12px;max-height:520px;overflow-y:auto;padding-right:4px;}
   .result-card{border:1px solid var(--border);background:var(--surface-sunken);border-radius:14px;padding:18px 20px;transition:background .2s,border-color .2s;}
   .result-card.peek-playing{ border-color:var(--purple);background:rgba(80,70,229,0.08);box-shadow:0 0 0 2px rgba(80,70,229,0.15); }
+  .flip-card.peek-playing .flip-card-front, .flip-card.peek-playing .flip-card-back{ border-color:var(--purple);box-shadow:0 0 0 2px rgba(80,70,229,0.15); }
 
   /* ============ 🎧 MINI-LECTEUR "VOIR LES MOTS" (compact, distinct de la Radio) ============ */
   .peek-player{
@@ -987,6 +988,21 @@
 
   /* ============ 🔥 OBJECTIF QUOTIDIEN ============ */
   .srs-card{ margin-bottom:16px; }
+  .peek-card-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(135px,1fr)); gap:12px; margin-top:14px; }
+  .flip-card{ perspective:1000px; height:130px; cursor:pointer; }
+  .flip-card-inner{ position:relative; width:100%; height:100%; transition:transform .5s; transform-style:preserve-3d; }
+  .flip-card.flipped .flip-card-inner{ transform:rotateY(180deg); }
+  .flip-card-front, .flip-card-back{
+    position:absolute; inset:0; backface-visibility:hidden; border-radius:14px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:10px; text-align:center; border:1px solid var(--border);
+  }
+  .flip-card-front{ background:var(--surface); }
+  .flip-card-back{ background:var(--surface-sunken); transform:rotateY(180deg); }
+  .flip-fr{ font-weight:800; font-size:15px; color:var(--text); }
+  .flip-cat{ font-size:10px; color:var(--text-dim); margin-top:4px; }
+  .flip-ar{ font-family:'Changa',sans-serif; direction:rtl; font-size:18px; font-weight:700; color:var(--purple); }
+  .flip-def{ font-size:10.5px; color:var(--text-dim); margin-top:5px; line-height:1.4; }
   .modal-overlay{
     position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:500;
     align-items:center;justify-content:center;padding:20px;
@@ -1859,6 +1875,7 @@ function renderBlockWordsPeek(words, title, onBack){
   document.getElementById('progressFill').style.width = '0%';
   document.getElementById('footerNote').textContent = '';
 
+  let peekView = 'list'; // 'list' ou 'cards'
   const card = document.getElementById('quizCard');
   card.innerHTML = `
     <div class="cat-tag">👁 Aperçu · ${words.length} mot${words.length>1?'s':''}</div>
@@ -1877,15 +1894,58 @@ function renderBlockWordsPeek(words, title, onBack){
         <button class="peek-ctrl-btn" id="peekStopBtn" title="Arrêter">✕</button>
       </div>
     </div>
-    <div class="search-results" id="peekResults" style="max-height:560px;margin-top:14px;">
-      ${words.map((w,i) => buildWordCardHtml(w).replace('class="result-card"', `class="result-card" data-peek-idx="${i}"`)).join('')}
+    <div class="mode-row" style="justify-content:center;margin-top:12px;">
+      <button class="mode-chip active" id="peekViewListBtn">📋 Liste</button>
+      <button class="mode-chip" id="peekViewCardsBtn">🃏 Cartes (retourner)</button>
     </div>
+    <div id="peekResultsWrap" style="margin-top:14px;"></div>
   `;
-  document.getElementById('backFromPeekBtn').addEventListener('click', () => { stopPeekPlay(); onBack(); });
-  document.getElementById('peekResults').addEventListener('click', (e) => {
-    const btn = e.target.closest('[data-speak-fr]');
-    if(btn){ speak(btn.dataset.speakFr, 'fr-FR'); }
+  function renderPeekResults(){
+    const wrap = document.getElementById('peekResultsWrap');
+    if(peekView === 'cards'){
+      wrap.innerHTML = `<div class="peek-card-grid" id="peekResults">
+        ${words.map((w,i) => `
+          <div class="flip-card" data-peek-idx="${i}" data-flip-idx="${i}">
+            <div class="flip-card-inner">
+              <div class="flip-card-front">
+                <div class="flip-fr">${escapeHtml(w.fr)}</div>
+                <div class="flip-cat">${escapeHtml(w.cat)}</div>
+              </div>
+              <div class="flip-card-back">
+                <div class="flip-ar">${escapeHtml(w.ar)}</div>
+                <div class="flip-def">${escapeHtml(w.def)}</div>
+              </div>
+            </div>
+          </div>
+        `).join('')}
+      </div>`;
+      wrap.querySelectorAll('.flip-card').forEach(el => {
+        el.addEventListener('click', () => el.classList.toggle('flipped'));
+      });
+    } else {
+      wrap.innerHTML = `<div class="search-results" id="peekResults" style="max-height:560px;">
+        ${words.map((w,i) => buildWordCardHtml(w).replace('class="result-card"', `class="result-card" data-peek-idx="${i}"`)).join('')}
+      </div>`;
+      wrap.querySelector('#peekResults').addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-speak-fr]');
+        if(btn){ speak(btn.dataset.speakFr, 'fr-FR'); }
+      });
+    }
+  }
+  renderPeekResults();
+  document.getElementById('peekViewListBtn').addEventListener('click', (e) => {
+    peekView = 'list';
+    card.querySelectorAll('#peekViewListBtn, #peekViewCardsBtn').forEach(b => b.classList.remove('active'));
+    e.target.classList.add('active');
+    renderPeekResults();
   });
+  document.getElementById('peekViewCardsBtn').addEventListener('click', (e) => {
+    peekView = 'cards';
+    card.querySelectorAll('#peekViewListBtn, #peekViewCardsBtn').forEach(b => b.classList.remove('active'));
+    e.target.classList.add('active');
+    renderPeekResults();
+  });
+  document.getElementById('backFromPeekBtn').addEventListener('click', () => { stopPeekPlay(); onBack(); });
   document.getElementById('peekListenBtn').addEventListener('click', () => startPeekPlay(words));
   document.getElementById('peekPlayPauseBtn').addEventListener('click', togglePeekPlayPause);
   document.getElementById('peekPrevBtn').addEventListener('click', () => { window.speechSynthesis.cancel(); if(peekPlayState){ peekPlayState.idx = Math.max(0, peekPlayState.idx - 1); playPeekCurrent(); } });
@@ -1893,9 +1953,14 @@ function renderBlockWordsPeek(words, title, onBack){
   document.getElementById('peekStopBtn').addEventListener('click', stopPeekPlay);
 }
 
-/* 🔆 Empêche l'écran de se mettre en veille pendant l'écoute (Wake Lock API — dégrade en
-   silence sur les navigateurs qui ne la supportent pas, aucune casse). */
+/* 🔆 Empêche l'écran de se mettre en veille pendant l'écoute. Deux mécanismes combinés :
+   1) l'API Wake Lock standard, quand disponible ;
+   2) un repli universel (vidéo silencieuse invisible en boucle) qui fonctionne même quand
+      l'API n'existe pas ou échoue silencieusement — c'est la technique la plus fiable
+      multi-navigateurs pour ce genre de cas. */
 let screenWakeLock = null;
+let wakeLockVideoEl = null;
+const WAKE_LOCK_VIDEO_SRC = 'data:video/mp4;base64,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';
 async function requestWakeLock(){
   try{
     if('wakeLock' in navigator){
@@ -1903,9 +1968,29 @@ async function requestWakeLock(){
       screenWakeLock.addEventListener('release', () => { screenWakeLock = null; });
     }
   }catch(e){ screenWakeLock = null; }
+  startWakeLockVideoFallback(); // toujours en plus, en filet de sécurité
+}
+function startWakeLockVideoFallback(){
+  try{
+    if(!wakeLockVideoEl){
+      wakeLockVideoEl = document.createElement('video');
+      wakeLockVideoEl.setAttribute('playsinline', '');
+      wakeLockVideoEl.setAttribute('muted', '');
+      wakeLockVideoEl.muted = true;
+      wakeLockVideoEl.loop = true;
+      wakeLockVideoEl.src = WAKE_LOCK_VIDEO_SRC;
+      wakeLockVideoEl.style.cssText = 'position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;z-index:-1;';
+      document.body.appendChild(wakeLockVideoEl);
+    }
+    wakeLockVideoEl.play().catch(() => {});
+  }catch(e){}
+}
+function stopWakeLockVideoFallback(){
+  try{ if(wakeLockVideoEl){ wakeLockVideoEl.pause(); } }catch(e){}
 }
 function releaseWakeLock(){
   try{ if(screenWakeLock){ screenWakeLock.release(); screenWakeLock = null; } }catch(e){}
+  stopWakeLockVideoFallback();
 }
 // Si l'écran s'est éteint puis rallumé pendant la lecture (le wake lock est alors relâché par
 // le système), on le redemande automatiquement tant qu'on écoute encore.
@@ -1977,7 +2062,7 @@ function updatePeekPlayPauseBtn(){
 }
 
 function highlightPeekCard(idx){
-  document.querySelectorAll('#peekResults .result-card').forEach(c => c.classList.remove('peek-playing'));
+  document.querySelectorAll('#peekResults [data-peek-idx]').forEach(c => c.classList.remove('peek-playing'));
   const el = document.querySelector(`#peekResults [data-peek-idx="${idx}"]`);
   if(el){ el.classList.add('peek-playing'); el.scrollIntoView({ behavior:'smooth', block:'nearest' }); }
 }
@@ -14852,7 +14937,7 @@ function renderShadowCard(){
   const st = shadowGameState;
   if(!st || st.idx >= st.queue.length){ endShadowGame(); return; }
   const item = st.queue[st.idx];
-  const hasExtra = item.full !== item.clean; // vrai s'il y avait bien du contenu entre parenthèses
+  const hasExtra = item.full !== item.clean; // vrai s'il y a du contenu entre parenthèses
   document.getElementById('scoreboard').innerHTML = `<div class="chip">✅ <b>${st.score.correct}</b>/${st.score.total}</div><button class="chip" id="shadowExitBtn" style="cursor:pointer;">← Quitter</button>`;
   document.getElementById('shadowExitBtn').addEventListener('click', () => { stopShadowRecognition(); renderDailyLesson(); });
   document.getElementById('progressFill').style.width = Math.round((st.idx/st.queue.length)*100) + '%';
@@ -14860,35 +14945,49 @@ function renderShadowCard(){
 
   const card = document.getElementById('quizCard');
   card.innerHTML = `
-    <div class="cat-tag">🎭 Shadow — Répète de mémoire</div>
-    <div class="question-line">Écoute la phrase, puis répète-la une fois qu'elle a disparu.</div>
-    <div class="word-fr" id="shadowSentenceDisplay" style="font-size:clamp(19px,4vw,25px);line-height:1.5;">${escapeHtml(item.clean)}</div>
-    ${hasExtra ? `
-    <button class="mode-chip" id="shadowToggleExtraBtn" style="margin-top:8px;">👁 Voir l'explication entre parenthèses</button>
-    <div id="shadowExtraNote" style="display:none;font-size:12.5px;color:var(--text-dim);font-style:italic;margin-top:6px;">${escapeHtml(item.full)}</div>
-    ` : ''}
-    <div id="shadowMicWrap" style="margin-top:20px;display:none;text-align:center;">
-      <div style="font-size:40px;">🎤</div>
-      <div style="font-size:13px;color:var(--text-dim);margin-top:6px;">🎧 J'écoute... répète la phrase !</div>
+    <div class="cat-tag">🎭 Shadow — comme Répétition, mais de mémoire</div>
+    <div class="question-line" id="shadowInstruction" style="text-align:center;margin-bottom:8px;">📖 Lis et écoute la phrase, elle va bientôt disparaître...</div>
+    <div class="repeat-sentence" id="repeatSentence">${escapeHtml(item.full)}</div>
+    ${hasExtra ? `<button class="mode-chip" id="shadowToggleExtraBtn" style="margin-top:8px;">🙈 Cacher l'explication entre parenthèses</button>` : ''}
+    <button class="speak-ar-btn" id="shadowReplayBtn" style="margin-top:10px;">🔊 Réécouter la phrase</button>
+    <div id="shadowMicWrap" style="display:none;">
+      <div class="mic-zone" style="margin-top:16px;">
+        <button class="mic-btn" id="shadowMicBtn" aria-label="Parler">
+          <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1M12 18v4M8 22h8"/>
+          </svg>
+        </button>
+      </div>
+      <div style="text-align:center;font-size:13px;color:var(--text-dim);margin-top:8px;" id="shadowMicHint">🎧 J'écoute... répète la phrase !</div>
     </div>
     <div class="reveal" id="shadowReveal"></div>
   `;
+  let parensShown = true;
   if(hasExtra){
-    document.getElementById('shadowToggleExtraBtn').addEventListener('click', () => {
-      const note = document.getElementById('shadowExtraNote');
-      note.style.display = note.style.display === 'none' ? 'block' : 'none';
+    document.getElementById('shadowToggleExtraBtn').addEventListener('click', (e) => {
+      parensShown = !parensShown;
+      document.getElementById('repeatSentence').textContent = parensShown ? item.full : item.clean;
+      e.target.textContent = parensShown ? "🙈 Cacher l'explication entre parenthèses" : "👁 Afficher l'explication entre parenthèses";
     });
   }
-  // Étape 1 : la phrase (sans parenthèses) est visible et lue à voix haute
-  const sentence = item.clean;
-  speak(sentence, 'fr-FR', () => {
-    // Étape 2 : elle disparaît, place au micro
-    const disp = document.getElementById('shadowSentenceDisplay');
-    if(disp){ disp.textContent = '🙈 ... à toi de répéter !'; disp.style.fontStyle = 'italic'; disp.style.color = 'var(--text-dim)'; }
-    const micWrap = document.getElementById('shadowMicWrap');
-    if(micWrap){ micWrap.style.display = 'block'; }
-    startShadowRecognition(sentence);
-  });
+  const playIntro = () => speak(item.clean, 'fr-FR', () => startShadowHiddenPhase(item));
+  document.getElementById('shadowReplayBtn').addEventListener('click', playIntro);
+  playIntro();
+}
+
+/* Étape 2 : la phrase se transforme en blancs (▁▁▁ ▁▁, comme en Répétition) et le micro s'active. */
+function startShadowHiddenPhase(item){
+  const sentEl = document.getElementById('repeatSentence');
+  if(!sentEl) return; // l'utilisateur a déjà quitté l'écran
+  const instr = document.getElementById('shadowInstruction');
+  if(instr){ instr.textContent = '🙈 À toi de répéter la phrase de mémoire !'; }
+  const toggleBtn = document.getElementById('shadowToggleExtraBtn');
+  if(toggleBtn){ toggleBtn.style.display = 'none'; }
+  sentEl.classList.add('hidden');
+  sentEl.innerHTML = buildRepeatWords(item.clean, true);
+  const micWrap = document.getElementById('shadowMicWrap');
+  if(micWrap){ micWrap.style.display = 'block'; }
+  startShadowRecognition(item.clean);
 }
 
 function startShadowRecognition(targetSentence){
@@ -14896,20 +14995,31 @@ function startShadowRecognition(targetSentence){
   try{
     shadowRecognition = new SpeechRec();
     shadowRecognition.lang = 'fr-FR';
-    shadowRecognition.interimResults = false;
+    shadowRecognition.interimResults = true; // pour révéler les mots au fur et à mesure, comme en Répétition
     shadowRecognition.continuous = false;
     shadowRecognition.maxAlternatives = 1;
   }catch(e){ showShadowManualValidation(targetSentence); return; }
   shadowRecoActive = true;
+  const micBtn = document.getElementById('shadowMicBtn');
+  if(micBtn){ micBtn.classList.add('listening'); }
   let finished = false;
   const finish = (heardText) => {
     if(finished) return;
     finished = true;
     shadowRecoActive = false;
+    if(micBtn){ micBtn.classList.remove('listening'); }
     try{ shadowRecognition.stop(); }catch(e){}
     validateShadowAnswer(heardText || '', targetSentence);
   };
-  shadowRecognition.onresult = (ev) => { finish(ev.results[0][0].transcript); };
+  shadowRecognition.onresult = (ev) => {
+    let finalText = '', interimText = '';
+    for(let i=0;i<ev.results.length;i++){
+      if(ev.results[i].isFinal){ finalText += ev.results[i][0].transcript; }
+      else{ interimText += ev.results[i][0].transcript; }
+    }
+    highlightSpokenWords(finalText + ' ' + interimText); // révélation progressive des mots, comme en Répétition
+    if(finalText.trim()){ finish(finalText); }
+  };
   shadowRecognition.onerror = () => { finish(''); };
   shadowRecognition.onend = () => { if(!finished){ finish(''); } };
   try{ shadowRecognition.start(); }catch(e){ showShadowManualValidation(targetSentence); }
@@ -14927,28 +15037,28 @@ function showShadowManualValidation(targetSentence){
       <button class="restart-btn" id="shadowManualOk">✅ J'ai réussi</button>
       <button class="restart-btn" id="shadowManualKo" style="background:var(--surface-sunken);border:1px solid var(--border);color:var(--red);box-shadow:none;">❌ Raté</button>
     </div>`;
-  document.getElementById('shadowManualOk').addEventListener('click', () => finalizeShadowAnswer(true, targetSentence));
-  document.getElementById('shadowManualKo').addEventListener('click', () => finalizeShadowAnswer(false, targetSentence));
+  document.getElementById('shadowManualOk').addEventListener('click', () => finalizeShadowAnswer(true, targetSentence, ''));
+  document.getElementById('shadowManualKo').addEventListener('click', () => finalizeShadowAnswer(false, targetSentence, ''));
 }
 function validateShadowAnswer(heard, targetSentence){
   const sim = sentenceSimilarity(heard, targetSentence);
-  finalizeShadowAnswer(sim >= 0.6, targetSentence); // même seuil de tolérance que le mode Répétition
+  finalizeShadowAnswer(sim >= 0.6, targetSentence, heard); // même seuil de tolérance que Répétition
 }
-function finalizeShadowAnswer(isCorrect, targetSentence){
+function finalizeShadowAnswer(isCorrect, targetSentence, heardText){
   const st = shadowGameState;
   if(!st) return;
   st.score.total++;
   if(isCorrect){ st.score.correct++; }
   bumpCombo(isCorrect);
-  const disp = document.getElementById('shadowSentenceDisplay');
-  if(disp){ disp.textContent = targetSentence; disp.style.fontStyle = 'normal'; disp.style.color = ''; }
+  const sentEl = document.getElementById('repeatSentence');
+  if(sentEl){ sentEl.classList.remove('hidden'); sentEl.innerHTML = buildScoredSentenceHtml(targetSentence, heardText); }
   const micWrap = document.getElementById('shadowMicWrap');
   if(micWrap){ micWrap.style.display = 'none'; }
   const reveal = document.getElementById('shadowReveal');
   if(reveal){ reveal.innerHTML = isCorrect ? `<div class="pass-banner ok">✅ Correct !</div>` : `<div class="pass-banner ko">❌ Raté</div>`; }
   if(isCorrect){ playCorrectSound(); reactMascot('ok'); vibrate(35); if(comboStreak>0 && comboStreak%5===0){ celebrate(); } }
   else { playWrongSound(); reactMascot('ko'); vibrate([40,40,40]); }
-  setTimeout(() => { st.idx++; renderShadowCard(); }, 1400);
+  setTimeout(() => { st.idx++; renderShadowCard(); }, 1600);
 }
 function endShadowGame(){
   document.body.classList.remove('quiz-active');
@@ -14979,6 +15089,7 @@ function endShadowGame(){
   document.getElementById('shadowBackBtn').addEventListener('click', renderDailyLesson);
   document.getElementById('shadowAgainBtn').addEventListener('click', () => startShadowGame(st.lesson));
 }
+
 
 function startVocabMatchGame(lesson){
   clearQuestionTimer();
