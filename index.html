@@ -1893,10 +1893,31 @@ function renderBlockWordsPeek(words, title, onBack){
   document.getElementById('peekStopBtn').addEventListener('click', stopPeekPlay);
 }
 
+/* 🔆 Empêche l'écran de se mettre en veille pendant l'écoute (Wake Lock API — dégrade en
+   silence sur les navigateurs qui ne la supportent pas, aucune casse). */
+let screenWakeLock = null;
+async function requestWakeLock(){
+  try{
+    if('wakeLock' in navigator){
+      screenWakeLock = await navigator.wakeLock.request('screen');
+      screenWakeLock.addEventListener('release', () => { screenWakeLock = null; });
+    }
+  }catch(e){ screenWakeLock = null; }
+}
+function releaseWakeLock(){
+  try{ if(screenWakeLock){ screenWakeLock.release(); screenWakeLock = null; } }catch(e){}
+}
+// Si l'écran s'est éteint puis rallumé pendant la lecture (le wake lock est alors relâché par
+// le système), on le redemande automatiquement tant qu'on écoute encore.
+document.addEventListener('visibilitychange', () => {
+  if(!document.hidden && peekPlayState && peekPlayState.playing){ requestWakeLock(); }
+});
+
 function startPeekPlay(words){
   peekPlayState = { words, idx: 0, playing: true };
   document.getElementById('peekListenBtn').style.display = 'none';
   document.getElementById('peekPlayer').style.display = 'flex';
+  requestWakeLock();
   playPeekCurrent();
 }
 
@@ -1946,8 +1967,8 @@ function advancePeekPlay(){
 function togglePeekPlayPause(){
   if(!peekPlayState) return;
   peekPlayState.playing = !peekPlayState.playing;
-  if(peekPlayState.playing){ playPeekCurrent(); }
-  else { window.speechSynthesis.cancel(); peekPlayToken++; updatePeekPlayPauseBtn(); }
+  if(peekPlayState.playing){ requestWakeLock(); playPeekCurrent(); }
+  else { window.speechSynthesis.cancel(); peekPlayToken++; releaseWakeLock(); updatePeekPlayPauseBtn(); }
 }
 
 function updatePeekPlayPauseBtn(){
@@ -1965,6 +1986,7 @@ function stopPeekPlay(){
   peekPlayToken++;
   peekPlayState = null;
   window.speechSynthesis.cancel();
+  releaseWakeLock();
   const listenBtn = document.getElementById('peekListenBtn');
   const player = document.getElementById('peekPlayer');
   if(listenBtn){ listenBtn.style.display = 'flex'; }
@@ -9092,6 +9114,7 @@ function renderCustomBlockRecapView(blockId, result, justFinished){
         ${result.xp ? `<span class="recap-meta-pill xp">⭐ +${result.xp} points${result.xpMult > 1 ? ` <b>×${result.xpMult}</b>` : ''}</span>` : ''}
       </div>` : ''}
       <div class="pass-banner ${passed ? 'ok' : 'todo'}">${passed ? `✅ Bloc validé à ${pct}% !` : `🎯 ${pct}% — vise ${PASS_THRESHOLD}% pour valider ce bloc.`}</div>
+      ${!passed ? `<button class="restart-btn" id="retryThisModeBtn" style="margin-top:10px;background:linear-gradient(135deg,#F97316,#EA580C);border-color:#B45309;">🔁 Refaire ce mode</button>` : ''}
       ${(justFinished && combo >= 3) ? `<div class="combo-line">🔥 Meilleure série : <b>${combo}</b> bonnes réponses d'affilée</div>` : ''}
       ${modeSummary}
       <div style="font-family:'Inter',sans-serif;font-weight:800;color:var(--purple);margin:20px 0 8px;font-size:15px;">🔁 Refaire ce bloc dans le mode :</div>
@@ -9109,6 +9132,16 @@ function renderCustomBlockRecapView(blockId, result, justFinished){
   `;
   document.getElementById('footerNote').textContent = justFinished ? 'Terminé' : '';
   document.getElementById('progressFill').style.width = '100%';
+  const retryThisModeBtn = document.getElementById('retryThisModeBtn');
+  if(retryThisModeBtn){
+    retryThisModeBtn.addEventListener('click', () => {
+      gameMode = result.mode || gameMode;
+      window.__customBlockId = blockId;
+      buildCustomDeck(blockId);
+      renderScoreboard();
+      renderCard();
+    });
+  }
   document.getElementById('peekWordsBtn').addEventListener('click', () => {
     renderBlockWordsPeek(block.words, block.title, () => renderCustomBlockRecapView(blockId, result, false));
   });
@@ -9949,7 +9982,7 @@ function renderBlockSelect(){
         </svg>
       </div>
       <div class="hero-badge">Français ↔ Arabe · ${WORDS.length} mots</div>
-      <div class="hero-title">Apprends avec <span class="grad">VocabVISION</span></div>
+      <div class="hero-title">Apprends avec <span class="grad">To3alib & To3ayliba</span> 🦊</div>
       <div class="hero-sub">${motto}</div>
       <button class="restart-btn" id="startNextBlockBtn" style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#F97316,#EA580C);border-color:#B45309;font-size:15px;padding:13px 30px;">▶ Commencer</button>
       <div id="resumeSessionSlot"></div>
@@ -12181,6 +12214,7 @@ function renderRecapView(blockIndex, result, justFinished){
         ${result.xp ? `<span class="recap-meta-pill xp">⭐ +${result.xp} points${result.xpMult > 1 ? ` <b>×${result.xpMult}</b>` : ''}</span>` : ''}
       </div>` : ''}
       ${passBanner}
+      ${!passed ? `<button class="restart-btn" id="retryThisModeBtn" style="margin-top:10px;background:linear-gradient(135deg,#F97316,#EA580C);border-color:#B45309;">🔁 Refaire ce mode</button>` : ''}
       ${modeSummary}
       <div style="font-family:'Inter',sans-serif;font-weight:800;color:var(--purple);margin:20px 0 8px;font-size:15px;">🔁 Refaire ce bloc dans le mode :</div>
       <div class="replay-modes" id="replayModes"></div>
@@ -12219,6 +12253,15 @@ function renderRecapView(blockIndex, result, justFinished){
   });
 
   document.getElementById('blocksBtn').addEventListener('click', renderBlockSelect);
+  const retryThisModeBtn = document.getElementById('retryThisModeBtn');
+  if(retryThisModeBtn){
+    retryThisModeBtn.addEventListener('click', () => {
+      gameMode = result.mode || gameMode;
+      buildDeck(blockIndex);
+      renderScoreboard();
+      renderCard();
+    });
+  }
   attachRecapSpeakHandlers();
 
   // 🎉 Petite pluie d'étoiles centrée sur la mascotte en grande célébration
@@ -14542,6 +14585,7 @@ function renderDailyLesson(){
         <button class="mode-chip" data-listen-mode="both">🇸🇦+🇫🇷 Les deux</button>
         ${lesson.fullAudioUrl ? `<button class="mode-chip" data-listen-mode="mp3">🎧 Enregistrement original</button>` : ''}
       </div>
+      <button class="restart-btn" id="shadowGameBtn" style="display:flex;align-items:center;gap:8px;margin-top:10px;background:linear-gradient(135deg,#6366F1,#4F46E5);border-color:#3730A3;">🎭 Jeu Shadow (répète de mémoire)</button>
     </div>
 
     <div id="lessonDialogueList" style="display:flex;flex-direction:column;gap:10px;text-align:left;"></div>
@@ -14585,6 +14629,7 @@ function renderDailyLesson(){
   card.querySelectorAll('[data-listen-mode]').forEach(btn => {
     btn.addEventListener('click', () => playLessonDialogueSequentially(lesson, 0, btn.dataset.listenMode));
   });
+  document.getElementById('shadowGameBtn').addEventListener('click', () => startShadowGame(lesson));
 
   const dlgList = document.getElementById('lessonDialogueList');
   dlgList.innerHTML = lesson.dialogue.map((line, i) => `
@@ -14781,6 +14826,160 @@ function playLessonDialogueSequentially(lesson, idx, mode){
 }
 
 let vocabGameState = null;
+/* ============ 🎭 SHADOW — écoute la phrase, elle disparaît, tu la répètes de mémoire ============
+   Les parenthèses du manuel (explications littérales) sont retirées : seule la phrase naturelle
+   compte, à l'écoute comme à l'écrit. Retour binaire uniquement (✅/❌), temps total chronométré. */
+function stripParens(text){
+  return text.replace(/\([^)]*\)/g, '').replace(/\s{2,}/g, ' ').replace(/\s+([,.!?;:])/g, '$1').trim();
+}
+
+let shadowGameState = null;
+let shadowRecognition = null;
+let shadowRecoActive = false;
+
+function startShadowGame(lesson){
+  clearQuestionTimer();
+  document.body.classList.add('quiz-active');
+  const items = lesson.dialogue
+    .map(line => ({ clean: stripParens(line.fr), full: line.fr }))
+    .filter(it => it.clean && it.clean.length > 3);
+  if(items.length === 0){ renderDailyLesson(); return; }
+  shadowGameState = { lesson, queue: shuffle(items.slice()), idx:0, score:{correct:0,total:0}, startTime: Date.now() };
+  renderShadowCard();
+}
+
+function renderShadowCard(){
+  const st = shadowGameState;
+  if(!st || st.idx >= st.queue.length){ endShadowGame(); return; }
+  const item = st.queue[st.idx];
+  const hasExtra = item.full !== item.clean; // vrai s'il y avait bien du contenu entre parenthèses
+  document.getElementById('scoreboard').innerHTML = `<div class="chip">✅ <b>${st.score.correct}</b>/${st.score.total}</div><button class="chip" id="shadowExitBtn" style="cursor:pointer;">← Quitter</button>`;
+  document.getElementById('shadowExitBtn').addEventListener('click', () => { stopShadowRecognition(); renderDailyLesson(); });
+  document.getElementById('progressFill').style.width = Math.round((st.idx/st.queue.length)*100) + '%';
+  document.getElementById('footerNote').textContent = `${st.idx+1} / ${st.queue.length}`;
+
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="cat-tag">🎭 Shadow — Répète de mémoire</div>
+    <div class="question-line">Écoute la phrase, puis répète-la une fois qu'elle a disparu.</div>
+    <div class="word-fr" id="shadowSentenceDisplay" style="font-size:clamp(19px,4vw,25px);line-height:1.5;">${escapeHtml(item.clean)}</div>
+    ${hasExtra ? `
+    <button class="mode-chip" id="shadowToggleExtraBtn" style="margin-top:8px;">👁 Voir l'explication entre parenthèses</button>
+    <div id="shadowExtraNote" style="display:none;font-size:12.5px;color:var(--text-dim);font-style:italic;margin-top:6px;">${escapeHtml(item.full)}</div>
+    ` : ''}
+    <div id="shadowMicWrap" style="margin-top:20px;display:none;text-align:center;">
+      <div style="font-size:40px;">🎤</div>
+      <div style="font-size:13px;color:var(--text-dim);margin-top:6px;">🎧 J'écoute... répète la phrase !</div>
+    </div>
+    <div class="reveal" id="shadowReveal"></div>
+  `;
+  if(hasExtra){
+    document.getElementById('shadowToggleExtraBtn').addEventListener('click', () => {
+      const note = document.getElementById('shadowExtraNote');
+      note.style.display = note.style.display === 'none' ? 'block' : 'none';
+    });
+  }
+  // Étape 1 : la phrase (sans parenthèses) est visible et lue à voix haute
+  const sentence = item.clean;
+  speak(sentence, 'fr-FR', () => {
+    // Étape 2 : elle disparaît, place au micro
+    const disp = document.getElementById('shadowSentenceDisplay');
+    if(disp){ disp.textContent = '🙈 ... à toi de répéter !'; disp.style.fontStyle = 'italic'; disp.style.color = 'var(--text-dim)'; }
+    const micWrap = document.getElementById('shadowMicWrap');
+    if(micWrap){ micWrap.style.display = 'block'; }
+    startShadowRecognition(sentence);
+  });
+}
+
+function startShadowRecognition(targetSentence){
+  if(!speechRecoAvailable){ showShadowManualValidation(targetSentence); return; }
+  try{
+    shadowRecognition = new SpeechRec();
+    shadowRecognition.lang = 'fr-FR';
+    shadowRecognition.interimResults = false;
+    shadowRecognition.continuous = false;
+    shadowRecognition.maxAlternatives = 1;
+  }catch(e){ showShadowManualValidation(targetSentence); return; }
+  shadowRecoActive = true;
+  let finished = false;
+  const finish = (heardText) => {
+    if(finished) return;
+    finished = true;
+    shadowRecoActive = false;
+    try{ shadowRecognition.stop(); }catch(e){}
+    validateShadowAnswer(heardText || '', targetSentence);
+  };
+  shadowRecognition.onresult = (ev) => { finish(ev.results[0][0].transcript); };
+  shadowRecognition.onerror = () => { finish(''); };
+  shadowRecognition.onend = () => { if(!finished){ finish(''); } };
+  try{ shadowRecognition.start(); }catch(e){ showShadowManualValidation(targetSentence); }
+}
+function stopShadowRecognition(){
+  if(shadowRecognition){ try{ shadowRecognition.stop(); }catch(e){} }
+  shadowRecoActive = false;
+}
+function showShadowManualValidation(targetSentence){
+  const reveal = document.getElementById('shadowReveal');
+  if(!reveal) return;
+  reveal.innerHTML = `
+    <div style="font-size:12.5px;color:var(--text-dim);">Micro non disponible ici — valide toi-même :</div>
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:8px;">
+      <button class="restart-btn" id="shadowManualOk">✅ J'ai réussi</button>
+      <button class="restart-btn" id="shadowManualKo" style="background:var(--surface-sunken);border:1px solid var(--border);color:var(--red);box-shadow:none;">❌ Raté</button>
+    </div>`;
+  document.getElementById('shadowManualOk').addEventListener('click', () => finalizeShadowAnswer(true, targetSentence));
+  document.getElementById('shadowManualKo').addEventListener('click', () => finalizeShadowAnswer(false, targetSentence));
+}
+function validateShadowAnswer(heard, targetSentence){
+  const sim = sentenceSimilarity(heard, targetSentence);
+  finalizeShadowAnswer(sim >= 0.6, targetSentence); // même seuil de tolérance que le mode Répétition
+}
+function finalizeShadowAnswer(isCorrect, targetSentence){
+  const st = shadowGameState;
+  if(!st) return;
+  st.score.total++;
+  if(isCorrect){ st.score.correct++; }
+  bumpCombo(isCorrect);
+  const disp = document.getElementById('shadowSentenceDisplay');
+  if(disp){ disp.textContent = targetSentence; disp.style.fontStyle = 'normal'; disp.style.color = ''; }
+  const micWrap = document.getElementById('shadowMicWrap');
+  if(micWrap){ micWrap.style.display = 'none'; }
+  const reveal = document.getElementById('shadowReveal');
+  if(reveal){ reveal.innerHTML = isCorrect ? `<div class="pass-banner ok">✅ Correct !</div>` : `<div class="pass-banner ko">❌ Raté</div>`; }
+  if(isCorrect){ playCorrectSound(); reactMascot('ok'); vibrate(35); if(comboStreak>0 && comboStreak%5===0){ celebrate(); } }
+  else { playWrongSound(); reactMascot('ko'); vibrate([40,40,40]); }
+  setTimeout(() => { st.idx++; renderShadowCard(); }, 1400);
+}
+function endShadowGame(){
+  document.body.classList.remove('quiz-active');
+  const st = shadowGameState;
+  const durationSec = computeActiveDurationSec(st.startTime);
+  const pct = st.score.total ? Math.round((st.score.correct/st.score.total)*100) : 0;
+  recordDailyActivity();
+  recordDailyStats(durationSec, pct >= PASS_THRESHOLD, st.score.correct * 5, 'vocabulaire');
+  cloudAutoPush();
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="shadowEndBackBtn" style="cursor:pointer;">← Retour</button>`;
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('footerNote').textContent = 'Terminé';
+  const fun = pct === 100 ? '🏆 Parfait !' : pct >= 90 ? '🌟 Excellent !' : pct >= 70 ? '👍 Bien joué !' : pct >= 50 ? '💪 Continue !' : '🌱 Réessaie encore !';
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="end-screen">
+      <div class="cat-tag">🎭 Shadow terminé</div>
+      <div class="big">${st.score.correct} / ${st.score.total}</div>
+      <div class="sub">${pct}% de réussite · ⏱️ ${fmtDuration(durationSec)} · ${fun}</div>
+      <div style="display:flex;gap:12px;justify-content:center;margin-top:20px;flex-wrap:wrap;">
+        <button class="restart-btn" id="shadowAgainBtn">🔁 Recommencer</button>
+        <button class="restart-btn" id="shadowBackBtn" style="background:var(--surface-sunken);border:1px solid var(--border);color:var(--purple);box-shadow:none;">← Retour</button>
+      </div>
+    </div>
+  `;
+  if(pct === 100){ celebrate(); setTimeout(launchConfetti, 250); } else if(pct >= 90){ launchConfetti(); }
+  document.getElementById('shadowEndBackBtn').addEventListener('click', renderDailyLesson);
+  document.getElementById('shadowBackBtn').addEventListener('click', renderDailyLesson);
+  document.getElementById('shadowAgainBtn').addEventListener('click', () => startShadowGame(st.lesson));
+}
+
 function startVocabMatchGame(lesson){
   clearQuestionTimer();
   document.body.classList.add('quiz-active');
