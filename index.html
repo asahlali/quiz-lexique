@@ -1669,6 +1669,23 @@ function reloadAllUserState(){
   customBlocks = loadCustomBlocks();
   blockTitles = loadBlockTitles();
   customVerbs = loadCustomVerbs();
+  // 🆕 Le reste de l'état lié au compte (série, points, préférences...), pour que changer de
+  // compte donne une vraie table rase immédiate, sans avoir besoin de recharger la page.
+  comboStreak = loadComboStreak();
+  bestCombo = 0;
+  streakFreezes = loadStreakFreezes();
+  frozenDays = loadFrozenDays();
+  questSettings = loadQuestSettings();
+  blockWastedTime = loadBlockWastedTime();
+  soundPrefs = loadSoundPrefs();
+  radioSpeed = loadRadioSpeed();
+  radioMusicOn = loadRadioMusicPref();
+  questsCollapsed = loadQuestsCollapsed();
+  blitzBest = loadBlitzBest();
+  dailyChallengeLog = loadDailyChallengeLog();
+  customColors = loadCustomColors();
+  if(typeof applyCustomColors === 'function'){ applyCustomColors(); }
+  qcmSets = loadQcmSets();
   try{ const dv = localStorage.getItem(nsKey('lexiqueQuiz::dictView')); dictView = (dv==='list'||dv==='cards') ? dv : 'cards'; }catch(e){ dictView='cards'; }
   const custom = loadCustomWords();
   WORDS = custom ? custom : DEFAULT_WORDS.slice();
