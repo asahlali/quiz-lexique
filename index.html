@@ -12493,6 +12493,7 @@ async function registerAccount(username, password){
   if(!out.ok) throw new Error(out.error || 'Inscription impossible.');
   saveAuthSession({ username });
   activateAccountProfile(username);
+  await pullAfterAccountSwitch(); // filet de sécurité : au cas où ce compte aurait déjà des données côté cloud
   return true;
 }
 
@@ -12506,7 +12507,24 @@ async function loginAccount(username, password){
   if(!out.ok) throw new Error(out.error || 'Mot de passe incorrect.');
   saveAuthSession({ username });
   activateAccountProfile(username);
+  // 🆕 On récupère les données déjà sauvegardées dans le cloud pour ce compte (points, série,
+  // progression...) — sans ça, se reconnecter sur un autre appareil (ou après un vidage du
+  // stockage local) affichait une progression vide alors qu'elle existait bien côté serveur.
+  await pullAfterAccountSwitch();
   return true;
+}
+
+/* Récupère et applique les données cloud du compte tout juste activé, puis rafraîchit l'écran.
+   Ne bloque jamais la connexion si le réseau est indisponible (best-effort, comme le reste de la synchro). */
+async function pullAfterAccountSwitch(){
+  try{
+    await cloudPull();
+    reloadAllUserState();
+    rebuildBlocks();
+    if(typeof renderBlockSelect === 'function'){ renderBlockSelect(); }
+  }catch(e){
+    // hors ligne ou synchro indisponible : le compte reste utilisable avec les données locales déjà chargées
+  }
 }
 
 function logoutAccount(){
@@ -14926,7 +14944,7 @@ function startShadowGame(lesson){
   clearQuestionTimer();
   document.body.classList.add('quiz-active');
   const items = lesson.dialogue
-    .map(line => ({ clean: stripParens(line.fr), full: line.fr }))
+    .map(line => ({ ar: line.ar, clean: stripParens(line.fr), full: line.fr }))
     .filter(it => it.clean && it.clean.length > 3);
   if(items.length === 0){ renderDailyLesson(); return; }
   shadowGameState = { lesson, queue: shuffle(items.slice()), idx:0, score:{correct:0,total:0}, startTime: Date.now() };
@@ -14939,7 +14957,7 @@ function renderShadowCard(){
   const item = st.queue[st.idx];
   const hasExtra = item.full !== item.clean; // vrai s'il y a du contenu entre parenthèses
   document.getElementById('scoreboard').innerHTML = `<div class="chip">✅ <b>${st.score.correct}</b>/${st.score.total}</div><button class="chip" id="shadowExitBtn" style="cursor:pointer;">← Quitter</button>`;
-  document.getElementById('shadowExitBtn').addEventListener('click', () => { stopShadowRecognition(); renderDailyLesson(); });
+  document.getElementById('shadowExitBtn').addEventListener('click', () => { stopShadowRecognition(); window.speechSynthesis.cancel(); renderDailyLesson(); });
   document.getElementById('progressFill').style.width = Math.round((st.idx/st.queue.length)*100) + '%';
   document.getElementById('footerNote').textContent = `${st.idx+1} / ${st.queue.length}`;
 
@@ -14947,6 +14965,7 @@ function renderShadowCard(){
   card.innerHTML = `
     <div class="cat-tag">🎭 Shadow — comme Répétition, mais de mémoire</div>
     <div class="question-line" id="shadowInstruction" style="text-align:center;margin-bottom:8px;">📖 Lis et écoute la phrase, elle va bientôt disparaître...</div>
+    <div style="font-family:'Changa',sans-serif;direction:rtl;font-size:20px;color:var(--purple);font-weight:700;text-align:center;margin-bottom:10px;">${escapeHtml(item.ar)}</div>
     <div class="repeat-sentence" id="repeatSentence">${escapeHtml(item.full)}</div>
     ${hasExtra ? `<button class="mode-chip" id="shadowToggleExtraBtn" style="margin-top:8px;">🙈 Cacher l'explication entre parenthèses</button>` : ''}
     <button class="speak-ar-btn" id="shadowReplayBtn" style="margin-top:10px;">🔊 Réécouter la phrase</button>
@@ -14959,18 +14978,24 @@ function renderShadowCard(){
         </button>
       </div>
       <div style="text-align:center;font-size:13px;color:var(--text-dim);margin-top:8px;" id="shadowMicHint">🎧 J'écoute... répète la phrase !</div>
+      <div style="text-align:center;font-size:12px;color:var(--text-faint);margin-top:4px;" id="shadowMicTranscript"></div>
     </div>
     <div class="reveal" id="shadowReveal"></div>
   `;
   let parensShown = true;
-  if(hasExtra){
-    document.getElementById('shadowToggleExtraBtn').addEventListener('click', (e) => {
+  const toggleBtn = document.getElementById('shadowToggleExtraBtn');
+  if(toggleBtn){
+    toggleBtn.addEventListener('click', () => {
       parensShown = !parensShown;
-      document.getElementById('repeatSentence').textContent = parensShown ? item.full : item.clean;
-      e.target.textContent = parensShown ? "🙈 Cacher l'explication entre parenthèses" : "👁 Afficher l'explication entre parenthèses";
+      const sentEl = document.getElementById('repeatSentence');
+      if(sentEl && !sentEl.classList.contains('hidden')){ sentEl.textContent = parensShown ? item.full : item.clean; }
+      toggleBtn.textContent = parensShown ? "🙈 Cacher l'explication entre parenthèses" : "👁 Afficher l'explication entre parenthèses";
     });
   }
-  const playIntro = () => speak(item.clean, 'fr-FR', () => startShadowHiddenPhase(item));
+  const playIntro = () => {
+    window.speechSynthesis.cancel();
+    speak(item.clean, 'fr-FR', () => startShadowHiddenPhase(item));
+  };
   document.getElementById('shadowReplayBtn').addEventListener('click', playIntro);
   playIntro();
 }
@@ -14990,43 +15015,113 @@ function startShadowHiddenPhase(item){
   startShadowRecognition(item.clean);
 }
 
+/* Reconnaissance vocale — calquée fidèlement sur le mode 🗣️ Répétition, qui fonctionne de façon
+   fiable : attend la fin du TTS avant de démarrer, écoute en continu, valide dès que tous les
+   mots de la phrase ont été reconnus (avec un filet de sécurité par silence), et affiche un
+   message clair en cas d'erreur (micro refusé, rien entendu...) plutôt que d'échouer en silence. */
 function startShadowRecognition(targetSentence){
   if(!speechRecoAvailable){ showShadowManualValidation(targetSentence); return; }
+  if(shadowRecoActive) return;
+  if(ttsSpeaking){ setTimeout(() => startShadowRecognition(targetSentence), 250); return; }
   try{
     shadowRecognition = new SpeechRec();
     shadowRecognition.lang = 'fr-FR';
-    shadowRecognition.interimResults = true; // pour révéler les mots au fur et à mesure, comme en Répétition
-    shadowRecognition.continuous = false;
+    shadowRecognition.interimResults = true;
+    shadowRecognition.continuous = true;
     shadowRecognition.maxAlternatives = 1;
   }catch(e){ showShadowManualValidation(targetSentence); return; }
-  shadowRecoActive = true;
+
   const micBtn = document.getElementById('shadowMicBtn');
+  const micHint = document.getElementById('shadowMicHint');
+  const micTr = document.getElementById('shadowMicTranscript');
+  shadowRecoActive = true;
   if(micBtn){ micBtn.classList.add('listening'); }
-  let finished = false;
-  const finish = (heardText) => {
-    if(finished) return;
-    finished = true;
+  if(micHint){ micHint.textContent = "🎧 J'écoute... répète la phrase !"; }
+  if(micTr){ micTr.textContent = ''; }
+
+  let finalTranscript = '';
+  let autoFinalizeScheduled = false;
+  let silenceTimer = null;
+
+  const finalizeNow = (heardText) => {
+    if(autoFinalizeScheduled) return;
+    autoFinalizeScheduled = true;
+    if(silenceTimer){ clearTimeout(silenceTimer); silenceTimer = null; }
+    try{ shadowRecognition.stop(); }catch(e){}
+    setTimeout(() => {
+      shadowRecoActive = false;
+      if(micBtn){ micBtn.classList.remove('listening'); }
+      validateShadowAnswer(heardText || '', targetSentence);
+    }, 300);
+  };
+
+  shadowRecognition.onresult = (ev) => {
+    let interim = '';
+    finalTranscript = '';
+    for(let i=0;i<ev.results.length;i++){
+      const t = ev.results[i][0].transcript;
+      if(ev.results[i].isFinal){ finalTranscript += t + ' '; }
+      else { interim += t + ' '; }
+    }
+    const running = (finalTranscript + ' ' + interim).trim();
+    if(micTr){ micTr.textContent = running ? `Tu dis : « ${running} »` : ''; }
+    highlightSpokenWords(running); // 🔴 surlignage en temps réel, mot par mot
+
+    const allWords = document.querySelectorAll('#repeatSentence .rw');
+    const spokenWords = document.querySelectorAll('#repeatSentence .rw.spoken');
+    if(allWords.length > 0 && spokenWords.length === allWords.length){
+      if(micHint){ micHint.textContent = '✅ Phrase complète, vérification...'; }
+      finalizeNow(running);
+      return;
+    }
+    if(silenceTimer){ clearTimeout(silenceTimer); }
+    if(running){
+      silenceTimer = setTimeout(() => {
+        if(micHint){ micHint.textContent = '✅ Vérification...'; }
+        finalizeNow(running);
+      }, 1600);
+    }
+  };
+  shadowRecognition.onerror = (ev) => {
     shadowRecoActive = false;
     if(micBtn){ micBtn.classList.remove('listening'); }
-    try{ shadowRecognition.stop(); }catch(e){}
-    validateShadowAnswer(heardText || '', targetSentence);
-  };
-  shadowRecognition.onresult = (ev) => {
-    let finalText = '', interimText = '';
-    for(let i=0;i<ev.results.length;i++){
-      if(ev.results[i].isFinal){ finalText += ev.results[i][0].transcript; }
-      else{ interimText += ev.results[i][0].transcript; }
+    if(silenceTimer){ clearTimeout(silenceTimer); silenceTimer = null; }
+    if(autoFinalizeScheduled) return;
+    if(ev.error === 'not-allowed' || ev.error === 'service-not-allowed'){
+      if(micHint){ micHint.textContent = '🚫 Micro refusé — autorise le micro dans les réglages du navigateur.'; }
+      showShadowRetryButton(targetSentence);
+    } else if(ev.error === 'no-speech'){
+      if(micHint){ micHint.textContent = "🤫 Rien entendu."; }
+      showShadowRetryButton(targetSentence);
+    } else {
+      if(micHint){ micHint.textContent = '⚠️ Problème micro (' + ev.error + ').'; }
+      showShadowRetryButton(targetSentence);
     }
-    highlightSpokenWords(finalText + ' ' + interimText); // révélation progressive des mots, comme en Répétition
-    if(finalText.trim()){ finish(finalText); }
   };
-  shadowRecognition.onerror = () => { finish(''); };
-  shadowRecognition.onend = () => { if(!finished){ finish(''); } };
-  try{ shadowRecognition.start(); }catch(e){ showShadowManualValidation(targetSentence); }
+  shadowRecognition.onend = () => {
+    shadowRecoActive = false;
+    if(micBtn){ micBtn.classList.remove('listening'); }
+    if(silenceTimer){ clearTimeout(silenceTimer); silenceTimer = null; }
+    if(autoFinalizeScheduled) return;
+    const said = finalTranscript.trim() || (micTr ? micTr.textContent.replace(/^Tu dis : « /, '').replace(/ »$/, '') : '');
+    if(said){ finalizeNow(said); }
+    else { showShadowRetryButton(targetSentence); }
+  };
+  try{ shadowRecognition.start(); }
+  catch(e){ shadowRecoActive = false; if(micBtn){ micBtn.classList.remove('listening'); } showShadowManualValidation(targetSentence); }
 }
 function stopShadowRecognition(){
   if(shadowRecognition){ try{ shadowRecognition.stop(); }catch(e){} }
   shadowRecoActive = false;
+}
+function showShadowRetryButton(targetSentence){
+  const reveal = document.getElementById('shadowReveal');
+  if(!reveal) return;
+  reveal.innerHTML = `<button class="restart-btn" id="shadowRetryMicBtn" style="margin:0 auto;">🎤 Réessayer</button>`;
+  document.getElementById('shadowRetryMicBtn').addEventListener('click', () => {
+    reveal.innerHTML = '';
+    startShadowRecognition(targetSentence);
+  });
 }
 function showShadowManualValidation(targetSentence){
   const reveal = document.getElementById('shadowReveal');
@@ -15058,7 +15153,7 @@ function finalizeShadowAnswer(isCorrect, targetSentence, heardText){
   if(reveal){ reveal.innerHTML = isCorrect ? `<div class="pass-banner ok">✅ Correct !</div>` : `<div class="pass-banner ko">❌ Raté</div>`; }
   if(isCorrect){ playCorrectSound(); reactMascot('ok'); vibrate(35); if(comboStreak>0 && comboStreak%5===0){ celebrate(); } }
   else { playWrongSound(); reactMascot('ko'); vibrate([40,40,40]); }
-  setTimeout(() => { st.idx++; renderShadowCard(); }, 1600);
+  setTimeout(() => { st.idx++; renderShadowCard(); }, 1800);
 }
 function endShadowGame(){
   document.body.classList.remove('quiz-active');
@@ -15089,6 +15184,7 @@ function endShadowGame(){
   document.getElementById('shadowBackBtn').addEventListener('click', renderDailyLesson);
   document.getElementById('shadowAgainBtn').addEventListener('click', () => startShadowGame(st.lesson));
 }
+
 
 
 function startVocabMatchGame(lesson){
