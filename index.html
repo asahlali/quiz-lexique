@@ -14528,7 +14528,6 @@ const DAILY_LESSON_17 = {
     4: "④ Le mot sìgha(t) (formule) est ici répété, alors qu'en français on évite la répétition avec « celle de ». Construction typiquement arabe à retenir.",
     5: "⑤ Kouffi...! (Cesse !) est la 2e pers. féminin singulier de l'impératif de kaffa, yakouffou. Au masculin : kouffa, sur le modèle de marra, yamourrou (passer) — d'où le fameux mourra kouch (« passe vite ») qui a donné le nom de Marrakech !",
     6: "⑥ wa (A)llah(i) ! est une interjection très courante signifiant « par Dieu », employée dans toutes sortes de circonstances : l'étonnement, parfois le doute (« ma foi, je ne sais pas vraiment »), ou au contraire pour prendre à témoin son interlocuteur (« c'est vrai, je le jure »).",
-    7: "⑦ Al-haqq signifiait, à l'époque anté-islamique, « le bon droit », s'opposant à bâtil (faux, vain). Dans le monde islamique, ce mot a le double sens de vérité et de droit. C'est aussi l'un des 99 noms de Dieu.",
   },
   vocabBox: {
     title: 'la vérité et le Liban',
@@ -14553,6 +14552,7 @@ const DAILY_LESSON_17 = {
     { fr:"Peut-être rencontrerons-nous notre ami diplomate qui vit là-bas.", ar:'لَعَلَّنَا نَلْتَقِي بِصَدِيقِنَا الدِّبْلُومَاسِيِّ الَّذِي يَعِيشُ هُنَاكَ.', tr:"La'allanà naltaqì bi-sadìqinà ad-dibloùmâsiyyi alladhì ya'ìchou hounàka." },
   ],
 };
+
 
 
 const DAILY_LESSON_18 = {
@@ -14791,7 +14791,694 @@ const DAILY_LESSON_21 = {
   revisionNote: "🎉 Bravo, tu as terminé toute la méthode ! Ce dernier chapitre est une grande révision, sans nouvel exercice de traduction. Pour t'entraîner une dernière fois, le mieux est de rejouer les leçons précédentes (surtout celles où ton score est encore bas) et de relire le tableau d'expressions ci-dessus. Mabroûk !",
 };
 
-const ALL_LESSONS = { 1: DAILY_LESSON_1, 2: DAILY_LESSON_2, 3: DAILY_LESSON_3, 4: DAILY_LESSON_4, 5: DAILY_LESSON_5, 6: DAILY_LESSON_6, 7: DAILY_LESSON_7, 8: DAILY_LESSON_8, 9: DAILY_LESSON_9, 10: DAILY_LESSON_10, 11: DAILY_LESSON_11, 12: DAILY_LESSON_12, 13: DAILY_LESSON_13, 14: DAILY_LESSON_14, 15: DAILY_LESSON_15, 16: DAILY_LESSON_16, 17: DAILY_LESSON_17, 18: DAILY_LESSON_18, 19: DAILY_LESSON_19, 20: DAILY_LESSON_20, 21: DAILY_LESSON_21 };
+const DAILY_LESSON_22 = {
+  num: 22,
+  titleFr: 'Une fillette surdouée',
+  titleAr: 'صَبِيَّةٌ مَوْهُوبَةٌ لِلْغَايَةِ',
+  fullAudioUrl: null,
+  introFr: "Portrait de presse d'une jeune Jordanienne prodige de l'informatique, entre don naturel et rêve d'entreprise familiale.",
+  dialogue: [
+    { ar:'لَطِيفَةُ صَبِيَّةٌ أُرْدُنِيَّةٌ مُنْشَرِحَةٌ لاَ يُفَارِقُهَا الاِبْتِسَامُ', tr:"Latìfatou sabiyyatoun ourdouniyyatoun mounchariha(toun) là youfàriqouhà al-ibtisàmou", fr:"Latifa est une fillette jordanienne enjouée toujours souriante,", audioUrl:null },
+    { ar:'تُحِبُّ الإِصْغَاءَ إِلَى الْقِصَصِ الَّتِي تَسْحَرُ الأَطْفَالَ', tr:"touhibbou al-isghà'a ilà al-qisasi allatì tashrou al-atfàla", fr:"qui aime écouter les contes qui fascinent les enfants,", audioUrl:null },
+    { ar:'حَتَّى لاَ يَتَخَيَّلُ الْمَرْءُ أَنَّهَا، عَلَى الرَّغْمِ مِنْ صِغَرِهَا،', tr:"hattà là yatakhayyalou al-mar'ou annahà, 'alà ar-raghmi min sighariha,", fr:"au point qu'on ne peut s'imaginer que, malgré son jeune âge,", audioUrl:null },
+    { ar:'تَحَوَّلَتْ إِلَى خَبِيرَةٍ فِي مَجَالِ الْحَاسُوبِ الَّذِي لَمْ يَبْقَ أَدْنَى سِرٍّ مِنْ أَسْرَارِهِ بَعِيدًا عَنْهَا فَحَسْبُ', tr:"tahaouwalat ilà khabìratin fì majàli al-hàsoùbi alladhì lam yabqa adnà sirrin min asràrihi ba'ìdan 'anhà fahasbou", fr:"non seulement elle est devenue experte en informatique,", audioUrl:null },
+    { ar:'بَلْ ذَهَبَتْ إِلَى حَدِّ الْحُصُولِ عَلَى رُخْصَةٍ دُوَلِيَّةٍ فِي إِدَارَةِ الْمُعَدَّاتِ الْمَعْلُومَاتِيَّةِ الْمُتَقَدِّمَةِ', tr:"bal dhahabat ilà haddi al-housoùli 'alà roukhsatin douwaliyyatin fì idàrati al-mou'addàti al-ma'loùmàtiyyati al-moutaqaddimati", fr:"mais encore elle a obtenu une licence internationale en gestion des matériels informatiques avancés.", audioUrl:null },
+    { ar:'إِنَّهَا صَبِيَّةٌ مَوْهُوبَةٌ، سَرِيعَةُ الْفَهْمِ وَالاِسْتِيعَابِ', tr:"innahà sabiyyatoun maouhoùbatoun, sarì'atou al-fahmi wa al-istì'àbi", fr:"Assurément, une fillette surdouée, vive d'esprit.", audioUrl:null },
+    { ar:'اِسْتَطَاعَتْ اِجْتِيَازَ أَصْعَبِ الاِمْتِحَانَاتِ فِي هَذَا الْمَجَالِ التِّكْنُولُوجِيِّ الْمُتَطَوِّرِ', tr:"istatà'at ijtiyàza as'abi al-imtihànàti fì hàdhà al-majàli at-tiknoùloùjiyyi al-moutataouwiri", fr:"Elle a réussi les examens les plus difficiles dans ce domaine sophistiqué,", audioUrl:null },
+    { ar:'وَإِنْ كَانَتْ مُنْتَمِيَةً إِلَى عَائِلَةٍ مُتَوَاضِعَةٍ', tr:"wa in kànat mountamiyatan ilà 'à'ilatin moutawàdi'atin", fr:"même si elle est issue d'une famille modeste", audioUrl:null },
+    { ar:'لَمْ يَكُنْ مِنْ شَأْنِهَا إِطْلاَقًا أَنْ تُسَاعِدَ لَطِيفَةَ الصَّغِيرَةَ عَلَى تَحْقِيقِ مِثْلِ هَذِهِ الطُّمُوحَاتِ', tr:"lam yakoun min cha'nihà itlàqan an tousà'ida Latìfata as-saghìrata 'alà tahqìqi mithli hàdhihi at-toumoùhàti", fr:"qui n'était pas en mesure de l'aider à réaliser ce genre d'ambition.", audioUrl:null },
+    { ar:'وَرَدًّا عَلَى سُؤَالٍ مِنْ صَحِيفَةٍ مَحَلِّيَّةٍ، أَعْرَبَتْ، وَهِيَ تَخْرُجُ مِنْ مَرْكَزِ التَّدْرِيبِ الْوَطَنِيِّ', tr:"wa raddan 'alà sou'àlin min sahìfatin mahalliyyatin, a'rabat, wa hiya takhrouju min markazi at-tadrìbi al-watanì", fr:"en réponse à une question d'un journal local, en sortant du centre de formation national, elle a exprimé", audioUrl:null },
+    { ar:'عَنْ رَغْبَتِهَا فِي مُوَاصَلَةِ دِرَاسَتِهَا الثَّانَوِيَّةِ', tr:"'an raghbatihà fì mouwàsalati diràsatihà ath-thànawiyyati", fr:"son désir de poursuivre ses études secondaires,", audioUrl:null },
+    { ar:'تَوَازِيًا مَعَ اسْتِمْرَارِهَا فِي مُعَالَجَةِ الْحَاسُوبِ', tr:"tawàziyan ma'a istimràrihà fì mou'àlajati al-hàsoùbi", fr:"parallèlement à ses études informatiques.", audioUrl:null },
+    { ar:'أَمَّا بِخُصُوصِ مَشَارِيعِهَا الْمُسْتَقْبَلِيَّةِ بَعْدَ الْبَكَالُورْيُوسِ فَأَعْلَنَتِ الْمَوْهُوبَةُ ضَاحِكَةً', tr:"ammà bi-khousoùsi machàrì'ihà al-moustaqbaliyyati ba'da al-bakàloùryoùsi fa-a'lanat-i al-maouhoùbatou dàhikatan", fr:"quant à ses projets d'avenir après le bac, elle a déclaré en riant :", audioUrl:null },
+    { ar:'كُلِّي أَمَلٌ أَنْ يَرْزُقَنِي اللَّهُ تَعَالَى بِالْعَدِيدِ مِنَ الأَوْلاَدِ', tr:"koullì amaloun an yarzouqanì Allahou ta'àlà bi-al-'adìdi min-a al-aoulàdi", fr:"J'ai le vif espoir que Dieu me donnera beaucoup d'enfants,", note:1, audioUrl:null },
+    { ar:'فَأُعَوِّدَهُمْ عَلَى اسْتِخْدَامِ الْحَاسُوبِ مِنْ وَقْتِ نُعُومَةِ أَظْفَارِهِمْ', tr:"fa-ou'awwidahoum 'alà istikhdàmi al-hàsoùbi min waqti nou'oùmati azfàrihim", fr:"que je familiariserai avec l'ordinateur dès leur plus tendre enfance,", note:2, audioUrl:null },
+    { ar:'بِهَدَفِ تَأْسِيسِ شَرِكَةٍ عَائِلِيَّةٍ لِتَصْمِيمِ', tr:"bi-hadafi ta'sìsi charikatin 'à'iliyyatin li-tasmìmi", fr:"dans le but de fonder une entreprise familiale afin de concevoir", audioUrl:null },
+    { ar:'بَرَامِجِيَّةٍ تَكُونُ فِي مُتَنَاوَلِ أَقَلِّ الْمُسْتَخْدِمِينَ مَهَارَةً فِي فَنِّ مُعَالَجَةِ الْحَاسُوبِ', tr:"barâmijiyyatin takoùnou fì moutanàwali aqalli al-moustakhdimìna mahâratan fì fanni mou'àlajati al-hàsoùbi", fr:"un logiciel à la portée des utilisateurs les moins habiles.", note:3, audioUrl:null },
+    { ar:'وَلِمُسَاعَدَةِ مَنْ يُعَذِّبُهُمْ هَذَا الْجِهَازُ الَّذِي يُشَكِّلُ أَحْيَانًا سِلاَحًا ذَا حَدَّيْنِ', tr:"wa li-mousà'adati man you'adhdhibouhoum hàdhà al-jihàzou alladhì youchakkilou ahyânan silâhan dhà haddayni", fr:"pour aider ceux que torture cet appareil, arme à double tranchant.", note:4, audioUrl:null },
+    { ar:'عَلَى أَيِّ حَالٍ فَلاَ يَسَعُنَا إِلاَّ أَنْ نُعَبِّرَ لِهَذِهِ الصَّبِيَّةِ اللاَّمِعَةِ', tr:"'alà ayyi hàlin fa-là yasa'ounà illà an nou'abbira li-hàdhihi as-sabiyyati al-làmi'ati", fr:"en tout cas, nous ne pouvons qu'exprimer à cette fillette brillante,", note:6, audioUrl:null },
+    { ar:'الْمُحْسِنَةِ إِلَى الإِنْسَانِيَّةِ بِأَسْرِهَا، عَنْ أَخْلَصِ التَّهَانِي وَالتَّمَنِّيَّاتِ!', tr:"al-mouhsinati ilà al-insâniyyati bi-asrihà, 'an akhlasi at-tahànì wa at-tamanniyyàti !", fr:"bienfaitrice de l'humanité entière, nos plus sincères félicitations !", note:8, audioUrl:null },
+  ],
+  notes: {
+    1: "① koullì amaloun = j'ai le vif espoir.",
+    2: "② fa-ou'awwidahoum = « et-alors-que-je-les-familiarise » : fa- + subjonctif = valeur de but.",
+    3: "③ aqalli al-moustakhdimìna mahâratan = les utilisateurs les moins habiles.",
+    4: "④/⑤ ahyânan = parfois, pluriel de hìn ; dhâ haddayni = à deux tranchants ; dhà toujours en annexion (dhoû/dhâ/dhî, fém. dhâtou/a/i).",
+    6: "⑥ 'alà ayyi hâlin = en tout cas.",
+    7: "⑦ fa-lâ yasa'ounâ illâ an nou'abbira 'an... = nous ne pouvons qu'exprimer.",
+    8: "⑧ bi-asrihâ = bi-koullihâ = toute entière.",
+  },
+  vocabBox: {
+    title: "l'informatique et le mérite",
+    items: [
+      { ar:'مَوْهُوبَةٌ', tr:"maouhoùba(t)", fr:'Surdouée' },
+      { ar:'حَاسُوبٌ', tr:"hâsoùb", fr:'Ordinateur' },
+      { ar:'بَرَامِجِيَّةٌ', tr:"barâmijiyya(t)", fr:'Logiciel' },
+    ],
+  },
+  exercise1: [
+    { ar:'رَغْمَ صِغَرِهِنَّ تَكُونُ هَؤُلاَءِ الصَّبَايَا سَرِيعَاتِ الْفَهْمِ وَمَوْهُوبَاتٍ.', tr:"Raghma sighàrihinna takoùnou hà'oulà'i as-sabàyà sarì'àti al-fahmi wa maouhoùbàtin.", fr:"Malgré leur jeune âge, ces fillettes sont vives d'esprit et douées." },
+    { ar:'أَحْتَاجُ إِلَى مُسَاعَدَتِكَ حَتَّى أَتَعَوَّدَ عَلَى اسْتِيعَابِ اشْتِغَالِ هَذِهِ الْبَرَامِجِيَّةِ الْجَدِيدَةِ.', tr:"Ahtàjou ilà mousà'adatika hattà ata'aouwada 'alà istì'àbi ichtighàli hàdhihi al-barâmijiyyati al-jadìdati.", fr:"J'ai besoin de ton aide afin de me familiariser avec le fonctionnement de ce nouveau logiciel." },
+    { ar:'نُفَكِّرُ فِي تَأْسِيسِ شَرِكَةٍ عَائِلِيَّةٍ فَنُصَمِّمُ مِنْ خِلاَلِهَا بَرَامِجِيَّةً سَهْلَةَ الاِسْتِخْدَامِ لِلْجَمِيعِ.', tr:"Noufakkirou fì ta'sìsi charikatin 'à'iliyyatin fa-nousammimou min khilâlihà barâmijiyyatan sahlata al-istikhdâmi lil-jamì'i.", fr:"Nous pensons fonder une entreprise familiale qui nous permettra de concevoir un logiciel d'une utilisation accessible à tous." },
+    { ar:'لَمَّا كَانَ هَذَا الطَّالِبُ مُنْتَمِيًا إِلَى عَائِلَةٍ مُتَوَاضِعَةٍ، لَيْسَ مِنْ شَأْنِهِ أَنْ يُنْجِزَ كَافَّةَ طُمُوحَاتِهِ.', tr:"Lammà kàna hàdhà at-tàlibou mountamiyan ilà 'à'ilatin moutawàdi'atin, laysa min cha'nihi an younjiza kâffata toumoùhàtihi.", fr:"Étant donné que cet étudiant appartient à une famille modeste, il ne lui est pas possible de réaliser toutes ses ambitions." },
+    { ar:'نَحْنُ حَرِيصُونَ عَلَى مُسَاعَدَتِكَ فِي مِثْلِ هَذَا الْمَشْرُوعِ الْمُهِمِّ جِدًّا لِلْمُجْتَمَعِ.', tr:"Nahnou harìsoùna 'alà mousà'adatika fì mithli hàdhà al-machroù'i al-mouhimmi jiddan lil-moujtama'i.", fr:"Nous désirons t'aider dans un tel projet, si important pour la société." },
+  ],
+  exercise2: [
+    { fr:"Pour toi, l'ordinateur n'a plus de secrets, mais pas pour moi !", ar:'لَيْسَ لَكَ أَمَامَكَ أَدْنَى سِرٍّ مِنْ أَسْرَارِ الْحَاسُوبِ، وَلَيْسَ بِالنِّسْبَةِ لِي!', tr:"Laysa laka amàmaka adnà sirrin min asràri al-hàsoùbi, wa laysa bi-an-nisbati lì !" },
+    { fr:"Mes deux fils ne désirent pas poursuivre leurs études secondaires.", ar:'لاَ يَرْغَبُ اِبْنَايَ فِي مُوَاصَلَةِ دِرَاسَتِهِمَا الثَّانَوِيَّةِ.', tr:"Là yarghabou ibnàya fì mouwàsalati diràsatihimà ath-thànawiyyati." },
+    { fr:"On ne peut pas imaginer que cet enfant a passé des examens très difficiles en informatique.", ar:'لاَ يُمْكِنُ أَنْ يُتَخَيَّلَ أَنَّ هَذَا الطِّفْلَ اِجْتَازَ اِمْتِحَانَاتٍ صَعْبَةً جِدًّا فِي مَجَالِ الْحَاسُوبِ.', tr:"Là youmkinou an youtakhayyala anna hàdhà at-tifla ijtàza imtihànàtin sa'batan jiddan fì majàli al-hàsoùbi." },
+    { fr:"L'utilisation de l'ordinateur est parfois une arme à double tranchant.", ar:'إِنَّ اسْتِخْدَامَ الْحَاسُوبِ يَتَحَوَّلُ أَحْيَانًا إِلَى سِلاَحٍ ذِي حَدَّيْنِ.', tr:"Inna istikhdàma al-hàsoùbi yatahaouwalou ahyânan ilà silâhin dhì haddayni." },
+  ],
+};
+
+const DAILY_LESSON_23 = {
+  num: 23,
+  titleFr: 'Méfiez-vous des perroquets !',
+  titleAr: 'إِيَّاكَ مِنَ الثِّقَةِ بِالْبَبَّغَاوَاتِ!',
+  fullAudioUrl: null,
+  introFr: "Un couple de retraités se fait cambrioler ; leur propre perroquet, qui répète le nom du voleur, permet de le confondre. Un couple de retraités rentre après quelques jours d'absence et découvre le vol de tous leurs bijoux et la disparition de leur perroquet chéri. Ils portent plainte ; l'enquête piétine d'abord, puis le perroquet réapparaît chez eux en répétant « Anà Jamîl al-moutacharridou ! » (Je suis Jamil le vagabond !). Le voleur est vite arrêté, avoue, et s'étonne : « Comment avez-vous su ? » — « C'est le perroquet qui t'a dénoncé ! »",
+  dialogue: [],
+  notes: {
+    1: "① iyyà-ka min...!! = Prends garde à ! / Fais attention à !",
+    2: "② ladà 'aoudatihimà = au moment de leur retour.",
+    3: "③ Foùji'a rajouloun... moufâja'atan ghayra sârratin : complément absolu.",
+    4: "④ al-'azîzi 'alayhimà = chéri d'eux deux.",
+    5: "⑤ mà labithat an ajrat = elle n'a pas tardé à diligenter.",
+    6: "⑥ Yà salàm(ou)!! = expression d'admiration/étonnement (Ça alors !, Bravo !).",
+    7: "⑦ annì houwa as-sàriqou = que moi j'étais le voleur ; houwa/houwa alladhì sert à traduire « c'est... qui... ».",
+  },
+  vocabBox: {
+    title: "le vol et l'enquête",
+    items: [
+      { ar:'بَبَّغَاءٌ', tr:"babbaghà'", fr:'Perroquet' },
+      { ar:'شَكْوَى', tr:"chakwà", fr:'Plainte' },
+      { ar:'مُتَشَرِّدٌ', tr:"moutacharrid", fr:'Vagabond' },
+    ],
+  },
+  exercise1: [
+    { ar:'تَعَرَّضَتْ أُخْتَانِ مُتَقَاعِدَتَانِ لِسَرِقَةِ مَائِدَةٍ قَدِيمَةٍ قَيِّمَةٍ أَثْنَاءَ غِيَابِهِمَا.', tr:"Ta'arradat oukhtàni moutaqà'idatàni li-sariqati mà'idatin qadìmatin qayyimatin athnà'a ghiyàbihimà.", fr:"Deux sœurs retraitées ont été victimes du vol d'une table ancienne de valeur pendant leur absence." },
+    { ar:'فُوجِئَتَا مُفَاجَأَةً شَدِيدَةً عِنْدَ مُلاَحَظَتِهِمَا اخْتِفَاءَ بَبَّغَائِهِمَا.', tr:"Foùji'atà moufàja'atan chadìdatan 'inda moulàhazatihimà ikhtifà'a babbaghà'ihimà.", fr:"Elles ont eu la grande surprise de constater la disparition de leur perroquet." },
+    { ar:'يَا سَلاَمُ! كَيْفَ عَلِمْتَ أَنَّ جَمِيلاً الْمُتَشَرِّدَ وَرِفَاقَهُ هُمْ السَّارِقُونَ؟', tr:"Yà salàmou ! Kayfa 'alimta anna Jamìlan al-moutacharrida wa rifàqahou houm as-sàriqoùna ?", fr:"Ça alors ! Comment as-tu su que Jamil le vagabond et ses camarades étaient les voleurs ?" },
+  ],
+  exercise2: [
+    { fr:"Le couple a pris l'initiative de déclarer le vol auprès de la police.", ar:'بَادَرَ الزَّوْجُ وَزَوْجَتُهُ إِلَى التَّصْرِيحِ بِالسَّرِقَةِ لَدَى رِجَالِ الشُّرْطَةِ.', tr:"Bàdara az-zaoujou wa zaoujatouhou ilà at-tasrìhi bi-as-sariqati ladà rijàli ach-chourtati." },
+    { fr:"Qui m'a dénoncé ? – C'est ta voisine qui t'a dénoncé !", ar:'مَنْ فَضَحَنِي؟ – جَارَتُكِ هِيَ الَّتِي فَضَحَتْكَ!', tr:"Man fadahanì ? – Jàratouki hiya allatì fadahatki !" },
+  ],
+};
+
+const DAILY_LESSON_24 = {
+  num: 24,
+  titleFr: 'Une œuvre gigantesque',
+  titleAr: 'عَمَلٌ جَبَّارٌ',
+  fullAudioUrl: null,
+  introFr: "Un jeune Marocain réalise la plus grande grille de mots croisés au monde en arabe, dessinée... sur le mur de la maison familiale. ⚠️ Il manque les phrases 2 à 8 du texte principal (pages non capturées) — le dialogue commence directement à la phrase 9.",
+  dialogue: [
+    { ar:'أَنْجَزَ شَابٌّ مَغْرِبِيٌّ أَكْبَرَ شَبَكَةٍ لِلْكَلِمَاتِ الْمُتَقَاطِعَةِ فِي الْعَالَمِ بِاللُّغَةِ الْعَرَبِيَّةِ', tr:"Anjaza chàbboun maghribiyyoun akbara chabakatin lil-kalimàti al-moutaqàti'ati fì al-'àlami bi-al-loughati al-'arabiyyati", fr:"Un jeune Marocain a réalisé la plus grande grille au monde de mots croisés en langue arabe,", audioUrl:null },
+    { ar:'أُفُقِيًّا تِسْعَةَ عَشَرَ أَلْفًا وَمِئَةً وَعِشْرِينَ لُغْزًا', tr:"Oufouqiyyan tis'ata 'achara alfan wa mi'atan wa 'ichrìna loughzan", fr:"horizontalement, dix-neuf mille cent vingt énigmes", audioUrl:null },
+    { ar:'وَعَمُودِيًّا ثَمَانِيَةَ عَشَرَ أَلْفًا وَمِئَتَيْنِ وَثَمَانِينَ لُغْزًا', tr:"wa 'amoùdiyyan thamàniyata 'achara alfan wa mi'atayni wa thamànìna loughzan", fr:"et verticalement, dix-huit mille deux cent quatre-vingts énigmes,", audioUrl:null },
+    { ar:'ثَمَانِيَةَ أَشْهُرٍ مِنَ الأَبْحَاثِ الْمُكَثَّفَةِ فِي مُخْتَلِفِ الْمَجَالاَتِ', tr:"thamàniyata achhourin min-a al-abhàthi al-moukaththafati fì moukhtalifi al-majàlàti", fr:"huit mois de recherches intensives dans les domaines les plus divers,", audioUrl:null },
+    { ar:'اِعْتِمَادًا عَلَى كِتَابِ «لِسَانِ الْعَرَبِ» لاِبْنِ مَنْظُورٍ', tr:"i'timàdan 'alà kitàbi «Lisàni al-'arabi» li-ibni Manzoùrin", fr:"en s'appuyant sur le \"Lisân al-'Arab\" d'Ibn Manzoûr,", audioUrl:null },
+    { ar:'وَمَوْسُوعَةٍ أُورُوبِّيَّةٍ وَالْعَدِيدِ مِنَ الْكُتُبِ الْعَرَبِيَّةِ وَالْفَرَنْسِيَّةِ.', tr:"wa mausoù'atin oùroubbiyyatin wa al-'adìdi min-a al-koutoubi al-'arabiyyati wa al-faransiyyati.", fr:"et une encyclopédie européenne et de nombreux ouvrages arabes et français.", audioUrl:null },
+    { ar:'بِالْجُمْلَةِ، تَأْتِي أَهَمِّيَّةُ مِثْلِ هَذَا الْعَمَلِ الْجَبَّارِ مِنِ اسْتِعْرَاضِهِ', tr:"Bi-al-joumlati, ta'tì ahammiyyatou mithli hàdhà al-'amali al-jabbàri min-i (i)sti'ràdihi", fr:"En bref, l'intérêt de cette œuvre gigantesque vient du fait d'avoir passé en revue", audioUrl:null },
+    { ar:'لِلْكَثِيرِ مِنَ الأَحْدَاثِ التَّارِيخِيَّةِ وَالثَّقَافِيَّةِ وَغَيْرِهَا، عَبْرَ الْعُصُورِ، غَرْبًا وَشَرْقًا', tr:"lil-kathìri min-a al-ahdàthi at-tàrìkhiyyati wa ath-thaqàfiyyati wa ghayrihà, 'abra al-'ousoùri, gharban wa charqan", fr:"de nombreux faits historiques et culturels, à l'ouest comme à l'est,", audioUrl:null },
+    { ar:'مَعَ التَّرْكِيزِ عَلَى مَفَاخِرِ الْحَضَارَاتِ وَخَاصَّةً الْحَضَارَتَيْنِ الأُورُوبِّيَّةِ الْمَسِيحِيَّةِ مِنْ جِهَةٍ', tr:"ma'a at-tarkìzi 'alà mafàkhiri al-hadàràti wa khàssatan al-hadàratayni al-oùroubbiyyati al-masìhiyyati min jihatin", fr:"en mettant l'accent sur les civilisations, en particulier chrétienne européenne d'une part", note:4, audioUrl:null },
+    { ar:'وَالْعَرَبِيَّةِ الإِسْلاَمِيَّةِ وَالْمَسِيحِيَّةِ فِي آنٍ وَاحِدٍ مِنْ جِهَةٍ أُخْرَى.', tr:"wa al-'arabiyyati al-islàmiyyati wa al-masìhiyyati fì ânin wàhidin min jihatin oukhrà.", fr:"et arabe islamique et chrétienne d'autre part.", audioUrl:null },
+    { ar:'الْمُشْكِلَةُ الْوَحِيدَةُ هِيَ أَنَّ الشَّابَّ رَسَمَ مُسَوَّدَةَ عَمَلِهِ عَلَى حَائِطٍ أَبْيَضَ', tr:"Al-mouchkilatou al-wahìdatou hiya anna ach-chàbba rasama mousawwadata 'amalihi 'alà hà'itin abyada", fr:"Le seul problème : il a tracé le brouillon sur un mur blanc", note:5, audioUrl:null },
+    { ar:'يُطِلُّ عَلَى فِنَاءِ بَيْتِهِ الدَّاخِلِيِّ.', tr:"youtillou 'alà finà'i baytihi ad-dàkhiliyyi.", fr:"donnant sur la cour intérieure de sa maison.", audioUrl:null },
+    { ar:'بَعْدَ أَنْ أَغْضَبَ ذَلِكَ وَالِدَيْهِ غَضَبًا شَدِيدًا، اِفْتَخَرَ كِلاَهُمَا، فِي النِّهَايَةِ', tr:"Ba'da an aghdaba dhàlika wàliday-hi ghadaban chadìdan, iftakhara kilâhoumà, fì an-nihàyati", fr:"Après une grosse colère des parents, ils ont finalement été très fiers", note:6, audioUrl:null },
+    { ar:'بِمَا أَبْدَاهُ اِبْنُهُمَا مِنْ عَبْقَرِيَّةٍ وَمَهَارَةٍ مِنْ خِلاَلِ تَصْمِيمِ هَذَا الْعَمَلِ الْجَبَّارِ.', tr:"bi-mà abdàhou ibnouhoumà min 'abqariyyatin wa mahàratin min khilâli tasmìmi hàdhà al-'amali al-jabbàri.", fr:"du génie et de l'habileté de leur fils, à travers la conception de cette œuvre gigantesque.", audioUrl:null },
+  ],
+  notes: {
+    4: "④ min jihatin... wa min jihatin oukhrà = d'une part... et d'autre part...",
+    5: "⑤ al-mouchkilatou al-wahìdatou hiya anna... = le seul problème est que...",
+    6: "⑥ wàliday-hi = ses parents (« ses deux pères ») au cas direct ; wàlid-àni au cas sujet. ⑦ Nouvel exemple de complément absolu.",
+  },
+  vocabBox: {
+    title: 'mots croisés et records',
+    items: [
+      { ar:'شَبَكَةٌ', tr:"chabaka(t)", fr:'Grille, réseau' },
+      { ar:'لُغْزٌ', tr:"loughz", fr:'Énigme' },
+      { ar:'رَقْمٌ قِيَاسِيٌّ', tr:"raqm qiyàsiy", fr:'Record' },
+    ],
+  },
+  exercise1: [
+    { ar:'بَلَغَنِي أَنَّ نُسْخَةً نَادِرَةً مِنْ نُسَخِ كِتَابِ «لِسَانِ الْعَرَبِ» الْمَشْهُورِ تَكُونُ فِي حَوْزَةِ أَحَدِ أَقَارِبِي.', tr:"Balaghanì anna nouskhatan nàdiratan min nousakhi kitàbi «Lisàni al-'arabi» al-machhoùri takoùnou fì hauzati ahadi aqàribì.", fr:"J'ai appris qu'un exemplaire rare du célèbre livre « La langue des Arabes » est en possession d'un de mes proches." },
+    { ar:'أَغْضَبَ الأُمَّ أَنْ تَرَى اِبْنَهَا يَسْتَخْدِمُ حَائِطَ الْبَيْتِ الأَبْيَضَ كَأَنَّهُ وَرَقَةٌ مِنْ أَوْرَاقِ مُسَوَّدَةٍ.', tr:"Aghdaba al-oumma an tarà ibnahà yastakhdimou hà'ita al-bayti al-abyada ka'annahou waraqatoun min aouràqi mousawwadatin.", fr:"La mère a été fâchée de voir son fils utiliser le mur blanc de la maison comme une feuille de brouillon." },
+  ],
+  exercise2: [
+    { fr:"Pour résoudre les énigmes de ces mots croisés, il faut de l'habileté et un peu de génie.", ar:'لِحَلِّ أَلْغَازِ هَذِهِ الْكَلِمَاتِ الْمُتَقَاطِعَةِ، لاَ بُدَّ مِنْ مَهَارَةٍ وَشَيْءٍ مِنَ الْعَبْقَرِيَّةِ.', tr:"Li-halli alghàzi hàdhihi al-kalimàti al-moutaqàti'ati, là boudda min mahàratin wa chay'in min-a al-'abqariyyati." },
+    { fr:"J'ai acheté un terrain à bâtir de cent mètres de longueur et cinquante mètres de largeur.", ar:'اِشْتَرَيْتُ أَرْضًا لِلْبِنَاءِ طُولُهَا مِئَةُ مِتْرٍ وَعَرْضُهَا خَمْسُونَ مِتْرًا.', tr:"Ichtaraytou ardan lil-binà'i toùlouhà mi'atou mitrin wa 'ardouhà khamsoùna mitran." },
+  ],
+};
+
+const DAILY_LESSON_25 = {
+  num: 25,
+  titleFr: 'Un enfant très attendu',
+  titleAr: 'مَوْلُودٌ طَالَ اِنْتِظَارُهُ',
+  fullAudioUrl: null,
+  introFr: "Après vingt et un ans d'attente et une quarantaine dépassée, une Tunisienne voit son rêve de maternité se réaliser naturellement.",
+  dialogue: [
+    { ar:'أَخِيرًا، تَحَقَّقَ حُلْمُ سَيِّدَةٍ تُونِسِيَّةٍ بِالأُمُومَةِ', tr:"Akhìran, tahaqqaqa houlmou sayyidatin toùnisiyyatin bi-al-oumoùmati", fr:"Enfin s'est réalisé le rêve d'une dame tunisienne de maternité", audioUrl:null },
+    { ar:'إِذْ أَنَّهَا وَضَعَتْ مَوْلُودَهَا الأَوَّلَ', tr:"idh annahà wada'at maouloùdahà al-aouwala", fr:"en mettant au monde son premier enfant,", note:1, audioUrl:null },
+    { ar:'بَعْدَ عُقْمٍ دَامَ وَاحِدًا وَعِشْرِينَ عَامًا.', tr:"ba'da 'ouqmin dàma wàhidan wa 'ichrìna 'àman.", fr:"après une stérilité de vingt et un ans.", audioUrl:null },
+    { ar:'الْوَاقِعُ أَنَّ هَذِهِ الْمَرْأَةَ الَّتِي كَانَتْ قَدْ تَجَاوَزَتِ الأَرْبَعِينَ مِنْ عُمْرِهَا', tr:"Al-wàqi'ou anna hàdhihi al-mar'ata allatì kànat qad tajàwazat-i al-arba'ìna min 'oumrihà", fr:"cette femme avait dépassé la quarantaine,", note:2, audioUrl:null },
+    { ar:'وَالَّتِي لَمْ تَزَلْ حَرِيصَةً عَلَى الإِنْجَابِ، أَفْنَتْ حَيَاتَهَا فِي تَجْرِيبِ كَافَّةِ الْمُعَالَجَاتِ الْمُمْكِنَةِ', tr:"wa allatì lam tazal harìsatan 'alà al-injàbi, afnat hayàtahà fì tajrìbi kâffati al-mou'àlajàti al-moumkinati", fr:"a passé sa vie à expérimenter tous les traitements possibles,", note:3, audioUrl:null },
+    { ar:'إِلَى دَرَجَةِ تَفْكِيرِ الزَّوْجَيْنِ فِي التَّعَرُّضِ لِقُيُودِ اللِّقَاحِ الاِصْطِنَاعِيِّ', tr:"ilà darajati tafkìri az-zaoujayni fì at-ta'arroudi li-qouyoùdi al-liqàhi al-istinà'iyyi", fr:"envisageant la fécondation in vitro,", audioUrl:null },
+    { ar:'غَيْرَ أَنَّهُمَا تَخَلَّى عَنِ اللُّجُوءِ إِلَى هَذِهِ الطَّرِيقَةِ لِبَوَاعِثَ أَخْلاَقِيَّةٍ.', tr:"ghayra annahoumà takhallà 'an-i al-loujoù'i ilà hàdhihi at-tarìqati li-bawà'itha akhlâqiyyatin.", fr:"mais y ont renoncé pour des raisons morales.", audioUrl:null },
+    { ar:'كَمَا أَنَّهَا أَقَامَتْ فِي عِدَّةِ مُؤَسَّسَاتٍ مُتَخَصِّصَاتٍ فِي الْخَارِجِ وَلَكِنْ بِدُونِ جَدْوَى.', tr:"Kamà annahà aqàmat fì 'iddati mou'assasàtin moutakhassisàtin fì al-khàriji wa lakin bi-doùni jadwà.", fr:"séjours à l'étranger sans résultat.", audioUrl:null },
+    { ar:'فِي نِهَايَةِ الْمَطَافِ وَفِي الْوَقْتِ الَّذِي لَمْ يَبْقَ فِيهِ أَدْنَى أَمَلٍ لَدَى الأَطِبَّاءِ', tr:"Fì nihàyati al-matàfi wa fì al-waqti alladhì lam yabqa fìhi adnà amalin ladà al-atibbà'i", fr:"Finalement, alors que les médecins avaient perdu tout espoir", note:6, audioUrl:null },
+    { ar:'وَلاَ لَدَى الْمَرْأَةِ وَزَوْجِهَا، جَاءَ الْحَمْلُ بِصِفَةٍ طَبِيعِيَّةٍ تَمَامًا!', tr:"wa là ladà al-mar'ati wa zaoujihà, jà'a al-hamlou bi-sifatin tabì'iyyatin tamàman !", fr:"la grossesse est survenue naturellement !", audioUrl:null },
+    { ar:'رَغْمَ سَعَادَتِهَا الْبَالِغَةِ، عَاشَتِ الأُمُّ قَلِقَةً لِلْغَايَةِ', tr:"Raghma sa'àdatihà al-bâlighati, 'àchat-i al-oummou qaliqatan lil-ghàyati", fr:"malgré sa joie, la mère était extrêmement inquiète,", audioUrl:null },
+    { ar:'خَائِفَةً مِنْ تَشَوُّهٍ قَدْ يُصِيبُ الْوَلِيدَ أَوْ مِنْ وَضْعٍ عَسِيرٍ أَوْ سَابِقٍ لأَوَانِهِ.', tr:"khà'ifatan min tachaouwouhin qad yousìbou al-walìda aou min wad'in 'asìrin aou sàbiqin li-awànihi.", fr:"craignant une malformation qui pourrait atteindre le nouveau-né ou un accouchement difficile ou prématuré.", audioUrl:null },
+    { ar:'مُنْذُ الشَّهْرِ السَّابِعِ لِحَمْلِهَا، بَقِيَتِ الأُمُّ فِي الْمُسْتَشْفَى لِوَضْعِ الْجَنِينِ تَحْتَ الرَّقَابَةِ.', tr:"Mounzou ach-chahri as-sàbi'i li-hamlihà, baqiyat-i al-oummou fì al-moustachfà li-wad'i al-janìni tahta ar-raqàbati.", fr:"Dès le 7e mois de sa grossesse, la mère est restée à l'hôpital pour mettre le fœtus sous surveillance.", audioUrl:null },
+    { ar:'بَلَغَنَا أَمْسِ أَنَّ الْوَضْعَ تَمَّ عَلَى مَا يُرَامُ', tr:"Balaghanà amsi anna al-wad'a tamma 'alà mà youràmou", fr:"On nous a appris hier que l'accouchement s'est déroulé au mieux", audioUrl:null },
+    { ar:'وَأَنَّهَا أَنْجَبَتْ مَوْلُودًا ذَكَرًا وَهُوَ فِي صِحَّةٍ جَيِّدَةٍ.', tr:"wa annahà anjabat maouloùdan dhakaran wa h(ou)wa fì sihhatin jayyidatin.", fr:"et qu'elle a mis au monde un garçon en parfaite santé.", audioUrl:null },
+    { ar:'لاَحَظَتْ إِحْدَى الْمُمَرِّضَاتِ أَنَّ الطِّفْلَ كَانَ يَقْبِضُ أَصَابِعَ يَدَيْهِ دَائِمًا', tr:"Lâhazat ihdà al-moumarridàti anna at-tifla kàna yaqbidou asàbi'a yaday-hi dà'iman", fr:"Une infirmière a remarqué que l'enfant fermait toujours les poings", audioUrl:null },
+    { ar:'فَصَاحَتْ مَازِحَةً:', tr:"fa-sàhat màzihatan :", fr:"et s'est écriée en plaisantant :", audioUrl:null },
+    { ar:'لِهَذَا الْمَوْلُودِ مَصِيرٌ مُشْرِقٌ مَحْتُومٌ:', tr:"Li-hàdhà al-maouloùdi masìroun mouchriqoun mahtoùmoun :", fr:"L'avenir de ce nourrisson est tout tracé :", note:7, audioUrl:null },
+    { ar:'سَيَكُونُ مَصْرِفِيًّا بِدُونِ أَيِّ شَكٍّ!', tr:"sa-yakoùnou masrifiyyan bi-doùni ayyi chakkin !", fr:"il sera banquier sans aucun doute !", audioUrl:null },
+  ],
+  notes: {
+    1: "① wada'a, yada'ou = poser/mettre, aussi mettre au monde. Masdar wad'.",
+    2: "② 'oumr = durée de la vie/âge, vs hayàt = la vie [qu'on vit], opposée à maout (mort).",
+    3: "③ lam tazal harìsatan 'alà... = elle n'a pas cessé de désirer ardemment. mà zàla/lam yazal + adj./nom cas direct = ne pas cesser de ; + inaccompli = être encore en train de.",
+    6: "⑥ fì nihàyati al-matàfi = finalement (« à la fin du parcours »).",
+    7: "⑦ mahtoùm = fixé d'avance, fatal, inéluctable (part. passif de hatama).",
+  },
+  vocabBox: {
+    title: 'la maternité et la grossesse',
+    items: [
+      { ar:'عُقْمٌ', tr:"'ouqm", fr:'Stérilité' },
+      { ar:'حَمْلٌ', tr:"hamal", fr:'Grossesse' },
+      { ar:'مَوْلُودٌ', tr:"maouloùd", fr:'Nouveau-né' },
+    ],
+    proverb: { ar:'أَفْنَيْتَ عُمْرَكَ وَالذُّنُوبُ تَزِيدُ. وَالْكَاتِبُ الْمُحْصِي عَلَيْكَ شَهِيدُ', tr:"Afnayta 'oumraka wa adh-dhounoùbou tazìdou. Wa al-kàtibou al-mouhsì 'alayka chahìdou(n).", fr:"Tu as consumé ta vie à accumuler les péchés sous l'œil de l'ange secrétaire qui recense tout. (Aboû Nouwâs)" },
+  },
+  exercise1: [
+    { ar:'نَحْنُ مَسْرُورُونَ لأَنَّ اِبْنَتَنَا وَضَعَتْ بِكُلِّ سُهُولَةٍ فَأَنْجَبَتْ مَوْلُودَتَهَا الأُولَى وَهِيَ فِي صِحَّةٍ جَيِّدَةٍ.', tr:"Nahnou masroùroùna li'anna ibnatanà wada'at bi-koulli souhoùlatin fa-anjabat maouloùdatahà al-oùlà wa hiya fì sihhatin jayyidatin.", fr:"Nous sommes heureux car notre fille a accouché sans difficulté et a mis au monde son premier né, une fille, en parfaite santé." },
+  ],
+  exercise2: [
+    { fr:"Ce malade a perdu tout espoir de recouvrer la santé.", ar:'فَقَدَ هَذَا الْمَرِيضُ أَيَّ أَمَلٍ فِي إِمْكَانِيَّةِ اسْتِرْجَاعِ صِحَّتِهِ.', tr:"Faqada hàdhà al-marìdou ayya amalin fì imkàniyyati istirjà'i sihhatihi." },
+    { fr:"Le directeur m'a dit : « Ton avenir est tout tracé, tu seras le nouveau directeur de la clinique ! »", ar:'قَالَ لِي الْمُدِيرُ: «مَصِيرُكَ مَحْتُومٌ: سَتَكُونُ مُدِيرَ الْعِيَادَةِ الْجَدِيدَ!»', tr:"Qàla lì al-moudìrou : « Masìrouka mahtoùmoun : sa-takoùnou moudìra al-'iyàdati al-jadìda ! »" },
+  ],
+};
+
+const DAILY_LESSON_26 = {
+  num: 26,
+  titleFr: "(Une déclaration d')incendie",
+  titleAr: 'شُبُوبُ حَرِيقٍ',
+  fullAudioUrl: null,
+  introFr: "Un incendie ravage un immeuble déshérité du Caire, faute d'électricité (transformateur percuté par un camion). Dispute sur la vraie responsabilité du sinistre. Incendie déclaré lundi soir dans un immeuble d'un quartier pauvre de la banlieue du Caire, privé d'électricité depuis plusieurs jours suite à un accident de camion contre un transformateur (d'où l'usage de bougies). L'incendie démarre au 1er étage, se propage vite ; malgré l'intervention des pompiers, des enfants souffrent d'asphyxie et des adultes de brûlures. L'enquête révèle qu'un garçonnet a renversé une bougie sur un rideau. Six familles trouvent refuge chez des proches, trois restent à la rue malgré la promesse de la municipalité. Le conducteur du camion, lui-même sinistré, se fait agresser verbalement par un voisin qui le tient pour responsable ; il rétorque qu'on peut remonter la faute jusqu'à Noé, et que la vraie faute est celle des parents qui laissent leurs enfants jouer avec le feu.",
+  dialogue: [],
+  notes: {
+    1: "① bà'is = misérable (plus fort que faqìr, pauvre — lié au mot « fakir »).",
+    2: "② ikhlà'i al-mabnà min soukkànihi = évacuation de l'immeuble de ses habitants.",
+    3: "③ qatìl (tué) = forme intensive équivalente à maqtoùl.",
+    4: "④ mimmà = contraction de min mà.",
+    5: "⑤ Ne pas confondre intalaqa (il a démarré, VIIe forme de talaqa) et intaqala (il s'est propagé, VIIIe forme de naqala).",
+    6: "⑥ li-rijàli... : li- signifie ici « appartenant à », pas « pour ».",
+    8: "⑧ moutafàwit = différent en degré, vs moukhtalif = différent en nature.",
+  },
+  vocabBox: {
+    title: "l'incendie et les secours",
+    items: [
+      { ar:'حَرِيقٌ', tr:"harìq", fr:'Incendie' },
+      { ar:'إِخْلاَءٌ', tr:"ikhlà'", fr:'Évacuation' },
+      { ar:'مَنْكُوبٌ', tr:"mankoùb", fr:'Sinistré' },
+    ],
+  },
+  exercise1: [
+    { ar:'فِي هَذِهِ الْحَارَةِ الْبَائِسَةِ، يَتَكَرَّرُ اِنْقِطَاعُ الْكَهْرَبَاءِ كُلَّ يَوْمٍ تَقْرِيبًا، بِسَبَبِ حَالَةِ الْمُحَوِّلاَتِ التَّالِفَةِ.', tr:"Fì hàdhihi al-hàrati al-bà'isati, yatakarrarou inqità'ou al-kahrabà'i koulla yaoumin taqrìban, bi-sababi hàlati al-mouhaouwilàti at-tàlifati.", fr:"Dans ce quartier déshérité, des coupures de courant surviennent presque tous les jours, en raison du mauvais état des transformateurs." },
+  ],
+  exercise2: [
+    { fr:"Cet incendie a fait treize morts et trente blessés.", ar:'أَسْفَرَ هَذَا الْحَرِيقُ عَنْ ثَلاَثَةَ عَشَرَ قَتِيلاً وَثَلاَثِينَ جَرِيحًا.', tr:"Asfara hàdhà al-harìqou 'an thalâthata 'achara qatìlan wa thalâthìna jarìhan." },
+  ],
+};
+
+const DAILY_LESSON_27 = {
+  num: 27,
+  titleFr: 'Qui l\'a rongée ? Ses chats ou le fisc ?',
+  titleAr: 'مَنْ قَرَضَهَا؟ قِطَاطُهَا أَمْ قِسْمُ الضَّرَائِبِ؟',
+  fullAudioUrl: null,
+  introFr: "Une vieille femme harcelée par le fisc jusqu'à l'indigence partage tout avec ses chats, s'éteint de faim, et laisse un manuscrit qui va opposer le fisc et la SPA. On retrouve le cadavre d'une vieille femme, à moitié dévoré par ses chats. Depuis des mois, le fisc lui réclamait des arriérés exorbitants malgré ses revenus modestes ; après avoir saisi sa pension puis ses effets personnels, elle n'a plus rien pour subsister. Elle partage sa nourriture avec ses chats jusqu'à épuisement des réserves, puis s'éteint de faim ; les chats, affamés, commencent à ronger son corps. Des amis découvrent la scène et un manuscrit de roman caché sous son matelas, dont les droits sont légués à la Société Protectrice des Animaux. Le livre se vend immédiatement à 250 000 exemplaires. Le fisc, qui avait pourtant tout saisi, réclame alors sa part des droits d'auteur sous prétexte d'avoir « inspiré » l'œuvre !",
+  dialogue: [],
+  notes: {
+    1: "① 'ajoùz = vieille femme impotente.",
+    2: "② doukhoùlihà = ses revenus (masdar de dakhala).",
+    3: "③ hawà'ijhà ach-chakhsiyyati = ses effets personnels.",
+    4: "④ mou'allabàt = boîtes de conserve.",
+    5: "⑤ siyàm/saoum = jeûne.",
+    6: "⑥ dhàta yaoumin = un certain jour (expression figée).",
+    7: "⑦ 'aqaba tajrìdihim chouqqatahà : complément du masdar au cas direct quand il porte un pronom.",
+  },
+  vocabBox: {
+    title: "le fisc et l'héritage",
+    items: [
+      { ar:'عَجُوزٌ', tr:"'ajoùz", fr:'Vieille femme' },
+      { ar:'ضَرَائِبُ', tr:"darà'ib", fr:'Impôts, fisc' },
+      { ar:'حُقُوقُ التَّأْلِيفِ', tr:"houqoùq at-ta'lìf", fr:"Droits d'auteur" },
+    ],
+    proverb: { ar:'مَنْ سَلَكَ جَدَدًا أَمِنَ عِثَارًا', tr:"Man salaka jadadan amina 'itharan.", fr:"Qui suit un sentier solide ne risque pas de trébucher." },
+  },
+  exercise1: [
+    { ar:'يُطَالِبُنِي قِسْمُ الضَّرَائِبِ بِدَفْعِ مَبَالِغَ خَيَالِيَّةٍ وَإِنِّي عَاجِزٌ عَنْ ذَلِكَ تَمَامًا.', tr:"Youtâliboùnì qismou ad-darà'ibi bi-daf'i mabâligha khayâliyyatin wa innì 'àjizoun 'an dhàlika tamàman.", fr:"Le fisc me réclame le règlement de sommes fabuleuses, que je suis totalement incapable de payer." },
+  ],
+  exercise2: [
+    { fr:"Si vous ne payez pas vos arriérés d'impôts, le fisc saisira vos pensions.", ar:'إِذَا لَمْ تَدْفَعُوا مُتَأَخِّرَاتِكُمْ سَيَحْجُزُ قِسْمُ الضَّرَائِبِ عَلَى مَعَاشَاتِكُمْ.', tr:"Idhà lam tadfa'où mouta'akhkhiràtikoum sa-yahjizou qismou ad-darà'ibi 'alà ma'àchàtikoum." },
+  ],
+};
+
+const DAILY_LESSON_28 = {
+  num: 28,
+  titleFr: 'Révision (série "textes de presse")',
+  titleAr: 'مُرَاجَعَةٌ',
+  fullAudioUrl: null,
+  introFr: "Chapitre de révision qui clôt la série « textes de presse » : les nombres, complément absolu, complément du masdar, fa- + subjonctif (valeur de but), verbes irréguliers rencontrés, mots type fa'ìl/fà'il, dhoû/dhât, traduction de « c'est... qui... ». Se termine par une grille de mots croisés (voir ci-dessous, avec son corrigé) au lieu des traductions habituelles.",
+  dialogue: [],
+  notes: {
+    1: "① Les nombres : 1 à 10, nom compté au pluriel cas indirect ; 11 à 99, singulier cas direct ; 100+, singulier cas indirect ; ordre unités-dizaines pour les nombres complexes.",
+    2: "② Complément absolu (maf'oùl moutlaq) — ex. Aghdaba dhalika wàlidayhi ghadaban chadidan (leçon 24).",
+    3: "③ Complément du masdar : si le masdar porte un pronom, son complément est au cas direct (pas d'annexion) — ex. 'aqaba tajrìdihim chouqqatahà (leçon 27).",
+    4: "④ fa- + subjonctif, valeur de but : fa-ou'awwidahoum, « et que je familiariserai » (leçon 22).",
+    5: "⑤ Verbes irréguliers de la série — hamzés : fàja'a/youfàji'ou (surprendre). Concaves : zàla/yazàlou (cesser), 'àcha/ya'ìchou (vivre), asàba/yousìbou (atteindre), ràma/yaroùmou (désirer), sàha/yasìhou (crier). Défectueux : ajrà/youjrì (effectuer), addà/you'addì ilà (aboutir à), ihtawà/yahtawì 'alà (contenir), abdà/youbdì (montrer), afnà/youfnì (consumer), takhallà/yatakhallà 'an (renoncer à), akhlà/youkhlì (évacuer), 'ànà/you'ànì (souffrir de), haziya/yahzà bi- (bénéficier de), intafa'a/yantafi'ou (s'éteindre).",
+    6: "⑥ Mots type fa'ìl/fà'il : intensif du participe actif ('àlim → 'alìm) ou équivalent du participe passif (qàtil → qatìl).",
+    7: "⑦ dhoû/dhât : dhoù/dhà/dhì + annexion = possesseur de.",
+    8: "⑧ Traduction de « c'est... (qui) » avec les pronoms de 3e personne : Anà houwa as-sàriqou !, C'est moi le voleur !",
+    9: "⑨ Noms masculins ou féminins au choix du locuteur : souq, moustachfan, hàl, tarìq.",
+    10: "⑩ Tournures : mà labitha an + accompli (ne pas tarder à) ; mà zàla/lam yazal (ne pas cesser de) ; yatahattamou 'alayya an (il est indispensable que) ; masìroun mahtoùmoun (avenir tout tracé) ; lam yousfir 'an ayyi qatìlin (n'a fait aucun mort) ; bi-asrihi (tout entier) ; là yasa'ounà illà an (nous ne pouvons que) ; iyyàka min... (prends garde à) ; bi-dharì'atin anna (sous prétexte que) ; Yà salàm(ou) ! (Formidable !).",
+    11: "📝 Grille de mots croisés (corrigé) — Horizontalement : ① fa- (ف) ; maouloùd (مولود) ② haoud (حوض) ; mìm (م) ③ alif (ا) ④ 'amal (عمل) ; 'asal (عسل) ; choughl (شغل) ⑤ aou (أو) ; yà' (ي) ; zour (زر) ⑥ sabiyya(t) (صبية) ; wàw (و) ⑦ mìm (م) ; wàw (و) ; bi (بي) ⑧ tà' marboùta (ة) ; mouchkila(t) (مشكلة). Verticalement : ① fa- (ف) ; 'àsima(t) (عاصمة) ② hàsoùb (حاسوب) ③ mìm (م) ; wàw (و) ; la- (ل) ; yaoum (يوم) ; wad' (وضع) ; -yya(t) (ية) ; chìn (ش) ⑤ li- (ل) ; mìm (م) ; chìn (ش) ; ka- (ك) ⑥ wàw (و) ; loughz (لغز) ; bal (بل) ⑦ dam (دم) ; làm (ل) ; rou'ya(t) (رؤية).",
+  },
+  vocabBox: {
+    title: 'points de révision (nombres, dhoû, verbes irréguliers)',
+    items: [
+      { ar:'دَرَجَاتٌ', tr:"darajàt", fr:'Degrés (échelle Richter, etc.)' },
+      { ar:'ذُو / ذَاتُ', tr:"dhoû / dhâtou", fr:'Possesseur de (masc./fém.)' },
+    ],
+  },
+  exercise1: [],
+  exercise2: [],
+  isRevision: true,
+  revisionNote: "Cette leçon est un chapitre de révision : au lieu des traductions habituelles, le manuel propose une grille de mots croisés (indices ci-dessus, corrigé dans les notes). Relis plutôt les points de grammaire ci-dessus, et amuse-toi à résoudre la grille sur papier si tu as le manuel sous la main !",
+};
+
+const DAILY_LESSON_29 = {
+  num: 29,
+  titleFr: 'Terrible tremblement de terre',
+  titleAr: 'زِلْزَالٌ رَهِيبٌ',
+  fullAudioUrl: null,
+  introFr: "Un violent séisme de force 6 frappe le sud algérien. Malgré la mobilisation nationale et internationale (chiens dressés, hôpital de campagne, Croissant-Rouge), le bilan est lourd et les sismologues n'excluent pas de répliques.",
+  dialogue: [
+    { ar:'خِلاَلَ لَيْلَةِ أَمْسِ، حَدَثَ زِلْزَالٌ عَنِيفٌ بَلَغَتْ قُوَّتُهُ سِتَّ دَرَجَاتٍ عَلَى سُلَّمِ «رِيشْتَر» فِي الْجَنُوبِ الْجَزَائِرِيِّ', tr:"Khilâla laylati amsi, hadatha zilzâloun 'anìfoun balaghat qouwwatouhou sitta darajâtin 'alà soullami «Richter» fì al-janoùbi al-jazà'iriyyi", fr:"Au cours de la nuit dernière, un violent séisme de force 6 sur l'échelle de Richter a eu lieu dans le sud algérien,", audioUrl:null },
+    { ar:'الأَمْرُ الَّذِي أَسْفَرَ عَنْ عَدَدٍ لاَ بَأْسَ بِهِ مِنَ الضَّحَايَا وَإِنْ لَمْ يَكُنْ مُحَدَّدًا إِلَى الآنَ', tr:"al-amrou alladhì asfara 'an 'adadin là ba'sa bihi min-a ad-dahàyà wa in lam yakoun mouhaddadan ilà al-àna", fr:"ce qui a fait un nombre assez important de victimes même si pour l'heure il reste indéterminé.", note:1, audioUrl:null },
+    { ar:'الْوَاقِعُ أَنَّ هَزَّةً أَرْضِيَّةً عَنِيفَةً نِسْبِيًّا سَبَقَ أَنْ حَصَلَتْ يَوْمَ الإِثْنَيْنِ الْمَاضِي', tr:"Al-wàqi'ou anna hazzatan ardiyyatan 'anìfatan nisbiyyan sabaqa an hasalat yaouma al-ithnayni al-màdì", fr:"En fait, une secousse assez forte s'était déjà fait sentir lundi dernier,", audioUrl:null },
+    { ar:'مِمَّا أَجْبَرَ الأَهَالِيَ عَلَى مُغَادَرَةِ بُيُوتِهِمْ لِلُّجُوءِ إِلَى الرِّيفِ مَخَافَةَ التَّعَرُّضِ لِهَزَّاتٍ مُتَكَرِّرَةٍ', tr:"mimmà ajbara al-ahàliya 'alà moughàdarati bouyoùtihim lil-loujoù'i ilà ar-rìfi makhàfata at-ta'arroudi li-hazzàtin moutakarriratin", fr:"ce qui a contraint les gens à quitter leurs maisons pour se réfugier à la campagne, craignant des répliques.", audioUrl:null },
+    { ar:'بَعْدَ يَوْمَيْنِ، عَادُوا مُطْمَئِنِّينَ إِلَى مَنَازِلِهِمْ وَلَكِنْ هَذِهِ اللَّيْلَةَ', tr:"Ba'da yaoumayni, 'àdoù moutma'innìna ilà manàzilihim wa lakin hàdhihi al-laylata", fr:"Au bout de deux jours, ils étaient revenus rassurés chez eux mais, cette nuit,", audioUrl:null },
+    { ar:'إِنْهَارَ الْعَدِيدُ مِنَ الْبُيُوتِ الَّتِي دَفَنَتْ مُعْظَمَ السُّكَّانِ تَحْتَ حِجَارَتِهَا', tr:"inhàra al-'adìdou min-a al-bouyoùti allatì dafanat mou'zama as-soukkàni tahta hijâratihà", fr:"un grand nombre de maisons se sont écroulées, ensevelissant la plupart des habitants sous les décombres.", audioUrl:null },
+    { ar:'سُرْعَانَ مَا اِلْتَحَقَتْ فِرَقُ إِنْقَاذٍ جَزَائِرِيَّةٌ بِمَكَانِ الزِّلْزَالِ', tr:"Sour'àna mà iltahaqat firaqou inqàdhin jazà'iriyyatoun bi-makàni az-zilzâli", fr:"Des équipes de secours algériennes se sont rapidement portées sur les lieux du séisme", note:2, audioUrl:null },
+    { ar:'وَشَرَعَتْ فِي اِنْتِشَالِ النُّجَاةِ الْمُحْتَمَلِينَ مِنْ تَحْتِ أَنْقَاضِ الْمَنَازِلِ', tr:"wa chara'at fì intichàli an-noujàti al-mouhtamalìna min tahti anqàdi al-manàzili", fr:"et ont commencé à dégager les éventuels survivants de dessous les décombres.", note:3, audioUrl:null },
+    { ar:'أَرْسَلَتْ بَعْضُ الدُّوَلِ الأَجْنَبِيَّةِ فِرَقَ إِنْقَاذٍ وَمُعَدَّاتٍ', tr:"Arsalat ba'dou ad-douwali al-ajnabiyyati firaqa inqàdhin wa mou'addàtin", fr:"Des pays étrangers ont envoyé des équipes de secours et du matériel,", audioUrl:null },
+    { ar:'مَعَ كِلاَبٍ مُدَرَّبَةٍ عَلَى الْبَحْثِ عَنِ النُّجَاةِ، مُسَاهَمَةً مِنْهَا فِي عَمَلِيَّاتِ الْبَحْثِ وَالإِسْعَافِ', tr:"ma'a kilâbin moudarrabatin 'alà al-bahthi 'an-i an-noujàti, mousàhamatan minhà fì 'amaliyyàti al-bahthi wa al-is'àfi", fr:"avec des chiens entraînés à rechercher les survivants, pour participer aux opérations de recherche et de secours.", note:4, audioUrl:null },
+    { ar:'يُشَارُ إِلَى أَنَّ طَائِرَةً سَتَنْقُلُ مُسْتَشْفًى مَيْدَانِيًّا', tr:"Youchârou ilà anna tà'iratan sa-tanqoulou moustachfan maydàniyyan", fr:"On nous signale qu'un avion va transporter un hôpital de campagne,", audioUrl:null },
+    { ar:'إِلاَّ أَنَّهُ يَنْبَغِي الْعَمَلُ عَلَى تَحْضِيرِ مَهْبَطٍ مُنَاسِبٍ لاِسْتِقْبَالِهَا', tr:"illà annahou yanbaghì al-'amalou 'alà tahdìri mahbatin mounàsibin li-istiqbâlihà", fr:"mais il faudrait aménager une piste d'atterrissage convenable pour son accueil,", note:5, audioUrl:null },
+    { ar:'بَيْنَمَا تَوَجَّهَتْ فِرَقُ الْهِلاَلِ الأَحْمَرِ إِلَى الْمِنْطَقَةِ الْمَنْكُوبَةِ مُتَزَوِّدَةً بِأَدْوِيَةٍ وَتَجْهِيزَاتٍ طِبِّيَّةٍ', tr:"Baynamà tawajjahat firaqou al-Hilâli al-Ahmari ilà al-mintaqati al-mankoùbati moutazaouwidatan bi-adwiyatin wa tajhìzâtin tibbiyyatin", fr:"tandis que les équipes du Croissant Rouge se sont mises en route pour la zone sinistrée, chargées de médicaments et d'équipements médicaux,", note:6, audioUrl:null },
+    { ar:'وَلَكِنَّهَا اِسْتَدَامَتْ بِصُعُوبَاتٍ كَثِيرَةٍ بِحُكْمِ تَضَارِيسِ الأَرْضِ وَالأَتْرِبَةِ الْوَعِرَةِ', tr:"wa lakinnahà istadàmat bi-sou'oùbàtin kathìratin bi-houkmi tadàrìsi al-ardi wa al-atribati al-wa'irati", fr:"mais elles se sont heurtées à de nombreuses difficultés du fait du relief et des terrains escarpés.", note:7, audioUrl:null },
+    { ar:'أَمَّا الشَّاحِنَةُ صِهْرِيجُ النَّاقِلَةُ لِلْمِيَاهِ الصَّالِحَةِ لِلشُّرْبِ فَوَاجَهَتْ نَفْسَ الْمُشْكِلَةِ', tr:"Ammà ach-chàhinatou sihrìjou an-nàqilatou lil-miyâhi as-sâlihati lich-chourbi fa-wàjahat nafsa al-mouchkilati", fr:"Quant au camion-citerne qui transporte l'eau potable, il a rencontré le même problème.", note:8, audioUrl:null },
+    { ar:'عَلَى الرَّغْمِ مِنَ الاِسْتِنْفَارِ الْعَامِّ، لَمْ يَنْجُ مِنَ الزِّلْزَالِ سِوَى عَدَدٍ قَلِيلٍ مِنَ النَّاسِ', tr:"'alà ar-raghmi min-a al-istinfâri al-'àmmi, lam yanjou min-a az-zilzâli siwà 'adadin qalìlin min-a an-nàsi", fr:"Malgré la mobilisation générale, seulement un petit nombre de gens a réchappé au séisme", audioUrl:null },
+    { ar:'وَيُقَدَّرُ عَدَدُ الْمَوْتَى فِي الْوَقْتِ الرَّاهِنِ بِمَا يَتَرَاوَحُ بَيْنَ ثَلاَثَةِ آلاَفٍ وَأَرْبَعَةِ آلاَفٍ مِنَ الأَشْخَاصِ', tr:"wa youqaddarou 'adadou al-mautà fì al-waqti ar-râhini bi-mà yataràwahou bayna thalâthati âlâfin wa arba'ati âlâfin min-a al-achkhâsi", fr:"et on estime le nombre de morts à un chiffre entre trois mille et quatre mille personnes,", note:9, audioUrl:null },
+    { ar:'فَضْلاً عَنْ خَمْسَةِ آلاَفٍ مِنَ الْمَفْقُودِينَ', tr:"fadlan 'an khamsati âlâfin min-a al-mafqoùdìna", fr:"sans compter cinq mille disparus.", audioUrl:null },
+    { ar:'بَيْدَ أَنَّ خُبَرَاءَ الزَّلاَزِلِ لاَ يَسْتَبْعِدُونَ تَكْرَارًا لِلْهَزَّاتِ الأَرْضِيَّةِ فِي حُدُودِ الأَيَّامِ الْمُقْبِلَةِ', tr:"Baydà anna khoubarà'a az-zalâzili là yastab'idoùna takrâran lil-hazzâti al-ardiyyati fì houdoùdi al-ayyâmi al-mouqbilati", fr:"Cependant les sismologues n'excluent pas des répliques dans les prochains jours,", audioUrl:null },
+    { ar:'الأَمْرُ الَّذِي جَعَلَ فِرَقَ الإِنْقَاذِ وَالأَهَالِيَ فِي حَالَةِ تَأَهُّبٍ دَائِمَةٍ', tr:"al-amrou alladhì ja'ala firaqa al-inqâdhi wa al-ahâliya fì hâlati ta'ahhoubin dà'imatin", fr:"ce qui met les équipes de secours et les gens dans un état d'alerte permanent.", audioUrl:null },
+  ],
+  notes: {
+    1: "① là ba'sa bihi (« pas de mal avec lui ») → pas mal de.",
+    2: "② sour'àna mà signifie rapidement (adverbe figé au cas direct, suivi de mà, comme yaouman mà, ghàliban mà, kathìran mà).",
+    3: "③ firaq est le pluriel de fariq (équipe), aussi firqa(t) (troupe, division, secte).",
+    4: "④ mousàhamatan minhà fì = pour participer à.",
+    5: "⑤ mahbat (piste d'atterrissage) est le nom de lieu de habata, yahbitou (descendre, s'abattre, atterrir) ; l'atterrissage = houboùt.",
+    6: "⑥ firaqou al-Hilâli al-Ahmari = les équipes du Croissant-Rouge (équivalent Croix-Rouge) ; hilâl (croissant de lune) vs badr/boudoùr (pleine lune, aussi beau visage).",
+    7: "⑦ bi-houkmi = « avec-jugement-de » = du fait de, en raison de.",
+    8: "⑧ ach-chàhinatou sihrìj = le camion-citerne, mot composé récemment ; chàhina(t) participe actif de chahana (charger).",
+    9: "⑨ bi-mà yatarawahou bayna... wa... = ce qui oscille entre... et... (VIe forme de ràha, yaroùhou).",
+  },
+  vocabBox: {
+    title: 'le séisme et les secours',
+    items: [
+      { ar:'زِلْزَالٌ', tr:"zilzâl", fr:'Séisme' },
+      { ar:'ضَحَايَا', tr:"dahâyà", fr:'Victimes' },
+      { ar:'فِرْقَةُ إِنْقَاذٍ', tr:"firqatou inqâdhin", fr:'Équipe de secours' },
+    ],
+  },
+  exercise1: [
+    { ar:'أَرْسَلَتِ الْحُكُومَةُ شَاحِنَةَ صِهْرِيجٍ اِصْطَدَمَتْ بِصُعُوبَاتٍ كَبِيرَةٍ فِي طَرِيقِهَا.', tr:"Arsalat-i al-houkoùmatou chàhinata sihrìjin istadamat bi-sou'oùbàtin kabìratin fì tarìqihà.", fr:"Le gouvernement a envoyé un camion-citerne, qui a rencontré de grandes difficultés en chemin." },
+    { ar:'لَمْ يَنْجُ مِنْ آثَارِ الزِّلْزَالِ سِوَى الأَهَالِي الَّذِينَ كَانُوا خَارِجَ بُيُوتِهِمْ.', tr:"Lam yanjou min àthâri az-zilzâli siwà al-ahâlì alladhìna kânoù khârija bouyoùtihim.", fr:"Seuls ont réchappé aux effets du séisme ceux qui étaient hors de leurs maisons." },
+  ],
+  exercise2: [
+    { fr:"Les équipes de secours n'ont pas tardé à dégager les survivants de dessous les décombres, avec l'aide de chiens entraînés.", ar:'مَا لَبِثَ فِرَقُ الإِنْقَاذِ أَنِ انْتَشَلَتِ النَّجَاةَ مِنْ تَحْتِ الأَنْقَاضِ بِمُسَاعَدَةِ كِلاَبٍ مُدَرَّبَةٍ.', tr:"Mà labitha firaqou al-inqâdhi an-i intachalat-i an-najâta min tahti al-anqâdi bi-mousà'adati kilâbin moudarrabatin." },
+    { fr:"Nous n'excluons pas l'éventualité d'une série de répliques au cours des prochains jours.", ar:'لاَ نَسْتَبْعِدُ اِحْتِمَالَ حُصُولِ سِلْسِلَةِ الْهَزَّاتِ الْمُتَكَرِّرَةِ خِلاَلَ الأَيَّامِ الْمُقْبِلَةِ.', tr:"Là nastab'idou ihtimâla housoùli silsilati al-hazzâti al-moutakarrirati khilâla al-ayyâmi al-mouqbilati." },
+  ],
+};
+
+const DAILY_LESSON_30 = {
+  num: 30,
+  titleFr: 'Embouteillage monstre sur une autoroute',
+  titleAr: 'إِزْدِحَامٌ ضَخْمٌ فِي طَرِيقٍ سَرِيعٍ',
+  fullAudioUrl: null,
+  introFr: "Un camion dérape sous la pluie et le brouillard, provoquant un carambolage et un embouteillage géant, avec des blessés parmi les secours et des automobilistes bloqués toute la nuit — dont un certain M. Lebattu, qui promet de ne plus jamais prendre l'autoroute le soir. Hier après-midi, sous la pluie puis un brouillard épais, un camion dérape et se renverse sur l'autoroute N°6, répandant tout son chargement. La mauvaise visibilité intensifie l'embouteillage ; les mesures de sécurité se révèlent insuffisantes ; plusieurs voitures percutent le camion renversé, des secouristes sont blessés. Trois pompiers et deux policiers, qui tentaient d'arrêter la circulation, trouvent la mort. De nombreux automobilistes sont piégés toute la nuit sur place, ravitaillés après trois heures d'attente ; la voie inverse s'ouvre progressivement, mais la circulation normale ne reprend qu'au petit matin. M. Lebattu, piégé, décide de ne plus prendre l'autoroute le soir — ce qui lui vaut une sévère algarade de sa femme... jusqu'à ce qu'elle consente à écouter les informations !",
+  dialogue: [],
+  notes: {
+    1: "① 'asra al-bàrihati = hier en milieu d'après-midi ; 'asr = époque/ère/siècle, aussi milieu de l'après-midi (salàtou al-'asri, une des cinq prières).",
+    2: "② Autoroute = tarìqoun sarì'oun ou khattoun sarì'oun.",
+    3: "③ ar-rou'yatou = vue, visibilité (à ne pas confondre avec rou'yà, songe/rêve). Les cinq sens : al-basarou (vue), as-sam'ou (ouïe), ach-chammou (odorat), al-lamsou (toucher), adh-dhaouqou (goût).",
+    5: "⑤ la situation : singulier al-wad' ou pluriel al-aoudà'.",
+    6: "⑥ ad-dahàyà allatì laqiyat masra'ahà = les victimes qui ont trouvé la mort ; maout (mort) vs wafà(t) (décès, passif touwouffiya).",
+    7: "⑦ min qibali zaoujatihi = de la part de sa femme.",
+  },
+  vocabBox: {
+    title: "l'autoroute et les intempéries",
+    items: [
+      { ar:'اِزْدِحَامٌ', tr:"izdihâm", fr:'Embouteillage' },
+      { ar:'ضَبَابٌ', tr:"dabâb", fr:'Brouillard' },
+      { ar:'فَخٌّ', tr:"fakhkh", fr:'Piège' },
+    ],
+    proverb: { ar:'اَلْحُرُّ تَكْفِيهِ الإِشَارَةُ', tr:"Al-hourrou takfìhi al-ichâratou.", fr:"À l'homme bien né, un signe suffit (« à bon clerc demi-mot suffit »)." },
+  },
+  exercise1: [
+    { ar:'لَمَّا كَانَتِ الإِجْرَاءَاتُ الأَمْنِيَّةُ غَيْرَ كَافِيَةٍ، عَجِزَتْ فِرَقُ الإِنْقَاذِ عَنْ مُوَاجَهَةِ الأَوْضَاعِ بِفَعَالِيَّةٍ.', tr:"Lammà kànat-i al-ijrà'àtou al-amniyyatou ghayra kâfiyatin, 'ajizat firaqou al-inqâdhi 'an mouwâjahati al-aoudâ'i bi-fa'âliyyatin.", fr:"Étant donné que les mesures de sécurité étaient insuffisantes, les équipes de secours ont été dans l'incapacité de faire face à la situation avec efficacité." },
+    { ar:'قَدْ يَتَحَوَّلُ الطَّرِيقُ السَّرِيعُ إِلَى فَخٍّ أَحْيَانًا وَخَاصَّةً لِلرِّجَالِ الْمُتَزَوِّجِينَ.', tr:"Qad yatahaouwalou at-tarìqou as-sarì'ou ilà fakhkhin ahyânan wa khàssatan lir-rijâli al-moutazaouwijìna.", fr:"L'autoroute peut se convertir parfois en piège, surtout pour les hommes mariés !" },
+  ],
+  exercise2: [
+    { fr:"On apprend qu'un brouillard épais a provoqué un embouteillage monstre hier soir dans le centre de la capitale.", ar:'يُشَارُ إِلَى أَنَّ ضَبَابًا كَثِيفًا أَحْدَثَ اِزْدِحَامًا ضَخْمًا مَسَاءَ أَمْسِ فِي وَسَطِ الْعَاصِمَةِ.', tr:"Youchârou ilà anna dabâban kathìfan ahdatha izdihâman dakhman masà'a amsi fì wasati al-'àsimati." },
+    { fr:"Un camion a tué trois policiers, alors qu'ils tentaient en vain d'arrêter la circulation.", ar:'قَتَلَتْ سَيَّارَةُ نَقْلٍ ثَلاَثَةَ رِجَالٍ لِلشُّرْطَةِ وَهُمْ يُحَاوِلُونَ إِيقَافَ الْمُرُورِ عَبَثًا.', tr:"Qatalat sayyâratou naqlin thalâthata rijâlin lich-chourtati wa houm youhâwiloùna ìqâfa al-mouroùri 'abathan." },
+  ],
+};
+
+const DAILY_LESSON_31 = {
+  num: 31,
+  titleFr: 'Inauguration de musée',
+  titleAr: 'تَدْشِينُ مُتْحَفٍ',
+  fullAudioUrl: null,
+  introFr: "Le ministre de l'Environnement inaugure un musée de l'écologie, ruban rouge et discours à l'appui — mais tombe, en sortant, sur des écoliers en train de polluer le canal du bâtiment ! Un nouveau musée de l'écologie ouvre dans la capitale, en présence de ministres et journalistes locaux/étrangers. Le ministre coupe le ruban devant des écoliers en tee-shirts écologistes. Les premières salles retracent l'histoire de l'irrigation (barrages, norias) depuis l'Antiquité et les projets futurs en partenariat international. Une salle sur le monde marin (poissons, coraux, algues, pollution) précède une salle pédagogique pour enfants. En sortant, le ministre surprend des élèves jetant des emballages de bonbons dans le canal entourant le musée, et déclare, avec ironie, qu'il faut absolument les faire revisiter le musée : « il semble que quelque chose leur ait échappé ! »",
+  dialogue: [],
+  notes: {
+    1: "① mouthaf (musée) dérive de touhfa(t) (bibelot, chef-d'œuvre).",
+    2: "② sahàfiyy (journaliste), formé sur sahàfat (presse).",
+    6: "⑥ Le mot chabakat (déjà en leçon 24 : grille de mots croisés) signifie aussi réseau, filet, chaîne [de télévision].",
+    7: "⑦ hachà'ich = pluriel de hachich (herbe sèche, hachisch), ≠ 'ouchb/a'chàb (herbe verte, gazon).",
+  },
+  vocabBox: {
+    title: "l'environnement et l'irrigation",
+    items: [
+      { ar:'مُتْحَفٌ', tr:"mouthaf", fr:'Musée' },
+      { ar:'بِيئَةٌ', tr:"bì'a(t)", fr:'Environnement' },
+      { ar:'رَيٌّ', tr:"rayy", fr:'Irrigation' },
+    ],
+    proverb: { ar:'إجتهد تنجح', tr:"Ijtahid tanjah.", fr:"Fais des efforts, tu réussiras !" },
+  },
+  exercise1: [
+    { ar:'فُوجِئَ الْوَزِيرُ عِنْدَمَا لاَحَظَ أَنَّ الأَطْفَالَ لَمْ يَفْهَمُوا مَدَى الرِّسَالَةِ الْخَاصَّةِ بِالْبِيئَةِ.', tr:"Foùji'a al-wazìrou 'indamà lâhaza anna al-atfâla lam yafhamoù madà ar-risâlati al-khâssati bi-al-bì'ati.", fr:"Le ministre a été étonné de voir que les enfants n'avaient pas compris la portée du message concernant l'environnement." },
+  ],
+  exercise2: [
+    { fr:"Le ministre de l'Environnement a inauguré, il y a peu, un nouveau musée consacré à ce sujet.", ar:'دَشَّنَ وَزِيرُ الْبِيئَةِ، قَبْلَ قَلِيلٍ، مُتْحَفًا جَدِيدًا مُخَصَّصًا لِهَذَا الْمَوْضُوعِ.', tr:"Dachchana wazìrou al-bì'ati, qabla qalìlin, mouthafan jadìdan moukhassasan li-hàdhà al-maoudoù'i." },
+    { fr:"Il faut absolument donner aux enfants les connaissances essentielles concernant l'écologie.", ar:'لاَ بُدَّ مِنْ تَزْوِيدِ الأَطْفَالِ بِالْمَعْلُومَاتِ الأَسَاسِيَّةِ الْخَاصَّةِ بِعِلْمِ الْبِيئَةِ.', tr:"Là boudda min tazwìdi al-atfâli bi-al-ma'loùmâti al-asâsiyyati al-khâssati bi-'ilmi al-bì'ati." },
+  ],
+};
+
+const DAILY_LESSON_32 = {
+  num: 32,
+  titleFr: 'Débrayage dans une usine de conserves',
+  titleAr: 'التَّوَقُّفُ عَنِ الشُّغْلِ فِي مَصْنَعِ مُعَلَّبَاتٍ',
+  fullAudioUrl: null,
+  introFr: "⚠️ L'exercice 1 de cette leçon est incomplet (pages non capturées). Menacée de faillite, une usine de conserves de légumes (« Fasouliya ») voit ses ouvriers débrayer contre les licenciements et distribuer des tracts. Un repreneur local se propose de redresser l'usine — au prix de suppressions de postes, mais avec promesse de reclassement dans les six mois. La société « al-Fàsoùliyà », spécialisée dans les conserves de légumes, est sur le point de déposer le bilan. Les ouvriers débrayent, se réunissent dans la cour, distribuent des tracts contre les licenciements et demandent l'intervention du Ministre de l'Économie — d'autant que le PDG, étranger, préfère investir dans des pays à bas salaires. Un homme d'affaires local se dit prêt à redresser et rentabiliser l'usine, moyennant modernisation et réduction du personnel. Le Directeur des Ressources Humaines promet un reclassement sous six mois dans une usine voisine ; les ouvriers menacés espèrent aussi une revalorisation de leurs indemnités de chômage après le prochain remaniement ministériel.",
+  dialogue: [],
+  notes: {
+    2: "② i'lànihà 'an-i al-iflàsi = sa déclaration de faillite (masdar de aflasa, faire faillite ; racine F L S, comme fals/fouloùs, sou/argent — d'où « flouss » en argot français).",
+    3: "③ 'oummàl (pluriel interne de 'àmil) = ouvriers, vs 'àmilìna (pluriel externe) = travailleurs/personnel.",
+    4: "④ ja'l (masdar de ja'ala) = poser, mettre, amener à, rendre.",
+    5: "⑤ Li-soù'i al-hazzi (malheureusement) vs li-housni al-hazzi (heureusement) ; racine S W A (sà'a, yasoù'ou, être mauvais).",
+  },
+  vocabBox: {
+    title: 'le monde du travail',
+    items: [
+      { ar:'إِفْلاَسٌ', tr:"iflâs", fr:'Faillite' },
+      { ar:'عُمَّالٌ', tr:"'oummâl", fr:'Ouvriers' },
+      { ar:'تَسْرِيحٌ', tr:"tasrìh", fr:'Licenciement' },
+    ],
+  },
+  exercise1: [],
+  exercise2: [
+    { fr:"Les ouvriers ont débrayé ce matin, parce qu'ils sont menacés d'opérations de licenciement à l'usine.", ar:'تَوَقَّفَ الْعُمَّالُ عَنِ الْعَمَلِ صَبَاحَ الْيَوْمِ لأَنَّهُمْ مُهَدَّدُونَ بِعَمَلِيَّاتِ فَصْلٍ فِي الْمَصْنَعِ.', tr:"Tawaqqafa al-'oummâlou 'an-i al-'amali sabâha al-yaoumi li'annahoum mouhaddadoùna bi-'amaliyyâti faslin fì al-masna'i." },
+    { fr:"Étant donné que cette usine est sur le point de déposer le bilan, les ouvriers vont être licenciés.", ar:'لَمَّا كَانَ هَذَا الْمَصْنَعُ عَلَى وَشْكِ إِعْلاَنِهِ عَنِ الإِفْلاَسِ، سَيَتِمُّ تَسْرِيحُ الْعُمَّالِ.', tr:"Lammà kâna hàdhà al-masna'ou 'alà wachki i'lânihi 'an-i al-iflâsi, sa-yatimmou tasrìhou al-'oummâli." },
+  ],
+};
+
+const DAILY_LESSON_33 = {
+  num: 33,
+  titleFr: 'Grève des transports',
+  titleAr: 'إِضْرَابُ وَسَائِلِ النَّقْلِ عَنِ الْعَمَلِ',
+  fullAudioUrl: null,
+  introFr: "Une grève des trains et bus surprend les usagers. Malgré la solidarité des automobilistes, la pagaille atteint son comble près du souk — jusqu'à ce qu'un chauffeur de taxi exaspéré somme les manifestants de dégager la rue. Aujourd'hui, seul un train sur trois circule dans les banlieues nord/est, deux sur trois au sud/ouest. Conducteurs de trains et bus réclament une hausse de salaire et davantage de sécurité au travail ; ils avaient déposé un préavis de trois jours, mais la grève ne devrait durer qu'un jour. Les syndicats négocient avec le Ministre des Transports, une nouvelle rencontre est prévue le soir même. Les usagers attendent dans de longues files ; la solidarité des automobilistes aide, mais les embouteillages limitent son effet. Près du souk, des manifestants bloquent la rue avec des banderoles réclamant « la liberté de circuler en sécurité et dignité » — jusqu'à ce qu'un chauffeur de taxi, transportant une vieille femme chargée de bagages, leur crie de dégager pour laisser circuler les autres librement !",
+  dialogue: [],
+  notes: {
+    1: "① idràbou wasà'ili an-naqli 'an-i al-'amali signifie littéralement « abandon des moyens de transport du travail » ; la grève = idràboun 'an-i al-'amali ou idràboun seul. Grève de la faim = idràboun 'an-i at-ta'àmi ; gréviste = moudrib.",
+    2: "② al-mazìda min = davantage de (racine Z Y D : zàda, augmenter ; ziyàda(t), augmentation ; zà'id, en surplus/excédentaire).",
+    5: "⑤ rasif, arsifa(t) = quai, débarcadère, plate-forme, terrasse, trottoir. A donné « récif » en français (arabe : rasifoun sakhriyyoun).",
+    6: "⑥ tabloughou mablaghahà = elle atteint son paroxysme (mablagh = somme/montant, ici paroxysme).",
+  },
+  vocabBox: {
+    title: 'la grève et les transports',
+    items: [
+      { ar:'إِضْرَابٌ', tr:"idràb", fr:'Grève' },
+      { ar:'أُجُورٌ', tr:"oujoùr", fr:'Salaires' },
+      { ar:'رَصِيفٌ', tr:"rasìf", fr:'Quai, trottoir' },
+    ],
+    proverb: { ar:'حَرِّكِ الْقَدَرَ يَتَحَرَّكْ!', tr:"Harrik-i al-qadara, yataharrak !", fr:"Aide-toi, le ciel t'aidera !" },
+  },
+  exercise1: [
+    { ar:'سَيَكُونُ عَلَيْكَ أَنْ تَنْتَظِرَ لِمُدَّةٍ طَوِيلَةٍ عَلَى رَصِيفِ الْقِطَارِ لأَنَّهُ لاَ يَتَحَرَّكُ فِي ضَاحِيَتِنَا سِوَى قِطَارٍ وَاحِدٍ مِنْ أَصْلِ اِثْنَيْنِ.', tr:"Sa-yakoùnou 'alayka an tantazira li-mouddatin tawìlatin 'alà rasìfi al-qitâri li'annahou là yataharrakou fì dàhiyatinà sìwà qitârin wàhidin min asli ithnayni.", fr:"Tu devras attendre longtemps sur le quai de la gare parce que dans notre banlieue seul un train sur deux circule." },
+  ],
+  exercise2: [
+    { fr:"Même s'il y a la grève des transports demain, nous irons au travail.", ar:'حَتَّى إِذَا كَانَ هُنَاكَ إِضْرَابٌ لِوَسَائِلِ النَّقْلِ غَدًا، سَوْفَ نَذْهَبُ إِلَى الْعَمَلِ.', tr:"Hattà idhà kâna hounàka idràboun li-wasâ'ili an-naqli ghadan, saoufa nadhhabou ilà al-'amali." },
+  ],
+};
+
+const DAILY_LESSON_34 = {
+  num: 34,
+  titleFr: 'Enlèvement de journalistes',
+  titleAr: 'عَمَلِيَّةُ اِخْتِطَافِ صَحَافِيِّينَ',
+  fullAudioUrl: null,
+  introFr: "Trois journalistes sont enlevés en banlieue de la capitale, en pleine Journée Mondiale de la Femme, par un groupe armé réclamant une rançon en représailles de caricatures jugées offensantes. Hier, deux hommes et une femme journalistes sont enlevés dans une zone industrielle où ils allaient faire un reportage. Selon un témoin, ils ont été forcés, sous la menace d'une arme, de monter dans une camionnette. Les ravisseurs se revendiquent d'un groupe inconnu, « Groupe pour le droit au respect », et exigent 10 000 dollars de rançon aux familles, sous l'accusation d'avoir publié des caricatures portant atteinte à la dignité de la femme. L'enlèvement coïncide avec le lendemain de la Journée Mondiale de la Femme. Une radio pirate diffuse depuis les régions frontalières un communiqué mettant en garde tous les journalistes contre le traitement désinvolte de la femme dans leurs caricatures, au nom du droit au respect et à la liberté de conviction — soulevant la question : la liberté de l'un peut-elle entraver celle d'autrui ?",
+  dialogue: [],
+  notes: {
+    1: "① ikhtitàf, rapt/enlèvement, masdar VIIIe forme de khatafa (ravir, kidnapper) ; khàtif (participe actif) = rapide, furtif.",
+    3: "③ qabd = prise, capture, arrestation (masdar de qabada).",
+    5: "⑤ dhawi as-sahàfiyyìna = les familles des journalistes (dhawì, cas direct de dhawoùna, pluriel de dhoû).",
+    7: "⑦ idhà'atoun ghayrou char'iyyatin = radio pirate (non légale) ; char'iyy (légal) vs machroù' (légitime).",
+  },
+  vocabBox: {
+    title: "l'enlèvement et la liberté",
+    items: [
+      { ar:'اِخْتِطَافٌ', tr:"ikhtitàf", fr:'Enlèvement, rapt' },
+      { ar:'فِدْيَةٌ', tr:"fidya(t)", fr:'Rançon' },
+      { ar:'إِذَاعَةٌ', tr:"idhà'a(t)", fr:'Radio' },
+    ],
+  },
+  exercise1: [
+    { ar:'يُتَّهَمُ هَؤُلاَءِ الصَّحَافِيُّونَ بِنَشْرِ رُسُومٍ كَارِيكَاتِيرِيَّةٍ تُسِيءُ إِلَى كَرَامَةِ الإِنْسَانِ.', tr:"Youttahamou hà'oulà'i as-sahâfiyyoùna bi-nachri rousoùmin kàrìkâtìriyyatin tousì'ou ilà karâmati al-insâni.", fr:"Ces journalistes sont accusés d'avoir publié des caricatures qui portent atteinte à la dignité de l'être humain." },
+  ],
+  exercise2: [
+    { fr:"On apprend qu'une journaliste a été enlevée de la part d'un groupe armé inconnu.", ar:'يُشَارُ إِلَى أَنَّ صَحَافِيَّةً تَمَّ اخْتِطَافُهَا مِنْ قِبَلِ مَجْمُوعَةٍ مُسَلَّحَةٍ مَجْهُولَةٍ.', tr:"Youchârou ilà anna sahâfiyyatan tamma ikhtitâfouhà min qibali majmoù'atin mousallahatin majhoùlatin." },
+  ],
+};
+
+const DAILY_LESSON_35 = {
+  num: 35,
+  titleFr: 'Révision (série "actualité")',
+  titleAr: 'مُرَاجَعَةٌ',
+  fullAudioUrl: null,
+  introFr: "Chapitre de révision : noms de lieu et de temps (maf'al/maf'il/maf'ala), adverbes et locutions adverbiales, compléments du masdar, traduction des mots en mal-/in-, traduction des participes présents, verbes irréguliers de la série — le tout suivi d'un flash radio qui boucle joliment sur l'usine Fasouliya de la leçon 32 !",
+  dialogue: [
+    { ar:'هنا إذاعة الشرق الأوسط. إليكم أخبار الصباح!', tr:"Hounà idhà'atou ach-charqi al-aousati. Ilaykoum akhbâra as-sabâhi !", fr:"Ici radio Moyen-Orient. Voici les nouvelles du matin.", audioUrl:null },
+    { ar:'لسوء الحظ، يشار إلى حصول زلزال عنيف، البارحة، في جنوب البلد، أسفر عن ألف ضحية تقريبا.', tr:"Li-soù'i al-hazzi, youchârou ilà housoùli zilzâlin 'anìfin, al-bàrihata, fì janoùbi al-baladi, asfara 'an alfi dahiyyatin taqrìban.", fr:"Malheureusement, on signale qu'a eu lieu un violent séisme, hier, dans le sud du pays, qui a fait un millier de victimes.", audioUrl:null },
+    { ar:'لحسن الحظ، ما لبثت أن جاءت فرق الهلال الأحمر لإسعاف وانتشال النجاة من تحت الأنقاض.', tr:"Li-housni al-hazzi, mà labithat an jà'at firaqou al-Hilâli al-Ahmari li-is'âfi wa intichâli an-najâti min tahti al-anqâdi.", fr:"Heureusement, les équipes du Croissant Rouge n'ont pas tardé à arriver pour dégager les rescapés des décombres.", audioUrl:null },
+    { ar:'بفضل الاستنفار العام، يؤمل أن ينجو العديد من السكان من ذلك الزلزال الرهيب.', tr:"Bi-fadli al-istinfâri al-'àmmi, you'malou an yanjouwa al-'adìdou min-a as-soukkâni min dhàlika az-zilzâli ar-rahìbi.", fr:"Grâce à la mobilisation générale, on espère qu'un grand nombre d'habitants vont réchapper de ce terrible tremblement de terre.", audioUrl:null },
+    { ar:'إضافة إلى ذلك، حدثت كارثة على الطريق الدولي حتى توقفت حركة المرور لمدة ساعتين.', tr:"Idâfatan ilà dhàlika, hadathat kàrithatoun 'alà at-tarìqi ad-douwaliyyi hattà tawaqqafat harakatou al-mouroùri li-mouddati sâ'atayni.", fr:"En plus de cela, une catastrophe s'est produite sur la route internationale, au point que la circulation a été interrompue pendant deux heures.", audioUrl:null },
+    { ar:'بحكم الرؤية السيئة، تصادمت عدة سيارات مع عدد من الشاحنات.', tr:"Bi-houkmi ar-rou'yati as-sayyi'ati, tasâdamat 'iddatou sayyârâtin ma'a 'adadin min-a ach-châhinâti.", fr:"En raison de la mauvaise visibilité, plusieurs voitures sont entrées en collision avec un certain nombre de camions.", audioUrl:null },
+    { ar:'يشار إلى اختطاف صحافية أجنبية جاءت لعمل تحقيق عن حرية المرأة.', tr:"Youchârou ilà ikhtitâfi sahâfiyyatin ajnabiyyatin jâ'at li-'amali tahqìqin 'an hourriyyati al-mar'ati.", fr:"On signale l'enlèvement d'une journaliste étrangère venue faire un reportage sur la liberté de la femme.", audioUrl:null },
+    { ar:'لا شك أنها تفهم الآن أن موضوع الحرية موضوع خطر ينبغي أن لا تلمسه.', tr:"Là chakka annahà tafhamou al-âna anna maoudoù'a al-hourriyyati maoudoù'oun khatiroun yanbaghì an là talmisahou.", fr:"Il n'y a pas de doute qu'elle comprendra maintenant que la question de la liberté est un sujet dangereux qu'il convient de ne pas toucher.", audioUrl:null },
+    { ar:'تتويجا لهذه السلسلة من الأخبار غير السارة، يتوقع حدوث إضراب لوسائل النقل غدا.', tr:"Tatouwìjan li-hàdhihi as-silsilati min-a al-akhbâri ghayri as-sârrati, youtawaqqa'ou houdoùthou idràbin li-wasâ'ili an-naqli ghadan.", fr:"Pour couronner cette série de nouvelles peu réjouissantes, une grève des transports est prévue pour demain.", audioUrl:null },
+    { ar:'توجهوا إلى جيرانكم لكي يتكفلوا لكم بنقلكم!', tr:"Tawajjahoù ilà jìrânikoum likay yatakaffaloù lakoum bi-naqlikoum !", fr:"Adressez-vous à vos voisins pour qu'ils se chargent de vous transporter.", audioUrl:null },
+    { ar:'ختاما، وللانتهاء بشكل ممتع، يسرنا أن نعلن لكم عن تدشين متحف مخصص للماء، فيمكنكم الحصول فيه على معلومات مفيدة عند عمليات انقطاع الماء في الصيف المقبل...', tr:"Khitâman, wa lil-intihâ'i bi-chaklin moumti'in, yasourrounà an nou'lina lakoum 'an tadchìni mouthafin moukhassasin lil-mâ'i, fa-youmkinoukoum al-housoùlou fìhi 'alà ma'loùmâtin moufìdatin 'inda 'amaliyyâti inqitâ'i al-mâ'i fì as-sayfi al-mouqbili...", fr:"Enfin, pour finir sur une note gaie, nous avons le plaisir de vous annoncer l'inauguration d'un musée consacré à l'eau, où vous pourrez obtenir des informations utiles au moment des coupures d'eau l'été prochain...", audioUrl:null },
+    { ar:'وقبل كل شيء، لا تنسوا أكل الكثير من الفاصوليا لمساعدة مصنع «الفاصوليا» وهو على وشك الإفلاس!', tr:"Wa qabla koulli chay'in, là tansaou akla al-kathìri min-a al-fâsoùliyà li-mousà'adati masna'i «al-Fâsoùliyà» wa h(ou)wa 'alà wachki al-iflâsi !", fr:"Et avant toute chose, n'oubliez pas de manger beaucoup de haricots pour venir en aide à l'usine Fasouliya, qui est au bord de la faillite !", audioUrl:null },
+  ],
+  notes: {
+    1: "① Noms de lieu/temps type maf'al/maf'il : selon la voyelle médiane de l'inaccompli (a/ou → maf'al ; i → maf'il). Ex. sana'a/yasna'ou → masna' (usine) ; kataba/yaktoubou → maktab (bureau) ; jalasa/yajlisou → majlis (salle de réunion).",
+    2: "② Type maf'ala(t) : noms de lieu en tà' marboùta — madrasa(t) (école), mahkama(t) (tribunal). Pour les formes dérivées, le participe passif sert de nom de lieu : mouthaf (musée), moujtama' (société).",
+    3: "③ Adverbes : masdar au cas direct indéterminé (mousàhamatan minhà fì) ; locutions en mot cas direct + mà (sour'àna mà, yaouman mà, ghàliban mà, kathìran mà).",
+    4: "④ Compléments du masdar : si le masdar porte un pronom, son complément est au cas direct (pas d'annexion).",
+    5: "⑤ mal-/in- : soù' (mal) opposé à housn (bien) : soù'ou at-taghdhiyati (malnutrition), soù'ou al-mou'âmalati (maltraitance), soù'ou al-fahmi (malentendu). Aussi 'adam, ghayr, là selon le préfixe français.",
+    6: "⑥ Participes présents : déterminer le sens avant de traduire — valeur épithète (participe actif au cas direct) ou valeur causale (lammà kâna/kânat + étant donné que).",
+    7: "⑦ Verbes irréguliers de la série : hamzés tasà'ala/yatasà'alou 'an (s'interroger sur), ista'nafa/yasta'nifou (recommencer) ; assimilés wazza'a/youwazzi'ou (distribuer), tawaqqa'a/yatawaqqa'ou (prévoir) ; concaves khàda/yakhoùdou (s'engager dans), hàla/yahoùlou doùna (empêcher), asà'a/yousì'ou ilà (offenser), najà/yanjoù min (échapper à), achàra/youchìrou ilà (signaler), taràwaha/yataràwahou bayna (osciller entre), ahàta/youhìtou bi- (entourer), tajàwaza/yatajàwazou (dépasser), inhàra/yanhàrou (s'effondrer), istafàda/yastafìdou min (bénéficier de) ; défectueux ramà/yarmì (jeter), tasannà/yatasannà (être possible).",
+    8: "⑧ Tournures : ja'ala + adj. cas direct (rendre) ; ràha wa jà'a (aller et venir) ; bi-houkmi (du fait de) ; min qibali (de la part de) ; min ajli (pour) ; min-a al-moutawaqqa'i an (il est prévu que) ; li-soù'i/housni al-hazzi (par chance/malchance) ; laqiya masra'ahou (trouver la mort).",
+  },
+  vocabBox: {
+    title: 'points de révision (noms de lieu, adverbes)',
+    items: [
+      { ar:'مَصْنَعٌ', tr:"masna'", fr:'Usine (nom de lieu)' },
+      { ar:'مَدْرَسَةٌ', tr:"madrasa(t)", fr:'École (nom de lieu en -a)' },
+    ],
+  },
+  exercise1: [],
+  exercise2: [],
+  isRevision: true,
+  revisionNote: "Cette leçon est un chapitre de révision : le « dialogue » ci-dessus est en réalité le flash radio d'exercice qui boucle sur toutes les leçons précédentes de la série actualité. Relis les points de grammaire ci-dessus pour réviser noms de lieu, adverbes et verbes irréguliers.",
+};
+
+const DAILY_LESSON_36 = {
+  num: 36,
+  titleFr: 'Recrudescence de la spirale de la violence',
+  titleAr: 'تَصْعِيدُ دَوَّامَةِ الْعُنْفِ',
+  fullAudioUrl: null,
+  introFr: "⚠️ L'exercice 2 de cette leçon est incomplet (pages suivantes non capturées). Une voiture piégée explose devant un bureau de recrutement militaire, tuant vingt-cinq jeunes venus s'enrôler. Un attentat de plus, revendiqué, qui pousse une population épuisée à ne plus sortir que par nécessité, tandis que hôpitaux et secours sont débordés. Ce matin, une voiture piégée explose devant le Ministère de la Défense (25 morts, des dizaines de blessés) alors que de nombreux jeunes s'étaient massés devant un bureau de recrutement pour s'enrôler dans l'armée. Malgré des barrières de sécurité dressées dès l'aube, la voiture a réussi à les franchir. Un groupe armé connu revendique l'attentat, l'un des plus sanglants du mois, qui fait suite à un attentat-suicide dans un grand magasin de banlieue. La population hésite désormais à sortir sauf urgence ; les travailleurs changent souvent d'itinéraire, craignant pour leur vie. De telles attaques individuelles et voitures piégées se sont multipliées récemment, touchant toutes les couches de la société. Les équipes de secours ne suffisent plus, les hôpitaux manquent de médicaments, de médecins et de chirurgiens ; les morgues débordent, où les proches viennent chercher des nouvelles des disparus.",
+  dialogue: [],
+  notes: {
+    1: "① tas'ìd (masdar de sa''ada) = faire monter, intensifier — ne pas confondre sa'ida/yas'adou (monter) et sa'ida/yas'adou (être heureux) !",
+    2: "② tajnìd = recrutement (masdar de jannada ; racine jound, armée).",
+    4: "④ admà = plus sanglant, élatif irrégulier de dàmin (sanglant, meurtrier).",
+    5: "⑤ you'qibou = fait suite à (IVe forme de 'aqaba, suivre/talonner) — à distinguer de tabi'a (suivre, avec notion d'appartenance).",
+  },
+  vocabBox: {
+    title: 'la violence et le terrorisme',
+    items: [
+      { ar:'عُنْفٌ', tr:"'ounf", fr:'Violence' },
+      { ar:'اِنْفِجَارٌ', tr:"infijâr", fr:'Explosion' },
+      { ar:'قَتْلَى', tr:"qatlà", fr:'Tués, victimes' },
+    ],
+  },
+  exercise1: [
+    { ar:'كَانَ هَؤُلاَءِ الشُّبَّانُ مُحْتَشِدِينَ أَمَامَ وِزَارَةِ الدِّفَاعِ لاِلْتِحَاقِهِمْ بِالْجَيْشِ الْوَطَنِيِّ.', tr:"Kâna hà'oulà'i ach-choubbânou mouhtachidìna amâma wizârati ad-difâ'i li-iltihâqihim bi-al-jaychi al-watanì.", fr:"Ces jeunes gens étaient massés devant le Ministère de la Défense pour s'enrôler dans l'armée nationale." },
+  ],
+  exercise2: [
+    { fr:"Ce genre d'opérations kamikazes s'est multiplié ces derniers temps.", ar:'تَكَاثَرَتْ فِي الآوِنَةِ الأَخِيرَةِ مِثْلُ هَذِهِ الْعَمَلِيَّاتِ الاِنْتِحَارِيَّةِ.', tr:"Takâtharat fì al-âwinati al-akhìrati mithlou hàdhihi al-'amaliyyâti al-intihâriyyati." },
+    { fr:"L'explosion d'une voiture piégée a causé la mort de trente soldats.", ar:'تَسَبَّبَ انْفِجَارُ سَيَّارَةٍ مُفَخَّخَةٍ فِي قَتْلِ ثَلاَثِينَ جُنْدِيًّا.', tr:"Tasabbaba infijârou sayyâratin moufakhkhakhatin fì qatli thalâthìna jondiyyan." },
+    { fr:"Il faut absolument dresser des barrières de sécurité devant ce bâtiment officiel.", ar:'لاَ بُدَّ مِنْ نَصْبِ حَوَاجِزَ أَمْنِيَّةٍ أَمَامَ هَذَا الْمَبْنَى الرَّسْمِيِّ.', tr:"Là boudda min nasbi hawâjiza amniyyatin amâma hàdhà al-mabnà ar-rasmiyyi." },
+  ],
+};
+
+const DAILY_LESSON_37 = {
+  num: 37,
+  titleFr: 'Un slogan efficace',
+  titleAr: 'شِعَارٌ نَاجِعٌ',
+  fullAudioUrl: null,
+  introFr: "Une manifestation sur la Place de la Révolution dégénère en affrontement avec la police — matraques, gaz lacrymogènes et arrestations en masse — mais laisse derrière elle une banderole au slogan qui, lui, a fait mouche. Des manifestations tumultueuses rassemblent des masses nombreuses sur la Place de la Révolution, brandissant des banderoles dénonçant la restriction des libertés, les arrestations arbitraires, la répression, la carence des services publics et la corruption. Les forces de l'ordre repoussent les premiers rangs avant qu'ils n'atteignent le Conseil de la Nation. Après une période de tension, un petit groupe se détache et bombarde les policiers de projectiles et d'injures ; les forces de sécurité répliquent avec des gaz lacrymogènes et chargent violemment, provoquant une bataille acharnée où certains sont piétinés. Finalement dispersés, cinquante arrestations sont recensées. Sur la place vide et jonchée de débris, une banderole reste au sol, portant son slogan efficace : « Arrêtez les arrestations arbitraires ! »",
+  dialogue: [],
+  notes: {
+    1: "① làfita(t) = banderole, pancarte (racine de alfata, attirer l'attention).",
+    4: "④ balagha at-tawattourou aoujahou / balaghat-i al-balbalatou dhourwatahà = la tension/confusion a atteint son comble : trois mots pour « apogée » — aouj, dhourwa(t), qimma(t).",
+    5: "⑤ tarmì = elle jette (de ràmà, yarmì ; ràmin, tireur/archer, pl. roumà(t)).",
+    7: "⑦ Après un nombre entre 11 et 99, nom singulier cas direct indéterminé ; si déterminé par annexion, le noùn final disparaît (khamsìna 'amaliyyata i'tiqàlin).",
+  },
+  vocabBox: {
+    title: 'la manifestation et la répression',
+    items: [
+      { ar:'مُظَاهَرَةٌ', tr:"mouzâhara(t)", fr:'Manifestation' },
+      { ar:'لاَفِتَةٌ', tr:"làfita(t)", fr:'Banderole' },
+      { ar:'اِعْتِقَالٌ', tr:"i'tiqâl", fr:'Arrestation' },
+    ],
+  },
+  exercise1: [
+    { ar:'بَيْنَمَا يَتَجَمَّعُ الْمُتَظَاهِرُونَ فِي الْمَيْدَانِ، تَحْتَشِدُ قُوَّاتُ الشُّرْطَةِ عَلَى اِمْتِدَادِ بِنَايَةِ مَجْلِسِ الأُمَّةِ.', tr:"Baynamà yatajamma'ou al-moutazâhiroùna fì al-maydâni, tahtachidou qouwwâtou ach-chourtati 'alà imtidâdi binâyati majlisi al-oummati.", fr:"Tandis que les manifestants se regroupent sur la place, les forces de police se massent le long du bâtiment du Conseil de la Nation." },
+  ],
+  exercise2: [
+    { fr:"Est-ce que ce slogan a été réellement efficace ? N'y a-t-il pas eu de nombreuses arrestations arbitraires ?", ar:'هَلْ كَانَ هَذَا الشِّعَارُ نَاجِعًا فِعْلاً؟ أَلَمْ يَكُنْ هُنَاكَ الْعَدِيدُ مِنَ الاِعْتِقَالاَتِ التَّعَسُّفِيَّةِ؟', tr:"Hal kâna hàdhà ach-chi'àrou nâji'an fi'lan ? Alam yakoun hounàka al-'adìdou min-a al-i'tiqâlâti at-ta'assoufiyyati ?" },
+  ],
+};
+
+const DAILY_LESSON_38 = {
+  num: 38,
+  titleFr: 'Un gentil escroc',
+  titleAr: 'مُحْتَالٌ لَطِيفٌ',
+  fullAudioUrl: null,
+  introFr: "Le procès d'un escroc à l'affabilité redoutable s'achève sur une clémence surprenante — et une vieille victime, encore sous le charme, plaide malgré elle en sa faveur devant un président du tribunal résolument ironique. Après six mois d'audiences, s'achève le procès de M. Amin (« Deconfiance »), dont les agissements avaient fait la une des journaux. Malgré une réquisition de vingt ans, il n'écope que de quinze ans dont cinq avec sursis. Rappel des faits : l'accusé démarchait des personnes aisées en leur promettant des placements fabuleux, extorquant en gros plusieurs centaines de millions à plus de 250 personnes — surtout des officiers retraités, réticents à avouer leur implication et leur naïveté. Lors d'une audience, une vieille victime s'écrie qu'un homme si poli ne peut être coupable et qu'il les a fait rêver ; l'avocat de la défense s'empresse d'exploiter ces propos pour présenter son client comme un bienfaiteur venant en aide aux personnes seules. Le président du tribunal réplique, ironique, en demandant s'il faut comprendre que l'accusé mérite des remerciements de l'humanité !",
+  dialogue: [],
+  notes: {
+    1: "① houkm 'alà = jugement contre (défavorable) vs houkm li- = jugement pour, en faveur de. Hàkim = juge et gouvernant.",
+    4: "④ chouhoùdou al-ithbàti = témoins à charge, vs chàhidou an-nafyi = témoin à décharge ; chàhidou zoùrin = faux témoin ; chàhidou 'iyânin = témoin oculaire.",
+    5: "⑤ adab = correction/bonnes manières, mais aussi culture générale (belles lettres, pl. àdàb) et moralité (= akhlàq).",
+    7: "⑦ yà hadrata al-mouhàmì = « ô Excellence de l'avocat » = Maître.",
+  },
+  vocabBox: {
+    title: "l'escroquerie et le procès",
+    items: [
+      { ar:'مُحْتَالٌ', tr:"mouhtâl", fr:'Escroc' },
+      { ar:'حُكْمٌ', tr:"houkm", fr:'Jugement' },
+      { ar:'ثِقَةٌ', tr:"thiqa(t)", fr:'Confiance' },
+    ],
+  },
+  exercise1: [
+    { ar:'إِنَّ الْمُحْتَالَ الَّذِي كَانَ قَدْ خَدَعَ ثَلاَثِينَ شَخْصًا حُكِمَ عَلَيْهِ بِالسَّجْنِ لِمُدَّةِ خَمْسَةِ أَعْوَامٍ.', tr:"Inna al-mouhtâla alladhì kâna qad khada'a thalâthìna chakhsan houkima 'alayhi bi-as-sijni li-mouddati khamsati a'wâmin.", fr:"L'escroc qui avait trompé trente personnes a été condamné à cinq ans de prison." },
+  ],
+  exercise2: [
+    { fr:"Monsieur le Président, voici un nouveau témoin à charge qui a chez lui des preuves importantes à vous fournir.", ar:'يَا حَضْرَةَ الرَّئِيسِ، هُنَاكَ شَاهِدٌ جَدِيدٌ لَدَيْهِ دَلاَئِلُ هَامَّةٌ يُزَوِّدُكُمْ بِهَا.', tr:"Yà hadrata ar-ra'ìsi, hounàka châhidoun jadìdoun ladayhi dalâ'ilou hâmmatoun youzawwidoukoum bihà." },
+  ],
+};
+
+const DAILY_LESSON_39 = {
+  num: 39,
+  titleFr: 'Une campagne électorale étonnante',
+  titleAr: 'حَمْلَةٌ اِنْتِخَابِيَّةٌ مُدْهِشَةٌ',
+  fullAudioUrl: null,
+  introFr: "Cinq candidats aux noms tout trouvés — Lejardinier, Lechangeur, Lerésactif, Leparesseux, Lecharlatan — se livrent à une surenchère de promesses électorales que tout le monde sait déjà intenables. La campagne présidentielle démarre ; tous les candidats passent à tour de rôle sur les chaînes de télévision. M. al-Boustani (« Lejardinier »), fervent écologiste, appelle à restreindre les véhicules à moteur, ce qui fait sourire ironiquement son rival M. as-Sarràf (« Lechangeur »). M. an-Nachchat (« Lerésactif ») promet des aides supplémentaires aux chômeurs et la gratuité des transports — proposition contestée par M. al-Kaslàn (« Leparesseux »), délégué syndical des chômeurs. M. ad-Dajjàl (« Lecharlatan ») promet, sans convaincre, la baisse du chômage et la hausse simultanée des salaires et du pouvoir d'achat. Chaque candidat abreuve les électeurs de promesses qu'il sait ne pouvoir tenir — mais comme chacun sait, les promesses n'engagent que ceux à qui elles s'adressent ! Les sondages annoncent une participation record, contrastant avec le désintérêt politique des scrutins précédents.",
+  dialogue: [],
+  notes: {
+    2: "② ka-al-mou'tàdi = comme à l'accoutumée (= ka-al-'àdati).",
+    4: "④ bi-at-tanàwoubi = à tour de rôle (a donné « nouba » en français).",
+    6: "⑥ bi-manhi... mousà'adàtin màliyyatan idâfiyyatan : le masdar manh se construit avec un double accusatif.",
+    8: "⑧ kaslân (paresseux) vs kasoùl (très paresseux, flemmard).",
+  },
+  vocabBox: {
+    title: 'les élections et les promesses',
+    items: [
+      { ar:'اِنْتِخَابَاتٌ', tr:"intikhâbât", fr:'Élections' },
+      { ar:'مُرَشَّحٌ', tr:"mourachchah", fr:'Candidat' },
+      { ar:'وَعْدٌ', tr:"wa'd", fr:'Promesse' },
+    ],
+  },
+  exercise1: [
+    { ar:'نَتَعَهَّدُ بِمَنْحِ جَمِيعِ الشَّبَابِ أُجُورًا كَافِيَةً فِي بِدَايَةِ نَشَاطِهِمِ الْمِهْنِيِّ.', tr:"Nata'ahhadou bi-manhi jamì'i ach-chabâbi oujoùran kâfiyatan fì bidâyati nachâtihim al-mihniyyi.", fr:"Nous nous engageons à donner à tous les jeunes un salaire suffisant pour leur premier emploi." },
+  ],
+  exercise2: [
+    { fr:"Les deux candidats exposeront à tour de rôle leurs programmes aux électeurs.", ar:'سَوْفَ يَعْرِضُ بَرْنَامَجَهُ كُلٌّ مِنَ الْمُرَشَّحَيْنِ عَلَى النَّاخِبِينَ وَذَلِكَ بِالتَّنَاوُبِ.', tr:"Saoufa ya'ridou barnâmajahou koulloun min-a al-mourachchahayni 'alà an-nâkhibìna wa dhàlika bi-at-tanàwoubi." },
+  ],
+};
+
+const DAILY_LESSON_40 = {
+  num: 40,
+  titleFr: 'Un coup de tête décisif',
+  titleAr: 'ضَرْبَةُ رَأْسٍ حَاسِمَةٌ',
+  fullAudioUrl: null,
+  introFr: "⚠️ Cette leçon est incomplète : le récit est coupé après la phrase 16, et les exercices n'ont pas été capturés. À compléter dès que les pages manquantes seront disponibles. Demi-finale électrique de la coupe des États arabes à Amman : le « Démon des stades » tente une contre-attaque éclair, l'équipe algérienne domine en marquant deux buts consécutifs... jusqu'à ce qu'Ali « Tête de bélier » al-Maliki, dix minutes avant la fin, réplique à des injures par un coup de tête dans l'estomac d'un adversaire. Match de demi-finale à Amman sous haute sécurité (des supporters avaient envahi le terrain l'année précédente). Stade bondé et impatient. Première mi-temps nulle, sans incident notoire, si ce n'est une contre-attaque du « Démon des stades » stoppée par la défense jordanienne et son gardien. En seconde période, chaque équipe marque un but immédiat, puis l'Algérie semble dominer avec deux buts consécutifs — fruit de deux mois d'entraînement intensif et d'une confiance inébranlable dans la victoire. Mais dix minutes avant la fin, Ali al-Maliki (« Tête de bélier ») répond à des insultes par un coup de tête dans l'estomac d'un joueur adverse... (suite à venir)",
+  dialogue: [],
+  notes: {
+    1: "① hàsimatoun = tranchant, déterminant (participe actif de hasama, couper/trancher).",
+    3: "③ Verbe à la 3e personne de l'inaccompli passif traduit en français par un adjectif : ayyi hàdithin youdhkarou = « un quelconque incident notoire » ; hàdhà là youdhkarou = c'est insignifiant.",
+    4: "④ hàrisi marmà = du gardien de but (marmà, nom de lieu de ramà, jeter/lancer).",
+    5: "⑤ là yarhamou = littéralement « il n'a pas pitié » → qui ne pardonne pas (but imparable).",
+  },
+  vocabBox: {
+    title: 'le football',
+    items: [
+      { ar:'مُبَارَاةٌ', tr:"moubârà(t)", fr:'Match' },
+      { ar:'حَارِسُ مَرْمَى', tr:"hârisou marmà", fr:'Gardien de but' },
+      { ar:'هَدَفٌ', tr:"hadaf", fr:'But' },
+    ],
+  },
+  exercise1: [],
+  exercise2: [],
+  isRevision: true,
+  revisionNote: "⚠️ Cette leçon est incomplète : le récit s'arrête à la phrase 16 et les exercices de traduction n'ont pas été transcrits. Dès que les pages manquantes seront fournies, cette leçon sera complétée.",
+};
+
+const ALL_LESSONS = { 1: DAILY_LESSON_1, 2: DAILY_LESSON_2, 3: DAILY_LESSON_3, 4: DAILY_LESSON_4, 5: DAILY_LESSON_5, 6: DAILY_LESSON_6, 7: DAILY_LESSON_7, 8: DAILY_LESSON_8, 9: DAILY_LESSON_9, 10: DAILY_LESSON_10, 11: DAILY_LESSON_11, 12: DAILY_LESSON_12, 13: DAILY_LESSON_13, 14: DAILY_LESSON_14, 15: DAILY_LESSON_15, 16: DAILY_LESSON_16, 17: DAILY_LESSON_17, 18: DAILY_LESSON_18, 19: DAILY_LESSON_19, 20: DAILY_LESSON_20, 21: DAILY_LESSON_21, 22: DAILY_LESSON_22, 23: DAILY_LESSON_23, 24: DAILY_LESSON_24, 25: DAILY_LESSON_25, 26: DAILY_LESSON_26, 27: DAILY_LESSON_27, 28: DAILY_LESSON_28, 29: DAILY_LESSON_29, 30: DAILY_LESSON_30, 31: DAILY_LESSON_31, 32: DAILY_LESSON_32, 33: DAILY_LESSON_33, 34: DAILY_LESSON_34, 35: DAILY_LESSON_35, 36: DAILY_LESSON_36, 37: DAILY_LESSON_37, 38: DAILY_LESSON_38, 39: DAILY_LESSON_39, 40: DAILY_LESSON_40 };
 
 function renderLessonList(){
   clearQuestionTimer();
@@ -14918,6 +15605,9 @@ function renderDailyLesson(){
   document.getElementById('shadowGameBtn').addEventListener('click', () => startShadowGame(lesson));
 
   const dlgList = document.getElementById('lessonDialogueList');
+  if(lesson.dialogue.length === 0){
+    dlgList.innerHTML = `<div class="lab-panel" style="text-align:left;"><div class="lab-fr-text">📝 Pour cette leçon, seul un résumé du récit a été transcrit (voir ci-dessus) — pas le dialogue ligne par ligne en arabe. Les notes, le vocabulaire et les exercices ci-dessous restent complets.</div></div>`;
+  } else {
   dlgList.innerHTML = lesson.dialogue.map((line, i) => `
     <div class="lab-dialogue-card" data-line-idx="${i}">
       <div class="lab-ar-row">
@@ -14941,6 +15631,7 @@ function renderDailyLesson(){
   dlgList.querySelectorAll('[data-open-note]').forEach(btn => {
     btn.addEventListener('click', (e) => { e.stopPropagation(); openNotePopup(lesson, parseInt(btn.dataset.openNote,10)); });
   });
+  }
 
   renderLessonNotesList(lesson);
 
