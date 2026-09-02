@@ -990,32 +990,33 @@
   .srs-card{ margin-bottom:16px; }
   /* ============ 📖 LEÇON DU JOUR — thème "Language Lab" (futuriste, motivant, ludique) ============ */
   .lesson-lab{
-    --lab-bg1:#0B1226; --lab-bg2:#161B3A; --lab-cyan:#22D3EE; --lab-violet:#A78BFA;
-    --lab-amber:#FBBF24; --lab-text:#EAF0FF; --lab-dim:#93A0C4; --lab-glass:rgba(255,255,255,0.045);
-    --lab-border:rgba(255,255,255,0.12); --lab-green:#34D399;
+    --lab-bg1:#F5F3FF; --lab-bg2:#ECFEFF; --lab-cyan:#0891B2; --lab-violet:#7C3AED;
+    --lab-amber:#D97706; --lab-text:#1E293B; --lab-dim:#64748B; --lab-glass:rgba(255,255,255,0.72);
+    --lab-border:rgba(124,58,237,0.16); --lab-green:#059669; --lab-btn-text:#ffffff;
     background:linear-gradient(160deg,var(--lab-bg1),var(--lab-bg2));
     border-radius:16px; padding:26px 20px; margin:-40px -34px;
     color:var(--lab-text); position:relative; overflow:hidden;
+    border:1px solid rgba(124,58,237,0.1);
   }
   @media (max-width:600px){ .lesson-lab{ margin:-30px -22px; padding:22px 16px; } }
   .lesson-lab::before{
     content:''; position:absolute; top:-90px; right:-60px; width:220px; height:220px;
-    background:radial-gradient(circle, rgba(34,211,238,0.20), transparent 70%); pointer-events:none;
+    background:radial-gradient(circle, rgba(8,145,178,0.14), transparent 70%); pointer-events:none;
   }
   .lesson-lab::after{
     content:''; position:absolute; bottom:-110px; left:-60px; width:240px; height:240px;
-    background:radial-gradient(circle, rgba(167,139,250,0.16), transparent 70%); pointer-events:none;
+    background:radial-gradient(circle, rgba(124,58,237,0.12), transparent 70%); pointer-events:none;
   }
   .lesson-lab > *{ position:relative; z-index:1; }
   .lab-eyebrow{
     display:inline-flex; align-items:center; gap:6px; font-size:11.5px; font-weight:700;
-    color:var(--lab-cyan); background:rgba(34,211,238,0.1);
-    border:1px solid rgba(34,211,238,0.32); padding:5px 12px; border-radius:20px;
+    color:var(--lab-cyan); background:rgba(8,145,178,0.1);
+    border:1px solid rgba(8,145,178,0.28); padding:5px 12px; border-radius:20px;
   }
   .lab-title-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:14px; flex-wrap:wrap; }
   .lab-title{
     font-size:clamp(21px,4.8vw,29px); font-weight:800; line-height:1.25; text-align:left;
-    background:linear-gradient(90deg,#ffffff,var(--lab-cyan) 130%); -webkit-background-clip:text;
+    background:linear-gradient(90deg,var(--lab-violet),var(--lab-cyan) 130%); -webkit-background-clip:text;
     background-clip:text; -webkit-text-fill-color:transparent;
   }
   .lab-title-ar{
@@ -1047,7 +1048,7 @@
   .lab-chip.active{ background:rgba(34,211,238,0.18); border-color:var(--lab-cyan); color:var(--lab-cyan); }
   .lab-btn{
     display:inline-flex; align-items:center; justify-content:center; gap:8px; width:100%;
-    font-size:14px; font-weight:800; color:var(--lab-bg1); background:linear-gradient(135deg,var(--lab-cyan),var(--lab-violet));
+    font-size:14px; font-weight:800; color:var(--lab-btn-text); background:linear-gradient(135deg,var(--lab-cyan),var(--lab-violet));
     border:none; border-radius:14px; padding:13px 20px; cursor:pointer; box-shadow:0 6px 20px rgba(34,211,238,0.28);
     transition:transform .15s;
   }
@@ -1120,7 +1121,7 @@
   .lab-lesson-left{ display:flex; align-items:center; gap:12px; min-width:0; }
   .lab-lesson-num{
     width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center;
-    background:linear-gradient(135deg,var(--lab-cyan),var(--lab-violet)); color:var(--lab-bg1);
+    background:linear-gradient(135deg,var(--lab-cyan),var(--lab-violet)); color:var(--lab-btn-text);
     font-weight:800; font-size:12.5px; flex-shrink:0;
   }
   .lab-lesson-title-fr{ font-weight:800; font-size:14.5px; color:var(--lab-text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
@@ -2293,6 +2294,7 @@ function startSRSReview(){
   const due = getSRSDueWords();
   if(due.length === 0){ setStatus('🎉 Rien à réviser aujourd\'hui — reviens demain !', 'ok'); return; }
   currentBlock = null;
+  isHomeScreen = false;
   gameMode = 'classic';
   window.__reviewSession = true;
   window.__trainingType = 'srs';
@@ -4720,6 +4722,11 @@ let initialLength = 0; // words in the block at the start
 let masteredCount = 0;
 let answered = false;
 let currentBlock = null;
+/* 🏠 Indicateur fiable : "suis-je bien sur l'écran d'accueil (choix des blocs) ?" — currentBlock
+   étant remis à null par PRESQUE tous les écrans (Grammaire, Leçon du jour, Conjugaison...), il
+   ne suffit pas à lui seul pour savoir si on est vraiment à l'accueil. Sert notamment à éviter
+   qu'une synchro en arrière-plan ne renvoie l'utilisateur à l'accueil alors qu'il est ailleurs. */
+let isHomeScreen = false;
 let score = { correct:0, total:0 };
 let catScore = {};
 let datasetHash = '';
@@ -5067,6 +5074,7 @@ function renderSoundSettings(){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
   currentBlock = null;
+  isHomeScreen = false;
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromSoundsBtn" style="cursor:pointer;">← Retour</button>`;
   document.getElementById('progressFill').style.width = '0%';
   document.getElementById('footerNote').textContent = '';
@@ -5515,6 +5523,7 @@ function renderAddWordsScreen(){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
   currentBlock = null;
+  isHomeScreen = false;
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromAddWordsBtn" style="cursor:pointer;">← Retour</button>`;
   document.getElementById('progressFill').style.width = '0%';
   document.getElementById('footerNote').textContent = '';
@@ -5676,6 +5685,7 @@ function renderImportPreview(a, fileName){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
   currentBlock = null;
+  isHomeScreen = false;
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="cancelImportBtn" style="cursor:pointer;">← Annuler</button>`;
   document.getElementById('progressFill').style.width = '0%';
   document.getElementById('footerNote').textContent = '';
@@ -5854,6 +5864,7 @@ function startTrainingBlock(typeKey, chunkIndex){
   const chunk = all.slice(chunkIndex * REVIEW_BLOCK_SIZE, (chunkIndex + 1) * REVIEW_BLOCK_SIZE);
   if(chunk.length === 0){ renderBlockSelect(); return; }
   currentBlock = null;
+  isHomeScreen = false;
   gameMode = type.mode;
   window.__reviewSession = true;
   window.__trainingType = typeKey;
@@ -5873,6 +5884,7 @@ function renderQuestSettings(){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
   currentBlock = null;
+  isHomeScreen = false;
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromQSBtn" style="cursor:pointer;">← Retour aux blocs</button>`;
   document.getElementById('progressFill').style.width = '0%';
   document.getElementById('footerNote').textContent = '';
@@ -6015,6 +6027,7 @@ function renderRadioSetup(){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
   currentBlock = null;
+  isHomeScreen = false;
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromRadioSetupBtn" style="cursor:pointer;">← Retour aux blocs</button>`;
   document.getElementById('progressFill').style.width = '0%';
   document.getElementById('footerNote').textContent = '';
@@ -6353,6 +6366,7 @@ function renderBlitzIntro(){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
   currentBlock = null;
+  isHomeScreen = false;
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromBlitzBtn" style="cursor:pointer;">← Retour aux blocs</button>`;
   document.getElementById('progressFill').style.width = '0%';
   document.getElementById('footerNote').textContent = '';
@@ -6480,6 +6494,7 @@ function renderSwipeIntro(){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
   currentBlock = null;
+  isHomeScreen = false;
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromSwipeBtn" style="cursor:pointer;">← Retour aux blocs</button>`;
   document.getElementById('progressFill').style.width = '0%';
   document.getElementById('footerNote').textContent = '';
@@ -6626,6 +6641,7 @@ function renderFlashcardsIntro(){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
   currentBlock = null;
+  isHomeScreen = false;
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromFlashBtn" style="cursor:pointer;">← Retour aux blocs</button>`;
   document.getElementById('progressFill').style.width = '0%';
   document.getElementById('footerNote').textContent = '';
@@ -6758,6 +6774,7 @@ function renderDailyChallenge(){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
   currentBlock = null;
+  isHomeScreen = false;
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromDCBtn" style="cursor:pointer;">← Retour aux blocs</button>`;
   document.getElementById('progressFill').style.width = '0%';
   document.getElementById('footerNote').textContent = '';
@@ -6891,6 +6908,7 @@ function renderBadgesScreen(){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
   currentBlock = null;
+  isHomeScreen = false;
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromBadgesBtn" style="cursor:pointer;">← Retour aux blocs</button>`;
   document.getElementById('progressFill').style.width = '0%';
   document.getElementById('footerNote').textContent = '';
@@ -6923,6 +6941,7 @@ function renderAssociationIntro(){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
   currentBlock = null;
+  isHomeScreen = false;
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromAssocBtn" style="cursor:pointer;">← Retour aux blocs</button>`;
   document.getElementById('progressFill').style.width = '0%';
   document.getElementById('footerNote').textContent = '';
@@ -7141,6 +7160,7 @@ function renderGrammarHome(level){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
   currentBlock = null;
+  isHomeScreen = false;
   window.__reviewSession = false;
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromGrammarBtn" style="cursor:pointer;">← Retour aux blocs</button>`;
   document.getElementById('progressFill').style.width = '0%';
@@ -8065,6 +8085,7 @@ function renderOrthoHome(level){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
   currentBlock = null;
+  isHomeScreen = false;
   window.__reviewSession = false;
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromOrthoBtn" style="cursor:pointer;">← Retour aux blocs</button>`;
   document.getElementById('progressFill').style.width = '0%';
@@ -8308,6 +8329,7 @@ function renderConjugationHome(level){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
   currentBlock = null;
+  isHomeScreen = false;
   window.__reviewSession = false;
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromConjBtn" style="cursor:pointer;">← Retour aux blocs</button>`;
   document.getElementById('progressFill').style.width = '0%';
@@ -9027,6 +9049,7 @@ function renderTrainingCenter(){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
   currentBlock = null;
+  isHomeScreen = false;
   window.__reviewSession = false;
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromTCBtn" style="cursor:pointer;">← Retour aux blocs</button>`;
   document.getElementById('progressFill').style.width = '0%';
@@ -9146,6 +9169,7 @@ function renderCustomBlockManage(blockId){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
   currentBlock = null;
+  isHomeScreen = false;
   window.__customBlockId = null;
   const block = getCustomBlock(blockId);
   if(!block){ renderBlockSelect(); return; }
@@ -9664,6 +9688,7 @@ function renderCustomBlockBuilder(){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
   currentBlock = null;
+  isHomeScreen = false;
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromBuilderBtn" style="cursor:pointer;">← Retour aux blocs</button>`;
   document.getElementById('progressFill').style.width = '0%';
   document.getElementById('footerNote').textContent = '';
@@ -9857,6 +9882,7 @@ function renderWordListView(kind){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
   currentBlock = null;
+  isHomeScreen = false;
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromListBtn" style="cursor:pointer;">← Retour aux blocs</button>`;
   document.getElementById('progressFill').style.width = '0%';
   document.getElementById('footerNote').textContent = '';
@@ -9907,6 +9933,7 @@ function renderDictionaryView(){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
   currentBlock = null;
+  isHomeScreen = false;
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromDictBtn" style="cursor:pointer;">← Retour aux blocs</button>`;
   document.getElementById('progressFill').style.width = '0%';
   document.getElementById('footerNote').textContent = '';
@@ -9990,6 +10017,7 @@ function renderProfileView(){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
   currentBlock = null;
+  isHomeScreen = false;
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromProfileBtn" style="cursor:pointer;">← Retour</button>`;
   document.getElementById('progressFill').style.width = '0%';
   document.getElementById('footerNote').textContent = '';
@@ -10031,6 +10059,7 @@ function renderHistoryView(){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
   currentBlock = null;
+  isHomeScreen = false;
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromHistBtn" style="cursor:pointer;">← Retour aux blocs</button>`;
   document.getElementById('progressFill').style.width = '0%';
   document.getElementById('footerNote').textContent = '';
@@ -10150,6 +10179,7 @@ function renderBlockSelect(){
   if(typeof stopRecognition === 'function'){ stopRecognition(); }
   document.body.classList.remove('quiz-active');
   currentBlock = null;
+  isHomeScreen = true;
   document.getElementById('scoreboard').innerHTML = '';
   document.getElementById('progressFill').style.width = '0%';
   document.getElementById('footerNote').textContent = '';
@@ -12724,6 +12754,7 @@ function renderAuthScreen(mode){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
   currentBlock = null;
+  isHomeScreen = false;
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromAuthBtn" style="cursor:pointer;">← Retour</button>`;
   document.getElementById('progressFill').style.width = '0%';
   document.getElementById('footerNote').textContent = '';
@@ -13067,7 +13098,7 @@ async function autoSyncOnLoad(){
     const changed = await cloudPull();
     await cloudPush();
     setStatus(changed ? '☁️ Synchronisé — nouvelles données récupérées !' : '☁️ Synchronisé.', 'ok');
-    if(changed && currentBlock === null){ renderBlockSelect(); }
+    if(changed && isHomeScreen){ renderBlockSelect(); }
   }catch(e){
     setStatus('☁️ Synchro impossible : ' + (e && e.message ? e.message : 'erreur inconnue'), 'err');
     console.error('Sync error:', e);
@@ -13133,6 +13164,7 @@ function renderSyncView(){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
   currentBlock = null;
+  isHomeScreen = false;
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromSyncBtn" style="cursor:pointer;">← Retour aux blocs</button>`;
   document.getElementById('progressFill').style.width = '0%';
   document.getElementById('footerNote').textContent = '';
@@ -14765,6 +14797,7 @@ function renderLessonList(){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
   currentBlock = null;
+  isHomeScreen = false;
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromLessonListBtn" style="cursor:pointer;">← Retour</button>`;
   document.getElementById('progressFill').style.width = '0%';
   document.getElementById('footerNote').textContent = '';
@@ -14801,6 +14834,7 @@ function renderDailyLesson(){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
   currentBlock = null;
+  isHomeScreen = false;
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromLessonBtn" style="cursor:pointer;">← Liste des leçons</button>`;
   document.getElementById('progressFill').style.width = '0%';
   document.getElementById('footerNote').textContent = '';
@@ -14836,7 +14870,7 @@ function renderDailyLesson(){
           <button class="lab-chip" data-listen-mode="both">🇸🇦+🇫🇷 Les deux</button>
           ${lesson.fullAudioUrl ? `<button class="lab-chip" data-listen-mode="mp3">🎧 Original</button>` : ''}
         </div>
-        <button class="lab-btn" id="shadowGameBtn" style="margin-top:12px;">🎭 Jeu Shadow — répète de mémoire</button>
+        <button class="lab-btn" id="shadowGameBtn" style="margin-top:12px;">🎭 Jeu Shadow — dialogue + exercices, répète de mémoire</button>
       </div>
 
       <div id="lessonDialogueList"></div>
@@ -15033,12 +15067,12 @@ function openNotePopup(lesson, noteKey){
   if(!modal) return;
   modal.style.display = 'flex';
   modal.innerHTML = `
-    <div class="modal-box" style="max-width:420px;background:linear-gradient(160deg,#0B1226,#161B3A);border:1px solid rgba(255,255,255,0.14);">
+    <div class="modal-box" style="max-width:420px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-        <div style="font-weight:800;color:#22D3EE;font-size:16px;">📌 Note ${noteKey}</div>
+        <div style="font-weight:800;color:var(--purple);font-size:16px;">📌 Note ${noteKey}</div>
         <button class="chip" id="closeNoteModalBtn" style="cursor:pointer;">✕</button>
       </div>
-      <div style="font-size:14px;color:#EAF0FF;line-height:1.7;text-align:left;">${escapeHtml(lesson.notes[noteKey])}</div>
+      <div style="font-size:14px;color:var(--text);line-height:1.7;text-align:left;">${escapeHtml(lesson.notes[noteKey])}</div>
     </div>
   `;
   document.getElementById('closeNoteModalBtn').addEventListener('click', closeNotePopup);
@@ -15093,8 +15127,11 @@ let shadowRecoActive = false;
 function startShadowGame(lesson){
   clearQuestionTimer();
   document.body.classList.add('quiz-active');
-  const items = lesson.dialogue
-    .map(line => ({ ar: line.ar, clean: stripParens(line.fr), full: line.fr }))
+  const dialogueItems = lesson.dialogue.map(line => ({ ar: line.ar, fr: line.fr }));
+  const ex1Items = (lesson.exercise1 || []).map(ex => ({ ar: ex.ar, fr: ex.fr }));
+  const ex2Items = (lesson.exercise2 || []).map(ex => ({ ar: ex.ar, fr: ex.fr }));
+  const items = [...dialogueItems, ...ex1Items, ...ex2Items]
+    .map(it => ({ ar: it.ar, clean: stripParens(it.fr), full: it.fr }))
     .filter(it => it.clean && it.clean.length > 3);
   if(items.length === 0){ renderDailyLesson(); return; }
   shadowGameState = { lesson, queue: shuffle(items.slice()), idx:0, score:{correct:0,total:0}, startTime: Date.now() };
@@ -15410,6 +15447,7 @@ function renderDailyReading(){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
   currentBlock = null;
+  isHomeScreen = false;
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromReadingBtn" style="cursor:pointer;">← Retour</button>`;
   document.getElementById('progressFill').style.width = '0%';
   document.getElementById('footerNote').textContent = '';
@@ -15459,6 +15497,7 @@ function renderTimeBreakdown(){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
   currentBlock = null;
+  isHomeScreen = false;
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromTimeBtn" style="cursor:pointer;">← Retour</button>`;
   document.getElementById('progressFill').style.width = '0%';
   document.getElementById('footerNote').textContent = '';
@@ -15523,6 +15562,7 @@ function renderSoundTest(){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
   currentBlock = null;
+  isHomeScreen = false;
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromSoundTestBtn" style="cursor:pointer;">← Retour</button>`;
   document.getElementById('progressFill').style.width = '0%';
   document.getElementById('footerNote').textContent = '';
@@ -15563,6 +15603,7 @@ function renderWhatsNew(){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
   currentBlock = null;
+  isHomeScreen = false;
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromWhatsNewBtn" style="cursor:pointer;">← Retour</button>`;
   document.getElementById('progressFill').style.width = '0%';
   document.getElementById('footerNote').textContent = '';
@@ -15595,6 +15636,7 @@ function renderColorSettings(){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
   currentBlock = null;
+  isHomeScreen = false;
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromColorsBtn" style="cursor:pointer;">← Retour</button>`;
   document.getElementById('progressFill').style.width = '0%';
   document.getElementById('footerNote').textContent = '';
@@ -15738,6 +15780,7 @@ function renderAppSwitcher(){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
   currentBlock = null;
+  isHomeScreen = false;
   document.getElementById('scoreboard').innerHTML = '';
   document.getElementById('progressFill').style.width = '0%';
   document.getElementById('footerNote').textContent = '';
@@ -15781,6 +15824,7 @@ function renderQcmHome(){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
   currentBlock = null;
+  isHomeScreen = false;
   document.getElementById('scoreboard').innerHTML = '';
   document.getElementById('progressFill').style.width = '0%';
   document.getElementById('footerNote').textContent = '';
@@ -15866,6 +15910,7 @@ function renderQcmSetBuilder(existingSetId){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
   currentBlock = null;
+  isHomeScreen = false;
   const existing = existingSetId ? getQcmSet(existingSetId) : null;
   qcmDraft = existing
     ? { id: existing.id, title: existing.title, category: existing.category || '', questions: existing.questions.map(q => ({...q, options: q.options.slice(), correct: q.correct.slice()})), attempts: existing.attempts || [] }
