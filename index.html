@@ -15141,6 +15141,7 @@ function startShadowGame(lesson){
 function renderShadowCard(){
   const st = shadowGameState;
   if(!st || st.idx >= st.queue.length){ endShadowGame(); return; }
+  stopShadowRecognition(); // repart toujours sur une base propre, quelle que soit la façon dont on arrive ici
   const item = st.queue[st.idx];
   const hasExtra = item.full !== item.clean; // vrai s'il y a du contenu entre parenthèses
   document.getElementById('scoreboard').innerHTML = `<div class="chip">✅ <b>${st.score.correct}</b>/${st.score.total}</div><button class="chip" id="shadowExitBtn" style="cursor:pointer;">← Quitter</button>`;
@@ -15180,7 +15181,20 @@ function renderShadowCard(){
     });
   }
   const playIntro = () => {
+    // 🔒 Le micro doit être fermé pendant qu'on écoute la phrase — on stoppe toute reconnaissance
+    // encore active et on remet l'écran dans son état "avant écoute", pour éviter qu'un clic sur
+    // "Réécouter" pendant que le micro tournait déjà ne le laisse bloqué en silence.
+    stopShadowRecognition();
     window.speechSynthesis.cancel();
+    const micWrap = document.getElementById('shadowMicWrap');
+    if(micWrap){ micWrap.style.display = 'none'; }
+    const micBtn = document.getElementById('shadowMicBtn');
+    if(micBtn){ micBtn.classList.remove('listening'); }
+    const sentEl = document.getElementById('repeatSentence');
+    if(sentEl){ sentEl.classList.remove('hidden'); sentEl.textContent = parensShown ? item.full : item.clean; }
+    const instr = document.getElementById('shadowInstruction');
+    if(instr){ instr.textContent = '📖 Lis et écoute la phrase, elle va bientôt disparaître...'; }
+    if(toggleBtn){ toggleBtn.style.display = ''; }
     speak(item.clean, 'fr-FR', () => startShadowHiddenPhase(item));
   };
   document.getElementById('shadowReplayBtn').addEventListener('click', playIntro);
@@ -15298,7 +15312,12 @@ function startShadowRecognition(targetSentence){
   catch(e){ shadowRecoActive = false; if(micBtn){ micBtn.classList.remove('listening'); } showShadowManualValidation(targetSentence); }
 }
 function stopShadowRecognition(){
-  if(shadowRecognition){ try{ shadowRecognition.stop(); }catch(e){} }
+  if(shadowRecognition){
+    try{ shadowRecognition.onresult = null; shadowRecognition.onerror = null; shadowRecognition.onend = null; }catch(e){}
+    try{ shadowRecognition.stop(); }catch(e){}
+    try{ shadowRecognition.abort(); }catch(e){}
+  }
+  shadowRecognition = null;
   shadowRecoActive = false;
 }
 function showShadowRetryButton(targetSentence){
