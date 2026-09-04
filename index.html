@@ -2008,6 +2008,7 @@ let peekPlayToken = 0;
 function renderBlockWordsPeek(words, title, onBack){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
+  isHomeScreen = false;
   stopPeekPlay();
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromPeekBtn" style="cursor:pointer;">← Retour</button>`;
   document.getElementById('progressFill').style.width = '0%';
@@ -2158,25 +2159,41 @@ function playPeekCurrent(){
     document.getElementById('peekPlayerStage').textContent = emoji;
     document.getElementById('peekPlayerWord').textContent = text;
   };
+  const stillPlaying = () => myToken === peekPlayToken && peekPlayState && peekPlayState.playing;
+
+  const goToArabic = () => {
+    if(!stillPlaying()) return;
+    showStage('🕌', w.ar);
+    speak(w.ar, 'ar-SA', () => {
+      if(!stillPlaying()) return;
+      setTimeout(() => {
+        if(!stillPlaying()) return;
+        const sentence = w.ex.replace(/~/g, w.fr);
+        showStage('💬', sentence);
+        speak(sentence, 'fr-FR', () => {
+          if(!stillPlaying()) return;
+          setTimeout(() => { advancePeekPlay(); }, 1100);
+        });
+      }, 700);
+    });
+  };
+
   showStage('🇫🇷', w.fr);
   speak(w.fr, 'fr-FR', () => {
-    if(myToken !== peekPlayToken || !peekPlayState || !peekPlayState.playing) return;
+    if(!stillPlaying()) return;
     setTimeout(() => {
-      if(myToken !== peekPlayToken || !peekPlayState || !peekPlayState.playing) return;
-      showStage('🕌', w.ar);
-      speak(w.ar, 'ar-SA', () => {
-        if(myToken !== peekPlayToken || !peekPlayState || !peekPlayState.playing) return;
-        setTimeout(() => {
-          if(myToken !== peekPlayToken || !peekPlayState || !peekPlayState.playing) return;
-          const sentence = w.ex.replace(/~/g, w.fr);
-          showStage('💬', sentence);
-          speak(sentence, 'fr-FR', () => {
-            if(myToken !== peekPlayToken || !peekPlayState || !peekPlayState.playing) return;
-            setTimeout(() => { advancePeekPlay(); }, 700);
-          });
-        }, 450);
-      });
-    }, 450);
+      if(!stillPlaying()) return;
+      if(w.def){
+        // 📖 étape définition ajoutée — lue avant l'arabe, pour un cycle plus complet
+        showStage('📖', w.def);
+        speak(w.def, 'fr-FR', () => {
+          if(!stillPlaying()) return;
+          setTimeout(goToArabic, 700);
+        });
+      } else {
+        goToArabic();
+      }
+    }, 700);
   });
 }
 
@@ -5813,6 +5830,7 @@ function setupDeckFromWords(words){
   sessionHistory = [];
   attemptsByFr = {};
   chronoStreak = 0;
+  isHomeScreen = false; // 🏠 on quitte forcément l'accueil dès qu'une session de jeu démarre
   // 🔥 comboStreak/bestCombo NE se réinitialisent PLUS ici : la série continue entre les blocs et
   // les modes, elle ne tombe à zéro que sur une vraie erreur (voir bumpCombo).
   micContinuous = false;
@@ -7399,6 +7417,7 @@ function renderCodCoiIntro(){
 }
 let codCoiState = null;
 function startCodCoiQuiz(){
+  isHomeScreen = false;
   codCoiState = { queue: shuffle(CODCOI_EXAMPLES.slice()), idx:0, score:{correct:0,total:0}, startTime: Date.now() };
   renderCodCoiCard();
 }
@@ -7510,6 +7529,7 @@ function renderSentenceTypeIntro(){
 }
 let sentenceTypeState = null;
 function startSentenceTypeQuiz(){
+  isHomeScreen = false;
   sentenceTypeState = { queue: shuffle(SENTENCE_TYPE_EXAMPLES.slice()), idx:0, score:{correct:0,total:0}, startTime: Date.now() };
   renderSentenceTypeCard();
 }
@@ -7692,6 +7712,7 @@ function renderGenericRecoIntro(exerciseKey){
   document.getElementById('startRecoBtn').addEventListener('click', () => startGenericRecoQuiz(exerciseKey));
 }
 function startGenericRecoQuiz(exerciseKey){
+  isHomeScreen = false;
   const ex = RECOGNITION_EXERCISES[exerciseKey];
   genericRecoState = { key: exerciseKey, queue: shuffle(ex.examples.slice()), idx:0, score:{correct:0,total:0}, startTime: Date.now() };
   renderGenericRecoCard();
@@ -7998,6 +8019,7 @@ function renderAccordPractice(){
 
 let accordQuizState = null;
 function startAccordQuiz(){
+  isHomeScreen = false;
   accordQuizState = { queue: shuffle(ADJ_PAIRS.slice()), idx:0, score:{correct:0,total:0}, startTime: Date.now() };
   renderAccordQuizCard();
 }
@@ -8868,6 +8890,7 @@ function playTipsSequentially(i){
 
 let tenseChoiceState = null;
 function startTenseChoiceQuiz(level){
+  isHomeScreen = false;
   const pool = (!level || level === 'tous') ? TENSE_TRIGGERS.slice() : TENSE_TRIGGERS.filter(t => t.level === level);
   tenseChoiceState = { queue: shuffle(pool), idx:0, score:{correct:0,total:0}, startTime: Date.now() };
   renderTenseChoiceCard();
@@ -15936,17 +15959,38 @@ const DAILY_LESSON_57 = {
   titleFr: "La poésie à l'époque antéislamique",
   titleAr: 'الشِّعْرُ فِي عَصْرِ الْجَاهِلِيَّةِ',
   fullAudioUrl: null,
-  introFr: "⚠️ Cette leçon vient de commencer : seules les 4 premières phrases ont été transcrites, la suite manque. Après la prose, place à la poésie — le genre le plus adapté au génie de la langue arabe. Ce chapitre n'est pas une anthologie complète, mais donne, par petites touches, une idée de ce que fut la poésie arabe des origines.",
+  introFr: "Après la prose, place à la poésie — le genre le plus adapté au génie de la langue arabe. Ce chapitre n'est pas une anthologie complète, mais donne, par petites touches, une idée de ce que fut la poésie arabe des origines, jusqu'à la naissance des \"Mou'allaqat\", ces odes suspendues aux murs de la Kaaba.",
   dialogue: [
     { ar:'كَانَ الْأَدَبُ الْعَرَبِيُّ فِي تِلْكَ الْعُصُورِ الْغَابِرَةِ شَفَهِيًّا أَسَاسًا، مُقْتَصِرًا عَلَى الشِّعْرِ،', tr:"Kàna al-adabou al-'arabiyyou fi tilka al-'ousoùri al-ghàbirati chafahiyyan asàsan, mouqtasiran 'alà ach-chi'ri,", fr:"La littérature arabe était en ces temps-là essentiellement orale, limitée à la poésie,", note:1, audioUrl:null },
     { ar:'وَإِنْ تَرَكَ لَنَا بَعْضُ الْخُطَبَاءِ أَقْوَالًا تَمْزِجُ الْكَلَامَ الْمَنْثُورَ بِالْكَلَامِ الْمَنْظُومِ،', tr:"wa in taraka lanà ba'dou al-khoutabà'i aqwàlan tamzijou al-kalàma al-manthoùra bil-kalàmi al-manzoùmi,", fr:"même si certains orateurs nous ont laissé des propos mêlant prose et poésie,", note:2, audioUrl:null },
     { ar:'إِسْمُهَا "السَّجْعُ" تَشْبِيهًا بِهَدِيلِ الْحَمَامِ.', tr:"ismouhà \"as-saj'ou\", tachbìhan bi-hadìli al-hamàmi.", fr:"appelées « saj' » [ou prose rimée], évoquant le roucoulement des pigeons.", audioUrl:null },
     { ar:'رُبَّمَا تَأَثَّرَ الشِّعْرُ الْعَرَبِيُّ بِحُدَاءِ الْجِمَالِ وَإِيقَاعِ مَشْيِ الْبُعْرَانِ', tr:"Roubbamà ta'aththara ach-chi'rou al-'arabiyyou bi-hidà'i al-jimàli wa iqà'i machyi al-bou'ràni", fr:"Il est possible que la poésie arabe ait été influencée par le chant du chamelier et par la cadence de la marche des chameaux,", note:3, audioUrl:null },
+    { ar:'وَكَذَلِكَ بِالطَّبِيعَةِ الصَّحْرَاوِيَّةِ الْخَلَّابَةِ وَالْقَاسِيَةِ', tr:"wa ka-dhalika bi-at-tabi'ati as-sahràwiyyati al-khallàbati wa al-qàsiyati", fr:"et de même que par la nature fascinante et cruelle du désert (désertique)", audioUrl:null },
+    { ar:'الَّتِي أَثَّرَتْ هِيَ الْأُخْرَى فِي تَفْجِيرِ شَاعِرِيَّةِ الْعَرَبِ مِنْ خِلَالِ لُغَةٍ غَزِيرَةٍ عَمِيقَةٍ.', tr:"allati aththarat hiya al-oukhrà fi tafjìri chà'iriyyati al-'Arabi min khilàli loughatin ghazìratin 'amìqatin.", fr:"qui a contribué (elle aussi) à faire jaillir le sens poétique des Arabes par le biais d'une langue riche et profonde.", audioUrl:null },
+    { ar:'غَالِبًا مَا كَانَ الْبَدْوُ، صِغَارُهُمْ وَكِبَارُهُمْ، يَتَحَلَّقُونَ لَيْلًا فِي "أَسْمَارٍ"،', tr:"Ghàliban mà kàna al-badwou, sighàrouhoum wa kibàrouhoum, yatahallaqoùna laylan fi \"asmàrin\",", fr:"Souvent les bédouins, petits et grands, faisaient cercle la nuit pendant des \"veillées\",", note:5, audioUrl:null },
+    { ar:'حَوْلَ نِيرَانٍ بِقُرْبِ الْخِيَامِ لِإِنْشَادِ أَبْيَاتٍ وَالِاسْتِمَاعِ إِلَيْهَا.', tr:"haoula nìrànin bi-qourbi al-khiyàmi li-inchàdi abyàtin wa al-istimà'i ilayhà.", fr:"autour de feux [allumés] près des tentes pour déclamer des vers et les écouter.", audioUrl:null },
+    { ar:'وَكَانَ لِكُلِّ شَاعِرٍ "رَاوٍ" يَعْمَلُ عَلَى نَشْرِ أَشْعَارِهِ عَبْرَ الْجَزِيرَةِ كُلِّهَا.', tr:"Wa kàna li-koulli chà'irin \"ràwin\" ya'malou 'alà nachri ach'àrihi 'abra al-jazìrati koullihà.", fr:"Chaque poète avait un \"transmetteur\" qui s'efforçait de diffuser ses poésies à travers toute la péninsule.", audioUrl:null },
+    { ar:'فِي كُلِّ سَنَةٍ، كَانَ يُنَظِّمُ الْعَرَبُ مَا يُشْبِهُ "مَعَارِضَ شِعْرِيَّةً" وَخَاصَّةً فِي عُكَاظٍ.', tr:"Fì koulli sanatin, kàna younazzimou al-'Arabou mà youchbihou \"ma'àrida chi'riyyatan\" wa khàssatan fi 'Oukàz.", fr:"Chaque année, les Arabes organisaient ce qui ressemblait à des foires poétiques et cela notamment à Oukaz,", note:6, audioUrl:null },
+    { ar:'الْوَاقِعَةِ فِي جَنُوبِ شَرْقِيِّ مَدِينَةِ مَكَّةَ حَيْثُ كَانَتْ تَجْرِي مَعَارِكُ كَلَامِيَّةٌ عَنْ طَرِيقِ إِنْشَادِ قَصَائِدَ أَمَامَ لِجَانِ تَحْكِيمٍ', tr:"al-wàqi'ati fi janoùbi charqi madìnati Makkata haythou kànat tajrì ma'àrikou kalàmiyyatoun 'an tariqi inchàdi qasà'ida amàmà lijàni tahkìmin", fr:"située au sud-est de La Mecque, où se déroulaient des joutes oratoires par le biais de la déclamation d'odes devant des jurys,", audioUrl:null },
+    { ar:'تَضُمُّ نُخْبَةَ الشُّعَرَاءِ، مِنْهُمُ النَّابِغَةُ الذُّبْيَانِيُّ الَّذِي صَارَ إِسْمُهُ مُرَادِفًا لِـ "عَبْقَرِيَّةٍ".', tr:"Tadoummou noukhbata ach-chou'arà'i, minhoum an-Nàbigha adh-Dhoubyàni alladhì sàra ismouhou mouràdifan li-\"'abqariyyatin\".", fr:"comprenant l'élite des poètes ; parmi eux, Nabigha adh-Dhoubyani dont le nom est devenu synonyme de talent (génie).", audioUrl:null },
+    { ar:'كَانَتْ خَيْرُ الْقَصَائِدِ مَحْفُوظَةً فِي ذَاكِرَةِ النَّاسِ إِلَى أَنْ كُتِبَتْ بِحُرُوفٍ ذَهَبِيَّةٍ – مِنْ هُنَا إِسْمُ "الْـمُذَهَّبَاتِ" –', tr:"Kànat khayrou al-qasà'idi mahfoùzatan fi dhàkirati an-nàsi ilà an koutibat bi-houroùfin dhahabiyyatin – min hounà ismou \"al-moudhahhabàti\" –", fr:"Les meilleures odes étaient apprises par cœur dans la mémoire des gens, jusqu'au moment où elles ont été écrites en lettres d'or – d'où le nom de \"les dorées\" –", audioUrl:null },
+    { ar:'عَلَى كَتَّانٍ قِبْطِيٍّ وَعُلِّقَتْ – مِنْ هُنَا إِسْمُ "الْمُعَلَّقَاتِ" – عَلَى جُدْرَانِ الْكَعْبَةِ', tr:"'alà kattànin qibtiyyin wa 'oulliqat – min hounà ismou \"al-mou'allaqàti\" – 'alà joudràni al-Ka'bati", fr:"sur du lin copte et suspendues – d'où leur nom de \"les suspendues\" – sur les murs de la Ka'aba", audioUrl:null },
+    { ar:'الَّتِي كَانَتْ مَعْبَدًا لِلْوَثَنِيِّينَ فِي مَكَّةَ آنَذَاكَ.', tr:"allatì kànat ma'badan lil-wathaniyyìna fi Makkata ànadhàka.", fr:"qui, à l'époque, était un sanctuaire païen à La Mecque.", note:7, audioUrl:null },
+    { ar:'أَجْمَعَ النَّاسُ، عَادَةً، عَلَى أَنَّهَا سَبْعُ قَصَائِدَ شَكَّلَتِ النَّمُوذَجَ الْأَسَاسِيَّ لِلنَّظْمِ الْعَرَبِيِّ طَوَالَ الْفَتَرَاتِ اللَّاحِقَةِ؛', tr:"Ajma'a an-nàsou, 'àdatan, 'alà annahà sab'ou qasà'ida chakkalat-i an-namoùdhaja al-asàsiyya li-an-nazmi al-'arabiyyi tiwàla al-fatarati al-làhiqati ;", fr:"Les gens sont d'habitude unanimes à dire qu'elles sont au nombre de sept et qu'elles ont constitué l'archétype de la poésie arabe tout au long des périodes ultérieures ;", audioUrl:null },
+    { ar:'فَإِنَّهَا تَعْكِسُ بِصِدْقٍ وَأَصَالَةٍ رُوحَ الْعَرَبِ الْعَائِشِينَ فِي تِلْكَ الْحِقَبِ.', tr:"fa'innahà ta'kisou bi-sidqin wa asàlatin roùha al-'Arabi al-'à'ichìna fi tilka al-hiqabi.", fr:"en effet, elles reflètent fidèlement et de manière authentique l'âme des Arabes qui vivaient à cette époque-là.", audioUrl:null },
+    { ar:'لَمَّا كَانَ جَمِيعُ أُولَئِكَ الشُّعَرَاءِ يَنْطِقُونَ بِاللَّهَجَاتِ الْخَاصَّةِ بِقَبَائِلِهِمْ،', tr:"Lammà kàna jamì'ou oulà'ika ach-chou'arà'i yantiqoùna bil-lahajàti al-khàssati bi-qabà'ilihim,", fr:"Étant donné que tous ces poètes s'exprimaient dans des dialectes propres à leurs tribus,", audioUrl:null },
+    { ar:'فَلِكَيْ يَفْهَمَهُمُ الْجَمِيعُ وَجَدُوا أَنْفُسَهُمْ مُضْطَرِّينَ إِلَى اِسْتِعْمَالِ لُغَةٍ وَاحِدَةٍ،', tr:"fa-likay yafhamahoum-ou al-jamì'ou wajadoù anfousahoum moudtarrìna ilà isti'màli loughatin wàhidatin,", fr:"pour être compris de tous, ils se sont vus contraints d'utiliser une seule et même langue,", audioUrl:null },
+    { ar:'وَهِيَ لُغَةُ الْحِجَازِ الَّتِي كَانَتْ لُغَةَ قَبِيلَةِ قُرَيْشٍ كَمَا أَنَّهَا اللُّغَةُ الَّتِي أُنْزِلَ بِهَا الْقُرْآنُ،', tr:"wa h(i)ya loughatou al-Hijàzi allatì kànat loughata qabìlati Qouraych kamà annahà al-loughatou allatì ounzila bihà al-Qour'ànou,", fr:"la langue du Hedjaz, qui était la langue de la tribu des Qoraïches, de même que ce fut la langue dans laquelle fut révélé le Coran,", audioUrl:null },
+    { ar:'هَذَا اللِّسَانُ الْـمُبِينُ الَّذِي تَحَوَّلَ، مَعَ الزَّمَنِ، إِلَى اللُّغَةِ الْعَرَبِيَّةِ الَّتِي نَعْرِفُهَا الْيَوْمَ،', tr:"hadhà al-lisànou al-moubìnou alladhì tahawwala, ma'a az-zamàni, ilà al-loughati al-'arabiyyati allatì na'rifouhà al-yaouma,", fr:"cette langue claire qui est devenue, avec le temps, la langue arabe que nous connaissons aujourd'hui,", audioUrl:null },
+    { ar:'الْـمَفْهُومَةِ وَالْمُسْتَخْدَمَةِ مِنَ الْـمَغْرِبِ الْأَقْصَى إِلَى سَلْطَنَةِ عُمَانَ.', tr:"al-mafhoùmati wa al-moustakhdamati min-a al-Maghribi al-Aqsà ilà saltanati 'Oumàn.", fr:"comprise et utilisée du Maroc jusqu'au Sultanat d'Oman.", audioUrl:null },
   ],
   notes: {
-    1: "① L'adjectif chafahiyy (oral, aussi chafawiyy), dérive de chafa(t), chifàh (lèvre — « ce qui sort des lèvres »). Expressions : bint ach-chafati (la parole, « la fille de la lèvre ») ; khafìf ach-chafati (discret, « léger de bouche »).",
+    1: "① L'adjectif chafahiyy (oral, aussi chafawiyy), dérive de chafa(t), chifàh (lèvre — « ce qui sort des lèvres »). Expressions : bint ach-chafati (la parole) ; khafìf ach-chafati (discret, « léger de bouche »).",
     2: "② al-kalàma al-manthoùra bil-kalàmi al-manzoùmi (la prose et la poésie), litt. « le langage dispersé avec le langage ordonné » ; simplement : an-nathrou wa an-nazmou.",
     3: "③ ta'aththara (être influencé, Ve forme, racine athar, trace) ; réfléchie de la IIe forme aththara, you'aththirou fi (laisser une trace sur, marquer, influencer). Le mot ìqà' (rythme) est le masdar de la IVe forme aouqa'a, youqi'ou (faire tomber) — signifie temps d'arrêt dans un chant, d'où cadence, rythme.",
+    5: "⑤ Le verbe yatahallaqou est l'inaccompli du verbe de Ve forme tahallaqa (faire cercle), formé à partir de halqa(t), pl. -àt ou halaq (cercle, anneau, boucle, maillon de chaîne).",
+    6: "⑥ ma'àrida (des foires), pluriel diptote de ma'ridoun, est « le lieu où l'on expose » d'où exposition, salon, foire : du verbe 'arada, ya'ridou (exposer).",
+    7: "⑦ lil-wathaniyyìna (pour les païens, les idolâtres) : wathaniyyoùna est le pluriel de wathaniyyoun, formé sur le mot wathan, aouthàn (idole).",
   },
   vocabBox: {
     title: 'la poésie et sa transmission orale',
@@ -15955,15 +15999,670 @@ const DAILY_LESSON_57 = {
       { ar:'شَفَهِيٌّ', tr:"chafahiyy", fr:'Oral' },
       { ar:'سَجْعٌ', tr:"saj'", fr:'Prose rimée' },
       { ar:'إِيقَاعٌ', tr:"ìqà'", fr:'Rythme, cadence' },
+      { ar:'رَاوٍ', tr:"ràwin", fr:'Transmetteur (de poésie)' },
+      { ar:'مُعَلَّقَاتٌ', tr:"mou'allaqàt", fr:'Les Mou\u02bfallaqat (odes suspendues)' },
+    ],
+  },
+  exercise1: [
+    { ar:'فِي الْعُصُورِ الْغَابِرَةِ وَطَوَالَ الْفَتَرَاتِ اللَّاحِقَةِ، وُجِدَتْ أَعْمَالٌ تَمْزُجُ النَّثْرَ بِالنَّظْمِ.', tr:"", fr:"Dans les premiers temps et tout au long des périodes ultérieures, ont existé des œuvres mêlant prose et poésie." },
+    { ar:'كَانَ الرُّوَاةُ يُنْشِدُونَ قَصَائِدَ شُعَرَاءِ حِقْبَتِهِمُ الْكِبَارِ حَتَّى نَشَرُوهَا، عَنْ ذَلِكَ الطَّرِيقِ، عَبْرَ جَزِيرَةِ الْعَرَبِ كُلِّهَا.', tr:"", fr:"Les transmetteurs déclamaient les odes des grands poètes de leur époque au point qu'ils les diffusèrent ainsi à travers toute la péninsule arabique." },
+    { ar:'فِي عُكَاظٍ، كَانَتْ تُنَظَّمُ مَعَارِضُ شِعْرِيَّةٌ سَنَوِيَّةٌ يَتَسَابَقُ فِيهَا أَفْضَلُ الشُّعَرَاءِ.', tr:"", fr:"À Oukaz étaient organisées des foires poétiques annuelles où concouraient les meilleurs poètes." },
+    { ar:'قَبْلَ أَنْ تَكُونَ الْقَصَائِدُ مَكْتُوبَةً عَلَى قُمَاشٍ مِنَ الْكَتَّانِ، كَانَتْ مَحْفُوظَةً فِي ذَاكِرَةِ الرُّوَاةِ وَعُشَّاقِ الشِّعْرِ.', tr:"", fr:"Avant d'être écrites sur le tissu de lin, les odes avaient été apprises par cœur par les \"transmetteurs\" et les amateurs de la poésie." },
+    { ar:'وَجَدَ أَعْضَاءُ لَجْنَةِ التَّحْكِيمِ أَنْفُسَهُمْ مُضْطَرِّينَ إِلَى فَرْضِ لُغَةٍ وَاحِدَةٍ عَلَى كَافَّةِ الشُّعَرَاءِ الْقَادِمِينَ إِلَى هُنَاكَ.', tr:"", fr:"Les membres du jury se sont vus contraints d'imposer une seule et même langue à tous les poètes venant là." },
+  ],
+  exercise2: [
+    { fr:"Il est certain que le chant du chamelier a influencé l'éclosion de la poésie arabe.", ar:'مِنَ الْمُؤَكَّدِ أَنَّ حِدَاءَ الْجِمَالِ قَدْ أَثَّرَ فِي تَفْجِيرِ الشِّعْرِ الْعَرَبِيِّ.', tr:"" },
+    { fr:"Les bédouins avaient l'habitude de déclamer des vers au cours de veillées autour des feux de leurs campements.", ar:'كَانَ مِنْ عَادَاتِ الْبَدْوِ إِنْشَادُ أَشْعَارٍ أَثْنَاءَ أَسْمَارٍ حَوْلَ نِيرَانِ مَنَازِلِهِمْ.', tr:"" },
+    { fr:"La richesse de la langue arabe et sa profondeur ont favorisé le jaillissement du sens poétique chez les Arabes.", ar:'أَثَّرَتْ غَزَارَةُ اللُّغَةِ الْعَرَبِيَّةِ وَعُمْقُهَا فِي تَفْجِيرِ الشَّاعِرِيَّةِ لَدَى الْعَرَبِ.', tr:"" },
+    { fr:"L'élite des poètes se rassemblait à Oukaz où ils rivalisaient de talent.", ar:'كَانَتْ نُخْبَةُ الشُّعَرَاءِ تَجَمَّعُ فِي عُكَاظٍ حَيْثُ كَانُوا يَتَنَافَسُونَ نُبُوغًا.', tr:"" },
+    { fr:"Je te prie de me réciter un fragment de ces odes appelées \"les suspendues\" ou \"les dorées\".", ar:'أَرْجُو مِنْكَ إِنْشَادِيَ شَيْئًا مِنْ تِلْكَ الْقَصَائِدِ الْمَعْرُوفَةِ بِإِسْمِ "الْمُعَلَّقَاتِ" أَوِ "الْمُذَهَّبَاتِ".', tr:"" },
+  ],
+};
+
+
+const DAILY_LESSON_58 = {
+  num: 58,
+  titleFr: "Les Mou'allaqat",
+  titleAr: 'الْمُعَلَّقَاتُ',
+  fullAudioUrl: null,
+  introFr: "Les \"Mou'allaqat\" sont l'œuvre de sept auteurs, que nous présenterons successivement avec un extrait de l'ode qu'ils ont laissée à la postérité. Tous ces poèmes sont monorimes.",
+  dialogue: [
+    { ar:'إِمْرُؤُ الْقَيْسِ: عَاشَ عَيْشَةَ الْأُمَرَاءِ فِي شَبَابِهِ،', tr:"Imrou'ou al-Qays: 'àcha 'aychata al-oumarà'i fi chabàbihi,", fr:"Imrou'ou al-Qays : Il a vécu la vie des princes dans sa jeunesse,", audioUrl:null },
+    { ar:'مُتَرَدِّدًا بَيْنَ الْغَوَانِي الْحِسَانِ، وَشُرْبِ الْخَمْرِ مَعَ النِّدْمَانِ وَالصَّيْدِ وَالْمَيْسِرِ.', tr:"moutaraddidan bayna al-ghawànì al-hisàni, wa chourbi al-khamri ma'a an-nadmàni wa as-saydi wa al-maysiri.", fr:"se partageant entre les belles, la boisson avec les commensaux, la chasse et le jeu de hasard.", note:1, audioUrl:null },
+    { ar:'"وَقَدْ أَغْتَدِي وَالطَّيْرُ فِي وَكُنَاتِهَا – بِمُنْجَرِدٍ قَيْدِ الْأَوَابِدِ هَيْكَلٍ،"', tr:"\"Wa qad aghtadì wa at-tayrou fi woukounàtihà // bi-mounjaridin qaydi al-awàbidi haykali.\"", fr:"\"Parfois je pars de bon matin, alors que les oiseaux sont dans leurs nids, // monté sur un cheval à poil ras puissant, fondant sur les bêtes sauvages,", note:3, audioUrl:null },
+    { ar:'مُكِرٍّ مُفِرٍّ مُقْبِلٍ مُدْبِرٍ مَعًا – كَجُلْمُودِ صَخْرٍ حَطَّهُ السَّيْلُ مِنْ عَلٍ."', tr:"mikarrin mifarrin mouqbilin moudbirin ma'an // ka-joulmoùdi sakhrin hattahou as-saylou min 'ali.\"", fr:"attaquant, s'enfuyant, se jetant en avant et tournant bride à la fois, // tel un rocher que précipite d'en haut un torrent.\"", audioUrl:null },
+    { ar:'"هَصَرْتُ بِفَوْدَيْ رَأْسِهَا فَتَمَايَلَتْ – عَلَيَّ هَضِيمَ الْكَشْحِ رَيَّا الْمُخَلْخَلِ."', tr:"\"Hasartou bi-faouday ra'sihà fa-tamàyalat // 'alayya hadìma al-kachhi rayyà al-moukhalkhali.\"", fr:"\"Je tirai à moi ses deux nattes et elle inclina sur moi // son corps à la taille svelte et aux fines chevilles cerclées d'un anneau.\"", audioUrl:null },
+    { ar:'طَرَفَةُ: الْفَتَى الْمُتَمَرِّدُ الَّذِي أَفْنَى عُمْرَهُ فِي الْمَلَذَّاتِ فَانْتَقَلَ مِنْ مَكَانٍ إِلَى مَكَانٍ،', tr:"Tarafa: al-fatà al-moutamarridou alladhì afnà 'oumrahou fi al-maladhdhàti fa-(i)ntaqala min makànin ilà makànin,", fr:"Tarafa : Jeune homme révolté qui a consumé sa vie dans les plaisirs, errant de lieu en lieu,", note:4, audioUrl:null },
+    { ar:'بَعِيدًا عَنْ أَهْلِهِ حَتَّى قُتِلَ وَهُوَ فِي الْبَحْرَيْنِ فِي عَنْفُوَانِ شَبَابِهِ.', tr:"ba'ìdan 'an ahlihi hattà qoutila wa h(ou)wa fi al-Bahrayn fi 'ounfouwàni chabàbihi.", fr:"loin des siens, jusqu'à ce qu'il soit tué au Bahreïn dans la fleur de sa jeunesse.", audioUrl:null },
+    { ar:'"لَعَمْرُكَ إِنَّ الْمَوْتَ مَا أَخْطَأَ الْفَتَى – لَكَالطَّوَلِ الْمُرْخَى وَثِنْيَاهُ بِالْيَدِ."', tr:"\"La-'amrouka inna al-maouta mà akhta'a al-fatà // la-ka-at-tawali al-mourkhà wa thinyàhou bil-yadi.\"", fr:"\"Par ma foi ! Avant qu'elle ne le frappe, la mort tient l'homme comme au bout d'une laisse !\"", audioUrl:null },
+    { ar:'الْحَارِثُ بْنُ حِلِّزَةَ: كَانَ رَمْزًا لِحَصَافَةِ وَحِكْمَةِ الشُّيُوخِ وَتَأَمُّلٍ فِي صُرُوفِ الدَّهْرِ وَتَجَارِبِ الْحَيَاةِ الدُّنْيَا.', tr:"Al-Hàrith ben Hilliza: kàna ramzan li-hasàfati wa hikmati ach-chouyoùkhi wa ta'ammala fi souroùfi ad-dahri wa tajàribi al-hayàti ad-dounyà.", fr:"Al-Harith ben Hilliza : C'était un symbole de la perspicacité et de la sagesse des vieillards ; il a médité sur les vicissitudes du Temps et les expériences de la vie d'ici-bas.", audioUrl:null },
+    { ar:'"أَسَدٌ فِي اللِّقَاءِ، وَرْدٌ هَمُوسٌ – وَرَبِيعٌ إِنْ شَمَّرَتْ غَبْرَاءُ."', tr:"\"Asadoun fi al-liqà'i, wardoun hamoùsoun // wa rabi'oun in chammarat ghabrà'ou.\"", fr:"\"Lion intrépide dans la bataille, fauve avançant à pas feutrés, // c'est un printemps généreux si l'année s'annonce accablante.\"", audioUrl:null },
+    { ar:'عَمْرُو بْنُ كُلْثُومٍ: كَانَ رَمْزًا لِلْحَمَاسَةِ وَنَخْوَةِ الْعَرَبِ الْمُفْتَخِرِينَ بِالْمَآثِرِ وَالْأَنْسَابِ.', tr:"'Amr ben Koulthoùm: kàna ramzan li-hamàsati wa nakhwati al-'Arabi al-mouftakhirìna bil-ma'àthiri wa al-ansàbi.", fr:"'Amr ben Koulthoum : C'était un symbole de la fougue et de l'orgueil des Arabes, fiers de leurs hauts faits et de leurs généalogies.", audioUrl:null },
+    { ar:'"بِأَنَّا نُورِدُ الرَّايَاتِ بِيضًا – وَنُصْدِرُهُنَّ حُمْرًا قَدْ رَوَيْنَ."', tr:"\"Bi-annà noùridou ar-ràyàti bìdan // wa nousdirouhounna houmran qad rawayna.\"", fr:"\"Quand nos étendards entrent blancs dans la mêlée, // c'est rouges qu'ils en sortent, gorgés du sang des preux.\"", note:5, audioUrl:null },
+    { ar:'"كَأَنَّ جَمَاجِمَ الْأَبْطَالِ فِيهَا – وَسُوقٌ بِالْأَمَاعِزِ يَرْتَمِينَ."', tr:"\"Ka'anna jamàjima al-abtàli fihà // wousoùqoun bil-amà'izi yartamìna.\"", fr:"\"Comme se déversent des charges de chameaux sur le sol, // les têtes des guerriers tombent dans la poussière en bondissant sur les pierres.\"", audioUrl:null },
+    { ar:'عَنْتَرَةُ: الْبَطَلُ الْهَجِينُ الَّذِي أَحَبَّ بِعِفَّةٍ وَوَفَاءٍ فَدَافَعَ عَنْ عِرْضِ قَبِيلَتِهِ بِبَسَالَةٍ.', tr:"'Antara: al-batalou al-hajìnou alladhì ahabba bi-'iffatin wa wafà'in fa-dàfa'a 'an 'irdi qabìlatihi bi-basàlatin.", fr:"Antara, le héros métis qui a aimé avec chasteté et fidélité et a défendu l'honneur de sa tribu avec bravoure.", audioUrl:null },
+    { ar:'"هَلَّا سَأَلْتِ الْخَيْلَ يَا إِبْنَةَ مَالِكٍ – إِنْ كُنْتِ جَاهِلَةً بِمَا لَمْ تَعْلَمِ."', tr:"\"Hal-là sa'alti al-khayla yà (i)bnata Màlikin // in kounti jàhilatan bimà lam ta'lami.\"", fr:"\"Que n'interroges-tu les guerriers, fille de Malik, // pour connaître, si tu l'ignores, ma conduite au combat ?\"", audioUrl:null },
+    { ar:'... يُخْبِرُكِ مَنْ شَهِدَ الْوَقِيعَةَ أَنَّنِي – أَغْشَى الْوَغَى وَأَعِفُّ عِنْدَ الْمَغْنَمِ.', tr:"... Youkhbirki man chahida al-waqì'ata annanì // aghchà al-waghà wa a'iffou 'inda al-maghnami.", fr:"... Quiconque a été de la bataille pourra te dire // avec quelle bravoure je me jette dans la mêlée, ne me réservant nul butin.", audioUrl:null },
+    { ar:'زُهَيْرٌ: كَانَ يَكْرَهُ الْحَرْبَ بَعْدَ أَنْ جَرَّبَهَا مِرَارًا وَلَمْ يَدَّخِرْ وُسْعًا مِنْ أَجْلِ الْوِئَامِ بَيْنَ الْقَبَائِلِ.', tr:"Zouhayr: kàna yakrahou al-harba ba'da an jarrabahà miràran wa lam yaddakhir was'an min ajli al-wi'àmi bayna al-qabà'ili.", fr:"Zouhaïr : il haïssait la guerre, après qu'il l'eut expérimentée fréquemment et il n'a épargné aucun effort pour la concorde entre les tribus.", audioUrl:null },
+    { ar:'"سَئِمْتُ تَكَالِيفَ الْحَيَاةِ وَمَنْ يَعِشْ – ثَمَانِينَ حَوْلًا لَا أَبَ لَكَ يَسْأَمِ !"', tr:"\"Sa'imtou takàlifa al-hayàti wa man ya'ich(ou) // thamànina haoulan là aba laka yas'am(i) !\"", fr:"\"Je suis las des tourments de la vie. // Après quatre-vingts ans, comment, diable, ne le serait-on pas ?\"", audioUrl:null },
+    { ar:'لَبِيدٌ: كَانَ تَجْسِيدًا لِدَيْمُومَةِ الْبَدَاوَةِ وَعَظَمَتِهَا', tr:"Labìd: kàna tajsìdan li-daymoùmati al-badàwati wa 'azamatihà.", fr:"Labid : il fut l'incarnation de la permanence du monde nomade et de sa grandeur,", audioUrl:null },
+    { ar:'مَعَ وَصْفِهِ الدَّقِيقِ لِمَنَاظِرِ الصَّحْرَاءِ الشَّاسِعَةِ وَحَيَاةِ الْعَرَبِ مِنْ أَهْلِ الْوَبَرِ وَالْمَدَرِ.', tr:"ma'a wasfihi ad-daqìqi li-manàziri as-sahrà'i ach-chàsi'ati wa hayàti al-'Arabi min ahli al-wabari wa al-madari.", fr:"avec sa description minutieuse des paysages du désert immense et de la vie des Arabes nomades et sédentaires.", note:6, audioUrl:null },
+    { ar:'"بِصَبُوحٍ صَافِيَةٍ وَجَذْبِ كَرِينَةٍ – بِمُوَتَّرٍ تَعْلُوهُ إِبْهَامُهَا."', tr:"\"Bi-saboùhi sàfiyatin wa jadhbi karìnatin // bi-mouwattarin ta'àlouhou ibhàmouhà.\"", fr:"\"Que de fois, au point du jour, j'ai bu d'un vin pur, // écoutant les accents d'une chanteuse qui pinçait son luth.\"", audioUrl:null },
+    { ar:'بَاكَرْتُ حَاجَتَهَا الدَّجَاجَةَ بِسُحْرَةٍ – لِأُعَلَّ مِنْهَا حِينَ هَبَّ نِيَامُهَا.', tr:"bàkartou hàjatahà ad-dajàja bi-souhratin // li-ou'alla minhà hìna habba niyàmouhà.\"", fr:"Coupe sur coupe, je m'en abreuvai, avant que ne chante le coq et quand s'éveillent les dormeurs.\"", note:7, audioUrl:null },
+  ],
+  notes: {
+    1: "① al-ghawànì al-hisàni (les belles) ; le singulier est ghàniya(t). Hisàn est le pluriel masculin de hasan, mais peut s'employer — surtout en poésie — pour le féminin pluriel : ici hisàn équivaut à hasanàt. ma'a an-nadmàni (avec les commensaux) est un collectif ; commensal se dit nadìm, pl. noudamà'.",
+    3: "③ qaydi al-awàbidi (fondant sur les bêtes sauvages), littéralement « un lien / une entrave quant aux bêtes sauvages » tellement il était rapide et capable de les rattraper en un éclair.",
+    4: "④ al-fatà (le jeune homme, l'homme) et fatan lorsque ce mot est indéterminé, son pluriel étant fityàn. Au féminin : fatà(t) / fatayàt (jeune fille).",
+    5: "⑤ houmr (rouges) est le pluriel de l'adjectif masculin ahmar, de même que bìd est le pluriel de abyad (blanc). On aurait attendu un féminin singulier (hamrà', baydà'), puisque ces adjectifs se rapportent à des choses : il s'agit d'une licence poétique.",
+    6: "⑥ min ahli al-wabari wa al-madari (les gens du poil de chameau et de l'argile), c'est-à-dire nomades et sédentaires. On oppose encore al-badwou (les bédouins) et ahlou al-hadari (les citadins).",
+    7: "⑦ bàkartou hàjatahà ad-dajàja bi-souhratin : construction un peu difficile — hàjatahà est un complément de manière au cas direct (« en besoin d'elle », c'est-à-dire du vin), et dajàja est le complément d'objet direct du verbe bàkara, youbàkirou (rare IIIe forme, indiquant ici une rivalité avec le coq — d'où l'idée de devancer). Retenez boukratan (au petit matin).",
+  },
+  vocabBox: {
+    title: 'les sept poètes des Mou\u02bfallaqat',
+    items: [
+      { ar:'إِمْرُؤُ الْقَيْسِ', tr:"Imrou'ou al-Qays", fr:'Imrou\u02bfou al-Qays' },
+      { ar:'عَنْتَرَةُ', tr:"'Antara", fr:'Antara (le héros métis)' },
+      { ar:'زُهَيْرٌ', tr:"Zouhayr", fr:'Zouhaïr (poète de la concorde)' },
+      { ar:'فَتًى', tr:"fatan", fr:'Jeune homme' },
+    ],
+  },
+  exercise1: [
+    { ar:'تَرَكَ هَذَا الشَّاعِرُ أَهْلَهُ وَهُوَ شَابٌّ فَتَرَدَّدَ بَيْنَ قُصُورِ الْأُمَرَاءِ حَيْثُ عَاشَ فِي الْمَلَذَّاتِ.', tr:"", fr:"Jeune homme, ce poète a quitté sa famille et fréquenté les palais des princes où il a vécu une vie de plaisirs." },
+    { ar:'كَانَتْ حَيَاةُ بَعْضِ الشُّعَرَاءِ حَيَاةَ مُغَامَرَاتٍ فَقُتِلُوا فِي عَنْفُوَانِ شَبَابِهِمْ.', tr:"", fr:"La vie de certains poètes fut une vie d'aventures et ils furent tués alors qu'ils étaient encore dans la fleur de l'âge." },
+    { ar:'فِي هَذِهِ الْأَبْيَاتِ يَتَأَمَّلُ الْمَرْءُ فِي صُرُوفِ الدَّهْرِ وَفِيهَا تَتَبَيَّنُ حِكْمَةُ الشُّيُوخِ.', tr:"", fr:"Dans ces vers, on médite sur les vicissitudes du temps et il s'y exprime la sagesse des vieillards." },
+    { ar:'عِشْنَا مُتَرَدِّدِينَ بَيْنَ حُبِّ الْغَوَانِي الْحِسَانِ وَالشُّرْبِ مَعَ النِّدْمَانِ، وَكَانَتْ عِيشَةً رَاضِيَةً.', tr:"", fr:"Nous avons partagé notre vie entre l'amour des belles et la boisson avec les commensaux, et nous avons bien vécu." },
+    { ar:'مِنْ خِلَالِ هَذِهِ الْقَصَائِدِ تَظْهَرُ دَيْمُومَةُ الْبَدَاوَةِ، مَعَ وَصْفٍ رَائِعٍ لِلْمَنَاظِرِ الصَّحْرَاوِيَّةِ.', tr:"", fr:"À travers ces odes se dessine la permanence du monde nomade, avec une description magnifique des paysages du désert." },
+  ],
+  exercise2: [
+    { fr:"Ce héros, qui a défendu avec bravoure sa tribu, a mérité sa place parmi les nobles.", ar:'هَذَا الْبَطَلُ الَّذِي دَافَعَ عَنْ قَبِيلَتِهِ بِبَسَالَةٍ إِسْتَحَقَّ مَكَانَتَهُ بَيْنَ الْأَشْرَافِ.', tr:"" },
+    { fr:"Si vous haïssez la guerre, vous devez déployer tous vos efforts pour instaurer la concorde entre les tribus.", ar:'إِنْ كَرِهْتُمُ الْحَرْبَ فَعَلَيْكُمْ بَذْلُ قُصَارَى جُهْدِكُمْ لِإِقَامَةِ الْوِئَامِ بَيْنَ الْقَبَائِلِ.', tr:"" },
+    { fr:"Nous sommes las des expériences amères de la vie, aussi écoutons les maximes de sagesse de ce poète !", ar:'سَئِمْنَا مِنْ تَجَارِبِ الْحَيَاةِ الدُّنْيَا الْمَرِيرَةِ، لِهَذَا فَلْنُصْغِ إِلَى حِكَمِ ذَلِكَ الشَّاعِرِ.', tr:"" },
+    { fr:"Ce jeune homme a aimé sa belle avec chasteté et fidélité jusqu'à en mourir.", ar:'أَحَبَّ ذَلِكَ الْفَتَى عَشِيقَتَهُ بِعِفَّةٍ وَوَفَاءٍ حَتَّى مَاتَ بِحُبِّهِ !', tr:"" },
+    { fr:"Souvent, ce prince s'en allait de bon matin dans le désert sur un puissant cheval à poil ras.", ar:'كَثِيرًا مَا كَانَ ذَلِكَ الْأَمِيرُ يَغْتَدِي إِلَى الْبَادِيَةِ بِمُنْجَرِدٍ هَيْكَلٍ.', tr:"" },
+  ],
+};
+const DAILY_LESSON_59 = {
+  num: 59,
+  titleFr: "La poésie à l'époque omeyyade",
+  titleAr: 'الشِّعْرُ فِي الْعَصْرِ الْأُمَوِيِّ',
+  fullAudioUrl: null,
+  introFr: "Damas était devenue la capitale du jeune empire arabe, qui se trouva brusquement confronté au luxe et au raffinement des Byzantins et, à leur contact, les Arabes oublièrent vite l'idéal de rusticité des premiers musulmans.",
+  dialogue: [
+    { ar:'فِي هَذَا الْعَصْرِ، مَا زَالَتِ الْأَرِسْتُقْرَاطِيَّةُ الْعَرَبِيَّةُ مُسَيْطِرَةً وَحَافَظَتْ عَلَى تَقَالِيدِ الْمُسْلِمِينَ الْأَوَّلِينَ،', tr:"Fi hadhà al-'asri, mà zàlat-i al-aristouqràtiyyatou al-'arabiyyatou mousaytiratan wa hàfazat 'alà taqàlidi al-mouslimìna al-awwalìna,", fr:"À cette époque, l'aristocratie arabe était encore prédominante et préservait les traditions des premiers musulmans,", note:1, audioUrl:null },
+    { ar:'وَإِنْ كَانَ التَّمَسُّكُ بِالْبَدَاوَةِ وَالْأَصَالَةِ الْعَرَبِيَّةِ مُتَفَتِّتًا بِسُرْعَةٍ', tr:"wa in kàna at-tamassoukou bil-badàwati wa al-asàlati al-'arabiyyati moutafattitan bi-sour'atin", fr:"même si l'attachement à la bédouinité et à l'authenticité arabe s'effritait rapidement", audioUrl:null },
+    { ar:'مِنْ جَرَّاءِ رَفَاهِيَةِ وَتَرَفِ أَسَالِيبِ الْمَعِيشَةِ الْمُقْتَبَسَةِ مِنَ الرُّومِ.', tr:"min jarrà'i rafàhiyati wa tarafi asàlibi al-ma'ìchati al-mouqtabasati min-a ar-Roùmi.", fr:"devant le luxe et le raffinement du mode de vie empruntés aux Byzantins.", audioUrl:null },
+    { ar:'كَانَ يُمَثِّلُ الشِّعْرُ إِمْتِدَادًا مُبَاشِرًا لِلرُّوحِ الشِّعْرِيَّةِ مُنْذُ الْعَصْرِ الْجَاهِلِيِّ،', tr:"Kàna youmaththilou ach-chi'rou imtidàdan moubàchiran li-ar-roùhi ach-chi'riyyati moundhou al-'asri al-jàhiliyyi,", fr:"La poésie était le prolongement direct de l'âme poétique antéislamique,", audioUrl:null },
+    { ar:'إِلَّا أَنَّهُ تَغَيَّرَ بِحُكْمِ مَا أَدْخَلَهُ التَّمَدُّنُ وَالْحَضَارَةُ الْجَدِيدَةُ', tr:"illà annahou taghayyara bi-houkmi mà adkhalahou at-tamaddounou wa al-hadàratou al-jadìdatou", fr:"mais elle se trouvait modifiée du fait des apports de la civilisation citadine nouvelle", audioUrl:null },
+    { ar:'فَضْلًا عَنِ اخْتِلَاطِ ثَقَافَاتٍ مُتَعَدِّدَةٍ.', tr:"fadlan 'an ikhtilàti thaqàfàtin mouta'addidatin.", fr:"ainsi que du brassage multiculturel.", note:2, audioUrl:null },
+    { ar:'نَتِيجَةً لِذَلِكَ، تَحَوَّلَتْ مَعَارِكُ الْبَدْوِ الْكَلَامِيَّةُ الْقَدِيمَةُ إِلَى أَلْعَابٍ أَدَبِيَّةٍ', tr:"Natìjatan li-dhalika, tahawwalat ma'àrikou al-badwi al-kalàmiyyatou al-qadìmatou ilà al'àbin adabiyyatin", fr:"Ainsi, les anciennes joutes oratoires des bédouins se sont transformées en jeux littéraires,", note:3, audioUrl:null },
+    { ar:'فِي الْمَجَالِسِ وَقُصُورِ الْخُلَفَاءِ وَالْأَعْيَانِ.', tr:"fi al-majàlisi wa qousoùri al-khoulafà'i wa al-a'yàni.", fr:"dans les salons ainsi que dans les palais des califes et des hauts dignitaires.", note:4, audioUrl:null },
+    { ar:'فِي بَلَاطِ الْخَلِيفَةِ عَبْدِ الْمَلِكِ بْنِ مَرْوَانَ، كَانَ أَشْهَرُ الشُّعَرَاءِ هُمْ: الْأَخْطَلُ وَجَرِيرٌ وَالْفَرَزْدَقُ.', tr:"Fi balàti al-khalìfati 'Abdi al-Malik ben Marwàn, kàna achharou ach-chou'arà'i houm: al-Akhtal wa Jarìr wa al-Farazdaq.", fr:"À la cour du calife Abd el-Malik ben Marwan, les poètes les plus illustres étaient al-Akhtal, Jarir et al-Farazdaq.", note:5, audioUrl:null },
+    { ar:'كَانُوا مِرْآةً لِلْعُرُوبَةِ مِنْ خِلَالِ أَشْعَارِهِمْ،', tr:"Kànoù mir'àtan lil-'ouroùbati min khilàli ach'àrihim-i,", fr:"Ils étaient le miroir de l'arabité à travers leurs poésies,", audioUrl:null },
+    { ar:'الَّتِي كَانَتْ أَغْرَاضُهَا الْمُتَمَيِّزَةُ: الْمَدْحُ وَالْفَخْرُ وَالْهِجَاءُ.', tr:"allatì kànat aghràdouhà al-moutamayyizatou: al-madha wa al-fakhra wa al-hijà'a.", fr:"dont les thèmes de prédilection étaient l'éloge, l'autopanégyrique et la satire.", audioUrl:null },
+    { ar:'وَكَانَتِ الْمُنَافَسَةُ دَائِمَةً بَيْنَ أُولَئِكَ الشُّعَرَاءِ الثَّلَاثَةِ فِي ظِلِّ تَحْكِيمِ الْعَاهِلِ الْمَشْغُوفِ بِالشِّعْرِ:', tr:"Wa kànat-i al-mounàfasatou dà'imatan bayna oulà'ika ach-chou'arà'i ath-thalàthati fi zilli tahkìmi al-'àhili al-machghoùfi bi-ach-chi'ri:", fr:"Et entre ces trois poètes s'exerçait une compétition permanente sous l'arbitrage du souverain féru de poésie :", note:6, audioUrl:null },
+    { ar:'الْأَخْطَلُ: "أَنَا الْقَطِرَانُ وَالشُّعَرَاءُ جَرْبَاءُ – وَفِي الْقَطِرَانِ لِلْجَرْبَاءِ شِفَاءٌ."', tr:"al-Akhtal: \"Anà al-qatiràno wa ach-chou'arà'ou jarbà'ou // wa fi al-qatiràni lil-jarbà'i chifà'ou(n).\"", fr:"al-Akhtal : \"Je suis le goudron et les poètes sont galeux. Le goudron guérit la gale.\"", note:7, audioUrl:null },
+    { ar:'الْفَرَزْدَقُ: "أَنَا الْمَوْتُ الَّذِي يَذْهَبُ بِنَفْسِكَ – فَانْظُرْ كَيْفَ أَنْتَ مُحَاوِلُهُ !"', tr:"al-Farazdaq: \"Anà al-maoutou alladhì yadhhabou bi-nafsika // fa-ounzour kayfa anta mouhàwilouhou !\"", fr:"al-Farazdaq : \"Je suis la mort qui emporte ton âme. Trouve donc un moyen de m'échapper !\"", audioUrl:null },
+    { ar:'جَرِيرٌ: "أَنَا الدَّهْرُ وَالدَّهْرُ يُفْنِي الْمَوْتَ – فَأْتِنِي مِثْلَ الدَّهْرِ بِشَيْءٍ يُطَاوِلُهُ."', tr:"Jarìr: \"Anà ad-dahrou wa ad-dahrou youfnì al-maouta // fa'tini mithla ad-dahri bi-chay'in youtàwilouhou.\"", fr:"Jarir : \"Je suis le Temps. Le Temps anéantit la mort. Apporte-moi quelque chose qui rivalise en longueur avec le Temps !\"", audioUrl:null },
+    { ar:'وَلَكِنَّ الْأَخْطَلَ كَانَ قَدْ نَالَ حُظْوَةَ الْخَلِيفَةِ لِتَعْبِيرِهِ عَنِ الْعُرُوبَةِ وَدِفَاعِهِ عَنِ الدَّوْلَةِ الْأُمَوِيَّةِ.', tr:"Wa lakinna al-Akhtala kàna qad nàla houzwata al-khalìfati li-ta'bìrihi 'an-i al-'ouroùbati wa difà'ihi 'an-i ad-daoulati al-oumawiyyati.", fr:"Mais al-Akhtal avait obtenu la faveur du calife pour son exaltation de l'arabité et sa défense de la dynastie omeyyade.", audioUrl:null },
+    { ar:'لِذَلِكَ، كَانَ مِنْ حَقِّ هَذَا الشَّاعِرِ الْمَسِيحِيِّ الْيَعْقُوبِيِّ أَنْ يَدْخُلَ الْقَصْرَ بِدُونِ إِذْنٍ لَيْلًا وَنَهَارًا', tr:"Li-dhalika, kàna min haqqi hadhà ach-chà'iri al-masìhiyyi al-ya'qoùbiyyi an yadkhoula al-qasra bidoùni idhnin laylan wa nahàran", fr:"C'est pourquoi ce poète chrétien jacobite avait le droit d'entrer librement au palais jour et nuit", audioUrl:null },
+    { ar:'وَهُوَ يَحْمِلُ صَلِيبًا وَلِحْيَتُهُ تَقْطُرُ خَمْرًا.', tr:"wa h(ou)wa yahmilou salìban wa lihyatouhou taqtourou khamran.", fr:"en arborant une croix et la barbe dégoulinante de vin.", note:8, audioUrl:null },
+    { ar:'فِي نَفْسِ الْفَتْرَةِ تَطَوَّرَ فِي نَجْدٍ وَالْحِجَازِ شِعْرٌ رَقِيقٌ إِسْمُهُ "الْغَزَلُ"،', tr:"Fi nafsi al-fatarati tatawwara fi Najd wa al-Hijàz chi'roun raqìqoun ismouhou \"al-ghazal\",", fr:"À la même époque, s'est développée dans le Nejd et le Hedjaz une poésie délicate appelée \"ghazal\",", audioUrl:null },
+    { ar:'وَهُوَ التَّعْبِيرُ عَنْ حُبٍّ صَافٍ، حَيْثُ كَانَتِ الْمَرْأَةُ مَوْضُوعًا لِلْعِبَادَةِ.', tr:"wa h(ou)wa at-ta'bìrou 'an houbbin sàfin, haythou kànat-i al-mar'atou maoudoù'an lil-'ibàdati.", fr:"qui était l'expression d'un amour chaste, où la femme était un objet d'adoration.", audioUrl:null },
+    { ar:'كُثَيِّرُ عَزَّةَ: "أَدْنَى رَغْبَةً فِي الْحُبِّ أَنْ مَنَعَتْ – أَشْهَى إِلَى الْمَرْءِ مِنْ دُنْيَاهُ مَا مُنِعَ."', tr:"Kouthayr 'Azza: \"Adnà raghbatan fi al-houbbi an mana'at // achhà ilà al-mar'i min dounyàhou mà mouni'a.\"", fr:"Kouthayr 'Azza : \"Elle s'est refusée et mon désir pour elle a grandi. On ne désire rien tant que ce que l'on vous interdit.\"", audioUrl:null },
+    { ar:'قَيْسٌ (مَجْنُونُ لَيْلَى): "كَأَنَّ زِمَامًا فِي الْفُؤَادِ مُعَلَّقٌ – تَقُودُهُ حَيْثُ اسْتَمَرَّتْ وَأَتْبَعُ."', tr:"Qays (Majnoùn Laylà): \"Ka'anna zimàman fi al-fou'àdi mou'allaqoun // taqoùdou bihi haythou (i)stamarrat wa atba'ou.\"", fr:"Qays (Le fou de Layla) : \"Mon cœur est comme tenu par une bride. Elle le dirige à son gré et, docile, je me laisse conduire.\"", note:10, audioUrl:null },
+    { ar:'جَمِيلُ بُثَيْنَةَ: "أُقَلِّبُ طَرْفِي فِي السَّمَاءِ لَعَلَّهُ – يُوَافِقُ طَرْفِي طَرْفَهَا حِينَ يَنْظُرُ."', tr:"Jamìl Bouthayna: \"Ouqallibou tarfì fi as-samà'i la'allahou // youwàfiqou tarfì tarfahà hìna yanzourou.\"", fr:"Jamil Bouthayna : \"Je tourne et retourne mon regard dans le ciel, dans l'espoir d'y rencontrer le sien.\"", audioUrl:null },
+  ],
+  notes: {
+    1: "① fi al-'asri al-oumawiyyi (ou al-amawiyyi) : oumawiyy dérive de oumayya(t), diminutif de amatoun / imà'oun (esclave femme). Oumayya(t) était un prénom masculin que portait l'ancêtre de la dynastie omeyyade.",
+    2: "② ikhtilàti thaqàfàtin mouta'addidatin (brassage multiculturel) : multiculturel se dira aussi mouta'addidou ath-thaqàfàti. Sur le même modèle : mouta'addidou al-adyàni (multiconfessionnel).",
+    3: "③ ma'àrikou al-badwi al-kalàmiyyatou (les joutes oratoires des bédouins) ; une polémique se dira harboun kalàmiyyatoun (« une guerre de langue »).",
+    4: "④ al-a'yàni (les notables, les hauts dignitaires) ; 'ayn, a'yàn (œil, source) a aussi le sens, au singulier, de personnage principal, seigneur, chef et, au pluriel, de notables.",
+    5: "⑤ fi balàti al-khalìfati (à la cour du calife). Le mot balàt est un collectif qui signifie dallage, le nom d'unité dalle se disant balàta(t).",
+    6: "⑥ al-machghoùfi bi-ach-chi'ri (féru de poésie) ; machghoùf est le participe passif du verbe chaghafa, yachghafou (captiver, séduire, rendre amoureux).",
+    7: "⑦ jarbà'ou (galeuse), féminin de ajrabou qui dérive de jarab (gale) : ce mot est au féminin car il se rapporte à un nom sous-entendu « les chameaux » (pluriel d'animaux = fém. sing.). Ajrabou (galeux) est un mot diptote qui a le schéma des noms de difformités, comme a'warou (borgne).",
+    8: "⑧ salìban (croix), dont le pluriel est soulbàn ; as-salìbou al-ahmarou ad-douwaliyyou (la Croix Rouge Internationale). Les croisés se dit as-salìbiyyoùna et les croisades al-houroùbou as-salìbiyyatou.",
+    10: "⑩ haythou istamarrat (où elle s'en est allée) ; le verbe istamarra, yastamirrou n'a pas ici son sens habituel de continuer, mais de s'en aller.",
+  },
+  vocabBox: {
+    title: "l'ère omeyyade et la poésie de cour",
+    items: [
+      { ar:'خَلِيفَةٌ', tr:"khalìfa(t)", fr:'Calife' },
+      { ar:'مَدْحٌ', tr:"madh", fr:'Éloge (thème poétique)' },
+      { ar:'هِجَاءٌ', tr:"hijà'", fr:'Satire (thème poétique)' },
+      { ar:'غَزَلٌ', tr:"ghazal", fr:'Poésie amoureuse' },
+    ],
+  },
+  exercise1: [
+    { ar:'عَمِلَ الْعَرَبُ عَلَى حِفْظِ التَّقَالِيدِ الْقَدِيمَةِ بِحُكْمِ تَمَسُّكِهِمُ الْعَمِيقِ بِأَصَالَتِهِمِ الْعَرَبِيَّةِ.', tr:"", fr:"Les Arabes se sont efforcés de préserver les traditions anciennes du fait de leur attachement profond à leur authenticité arabe." },
+    { ar:'فِي بِدَايَةِ الدَّوْلَةِ الْأُمَوِيَّةِ، اِقْتَبَسَ الْعَرَبُ مِنَ الرُّومِ تَرَفَ وَرَفَاهِيَةَ أَسَالِيبِ مَعِيشَتِهِمْ.', tr:"", fr:"Au début de la dynastie omeyyade, les Arabes ont emprunté aux Byzantins le luxe et le bien-être de leurs modes de vie." },
+    { ar:'كَانَ مِنْ شَأْنِ اِخْتِلَاطِ الثَّقَافَاتِ الْمُتَعَدِّدَةِ تَغْيِيرُ الْمُجْتَمَعِ الْعَرَبِيِّ بِشَكْلٍ عَمِيقٍ.', tr:"", fr:"Le brassage multiculturel a eu pour effet de modifier profondément la société arabe." },
+    { ar:'جَاءَ التَّمَدُّنُ الْجَدِيدُ لِتَحْوِيلِ عَقْلِيَّاتِ مَنْ كَانُوا مِنَ الْبَدْوِ سَابِقًا.', tr:"", fr:"La civilisation citadine nouvelle a transformé les mentalités de ceux qui étaient d'anciens bédouins." },
+    { ar:'لَا حَقَّ لِأَحَدٍ أَنْ يَدْخُلَ الْقَصْرَ دُونَ إِذْنٍ، خَاصَّةً وَلِحْيَتُهُ تَقْطُرُ خَمْرًا !', tr:"", fr:"Personne n'a le droit de pénétrer dans le palais sans autorisation, surtout avec la barbe dégoulinante de vin !" },
+  ],
+  exercise2: [
+    { fr:"Ce poète a obtenu la faveur du calife pour son habileté dans les jeux littéraires de salon.", ar:'نَالَ هَذَا الشَّاعِرُ حُظْوَةَ الْخَلِيفَةِ لِمَهَارَتِهِ فِي الْأَلْعَابِ الْأَدَبِيَّةِ دَاخِلَ الْمَجَالِسِ.', tr:"" },
+    { fr:"À cette époque-là, la satire faisait partie des thèmes poétiques de prédilection.", ar:'فِي تِلْكَ الْحُقْبَةِ، كَانَ الْهِجَاءُ مِنْ بَيْنِ الْأَغْرَاضِ الشِّعْرِيَّةِ الْمُتَمَيِّزَةِ.', tr:"" },
+    { fr:"Aux yeux de certains poètes, la femme était un objet d'adoration.", ar:'عِنْدَ بَعْضِ الشُّعَرَاءِ، كَانَتِ الْمَرْأَةُ مَوْضُوعًا لِلْعِبَادَةِ.', tr:"" },
+    { fr:"Ces poètes-là étaient un miroir de l'arabité, au travers de leurs poésies.", ar:'كَانَ أُولَئِكَ الشُّعَرَاءُ مِرْآةً لِلْعُرُوبَةِ مِنْ خِلَالِ أَشْعَارِهِمْ.', tr:"" },
+    { fr:"Dans les salons et les palais des notables, les poètes étaient en compétition permanente.", ar:'فِي مَجَالِسِ وَقُصُورِ الْأَعْيَانِ، كَانَ الشُّعَرَاءُ فِي حَالَةِ مُنَافَسَةٍ دَائِمَةٍ.', tr:"" },
+  ],
+};
+
+const DAILY_LESSON_60 = {
+  num: 60,
+  titleFr: "La poésie à l'époque abbasside",
+  titleAr: 'الشِّعْرُ فِي الْعَصْرِ الْعَبَّاسِيِّ',
+  fullAudioUrl: null,
+  introFr: "Rappelez-vous que l'avènement de la dynastie abbasside, avec le transfert de la capitale de Damas à Bagdad, a causé un grand bouleversement dans tous les domaines, marqué essentiellement par le multiculturalisme et la prépondérance de l'élément iranien.",
+  dialogue: [
+    { ar:'أَفْضَى ذَلِكَ الْوَاقِعُ إِلَى تَفْجِيرِ مُجَابَهَةٍ بَيْنَ عَنَاصِرِ الْمُجْتَمَعِ إِسْمُهَا "الشُّعُوبِيَّةُ" نِسْبَةً إِلَى كَلِمَةِ "شُعُوبٍ"،', tr:"Afdà dhalika al-wàqi'ou ilà tafjìri moujàbahatin bayna 'anàsiri al-moujtama'i ismouhà \"ach-chou'oùbiyyatou\", nisbatan ilà kalimati \"chou'oùb\".", fr:"Cette situation a donné naissance à un affrontement entre les divers éléments de la société, appelé \"chou'oubiyya\", en référence au mot \"chou'oùb\" (peuples).", note:1, audioUrl:null },
+    { ar:'وَقَفَ بَعْضُ الشُّعَرَاءِ إِلَى جَانِبِ الْعَجَمِ دَاعِينَ إِلَى تَحْدِيثِ الْأَسَالِيبِ الشِّعْرِيَّةِ وَالْمُفْرَدَاتِ.', tr:"Waqafa ba'dou ach-chou'arà'i ilà jànibi al-'Ajami dà'ìna ilà tahdìthi al-asàlibi ach-chi'riyyati wa al-moufradàti.", fr:"Certains poètes ont pris parti pour les Persans et ont prôné la modernisation des formes poétiques et du vocabulaire.", note:2, audioUrl:null },
+    { ar:'مِنْ بَيْنِهِمْ، خَاصَّةً، بَشَّارُ بْنُ بُرْدٍ وَأَبُو نُوَاسٍ الْمُلَقَّبُ بِـ "الشَّاعِرِ الْمُحْدَثِ".', tr:"Min baynihim, khàssatan, Bachchàr ben Bourd wa Aboù Nouwàs al-moulaqqabou bi-\"ach-chà'iri al-mouhdathi\".", fr:"Parmi eux, en particulier, Bachchar ben Bourd et Abou Nouwas, surnommé \"le poète moderne\".", audioUrl:null },
+    { ar:'فِي مُقَابِلِ هَؤُلَاءِ "الْمُحْدَثِينَ"، مَا زَالَ غَيْرُهُمُ الْمَعْرُوفُونَ بِإِسْمِ "الْقُدَمَاءِ" مُتَمَسِّكِينَ بِالتَّقَالِيدِ الْمَوْرُوثَةِ مِنْ عَصْرِ الْجَاهِلِيَّةِ وَبِخِصَالِ الْعَرَبِ الْقُدَمَاءِ.', tr:"Fì mouqàbili ha'oulà'i \"al-mouhdathìna\", mà zàla ghayrouhoum al-ma'roùfoùna bi-(i)smi \"al-qoudamà'i\" moutamassikìna bi-at-taqàlidi al-maourouthati min 'asri al-Jàhiliyyati wa bi-khisàli al-'Arabi al-qoudamà'i.", fr:"En opposition à ces \"Modernes\", d'autres connus sous le nom d'\"Anciens\" étaient restés attachés aux traditions héritées de l'antéislam et aux vertus des anciens Arabes.", audioUrl:null },
+    { ar:'مِنْ بَيْنِ شُعَرَاءِ ذَلِكَ الْعَصْرِ، أَبُو طَيِّبٍ الْمُتَنَبِّي الَّذِي كَانَ حَكِيمًا يَحِنُّ إِلَى الْعَظَمَةِ الْعَرَبِيَّةِ', tr:"Min bayni chou'arà'i dhàlika al-'asri, Aboù Tayyib al-Moutanabbi alladhì kàna hakìman yahinnou ilà al-'azamati al-'arabiyyati", fr:"Parmi les poètes de cette époque, il y avait Abou Tayyib al-Moutanabbi qui fut un sage habité par la nostalgie de la grandeur arabe,", audioUrl:null },
+    { ar:'الَّتِي أَخْمَدَتْهَا مَادِّيَّةُ وَوُصُولِيَّةُ الْمُجْتَمَعِ الْعَبَّاسِيِّ الْجَدِيدِ.', tr:"allatì akhmadathà màddiyyatou wa woussouliyyatou al-moujtama'i al-'abbàsiyyi al-jadìdi.", fr:"étouffée par le matérialisme et l'arrivisme de la nouvelle société abbasside.", audioUrl:null },
+    { ar:'إِبْنُ الرُّومِيِّ: يَتَمَيَّزُ بِشِعْرِهِ الْحَافِلِ بِالْعَوَاطِفِ الْعَمِيقَةِ وَالتَّأَمُّلِ فِي أَفْرَاحِ وَأَتْرَاحِ الْإِنْسَانِ.', tr:"Ibnou (a)r-Roùmi: Yatamayyazou bi-chi'rihi al-hàfili bil-'awàtifi al-'amìqati wa at-ta'ammouli fi afràhi wa atràhi al-insàni.", fr:"Ibn ar-Roumi : Il se distingue par sa poésie pleine de sentiments profonds et de méditation sur les joies et les peines de l'être humain.", audioUrl:null },
+    { ar:'"لِمَا تُؤْذِنُ الدُّنْيَا بِهِ مِنْ صُرُوفِهَا – يَكُونُ بُكَاءُ الطِّفْلِ سَاعَةَ يُوضَعُ."', tr:"\"Li-mà tou'dhinou ad-dounyà bihi min souroùfihà // yakoùnou boukà'ou at-tifli sà'ata yoùda'ou.\"", fr:"\"Si l'enfant pleure à l'instant de sa naissance, c'est à cause des malheurs que la vie lui réserve.\"", audioUrl:null },
+    { ar:'أَبُو نُوَاسٍ: "لَا عَيْشَ إِلَّا الْمُدَامُ أَشْرَبُهَا – مُغْتَبِقًا تَارَةً وَمُصْطَبِحًا."', tr:"Aboù Nouwàs: \"Là 'aycha illà al-moudàmou achrabouhà // moughtabiqan tàratan wa moustabihan.\"", fr:"Abou Nouwas : \"Il n'y a de vie que dans le vin que je bois, tantôt le soir, tantôt le matin.\"", note:3, audioUrl:null },
+    { ar:'"يَا صَاحِ ! لَا أَتْرُكُ الْمُدَامَ – وَلَا أَقْبَلُ فِي الْحُبِّ قَوْلَ مَنْ نَصَحَ !"', tr:"\"Yà sàhi(bou)! Là atroukou al-moudàma // wa là aqbalou fi al-houbbi qaoula man nasaha!\"", fr:"\"Ami ! Jamais je ne laisserai le vin, et en amour, je n'accepterai le conseil de personne !\"", audioUrl:null },
+    { ar:'"تَسْقِيكَ مِنْ طَرْفِهَا خَمْرًا وَمِنْ يَدِهَا – خَمْرًا فَمَا لَكَ مِنْ سُكْرَيْنِ مِنْ بُدٍّ."', tr:"\"Tasqìka min tarfihà khamran wa min yadihà // khamran fa-mà laka min soukrayni min boudd(in).\"", fr:"\"De ses regards elle te verse du vin et de sa main elle t'en verse encore. Comment échapper à deux ivresses ?\"", audioUrl:null },
+    { ar:'الْمُتَنَبِّي: "لَقَدْ حَسُنَتْ بِكَ الْأَوْقَاتُ حَتَّى – كَأَنَّكَ فِي فَمِ الزَّمَانِ اِبْتِسَامُ."', tr:"al-Moutanabbi: \"Laqad hasounat bika al-aouqàtou hattà // ka'annaka fi fami az-zamàni ibtisàmou(n).\"", fr:"al-Moutanabbi : \"Tu embellis les heures, comme si tu étais un sourire sur les lèvres du Temps.\"", audioUrl:null },
+    { ar:'"إِذَا أَنْتَ أَكْرَمْتَ الْكَرِيمَ مَلَكْتَهُ – وَإِنْ أَنْتَ أَكْرَمْتَ اللَّئِيمَ تَمَرَّدَ."', tr:"\"Idhà anta akramta al-karìma malaktahou // wa in anta akramta al-la'ìma tamarrada.\"", fr:"\"Si tu es noble envers un être noble, il te sera tout acquis, et si tu es noble envers un être vil, il se retournera contre toi.\"", audioUrl:null },
+    { ar:'"تَنَاهَى سُكُونُ الْحُسْنِ فِي حَرَكَاتِهَا – فَلَيْسَ لِرَآءِ وَجْهِهَا لَمْ يَمُتْ عُذْرٌ."', tr:"\"Tanàhà soukoùnou al-housni fi harakàtihà // fa-laysa li-rà'in wajhahà lam yamout 'oudhrou(n).\"", fr:"\"La beauté habite au plus haut point tous ses gestes. Qui a vu son visage sans en mourir n'a pas d'excuse.\"", audioUrl:null },
+    { ar:'"بِذِي الْغَبَاوَةِ مِنْ إِنْشَادِهَا ضَرَرٌ – كَمَا تَضُرُّ رِيَاحُ الْوَرْدِ بِالْجُعَلِ."', tr:"\"Bi-dhì al-ghabàwati min inchàdihà dararoun // kamà toudirrou riyàhou al-wardi bil-jou'ali.\"", fr:"\"À ma poésie l'imbécile est allergique comme le cafard l'est au parfum des roses.\"", audioUrl:null },
+    { ar:'الْحَلَّاجُ: حُكِمَ عَلَى ذَلِكَ الشَّاعِرِ الصُّوفِيِّ بِالْإِعْدَامِ بِتُهْمَةِ الْإِلْحَادِ إِذْ قَالَ: "أَنَا الْحَقُّ !"', tr:"Al-Hallàj: houkima 'alà dhalika ach-chà'iri as-soùfiyyi bil-i'dàmi bi-touhmati al-ilhàdi idh qàla: \"Anà al-haqqou !\"", fr:"Al-Hallaj : ce poète mystique a été condamné à mort sous l'accusation d'hérésie ayant dit : \"Je suis la Vérité !\"", audioUrl:null },
+    { ar:'"أَدْنَيْتَنِي مِنْكَ حَتَّى ظَنَنْتُ أَنَّكَ أَنَا – وَغِبْتُ فِي الْوَجْدِ حَتَّى أَفْنَيْتَنِي بِكَ عَنِّي."', tr:"\"Adnaytanì minka hattà zanantou annaka anà // wa ghibtou fi al-wajdi hattà afnaytanì bika 'annì.\"", fr:"\"Tu m'as tant rapproché de Toi que j'ai fini par croire que Tu étais moi, et je me suis absorbé dans l'extase, tellement que, par Toi, je suis mort à moi-même.\"", note:4, audioUrl:null },
+    { ar:'"هَا أَنَا فِي حَبْسِ الْحَيَاةِ مُجَمَّعٌ – مِنَ الْإِنْسِ فَاقْبِضْنِي إِلَيْكَ مِنَ الْحَبْسِ."', tr:"\"Hà anà fi habsi al-hayàti moujamma'oun(n) // min-a al-insi fa-(i)qbidnì ilayka min-a al-habsi.\"", fr:"\"Me voici dans la prison de la vie enfermé, parmi les hommes. Arrache-moi vers Toi de cette prison.\"", note:5, audioUrl:null },
+  ],
+  notes: {
+    1: "① 'anàsiri est le pluriel de 'ounsour (élément, ingrédient, principe, ethnie). C'est sur ce mot que sont fabriqués les mots racial et racisme : 'ounsouriyy, 'ounsouriyya(t) ; discrimination raciale se dira tamyiz 'ounsouriyy et l'apartheid al-faslou al-'ounsouriyyou.",
+    2: "② al-'Ajam désigne les non-Arabes et en particulier les Persans. Ce mot est devenu synonyme de al-Fours, collectif de Fàrisiyy (Persan).",
+    3: "③ tàratan (tantôt) est généralement répété : tàratan... wa tàratan oukhrà... L'absence ici du second tàratan est une licence poétique.",
+    4: "④ fi al-wajdi (dans l'extase) : il s'agit de l'extase mystique. Wajd signifie en premier lieu amour ardent, passion, émotion et le verbe wajida, yajidou veut dire sentir, souffrir, être épris/amoureux.",
+    5: "⑤ al-ins (les hommes, les humains), par opposition au monde des démons al-jinn. Le mot ins est à rapprocher de insàn (être humain, personne) et de nàs (gens).",
+  },
+  vocabBox: {
+    title: 'les grands poètes abbassides',
+    items: [
+      { ar:'شُعُوبِيَّةٌ', tr:"chou'oùbiyya(t)", fr:'Mouvement des « peuples » (anti-arabe)' },
+      { ar:'مُحْدَثٌ', tr:"mouhdath", fr:'Moderne (poète)' },
+      { ar:'صُوفِيٌّ', tr:"soùfiyy", fr:'Mystique, soufi' },
+    ],
+  },
+  exercise1: [
+    { ar:'يُشِيرُ إِسْمُ "الشُّعُوبِيَّةِ" إِلَى مُجَابَهَةٍ جَرَتْ بَيْنَ عُنْصُرَيْنِ رَئِيسِيَّيْنِ فِي الْمُجْتَمَعِ الْعَبَّاسِيِّ: الْعَرَبِ وَالْعَجَمِ.', tr:"", fr:"Le nom de \"chou'oubiyya\" fait référence à un affrontement qui a eu lieu entre deux éléments essentiels de la société abbasside : les Arabes et les non-Arabes (les Persans)." },
+    { ar:'أَنَا أُفَضِّلُ الْوُقُوفَ إِلَى جَانِبِ الشُّعَرَاءِ الدَّاعِينَ إِلَى تَحْدِيثٍ لِلْمُفْرَدَاتِ.', tr:"", fr:"Moi, je préfère prendre parti pour les poètes qui prônent une modernisation du vocabulaire." },
+    { ar:'هَذَا الصُّوفِيُّ قَدْ حُكِمَ عَلَيْهِ بِالْإِعْدَامِ بِتُهْمَةِ الْإِلْحَادِ مِنْ قِبَلِ الْمُتَمَسِّكِينَ بِالْمُعْتَقَدَاتِ التَّقْلِيدِيَّةِ.', tr:"", fr:"Ce mystique a été condamné à mort pour hérésie par les tenants de l'orthodoxie." },
+    { ar:'يَحِنُّ الْعَدِيدُ مِنَ الْعَرَبِ إِلَى الْإِمْبَرَاطُورِيَّةِ الْعَرَبِيَّةِ الْفَائِتَةِ.', tr:"", fr:"Nombre d'Arabes ont la nostalgie de l'empire arabe d'autrefois." },
+    { ar:'تَرَكَ لَنَا الشَّاعِرُ الْمُلَقَّبُ بِـ "الْمُحْدَثِ" دِيوَانًا يُشِيرُ فِيهِ إِلَى مَلَذَّاتِ الْحَيَاةِ الدُّنْيَا.', tr:"", fr:"Le poète dit \"le moderne\" nous a laissé un recueil dans lequel il parle des plaisirs de la vie." },
+  ],
+  exercise2: [],
+};
+const DAILY_LESSON_61 = {
+  num: 61,
+  titleFr: "La poésie arabe en Andalousie",
+  titleAr: 'الشِّعْرُ الْعَرَبِيُّ فِي الْأَنْدَلُسِ',
+  fullAudioUrl: null,
+  introFr: "L'histoire du prince omeyyade Abderrahman qui, fuyant le massacre de sa famille, fonda l'émirat de Cordoue et donna naissance à l'un des plus grands foyers de poésie, de musique et de culture du monde arabe médiéval.",
+  dialogue: [
+    { ar:'عَبْدُ الرَّحْمَانِ الدَّاخِلُ: «تَبَدَّتْ لَنَا وَسْطَ الرُّصَافَةِ نَخْلَةٌ – تَنَاءَتْ بِأَرْضِ الْغَرْبِ عَنْ بَلَدِ النَّخْلِ.»', tr:"'Abd ar-Rahmàn ad-Dàkhil: \"Tabaddat lanà wasta ar-Rousàfa nakhlatoun // tanà'at bi-ardi al-gharbi 'an baladi an-nakhli.\"", fr:"Abderrahman l'immigré : \"Au cœur d'ar-Rousafa m'est apparu un palmier sur la terre d'Occident, loin du pays du palmier.\"", note:2, audioUrl:null },
+    { ar:'فَقُلْتُ: شَبِيهِي فِي التَّغَرُّبِ وَالنَّوَى – وَطُولِ التَّنَائِي عَنْ بَنِيَّ وَعَنْ أَهْلِي.', tr:"Fa-qoultou: Chabìhì fi at-tagharroubi wa an-nawà // wa toùli at-tanà'i 'an baniyya 'an ahlì.", fr:"Je lui ai dit : Comme moi, tu es étranger dans un pays lointain, comme moi si longtemps séparé de mes fils et des miens.", note:3, audioUrl:null },
+    { ar:'نَشَأْتِ بِأَرْضٍ أَنْتِ فِيهَا غَرِيبَةٌ – فَمِثْلُكِ فِي الْإِقْصَاءِ وَالتَّنَائِي مِثْلِي !', tr:"Nacha'ti bi-ardin anti fihà gharìbatoun // fa-mithlouki fi al-iqsà'i wa at-tanà'i mithlì!\"", fr:"Tu as grandi sur une terre où tu es étrangère et comme toi je suis loin et en exil !\"", note:4, audioUrl:null },
+    { ar:'شَهِدَتْ خِلَافَةُ قُرْطُبَةَ عَصْرًا لَامِعًا فِي مُخْتَلِفِ الْمَجَالَاتِ قَبْلَ اِنْهِيَارِهَا فِي مَطْلَعِ الْقَرْنِ الْحَادِي عَشَرَ.', tr:"Chahidat khilàfatou Qourtouba(ta) 'asran làmi'an fi moukhtalifi al-majàlàti qabla inhiyàrihà fi matla'i al-qarni al-hàdì 'achara.", fr:"Le califat de Cordoue a connu une période brillante dans divers domaines, avant de s'effondrer au début du XIe siècle.", audioUrl:null },
+    { ar:'إِنْقَسَمَتْ إِلَى مَمَالِكَ صَغِيرَةٍ مُتَنَافِسَةٍ وَمُتَنَازِعَةٍ عُرِفَ حُكَّامُهَا بِـ "مُلُوكِ الطَّوَائِفِ"', tr:"Inqasamat ilà mamàlika saghìratin moutanàfisatin wa moutanàzi'atin 'ourifa houkkàmouhà bi-\"mouloùki at-tawà'ifi\"", fr:"Il s'est émietté en petits royaumes rivaux, en conflit, dont les dirigeants sont connus sous le nom de \"Rois des Communautés\" ;", note:5, audioUrl:null },
+    { ar:'الَّذِينَ كَانَ يَعْمَلُ مُعْظَمُهُمْ، رَغْمَ ذَلِكَ، عَلَى حِمَايَةِ وَتَشْجِيعِ الثَّقَافَةِ وَالْفُنُونِ.', tr:"alladhìna kàna ya'malou mou'zamouhoum, raghma dhalika, 'alà himàyati wa tachji'i ath-thaqàfati wa al-founoùni.", fr:"mais dont la plupart d'entre eux s'efforçaient, malgré cela, de protéger et d'encourager la culture et les arts.", audioUrl:null },
+    { ar:'بَيْنَمَا كَانَتِ الْجُسُورُ قَدْ قُطِعَتْ، مُنْذُ الْبِدَايَةِ، مَعَ الْمَشْرِقِ عَلَى الصَّعِيدِ السِّيَاسِيِّ،', tr:"Baynamà kànat-i al-jousoùrou qad qouti'at, moundhou al-bidàyati, ma'a al-Machriqi 'alà as-sa'idi as-siyàsiyyi,", fr:"Si, dès le début, les ponts avaient été coupés avec l'Orient sur le plan politique,", audioUrl:null },
+    { ar:'بِالْمُقَابِلِ فَعَلَى الصَّعِيدِ الثَّقَافِيِّ وَالشِّعْرِيِّ بِصِفَةٍ خَاصَّةٍ، كَانَ يَأْتِي مِنْ هُنَاكَ الْمِثَالُ الْمُقْتَدَى بِهِ', tr:"bil-mouqàbili fa-'alà as-sa'idi ath-thaqàfiyyi wa ach-chi'riyyi bi-sifatin khàssatin, kàna ya'tì min hounàlika al-mithàlou al-mouqtadà bihi", fr:"en revanche, sur le plan culturel et poétique en particulier, le modèle imité venait de là-bas,", note:6, audioUrl:null },
+    { ar:'فِيمَا يَتَعَلَّقُ بِأَغْرَاضِ الشِّعْرِ وَأَسَالِيبِهِ.', tr:"fìmà yata'allaqou bi-aghràdi ach-chi'ri wa asàlìbihi.", fr:"aussi bien du point de vue des thèmes que des styles poétiques.", audioUrl:null },
+    { ar:'مَعَ ذَلِكَ، تَفَوَّقَ شُعَرَاءُ الْأَنْدَلُسِ عَلَى نُظَرَائِهِمِ الْمَشَارِقَةِ فِي مَجَالَيْ وَصْفِ الطَّبِيعَةِ،', tr:"Ma'a dhalika, tafawwaqa chou'arà'ou al-Andalousi 'alà nouzarà'ihim-i al-machàriqati fi majàli wasfi at-tabì'ati,", fr:"Les poètes andalous, toutefois, ont surpassé leurs homologues orientaux dans la description de la nature,", audioUrl:null },
+    { ar:'بِحُكْمِ مَا كَانَ يَتَوَفَّرُ لَدَيْهِمْ مِنْ مَنَاظِرَ نَاضِرَةٍ وَأَنْهَارٍ وَرِيَاضٍ حَوَّلَتْ بَلَدَهُمْ إِلَى جَنَّةٍ حَقِيقِيَّةٍ.', tr:"bi-houkmi mà kàna yatawaffarou ladayhim min manàzira nàdiratin wa anhàrin wa riyàdin hawwalat baladahoum ilà jannatin haqìqiyyatin.", fr:"car ils bénéficiaient de paysages verdoyants, de cours d'eaux et de parterres de fleurs qui firent de leur pays un véritable paradis.", audioUrl:null },
+    { ar:'فِي طَلِيعَةِ عُشَّاقِ الطَّبِيعَةِ الْأَنْدَلُسِيَّةِ نَجِدُ إِبْنَ خَفَاجَةَ الْبَلَنْسِيَّ.', tr:"Fi tali'ati 'ouchchàqi at-tabì'ati al-andalousiyyati najidou Ibn Khafàja al-Balansiyy.", fr:"À l'avant-garde des amoureux de la nature andalouse, nous trouvons Ibn Khafaja de Valence.", audioUrl:null },
+    { ar:'لَا بُدَّ مِنْ ذِكْرِ إِبْنِ زَيْدُونَ هُوَ الْآخَرُ الَّذِي اِشْتُهِرَ بِحُبِّهِ لِوَلَّادَةَ بِنْتِ الْمُسْتَكْفِي حَاكِمِ قُرْطُبَةَ.', tr:"Là boudda min dhikri Ibn Zaydoùn houwa al-àkhari alladhì (i)chtahara bi-houbbihi li-Wallàda binti al-Moustakfì hàkimi Qourtoubata.", fr:"Mentionnons également Ibn Zaydoun, qui s'est illustré par son amour pour Wallada, la fille d'al-Moustakfi, souverain de Cordoue.", audioUrl:null },
+    { ar:'هَذِهِ الْمَرْأَةُ الْحُرَّةُ الَّتِي لَمْ تَتَزَوَّجْ، كَانَتْ تَجْمَعُ فِي بَيْتِهَا الْعُلَمَاءَ وَالشُّعَرَاءَ وَالْأُدَبَاءَ وَالْفَنَّانِينَ.', tr:"Hadhihi al-mar'atou al-hourratou, allatì lam tatazawwaj, kànat tajma'ou fi baytihà al-'oulamà'a wa ach-chou'arà'a wa al-oudabà'a wa al-fannànìna.", fr:"Cette femme libre, qui ne s'est pas mariée, réunissait dans sa maison les savants, les poètes, les hommes de lettres et les artistes.", audioUrl:null },
+    { ar:'«أَمَّا هَوَاكِ فَلَمْ نَعْدِلْ بِمَنْهَلِهِ – شِرْبًا وَإِنْ كَانَ يُرْوِينَا فَيُظْمِينَا.»', tr:"\"Ammà hawàki fa-lam na'dil bi-manhalihi // chourban wa in kàna yourwìnà fa-youzmìnà.\"", fr:"\"Rien n'est plus doux que de boire à l'aiguade de ton amour, même si, plus elle nous abreuve, plus elle nous donne soif.\"", note:7, audioUrl:null },
+    { ar:'«حَالَتْ لِفَقْدِكُمْ أَيَّامُنَا فَغَدَتْ – سُودًا وَكَانَتْ بِكُمْ بِيضًا لَيَالِينَا.»', tr:"\"Hàlat li-faqdikoum ayyàmounà fa-ghadat // soùdan wa kànat bikoum bìdan layàlìnà.\"", fr:"\"Ton absence a noirci mes jours, toi par qui blanches étaient mes nuits.\"", audioUrl:null },
+    { ar:'كَذَلِكَ، تَرَكَ لَنَا إِبْنُ حَزْمٍ كِتَابًا فِي الْحُبِّ تَتَخَلَّلُهُ أَبْيَاتٌ وَقَصَائِدُ، إِسْمُهُ "طَوْقُ الْحَمَامَةِ" :', tr:"Ka-dhalika taraka lanà Ibnou Hazm kitàban fi al-houbbi tatakhallalouhou abyàtoun wa qasà'idou, ismouhou \"Taouqou al-hamàmati\":", fr:"De même, Ibn Hazm nous a laissé un ouvrage sur l'amour, parsemé de vers et de poèmes, intitulé \"Le collier de la colombe\":", audioUrl:null },
+    { ar:'«كَأَنَّ الْهَوَى ضَيْفٌ أَلَمَّ بِمُهْجَتِي – فَلَحْمِي طَعَامٌ وَالنَّجِيعُ شَرَابُ.»', tr:"\"Ka'anna al-hawà dayfoun alamma bi-mouhjatì // fa-lahmì ta'àmoun wa an-najì'ou charàbou(n).\"", fr:"\"L'amour est comme un hôte descendu dans mon cœur, ma chair est sa nourriture et mon sang sa boisson.\"", audioUrl:null },
+    { ar:'أَمَّا إِبْنُ قُزْمَانَ فَتَرَكَ لَنَا دِيوَانًا لِلشِّعْرِ الشَّعْبِيِّ الْقَرِيبِ مِنَ الْعَامِّيَّةِ الْأَنْدَلُسِيَّةِ إِسْمُهُ "الزَّجَلُ".', tr:"Ammà Ibn Qouzmàn fa-taraka lanà diwànan li-ach-chi'ri ach-cha'biyyi al-qarìbi min-a al-'àmmiyyati al-andalousiyyati ismouhou \"az-zajal\".", fr:"Quant à Ibn Qouzmàn, il nous a laissé un recueil de poésie populaire proche du dialecte andalou, appelée \"zajal\".", audioUrl:null },
+    { ar:'وَقَدْ نَظَمَ أَيْضًا قَصَائِدَ مَعْرُوفَةً بِإِسْمِ "الْمُوَشَّحَاتِ"', tr:"wa qad nazama aydan qasà'ida ma'roùfatan bi-(i)smi \"al-mouwachchahàti\"", fr:"Et il a composé aussi des poèmes connus sous le nom de \"mouwachchahat\"", note:8, audioUrl:null },
+    { ar:'الَّتِي كَانَ يُتَغَنَّى بِهَا بِرِفْقَةِ الرَّقَصَاتِ وَأَصْوَاتِ الْعِيدَانِ وَالدُّفُوفِ.', tr:"allatì kàna youtaghannà bihà bi-rifqati ar-raqasàti wa aswàti al-'idàni wa ad-doufoùfi.", fr:"qui étaient chantés et accompagnés de danses au son des luths et des tambourins.", note:9, audioUrl:null },
+    { ar:'خِتَامًا، يُقَالُ إِنَّ الْأُمِّيَّةَ فِي الْأَنْدَلُسِ كَانَتْ شِبْهَ مَعْدُومَةٍ إِلَى دَرَجَةِ أَنَّ بَعْضَ النَّاسِ كَانُوا يَتَكَلَّمُونَ بِالسَّجْعِ فِي الْأَسْوَاقِ !', tr:"Khitàman, youqàlou inna al-oummiyyata fi al-Andalousi kànat chibha ma'doùmatin ilà darajati anna ba'da an-nàsi kànoù yatakallamoùna bi-as-saj'i fi al-aswàqi !", fr:"Pour conclure, on dit que l'analphabétisme en Andalousie était quasi inexistant au point que certaines personnes parlaient en prose rimée dans les marchés !", audioUrl:null },
+  ],
+  notes: {
+    2: "② ar-Rousàfa est le nom d'un palais d'été construit au nord-ouest de Cordoue par l'émir Abderrahman 1er au début de son règne (756-788).",
+    3: "③ fi at-tagharroubi (dans l'expatriation) : tagharroub est le masdar du verbe de Ve forme tagharraba, yataghharrabou (devenir étranger, s'expatrier). Pour traduire expatrié, on utilise le participe actif de VIIIe forme moughtarib.",
+    4: "④ fi al-iqsà'i (dans l'éloignement) : iqsà' est le masdar du verbe de IVe forme aqsà, youqsì (éloigner, exclure). Vous connaissez son élatif aqsà qui apparaît dans le nom de la mosquée al-Aqsà (« la plus lointaine »).",
+    5: "⑤ at-tawà'ifi (les communautés), singulier tà'ifa(t) ; tà'ifiyy signifie communautaire, confessionnel.",
+    6: "⑥ 'alà as-sa'idi ath-thaqàfiyyi (sur le plan culturel). Le mot sa'ìd signifie surface (de la terre), niveau, d'où plan. C'est aussi le nom de la Haute Égypte, rencontré à la leçon 53.",
+    7: "⑦ fa-youzmìnà (elle nous donne soif) : du verbe de IVe forme azma'a, youzmi'ou. Normalement on devrait avoir youzmi'ounà, licence poétique ici.",
+    8: "⑧ mouwachchahàt, singulier mouwachchah, est le participe passif du verbe wachchaha, youwachchihou (décorer quelqu'un, lui passer un collier ou une écharpe).",
+    9: "⑨ allatì kàna youtaghannà bihà (qui étaient chantées), litt. « lesquelles il était chanté avec-elles ».",
+  },
+  vocabBox: {
+    title: "al-Andalus et sa poésie",
+    items: [
+      { ar:'مُغْتَرِبٌ', tr:"moughtarib", fr:'Expatrié' },
+      { ar:'مُوَشَّحَةٌ', tr:"mouwachchaha(t)", fr:'Mouwachchah (poème chanté)' },
+      { ar:'زَجَلٌ', tr:"zajal", fr:'Poésie populaire andalouse' },
+    ],
+  },
+  exercise1: [
+    { ar:'بَعْدَ اِنْهِيَارِ خِلَافَةِ قُرْطُبَةَ، شَكَّلَ الْعَدِيدُ مِنْ مَجَالِسِ الْأُمَرَاءِ بُؤَرًا لِثَقَافَةٍ لَامِعَةٍ.', tr:"", fr:"Après l'effondrement du califat de Cordoue, de nombreuses cours princières ont constitué des foyers d'une culture brillante." },
+    { ar:'لَمْ تَقْطَعِ الْأَنْدَلُسُ الْجُسُورَ مَعَ الْمَشْرِقِ كُلِّيًّا، وَخَاصَّةً عَلَى الصَّعِيدِ الثَّقَافِيِّ وَالْإِبْدَاعِيِّ.', tr:"", fr:"L'Andalousie n'a pas complètement coupé les ponts avec l'Orient, surtout sur le plan culturel et créatif." },
+    { ar:'لَمْ يَسَعْ شُعَرَاءَ الْأَنْدَلُسِ إِلَّا أَنْ يَتَغَنَّوْا بِعَجَائِبِ الْأَرْضِ الَّتِي كَانُوا يَعِيشُونَ فِيهَا لِأَنَّهَا كَانَتْ شِبْهَ جَنَّةٍ.', tr:"", fr:"Les poètes andalous n'ont pu que chanter les merveilles de la terre où ils vivaient, car c'était comme un paradis." },
+    { ar:'لَوْ كَانَ يَتَوَفَّرُ لَدَيْكُمْ مَا يَتَوَفَّرُ لَدَيْنَا مِنْ مَنَاظِرَ نَاضِرَةٍ لَكُنْتُمْ رَاغِبِينَ، مَثَلًا، فِي وَصْفِهَا فِي الْأَبْيَاتِ وَالْقَصَائِدِ.', tr:"", fr:"Si vous bénéficiez comme nous de paysages verdoyants, vous auriez envie de les décrire sous forme de poésies." },
+    { ar:'لَا بُدَّ مِنْ ذِكْرِ هَذِهِ الْمَرْأَةِ الْحُرَّةِ الْمُحِبَّةِ لِلْأُدَبَاءِ وَالشُّعَرَاءِ الَّذِينَ كَانَتْ تَسْتَقْبِلُهُمْ فِي مَجْلِسِهَا بِتَكْرَارٍ.', tr:"", fr:"Il faut mentionner cette femme libre qui aimait les lettrés et les poètes qu'elle recevait fréquemment dans son salon." },
+  ],
+  exercise2: [
+    { fr:"Comme moi tu es en exil sur cette terre et nous souffrons tous les deux d'être éloignés de la famille et de la patrie.", ar:'أَنْتِ مِثْلِي مُغْتَرِبٌ فِي هَذِهِ الْأَرْضِ وَكِلَانَا يُؤْلِمُنَا التَّنَائِي عَنِ الْأَهْلِ وَالْوَطَنِ.', tr:"" },
+    { fr:"La description de la nature chez les poètes andalous surpasse celle des poètes orientaux.", ar:'عِنْدَ شُعَرَاءِ الْأَنْدَلُسِ، يَفُوقُ وَصْفُ الطَّبِيعَةِ وَصْفَهَا عِنْدَ شُعَرَاءِ الْمَشْرِقِ.', tr:"" },
+    { fr:"Les \"mouwachchahat\" étaient des poèmes chantés qu'accompagnaient la musique et les danses.", ar:'كَانَتِ الْمُوَشَّحَاتُ قَصَائِدَ يُغَنَّى بِهَا، تُرَافِقُهَا الْمُوسِيقَى وَالرَّقَصَاتُ.', tr:"" },
+    { fr:"La population était tellement engouée de poésie qu'on dit qu'elle parlait en prose rimée en faisant son marché.", ar:'كَانَ النَّاسُ مَشْغُوفِينَ بِالشِّعْرِ حَتَّى يُقَالُ إِنَّهُمْ كَانُوا يَتَكَلَّمُونَ بِالسَّجْعِ عِنْدَ تَسَوُّقِهِمْ.', tr:"" },
+    { fr:"Les artistes de cette région rivalisent d'habileté avec leurs homologues maghrébins.", ar:'يَتَنَافَسُ فَنَّانُو هَذِهِ الْمِنْطَقَةِ مَهَارَةً مَعَ نُظَرَائِهِمِ الْمَغَارِبَةِ.', tr:"" },
+  ],
+};
+
+const DAILY_LESSON_62 = {
+  num: 62,
+  titleFr: 'La poésie "moderne"',
+  titleAr: 'الشِّعْرُ «الْحَدِيثُ»',
+  fullAudioUrl: null,
+  introFr: "Après des siècles de déclin sous domination ottomane, la langue et la poésie arabes renaissent au XXe siècle avec le mouvement de la Nahda, porté notamment par des Libanais chrétiens soucieux de préserver leur arabité.",
+  dialogue: [
+    { ar:'فَسَدَتِ اللُّغَةُ الْعَرَبِيَّةُ وَاِنْحَدَرَ الشِّعْرُ إِلَى أَسْفَلِ الْمُسْتَوَيَاتِ.', tr:"Fasadat-i al-loughatou al-'arabiyyatou wa (i)nhadara ach-chi'rou ilà asfali al-moustawayàti.", fr:"La langue arabe s'est corrompue et la poésie est tombée au plus bas niveau.", note:1, audioUrl:null },
+    { ar:'إِسْتَوْلَى الْجُمُودُ عَلَى الْقَرَائِحِ وَسَادَ التَّكَلُّفُ وَالتَّقْلِيدُ مَعَ ضَيَاعِ الْإِبْتِكَارِ.', tr:"Istaoulà al-joumoùdou 'alà al-qarà'ihi wa sàda at-takalloufou wa at-taqlìdou ma'a dayà'i al-ibtikàri.", fr:"La sclérose s'est emparée des esprits, la préciosité et l'imitation ont dominé, avec la perte de l'originalité.", note:2, audioUrl:null },
+    { ar:'لَا يُمْكِنُنَا، لِلْحِقْبَةِ الَّتِي تَعْقُبُ عَهْدَ الْعَبَّاسِيِّينَ، أَنْ نَذْكُرَ سِوَى عَدَدٍ قَلِيلٍ مِنَ الشُّعَرَاءِ،', tr:"Là youmkinounà, lil-hiqbati allatì tou'qibou 'ahda al-'Abbàsiyyìna, an nadhkoura siwà 'adadin qalìlin min-a ach-chou'arà'i,", fr:"On ne peut retenir de l'époque qui fait suite aux Abbassides qu'un petit nombre de poètes,", audioUrl:null },
+    { ar:'مِنْهُمُ الْبُوصِيرِيُّ الَّذِي نَظَمَ قَصِيدَةَ "الْبُرْدَةِ" الشَّهِيرَةَ فِي مَدْحِ الرَّسُولِ', tr:"minhoum al-Boùsìri alladhì nazama qasìdata \"al-Bourdati\" ach-chahìrata fi madhi ar-Rasoùli", fr:"dont al-Bousiri qui a composé le célèbre poème du \"Manteau\" en éloge au Prophète", note:3, audioUrl:null },
+    { ar:'وَالَّتِي لَا يَزَالُ النَّاسُ يُنْشِدُونَهَا إِلَى يَوْمِنَا هَذَا بِمُنَاسَبَةِ عِيدِ الْمَوْلِدِ النَّبَوِيِّ.', tr:"wa allatì là yazàlou an-nàsou younchidoùnahà ilà yaouminà hadhà bi-mounàsabati 'idi al-maoulidi an-nabawiyyi.", fr:"et que les gens ne cessent de déclamer jusqu'à aujourd'hui à l'occasion de la fête de la Naissance du Prophète.", note:4, audioUrl:null },
+    { ar:'ثُمَّ، فِي مَطْلَعِ الْقَرْنِ السَّادِسِ عَشَرَ إِسْتَوْلَى الْعُثْمَانِيُّونَ عَلَى جُزْءٍ كَبِيرٍ مِنَ الْإِمْبَرَاطُورِيَّةِ الْإِسْلَامِيَّةِ الْقَدِيمَةِ.', tr:"Thoumma, fi matla'i al-qarni as-sàdisa 'achara istaoulà al-'Outhmàniyyoùna 'alà jouz'in kabìrin min-a al-imbràtoùriyyati al-islàmiyyati al-qadìmati.", fr:"Puis, au début du XVIe siècle, les Ottomans se sont emparés d'une grande partie de l'ancien empire islamique.", audioUrl:null },
+    { ar:'بِالنِّسْبَةِ لَهُمْ، كَانَتِ اللُّغَةُ الْعَرَبِيَّةُ لُغَةً أَجْنَبِيَّةً وَعَمِلُوا عَلَى فَرْضِ اللُّغَةِ التُّرْكِيَّةِ عَلَى حِسَابِهَا،', tr:"Bi-an-nisbati lahoum, kànat-i al-loughatou al-'arabiyyatou loughatan ajnabiyyatan wa 'amiloù 'alà fardi al-loughati at-tourkiyyati 'alà hisàbihà,", fr:"Pour eux, l'arabe était une langue étrangère et ils se sont efforcés d'imposer la langue turque à son détriment,", audioUrl:null },
+    { ar:'حَتَّى خَنَقُوا الْفِكْرَ وَالْخَيَالَ وَالشَّاعِرِيَّةَ لَدَى الْعَرَبِ.', tr:"hattà khanaqoù al-fikra wa al-khayàla wa ach-chà'iriyyata ladà al-'Arabi.", fr:"au point qu'ils ont étouffé la pensée, l'imagination et le sens poétique des Arabes.", audioUrl:null },
+    { ar:'أَضِفْ إِلَى ذَلِكَ سَيْطَرَةَ اللَّهَجَاتِ الْعَامِّيَّةِ الَّتِي أَفْقَرَتِ اللُّغَةَ الْعَرَبِيَّةَ الْفُصْحَى.', tr:"Adif ilà dhalika saytarata al-lahajàti al-'àmmiyyati allatì afqarat-i al-loughata al-'arabiyyata al-foushà.", fr:"Ajoutez à cela la prédominance des dialectes qui ont appauvri la langue arabe classique.", note:5, audioUrl:null },
+    { ar:'وَلَكِنْ فَوْرَ زَوَالِ الْخِلَافَةِ الْعُثْمَانِيَّةِ فِي الْقُسْطَنْطِينِيَّةِ عَامَ أَلْفٍ وَتِسْعِمِئَةٍ وَأَرْبَعَةٍ وَعِشْرِينَ (1924)،', tr:"Wa lakinna faoura zawàli al-khilàfati al-'outhmàniyyati fi al-Qoustantìniyyati 'àma alfin wa tis'imi'atin wa arba'atin wa 'ichrìna (1924),", fr:"Mais dès la disparition du califat ottoman à Constantinople en 1924,", audioUrl:null },
+    { ar:'إِنْتَعَشَتِ اللُّغَةُ الْعَرَبِيَّةُ وَآدَابُهَا نَثْرًا وَنَظْمًا،', tr:"Inta'achat-i al-loughatou al-'arabiyyatou wa àdàbouhà nathran wa nazman,", fr:"sont revenues à la vie la langue arabe et sa littérature, en prose et en poésie,", audioUrl:null },
+    { ar:'حَتَّى سُمِّيَتْ هَذِهِ الْفَتْرَةُ بِـ "عَهْدِ النَّهْضَةِ".', tr:"hattà soummiyat hadhihi al-fatratou bi-\"'ahdi an-Nahdati\".", fr:"au point que cette période a été appelée l'ère de la Renaissance.", audioUrl:null },
+    { ar:'فِي طَلِيعَةِ مَنْ كَانُوا وَرَاءَ تِلْكَ الْحَرَكَةِ عَدَدٌ مِنَ اللُّبْنَانِيِّينَ الْمَسِيحِيِّينَ', tr:"Fì tali'ati man kànoù warà'a tilka al-harakati 'adadoun min-a al-Loubnàniyyìna al-masìhiyyìna", fr:"À l'avant-garde de ceux qui furent les instigateurs de ce mouvement, il y eut un certain nombre de Libanais chrétiens", audioUrl:null },
+    { ar:'الَّذِينَ حَرَصُوا عَلَى إِثْبَاتِ تَمَسُّكِهِمْ بِعُرُوبَتِهِمْ مِنْ خِلَالِ النُّهُوضِ بِلُغَةٍ عَرَبِيَّةٍ خَالِصَةٍ وَحِمَايَتِهَا.', tr:"alladhìna harasoù 'alà ithbàti tamassoukihim bi-'ouroùbatihim min khilàli an-nouhoùdi bi-loughatin 'arabiyyatin khàlisatin wa himàyatihà.", fr:"qui ont voulu prouver leur attachement à leur arabité par la promotion et la préservation d'une langue arabe pure.", audioUrl:null },
+    { ar:'لَقَدْ شَارَكَ الْعَدِيدُ مِنَ الْمِصْرِيِّينَ وَالسُّورِيِّينَ وَالْعِرَاقِيِّينَ أَيْضًا فِي هَذِهِ الْحَرَكَةِ مِنْ أَجْلِ إِحْيَاءِ التُّرَاثِ الْقَوْمِيِّ الْفِكْرِيِّ وَالثَّقَافِيِّ', tr:"Laqad chàraka al-'adìdou min al-Misriyyìna wa as-Souriyyìna wa al-'Iràqiyyìna aydan fi hadhihi al-harakàti min ajli ihyà'i at-touràthi al-qaoumiyyi al-fikriyyi wa ath-thaqàfiyyi", fr:"Un grand nombre d'Égyptiens, de Syriens et d'Irakiens ont aussi participé à ce mouvement de revivification du patrimoine national intellectuel et culturel", audioUrl:null },
+    { ar:'عَلَى أَسَاسِ الشُّعُورِ الْقَوِيِّ بِالِانْتِمَاءِ إِلَى أُمَّةٍ عَرَبِيَّةٍ وَاحِدَةٍ.', tr:"'alà asàsi ach-chou'oùri al-qawiyyi bil-intimà'i ilà oummatin 'arabiyyatin wàhidatin.", fr:"sur la base d'un sentiment fort d'appartenance à une seule et même nation arabe.", audioUrl:null },
+    { ar:'كَمَا أَنَّ الِانْفِتَاحَ عَلَى الْأُدَبَاءِ الْغَرْبِيِّينَ لَعِبَ دَوْرًا رَاجِحًا فِي تَسْرِيعِ حَرَكَةِ النَّهْضَةِ.', tr:"Kamà anna al-infitàha 'alà al-oudabà'i al-gharbiyyìna la'iba daouran ràjihan fi tasrì'i harakati an-Nahdati.", fr:"Par ailleurs, l'ouverture vers les hommes de lettres occidentaux a joué un rôle prépondérant dans l'accélération du mouvement de la Nahda.", audioUrl:null },
+    { ar:'مِنْ بَيْنِ الشُّعَرَاءِ الْعَرَبِ الْكَثِيرِينَ التَّابِعِينَ لِهَذِهِ الْحَرَكَةِ، لَا بُدَّ مِنْ ذِكْرِ أَحْمَدَ شَوْقِي الْمُلَقَّبِ بِـ "أَمِيرِ الشُّعَرَاءِ".', tr:"Min bayni ach-chou'arà'i al-'arabi al-kathìrìna at-tàbi'ìna li-hadhihi al-harakàti, là boudda min dhikri Ahmad Chaouqi al-moulaqqabi bi-\"amìri ach-chou'arà'i\".", fr:"Parmi les nombreux poètes arabes appartenant à ce mouvement, il faut citer Ahmed Chaouqi, surnommé le Prince des poètes.", audioUrl:null },
+    { ar:'أَمَّا غَايَةُ النَّهْضَةِ فَإِنَّهَا تَتَجَسَّدُ مِنْ خِلَالِ هَذَيْنِ الْبَيْتَيْنِ حَيْثُ يَبْكِي شَوْقِي عَلَى الشَّاعِرِ الْفَقِيدِ حَافِظِ إِبْرَاهِيمَ قَائِلًا:', tr:"Ammà ghàyatou an-Nahdati fa-innahà tatajassadou min khilàli hadhayni al-baytayni haythou yabkì Chaouqi 'alà ach-chà'iri al-faqìdi Hàfiz Ibràhìm qà'ilan:", fr:"Le but poursuivi par la Nahda se trouve incarné dans ces deux vers où Chaouqi s'adresse au défunt poète Hafiz Ibrahim en ces termes :", audioUrl:null },
+    { ar:'«مَا زِلْتَ تَهْتِفُ بِالْقَدِيمِ وَفَضْلِهِ – حَتَّى حَمَيْتَ أَمَانَةَ الْقُدَمَاءِ', tr:"\"Mà zilta tahtifou bil-qadìmi wa fadlihi // hattà hamayta amànata al-qoudamà'i", fr:"\"Sans cesse tu as exalté les anciens et leurs mérites // et tu en as préservé l'intégrité,", audioUrl:null },
+    { ar:'يَا حَافِظَ الْفُصْحَى وَحَارِسَ مَجْدِهَا – وَإِمَامًا مِنْ نَجَلَتْ مِنَ الْبُلَغَاءِ.»', tr:"yà hàfiza al-foushà wa hàrisa majdihà // wa imàman min najalat min-a al-boulaghà'i.\"", fr:"toi le gardien de la classique et sentinelle de sa gloire, // à la tête des hommes d'éloquence qu'elle a engendrés.\"", note:6, audioUrl:null },
+  ],
+  notes: {
+    1: "① ilà asfali al-moustawayàti (jusqu'au plus bas niveau). Asfal dérive de safala, yasfoulou (être bas). C'est un élatif diptote, féminin souflà ; contraire a'là (plus haut), fém. 'oulyà.",
+    2: "② 'alà al-qarà'ihi (« sur les » esprits) ; qarà'ih est le pluriel de qariha(t) (talent naturel).",
+    3: "③ ar-Rasoùl, c'est-à-dire Rasoùl Allahi (le Messager de Dieu). Un musulman fait toujours suivre la mention du nom du Prophète de la formule Sallà Allahou 'alayhi wa sallama (Que Dieu prie sur lui et lui accorde le salut).",
+    4: "④ 'idi al-maoulidi (an-nabawiyy) (fête de la naissance du Prophète). Les mots maoulid et milàd signifient naissance. 'idou al-milàdi a le sens d'anniversaire, et milàd est aussi employé pour la Nativité : 'idou al-milàdi (Noël).",
+    5: "⑤ al-foushà (classique) : féminin de afsah, élatif de l'adjectif fasih, fousahà'ou (clair, éloquent). Éloquence se dit fasàha(t), à rapprocher de balàgha(t) (éloquence, rhétorique).",
+    6: "⑥ boulaghà'i, pluriel de baligh (homme d'éloquence), à rapprocher de balàgha(t).",
+  },
+  vocabBox: {
+    title: 'la Nahda et le renouveau de la langue',
+    items: [
+      { ar:'نَهْضَةٌ', tr:"Nahda(t)", fr:'Renaissance (mouvement)' },
+      { ar:'فُصْحَى', tr:"foushà", fr:'Arabe classique' },
+      { ar:'أَمِيرُ الشُّعَرَاءِ', tr:"amìrou ach-chou'arà'i", fr:'Le Prince des poètes (Ahmed Chaouqi)' },
+    ],
+  },
+  exercise1: [
+    { ar:'كَانَ تَأْثِيرُ الْمُؤَلِّفِينَ الْغَرْبِيِّينَ رَاجِحًا فِي حَرَكَةِ النَّهْضَةِ الَّتِي أَحْيَتِ اللُّغَةَ الْعَرَبِيَّةَ.', tr:"", fr:"L'influence des auteurs occidentaux a été prépondérante dans le mouvement de la Nahda qui revivifia la langue arabe." },
+    { ar:'إِسْتَوْلَى التَّقْلِيدُ عَلَى الْقَرَائِحِ حَتَّى ضَاعَ الْإِبْتِكَارُ.', tr:"", fr:"L'imitation servile s'est emparée des esprits, ce qui a entraîné une perte d'originalité." },
+    { ar:'لَا يَزَالُ النَّاسُ يُنْشِدُونَ فِي الْمَجَالِسِ الْأَدَبِيَّةِ أَبْيَاتًا لِأَكْبَرِ شُعَرَاءِ النَّهْضَةِ.', tr:"", fr:"Les gens continuent de déclamer dans les salons littéraires des vers des plus grands poètes de la Nahda." },
+    { ar:'عَمِلُوا، بِدُونِ جَدْوَى، عَلَى خَنْقِ شَاعِرِيَّةِ الْعَرَبِ.', tr:"", fr:"Ils ont essayé en vain d'étouffer le sens poétique des Arabes." },
+    { ar:'مَا زَالَ الْفَاتِحُونَ الْعُثْمَانِيُّونَ يَفْرِضُونَ اللُّغَةَ التُّرْكِيَّةَ عَلَى حِسَابِ الْعَرَبِيَّةِ.', tr:"", fr:"Les conquérants ottomans n'ont cessé d'imposer la langue turque au détriment de l'arabe." },
+  ],
+  exercise2: [
+    { fr:"La langue arabe a été corrompue par l'excès de recherche et de préciosité.", ar:'أَفْسَدَتِ اللُّغَةَ الْعَرَبِيَّةَ كَثْرَةُ التَّكَلُّفِ وَالتَّصَنُّعِ.', tr:"" },
+    { fr:"Dans tous les domaines, aussi bien littéraires qu'artistiques, la sclérose a dominé.", ar:'لَقَدْ سَادَ الْجُمُودُ فِي كَافَّةِ الْمَجَالَاتِ الْأَدَبِيَّةِ وَالْفَنِّيَّةِ.', tr:"" },
+    { fr:"Ajoutez à cela l'emploi des dialectes au détriment de la langue arabe classique.", ar:'أَضِفْ إِلَى ذَلِكَ إِسْتِعْمَالَ اللَّهَجَاتِ الْعَامِّيَّةِ عَلَى حِسَابِ اللُّغَةِ الْعَرَبِيَّةِ الْفُصْحَى.', tr:"" },
+    { fr:"Ces poètes furent les instigateurs du mouvement de la Nahda.", ar:'كَانَ هَؤُلَاءِ الشُّعَرَاءُ وَرَاءَ حَرَكَةِ النَّهْضَةِ.', tr:"" },
+    { fr:"Il faut absolument promouvoir la langue arabe classique pour préserver sa culture ancienne.", ar:'لَابُدَّ مِنَ النُّهُوضِ بِاللُّغَةِ الْعَرَبِيَّةِ الْفُصْحَى مِنْ أَجْلِ حِمَايَةِ ثَقَافَتِهَا الْعَرِيقَةِ.', tr:"" },
+  ],
+};
+const DAILY_LESSON_63 = {
+  num: 63,
+  titleFr: 'Révision — Chez le libraire',
+  titleAr: 'مُرَاجَعَةٌ',
+  fullAudioUrl: null,
+  introFr: "Révision de toute la série sur la poésie arabe : rappel de la prononciation du tà' marboùta, notions de prosodie (le vers, la rime, les mètres), formules pieuses, une grande liste de verbes irréguliers rencontrés, et des expressions utiles. Pour finir, un dialogue chez le libraire, où une demoiselle passionnée de poésie fait quelques emplettes bien choisies !",
+  dialogue: [
+    { ar:'يَا آنِسَتِي! يَبْدُو لِي أَنَّكِ مُهْتَمَّةٌ بِالشِّعْرِ.', tr:"Yà ànisatì! Yabdoù lì annaki mouhtammatoun bi-ach-chi'ri.", fr:"Mademoiselle, il me semble que vous vous intéressez à la poésie.", audioUrl:null },
+    { ar:'إِنْتَهِزِي فُرْصَةَ عَرْضِنَا الِاسْتِثْنَائِيِّ، بِمُنَاسَبَةِ الْأَعْيَادِ: نُهْدِي إِلَيْكِ كِتَابًا لِقَاءَ شِرَائِكِ كِتَابَيْنِ وَهُمَا مُجَلَّدَانِ!', tr:"Intahizì foursata 'ardinà al-istithnà'iyyi, bi-mounàsabati al-a'yàdi: nouhdì ilayki kitàban liqà'a chirà'iki kitàbayni wa houmà moujalladàni!", fr:"Profitez donc de notre offre exceptionnelle à l'occasion des fêtes : un livre offert pour deux achetés et ils sont reliés !", audioUrl:null },
+    { ar:'قَدْ يُسَاعِدُكِ ذَلِكَ عَلَى تَشْكِيلِ مَكْتَبَةٍ خَاصَّةٍ بِكِ تَشْمَلُ أَقْدَمَ وَأَرْوَعَ الْمُؤَلَّفَاتِ الْعَرَبِيَّةِ.', tr:"Qad yousà'idouki dhalika 'alà tachkìli maktabatin khàssatin biki tachmalou aqdama wa arwa'a al-mou'allafàti al-'arabiyyati.", fr:"Vous pourrez ainsi constituer votre bibliothèque personnelle des grands classiques arabes.", audioUrl:null },
+    { ar:'ضِمْنَ هَذِهِ الْمَجْمُوعَةِ، هَلْ عِنْدَكُمْ آثَارُ أَبِي نُوَاسٍ وَالْمُتَنَبِّي الَّذِي يَتَّسِمُ شِعْرُهُ بِبُعْدِ الْحِكْمَةِ وَالْأَصَالَةِ؟', tr:"Dimna hadhihi al-majmoù'ati, hal 'indakoum àtharou Abi Nouwàs wa al-Moutanabbi alladhì yattasimou chi'rouhou bi-bou'di al-hikmati wa al-asàlati?", fr:"Avez-vous dans cette collection les œuvres d'Abou Nouwas et de al-Moutanabbi, dont la poésie se distingue par une profonde sagesse et authenticité ?", audioUrl:null },
+    { ar:'نَعَمْ... تَفَضَّلِي...! وَكَذَلِكَ، عِنْدَنَا كِتَابُ الْمُعَلَّقَاتِ هَذَا الَّذِي صَدَرَ مُؤَخَّرًا وَفِيهِ صُوَرٌ بَاهِرَةٌ.', tr:"Na'am... tafaddalì...! wa ka-dhalika, 'indanà kitàbou al-mou'allaqàti hadhà alladhì sadara mou'akhkharan wa fihi souwaroun bàhiratoun.", fr:"Oui, tenez... nous avons aussi ce livre des Mou'allaqat qui vient de sortir et qui contient de très belles illustrations.", audioUrl:null },
+    { ar:'مَثَلًا: أُنْظُرِي إِلَى هَذِهِ الَّتِي تُمَثِّلُ سَمَرًا حَوْلَ النِّيرَانِ، مَعَ الرَّاوِي وَهُوَ يُنْشِدُ الْأَشْعَارَ.', tr:"Mathalan: onzourì ilà hadhihi allati toumaththilou samaran haoula an-nìràni, ma'a ar-ràwì wa h(ou)wa younchidou al-ach'àra.", fr:"Par exemple, regardez celle-ci qui représente une veillée autour des feux avec le \"ràwi\" en train de déclamer des vers !", audioUrl:null },
+    { ar:'جَمِيلَةٌ جِدًّا! وَتُعَبِّرُ حَقًّا عَنْ مَكَانَةِ إِنْشَادِ الْأَبْيَاتِ وَالْقَصَائِدِ فِي التَّقْلِيدِ الْبَدَوِيِّ؛', tr:"Jamìlatoun jiddan! wa toù'abbirou haqqan 'an makànati inchàdi al-abyàti wa al-qasà'idi fì at-taqlìdi al-badawiyyi;", fr:"Elle est superbe et elle exprime véritablement la place de la déclamation des vers et des poèmes dans la tradition bédouine...", audioUrl:null },
+    { ar:'فِي هَذِهِ الصُّورَةِ تَبْدُو الْجَمَاعَةُ كَأَنَّهَا مَسْحُورَةٌ تَمَامًا.', tr:"Fi hadhihi as-soùrati tabdoù al-jamà'atou ka'annahà mashoùratoun tamàman.", fr:"Dans cette image l'assemblée paraît totalement subjuguée.", audioUrl:null },
+    { ar:'كَذَلِكَ، هَلْ عِنْدَكُمْ آثَارٌ لِبَعْضِ الشُّعَرَاءِ الْأَنْدَلُسِيِّينَ،', tr:"Ka-dhalika, hal 'indakoum àtharoun li-ba'di ach-chou'arà'i al-andalousiyyìna,", fr:"De même, est-ce que vous avez des œuvres de certains poètes andalous,", audioUrl:null },
+    { ar:'كَإِبْنِ خَفَاجَةَ مَثَلًا الَّذِي وَصَفَ الطَّبِيعَةَ وَكَأَنَّهَا الْجَنَّةُ؟', tr:"ka-Ibn Khafàja mathalan alladhì wasafa at-tabì'ata wa ka'annahà al-jannatou?", fr:"comme Ibn Khafàja par exemple, qui a décrit la nature comme si c'était le paradis ?", audioUrl:null },
+    { ar:'دَعِينِي أُفَتِّشُ دَاخِلَ الدُّكَّانِ، وَاِنْتِظَارًا لِعَوْدَتِي، فَاجْلِسِي هُنَا وَاِشْرَبِي شَايًا أَوْ قَهْوَةً!', tr:"Da'ìnì oufattich dàkhila ad-doukkàni, wa (i)ntizàran li-'aoudatì, fa-(i)jlisì hounà wa (i)chrabì chàyan aou qahwatan!", fr:"Laissez-moi chercher dans mon arrière-boutique ; en attendant mon retour, asseyez-vous ici et prenez un thé ou un café !", audioUrl:null },
+    { ar:'يَا أَحْمَدُ! تَعَالَ فَاسْقِ الْآنِسَةَ!', tr:"Yà Ahmad! Ta'àla fa-(i)sqi al-ànisata!", fr:"Eh, Ahmad, viens et sers à boire à la demoiselle !", audioUrl:null },
+    { ar:'شُكْرًا جَزِيلًا!', tr:"Choukran jazìlan!", fr:"Merci beaucoup.", audioUrl:null },
+    { ar:'آهْ! الْحَمْدُ لِلَّهِ! فِي النِّهَايَةِ ظَفِرْنَا بِضَالَّتِنَا!', tr:"Àh! Al-hamdou lil-lahi! Fì an-nihàyati zafirnà bi-dàllatinà!", fr:"Ça y est ! Grâce à Dieu, j'ai enfin déniché ce que je cherchais !", audioUrl:null },
+    { ar:'هَذِهِ مَجْمُوعَةٌ فِيهَا الشِّعْرُ الْأَنْدَلُسِيُّ بِاللُّغَةِ الْعَرَبِيَّةِ بِكَامِلِهِ. هَلْ تُنَاسِبُكِ؟', tr:"Hadhihi majmoù'atoun fihà ach-chi'rou al-andalousiyyou bil-loughati al-'arabiyyati bi-kàmilihi. Hal tounàsibouki?", fr:"Voici une anthologie de toute la poésie andalouse en langue arabe. Cela vous convient-il ?", audioUrl:null },
+    { ar:'نَعَمْ... تَمَامًا! سُؤَالٌ آخَرُ: هَلْ يُمْكِنُ أَنْ نَجِدَ فِيهَا نُصُوصًا لِكَافَّةِ الْمُوَشَّحَاتِ؟', tr:"Na'am... tamàman!... Sou'àloun àkharou: hal youmkinou an najida fìhà nousoùsan li-kàffati al-mouwachchahàti?", fr:"Oui, parfaitement ! Encore une question. Peut-on trouver les paroles de toutes les \"mouwachchahat\" ?", audioUrl:null },
+    { ar:'هَذَا السُّؤَالُ، مِنَ الصَّعْبِ أَنْ أَرُدَّ عَلَيْهِ مِنَ الْآنَ،', tr:"Hàdhà as-sou'àlou, min-a as-sa'bi an aroudda 'alayhi min-a al-àni,", fr:"Là, vous m'en demandez beaucoup !", audioUrl:null },
+    { ar:'وَلَكِنْ إِذَا رَجَعْتِ بَعْدَ أُسْبُوعٍ، لَعَلَّنِي أَمْلِكُ مَا يُلَبِّي رَغْبَتَكِ إِنْ شَاءَ اللَّهُ!', tr:"Walakin idhà raja'ti ba'da ousboù'in, la'allanì amlikou mà youlabbì raghbataki, in chà'a (A)llahou(u)!", fr:"Mais revenez dans une semaine ; j'aurai peut-être ce que vous désirez, inch'allah !", audioUrl:null },
+  ],
+  notes: {
+    1: "① Rappel : le tà' marboùta ne se prononce généralement pas (sauf liaison ou annexion) : sayyàratoun jamìlatoun se prononce sayyàra jamìla, mais khilàfatou Qourtoubata (leçon 61) se prononce khilàfat Qourtouba — le t final de l'annexion doit toujours s'entendre.",
+    2: "② Le vers (bayt, pl. abyàt, « maison/tente ») : un poème est composé de distiques ayant chacun une autonomie propre. Les deux hémistiches d'un vers sont ach-chatrou al-awwal et ach-chatrou ath-thànì. Un distique isolé s'appelle mounfarid ou yatìm (« orphelin ») ; sept distiques ou plus forment une qasìda(t) (ode, poème).",
+    3: "③ La rime (qàfiya(t), qawàfin, « nuque, occiput ») : les poèmes arabes sont en principe monorimes et portent le nom de leur lettre de rime : an-noùniyya(t) (en noùn), al-làmiyya(t) (en làm), etc.",
+    4: "④ La prosodie (al-'aroùd) et la métrique (al-bouhoùr) ont été codifiées par al-Khalìl ben Ahmad al-Faràhìdì (Bassora, 718-786). Le mot bahr (mer) désigne le mètre poétique, par analogie avec le mouvement des vagues — son pluriel est bouhoùr (≠ bihàr, pluriel de « mer »).",
+    5: "⑤ Formules pieuses : ar-Rasoùl / Rasoùl Allahi (le Messager de Dieu), suivi de Sallà Allahou 'alayhi wa sallama (Que Dieu prie sur lui et lui accorde le salut) ou 'alayhi as-salàt(ou) wa as-salàm(ou).",
+  },
+  vocabBox: {
+    title: 'le vers et la prosodie',
+    items: [
+      { ar:'بَيْتٌ', tr:"bayt, pl. abyàt", fr:'Vers, distique' },
+      { ar:'قَافِيَةٌ', tr:"qàfiya(t)", fr:'Rime' },
+      { ar:'قَصِيدَةٌ', tr:"qasìda(t)", fr:'Ode, poème' },
+      { ar:'بَحْرٌ', tr:"bahr, pl. bouhoùr", fr:'Mètre poétique' },
+      { ar:'ظَفِرَ بِضَالَّتِهِ', tr:"zafira bi-dàllatihi", fr:'Dénicher ce qu\u2019on cherchait' },
     ],
   },
   exercise1: [],
   exercise2: [],
   isRevision: true,
-  revisionNote: "⚠️ Cette leçon vient à peine de commencer : seules les 4 premières phrases sont disponibles, la suite du récit ainsi que les exercices n'ont pas encore été transcrits. Dès que la suite sera fournie, cette leçon sera complétée.",
+  revisionNote: "Cette leçon est une leçon de révision : pas de nouvel exercice de traduction classique. Le dialogue ci-dessus (chez le libraire) EST l'exercice de révision du manuel — profites-en pour bien l'écouter et le comprendre ! Relis aussi les tableaux de grammaire ci-dessus (prosodie, formules pieuses, verbes irréguliers de toute la série sur la poésie).",
 };
 
-const ALL_LESSONS = { 1: DAILY_LESSON_1, 2: DAILY_LESSON_2, 3: DAILY_LESSON_3, 4: DAILY_LESSON_4, 5: DAILY_LESSON_5, 6: DAILY_LESSON_6, 7: DAILY_LESSON_7, 8: DAILY_LESSON_8, 9: DAILY_LESSON_9, 10: DAILY_LESSON_10, 11: DAILY_LESSON_11, 12: DAILY_LESSON_12, 13: DAILY_LESSON_13, 14: DAILY_LESSON_14, 15: DAILY_LESSON_15, 16: DAILY_LESSON_16, 17: DAILY_LESSON_17, 18: DAILY_LESSON_18, 19: DAILY_LESSON_19, 20: DAILY_LESSON_20, 21: DAILY_LESSON_21, 22: DAILY_LESSON_22, 23: DAILY_LESSON_23, 24: DAILY_LESSON_24, 25: DAILY_LESSON_25, 26: DAILY_LESSON_26, 27: DAILY_LESSON_27, 28: DAILY_LESSON_28, 29: DAILY_LESSON_29, 30: DAILY_LESSON_30, 31: DAILY_LESSON_31, 32: DAILY_LESSON_32, 33: DAILY_LESSON_33, 34: DAILY_LESSON_34, 35: DAILY_LESSON_35, 36: DAILY_LESSON_36, 37: DAILY_LESSON_37, 38: DAILY_LESSON_38, 39: DAILY_LESSON_39, 40: DAILY_LESSON_40, 49: DAILY_LESSON_49, 50: DAILY_LESSON_50, 51: DAILY_LESSON_51, 52: DAILY_LESSON_52, 53: DAILY_LESSON_53, 54: DAILY_LESSON_54, 55: DAILY_LESSON_55, 56: DAILY_LESSON_56, 57: DAILY_LESSON_57 };
+const DAILY_LESSON_64 = {
+  num: 64,
+  titleFr: 'Téléphone et multimédias',
+  titleAr: 'الْهَاتِفُ وَالْوَسَائِطُ الْمُتَعَدِّدَةُ',
+  fullAudioUrl: null,
+  introFr: "Dans cette dernière série de leçons, place à des phrases utiles relevant de domaines divers (nouvelles technologies, cinéma, théâtre, photographie, problèmes domestiques, monde des affaires...) plutôt qu'à des dialogues ou récits. Le vouvoiement, plus fréquent ici, reflète l'usage des relations commerciales internationales.",
+  dialogue: [
+    { ar:'لَا بُدَّ مِنْ تَبْدِيلِ بَطَّارِيَّةِ الْهَاتِفِ بِلَا سِلْكٍ فَإِنَّهَا صَارَتْ عَاجِزَةً عَنْ إِعَادَةِ الشَّحْنِ.', tr:"Là boudda min tabdìli battàriyyati al-hàtifi bi-là-silkin fa-innahà sàrat 'àjizatan 'an i'àdati ach-chahni.", fr:"La batterie du téléphone sans fil doit être changée, car elle ne charge plus.", note:1, audioUrl:null },
+    { ar:'مِنْ أَجْلِ الظَّفَرِ بِسَمَّاعَتِكَ الضَّائِعَةِ فِي مَكَانٍ مَا دَاخِلَ الْغُرْفَةِ، عَلَيْكَ الضَّغْطُ عَلَى هَذَا الزِّرِّ الْمَوْجُودِ فِي قَاعِدَةِ الْهَاتِفِ:', tr:"Min ajli az-zafari bi-sammà'atika ad-dà'i'ati fi makànin mà dàkhila al-ghourfati, 'alayka ad-daghtou 'alà hadhà az-zirri al-maoujoùdi fì qà'idati al-hàtifi:", fr:"Si vous avez égaré le combiné, pour le retrouver, il vous faut appuyer sur ce bouton de la base du téléphone :", note:2, audioUrl:null },
+    { ar:'حِينَئِذٍ سَوْفَ تَبُثُّ السَّمَّاعَةُ إِنْذَارًا صَوْتِيًّا "بِيبْ - بِيبْ" فَتَظْفَرُ بِضَالَّتِكَ !', tr:"Hìna'idhin saoufa taboutthou as-sammà'atou indhàran saoutiyyan \"bìb bìb\" fa-tazfarou bi-dàllatika!", fr:"Le combiné émettra alors un avertissement sonore \"bip bip\" et vous retrouverez \"votre égarée\" !", audioUrl:null },
+    { ar:'لَا تَنْسَ مُرَاجَعَةَ مُسَجَّلَةِ رَسَائِلِكَ كُلَّ يَوْمٍ؛ بَعْدَ ذَلِكَ عَلَيْكَ إِلْغَاءُ الرَّسَائِلِ.', tr:"Là tansa mourâja'ata mousajjilati rasà'ilika koulla yaoumin; ba'da dhalika 'alayka ilghà'ou ar-rasà'ili.", fr:"N'oubliez pas de consulter chaque jour votre messagerie et de supprimer ensuite les messages.", audioUrl:null },
+    { ar:'رَنَّ جَرَسُ الْهَاتِفِ: رَفَعْتُ السَّمَّاعَةَ وَسَمِعْتُ صَوْتًا عَذْبًا يَقُولُ لِي :', tr:"Ranna jarasou al-hàtifi: rafa'tou as-sammà'ata wa sami'tou saoutan 'adhban yaqoùlou lì:", fr:"Le téléphone a sonné : j'ai décroché et j'ai entendu une voix suave me dire :", audioUrl:null },
+    { ar:'«أَنَا نِينَا، مِنْ شَرِكَةِ" النَّوْمِ الْمُرِيحِ". أَعْرِضُ عَلَيْكَ مَفْرُوشَاتٍ جَدِيدَةً، بِأَسْعَارٍ لَا تُضَاهَى !»', tr:"\"Anà Nìnà, min charikati \"An-naoumi al-mourìhi\". A'ridou 'alayka mafroùchàtin jadìdatan, bi-as'àrin là toudàhà!\"", fr:"\"Je suis Nina de la société \"Doux-sommeil\". Je vous propose une nouvelle literie à des prix imbattables !\"", note:3, audioUrl:null },
+    { ar:'«شُكْرًا! لَدَيَّ مَا يَكْفِي!» وَأَغْلَقْتُ الْخَطَّ بِوَجْهِهَا.', tr:"\"Choukran! Ladayya mà yakfì!\" Wa aghlaqtou al-khatta bi-wajhihà.", fr:"\"Merci ! J'ai ce qu'il me faut !\" Et je lui ai raccroché au nez.", audioUrl:null },
+    { ar:'لِإِعَادَةِ شَحْنِ هَاتِفِكَ الْمَحْمُولِ، عَلَيْكَ رَبْطُهُ بِالشَّاحِنِ.', tr:"Li-i'àdati chahni hàtifika al-mahmoùli, 'alayka rabtouhou bi-ach-chàhini.", fr:"Pour recharger votre portable, vous devez le brancher au chargeur.", note:4, audioUrl:null },
+    { ar:'قُطِعُوا الْخَطَّ ؛ الِاتِّصَالُ سَيِّئٌ هُنَا، الشَّبَكَةُ مَعْدُومَةٌ حَالِيًّا.', tr:"Qata'où al-khatta ; al-ittisàlou sayyi'oun hounà, ach-chabakatou ma'doùmatoun hàliyyan.", fr:"Nous avons été coupés ; cela capte mal ici, il n'y a pas de réseau en ce moment.", audioUrl:null },
+    { ar:'لِهَذَا الْمَحْمُولِ قُدُرَاتٌ وَاسِعَةٌ إِذْ يُمْكِنُهُ أَنْ يَحْفَظَ فِي الذَّاكِرَةِ عِدَّةَ مِئَاتٍ مِنْ أَرْقَامِ الْهَاتِفِ،', tr:"Li-hadhà al-mahmoùli qoudouràtoun wàsi'atoun idh youmkinouhou an yahfaza fi adh-dhàkirati 'iddata mi'àtin min arqàmi al-hàtifi,", fr:"Ce portable a de grandes capacités : il peut garder en mémoire plusieurs centaines de numéros de téléphone,", audioUrl:null },
+    { ar:'فَضْلًا عَنْ تَوْجِيهِ رَسَائِلَ نَصِّيَّةٍ (إِس-إِم-إِس) وَصُوَرٍ وَفِيدْيُو وَمَقْطُوعَاتٍ مُوسِيقِيَّةٍ وَدُخُولِ الْإِنْتِرْنِتْ أَيْضًا: إِنَّهَا لُعْبَةٌ حَقِيقِيَّةٌ.', tr:"fadlan 'an taoujìhi rasà'ila nassiyyatin (SMS is-im-is) wa souwarin wa fidyoù wa maqtoù'àtin moùsìqiyyatin wa doukhoùli al-intarnat aydan : innahà lou'batoun haqìqiyyatoun.", fr:"outre envoyer des SMS, des photos, des vidéos, des morceaux de musique et aller sur internet également : c'est un vrai gadget !", audioUrl:null },
+    { ar:'كَمَا يَسْمَحُ بِمُشَاهَدَةِ التِّلِفِزْيُونِ وَقَدْ يُسْتَخْدَمُ كَـ" جِي بِي إِس" وَحَتَّى كَبِطَاقَةِ إِئْتِمَانٍ.', tr:"Kamà yasmahou bi-mouchàhadati at-tilifizyoùni wa qad youstakhdamou ka-\"jì bì is\" wa hattà ka-bitàqati (i)'timànin.", fr:"Il permet aussi de regarder la télévision, peut servir de GPS et même de carte de crédit.", audioUrl:null },
+    { ar:'إِنَّهُ فِي الْوَاقِعِ، يَكُونُ بِمَثَابَةِ حَاسُوبٍ مُصَغَّرٍ إِلَّا أَنَّ اِسْتِعْمَالَهُ مُعَقَّدٌ لِلْغَايَةِ', tr:"Innahou, fi al-wàqi'i, yakoùnou bi-mathàbati hàsoùbin mousaghgharin illà anna isti'màlahou mou'aqqadoun lil-ghàyati", fr:"En fait, c'est une sorte de mini-ordinateur, mais son maniement est trop compliqué", note:5, audioUrl:null },
+    { ar:'بِالنِّسْبَةِ لِلْمُسِنِّينَ الَّذِينَ لَا تَدْفَعُهُمْ بَوَاعِثُ قَوِيَّةٌ !', tr:"bi-an-nisbati lil-mousinnìna alladhìna là tadfa'ouhoum bawà'ithou qawiyyatoun !", fr:"pour les seniors peu motivés !", audioUrl:null },
+    { ar:'تَقُومُ الْبَرَامِجِيَّاتُ الْمُتَعَدِّدَةُ الْوَسَائِطِ بِتَجْسِيدِ كَافَّةِ الْمَعْلُومَاتِ', tr:"Taqoùmou al-baràmijiyyàtou al-mouta'addidatou al-wasà'iti bi-tajsìdi kàffati al-ma'loùmàti", fr:"Les logiciels multi-média matérialisent toutes les informations", audioUrl:null },
+    { ar:'فَتَجْعَلُهَا أَكْثَرَ جَاذِبِيَّةً عَنْ طَرِيقِ اِسْتِخْدَامِ الصَّوْتِ وَالصُّورَةِ.', tr:"fa-taj'alouhà aktharà jàdhibiyyatan 'an tariqi (i)stikhdàmi as-saouti wa as-soùrati.", fr:"et les rendent plus attractives par l'utilisation du son et de l'image.", audioUrl:null },
+    { ar:'جَاءَتْ تِقْنِيَّةُ بَرَامِجِيَّاتِ قِرَاءَةِ ذَاكِرَةِ الْقُرْصِ الْمُدْمَجِ الْمَعْرُوفِ بِإِسْمِ" سِي دِي" لِإِحْدَاثِ ثَوْرَةٍ فِي عَالَمِ الْأُسْطُوَانَاتِ التَّقْلِيدِيَّةِ.', tr:"Jà'at taqniyyatou baràmijiyyàti qirà'ati dhàkirati al-qoursi al-moudmaji al-ma'roùfi bi-ismi \"sì dì\" li-ihdàthi thaouratin fi 'àlami al-oustouwànàti at-taqlidiyyati.", fr:"La technique des logiciels de lecture de la mémoire du disque intégré connu sous le nom de CD a révolutionné le monde des disques traditionnels.", audioUrl:null },
+    { ar:'وَضَعَتْ شَرِكَتُنَا اِسْتِرَاتِيجِيَّةً جَدِيدَةً تَهْدِفُ إِلَى تَطْوِيرِ أَنْظِمَةِ الْإِتِّصَالِ.', tr:"Wada'at charikatounà istràtìjiyyatan jadìdatan tahdifou ilà tatwìri anzimati al-ittisàli.", fr:"Notre société a mis sur pied une nouvelle stratégie pour développer les systèmes de communication.", audioUrl:null },
+    { ar:'بِوَاسِطَةِ هَذَا النِّظَامِ الْحَدِيثِ، يُمْكِنُ إِجْرَاءُ مُنَاقَشَاتٍ عَنْ بُعْدٍ، عَنْ طَرِيقِ الْفِيدْيُو مِنْ خِلَالِ شَاشَاتِ الْحَوَاسِيبِ.', tr:"Bi-wàsitati hadhà an-nizàmi al-hadìthi, youmkinou ijrà'ou mounàqachàtin 'an bou'din, 'an tariqi al-fidyoù min khilàli chàchàti al-hawàsibi.", fr:"Grâce à ce système moderne, on peut tenir des vidéo-conférences au travers des écrans d'ordinateurs.", audioUrl:null },
+    { ar:'تَتَطَوَّرُ الْوَسَائِلُ لِجَمْعِ وَتَخْزِينِ وَتَبَادُلِ الْمَعْلُومَاتِ بِشَكْلٍ مُتَسَارِعٍ.', tr:"Tatatawwarou al-wasà'ilou li-jam'i wa takhzìni wa tabàdouli al-ma'loùmàti bi-chaklin moutasàri'in.", fr:"Les moyens de réunir, de stocker et d'échanger les informations se développent de manière accélérée.", audioUrl:null },
+    { ar:'يَتَسَنَّى لِأَيِّ شَخْصٍ مِنْ أَيِّ مَكَانٍ فِي الْعَالَمِ أَنْ يَحْصُلَ عَلَى أَيَّةِ مَعْلُومَةٍ فِي أَيِّ مَجَالٍ مِنَ الْمَجَالَاتِ.', tr:"Yatasannà li-ayyi chakhsin min ayyi makànin fi al-'àlami an yahsoula 'alà ayyati ma'loùmatin fi ayyi majàlin min-a al-majàlàti.", fr:"N'importe qui peut, de n'importe quel endroit dans le monde, accéder à n'importe quelle information dans n'importe quel domaine.", audioUrl:null },
+    { ar:'يُؤَكِّدُ خُبَرَاءُ الصِّنَاعَةِ الْمَعْلُومَاتِيَّةِ أَنَّ التَّجْهِيزَاتِ الْعَصْرِيَّةَ سَوْفَ تَعْتَمِدُ أَكْثَرَ فَأَكْثَرَ عَلَى التِّكْنُولُوجِيَا الرَّقْمِيَّةِ.', tr:"You'akkidou khoubarà'ou as-sinà'ati al-ma'loùmàtiyyati anna at-tajhìzàti al-'asriyyata saoufa ta'tamidou akthara fa-akthara 'alà at-tiknoùloùjiyà ar-raqmiyyati.", fr:"Les experts de l'industrie informatique assurent que les équipements modernes s'appuieront de plus en plus sur la technologie numérique.", audioUrl:null },
+    { ar:'يَشْمَلُ مَجَالُ نَشَاطِنَا كُلَّ مَا يَتَعَلَّقُ بِالْهَاتِفِ وَالْفِيدْيُو وَالْفَاكْسِ وَالْإِنْتِرْنِتْ، فَضْلًا عَنْ أَجْهِزَةِ إِرْسَالٍ وَإِسْتِقْبَالِ الْبَيَانَاتِ.', tr:"Yachmalou majàlou nachàtinà koulla mà yata'allaqou bil-hàtifi wa al-fidyoù wa al-fàks wa al-intarnat, fadlan 'an ajhizati irsàli wa (i)stiqbàli al-bayànàti.", fr:"Notre domaine d'activité s'étend à tout ce qui concerne le téléphone, la vidéo, le fax et l'internet ainsi que les appareils d'émission et de réception de données.", audioUrl:null },
+  ],
+  notes: {
+    1: "① 'àjizatan 'an i'àdati ach-chahni (elle ne charge plus). Le mot i'àdat (retour) exprime la répétition et les mots français en re- : i'àdatou al-qirà'ati (relecture), i'àdatou an-nazari (révision), i'àdatou at-tarkìbi (remontage). Ce masdar est celui de a'àda, you'ìdou (IVe forme de 'àda, revenir). Pour dire « bis », on emploie a'id! (« répète »).",
+    2: "② ad-daghtou 'alà (la pression sur). Ce mot s'emploie aussi pour la tension artérielle : daghtou ad-dami (« la pression du sang »).",
+    3: "③ bi-as'àrin là toudàhà (à des prix imbattables, « elle n'est pas comparée »).",
+    4: "④ bi-ach-chàhini (sur le chargeur). Chargeur se dit aussi mouhammil. La racine chahana et le verbe de IIe forme hammala, youhammilou signifient tous deux charger. Mahmoùl (portable) est le participe passif de hamala, yahmilou (porter).",
+    5: "⑤ hàsoùbin mousaghgharin (mini-ordinateur, « ordinateur rapetissé »). Mousaghghar est le participe passif du verbe de IIe forme saghghara, yousaghghirou (rendre petit, rapetisser, miniaturiser). Minibus se dit tout simplement bàsoun saghìroun (« petit bus »).",
+  },
+  vocabBox: {
+    title: 'le téléphone et le multimédia',
+    items: [
+      { ar:'هَاتِفٌ', tr:"hàtif", fr:'Téléphone' },
+      { ar:'سَمَّاعَةٌ', tr:"sammà'a(t)", fr:'Combiné, écouteur' },
+      { ar:'شَاحِنٌ', tr:"chàhin", fr:'Chargeur' },
+      { ar:'رِسَالَةٌ', tr:"risàla(t)", fr:'Message' },
+    ],
+  },
+  exercise1: [
+    { ar:'لَا، أَرْفُضُ رَفْضًا قَاطِعًا شِرَاءَ ذَلِكَ الْمَحْمُولِ الْمُتَطَوِّرِ وَالْمُعَقَّدِ لِلْغَايَةِ.', tr:"", fr:"Non, je refuse catégoriquement d'acheter ce portable sophistiqué et extrêmement compliqué." },
+    { ar:'إِنَّنِي مُتَقَاعِدٌ لَا تَدْفَعُهُ بَوَاعِثُ قَوِيَّةٌ لِلْإِسْتِخْدَامِ مِثْلِ هَذِهِ اللُّعَبِ !', tr:"", fr:"Moi, je suis un retraité peu emballé par l'utilisation de tels gadgets !" },
+    { ar:'اِنْقَطَعَ الِاتِّصَالُ لِأَنَّ الْقِطَارَ دَخَلَ نَفَقًا فِي هَذِهِ اللَّحْظَةِ.', tr:"", fr:"La communication a été coupée parce que le train est entré dans un tunnel en ce moment." },
+    { ar:'عَلَيْكَ أَنْ تَشْحَنَ ضِمْنَ حَاسُوبِكَ الصُّوَرَ الَّتِي اِلْتَقَطْتَهَا بِوَاسِطَةِ آلَتِكَ الرَّقْمِيَّةِ.', tr:"", fr:"Tu dois charger dans ton ordinateur les photos que tu as prises avec ton appareil numérique." },
+    { ar:'كُلَّمَا هَاتَفَنِي أَحَدٌ لِيَبِيعَ لِي شَيْئًا، كُلَّمَا أَغْلَقْتُ الْخَطَّ بِوَجْهِهِ.', tr:"", fr:"Chaque fois que quelqu'un me téléphone pour me vendre quelque chose, je lui raccroche au nez." },
+  ],
+  exercise2: [
+    { fr:"Zut ! La batterie de mon portable est déchargée : prête-moi le tien !", ar:'يَا لِلْخَسَارَةِ ! بَطَّارِيَّةُ هَاتِفِيَ الْمَحْمُولُ فَارِغَةٌ ؛ أَعِرْنِي جِهَازَكَ !', tr:"" },
+    { fr:"Hier, je t'ai adressé un message par internet : l'as-tu reçu ou non ?", ar:'اَلْبَارِحَةَ وَجَّهْتُ إِلَيْكَ رِسَالَةً عَنْ طَرِيقِ الْإِنْتِرْنِتْ : هَلْ حَصَلْتَ عَلَيْهَا أَمْ لَا ؟', tr:"" },
+    { fr:"Non, je n'ai pas encore consulté la messagerie.", ar:'لَا، إِلَى الْآنَ، لَمْ أُرَاجِعْ مُسَجَّلَةَ الرَّسَائِلِ.', tr:"" },
+    { fr:"Le téléphone sonne : décroche s'il te plaît et réponds, toi.", ar:'يَرِنُّ جَرَسُ الْهَاتِفِ ؛ إِرْفَعِ السَّمَّاعَةَ مِنْ فَضْلِكَ، وَأَجِبْ أَنْتَ !', tr:"" },
+    { fr:"Désolé ! J'ai supprimé, par erreur, ton message téléphonique !", ar:'آسِفٌ ! أَلْغَيْتُ، خَطَأً، رِسَالَتَكَ الْهَاتِفِيَّةَ !', tr:"" },
+  ],
+};
+const DAILY_LESSON_65 = {
+  num: 65,
+  titleFr: 'Informatique',
+  titleAr: 'الْمَعْلُومَاتِيَّةُ',
+  fullAudioUrl: null,
+  introFr: "Une série de phrases utiles sur l'informatique : lutte contre la cybercriminalité, usage du courrier électronique, sauvegarde de documents, raccourcis clavier et bonnes pratiques.",
+  dialogue: [
+    { ar:'تَمَّ إِنْشَاءُ مَكْتَبٍ لِمُكَافَحَةِ الْجَرَائِمِ الْمَعْلُومَاتِيَّةِ وَالدِّفَاعِ عَنِ الْمِلْكِيَّةِ الْفِكْرِيَّةِ.', tr:"Tamma inchà'ou maktabin li-moukàfahati al-jarà'imi al-ma'loùmàtiyyati wa ad-difà'i 'an-i al-milkiyyati al-fikriyyati.", fr:"Un bureau de lutte contre les délits informatiques et la défense de la propriété intellectuelle a été créé.", note:1, audioUrl:null },
+    { ar:'مِنْ بَيْنِ مَهَامِّهِ مُكَافَحَةُ الصُّنْعِ غَيْرِ الشَّرْعِيِّ لِأَقْرَاصٍ مَضْغُوطَةٍ وَالْقَرْصَنَةُ مِنْ خِلَالِ شَبَكَةِ الْإِنْتِرْنِتْ،', tr:"Min bayni mahàmmihi moukàfahatou as-soun'i ghayri ach-char'iyyi li-aqràsin madghoùtatin wa al-qarsanati min khilàli chabakati al-intarnat,", fr:"Parmi ses missions, la lutte contre la fabrication illégale de CD, le piratage par le réseau internet,", audioUrl:null },
+    { ar:'وَاِخْتِرَاقَ الْأَنْظِمَةِ الْمَعْلُومَاتِيَّةِ وَسَرِقَةَ بَعْضِ الْمِلَفَّاتِ وَبَثَّ الْفِيرُوسَاتِ.', tr:"wa (i)khtiràqa al-anzimati al-ma'loùmàtiyyati wa sariqata ba'di al-milaffàti wa baththi al-fìroùsàti.", fr:"l'infiltration des systèmes informatiques, le vol de dossiers et l'émission de virus.", audioUrl:null },
+    { ar:'تَدْخُلُونَ الْإِنْتِرْنِتْ وَتَتَنَقَّلُونَ عَبْرَ الشَّبَكَاتِ مِنْ أَجْلِ الِاتِّصَالِ بِغَيْرِكُمْ مِنْ رُوَّادِ الْإِنْتِرْنِتْ.', tr:"Tadkhouloùna al-intarnat wa tatanaqqaloùna 'abra ach-chabakàti min ajli al-ittisàli bi-ghayrika min rouwwàdi al-intarnat.", fr:"Vous allez sur internet et vous naviguez sur la toile pour contacter d'autres internautes.", audioUrl:null },
+    { ar:'لِإِجْرَاءِ بَحْثٍ مَا، يَكْفِي تَسْجِيلُ الْكَلِمَاتِ مَفَاتِيحِ الْخَاصَّةِ بَحْثِكَ ثُمَّ النَّقْرُ عَلَيْهَا.', tr:"Li-ijrà'i bahthin mà, yakfi tasjìlou al-kalimàti mafàtìhi al-khàssati bi-bahthika thoumma an-naqrou 'alayhà.", fr:"Pour faire une recherche quelconque, il suffit d'inscrire les mots clés de votre recherche et de cliquer dessus.", note:2, audioUrl:null },
+    { ar:'لِإِرْسَالِ رِسَالَةٍ إِلِكْتْرُونِيَّةٍ أَدْخُلْ" مُسَجَّلَةَ الرَّسَائِلِ" ثُمَّ" عُلْبَةَ الْإِرْسَالِ"، ثُمَّ أُنْقُرْ عَلَى" أُكْتُبْ رِسَالَةً" (أَوْ" رِسَالَةٌ جَدِيدَةٌ").', tr:"Li-irsàli risàlatin iliktroùniyyatin oudkhoul \"mousajjilata ar-rasà'ili\" thoumma \"'oulbata al-irsàli\", thoumma ounqour 'alà \"ouktoub risàlatan\" (aou \"risàlatoun jadìdatoun\").", fr:"Pour envoyer un message électronique, allez dans \"messagerie\", puis \"boîte d'envoi\", puis cliquez sur \"Créer un message\", ou \"Nouveau message\" ;", audioUrl:null },
+    { ar:'ثُمَّ سَجِّلِ الْعُنْوَانَ الْإِلِكْتْرُونِيَّ لِمُرَاسِلِكَ وَمَوْضُوعَ بَرِيدِكَ، ثُمَّ حَرِّرْ رِسَالَتَكَ ثُمَّ أَرْسِلْهَا.', tr:"thoumma sajjil al-'ounwàna al-iliktroùniyya li-mouràsilika wa maoudoù'a barìdika, thoumma harrir risàlataka thoumma arsilhà.", fr:"inscrivez l'adresse e-mail de votre correspondant et l'objet de votre courrier, puis rédigez votre message et envoyez-le.", note:3, audioUrl:null },
+    { ar:'إِذَا رَغِبْتَ فِي إِرْسَالِ وَثِيقَةٍ مُرْفَقَةٍ، أُنْقُرْ عَلَى صُورَةِ مِشْبَكٍ وَرَقِيٍّ أَوْ" أَضِفْ"،', tr:"Idhà raghibta fi irsàli wathìqatin mourfaqatin, ounqour 'alà soùrati michbaki waraqin aou \"adif\",", fr:"Si vous souhaitez envoyer une pièce jointe, cliquez sur l'image d'un trombone ou \"Joindre\",", audioUrl:null },
+    { ar:'ثُمَّ ابْحَثْ عَنِ الْوَثِيقَةِ الْمَطْلُوبَةِ، أُنْقُرْ عَلَيْهَا، ثُمَّ أَرْسِلْهَا إِلَى الْمُرْسَلِ إِلَيْهِ. وَاِنْتَهَى الْأَمْرُ !', tr:"thoumma ibhath 'an-i al-wathìqati al-matloùbati, ounqour 'alayhà, thoumma arsilhà ilà al-moursali ilayhi. Wa intahà al-amrou !", fr:"cherchez le document voulu, cliquez dessus puis envoyez-le vers son destinataire. Et le tour est joué !", audioUrl:null },
+    { ar:'لِمُرَاجَعَةِ رَسَائِلِكَ، ادْخُلْ" عُلْبَةَ الِاسْتِقْبَالِ" وَاسْتَعْرِضْ كَافَّةَ الرَّسَائِلِ الْجَدِيدَةِ.', tr:"Li-mouràja'ati rasà'ilika, oudkhoul \"'oulbata al-istiqbàli\" wa (i)sta'rid kàffata ar-rasà'ili al-jadìdati.", fr:"Pour consulter vos messages, allez dans \"boîte de réception\", et faites défiler tous les nouveaux messages.", audioUrl:null },
+    { ar:'أَلْغِ الَّتِي لَا تُفِيدُكَ أَوِ الَّتِي تَأْتِي مِنْ مَجْهُولِينَ لِأَنَّهَا قَدْ تَحْمِلُ فِيرُوسَاتٍ.', tr:"Alghi allatì là toufìdouka aou-i allatì ta'tì min majhoùlìna li'annahà qad tahmilou fìroùsàtin.", fr:"Supprimez ceux qui sont sans intérêt ou venant d'inconnus, car ils peuvent être porteurs de virus.", audioUrl:null },
+    { ar:'كَمَا يُمْكِنُكَ أَيْضًا تَحْوِيلُ الرِّسَالَةِ الْمُسْتَلَمَةِ أَوِ الْوَثِيقَةِ الْمُرْفَقَةِ إِلَى مُرَاسِلِينَ آخَرِينَ.', tr:"Kamà youmkinouka aydan tahwìlou ar-risàlati al-moustalamati aou-i al-wathìqati al-mourfaqati ilà mouràsilìna àkharìna.", fr:"Vous pouvez aussi transférer le message reçu ou la pièce jointe à d'autres correspondants.", note:4, audioUrl:null },
+    { ar:'أَشْعِلْ حَاسُوبَكَ وَاِفْتَحْ مَكْتَبَكَ وَاِنْتَقِ (إِخْتَرْ) الْمِلَفَّ ثُمَّ الْوَثِيقَةَ الَّتِي تُرِيدُ التَّعَامُلَ مَعَهَا.', tr:"Ach'il hàsoùbaka wa (i)ftah maktabaka wa (i)ntaqi (ikhtar) al-milaffa thoumma al-wathìqata allatì tourìdou at-ta'àmoula ma'ahà.", fr:"Allumez votre ordinateur, ouvrez votre bureau et sélectionnez le dossier, puis le document sur lequel vous voulez travailler.", audioUrl:null },
+    { ar:'سَجِّلْ، بِتَكْرَارٍ، الصَّفَحَاتِ الْمُحَصَّلَةَ وَلِحِفْظِ الْعَمَلِ الْجَارِي فِي الذَّاكِرَةِ، يُمْكِنُكَ أَنْ تَسْتَخْدِمَ أَيْضًا مَلْمَسًا لِلْمُخْتَزَلِ Alt + S', tr:"Sajjil, bi-takràrin, as-safahàti al-mouhassalata wa li-hifzi al-'amali al-jàrì fi adh-dhàkirati, youmkinouka an tastakhdima aydan malmasan lil-moukhtazali Alt + S (alt zà'id is).", fr:"Enregistrez fréquemment les pages saisies et pour sauvegarder le travail en cours, vous pouvez aussi utiliser une touche de raccourci, Alt + S.", note:5, audioUrl:null },
+    { ar:'عَلَيْكَ اِسْتِخْدَامُ بَرَامِجِيَّاتٍ جَيِّدَةٍ لِمُعَالَجَةِ النُّصُوصِ وَلِأَعْمَالِ الْمُحَاسَبَةِ أَوْ لِإِعْدَادِ الْجَدَاوِلِ فَهُنَاكَ بَرَامِجِيَّاتٌ خَاصَّةٌ.', tr:"'Alayka (i)stikhdàmou baràmijiyyàtin jayyidatin li-mou'àlajati an-nousoùsi aou-i li-a'màli al-mouhàsabati aou li-i'dàdi al-jadàwili fa-hounàka baràmijiyyàtoun khàssatoun.", fr:"Vous devez utiliser un bon logiciel de traitement de texte, et pour la comptabilité ou établir des tableaux, il y a des logiciels spécifiques.", audioUrl:null },
+    { ar:'كَذَلِكَ، يُمْكِنُكَ حِفْظُ وَثَائِقِكَ عَلَى قُرْصٍ مُدْمَجٍ (سِي دِي) أَوْ عَلَى مِفْتَاحِ "يُو إِس بِي" أَوْ عَلَى قُرْصٍ صُلْبٍ خَارِجِيٍّ.', tr:"Kadhalika, youmkinouka hifzou wathà'iqika 'alà qoursin moudmajin (si dì) aou 'alà miftàhin \"yoù is bì\" (USB) aou 'alà qoursin soulbin khàrijiyyin.", fr:"Vous pouvez aussi sauvegarder vos documents sur un CD ou sur une clé USB ou sur un disque dur externe.", audioUrl:null },
+    { ar:'إِعْمَلْ نَقْرًا مُزْدَوِجًا عَلَى الْمِلَفِّ الَّذِي تُرِيدُ فَتْحَهُ، وَلِإِغْلَاقِ النَّافِذَةِ، أُنْقُرْ عَلَى الزَّاوِيَةِ الْعُلْيَا إِلَى الْجَانِبِ الْأَيْمَنِ.', tr:"I'mal naqran mouzdawijan 'alà al-milaffi alladhì tourìdou fathahou, wa li-ighlàqi an-nàfidhati, ounqour 'alà az-zàwiyati al-'oulyà ilà al-jànibi al-aymani.", fr:"Faites un double-clic sur le dossier que vous souhaitez ouvrir, et pour fermer la fenêtre, cliquez dans l'angle en haut à droite.", audioUrl:null },
+    { ar:'سَجِّلِ التَّحْدِيثَاتِ الْجَدِيدَةَ لِبَرْنَامَجِكَ الْمُضَادِّ لِلْفِيرُوسَاتِ كُلَّمَا يُعْرَضُ بَعْضُهَا عَلَيْكَ.', tr:"Sajjil-i at-tahdìthàti al-jadìdata li-barnàmajika al-moudàddi lil-fìroùsàti koullamà you'radou ba'douhà 'alayka.", fr:"Enregistrez les nouvelles mises à jour de votre anti-virus chaque fois qu'on vous en propose.", audioUrl:null },
+    { ar:'لَا تَدَعْ حَاسُوبَكَ مُشْتَعِلًا لِمُدَّةٍ طَوِيلَةٍ إِلَّا مِنْ أَجْلِ إِعَادَةِ شَحْنِ الْبَطَّارِيَّةِ فَقَطْ.', tr:"Là tada' hàsoùbaka mouchta'ilan li-mouddatin tawìlatin illà min ajli i'àdati chahni al-battàriyyati faqat.", fr:"Ne laissez longtemps sous tension votre ordinateur que pour recharger la batterie.", audioUrl:null },
+    { ar:'فَكِّرْ فِي ضَرُورَةِ تَوْفِيرِ الطَّاقَةِ !', tr:"Fakkir fi daroùrati taoufìri at-tàqati !", fr:"Pensez aux économies d'énergie !", note:6, audioUrl:null },
+    { ar:'أَخِيرًا، وَإِذَا رَغِبْتَ فِي ذَلِكَ، فَالْتَحِقْ بِمُدَوَّنَةِ فُلَانٍ تَحْصُلْ عَلَى الْمَعْلُومَاتِ الْخَاصَّةِ بِالْمَوْضُوعِ الَّذِي تَهْتَمُّ بِهِ.', tr:"Akhìran, wa idhà raghibta fi dhalika, fa-(i)ltahiq bi-moudawwinati Foulànin tahsoul 'alà al-ma'loùmàti al-khàssati bil-maoudoù'i alladhì tahtammou bihi.", fr:"Enfin, si tu le souhaites, va sur le blog d'Untel, tu obtiendras les informations concernant le sujet qui t'intéresse.", note:7, audioUrl:null },
+  ],
+  notes: {
+    1: "① moukàfahat est le masdar du verbe de IIIe forme kàfaha, youkàfihou (combattre, lutter contre). On aurait pu employer un autre masdar, kifàh, qui se construit avec didda (contre). Lutte anti-terroriste : moukàfahatou al-irhàbi ou kifàhoun didda al-irhàbi.",
+    2: "② an-naqrou (le cliquage). Étymologiquement, c'est le fait de picorer, de becqueter. Le bec se dit minqàr, nom d'instrument du verbe naqara, yanqourou (picorer).",
+    3: "③ harrir (rédige !) : impératif de harrara, youharrirou, qui a deux sens : rédiger (d'où mouharrir, rédacteur, et tahrir, rédaction) et libérer (dérivant de hourr, libre — d'où tahrìr, libération).",
+    4: "④ moustalam est le participe passif du verbe de VIIIe forme istalama, yastalimou (recevoir), comme istaqbala (Xe forme). Accusé de réception : ifàdatoun bil-istilàmi.",
+    5: "⑤ malmas, malàmis (touche) est un nom de lieu formé sur le schéma maf'al (« l'endroit où l'on touche »), du verbe lamasa, yalmasou (toucher). Même modèle que masna' (usine) ou maktab (bureau).",
+    6: "⑥ at-tàqati (l'énergie), signifie capacité, pouvoir, potentiel, du verbe concave tàqa, yatoùqou (être capable de).",
+    7: "⑦ iltahiq... tahsoul... (va sur... tu obtiendras...) : impératif suivi d'un apocopé, traduit en français par un impératif suivi d'un futur avec une idée de conséquence.",
+  },
+  vocabBox: {
+    title: "l'informatique et internet",
+    items: [
+      { ar:'حَاسُوبٌ', tr:"hàsoùb", fr:'Ordinateur' },
+      { ar:'شَبَكَةٌ', tr:"chabaka(t)", fr:'Réseau' },
+      { ar:'فِيرُوسٌ', tr:"fìroùs", fr:'Virus' },
+      { ar:'مُرْفَقٌ', tr:"mourfaq", fr:'Pièce jointe' },
+    ],
+  },
+  exercise1: [
+    { ar:'أَرْجُو مِنْكَ إِعْلَامِي - عَنْ طَرِيقِ الْبَرِيدِ الْإِلِكْتْرُونِيِّ - بِالتَّظَاهُرَاتِ الثَّقَافِيَّةِ الْقَادِمَةِ فِي مِنْطَقَتِكَ.', tr:"", fr:"Je te prie de m'informer, par courrier électronique, des prochaines manifestations culturelles à venir dans ta région." },
+    { ar:'إِنْتَبِهْ إِلَى تَسْجِيلِ النُّصُوصِ الَّتِي حَصَّلْتَهَا، وَذَلِكَ بِتَكْرَارٍ.', tr:"", fr:"Pense à enregistrer fréquemment les textes que tu as saisis." },
+    { ar:'إِذَا لَمْ تُرَكِّبِ الْبَرْنَامَجَ الْمُضَادَّ لِلْفِيرُوسَاتِ فَأَنْتَ مُخَاطِرٌ حَقًّا !', tr:"", fr:"Si vous n'installez pas le programme anti-virus, eh bien vous prenez vraiment des risques !" },
+    { ar:'سَجِّلِ الْكَلِمَاتِ مَفَاتِيحَ الْخَاصَّةَ بِبَحْثِكَ تَجِدْ الْعَدِيدَ مِنَ الْمَعْلُومَاتِ حَوْلَ الْمَوْضُوعِ.', tr:"", fr:"Inscrivez les mots-clés concernant votre recherche et vous trouverez une grande quantité d'informations à ce sujet." },
+    { ar:'يُمْكِنُكَ الِاتِّصَالُ بِغَيْرِكَ مِنْ رُوَّادِ الْإِنْتِرْنِتْ قَصْدَ تَبَادُلِ مَعْلُومَاتٍ مَعَهُمْ.', tr:"", fr:"Vous pouvez prendre contact avec d'autres internautes dans le but d'échanger des informations." },
+  ],
+  exercise2: [
+    { fr:"Je n'ai pas réussi à ouvrir la pièce jointe que tu m'as envoyée il y a quelques jours.", ar:'لَمْ أَنْجَحْ فِي فَتْحِ الْوَثِيقَةِ الْمُرْفَقَةِ الَّتِي أَرْسَلْتَهَا إِلَيَّ قَبْلَ أَيَّامٍ.', tr:"" },
+    { fr:"Mon ordinateur est en panne, sans doute à cause d'un virus.", ar:'حَاسُوبِي مُعَطَّلٌ، وَرُبَّمَا بِسَبَبِ وُجُودِ فِيرُوسٍ فِيهِ.', tr:"" },
+    { fr:"Pour sauvegarder le document, tu dois l'enregistrer sur la clé USB.", ar:'لِحِفْظِ الْوَثِيقَةِ، عَلَيْكَ تَسْجِيلُهَا عَلَى الْمِفْتَاحِ يُو إِس بِي.', tr:"" },
+    { fr:"Éteignez votre ordinateur pour faire des économies d'énergie.", ar:'أَطْفِئْ حَاسُوبَكَ تَوْفِيرًا لِلطَّاقَةِ.', tr:"" },
+    { fr:"Vous pouvez utiliser les touches de raccourci sur le clavier.", ar:'لَكَ أَنْ تَسْتَخْدِمَ مَلَامِسَ الْمُخْتَزَلِ عَلَى لَوْحَةِ الْمَفَاتِيحِ.', tr:"" },
+  ],
+};
+
+const DAILY_LESSON_66 = {
+  num: 66,
+  titleFr: 'Problèmes domestiques',
+  titleAr: 'مَشَاكِلُ مَنْزِلِيَّةٌ',
+  fullAudioUrl: null,
+  introFr: "Une série de phrases utiles pour parler des petits tracas du quotidien : électroménager en panne, coupures d'électricité, plomberie bouchée, jardinage empêché !",
+  dialogue: [
+    { ar:'لَا تَنْسَ إِزَالَةَ الْجَلِيدِ مِنَ الثَّلَّاجَةِ: لَمْ يَعُدْ قِسْمُ الْجَلِيدِ مُشْتَغِلًا.', tr:"Là tansa izàlata al-jalìdi min-a ath-thallàjati: lam ya'oud qismou al-jalìdi mouchtaghilan.", fr:"N'oublie pas de dégivrer le réfrigérateur : le freezer ne fonctionne plus.", note:1, audioUrl:null },
+    { ar:'الْغَسَّالَةُ مُعَطَّلَةٌ: الطَّبْلَةُ مَحْصُورَةٌ؛ هُنَاكَ تَسَرُّبٌ لِلْمَاءِ، وَالْمِصْفَاةُ مَسْدُودَةٌ، وَكُلُّ شَيْءٍ مَغْمُورٌ.', tr:"Al-ghassàlatou mou'attalatoun: at-tablatou mahsoùratoun ; hounàka tasarroubоun lil-mà'i, wa al-misfàtou masdoùdatoun, wa koullou chay'in maghmoùroun.", fr:"La machine à laver est en panne : le tambour est coincé, il y a une fuite d'eau, la crépine est bouchée et tout est inondé.", note:2, audioUrl:null },
+    { ar:'إِخْتَرْ بَرْنَامَجًا يَتَضَمَّنُ عَمَلِيَّةَ الْغَسْلِ الْأَوَّلِيِّ، أَوْ، لِلْمَلَابِسِ الرَّقِيقَةِ، بَرْنَامَجًا بِحَرَارَةِ ثَلَاثِينَ دَرَجَةً يُؤَمِّنُونَ الْعَصْرَ النَّاعِمَ.', tr:"Ikhtar barnàmajan yatadammanou 'amaliyyata al-ghasli al-awwaliyyi, aou, lil-malàbisi ar-raqìqati, barnàmajan bi-haràrati thalàthina darajatan you'ammiroùna al-'asra an-nà'ima.", fr:"Choisissez un programme avec prélavage ou, pour le linge délicat, un programme à trente degrés avec un essorage doux.", note:3, audioUrl:null },
+    { ar:'لَمْ تُدْخِلِ الْقَابِسَ بِشَكْلٍ جَيِّدٍ: عَلَيْكَ الضَّغْطُ عَلَيْهِ قَلِيلًا.', tr:"Lam toudkhil-i al-qàbisa bi-chaklin jayyidin : 'alayka ad-daghtou 'alayhi qalìlan.", fr:"La fiche n'est pas bien enfoncée. Il faut un peu forcer.", audioUrl:null },
+    { ar:'لَا بُدَّ مِنْ تَنْظِيفِ الْفُرْنِ بِإِسْتِخْدَامِ مَادَّةٍ كَاشِطَةٍ.', tr:"Là boudda min tanzìfi al-fourni bi-(i)stikhdàmi màddatin kàchitatin.", fr:"Il faut nettoyer le four avec un produit décapant.", audioUrl:null },
+    { ar:'إِنْزَعْ هَذِهِ اللَّوْحَةَ وَرَكِّبْ شَبَكَةً فِي مَكَانِهَا ؛ إِضْغَطْ عَلَى الزِّرِّ وَسَوْفَ تَنْطَلِقُ الْمِشْوَاةُ.', tr:"Inza' hadhihi al-laouhata wa rakkib chabakatan fi makànihà ; idghat 'alà az-zirri wa saoufa tantaliqou al-michwàtou.", fr:"Enlevez cette plaque et mettez une grille à la place ; appuyez sur le bouton et la rôtissoire va se mettre en marche.", audioUrl:null },
+    { ar:'لِإِبْقَاءِ وَجَبَاتِكَ سَاخِنَةً، أَدْخِلْهَا ضِمْنَ فُرْنِ" الْمَايْكْرُووَايْف" خِلَالَ بِضْعِ دَقَائِقَ قَبْلَ تَقْدِيمِهَا.', tr:"Li-ibqà'i wajabàtika sàkhinatan, adkhilhà dimna fourni \"al-màykroùwàyf\" khilàla bid'i daqà'iqa qabla taqdìmihà.", fr:"Pour garder vos plats au chaud, passez-les au micro-ondes pendant quelques minutes avant de servir.", audioUrl:null },
+    { ar:'لِفَرْمِ الثُّومِ وَالْبَقْدُونَسِ، اِسْتَخْدِمْ خَلَّاطَةً كَهْرَبَائِيَّةً ؛ لَيْسَ عَلَيْكَ سِوَى رَبْطِ الْجِهَازِ وَالضَّغْطِ عَلَى غِطَائِهِ.', tr:"Li-farmi ath-thoùmi wa al-baqdoùnasi, istakhdim khallàtatan kahrabà'iyyatan ; laysa 'alayka siwà rabti al-jihàzi wa ad-daghti 'alà ghità'ihi.", fr:"Pour hacher de l'ail et du persil, utilisez un mixeur électrique ; il n'y a qu'à brancher et appuyer sur son couvercle.", note:4, audioUrl:null },
+    { ar:'الْيَوْمَ، يُنَظَّفُ كُلُّ شَيْءٍ بِوَاسِطَةِ مَوَادِّ تَنْظِيفٍ قَوِيَّةٍ وَلَكِنْ لَا يُوجَدُ شَيْءٌ كَصَابُونِ مَرْسِيلْيَا أَوْ حَلَبَ.', tr:"Al-yaouma, younazzafou koullou chay'in bi-wàsitati mawàddi tanzìfin qawiyyatin wa lakin là toùjadou chay'oun ka-sàboùni Marsìliyà aou Halab.", fr:"Aujourd'hui, on nettoie tout avec des produits détergents, mais rien de mieux que le savon de Marseille ou d'Alep.", audioUrl:null },
+    { ar:'الْمَغْسَلُ مَسْدُودٌ ؛ يَجِبُ فَكُّ" السِّيفُون" ثُمَّ تَنْظِيفُهُ،', tr:"Al-mighsalou masdoùdoun ; yajibou fakkou \"as-sìfoùn\" thoumma tanzìfouhou,", fr:"L'évier est bouché : il faut dévisser le siphon, le nettoyer,", audioUrl:null },
+    { ar:'ثُمَّ إِعَادَةُ تَرْكِيبِهِ فِي مَكَانِهِ الْأَصْلِيِّ بِالضَّبْطِ، الْأَمْرُ الَّذِي يُشَكِّلُ عَمَلِيَّةً دَقِيقَةً شِبْهَ جِرَاحِيَّةٍ.', tr:"thoumma i'àdatou tarkìbihi fi makànihi al-asliyyi bi-ad-dabti, al-amrou alladhì youchakkilou 'amaliyyatan daqìqatan chibha jiràhiyyatin.", fr:"puis le remonter exactement à sa place d'origine, ce qui est une opération délicate quasi chirurgicale !", audioUrl:null },
+    { ar:'الْمِرْحَاضُ مَسْدُودٌ ؛ أَمَّا صُنْدُوقُ الدَّفْقِ فَلَا يَشْتَغِلُ جَيِّدًا.', tr:"Al-mirhàdou masdoùdoun ; ammà soundoùqou ad-dafqi fa-là yachtaghilou jayyidan.", fr:"Les toilettes sont bouchées, la chasse d'eau ne fonctionne pas bien.", audioUrl:null },
+    { ar:'اِنْقَطَعَتِ الْكَهْرَبَاءُ ؛ أَيْنَ الشُّمُوعُ وَقِنْدِيلُ الْكَازِ ؟', tr:"Inqata'at-i al-kahrabà'ou ; ayna ach-choumoù'ou wa qindìlou al-kàz ?", fr:"Il y a une panne d'électricité : où sont les bougies, la lampe à pétrole ?", audioUrl:null },
+    { ar:'إِذَا اِسْتَمَرَّ الِانْقِطَاعُ لِمُدَّةٍ طَوِيلَةٍ، فَعَلَيْنَا اللُّجُوءُ إِلَى مُوَلِّدٍ لِلْكَهْرَبَاءِ.', tr:"Idhà (i)stamarra al-inqità'ou li-mouddatin tawìlatin, fa-'alaynà al-loujoù'ou ilà mouwallidin lil-kahrabà'i.", fr:"Si cela dure, il nous faudra recourir à un générateur.", audioUrl:null },
+    { ar:'لِنَنْظُرْ فِي عَدَّادِ الْكَهْرَبَاءِ ! رُبَّمَا اِنْفَصَلَ التَّيَّارُ بِسَبَبِ الْعَاصِفَةِ.', tr:"Li-nanzour fi 'addàdi al-kahrabà'i ! Roubbamà infasala at-tayyàrou bi-sababi al-'àsifati.", fr:"Voyons le compteur électrique ; cela a disjoncté peut-être à cause de l'orage.", audioUrl:null },
+    { ar:'أَيْنَ الْفَاصِلُ ؟ أَحْتَاجُ إِلَى صُهَيْرَةٍ بِقُوَّةِ خَمْسَةَ عَشَرَ أَمْبِيرْ.', tr:"Ayna al-fàsilou ? Ahtàjou ilà sahìratin bi-qouwwati khamsata 'achara ambìr.", fr:"Où est le disjoncteur ? Il me faudrait un fusible de 15 ampères.", audioUrl:null },
+    { ar:'بَابُ الْكَارَاجِ الْمُنْزَلِقُ مَحْصُورٌ ؛ لَا بُدَّ مِنْ تَنْظِيفِ السِّكَّةِ.', tr:"Bàbou al-kàràji al-mounzaliqou mahsoùroun ; là boudda min tanzìfi as-sikkati.", fr:"La porte coulissante du garage est bloquée ; il faut nettoyer le rail.", audioUrl:null },
+    { ar:'تَحْتَاجُ مَصَارِيعُ النَّوَافِذِ وَالْأَبْوَابِ الْخَارِجِيَّةِ إِلَى إِعَادَةِ الدِّهَانِ ؛ إِنْتَظَرْتَ طَوِيلًا، أَكْثَرَ مِنَ اللَّازِمِ... فَقَبْلَ ذَلِكَ، لَا بُدَّ مِنْ صَقْلِهَا.', tr:"Tahtàjou masàri'ou an-nawàfidhi wa al-abwàbou al-khàrijiyyatou ilà i'àdati ad-dihàni ; intazarta tawìlan, akthara min-a al-làzimi... fa-qabla dhalika, là boudda min saqlihà.", fr:"Les volets et les portes extérieures ont besoin d'être repeints ; vous avez trop longtemps attendu, il faudra les poncer auparavant.", note:5, audioUrl:null },
+    { ar:'هُنَاكَ تَسَرُّبٌ فِي سَقْفِ الطَّابِقِ الْأَعْلَى ؛ أَعْتَقِدُ أَنَّ هُنَاكَ مِيزَابًا مَسْدُودًا فَالْمَاءُ يَطْفَحُ.', tr:"Hounàka tasarroubоun fi saqfi at-tàbiqi al-a'là ; a'taqidou anna hounàka mìzàban masdoùdan fa-al-mà'ou yatfahou.", fr:"Il y a une fuite dans le plafond du grenier. Je crois qu'une gouttière est bouchée et l'eau déborde.", audioUrl:null },
+    { ar:'لَا بُدَّ مِنْ إِجْرَاءِ عَمَلِيَّةِ فَحْصٍ شَامِلَةٍ لِصِيَانَةِ السَّقْفِ الْخَارِجِيِّ.', tr:"Là boudda min ijrà'i 'amaliyyati fahsin chàmilatin li-siyànati as-saqfi al-khàriji.", fr:"Il faut procéder à une révision générale de la toiture.", audioUrl:null },
+    { ar:'إِذَا تَعَرَّضَ حَيُّكُمْ لِمَخَاطِرِ السَّطْوِ وَالنَّهْبِ أَوْ إِذَا سَكَنْتُمْ بَيْتًا مَعْزُولًا،', tr:"Idhà ta'arrada hayyoukoum li-makhàtiri as-satwi wa an-nahbi aou idhà sakantoum baytan ma'zoùlan,", fr:"S'il y a des risques de cambriolage dans votre quartier ou si vous habitez une maison isolée,", audioUrl:null },
+    { ar:'فَمِنْ مَصْلَحَتِكُمْ تَزْوِيدُ مَنْزِلِكُمْ بِجِهَازِ إِنْذَارٍ وَالِارْتِبَاطُ بِمَرْكَزٍ لِلْمُرَاقَبَةِ عَنْ بُعْدٍ.', tr:"fa-min maslahatikoum tazwìdou manzilikoum bi-jihàzi indhàrin wa al-irtibàtou bi-markazin lil-mouràqabati 'an bou'din.", fr:"vous avez intérêt à mettre une alarme et à vous abonner à une télésurveillance.", audioUrl:null },
+  ],
+  notes: {
+    1: "① izàla(t) est le masdar du verbe de IVe forme azàla, youzìlou (faire cesser, éliminer), qui exprime aussi le préfixe dé- : azàla al-ghoubàra (dépoussiérer), azàla ach-chahma (dégraisser), azàla at-talawwoutha (dépolluer).",
+    2: "② al-ghassàlatou (la machine à laver), du verbe ghasala, yaghsilou (laver). Ce mot est formé sur le schéma fa''àla(t) qui exprime la notion de fréquence, comme 'addàd (compteur), qaddàha(t) (briquet) ou farràma(t) (hachoir).",
+    3: "③ al-'asra an-nà'ima (l'essorage doux) ; du verbe 'asara, ya'siro (presser, tordre, pressurer). D'où 'asìr (jus). Ne pas confondre le masdar 'asr (fait de presser) et le mot 'asr, 'ousoùr (siècle, époque).",
+    4: "④ farm (hachis) est le masdar du verbe farama, yafrimou (hacher).",
+    5: "⑤ Le singulier de masàri' est misrà'. L'expression « lui ouvrir la porte toute grande » se dit fataha lahou al-bàba 'alà misrà'ayhi. Misrà' désigne aussi l'hémistiche dans un vers.",
+  },
+  vocabBox: {
+    title: 'la maison et les pannes',
+    items: [
+      { ar:'ثَلَّاجَةٌ', tr:"thallàja(t)", fr:'Réfrigérateur' },
+      { ar:'غَسَّالَةٌ', tr:"ghassàla(t)", fr:'Machine à laver' },
+      { ar:'كَهْرَبَاءُ', tr:"kahrabà'", fr:'Électricité' },
+      { ar:'مَسْدُودٌ', tr:"masdoùd", fr:'Bouché' },
+    ],
+    proverb: { ar:'فَرَّ مِنَ الْمَطَرِ وَقَعَدَ تَحْتَ الْمِيزَابِ', tr:"Farra min-a al-matari wa qa'ida tahta al-mìzàbi.", fr:"Il a fui la pluie et s'est assis sous la gouttière — Tomber de Charybde en Scylla." },
+  },
+  exercise1: [
+    { ar:'غَسَّالَتِي مُعَطَّلَةٌ... تَسَرَّبَتْ حَتَّى صَارَ الْمَطْبَخُ مَغْمُورًا.', tr:"", fr:"Mon lave-linge est en panne... il y a une fuite d'eau et la cuisine est inondée." },
+    { ar:'تُسْتَخْدَمُ بِشَكْلٍ مُفْرِطٍ فُرْنَ الْمَايْكْرُووَايْف لِتَسْخِينِ الْوَجَبَاتِ.', tr:"", fr:"Tu utilises trop le four à micro-ondes pour réchauffer les plats." },
+    { ar:'أَثَارَتِ الْعَاصِفَةُ فِي عَدَّادِ الْكَهْرَبَاءِ حَتَّى اِنْفَصَلَ.', tr:"", fr:"L'orage a fait disjoncter le compteur d'électricité." },
+    { ar:'فِي أَعْقَابِ سُقُوطِ هَذِهِ الْأَمْطَارِ الْغَزِيرَةِ، يَجِبُ التَّحَقُّقُ مِنْ عَدَمِ وُجُودِ أَيِّ تَسَرُّبٍ لِلْمِيَاهِ فِي السَّقْفِ الْخَارِجِيِّ.', tr:"", fr:"Après ces pluies torrentielles, il faudra vérifier qu'il n'y a pas de fuite d'eau dans la toiture." },
+    { ar:'الْحَمْدُ لِلَّهِ ! إِنْطَلَقَ جَرَسُ الْإِنْذَارِ، مِمَّا خَوَّفَ اللُّصُوصَ حَتَّى أَطْلَقُوا سِيقَانَهُمْ لِلرِّيحِ.', tr:"", fr:"Dieu soit loué ! L'alarme s'est déclenchée, ce qui a effrayé les voleurs au point qu'ils ont pris leurs jambes à leur cou." },
+  ],
+  exercise2: [
+    { fr:"Branche ton mixeur et hache-moi vite un peu d'ail et de persil.", ar:'إِرْبِطْ خَلَّاطَكَ وَافْرِمْ لِي بِسُرْعَةٍ قَلِيلًا مِنَ الثُّومِ وَالْبَقْدُونَسِ.', tr:"" },
+    { fr:"Quand survient une panne d'électricité, nous avons recours aux bougies.", ar:'عِنْدَمَا نُفَاجَأُ بِانْقِطَاعِ الْكَهْرَبَاءِ، نَلْجَأُ إِلَى الشُّمُوعِ.', tr:"" },
+    { fr:"Nous devons poncer et repeindre les portes de la maison.", ar:'عَلَيْنَا صَقْلُ وَإِعَادَةُ دِهَانِ أَبْوَابِ الْمَنْزِلِ.', tr:"" },
+    { fr:"Je n'ai pas pu rentrer la voiture dans le garage, car la porte coulissante était coincée.", ar:'مَا اسْتَطَعْتُ إِدْخَالَ السَّيَّارَةِ إِلَى الْكَارَاجِ لِأَنَّ الْبَابَ الْمُنْزَلِقَ كَانَ مَحْصُورًا !', tr:"" },
+    { fr:"Attention, n'utilisez pas ces toilettes, car elles sont bouchées !", ar:'إِنْتَبِهْ ! لَا تَسْتَخْدِمْ هَذَا الْمِرْحَاضَ فَإِنَّهُ مَسْدُودٌ !', tr:"" },
+  ],
+};
+const DAILY_LESSON_67 = {
+  num: 67,
+  titleFr: 'Voiture et jardinage',
+  titleAr: 'السَّيَّارَةُ وَالْبَسْتَنَةُ',
+  fullAudioUrl: null,
+  introFr: "Une série de phrases utiles sur deux thèmes bien différents : les petits soucis mécaniques (crevaison, batterie, vidange) et les travaux du jardin selon les saisons.",
+  dialogue: [
+    { ar:'مَعَ هَذَا الطُّوفَانِ، رَاوَحَتِ الدَّوَالِيبُ مَكَانَهَا فَارْتَطَمَتْ سَيَّارَتِي.', tr:"Ma'a hadhà at-toùfàni, ràwahat-i ad-dawàlibou makànahà fa-(i)rtatamat sayyàrati.", fr:"Avec cette pluie torrentielle, les roues ont patiné et ma voiture s'est embourbée.", audioUrl:null },
+    { ar:'أَحْتَاجُ إِلَى أَكْيَاسٍ مِنَ الْقُمَاشِ أَوْ كَرْتُونَاتٍ أَوْ أَغْصَانٍ لِكَيْ أُخْرِجَ نَفْسِي مِنْ هَذِهِ الْوَرْطَةِ.', tr:"Ahtàjou ilà akyàsin min-a al-qoumàchi aou kartoùnàt aou aghsànin likay oukhrija nafsì min hadhihi al-wartati.", fr:"Il me faut des sacs de toile, des cartons ou des branchages pour m'en sortir.", audioUrl:null },
+    { ar:'سَوْفَ يَنْزِلُ الصَّقِيعُ هَذَا الْمَسَاءَ ؛ فَكِّرْ فِي تَزَوُّدِكَ بِعُبُوَّةٍ مُضَادَّةٍ لِلصَّقِيعِ وَبِخِرَقٍ.', tr:"Saoufa yanzilou as-saqì'ou hadhà al-masà'a; fakkir fi tazawwoudika bi-'oubouwwatin moudàddatin li-as-saqì'i wa bi-khiraqin.", fr:"Il va geler ce soir. Pensez à vous munir d'une bombe anti-givre et de chiffons.", note:1, audioUrl:null },
+    { ar:'هَلْ عِنْدَكَ كَافَّةُ الْمُعَدَّاتِ اللَّازِمَةِ لِتَبْدِيلِ الدُّولَابِ فِي حَالَةِ تَحَقُّقِ إِطَارَيْنِ مَطَّاطِيَّيْنِ فِي الطَّرِيقِ ؟', tr:"Hal 'indaka kàffatou al-mou'addàti al-làzimati li-tabdìli ad-doùlàbi fi hàlati tachaqqouqi itàrin mattàtiyyayni fi at-tariqi ?", fr:"Avez-vous tout le matériel nécessaire pour changer la roue si vous crevez en route ?", audioUrl:null },
+    { ar:'... مِنْهَا : رَافِعَةٌ وَسَائِلٌ مُذِيبٌ وَأَدَاةٌ لِفَكِّ الصَّوَامِيلِ الْمُنْقَبِضَةِ ؟', tr:"...minhà : ràfi'atoun wa sà'iloun moudhìboun wa adàtoun li-fakki as-sawàmìli al-mounqabidati ?", fr:"...dont un cric, du dégrippant et un outil pour dévisser les écrous récalcitrants ?", audioUrl:null },
+    { ar:'هَلْ يُمْكِنُكَ إِعَادَةُ نَفْخِ الْإِطَارَاتِ الْمَطَّاطِيَّةِ وَالتَّحَقُّقُ مِنْ سَلَامَةِ التَّوَازُنِ فِيمَا بَيْنَهَا ؟', tr:"Hal youmkinouka i'àdatou nafkhi al-itàràti al-mattàtiyyati wa at-tahaqqouqou min salàmati at-tawàzouni fìmà baynahà ?", fr:"Pouvez-vous regonfler les pneus et vérifier qu'ils sont bien équilibrés ?", audioUrl:null },
+    { ar:'لَمْ تَعُدِ الْأَضْوَاءُ مُشْتَغِلَةً ؛', tr:"Lam ta'oud-i al-adwà'ou mouchtaghilatan ;", fr:"Les phares ne fonctionnent plus ;", audioUrl:null },
+    { ar:'رُبَّمَا اِحْتَرَقَتْ مَصَابِيحُهَا أَوْ قَدْ تَكُونُ قِيَادَتُهَا الْأَضْوَاءُ هِيَ الَّتِي لَا تَشْتَغِلُ جَيِّدًا.', tr:"roubbamà (i)htaraqat masàbìhouhà aou qad takoùnou qiyàdatou al-adwà'i hiya allatì là tachtaghilou jayyidan.", fr:"les ampoules doivent être grillées ou bien c'est peut-être la commande des phares qui ne fonctionne pas bien.", audioUrl:null },
+    { ar:'يَدُورُ الْمُحَرِّكُ بِشَكْلٍ مُتَقَطِّعٍ.', tr:"Yadoùrou al-mouharrikou bi-chaklin moutaqatti'in.", fr:"Le moteur a des ratés.", audioUrl:null },
+    { ar:'هَلْ يُمْكِنُكَ التَّحَقُّقُ مِنْ جَوْدَةِ الشُّمُوعِ وَضَبْطُ جِهَازِ التَّقَدُّمِ لِلْإِشْعَالِ ؟', tr:"Hal youmkinouka at-tahaqqouqou min jaoudati ach-choumoù'i wa dabti jihàzi at-taqaddoumi lil-ich'àli ?", fr:"Pouvez-vous vérifier les bougies et régler l'avance à l'allumage ?", audioUrl:null },
+    { ar:'تَصِرُّ عُلْبَةُ السُّرْعَاتِ : يَجِبُ تَبْدِيلُ الشَّوْكَةِ الَّتِي قَدْ تَكُونُ مُتَآكِلَةً.', tr:"Tasirrou 'oulbatou as-sour'àti: yajibou tabdìlou ach-chaoukati allatì qad takoùnou mouta'àkilatan.", fr:"La boîte de vitesses grince. Il faudrait changer la fourchette qui doit être usée.", note:2, audioUrl:null },
+    { ar:'هَلْ يُمْكِنُ أَنْ تَمْلَأَ الْخِزَّانَ بِالْبَنْزِينِ / بِالْغَازْوَل ثُمَّ أَنْ تَتَحَقَّقَ مِنْ سَلَامَةِ مُسْتَوَى الزَّيْتِ ؟', tr:"Hal youmkinou an tamla'a al-khazzàna bil-banzìni / bil-ghazwal thoumma an tatahaqqaqa min salàmati moustawà az-zayti ?", fr:"Pouvez-vous faire le plein d'essence / de gazole et puis contrôler le niveau d'huile ?", audioUrl:null },
+    { ar:'عَلَيَّ أَنْ أَطْلُبَ إِجْرَاءَ التَّفْرِيغِ قَرِيبًا.', tr:"'Alayya an atlouba ijrà'a at-tafrìghi qariban.", fr:"Je dois bientôt faire faire la vidange.", note:3, audioUrl:null },
+    { ar:'الْمَوْسِمُ غَيْرُ مُنَاسِبٍ لِلْغَرْسِ ؛ إِنْتَظِرِ الرَّبِيعَ أَوِ الْخَرِيفَ.', tr:"Al-maousimou ghayrou mounàsibin lil-gharsi ; intazir-i ar-rabì'a aou-i al-kharìfa.", fr:"La saison n'est pas bonne pour les plantations ; attends le printemps ou l'automne.", audioUrl:null },
+    { ar:'يَجِبُ الْعَزْقُ فِي سَفْحِ الْأَشْجَارِ الْمُثْمِرَةِ، ثُمَّ تَشْذِيبُهَا ثُمَّ نَثْرُ سَمَادٍ وَحِمَايَتُهَا مِنَ الصَّقِيعِ عِنْدَ اللُّزُومِ.', tr:"Yajibou al-'azqou fi safhi al-achjàri al-mouthmirati, thoumma tachdhìbouhà thoumma nathrou samàdin wa himàyatouhà min-a as-saqì'i 'inda al-louzoùmi.", fr:"Il faut bêcher le pied des arbres fruitiers, les tailler, mettre de l'engrais et les protéger du gel si nécessaire.", note:4, audioUrl:null },
+    { ar:'فَشِلَتْ عَمَلِيَّةُ تَطْعِيمِ شَجَرَةِ الْبَرْقُوقِ الْبَرِّيَّةِ هَذِهِ وَلَكِنَّهَا نَجَحَتْ بِالنِّسْبَةِ لِشَجَرَةِ الْكَرَزِ.', tr:"Fachalat 'amaliyyatou tat'ìmi chajarati al-barqoùqi al-barriyyati hadhihi wa lakinnahà najahat bi-an-nisbati li-chajarati al-karazi.", fr:"La greffe que j'ai faite sur ce prunier sauvage n'a pas pris ; mais elle a réussi pour le cerisier.", note:5, audioUrl:null },
+    { ar:'إِذْهَبْ لِمَلْءِ الْمِرَشَّةِ حَتَّى أَرُشَّ زُهُورَ الْحَوَاشِي الَّتِي نَقَصَهَا الْمَاءُ أَثْنَاءَ فَتْرَةِ الْقَيْظِ.', tr:"Idhhab li-mal'i al-mirachchati hattà arachcha zouhoùra al-hawàchi allatì naqasahà al-mà'ou athnà'a fatrati al-qayzi.", fr:"Va remplir l'arrosoir pour que j'arrose les fleurs des plate-bandes qui ont manqué d'eau pendant la canicule.", note:6, audioUrl:null },
+    { ar:'تَعَرَّضَتْ شَجَرَةُ الْوَرْدِ هَذِهِ لِهُجُومِ الطُّفَيْلِيَّاتِ ؛ لَا بُدَّ لَكَ مِنْ رَشِّكَ مَادَّةً مُعَيَّنَةً عَلَيْهَا.', tr:"Ta'arradat chajaratou al-wardi hadhihi li-houjoùmi at-toufayliyyàti ; là boudda laka min rachchi màddatin mou'ayyanatin 'alayhà.", fr:"Ce rosier est attaqué par les parasites ; tu dois pulvériser dessus un produit spécifique.", audioUrl:null },
+    { ar:'سَوْفَ نَضَعُ تُرْبَةً مُخَصَّبَةً فِي هَذَا الْأَصِيصِ لِبَذْرِ طَمَاطِمَ فِيهِ.', tr:"Saoufa nada'ou tourbatan moukhassibatan fi hadhà al-asìsi li-badhri tamàtim fìhi.", fr:"Nous allons mettre du terreau dans cette jardinière pour y faire des semis de tomates.", note:7, audioUrl:null },
+    { ar:'عَلَيْكَ التَّفْرِيجُ بَيْنَ الْبُذُورِ وَإِعَادَةُ تَشْتِيلِ الْغَرْسَاتِ الصَّغِيرَةِ ؛ ثُمَّ تَغْرِسُهَا عِنْدَمَا يَكُونُ الْقَمَرُ مُؤَاتِيًا.', tr:"'Alayka at-tafrìjou bayna al-boudhoùri wa i'àdatou tachtìli al-gharsàti as-saghìrati; thoumma taghrisouhà 'indamà yakoùnou al-qamarou mou'àtiyan.", fr:"Vous devez éclaircir votre semis et repiquer les petits plants ; puis vous les planterez quand la lune sera favorable.", audioUrl:null },
+    { ar:'إِلَى الْآنَ مَا غَرَسْتَ الْبَطَاطَا ؟ لَا تَنْسَ ضَرُورَةَ عَزْقِهَا فِيمَا بَعْدُ، وَإِلَّا لَنْ تَحْصُدَ شَيْئًا.', tr:"Ilà al-àni mà gharasta al-batàtà ? Là tansa daroùrata 'azqihà fìmà ba'dou, wa illà lan tahsida chay'an.", fr:"Tu n'as pas encore planté tes pommes de terre ? N'oublie pas que tu dois les sarcler ensuite, sinon tu ne récolteras rien.", audioUrl:null },
+    { ar:'أَشْجَارُ التُّفَّاحِ مُزْدَهِرَةٌ، سَوْفَ تَحْمِلُ ثِمَارًا كَثِيرَةً هَذِهِ السَّنَةَ.', tr:"Achjàrou at-touffàhi mouzdahiratoun, saoufa tahmilou thimàran kathìratan hadhihi as-sanata.", fr:"Les pommiers sont en fleurs et donneront beaucoup de fruits cette année.", audioUrl:null },
+    { ar:'خُذِي مَعَكِ أَدَوَاتِ الْبَسْتَنَةِ اللَّازِمَةَ كَالْمِجْرَفَةِ وَالْمِخْلَبِ وَمِقَصِّ الْبُسْتَانِيِّ وَلَا تَنْسَيِ الْقُفَّازَيْنِ الْوَاقِيَيْنِ.', tr:"Khoudhì ma'aki adawàti al-bastanati al-làzimata ka-al-mijrafati wa al-mikhlabi wa miqassi al-boustàniyyi wa là tansay al-qouffàzayni al-wàqiyayni.", fr:"Prends avec toi les outils de jardinage nécessaires : pelle, griffe, sécateur et n'oublie pas les gants de protection.", note:8, audioUrl:null },
+    { ar:'لَا بُدَّ مِنْ قَصِّ الْعُشْبِ وَتَشْذِيبِ الْأَسْيِجَةِ وَالْأَشْجَارِ.', tr:"Là boudda min qassi al-'ouchbi wa tachdhìbi al-asyijati wa al-achjàri.", fr:"Il va falloir tondre la pelouse, tailler les haies et les arbres.", audioUrl:null },
+  ],
+  notes: {
+    1: "① Le mot 'oubouwwa(t), traduit ici par bombe, signifie en premier lieu charge : 'oubouwwatoun nàsifatoun ou moutafajjiratoun signifiera charge explosive.",
+    2: "② ach-chaoukati signifie la fourchette, la fourche, mais aussi épine, arête (de poisson), dard.",
+    3: "③ Le mot tafrigh, masdar de IIe forme, signifie vidange, mais aussi décharge : tafrìghoun kahrabà'iyyoun (décharge électrique).",
+    4: "④ Le sens premier de samàd, asmida(t) est fumier, fumure, puis engrais. D'où asmidatoun kìmyà'iyyatoun (engrais chimiques).",
+    5: "⑤ tat'ìmi (greffe) est le masdar du verbe de IIe forme ta''ama, youta''imou (greffer). Ce verbe veut dire aussi vacciner, d'où le certificat de vaccination daftarou at-tat'ìmi.",
+    6: "⑥ al-hawàchì (plate-bandes) est le pluriel de hàchiya(t) qui signifie frange, bord, et aussi suite (royale ou princière), courtisans.",
+    7: "⑦ tamàtim (tomates). On dit aussi, et surtout en Syrie, Jordanie et au Liban, banadoùra(t).",
+    8: "⑧ mikhlab, makhàlib (griffe, serre), synonyme de bourthoun, baràthin. Dérive du verbe khalaba, yakhloubou (prendre dans ses griffes, mais aussi fasciner, charmer, captiver). D'où khallàb (captivant) : manàzirou khallàbatoun (des paysages fascinants).",
+  },
+  vocabBox: {
+    title: 'la voiture et le jardin',
+    items: [
+      { ar:'إِطَارٌ', tr:"itàr", fr:'Pneu' },
+      { ar:'مُحَرِّكٌ', tr:"mouharrik", fr:'Moteur' },
+      { ar:'غَرْسٌ', tr:"gharс", fr:'Plantation' },
+      { ar:'سَمَادٌ', tr:"samàd", fr:'Engrais' },
+    ],
+    proverb: { ar:'كَمَا تَزْرَعُ تَحْصُدُ', tr:"Kamà tazra'ou tahsidou.", fr:"Comme tu sèmes, tu récoltes — On récolte ce qu'on a semé." },
+  },
+  exercise1: [
+    { ar:'تُرَاوِحُ سَيَّارَتِي مَكَانَهَا. تَعَالَ لِمُسَاعَدَتِي عَلَى الْخُرُوجِ مِنْ هَذِهِ الْوَرْطَةِ !', tr:"", fr:"Ma voiture patine. Viens m'aider à sortir de ce bourbier !" },
+    { ar:'إِذَا سَافَرْتُمْ أَثْنَاءَ فَصْلِ الشِّتَاءِ، أَنْصَحُكُمْ بِالتَّزَوُّدِ بِعُبُوَّةٍ مُضَادَّةٍ لِلصَّقِيعِ.', tr:"", fr:"Si vous voyagez en hiver, je vous conseille de vous munir d'une bombe anti-givre." },
+    { ar:'يَا لِلْخَسَارَةِ! تَشَقَّقَ إِطَارٌ مَطَّاطِيٌّ! لِنُخْرِجِ الرَّافِعَةَ بِسُرْعَةٍ حَتَّى نُبَدِّلَ الدُّولَابَ!', tr:"", fr:"Ah quelle poisse ! Un pneu a crevé ! Vite sortons le cric et changeons la roue !" },
+    { ar:'إِذَا لَمْ تَغْرِسِ الْآنَ، لَنْ يُمْكِنَكَ أَنْ تَحْصُدَ شَيْئًا فِي هَذَا الصَّيْفِ.', tr:"", fr:"Si tu ne plantes pas maintenant, tu ne pourras rien récolter cet été." },
+    { ar:'إِذَا وَضَعْتَ سَمَادًا عِنْدَ كُلِّ عَمَلِيَّةِ رَشٍّ سَوْفَ تَحْصُلُ عَلَى رِيَاضٍ مُزْدَهِرَةٍ جَمِيلَةٍ.', tr:"", fr:"Si tu mets de l'engrais à chaque arrosage, tu auras de beaux parterres de fleurs." },
+  ],
+  exercise2: [
+    { fr:"Avant de partir en voyage, n'oublie pas que tu dois faire le plein d'essence.", ar:'قُبَيْلَ خُرُوجِكَ إِلَى السَّفَرِ، لَا تَنْسَ ضَرُورَةَ مَلْءِ الْخِزَّانِ بِالْبَنْزِينِ!', tr:"" },
+    { fr:"Il n'y a plus une goutte d'essence ! Je vais faire le plein.", ar:'لَمْ يَبْقَ حَتَّى قَطْرَةٌ مِنَ الْبَنْزِينِ! سَوْفَ أَمْلَأُ الْخِزَّانَ!', tr:"" },
+    { fr:"N'oublie pas d'arroser les semis de tomates !", ar:'لَا تَنْسَ رَشَّ بُذُورِ الطَّمَاطِمِ.', tr:"" },
+    { fr:"Cet après-midi, je dois tondre la pelouse.", ar:'بَعْدَ ظُهْرِ الْيَوْمِ، عَلَيَّ قَصُّ الْعُشْبِ.', tr:"" },
+    { fr:"Mon voisin m'a demandé d'élaguer mes arbres.", ar:'طَلَبَ مِنِّي جَارِي تَشْذِيبَ أَشْجَارِي.', tr:"" },
+  ],
+};
+
+const DAILY_LESSON_68 = {
+  num: 68,
+  titleFr: 'Cinéma, vidéo, télévision',
+  titleAr: 'السِّينِمَا وَالْفِيدْيُو وَالتِّلِفِزْيُونُ',
+  fullAudioUrl: null,
+  introFr: "⚠️ Seules les phrases 1 à 5 sont capturées ; la suite manque. Une série de phrases utiles sur le monde du cinéma : festivals, mise en scène, censure et critique.",
+  dialogue: [
+    { ar:'فَازَ الْفِيلْمُ بِجَائِزَتَيْنِ فِي مَهْرَجَانِ" كَانَّ" السِّينِمَائِيِّ فِي الْعَامِ الْمَاضِي.', tr:"Fàza al-filmou bi-jà'izatayni fi mahrajàni \"Kàn\" as-sìnamà'iyyi fi al-'àmi al-màdi.", fr:"Le film a remporté deux prix au festival de Cannes l'année dernière.", note:1, audioUrl:null },
+    { ar:'إِنَّهُ مُخْرِجٌ مَشْهُورٌ، مُتَشَدِّدٌ فِي عَمَلِهِ غَيْرَ أَنَّهُ يُعَامِلُ الْمُمَثِّلِينَ بِمُرُونَةٍ.', tr:"Innahou moukhrijoun machhoùroun, moutachaddidoun fi 'amalihi ghayra annahou you'àmilou al-moumaththilìna bi-mouroùnatin.", fr:"C'est un célèbre metteur en scène, rigoureux dans son travail, mais qui dirige les acteurs avec souplesse.", note:2, audioUrl:null },
+    { ar:'قَرَّرَ بَلَدُنَا الْمُشَارَكَةَ فِي مُسَابَقَةِ" الْأُوسْكَار" لِأَفْضَلِ فِيلْمٍ أَجْنَبِيٍّ.', tr:"Qarrara baladounà al-mouchàrakata fi mousàbaqati \"al-Oùskàr\" li-afdali filmin ajnabiyyin.", fr:"Notre pays a décidé de participer au concours pour l'obtention de l'Oscar du meilleur film étranger.", note:3, audioUrl:null },
+    { ar:'وَافَقَتِ الرَّقَابَةُ عَلَى عَرْضِ عَدَدٍ مِنَ الْأَفْلَامِ دُونَ حَذْفِ أَيِّ مَشْهَدٍ مِنْ مَشَاهِدِهَا.', tr:"Wàfaqat-i ar-raqàbatou 'alà 'ardi 'adadin min-a al-aflàmi doùna hadhfi ayyi machhadin min machàhidihà.", fr:"La censure a accepté la projection d'un certain nombre de films sans en supprimer la moindre scène.", note:4, audioUrl:null },
+    { ar:'يَفْتَقِرُ السِّينَارْيُو إِلَى شَيْءٍ مِنَ الْعُمْقِ ؛ إِنَّهُ فِيلْمُ مُغَامَرَاتٍ عَادِيٌّ، لَا يُجْدِي نَفْعًا.', tr:"Yaftaqirou as-sinàryoù ilà chay'in min-a al-'oumqi ; innahou filmou moughàmaràtin 'àdiyyoun, là youjdì naf'an.", fr:"Le scénario manque de profondeur ; c'est un film d'aventures banal, sans aucun intérêt.", note:5, audioUrl:null },
+  ],
+  notes: {
+    1: "① mahrajàn, mahrajànàt (festival) est un mot d'origine persane signifiant aussi gala, kermesse, fête champêtre.",
+    2: "② moukhrijoun (metteur en scène), participe actif du verbe de IVe forme akhraja, youkhrijou (faire sortir, faire éclore), d'où « mettre en scène » une pièce de théâtre.",
+    3: "③ moutachaddidoun (rigoureux) est le participe actif du verbe de Ve forme tachaddada, yatachaddadou (être dur / sévère / ferme). Ce terme est aussi utilisé dans le sens de « radical » : tayyàroun moutachaddidoun (un courant radical) et al-moutachaddidoùna (les radicaux).",
+    4: "④ hadhf signifie coupure, élision, retranchement, suppression du verbe hadhafa, yahdhifou, et ilghà' (annulation, suppression) du verbe de IVe forme alghà, youlghì, rencontré à la leçon 64. Ces deux verbes sont à peu près équivalents.",
+    5: "⑤ là youjdì naf'an (sans aucun intérêt, « il n'est pas utile en-tant-qu'utilité »). Formule redondante qu'on peut réduire à là youjdì (il n'est pas utile), du verbe de IVe forme ajdà (servir, être utile). Moujdin (utile, profitable) et ghayrou moujdin (inutile). Naf' signifie utilité, avantage, intérêt.",
+  },
+  vocabBox: {
+    title: 'le cinéma',
+    items: [
+      { ar:'فِيلْمٌ', tr:"film", fr:'Film' },
+      { ar:'مُخْرِجٌ', tr:"moukhrij", fr:'Metteur en scène, réalisateur' },
+      { ar:'مُمَثِّلٌ', tr:"moumaththil", fr:'Acteur' },
+      { ar:'رَقَابَةٌ', tr:"raqàba(t)", fr:'Censure' },
+    ],
+  },
+  exercise1: [],
+  exercise2: [],
+  isRevision: true,
+  revisionNote: "⚠️ Cette leçon vient de commencer : seules les 5 premières phrases sont disponibles (festivals, mise en scène, censure, scénario), la suite consacrée à la vidéo et à la télévision ainsi que les exercices n'ont pas encore été transcrits. Dès que la suite sera fournie, cette leçon sera complétée.",
+};
+
+const ALL_LESSONS = { 1: DAILY_LESSON_1, 2: DAILY_LESSON_2, 3: DAILY_LESSON_3, 4: DAILY_LESSON_4, 5: DAILY_LESSON_5, 6: DAILY_LESSON_6, 7: DAILY_LESSON_7, 8: DAILY_LESSON_8, 9: DAILY_LESSON_9, 10: DAILY_LESSON_10, 11: DAILY_LESSON_11, 12: DAILY_LESSON_12, 13: DAILY_LESSON_13, 14: DAILY_LESSON_14, 15: DAILY_LESSON_15, 16: DAILY_LESSON_16, 17: DAILY_LESSON_17, 18: DAILY_LESSON_18, 19: DAILY_LESSON_19, 20: DAILY_LESSON_20, 21: DAILY_LESSON_21, 22: DAILY_LESSON_22, 23: DAILY_LESSON_23, 24: DAILY_LESSON_24, 25: DAILY_LESSON_25, 26: DAILY_LESSON_26, 27: DAILY_LESSON_27, 28: DAILY_LESSON_28, 29: DAILY_LESSON_29, 30: DAILY_LESSON_30, 31: DAILY_LESSON_31, 32: DAILY_LESSON_32, 33: DAILY_LESSON_33, 34: DAILY_LESSON_34, 35: DAILY_LESSON_35, 36: DAILY_LESSON_36, 37: DAILY_LESSON_37, 38: DAILY_LESSON_38, 39: DAILY_LESSON_39, 40: DAILY_LESSON_40, 49: DAILY_LESSON_49, 50: DAILY_LESSON_50, 51: DAILY_LESSON_51, 52: DAILY_LESSON_52, 53: DAILY_LESSON_53, 54: DAILY_LESSON_54, 55: DAILY_LESSON_55, 56: DAILY_LESSON_56, 57: DAILY_LESSON_57, 58: DAILY_LESSON_58, 59: DAILY_LESSON_59, 60: DAILY_LESSON_60, 61: DAILY_LESSON_61, 62: DAILY_LESSON_62, 63: DAILY_LESSON_63, 64: DAILY_LESSON_64, 65: DAILY_LESSON_65, 66: DAILY_LESSON_66, 67: DAILY_LESSON_67, 68: DAILY_LESSON_68 };
 
 function renderLessonList(){
   clearQuestionTimer();
@@ -16303,6 +17002,7 @@ let shadowRecoActive = false;
 function startShadowGame(lesson){
   clearQuestionTimer();
   document.body.classList.add('quiz-active');
+  isHomeScreen = false;
   const dialogueItems = lesson.dialogue.map(line => ({ ar: line.ar, fr: line.fr }));
   const ex1Items = (lesson.exercise1 || []).map(ex => ({ ar: ex.ar, fr: ex.fr }));
   const ex2Items = (lesson.exercise2 || []).map(ex => ({ ar: ex.ar, fr: ex.fr }));
@@ -16572,6 +17272,7 @@ function endShadowGame(){
 function startVocabMatchGame(lesson){
   clearQuestionTimer();
   document.body.classList.add('quiz-active');
+  isHomeScreen = false;
   const items = shuffle(lesson.vocabBox.items.slice()).slice(0, 8);
   const tiles = [];
   items.forEach((it, i) => {
