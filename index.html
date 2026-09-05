@@ -1819,6 +1819,7 @@ function reloadAllUserState(){
   dailyStats = loadDailyStats();
   xpTotal = loadXpTotal();
   quizTimerSeconds = loadTimerSetting();
+  autoAdvanceSeconds = loadAutoAdvanceSeconds();
   autoSpeak = loadAutoSpeak();
   customBlocks = loadCustomBlocks();
   blockTitles = loadBlockTitles();
@@ -4733,6 +4734,56 @@ function saveTimerSetting(n){
   try{ localStorage.setItem(nsKey(TIMER_KEY), String(n)); }catch(e){}
 }
 let quizTimerSeconds = loadTimerSetting();
+
+/* ============ ⏸️▶️ AUTO-AVANCE — chronomètre entre deux questions ============
+   Remplace le bouton "Suivant" par un compte à rebours configurable (0 = désactivé) : le bouton
+   affiche "⏸️ Pause (Ns)" et décompte tout seul ; un clic met en pause et le bouton devient
+   "➡️ Suivant" (un second clic avance alors manuellement) ; si on ne touche à rien, l'avance se
+   fait automatiquement à la fin du délai. */
+const AUTO_ADVANCE_KEY = 'lexiqueQuiz::autoAdvanceSec';
+function loadAutoAdvanceSeconds(){
+  try{
+    const raw = localStorage.getItem(nsKey(AUTO_ADVANCE_KEY));
+    const n = parseInt(raw, 10);
+    return (Number.isInteger(n) && n >= 0 && n <= 30) ? n : 5;
+  }catch(e){ return 5; }
+}
+function saveAutoAdvanceSeconds(n){
+  try{ localStorage.setItem(nsKey(AUTO_ADVANCE_KEY), String(n)); }catch(e){}
+}
+let autoAdvanceSeconds = loadAutoAdvanceSeconds();
+let autoAdvanceIntervalId = null;
+
+function clearAutoAdvance(){
+  if(autoAdvanceIntervalId){ clearInterval(autoAdvanceIntervalId); autoAdvanceIntervalId = null; }
+}
+
+/* Attache le mécanisme pause/suivant + compte à rebours au bouton donné. onAdvance() est appelé
+   soit automatiquement à la fin du délai, soit manuellement après une mise en pause. */
+function attachAutoAdvance(btnId, onAdvance){
+  clearAutoAdvance(); // ne jamais laisser tourner un ancien minuteur en arrière-plan
+  const btn = document.getElementById(btnId);
+  if(!btn) return;
+  if(autoAdvanceSeconds <= 0){ btn.textContent = 'Suivant →'; btn.onclick = onAdvance; return; }
+  let remaining = autoAdvanceSeconds;
+  let paused = false;
+  btn.textContent = `⏸️ Pause (${remaining}s)`;
+  autoAdvanceIntervalId = setInterval(() => {
+    remaining--;
+    if(remaining <= 0){
+      clearAutoAdvance();
+      onAdvance();
+      return;
+    }
+    btn.textContent = `⏸️ Pause (${remaining}s)`;
+  }, 1000);
+  btn.onclick = () => {
+    if(paused){ clearAutoAdvance(); onAdvance(); return; }
+    paused = true;
+    clearAutoAdvance();
+    btn.textContent = '➡️ Suivant';
+  };
+}
 
 let queue = [];        // words still to master in the current block (wrong answers get requeued)
 let initialLength = 0; // words in the block at the start
@@ -10257,7 +10308,7 @@ function renderBlockSelect(){
         </svg>
       </div>
       <div class="hero-badge">Français ↔ Arabe · ${WORDS.length} mots</div>
-      <div class="hero-title">Apprends avec <span class="grad">To3alib & To3ayliba</span> 🦊</div>
+      <div class="hero-title">Apprends avec <span class="grad">To3aylib & BouFloussa</span> 🦊</div>
       <div class="hero-sub">${motto}</div>
       <button class="restart-btn" id="startNextBlockBtn" style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#F97316,#EA580C);border-color:#B45309;font-size:15px;padding:13px 30px;">▶ Commencer</button>
       <div id="resumeSessionSlot"></div>
@@ -10362,6 +10413,7 @@ function renderBlockSelect(){
     <div style="font-family:'Inter',sans-serif;font-weight:800;color:var(--purple);margin:20px 0 4px;font-size:18px;text-align:center;">Choisis ton mode & ton bloc</div>
     <div class="mode-row" id="modeRow"></div>
     <div class="mode-row" id="timerRow"></div>
+    <div class="mode-row" id="autoAdvanceRow"></div>
     <div class="filter-row" id="filterRow"></div>
     <div class="mode-row" style="margin-top:0;">
       <button class="mode-chip" id="createCustomBlockBtn" style="background:var(--surface-sunken);border:1px solid var(--border);color:var(--purple);">🧩 Créer un bloc personnalisé</button>
@@ -10519,6 +10571,20 @@ function renderBlockSelect(){
     btn.textContent = `${sec}s`;
     btn.addEventListener('click', () => { quizTimerSeconds = sec; saveTimerSetting(sec); renderBlockSelect(); });
     timerRow.appendChild(btn);
+  });
+
+  const autoAdvanceRow = document.getElementById('autoAdvanceRow');
+  const autoAdvanceLabel = document.createElement('span');
+  autoAdvanceLabel.textContent = '⏸️➡️ Auto-avance ';
+  autoAdvanceLabel.style.cssText = 'align-self:center;color:var(--text-dim);font-weight:800;font-size:13px;';
+  autoAdvanceRow.appendChild(autoAdvanceLabel);
+  [0, 3, 5, 8, 12].forEach(sec => {
+    const btn = document.createElement('button');
+    btn.className = 'mode-chip' + (autoAdvanceSeconds === sec ? ' active' : '');
+    btn.textContent = sec === 0 ? 'Off' : `${sec}s`;
+    btn.title = sec === 0 ? "Toujours cliquer manuellement sur Suivant" : `Passe seul à la question suivante après ${sec}s`;
+    btn.addEventListener('click', () => { autoAdvanceSeconds = sec; saveAutoAdvanceSeconds(sec); renderBlockSelect(); });
+    autoAdvanceRow.appendChild(btn);
   });
 
   const filterRow = document.getElementById('filterRow');
@@ -11061,7 +11127,7 @@ function handleSpeakResult(isCorrect, word, info){
     <button class="next-btn" id="nextBtn">Suivant →</button>
   `;
   document.getElementById('speakFrBtn').addEventListener('click', () => speak(word.fr, 'fr-FR'));
-  document.getElementById('nextBtn').addEventListener('click', () => { renderCard(); });
+  attachAutoAdvance('nextBtn', () => { renderCard(); });
   autoSpeakWord(word.fr, 'fr-FR');
   focusReveal(revealWrap);
 }
@@ -11595,7 +11661,7 @@ function handleRepeatResult(similarity, info){
     <button class="next-btn" id="nextBtn">Suivant →</button>
   `;
   document.getElementById('repSpeakBtn').addEventListener('click', () => { mascotTalk(); speak(sentence, 'fr-FR'); });
-  document.getElementById('nextBtn').addEventListener('click', () => { renderCard(); });
+  attachAutoAdvance('nextBtn', () => { renderCard(); });
   focusReveal(revealWrap);
 }
 
@@ -12092,7 +12158,7 @@ function handleOrderAnswer(timedOut){
     <button class="next-btn" id="nextBtn">Suivant →</button>
   `;
   document.getElementById('orderSpeakBtn').addEventListener('click', () => speak(target, 'fr-FR'));
-  document.getElementById('nextBtn').addEventListener('click', () => { renderCard(); });
+  attachAutoAdvance('nextBtn', () => { renderCard(); });
   autoSpeakWord(target, 'fr-FR');
   focusReveal(revealWrap);
 }
@@ -12213,6 +12279,7 @@ function startQuestionTimer(onTimeout, seconds){
 }
 function clearQuestionTimer(){
   if(questionTimer){ clearTimeout(questionTimer); questionTimer = null; }
+  clearAutoAdvance();
   const fill = document.getElementById('quizTimerFill');
   if(fill){
     const w = getComputedStyle(fill).width;
@@ -12296,7 +12363,7 @@ function handleChronoAnswer(playerSaysTrue){
   document.getElementById('speakExBtn').addEventListener('click', () => {
     speak(word.ex.replace(/~/g, word.fr), 'fr-FR');
   });
-  document.getElementById('nextBtn').addEventListener('click', () => { renderCard(); });
+  attachAutoAdvance('nextBtn', () => { renderCard(); });
   autoSpeakWord(word.fr, 'fr-FR');
   focusReveal(revealWrap);
 }
@@ -12382,7 +12449,7 @@ function handleAnswer(i){
     const fullSentence = word.ex.replace(/~/g, word.fr);
     speak(fullSentence, 'fr-FR');
   });
-  document.getElementById('nextBtn').addEventListener('click', () => { renderCard(); });
+  attachAutoAdvance('nextBtn', () => { renderCard(); });
   if(gameMode !== 'classic'){ autoSpeakWord(word.fr, 'fr-FR'); }
   focusReveal(revealWrap);
 }
@@ -17010,7 +17077,7 @@ function startShadowGame(lesson){
     .map(it => ({ ar: it.ar, clean: stripParens(it.fr), full: it.fr }))
     .filter(it => it.clean && it.clean.length > 3);
   if(items.length === 0){ renderDailyLesson(); return; }
-  shadowGameState = { lesson, queue: shuffle(items.slice()), idx:0, score:{correct:0,total:0}, startTime: Date.now() };
+  shadowGameState = { lesson, queue: shuffle(items.slice()), idx:0, score:{correct:0,total:0}, attempts:0, startTime: Date.now() };
   renderShadowCard();
 }
 
@@ -17224,37 +17291,65 @@ function validateShadowAnswer(heard, targetSentence){
 function finalizeShadowAnswer(isCorrect, targetSentence, heardText){
   const st = shadowGameState;
   if(!st) return;
-  st.score.total++;
-  if(isCorrect){ st.score.correct++; }
-  bumpCombo(isCorrect);
+  st.attempts++;
   const sentEl = document.getElementById('repeatSentence');
   if(sentEl){ sentEl.classList.remove('hidden'); sentEl.innerHTML = buildScoredSentenceHtml(targetSentence, heardText); }
   const micWrap = document.getElementById('shadowMicWrap');
   if(micWrap){ micWrap.style.display = 'none'; }
   const reveal = document.getElementById('shadowReveal');
-  if(reveal){ reveal.innerHTML = isCorrect ? `<div class="pass-banner ok">✅ Correct !</div>` : `<div class="pass-banner ko">❌ Raté</div>`; }
-  if(isCorrect){ playCorrectSound(); reactMascot('ok'); vibrate(35); if(comboStreak>0 && comboStreak%5===0){ celebrate(); } }
-  else { playWrongSound(); reactMascot('ko'); vibrate([40,40,40]); }
-  setTimeout(() => { st.idx++; renderShadowCard(); }, 1800);
+
+  if(isCorrect){
+    st.score.total++;
+    st.score.correct++;
+    bumpCombo(true);
+    playCorrectSound(); reactMascot('ok'); vibrate(35);
+    if(comboStreak>0 && comboStreak%5===0){ celebrate(); }
+    if(reveal){
+      reveal.innerHTML = `
+        <div class="pass-banner ok">✅ Correct !</div>
+        <button class="next-btn" id="shadowNextBtn" style="margin-top:10px;">Suivant →</button>
+      `;
+    }
+    attachAutoAdvance('shadowNextBtn', () => { st.idx++; renderShadowCard(); });
+  } else {
+    // ❌ Raté : on ne passe pas à la phrase suivante — on laisse réessayer la même, comme demandé.
+    bumpCombo(false);
+    playWrongSound(); reactMascot('ko'); vibrate([40,40,40]);
+    if(reveal){
+      reveal.innerHTML = `
+        <div class="pass-banner ko">❌ Raté — réessaie, tu vas y arriver !</div>
+        <button class="restart-btn" id="shadowRetryBtn" style="margin-top:10px;">🎤 Réessayer cette phrase</button>
+      `;
+      document.getElementById('shadowRetryBtn').addEventListener('click', () => {
+        reveal.innerHTML = '';
+        if(sentEl){ sentEl.classList.add('hidden'); sentEl.innerHTML = buildRepeatWords(targetSentence, true); }
+        if(micWrap){ micWrap.style.display = 'block'; }
+        startShadowRecognition(targetSentence);
+      });
+    }
+  }
 }
 function endShadowGame(){
   document.body.classList.remove('quiz-active');
   const st = shadowGameState;
   const durationSec = computeActiveDurationSec(st.startTime);
-  const pct = st.score.total ? Math.round((st.score.correct/st.score.total)*100) : 0;
+  // Puisqu'on ne compte une phrase que lorsqu'elle est enfin réussie, correct === total toujours ;
+  // la vraie mesure de performance ici est le taux de réussite du premier coup (moins de reprises = mieux).
+  const pct = st.attempts ? Math.round((st.score.total / st.attempts) * 100) : 0;
+  const extraTries = Math.max(0, st.attempts - st.score.total);
   recordDailyActivity();
   recordDailyStats(durationSec, pct >= PASS_THRESHOLD, st.score.correct * 5, 'vocabulaire');
   cloudAutoPush();
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="shadowEndBackBtn" style="cursor:pointer;">← Retour</button>`;
   document.getElementById('progressFill').style.width = '100%';
   document.getElementById('footerNote').textContent = 'Terminé';
-  const fun = pct === 100 ? '🏆 Parfait !' : pct >= 90 ? '🌟 Excellent !' : pct >= 70 ? '👍 Bien joué !' : pct >= 50 ? '💪 Continue !' : '🌱 Réessaie encore !';
+  const fun = pct === 100 ? '🏆 Parfait du premier coup !' : pct >= 90 ? '🌟 Excellent !' : pct >= 70 ? '👍 Bien joué !' : pct >= 50 ? '💪 Continue !' : '🌱 Encore un peu de pratique !';
   const card = document.getElementById('quizCard');
   card.innerHTML = `
     <div class="end-screen">
       <div class="cat-tag">🎭 Shadow terminé</div>
-      <div class="big">${st.score.correct} / ${st.score.total}</div>
-      <div class="sub">${pct}% de réussite · ⏱️ ${fmtDuration(durationSec)} · ${fun}</div>
+      <div class="big">${st.score.total} phrase${st.score.total>1?'s':''} réussie${st.score.total>1?'s':''}</div>
+      <div class="sub">${pct}% du premier coup${extraTries>0 ? ` (${extraTries} reprise${extraTries>1?'s':''})` : ''} · ⏱️ ${fmtDuration(durationSec)} · ${fun}</div>
       <div style="display:flex;gap:12px;justify-content:center;margin-top:20px;flex-wrap:wrap;">
         <button class="restart-btn" id="shadowAgainBtn">🔁 Recommencer</button>
         <button class="restart-btn" id="shadowBackBtn" style="background:var(--surface-sunken);border:1px solid var(--border);color:var(--purple);box-shadow:none;">← Retour</button>
