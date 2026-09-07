@@ -190,6 +190,22 @@
   .lexicon-legend-item b{ color:var(--text);font-weight:800; }
   .lexicon-legend-dot{ width:9px;height:9px;border-radius:50%;display:inline-block; }
 
+  .home-nav-arrows{
+    position:fixed; right:16px; bottom:90px; z-index:40; display:flex; flex-direction:column; gap:10px;
+  }
+  .home-nav-arrow{
+    width:46px; height:46px; border-radius:50%; border:none; cursor:pointer;
+    background:linear-gradient(135deg,var(--purple),#4338CA); color:#fff; font-size:19px;
+    display:flex; align-items:center; justify-content:center; box-shadow:0 4px 14px rgba(80,70,229,0.35);
+    transition:transform .15s;
+  }
+  .home-nav-arrow:active{ transform:scale(.92); }
+  .jump-highlight{ animation:jumpFlash 1.6s ease; }
+  @keyframes jumpFlash{
+    0%,100%{ box-shadow:none; }
+    15%,45%{ box-shadow:0 0 0 4px rgba(80,70,229,0.5); }
+  }
+
   .card{
     background:var(--card);color:var(--text);border-radius:16px;padding:38px 32px;position:relative;
     box-shadow:var(--shadow-md);
@@ -1725,6 +1741,7 @@
     <button class="menu-item" id="authAccountBtn"><span class="mi-ic">🔐</span> Mon compte</button>
     <button class="menu-item" id="whatsNewBtn"><span class="mi-ic">🆕</span> Nouveautés</button>
     <button class="menu-item" id="soundTestBtn"><span class="mi-ic">🔊</span> Tester le son</button>
+    <button class="menu-item" id="leaderboardBtn"><span class="mi-ic">🏆</span> Classement du jour</button>
     <button class="menu-item" id="timeBreakdownBtn"><span class="mi-ic">📊</span> Répartition du temps</button>
     <button class="menu-item" id="homeBtn"><span class="mi-ic">🏠</span> Accueil</button>
     <button class="menu-item" id="dictBtn"><span class="mi-ic">📖</span> Mots &amp; recherche</button>
@@ -2133,10 +2150,20 @@ function releaseWakeLock(){
   stopWakeLockVideoFallback();
 }
 // Si l'écran s'est éteint puis rallumé pendant la lecture (le wake lock est alors relâché par
-// le système), on le redemande automatiquement tant qu'on écoute encore.
+// le système), on le redemande automatiquement tant qu'on écoute ou qu'un mode est actif.
 document.addEventListener('visibilitychange', () => {
-  if(!document.hidden && peekPlayState && peekPlayState.playing){ requestWakeLock(); }
+  if(!document.hidden && ((peekPlayState && peekPlayState.playing) || document.body.classList.contains('quiz-active'))){
+    requestWakeLock();
+  }
 });
+// 🔆 L'écran ne doit plus jamais se mettre en veille pendant qu'un mode/jeu est en cours, pas
+// seulement pendant l'écoute de "Voir les mots". Un observateur sur la classe du <body> couvre
+// automatiquement tous les endroits de l'app qui activent/désactivent "quiz-active", sans avoir
+// à modifier chacun d'eux individuellement.
+new MutationObserver(() => {
+  if(document.body.classList.contains('quiz-active')){ requestWakeLock(); }
+  else if(!peekPlayState || !peekPlayState.playing){ releaseWakeLock(); }
+}).observe(document.body, { attributes: true, attributeFilter: ['class'] });
 
 function startPeekPlay(words){
   peekPlayState = { words, idx: 0, playing: true };
@@ -4978,9 +5005,13 @@ if(speechAvailable){
 
 const FEMALE_HINTS = ['female','femme','amelie','amélie','audrey','aurelie','aurélie','hortense','julie','marie','virginie','denise','celine','céline','charline','brigitte','elise','léa','lea','eloise','éloise','sabrina','vlasta','zariyah','salma','laila','layla','amina','hoda','naira','sana','fatima','google français','google arabic','samira'];
 const MALE_HINTS = ['male','homme','thomas','paul','nicolas','henri','claude','mathieu','guillaume','jacques','daniel','tarik','hamed','maged','naayf','nizar','omar','ahmed','yassin','rachid'];
+// 🧒 Voix "enfant" : très rares dans les catalogues des navigateurs, mais certains moteurs (surtout
+// mobiles) en proposent sous ces noms — utilisées seulement si l'appareil en a réellement une.
+const CHILD_HINTS = ['child','enfant','kid','junior','boy','girl','garçon','fille','niño','niña','kind'];
 
 function classifyGender(v){
   const n = (v.name || '').toLowerCase();
+  for(const h of CHILD_HINTS){ if(n.includes(h)) return 'c'; }
   for(const h of FEMALE_HINTS){ if(n.includes(h)) return 'f'; }
   for(const h of MALE_HINTS){ if(n.includes(h)) return 'm'; }
   return null;
@@ -5002,20 +5033,28 @@ function getVoicesFor(langPrefix){
     .sort((a,b) => voiceQuality(b) - voiceQuality(a));
 }
 function hasVoiceFor(langPrefix){ return getVoicesFor(langPrefix).length > 0; }
-/* Choisit une voix pour la langue, en préférant un genre donné (ou aléatoire). */
+/* Choisit une voix pour la langue. Sans genre imposé, tire au hasard parmi TOUTES les catégories
+   réellement disponibles sur l'appareil (femme / homme / enfant si le moteur en propose une) —
+   pas seulement femme/homme, pour une vraie variété quand le système le permet. */
 function pickVoice(langPrefix, gender){
   const voices = getVoicesFor(langPrefix);
   if(!voices.length) return null;
-  const g = gender || (Math.random() < 0.5 ? 'f' : 'm');
-  const sameGender = voices.filter(v => classifyGender(v) === g);
-  // Parmi les meilleures voix de ce genre (pas juste LA meilleure), on en tire une au hasard
-  // à chaque appel, pour varier réellement d'une phrase à l'autre — pas toujours la même voix.
   const pickRandomAmongTop = (list) => {
     if(!list.length) return null;
     const bestScore = voiceQuality(list[0]);
     const top = list.filter(v => voiceQuality(v) >= bestScore - 20); // toutes les voix de qualité proche du max
     return top[Math.floor(Math.random() * top.length)];
   };
+  let g = gender;
+  if(!g){
+    const byCategory = { f: [], m: [], c: [] };
+    voices.forEach(v => { const c = classifyGender(v); if(c) byCategory[c].push(v); });
+    const availableCategories = Object.keys(byCategory).filter(k => byCategory[k].length > 0);
+    g = availableCategories.length
+      ? availableCategories[Math.floor(Math.random() * availableCategories.length)]
+      : 'f'; // filet de sécurité si aucune voix n'est catégorisable (utilisera "otherGender" plus bas)
+  }
+  const sameGender = voices.filter(v => classifyGender(v) === g);
   if(sameGender.length) return pickRandomAmongTop(sameGender);
   const otherGender = voices.filter(v => classifyGender(v) === (g === 'f' ? 'm' : 'f'));
   if(otherGender.length) return pickRandomAmongTop(otherGender);
@@ -10308,7 +10347,7 @@ function renderBlockSelect(){
         </svg>
       </div>
       <div class="hero-badge">Français ↔ Arabe · ${WORDS.length} mots</div>
-      <div class="hero-title">Apprends avec <span class="grad">To3aylib & BouFloussa</span> 🦊</div>
+      <div class="hero-title">Apprends avec <span class="grad">To3alib & To3ayliba</span> 🦊</div>
       <div class="hero-sub">${motto}</div>
       <button class="restart-btn" id="startNextBlockBtn" style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#F97316,#EA580C);border-color:#B45309;font-size:15px;padding:13px 30px;">▶ Commencer</button>
       <div id="resumeSessionSlot"></div>
@@ -10795,6 +10834,32 @@ function renderBlockSelect(){
 
   // Restaure la position de défilement où on était, au lieu de toujours remonter en haut.
   requestAnimationFrame(() => { window.scrollTo(0, homeScrollY); });
+
+  // ⬆️⬇️ Flèches de navigation rapide : descendre directement au bloc à faire, ou remonter en haut.
+  let navArrows = document.getElementById('homeNavArrows');
+  if(!navArrows){
+    navArrows = document.createElement('div');
+    navArrows.id = 'homeNavArrows';
+    navArrows.className = 'home-nav-arrows';
+    document.body.appendChild(navArrows);
+  }
+  navArrows.innerHTML = `
+    <button class="home-nav-arrow" id="jumpToMyBlockBtn" title="Aller à mon bloc à faire">🎯</button>
+    <button class="home-nav-arrow" id="jumpToTopBtn" title="Remonter en haut">⬆️</button>
+  `;
+  document.getElementById('jumpToTopBtn').addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+  document.getElementById('jumpToMyBlockBtn').addEventListener('click', () => {
+    const idx = findNextBlockToPlay();
+    if(idx === null) return;
+    const el = document.querySelector(`[data-block="${idx}"]`);
+    if(el){
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.classList.remove('jump-highlight'); void el.offsetWidth; el.classList.add('jump-highlight');
+      setTimeout(() => el.classList.remove('jump-highlight'), 1600);
+    }
+  });
 }
 
 function focusReveal(revealWrap){
@@ -12280,6 +12345,8 @@ function startQuestionTimer(onTimeout, seconds){
 function clearQuestionTimer(){
   if(questionTimer){ clearTimeout(questionTimer); questionTimer = null; }
   clearAutoAdvance();
+  const navArrows = document.getElementById('homeNavArrows');
+  if(navArrows){ navArrows.remove(); } // recréées fraîches par renderBlockSelect si on reste bien à l'accueil
   const fill = document.getElementById('quizTimerFill');
   if(fill){
     const w = getComputedStyle(fill).width;
@@ -13153,9 +13220,97 @@ function cloudAutoPush(){
   if(!getSyncUrl() || syncBusy) return;
   syncBusy = true;
   cloudPush()
-    .then(() => { setStatus('☁️ Scores synchronisés.', 'ok'); })
+    .then(() => { setStatus('☁️ Scores synchronisés.', 'ok'); pushLeaderboardEntry(); })
     .catch((e) => { setStatus('☁️ Synchro impossible : ' + (e && e.message ? e.message : 'erreur inconnue'), 'err'); console.error('Sync push error:', e); })
     .finally(() => { syncBusy = false; });
+}
+
+/* ============ 🏆 CLASSEMENT JOURNALIER ============
+   Ne nécessite AUCUNE nouvelle fonction côté serveur : on réutilise simplement push/pull avec
+   des clés dédiées (préfixées, sans "::u:" pour échapper au filtre par-utilisateur normal de
+   mergeRemoteData). Seuls les comptes nommés (pas les profils locaux anonymes) participent. */
+const LEADERBOARD_PREFIX = 'lexiqueQuiz::leaderboard::';
+function leaderboardKeyForToday(username){
+  return `${LEADERBOARD_PREFIX}${todayKey()}::${username}`;
+}
+async function pushLeaderboardEntry(){
+  const session = getAuthSession();
+  if(!session || !session.username) return; // pas de compte nommé : ne participe pas au classement public
+  try{
+    const xp = todayStats().xp || 0;
+    const key = leaderboardKeyForToday(session.username);
+    const value = JSON.stringify({ name: session.username, xp, updatedAt: Date.now() });
+    await cloudRequest({ action:'push', data: { [key]: value } });
+  }catch(e){ /* best-effort, comme le reste de la synchro : jamais bloquant */ }
+}
+async function fetchLeaderboardToday(){
+  const out = await cloudRequest({ action:'pull' });
+  const prefix = `${LEADERBOARD_PREFIX}${todayKey()}::`;
+  const entries = [];
+  Object.keys(out.data || {}).forEach(key => {
+    if(!key.startsWith(prefix)) return;
+    try{
+      const parsed = JSON.parse(out.data[key].v);
+      if(parsed && parsed.name){ entries.push(parsed); }
+    }catch(e){}
+  });
+  entries.sort((a,b) => (b.xp||0) - (a.xp||0));
+  return entries;
+}
+
+function renderLeaderboard(){
+  clearQuestionTimer();
+  document.body.classList.remove('quiz-active');
+  isHomeScreen = false;
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromLeaderboardBtn" style="cursor:pointer;">← Retour</button>`;
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('footerNote').textContent = '';
+  const card = document.getElementById('quizCard');
+  const session = getAuthSession();
+  const hasSyncUrl = !!getSyncUrl();
+  card.innerHTML = `
+    <div class="cat-tag">🏆 Classement du jour</div>
+    <div class="word-fr" style="font-size:clamp(22px,4.5vw,28px);">Qui a le plus appris aujourd'hui ?</div>
+    <div id="leaderboardBody" style="margin-top:18px;text-align:left;"></div>
+    ${!session ? `<div style="margin-top:16px;font-size:12.5px;color:var(--text-dim);background:var(--surface-sunken);border:1px solid var(--border);border-radius:12px;padding:12px 16px;text-align:left;">💡 Crée un compte (menu ☰ → 🔐 Mon compte) pour apparaître dans ce classement !</div>` : ''}
+  `;
+  document.getElementById('backFromLeaderboardBtn').addEventListener('click', renderBlockSelect);
+  const body = document.getElementById('leaderboardBody');
+
+  if(!hasSyncUrl){
+    body.innerHTML = `<div style="text-align:center;color:var(--text-dim);padding:20px;">☁️ Configure d'abord la synchro (menu ☰ → ☁️ Synchro) pour voir le classement.</div>`;
+    return;
+  }
+  body.innerHTML = `<div style="text-align:center;color:var(--text-dim);padding:20px;">⏳ Chargement...</div>`;
+
+  // On pousse d'abord notre propre score du jour, puis on récupère le classement complet.
+  pushLeaderboardEntry().finally(() => {
+    fetchLeaderboardToday().then(entries => {
+      const bodyEl = document.getElementById('leaderboardBody');
+      if(!bodyEl) return; // l'utilisateur a déjà quitté l'écran
+      if(entries.length === 0){
+        bodyEl.innerHTML = `<div style="text-align:center;color:var(--text-dim);padding:20px;">Personne n'a encore de points aujourd'hui — sois le·la premier·ère !</div>`;
+        return;
+      }
+      const myName = session ? session.username : null;
+      bodyEl.innerHTML = entries.slice(0, 20).map((e, i) => {
+        const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i+1}.`;
+        const isMe = myName && e.name === myName;
+        return `
+          <div class="result-card" style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;margin-bottom:6px;${isMe ? 'border-color:var(--purple);background:rgba(80,70,229,0.08);' : ''}">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-weight:800;min-width:28px;">${medal}</span>
+              <span style="font-weight:700;color:var(--text);">${escapeHtml(e.name)}${isMe ? ' (toi)' : ''}</span>
+            </div>
+            <span style="font-weight:800;color:var(--purple);">${e.xp} XP</span>
+          </div>
+        `;
+      }).join('');
+    }).catch(e => {
+      const bodyEl = document.getElementById('leaderboardBody');
+      if(bodyEl){ bodyEl.innerHTML = `<div style="text-align:center;color:var(--red);padding:20px;">⚠️ Impossible de charger le classement (${escapeHtml(e && e.message ? e.message : 'erreur réseau')}).</div>`; }
+    });
+  });
 }
 
 function setSyncIndicator(on){
@@ -17723,6 +17878,7 @@ document.getElementById('authAccountBtn').addEventListener('click', () => {
 });
 document.getElementById('whatsNewBtn').addEventListener('click', () => renderWhatsNew());
 document.getElementById('soundTestBtn').addEventListener('click', () => renderSoundTest());
+document.getElementById('leaderboardBtn').addEventListener('click', () => renderLeaderboard());
 document.getElementById('timeBreakdownBtn').addEventListener('click', () => renderTimeBreakdown());
 
 document.getElementById('closeSummaryBtn').addEventListener('click', hideBlockSummaryOverlay);
