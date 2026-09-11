@@ -4794,12 +4794,23 @@ function attachAutoAdvance(btnId, onAdvance){
   if(autoAdvanceSeconds <= 0){ btn.textContent = 'Suivant →'; btn.onclick = onAdvance; return; }
   let remaining = autoAdvanceSeconds;
   let paused = false;
+
+  // ⏳ Au bout du délai, si une phrase est encore en train d'être lue à voix haute, on n'avance
+  // PAS tout de suite — on attend qu'elle se termine, pour ne jamais la couper en plein milieu.
+  const waitForAudioThenAdvance = () => {
+    if(!ttsSpeaking){ clearAutoAdvance(); onAdvance(); return; }
+    btn.textContent = "🔊 Fin de l'audio...";
+    autoAdvanceIntervalId = setInterval(() => {
+      if(!ttsSpeaking){ clearAutoAdvance(); onAdvance(); }
+    }, 250);
+  };
+
   btn.textContent = `⏸️ Pause (${remaining}s)`;
   autoAdvanceIntervalId = setInterval(() => {
     remaining--;
     if(remaining <= 0){
       clearAutoAdvance();
-      onAdvance();
+      waitForAudioThenAdvance();
       return;
     }
     btn.textContent = `⏸️ Pause (${remaining}s)`;
@@ -7316,6 +7327,7 @@ function renderGrammarHome(level){
       <button class="restart-btn" id="voixPassiveBtn" style="margin:0;background:linear-gradient(135deg,#6366F1,#4F46E5);border-color:#3730A3;">🔄 Voix active/passive</button>
       <button class="restart-btn" id="discoursRapporteBtn" style="margin:0;background:linear-gradient(135deg,#6366F1,#4F46E5);border-color:#3730A3;">💬 Discours rapporté</button>
       <button class="restart-btn" id="genreNomsBtn" style="margin:0;background:linear-gradient(135deg,#6366F1,#4F46E5);border-color:#3730A3;">⚧️ Genre des noms</button>
+      <button class="restart-btn" id="prepositionsBtn" style="margin:0;background:linear-gradient(135deg,#6366F1,#4F46E5);border-color:#3730A3;">📍 Prépositions (au, dans, sur, de, en)</button>
     </div>
   `;
   document.getElementById('backFromGrammarBtn').addEventListener('click', renderBlockSelect);
@@ -7327,6 +7339,7 @@ function renderGrammarHome(level){
   document.getElementById('voixPassiveBtn').addEventListener('click', () => renderGenericRecoIntro('voixPassive'));
   document.getElementById('discoursRapporteBtn').addEventListener('click', () => renderGenericRecoIntro('discoursRapporte'));
   document.getElementById('genreNomsBtn').addEventListener('click', () => renderGenericRecoIntro('genreNoms'));
+  document.getElementById('prepositionsBtn').addEventListener('click', () => renderGenericRecoIntro('prepositions'));
   document.getElementById('toggleGrammarRulesBtn').addEventListener('click', () => {
     const panel = document.getElementById('grammarRulesPanel');
     panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
@@ -7702,6 +7715,28 @@ function endSentenceTypeQuiz(){
    Réutilisé pour Négation, Formation des questions, Accord du participe passé — même principe que
    COD/COI et Types de phrases, mais factorisé pour éviter de dupliquer le code à chaque nouveau sujet. */
 const RECOGNITION_EXERCISES = {
+  prepositions: {
+    title:'Quelle préposition ? (au, dans, sur, de, en)', icon:'📍',
+    options:['au','dans','sur','de','en'],
+    tip:"AU (= à + le) : devant un nom masculin singulier — pays masculins (au Japon, au Canada), lieux précis (au bureau, au marché). · DANS : l'intérieur d'un espace fermé/délimité (dans la boîte, dans le tiroir), et le futur avec une durée (dans 5 minutes = après ce délai, à partir de maintenant). · SUR : une surface, le dessus de quelque chose (posé sur la table), ou un sujet/thème traité (un exposé sur l'Égypte). · DE : l'origine/la provenance (venir de Paris), la possession (le sac de Léa), parfois la matière (une table de bois). · EN : les pays/continents féminins ou commençant par une voyelle (en France, en Iran), les mois/saisons sans article (en hiver, en juin), les moyens de transport où l'on est « à l'intérieur » sans les conduire soi-même (en avion, en bus), et la matière (en bois, en verre).",
+    examples:[
+      { sentence:"Il travaille ___ Canada.", correct:"au", rule:"« au » = à + le, devant un nom masculin singulier → le Canada devient au Canada." },
+      { sentence:"Elle est née ___ Espagne.", correct:"en", rule:"« en » devant un pays féminin (ou commençant par une voyelle) → l'Espagne devient en Espagne." },
+      { sentence:"Range tes affaires ___ ton sac.", correct:"dans", rule:"« dans » marque l'intérieur d'un espace fermé/délimité, ici le sac." },
+      { sentence:"Pose le vase ___ la table.", correct:"sur", rule:"« sur » marque une surface, le dessus de quelque chose." },
+      { sentence:"C'est un article ___ le réchauffement climatique.", correct:"sur", rule:"« sur » introduit aussi le sujet/thème traité (un article sur..., un débat sur...)." },
+      { sentence:"Ce train vient ___ Marseille.", correct:"de", rule:"« de » marque l'origine, la provenance." },
+      { sentence:"Cette table est faite ___ bois massif.", correct:"en", rule:"« en » indique la matière dont un objet est fait (en bois, en verre, en métal)." },
+      { sentence:"Nous voyageons toujours ___ train.", correct:"en", rule:"« en » devant un moyen de transport où l'on est à l'intérieur, sans le conduire soi-même (en train, en avion, en bus — mais à vélo, à pied)." },
+      { sentence:"Il range ses vêtements ___ l'armoire.", correct:"dans", rule:"« dans » marque l'intérieur d'un espace fermé, ici l'armoire." },
+      { sentence:"Le stylo est resté ___ le bureau.", correct:"sur", rule:"« sur » car le stylo est posé sur la surface du bureau (pas rangé dedans)." },
+      { sentence:"Ils partiront ___ deux semaines.", correct:"dans", rule:"« dans » + une durée exprime un futur : l'action aura lieu après ce délai, à partir de maintenant." },
+      { sentence:"Ce cadeau vient ___ ma grand-mère.", correct:"de", rule:"« de » marque la provenance : ce cadeau a pour origine ma grand-mère." },
+      { sentence:"Elle habite ___ Brésil depuis deux ans.", correct:"au", rule:"« au » = à + le, devant un nom masculin singulier → le Brésil devient au Brésil." },
+      { sentence:"Le chat est caché ___ le panier.", correct:"dans", rule:"« dans » marque l'intérieur d'un contenant, ici le panier." },
+      { sentence:"Cette bague est ___ argent véritable.", correct:"en", rule:"« en » indique la matière (en argent, en or, en cuir)." },
+      { sentence:"Le livre est tombé ___ le sol.", correct:"sur", rule:"« sur » marque une surface — ici le sol, sur lequel le livre repose." },
+    ] },
   genreNoms: {
     title:'Masculin ou féminin ?', icon:'⚧️',
     options:['Masculin','Féminin'],
@@ -11957,7 +11992,7 @@ function startOrderDrag(e, el){
     item = window.__orderPool.find(p => p.uid === uid);
     if(!item) return;
   }
-  speak(item.word, 'fr-FR'); // 🔊 on entend le mot dès qu'on le touche
+  if(!ttsSpeaking){ speak(item.word, 'fr-FR'); } // 🔊 on entend le mot dès qu'on le touche — sauf si la phrase complète est en train d'être lue, pour ne jamais la couper
   el.style.visibility = 'hidden'; // masque l'original pendant le glissement (le fantôme le représente)
 
   const rect = el.getBoundingClientRect();
@@ -12807,6 +12842,28 @@ function activateAccountProfile(username){
   rebuildBlocks();
 }
 
+/* 🛡️ Transfère toute la progression du profil ACTUEL (série, points, mots appris...) vers le
+   nouveau compte qu'on est en train de créer, au lieu de la laisser "orpheline" sous l'ancien
+   profil pendant que l'app bascule sur un espace vide. Sans ça, créer un compte pour la première
+   fois donnerait l'impression d'avoir tout perdu — alors qu'on veut juste NOMMER sa progression
+   existante, pas repartir de zéro. Les anciennes clés ne sont jamais supprimées (aucun risque). */
+function migrateCurrentProfileTo(newId){
+  const oldId = getCurrentUserId();
+  if(!oldId || oldId === newId) return;
+  const oldSuffix = '::u:' + oldId;
+  const newSuffix = '::u:' + newId;
+  try{
+    const keys = Object.keys(localStorage).filter(k => k.endsWith(oldSuffix));
+    keys.forEach(oldKey => {
+      const baseKey = oldKey.slice(0, -oldSuffix.length);
+      const newKey = baseKey + newSuffix;
+      if(localStorage.getItem(newKey) === null){ // ne jamais écraser des données déjà présentes sous le nouveau compte
+        localStorage.setItem(newKey, localStorage.getItem(oldKey));
+      }
+    });
+  }catch(e){}
+}
+
 async function registerAccount(username, password){
   username = (username||'').trim();
   if(!username || !password) throw new Error('Nom d\'utilisateur et mot de passe requis.');
@@ -12816,6 +12873,12 @@ async function registerAccount(username, password){
   const out = await cloudRequest({ action:'register', username, salt, hash });
   if(!out.ok) throw new Error(out.error || 'Inscription impossible.');
   saveAuthSession({ username });
+  // 🛡️ Si c'est la toute première activation de ce compte sur cet appareil, on transfère la
+  // progression actuelle (série, points, mots appris...) au lieu de la laisser derrière soi —
+  // créer un compte doit NOMMER sa progression existante, pas repartir de zéro.
+  const newId = 'acct_' + username.toLowerCase().replace(/[^a-z0-9]+/g,'_');
+  const alreadyExists = loadUsers().some(u => u.id === newId);
+  if(!alreadyExists){ migrateCurrentProfileTo(newId); }
   activateAccountProfile(username);
   await pullAfterAccountSwitch(); // filet de sécurité : au cas où ce compte aurait déjà des données côté cloud
   return true;
