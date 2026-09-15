@@ -10463,6 +10463,9 @@ function renderBlockSelect(){
       <button class="restart-btn" id="dailyLessonBtn" style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#7C3AED,#5B21B6);color:#fff;box-shadow:0 4px 0 #4C1D95;">
         📖 Leçon du jour
       </button>
+      <button class="restart-btn" id="practicalSheetsBtn" style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#EA580C,#C2410C);color:#fff;box-shadow:0 4px 0 #9A3412;">
+        📎 Fiches pratiques
+      </button>
       ${toReviewCount > 0 ? `
       <button class="restart-btn" id="startReviewBtn" style="display:flex;align-items:center;gap:8px;">
         ⚠️ ${toReviewCount} mot${toReviewCount>1?'s':''} à revoir
@@ -10587,6 +10590,7 @@ function renderBlockSelect(){
   document.getElementById('orthoBtn').addEventListener('click', () => renderOrthoHome());
   document.getElementById('dailyReadingBtn').addEventListener('click', () => renderDailyReading());
   document.getElementById('dailyLessonBtn').addEventListener('click', () => renderLessonList());
+  document.getElementById('practicalSheetsBtn').addEventListener('click', () => renderPracticalSheetsHome());
   const questsHead = document.getElementById('questsHead');
   const questsChevron = document.getElementById('questsChevron');
   if(questsChevron){ questsChevron.style.transform = questsCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)'; }
@@ -16948,6 +16952,233 @@ const DAILY_LESSON_68 = {
 };
 
 const ALL_LESSONS = { 1: DAILY_LESSON_1, 2: DAILY_LESSON_2, 3: DAILY_LESSON_3, 4: DAILY_LESSON_4, 5: DAILY_LESSON_5, 6: DAILY_LESSON_6, 7: DAILY_LESSON_7, 8: DAILY_LESSON_8, 9: DAILY_LESSON_9, 10: DAILY_LESSON_10, 11: DAILY_LESSON_11, 12: DAILY_LESSON_12, 13: DAILY_LESSON_13, 14: DAILY_LESSON_14, 15: DAILY_LESSON_15, 16: DAILY_LESSON_16, 17: DAILY_LESSON_17, 18: DAILY_LESSON_18, 19: DAILY_LESSON_19, 20: DAILY_LESSON_20, 21: DAILY_LESSON_21, 22: DAILY_LESSON_22, 23: DAILY_LESSON_23, 24: DAILY_LESSON_24, 25: DAILY_LESSON_25, 26: DAILY_LESSON_26, 27: DAILY_LESSON_27, 28: DAILY_LESSON_28, 29: DAILY_LESSON_29, 30: DAILY_LESSON_30, 31: DAILY_LESSON_31, 32: DAILY_LESSON_32, 33: DAILY_LESSON_33, 34: DAILY_LESSON_34, 35: DAILY_LESSON_35, 36: DAILY_LESSON_36, 37: DAILY_LESSON_37, 38: DAILY_LESSON_38, 39: DAILY_LESSON_39, 40: DAILY_LESSON_40, 49: DAILY_LESSON_49, 50: DAILY_LESSON_50, 51: DAILY_LESSON_51, 52: DAILY_LESSON_52, 53: DAILY_LESSON_53, 54: DAILY_LESSON_54, 55: DAILY_LESSON_55, 56: DAILY_LESSON_56, 57: DAILY_LESSON_57, 58: DAILY_LESSON_58, 59: DAILY_LESSON_59, 60: DAILY_LESSON_60, 61: DAILY_LESSON_61, 62: DAILY_LESSON_62, 63: DAILY_LESSON_63, 64: DAILY_LESSON_64, 65: DAILY_LESSON_65, 66: DAILY_LESSON_66, 67: DAILY_LESSON_67, 68: DAILY_LESSON_68 };
+
+/* ============ 📎 FICHES PRATIQUES — "Français en poche" ============
+   Petites fiches ponctuelles (expressions, nuances de grammaire, modèles de lettres...) qui ne
+   rentrent pas dans le moule habituel d'un exercice — pensées pour être lues et retenues. */
+const PRACTICAL_SHEETS = [
+  {
+    id: 'expressions-orales-1',
+    category: 'Expressions orales',
+    icon: '🗣️',
+    title: 'Les Français disent plutôt...',
+    intro: "15 expressions françaises très utilisées à l'oral, à préférer à leur équivalent \"de manuel\".",
+    type: 'table',
+    columns: ['Éviter', 'Dire plutôt'],
+    rows: [
+      ['Je suis content.', 'Je suis refait.'],
+      ["C'est incroyable !", 'C\'est dingue !'],
+      ['Je suis pressé.', 'Je suis à la bourre.'],
+      ["Je n'en reviens pas !", "J'hallucine !"],
+      ["Ça ne m'intéresse pas.", "Je m'en fiche."],
+      ['Il est très riche.', 'Il est blindé.'],
+      ['Je suis très fatigué.', 'Je suis KO.'],
+      ['Ça fonctionne.', 'Ça marche !'],
+      ['Je suis de mauvaise humeur.', 'Je fais la tête.'],
+      ["C'est très cher.", 'Ça coûte un bras.'],
+      ['Je suis perdu.', 'Je suis paumé.'],
+      ['Il est paresseux.', "C'est un flemmard."],
+      ['Je vais partir.', 'Je me tire.'],
+      ["C'est parfait.", "C'est carré."],
+      ['Je suis très heureux.', 'Je suis aux anges.'],
+    ],
+    note: "Ces expressions sont surtout utilisées à l'oral et dans un registre familier — elles ne conviennent pas forcément à un contexte professionnel ou formel.",
+  },
+  {
+    id: 'expressions-familieres-1',
+    category: 'Registre familier',
+    icon: '😎',
+    title: 'Dites plutôt... (expressions familières)',
+    intro: "16 expressions françaises familières, courantes entre proches à l'oral.",
+    type: 'table',
+    columns: ['Éviter', 'Dire plutôt'],
+    rows: [
+      ['Je suis énervé.', 'Je suis saoulé.'],
+      ["C'est facile.", "C'est du gâteau."],
+      ['Je suis surpris.', 'Je suis sur le cul. (très familier)'],
+      ['Il ment.', "Il raconte n'importe quoi."],
+      ['Je comprends.', 'Je capte.'],
+      ['Je suis occupé.', 'Je suis débordé.'],
+      ['Ça ne va pas.', 'Ça craint.'],
+      ['Je suis stressé.', 'Je suis sous pression.'],
+      ['Il est sympa.', 'Il est cool.'],
+      ["Je n'ai plus d'argent.", 'Je suis fauché.'],
+      ['Je suis inquiet.', 'Je me fais du souci.'],
+      ['Ça me plaît.', 'Je kiffe.'],
+      ['Je suis très occupé.', 'Je cours partout.'],
+      ['Il parle beaucoup.', 'C\'est une vraie pipelette.'],
+      ['Je vais dormir.', 'Je vais pioncer.'],
+      ["C'est très bien.", 'C\'est nickel.'],
+    ],
+    note: "Ces expressions appartiennent surtout au français familier — naturelles à l'oral, mais certaines sont à éviter en contexte professionnel ou formel.",
+  },
+  {
+    id: 'grammaire-couleurs-composees',
+    category: 'Grammaire',
+    icon: '🎨',
+    title: "L'accord des couleurs composées — objets à plusieurs couleurs",
+    intro: "Complète la règle générale de l'accord des couleurs avec une nuance sur les objets qui contiennent plusieurs couleurs à la fois.",
+    type: 'rule',
+    blocks: [
+      { heading: 'Règle générale (rappel)', text: "Les adjectifs de couleur simples s'accordent en genre et en nombre avec le nom qu'ils qualifient.", examples: ['Une robe blanche. / Des robes blanches.', 'Une maison blanche. / Des maisons blanches.'] },
+      { heading: 'Mais : plusieurs couleurs à la fois', text: "Lorsqu'un objet contient plusieurs couleurs à la fois, les adjectifs de couleur ne s'accordent pas — le sens change selon l'accord." },
+    ],
+    table: {
+      columns: ['Expression', 'Sens', 'Accord'],
+      rows: [
+        ['Une robe blanc et noir', 'Une seule robe qui contient à la fois du blanc et du noir', 'invariable'],
+        ['Des robes blanches et noires', "Plusieurs robes : certaines blanches, d'autres noires", 'accord'],
+        ['Drapeaux blanc et noir', 'Chaque drapeau contient du blanc + du noir', 'invariable'],
+        ['Drapeaux blancs et noirs', 'Des drapeaux blancs + des drapeaux noirs (deux groupes distincts)', 'accord'],
+      ],
+    },
+    note: "Astuce : si l'objet mélange les deux couleurs à la fois → invariable (blanc et noir). Si les objets sont répartis en deux groupes de couleur différente → accord (blancs + noirs).",
+  },
+  {
+    id: 'lettre-demande-emploi',
+    category: 'Lettres types',
+    icon: '✉️',
+    title: "Modèle de lettre — Demande d'emploi",
+    intro: "Un modèle de lettre de candidature à adapter selon le poste et l'entreprise visés.",
+    type: 'letter',
+    subject: 'Objet : Candidature à un poste',
+    body: [
+      'Madame, Monsieur,',
+      "Je vous adresse par la présente ma candidature pour un poste au sein de votre entreprise.",
+      "Sérieux, motivé et désireux d'apprendre, je souhaite mettre mes compétences, mon dynamisme et mon sens des responsabilités au service de votre équipe. Je suis également prêt à m'investir pleinement dans les missions qui me seront confiées.",
+      "Je serais heureux de pouvoir vous rencontrer lors d'un entretien afin de vous présenter plus précisément mon parcours, mes compétences et mes motivations.",
+      "Dans l'attente de votre réponse, je vous prie d'agréer, Madame, Monsieur, l'expression de mes salutations distinguées.",
+    ],
+    fields: ['Nom et prénom', 'Téléphone', 'Adresse e-mail', 'Fait à', 'Le'],
+    note: "Astuce : soigner la présentation de la lettre et l'adapter toujours au poste visé et à l'entreprise.",
+  },
+  {
+    id: 'grammaire-tout-adverbe',
+    category: 'Grammaire',
+    icon: '📐',
+    title: '"Tout" adverbe invariable devant un adjectif féminin',
+    intro: 'Cas particulier de "tout" employé comme adverbe (et non déterminant) devant un adjectif, au sens de "tout à fait / entièrement".',
+    type: 'rule',
+    blocks: [
+      { heading: 'Le principe', text: 'TOUT + ADJECTIF = adverbe, équivalent à "totalement".', examples: ['Elle était tout émue. (et non "toute émue")'] },
+      { heading: "Règle d'accord", text: "Devant un adjectif féminin commençant par une CONSONNE → TOUT devient TOUTE(S). Devant un adjectif féminin commençant par une VOYELLE (ou h muet) → TOUT reste invariable." },
+      { heading: 'Ne pas confondre', text: 'Elle était toute émue ❌ (émue commence par une voyelle) → Elle était tout émue ✓. On ne dit jamais "touts" au masculin pluriel adverbial.' },
+    ],
+  },
+  {
+    id: 'vocabulaire-b2-c1-2',
+    category: 'Vocabulaire B2-C1',
+    icon: '📈',
+    title: 'Du français simple au français plus soutenu #2',
+    intro: "Enrichir son vocabulaire pour un niveau C1, à partir de formulations simples.",
+    type: 'table',
+    columns: ['Débutant', 'C1'],
+    rows: [
+      ['Je suis très fatigué.', 'Je suis à bout de forces.'],
+      ['Il est très en colère.', 'Il est hors de lui.'],
+      ['Je suis très heureux.', 'Je suis aux anges.'],
+      ['Cette décision est très importante.', 'Cette décision est cruciale.'],
+      ["Il a beaucoup d'expérience.", 'Il possède une solide expérience.'],
+      ["C'est très évident.", 'Cela va de soi.'],
+      ['Il parle sans réfléchir.', 'Il parle à tort et à travers.'],
+    ],
+  },
+];
+
+function renderPracticalSheetsHome(){
+  clearQuestionTimer();
+  document.body.classList.remove('quiz-active');
+  currentBlock = null;
+  isHomeScreen = false;
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromSheetsBtn" style="cursor:pointer;">← Retour</button>`;
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('footerNote').textContent = '';
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="cat-tag">📎 Fiches pratiques</div>
+    <div class="word-fr" style="font-size:clamp(22px,4.5vw,28px);">Petites fiches à retenir</div>
+    <div class="word-def" style="margin-top:4px;">Expressions, nuances de grammaire, modèles de lettres...</div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:18px;text-align:left;">
+      ${PRACTICAL_SHEETS.map(s => `
+        <button class="opt" data-sheet="${s.id}" style="text-align:left;padding:14px 16px;display:flex;align-items:center;gap:12px;">
+          <span style="font-size:22px;">${s.icon}</span>
+          <span>
+            <div style="font-size:10.5px;color:var(--text-dim);font-weight:700;">${escapeHtml(s.category.toUpperCase())}</div>
+            <div style="font-weight:800;font-size:14.5px;color:var(--text);margin-top:1px;">${escapeHtml(s.title)}</div>
+          </span>
+        </button>
+      `).join('')}
+    </div>
+  `;
+  document.getElementById('backFromSheetsBtn').addEventListener('click', renderBlockSelect);
+  card.querySelectorAll('[data-sheet]').forEach(btn => {
+    btn.addEventListener('click', () => renderPracticalSheetDetail(btn.dataset.sheet));
+  });
+}
+
+function buildSheetTableHtml(columns, rows){
+  return `
+    <div style="overflow-x:auto;margin-top:12px;">
+      <table style="width:100%;border-collapse:collapse;font-size:13.5px;">
+        <thead>
+          <tr>${columns.map(c => `<th style="text-align:left;padding:8px 10px;border-bottom:2px solid var(--border);color:var(--text-dim);font-size:11.5px;">${escapeHtml(c)}</th>`).join('')}</tr>
+        </thead>
+        <tbody>
+          ${rows.map(r => `<tr>${r.map((cell,i) => `<td style="padding:8px 10px;border-bottom:1px solid var(--border);${i===r.length-1 && r.length>2 ? 'font-weight:700;color:var(--purple);' : ''}">${escapeHtml(cell)}</td>`).join('')}</tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderPracticalSheetDetail(id){
+  clearQuestionTimer();
+  document.body.classList.remove('quiz-active');
+  isHomeScreen = false;
+  const sheet = PRACTICAL_SHEETS.find(s => s.id === id);
+  if(!sheet){ renderPracticalSheetsHome(); return; }
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromSheetDetailBtn" style="cursor:pointer;">← Toutes les fiches</button>`;
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('footerNote').textContent = '';
+  const card = document.getElementById('quizCard');
+
+  let bodyHtml = '';
+  if(sheet.type === 'table'){
+    bodyHtml = buildSheetTableHtml(sheet.columns, sheet.rows);
+  } else if(sheet.type === 'letter'){
+    bodyHtml = `
+      <div style="text-align:left;background:var(--surface-sunken);border:1px solid var(--border);border-radius:14px;padding:18px 20px;margin-top:14px;font-size:13.5px;line-height:1.7;">
+        <div style="font-weight:800;margin-bottom:10px;color:var(--text);">${escapeHtml(sheet.subject)}</div>
+        ${sheet.body.map(p => `<p style="margin:0 0 10px;">${escapeHtml(p)}</p>`).join('')}
+      </div>
+      <div style="margin-top:12px;font-size:12.5px;color:var(--text-dim);text-align:left;">
+        <b>Champs à compléter :</b> ${sheet.fields.map(f => escapeHtml(f)).join(' · ')}
+      </div>
+    `;
+  } else if(sheet.type === 'rule'){
+    bodyHtml = sheet.blocks.map(b => `
+      <div style="text-align:left;margin-top:14px;">
+        <div style="font-weight:800;color:var(--purple);font-size:13.5px;">${escapeHtml(b.heading)}</div>
+        <div style="font-size:13.5px;color:var(--text);margin-top:4px;line-height:1.6;">${escapeHtml(b.text)}</div>
+        ${b.examples ? `<ul style="margin:8px 0 0;padding-left:20px;font-size:13px;color:var(--text-dim);">${b.examples.map(ex => `<li style="margin-bottom:4px;">${escapeHtml(ex)}</li>`).join('')}</ul>` : ''}
+      </div>
+    `).join('');
+    if(sheet.table){ bodyHtml += buildSheetTableHtml(sheet.table.columns, sheet.table.rows); }
+  }
+
+  card.innerHTML = `
+    <div class="cat-tag">${sheet.icon} ${escapeHtml(sheet.category)}</div>
+    <div class="word-fr" style="font-size:clamp(19px,4vw,25px);">${escapeHtml(sheet.title)}</div>
+    <div class="word-def" style="margin-top:6px;">${escapeHtml(sheet.intro)}</div>
+    ${bodyHtml}
+    ${sheet.note ? `<div style="margin-top:16px;text-align:left;font-size:12.5px;color:var(--text-dim);background:rgba(80,70,229,0.06);border:1px solid rgba(80,70,229,0.18);border-radius:12px;padding:12px 16px;">💡 ${escapeHtml(sheet.note)}</div>` : ''}
+    <button class="restart-btn" id="nextSheetBtn" style="margin-top:20px;">Fiche suivante →</button>
+  `;
+  document.getElementById('backFromSheetDetailBtn').addEventListener('click', renderPracticalSheetsHome);
+  const idx = PRACTICAL_SHEETS.findIndex(s => s.id === id);
+  const nextSheet = PRACTICAL_SHEETS[(idx + 1) % PRACTICAL_SHEETS.length];
+  document.getElementById('nextSheetBtn').addEventListener('click', () => renderPracticalSheetDetail(nextSheet.id));
+}
 
 function renderLessonList(){
   clearQuestionTimer();
