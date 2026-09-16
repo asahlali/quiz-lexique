@@ -7715,6 +7715,32 @@ function endSentenceTypeQuiz(){
    Réutilisé pour Négation, Formation des questions, Accord du participe passé — même principe que
    COD/COI et Types de phrases, mais factorisé pour éviter de dupliquer le code à chaque nouveau sujet. */
 const RECOGNITION_EXERCISES = {
+  couleursComposees: {
+    title:'Couleurs composées : accord ou invariable ?', icon:'🎨',
+    options:['Invariable (mélange dans le même objet)','Accord (objets de couleurs différentes)'],
+    tip:"Quand un objet contient plusieurs couleurs à la fois (blanc et noir, vert et jaune...), les adjectifs de couleur ne s'accordent PAS. Mais si on parle de plusieurs objets répartis en deux groupes de couleur différente, l'accord normal s'applique.",
+    examples:[
+      { sentence:"Une robe blanc et noir.", correct:"Invariable (mélange dans le même objet)", rule:"Une seule robe qui contient à la fois du blanc et du noir → invariable." },
+      { sentence:"Des robes blanches et noires.", correct:"Accord (objets de couleurs différentes)", rule:"Plusieurs robes : certaines blanches, d'autres noires (deux groupes) → accord." },
+      { sentence:"Des drapeaux blanc et noir.", correct:"Invariable (mélange dans le même objet)", rule:"Chaque drapeau contient du blanc + du noir → invariable." },
+      { sentence:"Des drapeaux blancs et noirs.", correct:"Accord (objets de couleurs différentes)", rule:"Des drapeaux blancs + des drapeaux noirs, deux groupes distincts → accord." },
+      { sentence:"Une jupe vert et jaune.", correct:"Invariable (mélange dans le même objet)", rule:"Une seule jupe qui mélange vert et jaune → invariable." },
+      { sentence:"Des jupes vertes et jaunes.", correct:"Accord (objets de couleurs différentes)", rule:"Des jupes vertes et des jupes jaunes, deux groupes → accord." },
+      { sentence:"Un ballon rouge et blanc.", correct:"Invariable (mélange dans le même objet)", rule:"Un seul ballon aux deux couleurs mélangées → invariable." },
+      { sentence:"Des ballons rouges et blancs.", correct:"Accord (objets de couleurs différentes)", rule:"Des ballons rouges + des ballons blancs, deux groupes → accord." },
+    ] },
+  toutAdverbe: {
+    title:'"Tout" : adverbe invariable ou accordé ?', icon:'📐',
+    options:['tout (invariable)','toute / toutes (accord)'],
+    tip:"TOUT + ADJECTIF FÉMININ = adverbe (\"totalement\"). Devant une consonne → TOUT devient TOUTE(S). Devant une voyelle ou un h muet → TOUT reste invariable.",
+    examples:[
+      { sentence:"Elle était ___ émue.", correct:"tout (invariable)", rule:"« émue » commence par une voyelle → tout reste invariable." },
+      { sentence:"Elle est ___ contente.", correct:"toute / toutes (accord)", rule:"« contente » commence par une consonne → tout devient toute." },
+      { sentence:"Elles étaient ___ heureuses.", correct:"tout (invariable)", rule:"« heureuses » commence par un h muet → tout reste invariable." },
+      { sentence:"Elles étaient ___ contentes.", correct:"toute / toutes (accord)", rule:"« contentes » commence par une consonne → tout devient toutes." },
+      { sentence:"La maison est ___ illuminée.", correct:"tout (invariable)", rule:"« illuminée » commence par une voyelle → tout reste invariable." },
+      { sentence:"La maison est ___ délabrée.", correct:"toute / toutes (accord)", rule:"« délabrée » commence par une consonne → tout devient toute." },
+    ] },
   prepositions: {
     title:'Quelle préposition ? (au, dans, sur, de, en)', icon:'📍',
     options:['au','dans','sur','de','en'],
@@ -17019,6 +17045,7 @@ const PRACTICAL_SHEETS = [
     title: "L'accord des couleurs composées — objets à plusieurs couleurs",
     intro: "Complète la règle générale de l'accord des couleurs avec une nuance sur les objets qui contiennent plusieurs couleurs à la fois.",
     type: 'rule',
+    recoKey: 'couleursComposees',
     blocks: [
       { heading: 'Règle générale (rappel)', text: "Les adjectifs de couleur simples s'accordent en genre et en nombre avec le nom qu'ils qualifient.", examples: ['Une robe blanche. / Des robes blanches.', 'Une maison blanche. / Des maisons blanches.'] },
       { heading: 'Mais : plusieurs couleurs à la fois', text: "Lorsqu'un objet contient plusieurs couleurs à la fois, les adjectifs de couleur ne s'accordent pas — le sens change selon l'accord." },
@@ -17059,6 +17086,7 @@ const PRACTICAL_SHEETS = [
     title: '"Tout" adverbe invariable devant un adjectif féminin',
     intro: 'Cas particulier de "tout" employé comme adverbe (et non déterminant) devant un adjectif, au sens de "tout à fait / entièrement".',
     type: 'rule',
+    recoKey: 'toutAdverbe',
     blocks: [
       { heading: 'Le principe', text: 'TOUT + ADJECTIF = adverbe, équivalent à "totalement".', examples: ['Elle était tout émue. (et non "toute émue")'] },
       { heading: "Règle d'accord", text: "Devant un adjectif féminin commençant par une CONSONNE → TOUT devient TOUTE(S). Devant un adjectif féminin commençant par une VOYELLE (ou h muet) → TOUT reste invariable." },
@@ -17116,7 +17144,7 @@ function renderPracticalSheetsHome(){
   });
 }
 
-function buildSheetTableHtml(columns, rows){
+function buildSheetTableHtml(columns, rows, speakableCols){
   return `
     <div style="overflow-x:auto;margin-top:12px;">
       <table style="width:100%;border-collapse:collapse;font-size:13.5px;">
@@ -17124,7 +17152,12 @@ function buildSheetTableHtml(columns, rows){
           <tr>${columns.map(c => `<th style="text-align:left;padding:8px 10px;border-bottom:2px solid var(--border);color:var(--text-dim);font-size:11.5px;">${escapeHtml(c)}</th>`).join('')}</tr>
         </thead>
         <tbody>
-          ${rows.map(r => `<tr>${r.map((cell,i) => `<td style="padding:8px 10px;border-bottom:1px solid var(--border);${i===r.length-1 && r.length>2 ? 'font-weight:700;color:var(--purple);' : ''}">${escapeHtml(cell)}</td>`).join('')}</tr>`).join('')}
+          ${rows.map((r, ri) => `<tr>${r.map((cell,i) => {
+            const canSpeak = !speakableCols || speakableCols.includes(i);
+            return `<td style="padding:8px 10px;border-bottom:1px solid var(--border);${i===r.length-1 && r.length>2 ? 'font-weight:700;color:var(--purple);' : ''}">
+              ${escapeHtml(cell)}${canSpeak ? `<button class="speak-btn small" data-speak-cell="${ri}:${i}" style="margin-left:6px;vertical-align:middle;">${SPEAK_SVG_SMALL}</button>` : ''}
+            </td>`;
+          }).join('')}</tr>`).join('')}
         </tbody>
       </table>
     </div>
@@ -17141,29 +17174,33 @@ function renderPracticalSheetDetail(id){
   document.getElementById('progressFill').style.width = '100%';
   document.getElementById('footerNote').textContent = '';
   const card = document.getElementById('quizCard');
+  const canQuiz = sheet.type === 'table' || sheet.recoKey; // 🎯 les tableaux et les règles à choix binaire sont "entraînables"
 
   let bodyHtml = '';
   if(sheet.type === 'table'){
     bodyHtml = buildSheetTableHtml(sheet.columns, sheet.rows);
   } else if(sheet.type === 'letter'){
     bodyHtml = `
-      <div style="text-align:left;background:var(--surface-sunken);border:1px solid var(--border);border-radius:14px;padding:18px 20px;margin-top:14px;font-size:13.5px;line-height:1.7;">
-        <div style="font-weight:800;margin-bottom:10px;color:var(--text);">${escapeHtml(sheet.subject)}</div>
-        ${sheet.body.map(p => `<p style="margin:0 0 10px;">${escapeHtml(p)}</p>`).join('')}
+      <button class="mode-chip" id="speakWholeLetterBtn" style="margin-top:10px;">🔊 Écouter toute la lettre</button>
+      <div style="text-align:left;background:var(--surface-sunken);border:1px solid var(--border);border-radius:14px;padding:18px 20px;margin-top:10px;font-size:13.5px;line-height:1.7;">
+        <div style="font-weight:800;margin-bottom:10px;color:var(--text);">${escapeHtml(sheet.subject)}
+          <button class="speak-btn small" data-speak-para="-1" style="margin-left:6px;vertical-align:middle;">${SPEAK_SVG_SMALL}</button>
+        </div>
+        ${sheet.body.map((p,i) => `<p style="margin:0 0 10px;">${escapeHtml(p)} <button class="speak-btn small" data-speak-para="${i}" style="vertical-align:middle;">${SPEAK_SVG_SMALL}</button></p>`).join('')}
       </div>
       <div style="margin-top:12px;font-size:12.5px;color:var(--text-dim);text-align:left;">
         <b>Champs à compléter :</b> ${sheet.fields.map(f => escapeHtml(f)).join(' · ')}
       </div>
     `;
   } else if(sheet.type === 'rule'){
-    bodyHtml = sheet.blocks.map(b => `
+    bodyHtml = sheet.blocks.map((b, bi) => `
       <div style="text-align:left;margin-top:14px;">
         <div style="font-weight:800;color:var(--purple);font-size:13.5px;">${escapeHtml(b.heading)}</div>
         <div style="font-size:13.5px;color:var(--text);margin-top:4px;line-height:1.6;">${escapeHtml(b.text)}</div>
-        ${b.examples ? `<ul style="margin:8px 0 0;padding-left:20px;font-size:13px;color:var(--text-dim);">${b.examples.map(ex => `<li style="margin-bottom:4px;">${escapeHtml(ex)}</li>`).join('')}</ul>` : ''}
+        ${b.examples ? `<ul style="margin:8px 0 0;padding-left:20px;font-size:13px;color:var(--text-dim);">${b.examples.map((ex,ei) => `<li style="margin-bottom:4px;">${escapeHtml(ex)} <button class="speak-btn small" data-speak-block="${bi}:${ei}" style="vertical-align:middle;">${SPEAK_SVG_SMALL}</button></li>`).join('')}</ul>` : ''}
       </div>
     `).join('');
-    if(sheet.table){ bodyHtml += buildSheetTableHtml(sheet.table.columns, sheet.table.rows); }
+    if(sheet.table){ bodyHtml += buildSheetTableHtml(sheet.table.columns, sheet.table.rows, [0]); }
   }
 
   card.innerHTML = `
@@ -17172,13 +17209,153 @@ function renderPracticalSheetDetail(id){
     <div class="word-def" style="margin-top:6px;">${escapeHtml(sheet.intro)}</div>
     ${bodyHtml}
     ${sheet.note ? `<div style="margin-top:16px;text-align:left;font-size:12.5px;color:var(--text-dim);background:rgba(80,70,229,0.06);border:1px solid rgba(80,70,229,0.18);border-radius:12px;padding:12px 16px;">💡 ${escapeHtml(sheet.note)}</div>` : ''}
-    <button class="restart-btn" id="nextSheetBtn" style="margin-top:20px;">Fiche suivante →</button>
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:20px;flex-wrap:wrap;">
+      ${canQuiz ? `<button class="restart-btn" id="sheetPracticeBtn" style="margin:0;background:linear-gradient(135deg,#EA580C,#C2410C);border-color:#9A3412;">🎯 S'entraîner</button>` : ''}
+      <button class="restart-btn" id="nextSheetBtn" style="margin:0;background:var(--surface-sunken);border:1px solid var(--border);color:var(--purple);box-shadow:none;">Fiche suivante →</button>
+    </div>
   `;
   document.getElementById('backFromSheetDetailBtn').addEventListener('click', renderPracticalSheetsHome);
   const idx = PRACTICAL_SHEETS.findIndex(s => s.id === id);
   const nextSheet = PRACTICAL_SHEETS[(idx + 1) % PRACTICAL_SHEETS.length];
   document.getElementById('nextSheetBtn').addEventListener('click', () => renderPracticalSheetDetail(nextSheet.id));
+
+  const practiceBtn = document.getElementById('sheetPracticeBtn');
+  if(practiceBtn){
+    practiceBtn.addEventListener('click', () => {
+      if(sheet.recoKey){ renderGenericRecoIntro(sheet.recoKey); }
+      else { startSheetQuiz(sheet.id); }
+    });
+  }
+
+  // 🔊 Écoute : tableaux (chaque cellule), lettre (chaque paragraphe + bouton "toute la lettre"), règles (chaque exemple)
+  card.querySelectorAll('[data-speak-cell]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const [ri, ci] = btn.dataset.speakCell.split(':').map(Number);
+      const rows = sheet.type === 'rule' ? sheet.table.rows : sheet.rows;
+      speak(rows[ri][ci], 'fr-FR');
+    });
+  });
+  const speakWholeLetterBtn = document.getElementById('speakWholeLetterBtn');
+  if(speakWholeLetterBtn){
+    speakWholeLetterBtn.addEventListener('click', () => {
+      const full = [sheet.subject, ...sheet.body].join('. ');
+      speak(full, 'fr-FR');
+    });
+  }
+  card.querySelectorAll('[data-speak-para]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const i = parseInt(btn.dataset.speakPara, 10);
+      speak(i === -1 ? sheet.subject : sheet.body[i], 'fr-FR');
+    });
+  });
+  card.querySelectorAll('[data-speak-block]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const [bi, ei] = btn.dataset.speakBlock.split(':').map(Number);
+      speak(sheet.blocks[bi].examples[ei], 'fr-FR');
+    });
+  });
 }
+
+/* ============ 🎯 EXERCICE POUR LES FICHES "TABLEAU" (expressions, vocabulaire) ============
+   QCM : on montre la phrase de gauche, il faut retrouver la bonne équivalence parmi 4 propositions
+   (la bonne + 3 prises au hasard dans les autres lignes de la même fiche). */
+let sheetQuizState = null;
+function startSheetQuiz(sheetId){
+  const sheet = PRACTICAL_SHEETS.find(s => s.id === sheetId);
+  if(!sheet || sheet.type !== 'table') return;
+  clearQuestionTimer();
+  document.body.classList.add('quiz-active');
+  isHomeScreen = false;
+  const queue = shuffle(sheet.rows.slice());
+  sheetQuizState = { sheet, queue, idx:0, score:{correct:0,total:0} };
+  renderSheetQuizCard();
+}
+function renderSheetQuizCard(){
+  const st = sheetQuizState;
+  if(!st || st.idx >= st.queue.length){ endSheetQuiz(); return; }
+  document.getElementById('scoreboard').innerHTML = `<div class="chip">✅ <b>${st.score.correct}</b>/${st.score.total}</div><button class="chip" id="sheetQuizExitBtn" style="cursor:pointer;">← Quitter</button>`;
+  document.getElementById('sheetQuizExitBtn').addEventListener('click', () => { clearAutoAdvance(); renderPracticalSheetDetail(st.sheet.id); });
+  document.getElementById('progressFill').style.width = Math.round((st.idx/st.queue.length)*100) + '%';
+  document.getElementById('footerNote').textContent = `${st.idx+1} / ${st.queue.length}`;
+
+  const row = st.queue[st.idx];
+  const prompt = row[0], correct = row[1];
+  const others = st.sheet.rows.map(r => r[1]).filter(v => v !== correct);
+  const distractors = shuffle(others).slice(0, 3);
+  const options = shuffle([correct, ...distractors]);
+
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="cat-tag">${st.sheet.icon} ${escapeHtml(st.sheet.category)}</div>
+    <div class="question-line">Comment dire autrement :</div>
+    <div class="word-fr" style="font-size:clamp(18px,4vw,23px);">« ${escapeHtml(prompt)} »
+      <button class="speak-btn small" id="sheetQPromptSpeak">${SPEAK_SVG_SMALL}</button>
+    </div>
+    <div class="options" id="sheetQOptions" style="grid-template-columns:repeat(auto-fill,minmax(180px,1fr));margin-top:16px;">
+      ${options.map(o => `<button class="opt" data-opt="${escapeHtml(o)}">${escapeHtml(o)}</button>`).join('')}
+    </div>
+    <div class="reveal" id="sheetQReveal"></div>
+  `;
+  document.getElementById('sheetQPromptSpeak').addEventListener('click', () => speak(prompt, 'fr-FR'));
+  card.querySelectorAll('[data-opt]').forEach(btn => btn.addEventListener('click', () => validateSheetQuiz(btn.dataset.opt, correct, prompt)));
+}
+function validateSheetQuiz(chosen, correct, prompt){
+  const st = sheetQuizState;
+  const optionsEl = document.getElementById('sheetQOptions');
+  if(!st || optionsEl.classList.contains('disabled')) return;
+  optionsEl.classList.add('disabled');
+  document.querySelectorAll('#sheetQOptions [data-opt]').forEach(b => {
+    b.style.pointerEvents = 'none';
+    if(b.dataset.opt === correct){ b.classList.add('correct'); }
+  });
+  const isCorrect = chosen === correct;
+  if(!isCorrect){ const wrongBtn = document.querySelector(`#sheetQOptions [data-opt="${CSS.escape(chosen)}"]`); if(wrongBtn) wrongBtn.classList.add('wrong'); }
+  st.score.total++;
+  if(isCorrect){ st.score.correct++; }
+  bumpCombo(isCorrect);
+  if(isCorrect){ playCorrectSound(); reactMascot('ok'); vibrate(35); }
+  else { playWrongSound(); reactMascot('ko'); vibrate([40,40,40]); }
+  const reveal = document.getElementById('sheetQReveal');
+  reveal.classList.add('show');
+  reveal.innerHTML = `
+    <div class="pass-banner ${isCorrect ? 'ok' : 'ko'}">${isCorrect ? '✅ Exact !' : '❌ Pas tout à fait'}</div>
+    <div class="def-text" style="margin-top:8px;">« ${escapeHtml(correct)} »
+      <button class="speak-btn small" id="sheetQCorrectSpeak">${SPEAK_SVG_SMALL}</button>
+    </div>
+    <button class="next-btn" id="nextBtn">Suivant →</button>
+  `;
+  document.getElementById('sheetQCorrectSpeak').addEventListener('click', () => speak(correct, 'fr-FR'));
+  attachAutoAdvance('nextBtn', () => { st.idx++; renderSheetQuizCard(); });
+  autoSpeakWord(correct, 'fr-FR');
+}
+function endSheetQuiz(){
+  document.body.classList.remove('quiz-active');
+  const st = sheetQuizState;
+  const pct = st.score.total ? Math.round((st.score.correct/st.score.total)*100) : 0;
+  recordDailyActivity();
+  recordDailyStats(0, pct >= PASS_THRESHOLD, st.score.correct * 5, 'vocabulaire');
+  cloudAutoPush();
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="sheetQuizEndBackBtn" style="cursor:pointer;">← Retour</button>`;
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('footerNote').textContent = 'Terminé';
+  const fun = pct === 100 ? '🏆 Parfait !' : pct >= 90 ? '🌟 Excellent !' : pct >= 70 ? '👍 Bien joué !' : pct >= 50 ? '💪 Continue !' : '🌱 Réessaie encore !';
+  document.getElementById('quizCard').innerHTML = `
+    <div class="end-screen">
+      <div class="cat-tag">${st.sheet.icon} Fiche terminée</div>
+      <div class="big">${st.score.correct} / ${st.score.total}</div>
+      <div class="sub">${pct}% de réussite · ${fun}</div>
+      <div style="display:flex;gap:12px;justify-content:center;margin-top:20px;flex-wrap:wrap;">
+        <button class="restart-btn" id="sheetQuizAgainBtn">🔁 Recommencer</button>
+        <button class="restart-btn" id="sheetQuizBackBtn" style="background:var(--surface-sunken);border:1px solid var(--border);color:var(--purple);box-shadow:none;">← Retour</button>
+      </div>
+    </div>
+  `;
+  if(pct >= 90){ launchConfetti(); }
+  document.getElementById('sheetQuizEndBackBtn').addEventListener('click', () => renderPracticalSheetDetail(st.sheet.id));
+  document.getElementById('sheetQuizBackBtn').addEventListener('click', () => renderPracticalSheetDetail(st.sheet.id));
+  document.getElementById('sheetQuizAgainBtn').addEventListener('click', () => startSheetQuiz(st.sheet.id));
+}
+
 
 function renderLessonList(){
   clearQuestionTimer();
@@ -17925,9 +18102,13 @@ function renderDailyReading(){
         <div class="arabic-word" style="font-size:18px;margin:4px 0;">${escapeHtml(info.def_ar)}</div>
         <div style="font-size:13.5px;color:var(--text);margin-top:8px;"><b>🇫🇷 Définition :</b> ${escapeHtml(info.def_fr)}</div>
         <div style="font-size:13px;color:var(--text-dim);margin-top:8px;background:var(--surface-sunken);border-radius:8px;padding:8px 10px;"><b>📚 Grammaire/orthographe :</b> ${escapeHtml(info.gram)}</div>
-        <button class="mode-chip" id="listenWordBtn" style="margin-top:10px;">🔊 Écouter ce mot</button>
+        <div style="display:flex;gap:8px;margin-top:10px;">
+          <button class="mode-chip" id="listenWordFrBtn">🇫🇷 Écouter ce mot</button>
+          <button class="mode-chip" id="listenWordArBtn">🇸🇦 Écouter en arabe</button>
+        </div>
       `;
-      document.getElementById('listenWordBtn').addEventListener('click', () => speak(w, 'fr-FR'));
+      document.getElementById('listenWordFrBtn').addEventListener('click', () => speak(w, 'fr-FR'));
+      document.getElementById('listenWordArBtn').addEventListener('click', () => speak(info.def_ar, 'ar-SA'));
       panel.scrollIntoView({ behavior:'smooth', block:'nearest' });
     });
   });
