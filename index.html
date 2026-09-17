@@ -7715,6 +7715,48 @@ function endSentenceTypeQuiz(){
    Réutilisé pour Négation, Formation des questions, Accord du participe passé — même principe que
    COD/COI et Types de phrases, mais factorisé pour éviter de dupliquer le code à chaque nouveau sujet. */
 const RECOGNITION_EXERCISES = {
+  yEn: {
+    title:'« Y » ou « EN » ?', icon:'🔀',
+    options:['Y','EN'],
+    tip:"« Y » remplace un lieu ou un complément introduit par à/dans/sur/chez/en (jamais une personne). « EN » remplace une quantité ou un nom introduit par de/du/de la/des. Astuce : Y → pense à « À / un lieu » ; EN → pense à « DE / une quantité ».",
+    examples:[
+      { sentence:"Je vais au marché. → J'___ vais.", correct:"Y", rule:"« au marché » = lieu introduit par « à » → Y." },
+      { sentence:"Elle parle de son voyage. → Elle ___ parle.", correct:"EN", rule:"« de son voyage » introduit par « de » → EN." },
+      { sentence:"Nous avons deux voitures. → Nous ___ avons deux.", correct:"EN", rule:"« deux voitures » = quantité → EN." },
+      { sentence:"Tu penses à ton avenir. → Tu ___ penses.", correct:"Y", rule:"« à ton avenir » = lieu/complément en « à » (chose, pas personne) → Y." },
+      { sentence:"Ils achètent des légumes. → Ils ___ achètent.", correct:"EN", rule:"« des légumes » introduit par « des » (de) → EN." },
+      { sentence:"Elle habite à Paris. → Elle ___ habite.", correct:"Y", rule:"« à Paris » = lieu → Y." },
+      { sentence:"Tu veux du café ? → Oui, j'___ veux.", correct:"EN", rule:"« du café » introduit par « du » (de) → EN." },
+      { sentence:"Nous sommes dans la classe. → Nous ___ sommes.", correct:"Y", rule:"« dans la classe » = lieu → Y." },
+    ] },
+  belBelle: {
+    title:'BEAU, BEL ou BELLE ?', icon:'✨',
+    options:['beau','bel','belle'],
+    tip:"BEAU devant un nom masculin singulier commençant par une consonne. BEL devant un nom masculin singulier commençant par une voyelle ou un h muet. BELLE devant un nom féminin singulier (quelle que soit la lettre initiale).",
+    examples:[
+      { sentence:"Un ___ garçon.", correct:"beau", rule:"« garçon » masculin singulier, commence par une consonne → beau." },
+      { sentence:"Un ___ homme.", correct:"bel", rule:"« homme » masculin singulier, commence par une voyelle → bel." },
+      { sentence:"Une ___ femme.", correct:"belle", rule:"« femme » féminin singulier → belle, quelle que soit la lettre initiale." },
+      { sentence:"Un ___ ami.", correct:"bel", rule:"« ami » masculin singulier, commence par une voyelle → bel." },
+      { sentence:"Une ___ amie.", correct:"belle", rule:"« amie » féminin singulier → belle." },
+      { sentence:"Un ___ arbre.", correct:"bel", rule:"« arbre » masculin singulier, commence par une voyelle → bel." },
+      { sentence:"Un ___ livre.", correct:"beau", rule:"« livre » masculin singulier, commence par une consonne → beau." },
+      { sentence:"Une ___ maison.", correct:"belle", rule:"« maison » féminin singulier → belle." },
+    ] },
+  cestSestCesSes: {
+    title:"C'EST, S'EST, CES ou SES ?", icon:'🔤',
+    options:["c'est","s'est","ces","ses"],
+    tip:"C'EST = ce + est (présentatif : « c'est... »). S'EST = se + est (verbe pronominal au passé composé : il s'est levé). CES = déterminant démonstratif pluriel (ces chaussures = celles-ci). SES = déterminant possessif pluriel (ses clés = les siennes).",
+    examples:[
+      { sentence:"___ une bonne idée.", correct:"c'est", rule:"Présentatif « ce + est » → c'est." },
+      { sentence:"Il ___ levé tôt.", correct:"s'est", rule:"Verbe pronominal « se lever » au passé composé → s'est." },
+      { sentence:"___ chaussures sont neuves.", correct:"ces", rule:"Démonstratif pluriel (« celles-ci ») → ces." },
+      { sentence:"Elle a oublié ___ clés.", correct:"ses", rule:"Possessif pluriel (« les siennes ») → ses." },
+      { sentence:"___ difficile de comprendre.", correct:"c'est", rule:"Présentatif « ce + est » → c'est." },
+      { sentence:"Il ___ trompé de route.", correct:"s'est", rule:"Verbe pronominal « se tromper » au passé composé → s'est." },
+      { sentence:"Regarde ___ photos !", correct:"ces", rule:"Démonstratif pluriel → ces." },
+      { sentence:"Il a rangé ___ affaires.", correct:"ses", rule:"Possessif pluriel → ses." },
+    ] },
   couleursComposees: {
     title:'Couleurs composées : accord ou invariable ?', icon:'🎨',
     options:['Invariable (mélange dans le même objet)','Accord (objets de couleurs différentes)'],
@@ -10492,6 +10534,9 @@ function renderBlockSelect(){
       <button class="restart-btn" id="practicalSheetsBtn" style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#EA580C,#C2410C);color:#fff;box-shadow:0 4px 0 #9A3412;">
         📎 Fiches pratiques
       </button>
+      <button class="restart-btn" id="atelierBtn" style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#DC2626,#B91C1C);color:#fff;box-shadow:0 4px 0 #7F1D1D;">
+        🏛️ Atelier Français
+      </button>
       ${toReviewCount > 0 ? `
       <button class="restart-btn" id="startReviewBtn" style="display:flex;align-items:center;gap:8px;">
         ⚠️ ${toReviewCount} mot${toReviewCount>1?'s':''} à revoir
@@ -10617,6 +10662,7 @@ function renderBlockSelect(){
   document.getElementById('dailyReadingBtn').addEventListener('click', () => renderDailyReading());
   document.getElementById('dailyLessonBtn').addEventListener('click', () => renderLessonList());
   document.getElementById('practicalSheetsBtn').addEventListener('click', () => renderPracticalSheetsHome());
+  document.getElementById('atelierBtn').addEventListener('click', () => renderAtelierHome());
   const questsHead = document.getElementById('questsHead');
   const questsChevron = document.getElementById('questsChevron');
   if(questsChevron){ questsChevron.style.transform = questsCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)'; }
@@ -16985,6 +17031,7 @@ const ALL_LESSONS = { 1: DAILY_LESSON_1, 2: DAILY_LESSON_2, 3: DAILY_LESSON_3, 4
 const PRACTICAL_SHEETS = [
   {
     id: 'expressions-orales-1',
+    section: 'pratique',
     category: 'Expressions orales',
     icon: '🗣️',
     title: 'Les Français disent plutôt...',
@@ -17012,6 +17059,7 @@ const PRACTICAL_SHEETS = [
   },
   {
     id: 'expressions-familieres-1',
+    section: 'pratique',
     category: 'Registre familier',
     icon: '😎',
     title: 'Dites plutôt... (expressions familières)',
@@ -17040,6 +17088,7 @@ const PRACTICAL_SHEETS = [
   },
   {
     id: 'grammaire-couleurs-composees',
+    section: 'pratique',
     category: 'Grammaire',
     icon: '🎨',
     title: "L'accord des couleurs composées — objets à plusieurs couleurs",
@@ -17063,6 +17112,7 @@ const PRACTICAL_SHEETS = [
   },
   {
     id: 'lettre-demande-emploi',
+    section: 'pratique',
     category: 'Lettres types',
     icon: '✉️',
     title: "Modèle de lettre — Demande d'emploi",
@@ -17081,6 +17131,7 @@ const PRACTICAL_SHEETS = [
   },
   {
     id: 'grammaire-tout-adverbe',
+    section: 'pratique',
     category: 'Grammaire',
     icon: '📐',
     title: '"Tout" adverbe invariable devant un adjectif féminin',
@@ -17095,6 +17146,7 @@ const PRACTICAL_SHEETS = [
   },
   {
     id: 'vocabulaire-b2-c1-2',
+    section: 'pratique',
     category: 'Vocabulaire B2-C1',
     icon: '📈',
     title: 'Du français simple au français plus soutenu #2',
@@ -17111,9 +17163,218 @@ const PRACTICAL_SHEETS = [
       ['Il parle sans réfléchir.', 'Il parle à tort et à travers.'],
     ],
   },
+  // ============ 🏛️ ATELIER FRANÇAIS — premier lot (fiches 1-18 de la compilation) ============
+  {
+    id: 'atelier-y-en',
+    section: 'atelier',
+    category: 'Grammaire',
+    icon: '🔀',
+    title: 'Les pronoms « Y » et « EN »',
+    intro: "« Y » remplace un lieu ou un complément en à/dans/sur/chez ; « EN » remplace une quantité ou un complément en de/du/des.",
+    type: 'rule',
+    recoKey: 'yEn',
+    blocks: [
+      { heading: 'Le pronom « Y »', text: "« Y » remplace généralement un lieu introduit par à, dans, sur, chez, en...", examples: ["Je vais à l'école. → J'y vais.", 'Elle habite à Paris. → Elle y habite.', 'Nous sommes dans la classe. → Nous y sommes.', 'Il pense à son travail. → Il y pense.'] },
+      { heading: 'Attention', text: '« Y » ne remplace généralement pas une personne : on ne dit pas « je y pense » pour parler de Marie, mais « je pense à elle ».' },
+      { heading: 'Le pronom « EN »', text: "« EN » remplace généralement une quantité ou un nom introduit par de, du, de la, des...", examples: ['Je parle de ce problème. → J\'en parle.', 'Elle revient de Paris. → Elle en revient.', 'Tu veux du café ? → Oui, j\'en veux.', 'Tu as trois livres ? → Oui, j\'en ai trois.'] },
+      { heading: 'Comment choisir ?', text: "Y → pense à « À / un lieu ». EN → pense à « DE / une quantité »." },
+    ],
+    note: "À retenir : Y = à / lieu (Je vais à la bibliothèque → J'y vais). EN = de / quantité (Je prends des livres → J'en prends).",
+  },
+  {
+    id: 'atelier-verlan',
+    section: 'atelier',
+    category: 'Registre familier',
+    icon: '🔄',
+    title: 'Le verlan',
+    intro: "Le verlan est un langage familier qui consiste généralement à inverser les syllabes ou les sons d'un mot — surtout utilisé à l'oral, entre jeunes.",
+    type: 'table',
+    columns: ['Mot en verlan', 'Signification'],
+    rows: [
+      ['Meuf', 'Femme ou fille'],
+      ['Keum', 'Homme ou garçon'],
+      ['Reuf', 'Frère'],
+      ['Reum', 'Mère'],
+      ['Cimer', 'Merci'],
+      ['Ouf', 'Fou ; peut aussi signifier incroyable'],
+      ['Chelou', 'Bizarre, suspect'],
+      ['Relou', 'Lourd, agaçant'],
+      ['Vénère', 'Énervé, en colère'],
+      ['Teuf', 'Fête'],
+      ['Téma', 'Regarde'],
+      ['Pécho', 'Attraper ; parfois séduire ou embrasser'],
+      ['Teubé', 'Bête, stupide'],
+      ['Québlo', 'Bloqué'],
+      ['Mifa', 'Famille'],
+      ['Reuch', 'Cher'],
+      ['À donf', 'À fond'],
+      ['La tof', 'La photo'],
+    ],
+    note: "Exemples : « Cette teuf était ouf ! » = Cette fête était incroyable ! · « Cimer pour ton aide » = Merci pour ton aide.",
+  },
+  {
+    id: 'atelier-jai-faim',
+    section: 'atelier',
+    category: 'Expressions orales',
+    icon: '🍽️',
+    title: 'Dire « j\'ai faim » en français',
+    intro: "10 expressions, du plus courant au plus familier, pour exprimer la faim.",
+    type: 'table',
+    columns: ['Expression', 'Registre'],
+    rows: [
+      ["J'ai faim.", 'Courant'],
+      ["J'ai l'estomac vide.", 'Courant'],
+      ["J'ai un petit creux.", 'Courant'],
+      ["J'ai une fringale.", 'Courant'],
+      ['J\'ai une faim de loup.', 'Courant / imagé'],
+      ['Je meurs de faim.', 'Courant'],
+      ["J'ai les crocs.", 'Familier'],
+      ["J'ai la dalle.", 'Familier'],
+      ['Je crève la dalle / Je crève de faim.', 'Familier'],
+      ["J'ai l'estomac dans les talons.", 'Courant / imagé'],
+    ],
+  },
+  {
+    id: 'atelier-expressions-soutenues',
+    section: 'atelier',
+    category: 'Vocabulaire soutenu',
+    icon: '📖',
+    title: 'Expressions et alternatives soutenues',
+    intro: "Remplacer des expressions courantes par des équivalents plus soutenus, avec un exemple d'usage.",
+    type: 'table',
+    columns: ['Expression courante', 'Alternative soutenue'],
+    rows: [
+      ['Être en colère', "S'emporter / S'irriter"],
+      ['Avoir faim', 'Avoir une faim de loup'],
+      ['Très important', 'Essentiel / Primordial'],
+      ['Regarder attentivement', 'Observer / Examiner'],
+      ['Se dépêcher', 'Se hâter / Faire vite'],
+      ['Beaucoup de personnes', 'Une foule / Une multitude'],
+      ['Être courageux', 'Être brave / Être téméraire'],
+      ['Parler doucement', 'Parler à voix basse / Murmurer'],
+      ['Faire attention', 'Être vigilant / Être prudent'],
+      ['Commencer un travail', 'Entamer / Débuter'],
+    ],
+  },
+  {
+    id: 'atelier-bel-belle',
+    section: 'atelier',
+    category: 'Grammaire',
+    icon: '✨',
+    title: 'BEAU, BEL ou BELLE ?',
+    intro: "L'adjectif « beau » change de forme selon le genre du nom et sa première lettre.",
+    type: 'rule',
+    recoKey: 'belBelle',
+    blocks: [
+      { heading: 'La règle', text: "BEAU devant un nom masculin singulier commençant par une consonne (un beau garçon). BEL devant un nom masculin singulier commençant par une voyelle ou un h muet (un bel homme, un bel ami, un bel arbre). BELLE devant un nom féminin singulier, quelle que soit la lettre initiale (une belle femme, une belle amie)." },
+    ],
+    table: { columns: ['BEAU', 'BEL', 'BELLE'], rows: [['un beau garçon, un beau livre', 'un bel homme, un bel ami, un bel arbre', 'une belle femme, une belle amie, une belle maison']] },
+    note: "Astuce : nom masculin singulier + voyelle/h muet → bel. Nom féminin singulier → belle. Sinon (masculin + consonne) → beau.",
+  },
+  {
+    id: 'atelier-participe-passe-etre',
+    section: 'atelier',
+    category: 'Grammaire',
+    icon: '🧩',
+    title: "L'accord du participe passé avec « être »",
+    intro: "Avec l'auxiliaire « être », le participe passé s'accorde toujours avec le sujet.",
+    type: 'rule',
+    blocks: [
+      { heading: 'La règle', text: "Avec « être », le participe passé s'accorde TOUJOURS avec le sujet.", examples: ['Il est arrivé. (masculin singulier)', 'Elle est arrivée. (féminin singulier)', 'Ils sont arrivés. (masculin pluriel)', 'Elles sont arrivées. (féminin pluriel)'] },
+    ],
+    note: "À retenir : masculin singulier → arrivé · féminin singulier → arrivée · masculin pluriel → arrivés · féminin pluriel → arrivées.",
+  },
+  {
+    id: 'atelier-cest-sest-ces-ses',
+    section: 'atelier',
+    category: 'Orthographe',
+    icon: '🔤',
+    title: "C'EST, S'EST, CES ou SES ?",
+    intro: "Quatre homophones très fréquents, à ne pas confondre à l'écrit.",
+    type: 'rule',
+    recoKey: 'cestSestCesSes',
+    blocks: [
+      { heading: 'C\'EST', text: "ce + est — un présentatif : « c'est une bonne idée »." },
+      { heading: 'S\'EST', text: "se + est — un verbe pronominal au passé composé : « il s'est levé tôt »." },
+      { heading: 'CES', text: "déterminant démonstratif pluriel : « ces chaussures sont neuves » (celles-ci)." },
+      { heading: 'SES', text: "déterminant possessif pluriel : « elle a oublié ses clés » (les siennes)." },
+    ],
+  },
+  {
+    id: 'atelier-pronoms-relatifs-erreurs',
+    section: 'atelier',
+    category: 'Grammaire',
+    icon: '⚠️',
+    title: 'Erreurs fréquentes avec les pronoms relatifs',
+    intro: "Cinq confusions courantes entre qui, que, dont, où et auquel/à laquelle.",
+    type: 'rule',
+    blocks: [
+      { heading: 'Erreurs à corriger', text: "qui = sujet · que = complément direct · dont = de + nom/pronom · où = lieu ou moment · auquel/à laquelle = à + lequel/laquelle.", examples: [
+        "❌ C'est le livre que je t'ai parlé. → ✅ C'est le livre dont je t'ai parlé.",
+        '❌ La personne que je pense est intelligente. → ✅ La personne à laquelle je pense est intelligente.',
+        "❌ C'est une chose qui j'aime beaucoup. → ✅ C'est une chose que j'aime beaucoup.",
+        '❌ La femme dont son fils travaille ici est ma voisine. → ✅ La femme dont le fils travaille ici est ma voisine.',
+        '❌ Voici la ville que je suis né. → ✅ Voici la ville où je suis né.',
+      ] },
+    ],
+  },
+  {
+    id: 'atelier-argot',
+    section: 'atelier',
+    category: 'Registre familier',
+    icon: '🗯️',
+    title: "10 mots d'argot et leur signification",
+    intro: "Du vocabulaire familier fréquent à l'oral, à connaître pour comprendre (pas forcément à utiliser).",
+    type: 'table',
+    columns: ['Mot', 'Signification'],
+    rows: [
+      ['Chelou', 'Bizarre, étrange'],
+      ['Relou', 'Pénible, agaçant'],
+      ['Vénère', 'Très énervé'],
+      ['Ouf', 'Fou, incroyable'],
+      ['Mytho', 'Menteur'],
+      ['Boloss', 'Personne naïve ou facilement manipulable'],
+      ['Zarbi', 'Étrange, bizarre'],
+      ['Guez', 'Mauvais, de mauvaise qualité'],
+      ['Pécho', 'Séduire ou avoir une relation avec quelqu\'un'],
+      ['Gratter', 'Obtenir quelque chose sans payer ou profiter de quelqu\'un'],
+    ],
+  },
+  {
+    id: 'atelier-je-peux',
+    section: 'atelier',
+    category: 'Orthographe',
+    icon: '✍️',
+    title: '« Je peux » et non « je peu »',
+    intro: "Une confusion fréquente à l'écrit avec le verbe pouvoir au présent.",
+    type: 'rule',
+    blocks: [
+      { heading: 'JE PEUX ✅', text: "« Je peux » est la forme du verbe pouvoir au présent, 1ère personne du singulier, toujours suivie d'un infinitif.", examples: ['Je peux venir demain.', "Je peux t'aider.", 'Je peux parler français.'] },
+      { heading: 'JE PEU ❌', text: "« Je peu » est incorrect. Le x ne se prononce pas, mais il s'écrit toujours avec « je »." },
+    ],
+    note: "À retenir : je peux, tu peux, il peut.",
+  },
+  {
+    id: 'atelier-subjonctif-passe-erreurs',
+    section: 'atelier',
+    category: 'Grammaire',
+    icon: '⚠️',
+    title: 'Erreurs fréquentes avec le subjonctif passé',
+    intro: "Après certaines expressions (content que, regretter que, bien que, douter que...), le verbe subordonné doit être au subjonctif — y compris au passé.",
+    type: 'rule',
+    blocks: [
+      { heading: 'Corrections à connaître', text: "Le subjonctif passé se forme avec l'auxiliaire être/avoir au subjonctif présent + participe passé.", examples: [
+        '❌ Je suis content que tu as réussi. → ✅ Je suis content que tu aies réussi.',
+        '❌ Je regrette qu\'il est parti. → ✅ Je regrette qu\'il soit parti.',
+        '❌ Bien qu\'elle a terminé son travail... → ✅ Bien qu\'elle ait terminé son travail...',
+        '❌ Je doute qu\'ils ont compris. → ✅ Je doute qu\'ils aient compris.',
+        '❌ Je suis heureux que vous êtes venus. → ✅ Je suis heureux que vous soyez venus.',
+      ] },
+    ],
+  },
 ];
 
-function renderPracticalSheetsHome(){
+function renderSheetsHomeBySection(section, catTag, heroTitle, heroSubtitle){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
   currentBlock = null;
@@ -17122,12 +17383,13 @@ function renderPracticalSheetsHome(){
   document.getElementById('progressFill').style.width = '0%';
   document.getElementById('footerNote').textContent = '';
   const card = document.getElementById('quizCard');
+  const list = PRACTICAL_SHEETS.filter(s => (s.section || 'pratique') === section);
   card.innerHTML = `
-    <div class="cat-tag">📎 Fiches pratiques</div>
-    <div class="word-fr" style="font-size:clamp(22px,4.5vw,28px);">Petites fiches à retenir</div>
-    <div class="word-def" style="margin-top:4px;">Expressions, nuances de grammaire, modèles de lettres...</div>
+    <div class="cat-tag">${catTag}</div>
+    <div class="word-fr" style="font-size:clamp(22px,4.5vw,28px);">${escapeHtml(heroTitle)}</div>
+    <div class="word-def" style="margin-top:4px;">${escapeHtml(heroSubtitle)}</div>
     <div style="display:flex;flex-direction:column;gap:10px;margin-top:18px;text-align:left;">
-      ${PRACTICAL_SHEETS.map(s => `
+      ${list.map(s => `
         <button class="opt" data-sheet="${s.id}" style="text-align:left;padding:14px 16px;display:flex;align-items:center;gap:12px;">
           <span style="font-size:22px;">${s.icon}</span>
           <span>
@@ -17142,6 +17404,12 @@ function renderPracticalSheetsHome(){
   card.querySelectorAll('[data-sheet]').forEach(btn => {
     btn.addEventListener('click', () => renderPracticalSheetDetail(btn.dataset.sheet));
   });
+}
+function renderPracticalSheetsHome(){
+  renderSheetsHomeBySection('pratique', '📎 Fiches pratiques', 'Petites fiches à retenir', 'Expressions, nuances de grammaire, modèles de lettres...');
+}
+function renderAtelierHome(){
+  renderSheetsHomeBySection('atelier', '🏛️ Atelier Français', 'Cours, exercices et jeux', "Grammaire, orthographe, expressions familières — avec exercices et écoute (lot 1)");
 }
 
 function buildSheetTableHtml(columns, rows, speakableCols){
@@ -17169,7 +17437,8 @@ function renderPracticalSheetDetail(id){
   document.body.classList.remove('quiz-active');
   isHomeScreen = false;
   const sheet = PRACTICAL_SHEETS.find(s => s.id === id);
-  if(!sheet){ renderPracticalSheetsHome(); return; }
+  const homeFn = (sheet && sheet.section === 'atelier') ? renderAtelierHome : renderPracticalSheetsHome;
+  if(!sheet){ homeFn(); return; }
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromSheetDetailBtn" style="cursor:pointer;">← Toutes les fiches</button>`;
   document.getElementById('progressFill').style.width = '100%';
   document.getElementById('footerNote').textContent = '';
@@ -17214,9 +17483,10 @@ function renderPracticalSheetDetail(id){
       <button class="restart-btn" id="nextSheetBtn" style="margin:0;background:var(--surface-sunken);border:1px solid var(--border);color:var(--purple);box-shadow:none;">Fiche suivante →</button>
     </div>
   `;
-  document.getElementById('backFromSheetDetailBtn').addEventListener('click', renderPracticalSheetsHome);
-  const idx = PRACTICAL_SHEETS.findIndex(s => s.id === id);
-  const nextSheet = PRACTICAL_SHEETS[(idx + 1) % PRACTICAL_SHEETS.length];
+  document.getElementById('backFromSheetDetailBtn').addEventListener('click', homeFn);
+  const sectionList = PRACTICAL_SHEETS.filter(s => (s.section || 'pratique') === (sheet.section || 'pratique'));
+  const idx = sectionList.findIndex(s => s.id === id);
+  const nextSheet = sectionList[(idx + 1) % sectionList.length];
   document.getElementById('nextSheetBtn').addEventListener('click', () => renderPracticalSheetDetail(nextSheet.id));
 
   const practiceBtn = document.getElementById('sheetPracticeBtn');
