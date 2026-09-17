@@ -8276,10 +8276,11 @@ const RECOGNITION_EXERCISES = {
 };
 
 let genericRecoState = null;
-function renderGenericRecoIntro(exerciseKey){
+function renderGenericRecoIntro(exerciseKey, sourceSheetId){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
   const ex = RECOGNITION_EXERCISES[exerciseKey];
+  const backFn = sourceSheetId ? (() => renderPracticalSheetDetail(sourceSheetId)) : renderGrammarHome;
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromRecoIntroBtn" style="cursor:pointer;">← Retour</button>`;
   document.getElementById('progressFill').style.width = '0%';
   document.getElementById('footerNote').textContent = '';
@@ -8289,16 +8290,17 @@ function renderGenericRecoIntro(exerciseKey){
     <div class="word-fr" style="font-size:clamp(22px,4.5vw,28px);">Avant de commencer, écoute le conseil</div>
     <button class="restart-btn" id="playRecoTipBtn" style="display:flex;align-items:center;gap:8px;margin:14px auto;background:linear-gradient(135deg,#6366F1,#4F46E5);border-color:#3730A3;">🔊 Écouter le conseil</button>
     <div style="background:var(--surface-sunken);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-top:10px;text-align:left;font-size:13px;color:var(--text-dim);line-height:1.6;">💡 ${escapeHtml(ex.tip)}</div>
+    ${sourceSheetId ? `<div style="margin-top:10px;font-size:12px;color:var(--text-dim);">🎯 99% de bonnes réponses requis pour valider cette fiche.</div>` : ''}
     <button class="restart-btn" id="startRecoBtn" style="margin-top:20px;">🎯 C'est parti !</button>
   `;
-  document.getElementById('backFromRecoIntroBtn').addEventListener('click', renderGrammarHome);
+  document.getElementById('backFromRecoIntroBtn').addEventListener('click', backFn);
   document.getElementById('playRecoTipBtn').addEventListener('click', () => speak(ex.tip, 'fr-FR'));
-  document.getElementById('startRecoBtn').addEventListener('click', () => startGenericRecoQuiz(exerciseKey));
+  document.getElementById('startRecoBtn').addEventListener('click', () => startGenericRecoQuiz(exerciseKey, sourceSheetId));
 }
-function startGenericRecoQuiz(exerciseKey){
+function startGenericRecoQuiz(exerciseKey, sourceSheetId){
   isHomeScreen = false;
   const ex = RECOGNITION_EXERCISES[exerciseKey];
-  genericRecoState = { key: exerciseKey, queue: shuffle(ex.examples.slice()), idx:0, score:{correct:0,total:0}, startTime: Date.now() };
+  genericRecoState = { key: exerciseKey, sourceSheetId: sourceSheetId || null, queue: shuffle(ex.examples.slice()), idx:0, score:{correct:0,total:0}, startTime: Date.now() };
   renderGenericRecoCard();
 }
 function renderGenericRecoCard(){
@@ -8308,7 +8310,9 @@ function renderGenericRecoCard(){
   const ex = RECOGNITION_EXERCISES[st.key];
   const item = st.queue[st.idx];
   document.getElementById('scoreboard').innerHTML = `<div class="chip">✅ <b>${st.score.correct}</b>/${st.score.total}</div><button class="chip" id="recoExitBtn" style="cursor:pointer;">← Quitter</button>`;
-  document.getElementById('recoExitBtn').addEventListener('click', renderGrammarHome);
+  document.getElementById('recoExitBtn').addEventListener('click', () => {
+    if(st.sourceSheetId){ renderPracticalSheetDetail(st.sourceSheetId); } else { renderGrammarHome(); }
+  });
   document.getElementById('progressFill').style.width = Math.round((st.idx/st.queue.length)*100) + '%';
   document.getElementById('footerNote').textContent = `${st.idx+1} / ${st.queue.length}`;
   const card = document.getElementById('quizCard');
@@ -8351,30 +8355,37 @@ function endGenericRecoQuiz(){
   const ex = RECOGNITION_EXERCISES[st.key];
   const pct = st.score.total ? Math.round((st.score.correct/st.score.total)*100) : 0;
   const durationSec = computeActiveDurationSec(st.startTime);
+  const threshold = st.sourceSheetId ? SHEET_PASS_THRESHOLD : PASS_THRESHOLD;
+  const passed = pct >= threshold;
+  if(st.sourceSheetId && passed){ markSheetPassed(st.sourceSheetId, pct); }
+  const backFn = st.sourceSheetId ? (() => renderPracticalSheetDetail(st.sourceSheetId)) : renderGrammarHome;
   recordDailyActivity();
-  recordDailyStats(durationSec, pct >= PASS_THRESHOLD, st.score.correct * 5, 'grammaire');
+  recordDailyStats(durationSec, passed, st.score.correct * 5, 'grammaire');
   bumpSubjectLifetime('grammaire', st.score.correct);
   cloudAutoPush();
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="recoEndBackBtn" style="cursor:pointer;">← Retour</button>`;
   document.getElementById('progressFill').style.width = '100%';
   document.getElementById('footerNote').textContent = 'Terminé';
-  const fun = pct === 100 ? '🏆 Parfait !' : pct >= 90 ? '🌟 Excellent !' : pct >= 70 ? '👍 Bien joué !' : pct >= 50 ? '💪 Continue !' : '🌱 Réécoute le conseil et réessaie !';
+  const fun = st.sourceSheetId
+    ? (passed ? '🏆 Validé !' : pct >= 90 ? '🌟 Presque ! Encore un petit effort pour valider.' : pct >= 70 ? '👍 Bien joué, mais il faut 99% pour valider.' : pct >= 50 ? '💪 Continue !' : '🌱 Réécoute le conseil et réessaie !')
+    : (pct === 100 ? '🏆 Parfait !' : pct >= 90 ? '🌟 Excellent !' : pct >= 70 ? '👍 Bien joué !' : pct >= 50 ? '💪 Continue !' : '🌱 Réécoute le conseil et réessaie !');
   const card = document.getElementById('quizCard');
   card.innerHTML = `
     <div class="end-screen">
       <div class="cat-tag">${ex.icon} Terminé</div>
       <div class="big">${st.score.correct} / ${st.score.total}</div>
-      <div class="sub">${pct}% de bonnes réponses · ${fun}</div>
+      <div class="sub">${pct}% de bonnes réponses${st.sourceSheetId ? ' (99% requis pour valider)' : ''} · ${fun}</div>
+      ${st.sourceSheetId && passed ? '<div class="pass-banner ok" style="margin-top:10px;">✅ Fiche validée !</div>' : ''}
       <div style="display:flex;gap:12px;justify-content:center;margin-top:20px;flex-wrap:wrap;">
-        <button class="restart-btn" id="recoAgainBtn">🔁 Recommencer</button>
+        <button class="restart-btn" id="recoAgainBtn">🔁 ${passed ? 'Rejouer' : 'Recommencer'}</button>
         <button class="restart-btn" id="recoBackBtn" style="background:var(--surface-sunken);border:1px solid var(--border);color:var(--purple);box-shadow:none;">← Retour</button>
       </div>
     </div>
   `;
-  if(pct === 100){ celebrate(); setTimeout(launchConfetti, 250); } else if(pct >= 90){ launchConfetti(); }
-  document.getElementById('recoEndBackBtn').addEventListener('click', renderGrammarHome);
-  document.getElementById('recoBackBtn').addEventListener('click', renderGrammarHome);
-  document.getElementById('recoAgainBtn').addEventListener('click', () => renderGenericRecoIntro(st.key));
+  if(passed){ celebrate(); setTimeout(launchConfetti, 250); } else if(pct >= 90){ launchConfetti(); }
+  document.getElementById('recoEndBackBtn').addEventListener('click', backFn);
+  document.getElementById('recoBackBtn').addEventListener('click', backFn);
+  document.getElementById('recoAgainBtn').addEventListener('click', () => renderGenericRecoIntro(st.key, st.sourceSheetId));
 }
 
 /* ============ ✏️ ORTHOGRAPHE — homophones grammaticaux, avec cours et niveaux ============
@@ -10742,6 +10753,26 @@ function renderHistoryView(){
 }
 
 const PASS_THRESHOLD = 90; // % requis pour valider un bloc et débloquer le suivant
+// 📎🏛️ Seuil dédié pour les exercices des Fiches pratiques / Atelier Français : plus exigeant
+// (quasi-perfection demandée) puisque ce sont des points de grammaire ciblés et courts.
+const SHEET_PASS_THRESHOLD = 99;
+const SHEET_RESULTS_KEY = 'lexiqueQuiz::sheetResults';
+function loadSheetResults(){
+  try{ return JSON.parse(localStorage.getItem(nsKey(SHEET_RESULTS_KEY)) || '{}'); }catch(e){ return {}; }
+}
+function saveSheetResults(results){
+  try{ localStorage.setItem(nsKey(SHEET_RESULTS_KEY), JSON.stringify(results)); }catch(e){}
+}
+function markSheetPassed(sheetId, pct){
+  const results = loadSheetResults();
+  const prevBest = results[sheetId] ? results[sheetId].pct : 0;
+  results[sheetId] = { passed: true, pct: Math.max(pct, prevBest), lastAt: Date.now() };
+  saveSheetResults(results);
+}
+function isSheetPassed(sheetId){
+  const results = loadSheetResults();
+  return !!(results[sheetId] && results[sheetId].passed);
+}
 
 function blockBestPct(i){
   const perMode = blockResults[i] || {};
@@ -21119,18 +21150,20 @@ function renderSheetsHomeBySection(section, catTag, heroTitle, heroSubtitle){
   document.getElementById('footerNote').textContent = '';
   const card = document.getElementById('quizCard');
   const list = PRACTICAL_SHEETS.filter(s => (s.section || 'pratique') === section);
+  const passedCount = list.filter(s => isSheetPassed(s.id)).length;
   card.innerHTML = `
     <div class="cat-tag">${catTag}</div>
     <div class="word-fr" style="font-size:clamp(22px,4.5vw,28px);">${escapeHtml(heroTitle)}</div>
-    <div class="word-def" style="margin-top:4px;">${escapeHtml(heroSubtitle)}</div>
+    <div class="word-def" style="margin-top:4px;">${escapeHtml(heroSubtitle)} · ✅ ${passedCount}/${list.length} validées</div>
     <div style="display:flex;flex-direction:column;gap:10px;margin-top:18px;text-align:left;">
       ${list.map(s => `
         <button class="opt" data-sheet="${s.id}" style="text-align:left;padding:14px 16px;display:flex;align-items:center;gap:12px;">
           <span style="font-size:22px;">${s.icon}</span>
-          <span>
+          <span style="flex:1;">
             <div style="font-size:10.5px;color:var(--text-dim);font-weight:700;">${escapeHtml(s.category.toUpperCase())}</div>
             <div style="font-weight:800;font-size:14.5px;color:var(--text);margin-top:1px;">${escapeHtml(s.title)}</div>
           </span>
+          ${isSheetPassed(s.id) ? '<span style="font-size:18px;" title="Validée">✅</span>' : ''}
         </button>
       `).join('')}
     </div>
@@ -21208,7 +21241,7 @@ function renderPracticalSheetDetail(id){
   }
 
   card.innerHTML = `
-    <div class="cat-tag">${sheet.icon} ${escapeHtml(sheet.category)}</div>
+    <div class="cat-tag">${sheet.icon} ${escapeHtml(sheet.category)}${isSheetPassed(sheet.id) ? ' · ✅ Validée' : ''}</div>
     <div class="word-fr" style="font-size:clamp(19px,4vw,25px);">${escapeHtml(sheet.title)}</div>
     <div class="word-def" style="margin-top:6px;">${escapeHtml(sheet.intro)}</div>
     ${bodyHtml}
@@ -21227,7 +21260,7 @@ function renderPracticalSheetDetail(id){
   const practiceBtn = document.getElementById('sheetPracticeBtn');
   if(practiceBtn){
     practiceBtn.addEventListener('click', () => {
-      if(sheet.recoKey){ renderGenericRecoIntro(sheet.recoKey); }
+      if(sheet.recoKey){ renderGenericRecoIntro(sheet.recoKey, sheet.id); }
       else { startSheetQuiz(sheet.id); }
     });
   }
@@ -21272,7 +21305,7 @@ function startSheetQuiz(sheetId){
   document.body.classList.add('quiz-active');
   isHomeScreen = false;
   const queue = shuffle(sheet.rows.slice());
-  sheetQuizState = { sheet, queue, idx:0, score:{correct:0,total:0} };
+  sheetQuizState = { sheet, queue, idx:0, score:{correct:0,total:0}, startTime: Date.now() };
   renderSheetQuizCard();
 }
 function renderSheetQuizCard(){
@@ -21337,25 +21370,29 @@ function endSheetQuiz(){
   document.body.classList.remove('quiz-active');
   const st = sheetQuizState;
   const pct = st.score.total ? Math.round((st.score.correct/st.score.total)*100) : 0;
+  const durationSec = computeActiveDurationSec(st.startTime);
+  const passed = pct >= SHEET_PASS_THRESHOLD;
+  if(passed){ markSheetPassed(st.sheet.id, pct); }
   recordDailyActivity();
-  recordDailyStats(0, pct >= PASS_THRESHOLD, st.score.correct * 5, 'vocabulaire');
+  recordDailyStats(durationSec, passed, st.score.correct * 5, 'vocabulaire');
   cloudAutoPush();
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="sheetQuizEndBackBtn" style="cursor:pointer;">← Retour</button>`;
   document.getElementById('progressFill').style.width = '100%';
   document.getElementById('footerNote').textContent = 'Terminé';
-  const fun = pct === 100 ? '🏆 Parfait !' : pct >= 90 ? '🌟 Excellent !' : pct >= 70 ? '👍 Bien joué !' : pct >= 50 ? '💪 Continue !' : '🌱 Réessaie encore !';
+  const fun = passed ? '🏆 Validé !' : pct >= 90 ? '🌟 Presque ! Encore un petit effort pour valider.' : pct >= 70 ? '👍 Bien joué, mais il faut 99% pour valider.' : pct >= 50 ? '💪 Continue !' : '🌱 Réessaie encore !';
   document.getElementById('quizCard').innerHTML = `
     <div class="end-screen">
       <div class="cat-tag">${st.sheet.icon} Fiche terminée</div>
       <div class="big">${st.score.correct} / ${st.score.total}</div>
-      <div class="sub">${pct}% de réussite · ${fun}</div>
+      <div class="sub">${pct}% de réussite (99% requis pour valider) · ${fun}</div>
+      ${passed ? '<div class="pass-banner ok" style="margin-top:10px;">✅ Fiche validée !</div>' : ''}
       <div style="display:flex;gap:12px;justify-content:center;margin-top:20px;flex-wrap:wrap;">
-        <button class="restart-btn" id="sheetQuizAgainBtn">🔁 Recommencer</button>
+        <button class="restart-btn" id="sheetQuizAgainBtn">🔁 ${passed ? 'Rejouer' : 'Recommencer'}</button>
         <button class="restart-btn" id="sheetQuizBackBtn" style="background:var(--surface-sunken);border:1px solid var(--border);color:var(--purple);box-shadow:none;">← Retour</button>
       </div>
     </div>
   `;
-  if(pct >= 90){ launchConfetti(); }
+  if(passed){ celebrate(); setTimeout(launchConfetti, 250); } else if(pct >= 90){ launchConfetti(); }
   document.getElementById('sheetQuizEndBackBtn').addEventListener('click', () => renderPracticalSheetDetail(st.sheet.id));
   document.getElementById('sheetQuizBackBtn').addEventListener('click', () => renderPracticalSheetDetail(st.sheet.id));
   document.getElementById('sheetQuizAgainBtn').addEventListener('click', () => startSheetQuiz(st.sheet.id));
