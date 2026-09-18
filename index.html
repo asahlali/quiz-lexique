@@ -1718,6 +1718,15 @@
     <div id="summaryOverlayBody"></div>
   </div>
 </div>
+<div class="summary-overlay" id="modeSuggestOverlay">
+  <div class="summary-box">
+    <div class="summary-box-head">
+      <span>🎯 On s'entraîne ?</span>
+      <button id="closeModeSuggestBtn" title="Fermer">✕</button>
+    </div>
+    <div id="modeSuggestBody"></div>
+  </div>
+</div>
 <nav class="menu" id="menu" aria-label="Menu principal">
   <div class="menu-head">
     <div class="menu-head-brand">
@@ -2228,7 +2237,12 @@ function playPeekCurrent(){
 function advancePeekPlay(){
   if(!peekPlayState) return;
   peekPlayState.idx++;
-  if(peekPlayState.idx >= peekPlayState.words.length){ stopPeekPlay(); return; }
+  if(peekPlayState.idx >= peekPlayState.words.length){
+    const finishedWords = peekPlayState.words.slice(); // capturé avant que stopPeekPlay() ne vide l'état
+    stopPeekPlay();
+    setTimeout(() => showModeSuggestPopup(finishedWords), 500);
+    return;
+  }
   playPeekCurrent();
 }
 
@@ -2260,6 +2274,51 @@ function stopPeekPlay(){
   if(listenBtn){ listenBtn.style.display = 'flex'; }
   if(player){ player.style.display = 'none'; }
   document.querySelectorAll('#peekResults .result-card').forEach(c => c.classList.remove('peek-playing'));
+}
+
+/* 🎯 Après avoir écouté une liste de mots (« Voir les mots »), propose de s'entraîner dessus
+   directement, sans devoir la reconstruire manuellement dans un bloc. */
+const PEEK_SUGGEST_MODES = [
+  { mode:'classic', label:'🎯 Classique' },
+  { mode:'chrono',  label:'⚡ Chrono Vrai/Faux' },
+  { mode:'speak',   label:'🎤 Prononciation' },
+  { mode:'blank',   label:'🕳️ Phrase à trous' },
+];
+function showModeSuggestPopup(words){
+  if(!words || words.length < 2) return; // pas assez de mots pour un mode digne de ce nom
+  const overlay = document.getElementById('modeSuggestOverlay');
+  const body = document.getElementById('modeSuggestBody');
+  if(!overlay || !body) return;
+  body.innerHTML = `
+    <div style="padding:4px 4px 16px;text-align:center;">
+      <div style="font-size:14px;color:var(--text-dim);margin-bottom:14px;">Tu viens d'écouter ${words.length} mots — tu veux t'entraîner dessus tout de suite ?</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        ${PEEK_SUGGEST_MODES.map(m => `<button class="opt" data-suggest-mode="${m.mode}" style="padding:13px 16px;font-weight:800;">${m.label}</button>`).join('')}
+      </div>
+    </div>
+  `;
+  body.querySelectorAll('[data-suggest-mode]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      hideModeSuggestPopup();
+      startModeWithWords(words, btn.dataset.suggestMode);
+    });
+  });
+  overlay.classList.add('show');
+}
+function hideModeSuggestPopup(){
+  const overlay = document.getElementById('modeSuggestOverlay');
+  if(overlay){ overlay.classList.remove('show'); }
+}
+/* Démarre n'importe quel mode de jeu directement avec une liste de mots arbitraire (ex. celle
+   qu'on vient de "peek"/écouter), sans passer par un bloc ou un bloc personnalisé enregistré. */
+function startModeWithWords(words, mode){
+  gameMode = mode;
+  currentBlock = null;
+  window.__reviewSession = false;
+  window.__customBlockId = null;
+  setupDeckFromWords(words);
+  renderScoreboard();
+  renderCard();
 }
 
 function loadWordStats(){
@@ -4781,6 +4840,16 @@ function saveAutoAdvanceSeconds(n){
 let autoAdvanceSeconds = loadAutoAdvanceSeconds();
 let autoAdvanceIntervalId = null;
 
+// 👆 Swipe gauche/droite en mode Chrono Vrai/Faux — option, désactivée par défaut.
+const CHRONO_SWIPE_KEY = 'lexiqueQuiz::chronoSwipe';
+function loadChronoSwipe(){
+  try{ return localStorage.getItem(nsKey(CHRONO_SWIPE_KEY)) === '1'; }catch(e){ return false; }
+}
+function saveChronoSwipe(on){
+  try{ localStorage.setItem(nsKey(CHRONO_SWIPE_KEY), on ? '1' : '0'); }catch(e){}
+}
+let chronoSwipeEnabled = loadChronoSwipe();
+
 function clearAutoAdvance(){
   if(autoAdvanceIntervalId){ clearInterval(autoAdvanceIntervalId); autoAdvanceIntervalId = null; }
 }
@@ -5408,6 +5477,33 @@ function reactMascot(kind){
 function hideMascotBubble(){
   const bubble = document.getElementById('mascotBubble');
   if(bubble) bubble.classList.remove('show');
+}
+
+/* 🦊🦊 Alterne les deux mascottes (To3aylib / To3ayliba) sur l'écran d'accueil toutes les 10s,
+   avec un fondu doux, et met en valeur le nom correspondant dans le titre. */
+let mascotCycleIntervalId = null;
+function stopMascotCycle(){
+  if(mascotCycleIntervalId){ clearInterval(mascotCycleIntervalId); mascotCycleIntervalId = null; }
+}
+function startMascotCycle(){
+  stopMascotCycle(); // jamais deux cycles en parallèle
+  let showingFemale = false;
+  mascotCycleIntervalId = setInterval(() => {
+    showingFemale = !showingFemale;
+    const male = document.getElementById('mascotMale');
+    const female = document.getElementById('mascotFemale');
+    const nameMale = document.getElementById('heroNameMale');
+    const nameFemale = document.getElementById('heroNameFemale');
+    if(!male || !female){ stopMascotCycle(); return; } // l'écran a changé entre-temps
+    male.style.opacity = showingFemale ? '0' : '1';
+    male.style.transform = showingFemale ? 'scale(0.85) rotate(-6deg)' : 'scale(1) rotate(0deg)';
+    female.style.opacity = showingFemale ? '1' : '0';
+    female.style.transform = showingFemale ? 'scale(1) rotate(0deg)' : 'scale(0.85) rotate(6deg)';
+    if(nameMale && nameFemale){
+      nameMale.style.opacity = showingFemale ? '0.4' : '1';
+      nameFemale.style.opacity = showingFemale ? '1' : '0.4';
+    }
+  }, 10000);
 }
 
 /* 🥚 Petite explosion d'œuf qui éclot — jouée quand on ouvre un bloc jamais fait, pour marquer la découverte. */
@@ -10774,6 +10870,29 @@ function isSheetPassed(sheetId){
   return !!(results[sheetId] && results[sheetId].passed);
 }
 
+// 📖 Marque un texte de Bouquinage comme lu — même principe que les fiches, mais binaire (lu/pas lu).
+const BOUQUINAGE_READ_KEY = 'lexiqueQuiz::bouquinageRead';
+function loadBouquinageRead(){
+  try{ return JSON.parse(localStorage.getItem(nsKey(BOUQUINAGE_READ_KEY)) || '{}'); }catch(e){ return {}; }
+}
+function saveBouquinageRead(read){
+  try{ localStorage.setItem(nsKey(BOUQUINAGE_READ_KEY), JSON.stringify(read)); }catch(e){}
+}
+function markBouquinageRead(idx){
+  const read = loadBouquinageRead();
+  read[idx] = true;
+  saveBouquinageRead(read);
+}
+function unmarkBouquinageRead(idx){
+  const read = loadBouquinageRead();
+  delete read[idx];
+  saveBouquinageRead(read);
+}
+function isBouquinageRead(idx){
+  const read = loadBouquinageRead();
+  return !!read[idx];
+}
+
 function blockBestPct(i){
   const perMode = blockResults[i] || {};
   let best = 0;
@@ -10847,8 +10966,8 @@ function renderBlockSelect(){
   const card = document.getElementById('quizCard');
   card.innerHTML = `
     <div class="hero">
-      <div class="hero-mascot" aria-hidden="true">
-        <svg viewBox="0 0 120 120" width="96" height="96">
+      <div class="hero-mascot" id="heroMascotContainer" aria-hidden="true" style="position:relative;width:96px;height:96px;margin:0 auto;">
+        <svg id="mascotMale" viewBox="0 0 120 120" width="96" height="96" style="position:absolute;top:0;left:0;transition:opacity .6s ease, transform .6s ease;">
           <ellipse cx="60" cy="112" rx="30" ry="6" fill="rgba(0,0,0,0.10)"/>
           <defs>
             <linearGradient id="hbody" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FB923C"/><stop offset="1" stop-color="#EA580C"/></linearGradient>
@@ -10870,9 +10989,35 @@ function renderBlockSelect(){
           <ellipse cx="33" cy="82" rx="6" ry="4" fill="#FDBA74" opacity="0.75"/>
           <ellipse cx="87" cy="82" rx="6" ry="4" fill="#FDBA74" opacity="0.75"/>
         </svg>
+        <svg id="mascotFemale" viewBox="0 0 120 120" width="96" height="96" style="position:absolute;top:0;left:0;opacity:0;transform:scale(0.85) rotate(6deg);transition:opacity .6s ease, transform .6s ease;">
+          <ellipse cx="60" cy="112" rx="30" ry="6" fill="rgba(0,0,0,0.10)"/>
+          <defs>
+            <linearGradient id="hbody2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FB923C"/><stop offset="1" stop-color="#EA580C"/></linearGradient>
+            <linearGradient id="hear2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F97316"/><stop offset="1" stop-color="#B45309"/></linearGradient>
+          </defs>
+          <path d="M20 36 L33 3 L45 38 Z" fill="url(#hear2)"/>
+          <path d="M100 36 L87 3 L75 38 Z" fill="url(#hear2)"/>
+          <path d="M26 31 L33 13 L39 32 Z" fill="#FFF7ED"/>
+          <path d="M94 31 L87 13 L81 32 Z" fill="#FFF7ED"/>
+          <ellipse cx="60" cy="68" rx="40" ry="42" fill="url(#hbody2)"/>
+          <path d="M60 46 C78 46 88 62 84 82 C81 96 71 100 60 100 C49 100 39 96 36 82 C32 62 42 46 60 46 Z" fill="#FFF7ED" opacity="0.95"/>
+          <circle cx="46" cy="60" r="17" fill="#fff" stroke="#431407" stroke-width="3"/>
+          <circle cx="76" cy="60" r="17" fill="#fff" stroke="#431407" stroke-width="3"/>
+          <line x1="61" y1="60" x2="63" y2="60" stroke="#431407" stroke-width="3"/>
+          <circle cx="46" cy="61" r="7" fill="#431407"/><circle cx="76" cy="61" r="7" fill="#431407"/>
+          <circle cx="49" cy="58" r="2.4" fill="#fff"/><circle cx="79" cy="58" r="2.4" fill="#fff"/>
+          <ellipse cx="60" cy="79" rx="5.5" ry="4" fill="#431407"/>
+          <path d="M50 88 Q60 96 70 88" fill="none" stroke="#431407" stroke-width="3.2" stroke-linecap="round"/>
+          <ellipse cx="33" cy="82" rx="6" ry="4" fill="#FDBA74" opacity="0.75"/>
+          <ellipse cx="87" cy="82" rx="6" ry="4" fill="#FDBA74" opacity="0.75"/>
+          <path d="M31 51 L23 45 M35 48 L29 41" stroke="#431407" stroke-width="2" stroke-linecap="round"/>
+          <path d="M89 51 L97 45 M85 48 L91 41" stroke="#431407" stroke-width="2" stroke-linecap="round"/>
+          <path d="M60 30 C64 24 72 24 74 31 C76 24 84 26 82 34 C80 40 68 42 60 30 Z" fill="#EC4899"/>
+          <circle cx="72" cy="31" r="3" fill="#F472B6"/>
+        </svg>
       </div>
       <div class="hero-badge">Français ↔ Arabe · ${WORDS.length} mots</div>
-      <div class="hero-title">Apprends avec <span class="grad">To3alib & To3ayliba</span> 🦊</div>
+      <div class="hero-title">Apprends avec <span class="grad" id="heroNameMale" style="transition:opacity .6s ease;">To3aylib</span> <span class="grad" style="opacity:0.5;">&amp;</span> <span class="grad" id="heroNameFemale" style="opacity:0.4;transition:opacity .6s ease;">To3ayliba</span> 🦊</div>
       <div class="hero-sub">${motto}</div>
       <button class="restart-btn" id="startNextBlockBtn" style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#F97316,#EA580C);border-color:#B45309;font-size:15px;padding:13px 30px;">▶ Commencer</button>
       <div id="resumeSessionSlot"></div>
@@ -10987,6 +11132,7 @@ function renderBlockSelect(){
     <div class="mode-row" id="modeRow"></div>
     <div class="mode-row" id="timerRow"></div>
     <div class="mode-row" id="autoAdvanceRow"></div>
+    <div class="mode-row" id="chronoSwipeRow"></div>
     <div class="filter-row" id="filterRow"></div>
     <div class="mode-row" style="margin-top:0;">
       <button class="mode-chip" id="createCustomBlockBtn" style="background:var(--surface-sunken);border:1px solid var(--border);color:var(--purple);">🧩 Créer un bloc personnalisé</button>
@@ -11161,6 +11307,23 @@ function renderBlockSelect(){
     btn.title = sec === 0 ? "Toujours cliquer manuellement sur Suivant" : `Passe seul à la question suivante après ${sec}s`;
     btn.addEventListener('click', () => { autoAdvanceSeconds = sec; saveAutoAdvanceSeconds(sec); renderBlockSelect(); });
     autoAdvanceRow.appendChild(btn);
+  });
+
+  const chronoSwipeRow = document.getElementById('chronoSwipeRow');
+  const chronoSwipeLabel = document.createElement('span');
+  chronoSwipeLabel.textContent = '👆 Swipe Chrono Vrai/Faux ';
+  chronoSwipeLabel.style.cssText = 'align-self:center;color:var(--text-dim);font-weight:800;font-size:13px;';
+  chronoSwipeRow.appendChild(chronoSwipeLabel);
+  [
+    { val:false, label:'Boutons' },
+    { val:true,  label:'👈 👉 Swipe' },
+  ].forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'mode-chip' + (chronoSwipeEnabled === opt.val ? ' active' : '');
+    btn.textContent = opt.label;
+    btn.title = opt.val ? "Glisse la carte à gauche (Faux) ou à droite (Vrai)" : "Réponds avec les boutons Vrai/Faux";
+    btn.addEventListener('click', () => { chronoSwipeEnabled = opt.val; saveChronoSwipe(opt.val); renderBlockSelect(); });
+    chronoSwipeRow.appendChild(btn);
   });
 
   const filterRow = document.getElementById('filterRow');
@@ -11397,6 +11560,7 @@ function renderBlockSelect(){
       setTimeout(() => el.classList.remove('jump-highlight'), 1600);
     }
   });
+  startMascotCycle();
 }
 
 function focusReveal(revealWrap){
@@ -12835,6 +12999,61 @@ function renderBlankCard(){
   startQuestionTimer(() => handleAnswer(null));
 }
 
+/* 👆 Glisser-déposer pour le mode Chrono Vrai/Faux : glisse à droite = Vrai, à gauche = Faux.
+   Utilise les Pointer Events (marchent aussi bien au doigt qu'à la souris). */
+function attachChronoSwipe(el){
+  if(!el) return;
+  const THRESHOLD = 90; // px avant de valider le swipe
+  let startX = 0, startY = 0, dx = 0, dragging = false;
+
+  const setTransform = (x, rot, opacity) => {
+    el.style.transform = `translateX(${x}px) rotate(${rot}deg)`;
+    el.style.opacity = opacity;
+  };
+  const reset = () => {
+    el.style.transition = 'transform .25s ease, opacity .25s ease';
+    setTransform(0, 0, 1);
+  };
+
+  const onDown = (e) => {
+    if(answered) return;
+    dragging = true;
+    startX = e.clientX; startY = e.clientY; dx = 0;
+    el.style.transition = 'none';
+    el.style.cursor = 'grabbing';
+    el.setPointerCapture && el.setPointerCapture(e.pointerId);
+  };
+  const onMove = (e) => {
+    if(!dragging || answered) return;
+    dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    if(Math.abs(dy) > Math.abs(dx) * 1.3) return; // geste plutôt vertical (scroll) → on ignore
+    const rot = Math.max(-14, Math.min(14, dx / 8));
+    setTransform(dx, rot, Math.max(0.5, 1 - Math.abs(dx) / 400));
+  };
+  const onUp = () => {
+    if(!dragging) return;
+    dragging = false;
+    el.style.cursor = 'grab';
+    if(answered){ reset(); return; }
+    if(dx > THRESHOLD){
+      el.style.transition = 'transform .35s ease, opacity .35s ease';
+      setTransform(500, 20, 0);
+      handleChronoAnswer(true);
+    } else if(dx < -THRESHOLD){
+      el.style.transition = 'transform .35s ease, opacity .35s ease';
+      setTransform(-500, -20, 0);
+      handleChronoAnswer(false);
+    } else {
+      reset();
+    }
+  };
+
+  el.addEventListener('pointerdown', onDown);
+  el.addEventListener('pointermove', onMove);
+  el.addEventListener('pointerup', onUp);
+  el.addEventListener('pointercancel', onUp);
+}
 function renderChronoCard(){
   const word = queue[0];
   answered = false;
@@ -12853,16 +13072,25 @@ function renderChronoCard(){
   card.innerHTML = `
     <div class="cat-tag">${escapeHtml(word.cat)} · ⚡ Chrono Vrai/Faux</div>
     <div class="chrono-timer-track"><div class="chrono-timer-fill" id="quizTimerFill"></div></div>
-    <div class="chrono-statement">${sentenceHtml}</div>
+    <div class="chrono-statement" id="chronoStatement" style="${chronoSwipeEnabled ? 'touch-action:pan-y;cursor:grab;user-select:none;position:relative;' : ''}">${sentenceHtml}</div>
+    ${chronoSwipeEnabled ? `
+    <div class="chrono-swipe-hint" style="display:flex;justify-content:space-between;padding:0 8px;margin-top:6px;font-size:13px;font-weight:800;color:var(--text-dim);">
+      <span>👈 Faux</span><span>Vrai 👉</span>
+    </div>
+    ` : `
     <div class="chrono-btns">
       <button class="chrono-btn true" id="chronoTrueBtn">✅ Vrai</button>
       <button class="chrono-btn false" id="chronoFalseBtn">❌ Faux</button>
     </div>
-    <div class="kbd-hint">⌨️ 1 ou V = Vrai · 2 ou F = Faux</div>
+    `}
+    <div class="kbd-hint">${chronoSwipeEnabled ? '👆 Glisse la phrase à gauche ou à droite' : '⌨️ 1 ou V = Vrai · 2 ou F = Faux'}</div>
     <div class="reveal" id="revealWrap"></div>
   `;
-  document.getElementById('chronoTrueBtn').addEventListener('click', () => handleChronoAnswer(true));
-  document.getElementById('chronoFalseBtn').addEventListener('click', () => handleChronoAnswer(false));
+  if(chronoSwipeEnabled){ attachChronoSwipe(document.getElementById('chronoStatement')); }
+  else {
+    document.getElementById('chronoTrueBtn').addEventListener('click', () => handleChronoAnswer(true));
+    document.getElementById('chronoFalseBtn').addEventListener('click', () => handleChronoAnswer(false));
+  }
   renderProgress();
   startQuestionTimer(() => handleChronoAnswer(null));
 }
@@ -12882,6 +13110,7 @@ function startQuestionTimer(onTimeout, seconds){
 function clearQuestionTimer(){
   if(questionTimer){ clearTimeout(questionTimer); questionTimer = null; }
   clearAutoAdvance();
+  stopMascotCycle();
   const navArrows = document.getElementById('homeNavArrows');
   if(navArrows){ navArrows.remove(); } // recréées fraîches par renderBlockSelect si on reste bien à l'accueil
   const fill = document.getElementById('quizTimerFill');
@@ -21160,16 +21389,19 @@ function renderSheetsHomeBySection(section, catTag, heroTitle, heroSubtitle){
     <div class="word-fr" style="font-size:clamp(22px,4.5vw,28px);">${escapeHtml(heroTitle)}</div>
     <div class="word-def" style="margin-top:4px;">${escapeHtml(heroSubtitle)} · ✅ ${passedCount}/${list.length} validées</div>
     <div style="display:flex;flex-direction:column;gap:10px;margin-top:18px;text-align:left;">
-      ${list.map(s => `
-        <button class="opt" data-sheet="${s.id}" style="text-align:left;padding:14px 16px;display:flex;align-items:center;gap:12px;">
+      ${list.map(s => {
+        const passed = isSheetPassed(s.id);
+        return `
+        <button class="opt" data-sheet="${s.id}" style="text-align:left;padding:14px 16px;display:flex;align-items:center;gap:12px;${passed ? 'background:rgba(34,197,94,0.12);border-color:rgba(34,197,94,0.4);' : ''}">
           <span style="font-size:22px;">${s.icon}</span>
           <span style="flex:1;">
             <div style="font-size:10.5px;color:var(--text-dim);font-weight:700;">${escapeHtml(s.category.toUpperCase())}</div>
             <div style="font-weight:800;font-size:14.5px;color:var(--text);margin-top:1px;">${escapeHtml(s.title)}</div>
           </span>
-          ${isSheetPassed(s.id) ? '<span style="font-size:18px;" title="Validée">✅</span>' : ''}
+          ${passed ? '<span style="font-size:18px;color:#16A34A;" title="Validée">✅</span>' : ''}
         </button>
-      `).join('')}
+      `;
+      }).join('')}
     </div>
   `;
   document.getElementById('backFromSheetsBtn').addEventListener('click', renderBlockSelect);
@@ -21662,15 +21894,22 @@ function renderBouquinageHome(){
   document.getElementById('progressFill').style.width = '0%';
   document.getElementById('footerNote').textContent = '';
   const card = document.getElementById('quizCard');
+  const readCount = BOUQUINAGE_TEXTS.filter((t, i) => isBouquinageRead(i)).length;
   card.innerHTML = `
     <div class="cat-tag">📖 Bouquinage</div>
     <div class="word-fr" style="font-size:clamp(22px,4.5vw,28px);">Textes de motivation</div>
-    <div class="word-def" style="margin-top:4px;">${BOUQUINAGE_TEXTS.length} textes à lire et à écouter, à parcourir librement.</div>
+    <div class="word-def" style="margin-top:4px;">${BOUQUINAGE_TEXTS.length} textes à lire et à écouter · ✅ ${readCount}/${BOUQUINAGE_TEXTS.length} lus</div>
     <button class="restart-btn" id="bouquinageRandomBtn" style="margin:16px auto;background:linear-gradient(135deg,#7C3AED,#5B21B6);border-color:#4C1D95;">🎲 Lire un texte au hasard</button>
     <div style="display:flex;flex-direction:column;gap:8px;margin-top:14px;text-align:left;max-height:420px;overflow-y:auto;">
-      ${BOUQUINAGE_TEXTS.map((t, i) => `
-        <button class="opt" data-bouq="${i}" style="text-align:left;padding:11px 14px;font-size:13.5px;">${escapeHtml(t.title)}</button>
-      `).join('')}
+      ${BOUQUINAGE_TEXTS.map((t, i) => {
+        const read = isBouquinageRead(i);
+        return `
+        <button class="opt" data-bouq="${i}" style="text-align:left;padding:11px 14px;font-size:13.5px;display:flex;align-items:center;gap:8px;${read ? 'background:rgba(34,197,94,0.12);border-color:rgba(34,197,94,0.4);color:var(--text);' : ''}">
+          ${read ? '<span style="color:#16A34A;font-weight:800;">✅</span>' : ''}
+          <span style="flex:1;">${escapeHtml(t.title)}</span>
+        </button>
+      `;
+      }).join('')}
     </div>
   `;
   document.getElementById('backFromBouquinageBtn').addEventListener('click', renderBlockSelect);
@@ -21689,15 +21928,19 @@ function renderBouquinageDetail(idx){
   document.getElementById('progressFill').style.width = Math.round(((idx+1)/BOUQUINAGE_TEXTS.length)*100) + '%';
   document.getElementById('footerNote').textContent = `${idx+1} / ${BOUQUINAGE_TEXTS.length}`;
   const card = document.getElementById('quizCard');
+  const read = isBouquinageRead(idx);
   card.innerHTML = `
-    <div class="cat-tag">📖 Bouquinage</div>
+    <div class="cat-tag">📖 Bouquinage${read ? ' · ✅ Lu' : ''}</div>
     <div class="word-fr" style="font-size:clamp(19px,4vw,24px);">${escapeHtml(t.title)}</div>
     <button class="mode-chip" id="listenBouquinageBtn" style="margin-top:10px;">🔊 Écouter ce texte</button>
     <div style="text-align:left;background:var(--surface-sunken);border:1px solid var(--border);border-radius:14px;padding:18px 20px;margin-top:12px;font-size:14px;line-height:1.75;color:var(--text);">
       ${escapeHtml(t.body)}
     </div>
     ${t.quote ? `<div style="margin-top:14px;font-style:italic;color:var(--purple);font-weight:700;font-size:13.5px;">« ${escapeHtml(t.quote)} »</div>` : ''}
-    <div style="display:flex;gap:10px;justify-content:center;margin-top:20px;flex-wrap:wrap;">
+    <button class="restart-btn" id="markReadBtn" style="margin:16px auto 0;${read ? 'background:var(--surface-sunken);border:1px solid rgba(34,197,94,0.5);color:#16A34A;box-shadow:none;' : 'background:linear-gradient(135deg,#22C55E,#16A34A);border-color:#15803D;'}">
+      ${read ? '✅ Marqué comme lu (cliquer pour annuler)' : '☐ Marquer comme lu'}
+    </button>
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap;">
       <button class="restart-btn" id="bouquinagePrevBtn" style="margin:0;background:var(--surface-sunken);border:1px solid var(--border);color:var(--purple);box-shadow:none;" ${idx===0?'disabled':''}>← Précédent</button>
       <button class="restart-btn" id="bouquinageRandomDetailBtn" style="margin:0;background:linear-gradient(135deg,#7C3AED,#5B21B6);border-color:#4C1D95;">🎲 Au hasard</button>
       <button class="restart-btn" id="bouquinageNextBtn" style="margin:0;" ${idx===BOUQUINAGE_TEXTS.length-1?'disabled':''}>Suivant →</button>
@@ -21705,6 +21948,10 @@ function renderBouquinageDetail(idx){
   `;
   document.getElementById('backFromBouquinageDetailBtn').addEventListener('click', renderBouquinageHome);
   document.getElementById('listenBouquinageBtn').addEventListener('click', () => speak(t.body + (t.quote ? '. ' + t.quote : ''), 'fr-FR'));
+  document.getElementById('markReadBtn').addEventListener('click', () => {
+    if(isBouquinageRead(idx)){ unmarkBouquinageRead(idx); } else { markBouquinageRead(idx); playCorrectSound(); }
+    renderBouquinageDetail(idx);
+  });
   if(idx > 0){ document.getElementById('bouquinagePrevBtn').addEventListener('click', () => renderBouquinageDetail(idx - 1)); }
   if(idx < BOUQUINAGE_TEXTS.length - 1){ document.getElementById('bouquinageNextBtn').addEventListener('click', () => renderBouquinageDetail(idx + 1)); }
   document.getElementById('bouquinageRandomDetailBtn').addEventListener('click', () => renderBouquinageDetail(Math.floor(Math.random() * BOUQUINAGE_TEXTS.length)));
@@ -22710,6 +22957,7 @@ document.getElementById('leaderboardBtn').addEventListener('click', () => render
 document.getElementById('timeBreakdownBtn').addEventListener('click', () => renderTimeBreakdown());
 
 document.getElementById('closeSummaryBtn').addEventListener('click', hideBlockSummaryOverlay);
+document.getElementById('closeModeSuggestBtn').addEventListener('click', hideModeSuggestPopup);
 document.getElementById('summaryOverlay').addEventListener('click', (e) => {
   if(e.target.id === 'summaryOverlay'){ hideBlockSummaryOverlay(); }
 });
