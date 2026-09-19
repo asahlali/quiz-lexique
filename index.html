@@ -89,7 +89,7 @@
     --card:#15151D;
   }
   *{box-sizing:border-box;}
-  html{ color-scheme:light dark;overflow-x:hidden;width:100%; }
+  html{ color-scheme:light dark;overflow-x:hidden;width:100%;scroll-behavior:smooth; }
   *{ min-width:0; } /* évite qu'un enfant flex/grid force son parent à déborder */
   body{
     margin:0;min-height:100vh;color:var(--text);font-family:'Inter',sans-serif;
@@ -5270,22 +5270,28 @@ function speakHighlighted(text, lang, targetElId, onEnd){
         u.onstart = () => {
           // 🛟 Filet de secours : certains navigateurs/appareils (dont plusieurs liseuses) ne
           // déclenchent JAMAIS "boundary" — on avance alors la surbrillance nous-mêmes, mot par
-          // mot, par estimation du temps que prend chacun (proportionnel à sa longueur).
+          // mot. Modèle calé sur un débit de parole naturel : un temps de base par mot (l'attaque
+          // + la respiration entre les mots) plus un temps proportionnel à sa longueur, et une
+          // pause supplémentaire après la ponctuation forte — plus réaliste qu'une simple
+          // proportion linéaire sur la longueur totale du texte.
           setTimeout(() => {
             if(usedBoundary || finished) return;
-            const totalEstMs = Math.max(800, (text.length * 95) / rate);
-            const perCharMs = totalEstMs / (text.length || 1);
+            const baseMsPerWord = 175;
+            const msPerChar = 38;
             let cumulative = 0;
             words.forEach((w, i) => {
-              cumulative += (w.len + 1) * perCharMs;
+              let dur = (baseMsPerWord + w.len * msPerChar) / rate;
+              if(/[,;:]$/.test(w.text)) dur += 120 / rate;
+              else if(/[.!?…]$/.test(w.text)) dur += 260 / rate;
+              cumulative += dur;
               fallbackIds.push(setTimeout(() => { if(!usedBoundary && !finished) highlightIdx(i); }, cumulative));
             });
-          }, 350);
+          }, 300);
         };
         u.onend = finish;
         u.onerror = finish;
         window.speechSynthesis.speak(u);
-        const estMs = Math.max(1500, (text.length * 100) / rate) + 800;
+        const estMs = Math.max(1500, words.length * (175 + 38 * 6) / rate) + 900;
         setTimeout(finish, estMs);
       }catch(e){ ttsSpeaking = false; updateMicButtonUI(); if(onEnd) onEnd(); }
     }, 60);
@@ -5322,55 +5328,60 @@ applyReadingScale();
 
 /* Barre d'outils de lecture — taille du texte, vitesse, voix, plein écran. Génère le HTML et câble
    les événements ; à appeler juste après avoir injecté le HTML retourné dans le DOM. */
-function buildReadingToolbarHtml(){
+function buildReadingToolbarHtml(idPrefix){
+  const p = idPrefix || '';
   return `
-    <div class="reading-toolbar" id="readingToolbar" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;margin:10px 0;">
+    <div class="reading-toolbar" id="${p}readingToolbar" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;margin:10px 0;">
       <div style="display:flex;align-items:center;gap:4px;background:var(--surface-sunken);border:1px solid var(--border);border-radius:999px;padding:4px;">
-        <button class="mode-chip" id="readingScaleDownBtn" style="padding:6px 12px;margin:0;" title="Réduire le texte">A-</button>
-        <button class="mode-chip" id="readingScaleUpBtn" style="padding:6px 12px;margin:0;font-size:16px;" title="Agrandir le texte">A+</button>
+        <button class="mode-chip" id="${p}readingScaleDownBtn" style="padding:6px 12px;margin:0;" title="Réduire le texte">A-</button>
+        <button class="mode-chip" id="${p}readingScaleUpBtn" style="padding:6px 12px;margin:0;font-size:16px;" title="Agrandir le texte">A+</button>
       </div>
       <div style="display:flex;align-items:center;gap:4px;background:var(--surface-sunken);border:1px solid var(--border);border-radius:999px;padding:4px;">
-        <button class="mode-chip" id="readingSpeedDownBtn" style="padding:6px 12px;margin:0;" title="Ralentir la lecture">🐢</button>
-        <span id="readingSpeedLabel" style="font-size:12px;font-weight:800;color:var(--text-dim);min-width:34px;text-align:center;">${readingRate.toFixed(2)}×</span>
-        <button class="mode-chip" id="readingSpeedUpBtn" style="padding:6px 12px;margin:0;" title="Accélérer la lecture">🐇</button>
+        <button class="mode-chip" id="${p}readingSpeedDownBtn" style="padding:6px 12px;margin:0;" title="Ralentir la lecture">🐢</button>
+        <span id="${p}readingSpeedLabel" style="font-size:12px;font-weight:800;color:var(--text-dim);min-width:34px;text-align:center;">${readingRate.toFixed(2)}×</span>
+        <button class="mode-chip" id="${p}readingSpeedUpBtn" style="padding:6px 12px;margin:0;" title="Accélérer la lecture">🐇</button>
       </div>
       <div style="display:flex;align-items:center;gap:2px;background:var(--surface-sunken);border:1px solid var(--border);border-radius:999px;padding:4px;">
-        <button class="mode-chip ${readingVoiceGender === null ? 'active' : ''}" id="readingVoiceRandomBtn" style="padding:6px 10px;margin:0;" title="Voix aléatoire">🎲</button>
-        <button class="mode-chip ${readingVoiceGender === 'f' ? 'active' : ''}" id="readingVoiceFBtn" style="padding:6px 10px;margin:0;" title="Voix féminine">👩</button>
-        <button class="mode-chip ${readingVoiceGender === 'm' ? 'active' : ''}" id="readingVoiceMBtn" style="padding:6px 10px;margin:0;" title="Voix masculine">👨</button>
+        <button class="mode-chip ${readingVoiceGender === null ? 'active' : ''}" id="${p}readingVoiceRandomBtn" style="padding:6px 10px;margin:0;" title="Voix aléatoire">🎲</button>
+        <button class="mode-chip ${readingVoiceGender === 'f' ? 'active' : ''}" id="${p}readingVoiceFBtn" style="padding:6px 10px;margin:0;" title="Voix féminine">👩</button>
+        <button class="mode-chip ${readingVoiceGender === 'm' ? 'active' : ''}" id="${p}readingVoiceMBtn" style="padding:6px 10px;margin:0;" title="Voix masculine">👨</button>
       </div>
-      <button class="mode-chip" id="readingFullscreenBtn" style="padding:8px 14px;margin:0;" title="Mode plein écran">⛶ Plein écran</button>
+      ${!p ? `<button class="mode-chip" id="readingFullscreenBtn" style="padding:8px 14px;margin:0;" title="Mode plein écran">⛶ Plein écran</button>` : ''}
     </div>
   `;
 }
-function wireReadingToolbar(onChange){
+function wireReadingToolbar(onChange, idPrefix){
+  const p = idPrefix || '';
   const refreshVoiceButtons = () => {
-    document.getElementById('readingVoiceRandomBtn').classList.toggle('active', readingVoiceGender === null);
-    document.getElementById('readingVoiceFBtn').classList.toggle('active', readingVoiceGender === 'f');
-    document.getElementById('readingVoiceMBtn').classList.toggle('active', readingVoiceGender === 'm');
+    document.getElementById(p+'readingVoiceRandomBtn').classList.toggle('active', readingVoiceGender === null);
+    document.getElementById(p+'readingVoiceFBtn').classList.toggle('active', readingVoiceGender === 'f');
+    document.getElementById(p+'readingVoiceMBtn').classList.toggle('active', readingVoiceGender === 'm');
   };
-  document.getElementById('readingScaleDownBtn').addEventListener('click', () => {
+  document.getElementById(p+'readingScaleDownBtn').addEventListener('click', () => {
     const i = Math.max(0, READING_SCALES.indexOf(readingScale) - 1);
     readingScale = READING_SCALES[i]; saveReadingScale(readingScale); applyReadingScale();
   });
-  document.getElementById('readingScaleUpBtn').addEventListener('click', () => {
+  document.getElementById(p+'readingScaleUpBtn').addEventListener('click', () => {
     const i = Math.min(READING_SCALES.length - 1, READING_SCALES.indexOf(readingScale) + 1);
     readingScale = READING_SCALES[i]; saveReadingScale(readingScale); applyReadingScale();
   });
-  document.getElementById('readingSpeedDownBtn').addEventListener('click', () => {
+  document.getElementById(p+'readingSpeedDownBtn').addEventListener('click', () => {
     const i = Math.max(0, READING_RATES.indexOf(readingRate) - 1);
     readingRate = READING_RATES[i]; saveReadingRate(readingRate);
-    document.getElementById('readingSpeedLabel').textContent = readingRate.toFixed(2) + '×';
+    document.getElementById(p+'readingSpeedLabel').textContent = readingRate.toFixed(2) + '×';
   });
-  document.getElementById('readingSpeedUpBtn').addEventListener('click', () => {
+  document.getElementById(p+'readingSpeedUpBtn').addEventListener('click', () => {
     const i = Math.min(READING_RATES.length - 1, READING_RATES.indexOf(readingRate) + 1);
     readingRate = READING_RATES[i]; saveReadingRate(readingRate);
-    document.getElementById('readingSpeedLabel').textContent = readingRate.toFixed(2) + '×';
+    document.getElementById(p+'readingSpeedLabel').textContent = readingRate.toFixed(2) + '×';
   });
-  document.getElementById('readingVoiceRandomBtn').addEventListener('click', () => { readingVoiceGender = null; saveReadingVoice(null); refreshVoiceButtons(); });
-  document.getElementById('readingVoiceFBtn').addEventListener('click', () => { readingVoiceGender = 'f'; saveReadingVoice('f'); refreshVoiceButtons(); });
-  document.getElementById('readingVoiceMBtn').addEventListener('click', () => { readingVoiceGender = 'm'; saveReadingVoice('m'); refreshVoiceButtons(); });
-  document.getElementById('readingFullscreenBtn').addEventListener('click', () => { if(onChange) onChange(); });
+  document.getElementById(p+'readingVoiceRandomBtn').addEventListener('click', () => { readingVoiceGender = null; saveReadingVoice(null); refreshVoiceButtons(); });
+  document.getElementById(p+'readingVoiceFBtn').addEventListener('click', () => { readingVoiceGender = 'f'; saveReadingVoice('f'); refreshVoiceButtons(); });
+  document.getElementById(p+'readingVoiceMBtn').addEventListener('click', () => { readingVoiceGender = 'm'; saveReadingVoice('m'); refreshVoiceButtons(); });
+  if(!p){
+    const fsBtn = document.getElementById('readingFullscreenBtn');
+    if(fsBtn){ fsBtn.addEventListener('click', () => { if(onChange) onChange(); }); }
+  }
 }
 
 /* ⛶ Mode plein écran de lecture : masque toute l'interface de l'app pour ne garder que le texte,
@@ -5380,13 +5391,13 @@ function openReadingFullscreen(title, text, lang){
   if(!overlay){
     overlay = document.createElement('div');
     overlay.id = 'readingFullscreenOverlay';
-    overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:var(--bg);overflow-y:auto;display:none;';
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:var(--bg);overflow-y:auto;scroll-behavior:smooth;display:none;';
     document.body.appendChild(overlay);
   }
   overlay.innerHTML = `
-    <div style="max-width:680px;margin:0 auto;padding:20px 18px 60px;">
+    <div style="max-width:680px;margin:0 auto;padding:max(20px,env(safe-area-inset-top)) 18px 60px;min-height:100%;">
       <button id="closeReadingFullscreenBtn" class="chip total" style="cursor:pointer;margin-bottom:14px;">✕ Fermer le plein écran</button>
-      ${buildReadingToolbarHtml()}
+      ${buildReadingToolbarHtml('fs-')}
       <div class="word-fr" style="font-size:clamp(20px,4.5vw,26px);margin:10px 0 6px;">${escapeHtml(title)}</div>
       <button class="mode-chip" id="fullscreenListenBtn" style="margin-bottom:12px;">🔊 Écouter</button>
       <div class="reading-text" style="text-align:left;">
@@ -5395,9 +5406,23 @@ function openReadingFullscreen(title, text, lang){
     </div>
   `;
   overlay.style.display = 'block';
-  document.getElementById('closeReadingFullscreenBtn').addEventListener('click', () => { window.speechSynthesis.cancel(); overlay.style.display = 'none'; });
+  // 📱 Vrai plein écran natif quand le navigateur le permet (masque la barre d'adresse etc.) —
+  // se dégrade silencieusement vers l'overlay plein-viewport si l'API n'est pas disponible/permise.
+  try{
+    if(overlay.requestFullscreen){ overlay.requestFullscreen().catch(() => {}); }
+    else if(overlay.webkitRequestFullscreen){ overlay.webkitRequestFullscreen(); }
+  }catch(e){}
+  const closeFullscreen = () => {
+    window.speechSynthesis.cancel();
+    overlay.style.display = 'none';
+    try{
+      if(document.fullscreenElement){ document.exitFullscreen().catch(() => {}); }
+      else if(document.webkitFullscreenElement && document.webkitExitFullscreen){ document.webkitExitFullscreen(); }
+    }catch(e){}
+  };
+  document.getElementById('closeReadingFullscreenBtn').addEventListener('click', closeFullscreen);
   document.getElementById('fullscreenListenBtn').addEventListener('click', () => speakHighlighted(text, lang || 'fr-FR', 'fullscreenReadingTarget'));
-  wireReadingToolbar();
+  wireReadingToolbar(null, 'fs-');
 }
 
 
