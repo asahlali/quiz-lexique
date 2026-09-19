@@ -5212,7 +5212,7 @@ function speak(text, lang, onEnd, rateOverride){
    le mot en cours de lecture au fil de la prononciation (via l'événement "boundary" de la synthèse
    vocale). Dégrade proprement si le navigateur ne déclenche jamais cet événement : l'audio joue
    quand même, simplement sans surbrillance. Utilisé pour Bouquinage / Fiches pratiques / Atelier. */
-function speakHighlighted(text, lang, targetElId, onEnd){
+function speakHighlighted(text, lang, targetElId, onEnd, controlBtnId){
   const el = document.getElementById(targetElId);
   if(!speechAvailable || !text){ if(onEnd) onEnd(); return; }
   if(!el){ speak(text, lang, onEnd); return; } // filet de sécurité : au moins l'audio marche
@@ -5224,12 +5224,27 @@ function speakHighlighted(text, lang, targetElId, onEnd){
   while((m = wordRe.exec(text)) !== null){ words.push({ text: m[0], start: m.index, end: m.index + m[0].length, len: m[0].length }); }
   el.innerHTML = words.map((w, i) => `<span class="reading-word" data-widx="${i}">${escapeHtml(w.text)}</span>`).join(' ');
 
+  // Regroupe les mots en phrases (coupure après . ! ? …) — la surbrillance de secours illumine
+  // toute la phrase en cours plutôt qu'un seul mot : bien plus tolérant à une estimation imprécise
+  // du débit de parole, donc beaucoup moins d'impression de désynchronisation.
+  const sentences = [];
+  let sentStart = 0;
+  words.forEach((w, i) => {
+    if(/[.!?…]$/.test(w.text) || i === words.length - 1){ sentences.push({ from: sentStart, to: i }); sentStart = i + 1; }
+  });
+
   const clearHighlights = () => { el.querySelectorAll('.reading-word.hl').forEach(s => s.classList.remove('hl')); };
   const highlightIdx = (idx) => {
     if(idx < 0 || idx >= words.length) return;
     clearHighlights();
     const span = el.querySelector(`[data-widx="${idx}"]`);
     if(span){ span.classList.add('hl'); span.scrollIntoView({ behavior:'smooth', block:'nearest' }); }
+  };
+  const highlightRange = (from, to) => {
+    clearHighlights();
+    for(let i = from; i <= to; i++){ const span = el.querySelector(`[data-widx="${i}"]`); if(span){ span.classList.add('hl'); } }
+    const firstSpan = el.querySelector(`[data-widx="${from}"]`);
+    if(firstSpan){ firstSpan.scrollIntoView({ behavior:'smooth', block:'center' }); }
   };
   const highlightAtChar = (charIndex) => {
     let idx = words.findIndex(w => charIndex >= w.start && charIndex < w.end);
@@ -5241,6 +5256,25 @@ function speakHighlighted(text, lang, targetElId, onEnd){
   let usedBoundary = false;
   let fallbackIds = [];
   const clearFallback = () => { fallbackIds.forEach(id => clearTimeout(id)); fallbackIds = []; };
+
+  // ⏸️▶️ Bouton pause/reprise optionnel : pendant la lecture, remplace son comportement pour
+  // mettre en pause / reprendre l'audio à la même position (sans tout recommencer), puis lui
+  // rend son comportement d'origine une fois la lecture terminée.
+  let restoreBtn = null;
+  if(controlBtnId){
+    const btn = document.getElementById(controlBtnId);
+    if(btn){
+      const originalLabel = btn.innerHTML;
+      const originalOnclick = btn.onclick;
+      let paused = false;
+      btn.innerHTML = '⏸️ Pause';
+      btn.onclick = () => {
+        if(!paused){ window.speechSynthesis.pause(); paused = true; btn.innerHTML = '▶️ Reprendre'; }
+        else{ window.speechSynthesis.resume(); paused = false; btn.innerHTML = '⏸️ Pause'; }
+      };
+      restoreBtn = () => { btn.innerHTML = originalLabel; btn.onclick = originalOnclick; };
+    }
+  }
 
   try{
     stopRecognition();
@@ -5259,7 +5293,11 @@ function speakHighlighted(text, lang, targetElId, onEnd){
         u.rate = rate;
         u.pitch = 1.0;
         let finished = false;
-        const finish = () => { if(finished) return; finished = true; clearFallback(); ttsSpeaking = false; updateMicButtonUI(); clearHighlights(); if(onEnd) onEnd(); };
+        const finish = () => {
+          if(finished) return; finished = true; clearFallback(); ttsSpeaking = false; updateMicButtonUI(); clearHighlights();
+          if(restoreBtn) restoreBtn();
+          if(onEnd) onEnd();
+        };
         u.onboundary = (event) => {
           if(event.name === 'word' || event.charIndex != null){
             usedBoundary = true;
@@ -5269,22 +5307,23 @@ function speakHighlighted(text, lang, targetElId, onEnd){
         };
         u.onstart = () => {
           // 🛟 Filet de secours : certains navigateurs/appareils (dont plusieurs liseuses) ne
-          // déclenchent JAMAIS "boundary" — on avance alors la surbrillance nous-mêmes, mot par
-          // mot. Modèle calé sur un débit de parole naturel : un temps de base par mot (l'attaque
-          // + la respiration entre les mots) plus un temps proportionnel à sa longueur, et une
-          // pause supplémentaire après la ponctuation forte — plus réaliste qu'une simple
-          // proportion linéaire sur la longueur totale du texte.
+          // déclenchent JAMAIS "boundary" — on surligne alors PHRASE PAR PHRASE (pas mot par mot)
+          // par estimation du temps que prend chacune. Une granularité plus large est bien plus
+          // tolérante à une estimation imprécise du débit réel de la voix : même si l'estimation
+          // dérive un peu, la phrase entière reste juste plus longtemps en surbrillance, ce qui
+          // paraît toujours "à peu près synchronisé" — contrairement à un mot isolé qui décale
+          // visiblement dès la moindre erreur de calibrage.
           setTimeout(() => {
             if(usedBoundary || finished) return;
             const baseMsPerWord = 175;
             const msPerChar = 38;
             let cumulative = 0;
-            words.forEach((w, i) => {
-              let dur = (baseMsPerWord + w.len * msPerChar) / rate;
-              if(/[,;:]$/.test(w.text)) dur += 120 / rate;
-              else if(/[.!?…]$/.test(w.text)) dur += 260 / rate;
+            sentences.forEach((s) => {
+              let dur = 0;
+              for(let i = s.from; i <= s.to; i++){ dur += (baseMsPerWord + words[i].len * msPerChar) / rate; }
+              dur += 260 / rate; // pause de fin de phrase
+              fallbackIds.push(setTimeout(() => { if(!usedBoundary && !finished) highlightRange(s.from, s.to); }, cumulative));
               cumulative += dur;
-              fallbackIds.push(setTimeout(() => { if(!usedBoundary && !finished) highlightIdx(i); }, cumulative));
             });
           }, 300);
         };
@@ -5293,9 +5332,9 @@ function speakHighlighted(text, lang, targetElId, onEnd){
         window.speechSynthesis.speak(u);
         const estMs = Math.max(1500, words.length * (175 + 38 * 6) / rate) + 900;
         setTimeout(finish, estMs);
-      }catch(e){ ttsSpeaking = false; updateMicButtonUI(); if(onEnd) onEnd(); }
+      }catch(e){ ttsSpeaking = false; updateMicButtonUI(); if(restoreBtn) restoreBtn(); if(onEnd) onEnd(); }
     }, 60);
-  }catch(e){ ttsSpeaking = false; updateMicButtonUI(); if(onEnd) onEnd(); }
+  }catch(e){ ttsSpeaking = false; updateMicButtonUI(); if(restoreBtn) restoreBtn(); if(onEnd) onEnd(); }
 }
 
 /* ============ 📖 RÉGLAGES DE LECTURE (Bouquinage, Fiches pratiques, Atelier) ============
@@ -5421,7 +5460,7 @@ function openReadingFullscreen(title, text, lang){
     }catch(e){}
   };
   document.getElementById('closeReadingFullscreenBtn').addEventListener('click', closeFullscreen);
-  document.getElementById('fullscreenListenBtn').addEventListener('click', () => speakHighlighted(text, lang || 'fr-FR', 'fullscreenReadingTarget'));
+  document.getElementById('fullscreenListenBtn').addEventListener('click', () => speakHighlighted(text, lang || 'fr-FR', 'fullscreenReadingTarget', null, 'fullscreenListenBtn'));
   wireReadingToolbar(null, 'fs-');
 }
 
@@ -23205,6 +23244,11 @@ function renderPracticalSheetDetail(id){
   document.getElementById('footerNote').textContent = '';
   const card = document.getElementById('quizCard');
   const canQuiz = sheet.type === 'table' || sheet.recoKey; // 🎯 les tableaux et les règles à choix binaire sont "entraînables"
+  if(!canQuiz && !isSheetPassed(sheet.id)){
+    // 📖 Pas d'exercice possible pour cette fiche (règle purement descriptive, lettre type...) :
+    // la lecture EST l'accomplissement — on la marque automatiquement comme faite.
+    markSheetPassed(sheet.id, 100);
+  }
 
   let bodyHtml = '';
   if(sheet.type === 'table'){
@@ -23284,7 +23328,7 @@ function renderPracticalSheetDetail(id){
   if(speakWholeLetterBtn){
     speakWholeLetterBtn.addEventListener('click', () => {
       const full = [sheet.subject, ...sheet.body].join('. ');
-      speakHighlighted(full, 'fr-FR', 'letterSubjectTarget');
+      speakHighlighted(full, 'fr-FR', 'letterSubjectTarget', null, 'speakWholeLetterBtn');
     });
   }
   card.querySelectorAll('[data-speak-para]').forEach(btn => {
@@ -23722,7 +23766,7 @@ function renderBouquinageDetail(idx){
     </div>
   `;
   document.getElementById('backFromBouquinageDetailBtn').addEventListener('click', renderBouquinageHome);
-  document.getElementById('listenBouquinageBtn').addEventListener('click', () => speakHighlighted(t.body + (t.quote ? '. ' + t.quote : ''), 'fr-FR', 'bouquinageReadingTarget'));
+  document.getElementById('listenBouquinageBtn').addEventListener('click', () => speakHighlighted(t.body + (t.quote ? '. ' + t.quote : ''), 'fr-FR', 'bouquinageReadingTarget', null, 'listenBouquinageBtn'));
   wireReadingToolbar(() => openReadingFullscreen(t.title, t.body + (t.quote ? '\n\n« ' + t.quote + ' »' : ''), 'fr-FR'));
   document.getElementById('markReadBtn').addEventListener('click', () => {
     if(isBouquinageRead(idx)){ unmarkBouquinageRead(idx); } else { markBouquinageRead(idx); playCorrectSound(); }
