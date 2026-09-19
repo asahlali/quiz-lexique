@@ -677,13 +677,14 @@
      plutôt que blanc pur — plus reposant pour de la lecture prolongée. */
   .reading-text{
     font-family:Georgia,'Iowan Old Style','Palatino Linotype',serif;
-    font-size:clamp(17px,3.4vw,19px);
+    font-size:calc(clamp(17px,3.4vw,19px) * var(--reading-scale,1));
     line-height:1.9;
     letter-spacing:0.01em;
     color:var(--reading-ink,var(--text));
     background:var(--reading-bg,var(--surface-sunken));
     border-radius:14px;
     padding:20px 22px;
+    transition:font-size .15s ease;
   }
   .reading-text td, .reading-text th{ font-family:inherit;font-size:inherit;line-height:1.6; }
   [data-theme="light"] .reading-text, :root .reading-text{ --reading-bg:#F7F1E1; --reading-ink:#3B3226; }
@@ -5220,18 +5221,26 @@ function speakHighlighted(text, lang, targetElId, onEnd){
   const wordRe = /\S+/g;
   const words = [];
   let m;
-  while((m = wordRe.exec(text)) !== null){ words.push({ text: m[0], start: m.index, end: m.index + m[0].length }); }
+  while((m = wordRe.exec(text)) !== null){ words.push({ text: m[0], start: m.index, end: m.index + m[0].length, len: m[0].length }); }
   el.innerHTML = words.map((w, i) => `<span class="reading-word" data-widx="${i}">${escapeHtml(w.text)}</span>`).join(' ');
 
   const clearHighlights = () => { el.querySelectorAll('.reading-word.hl').forEach(s => s.classList.remove('hl')); };
-  const highlightAt = (charIndex) => {
-    let idx = words.findIndex(w => charIndex >= w.start && charIndex < w.end);
-    if(idx === -1){ idx = words.findIndex(w => w.start > charIndex) - 1; } // entre deux mots : garde le précédent
-    if(idx < 0) return;
+  const highlightIdx = (idx) => {
+    if(idx < 0 || idx >= words.length) return;
     clearHighlights();
     const span = el.querySelector(`[data-widx="${idx}"]`);
     if(span){ span.classList.add('hl'); span.scrollIntoView({ behavior:'smooth', block:'nearest' }); }
   };
+  const highlightAtChar = (charIndex) => {
+    let idx = words.findIndex(w => charIndex >= w.start && charIndex < w.end);
+    if(idx === -1){ idx = words.findIndex(w => w.start > charIndex) - 1; } // entre deux mots : garde le précédent
+    highlightIdx(idx);
+  };
+
+  const rate = readingRate;
+  let usedBoundary = false;
+  let fallbackIds = [];
+  const clearFallback = () => { fallbackIds.forEach(id => clearTimeout(id)); fallbackIds = []; };
 
   try{
     stopRecognition();
@@ -5245,22 +5254,152 @@ function speakHighlighted(text, lang, targetElId, onEnd){
         const langCode = lang || 'fr-FR';
         u.lang = langCode;
         const prefix = langCode.slice(0,2).toLowerCase();
-        const v = pickVoice(prefix);
+        const v = pickVoice(prefix, readingVoiceGender); // genre choisi par l'utilisateur, sinon aléatoire
         if(v){ u.voice = v; u.lang = v.lang; }
-        u.rate = 0.92; // un peu plus lent : plus confortable pour suivre la surbrillance
+        u.rate = rate;
         u.pitch = 1.0;
         let finished = false;
-        const finish = () => { if(finished) return; finished = true; ttsSpeaking = false; updateMicButtonUI(); clearHighlights(); if(onEnd) onEnd(); };
-        u.onboundary = (event) => { if(event.name === 'word' || event.charIndex != null){ highlightAt(event.charIndex); } };
+        const finish = () => { if(finished) return; finished = true; clearFallback(); ttsSpeaking = false; updateMicButtonUI(); clearHighlights(); if(onEnd) onEnd(); };
+        u.onboundary = (event) => {
+          if(event.name === 'word' || event.charIndex != null){
+            usedBoundary = true;
+            clearFallback(); // le vrai signal du navigateur prend le relais, on arrête l'estimation
+            highlightAtChar(event.charIndex);
+          }
+        };
+        u.onstart = () => {
+          // 🛟 Filet de secours : certains navigateurs/appareils (dont plusieurs liseuses) ne
+          // déclenchent JAMAIS "boundary" — on avance alors la surbrillance nous-mêmes, mot par
+          // mot, par estimation du temps que prend chacun (proportionnel à sa longueur).
+          setTimeout(() => {
+            if(usedBoundary || finished) return;
+            const totalEstMs = Math.max(800, (text.length * 95) / rate);
+            const perCharMs = totalEstMs / (text.length || 1);
+            let cumulative = 0;
+            words.forEach((w, i) => {
+              cumulative += (w.len + 1) * perCharMs;
+              fallbackIds.push(setTimeout(() => { if(!usedBoundary && !finished) highlightIdx(i); }, cumulative));
+            });
+          }, 350);
+        };
         u.onend = finish;
         u.onerror = finish;
         window.speechSynthesis.speak(u);
-        const estMs = Math.max(1500, text.length * 100);
+        const estMs = Math.max(1500, (text.length * 100) / rate) + 800;
         setTimeout(finish, estMs);
       }catch(e){ ttsSpeaking = false; updateMicButtonUI(); if(onEnd) onEnd(); }
     }, 60);
   }catch(e){ ttsSpeaking = false; updateMicButtonUI(); if(onEnd) onEnd(); }
 }
+
+/* ============ 📖 RÉGLAGES DE LECTURE (Bouquinage, Fiches pratiques, Atelier) ============
+   Taille du texte, vitesse de lecture, genre de voix imposé — mémorisés par compte. */
+const READING_SCALE_KEY = 'lexiqueQuiz::readingScale';
+const READING_RATE_KEY = 'lexiqueQuiz::readingRate';
+const READING_VOICE_KEY = 'lexiqueQuiz::readingVoice';
+const READING_SCALES = [0.85, 1, 1.15, 1.35, 1.6];
+const READING_RATES = [0.7, 0.85, 1.0, 1.15, 1.3];
+function loadReadingScale(){
+  try{ const v = parseFloat(localStorage.getItem(nsKey(READING_SCALE_KEY))); return READING_SCALES.includes(v) ? v : 1; }catch(e){ return 1; }
+}
+function saveReadingScale(v){ try{ localStorage.setItem(nsKey(READING_SCALE_KEY), String(v)); }catch(e){} }
+function loadReadingRate(){
+  try{ const v = parseFloat(localStorage.getItem(nsKey(READING_RATE_KEY))); return READING_RATES.includes(v) ? v : 0.92; }catch(e){ return 0.92; }
+}
+function saveReadingRate(v){ try{ localStorage.setItem(nsKey(READING_RATE_KEY), String(v)); }catch(e){} }
+function loadReadingVoice(){
+  try{ const v = localStorage.getItem(nsKey(READING_VOICE_KEY)); return (v === 'f' || v === 'm') ? v : null; }catch(e){ return null; }
+}
+function saveReadingVoice(v){ try{ localStorage.setItem(nsKey(READING_VOICE_KEY), v || ''); }catch(e){} }
+let readingScale = loadReadingScale();
+let readingRate = loadReadingRate();
+let readingVoiceGender = loadReadingVoice(); // null = aléatoire, 'f' = femme imposée, 'm' = homme imposé
+
+function applyReadingScale(){
+  document.documentElement.style.setProperty('--reading-scale', readingScale);
+}
+applyReadingScale();
+
+/* Barre d'outils de lecture — taille du texte, vitesse, voix, plein écran. Génère le HTML et câble
+   les événements ; à appeler juste après avoir injecté le HTML retourné dans le DOM. */
+function buildReadingToolbarHtml(){
+  return `
+    <div class="reading-toolbar" id="readingToolbar" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;margin:10px 0;">
+      <div style="display:flex;align-items:center;gap:4px;background:var(--surface-sunken);border:1px solid var(--border);border-radius:999px;padding:4px;">
+        <button class="mode-chip" id="readingScaleDownBtn" style="padding:6px 12px;margin:0;" title="Réduire le texte">A-</button>
+        <button class="mode-chip" id="readingScaleUpBtn" style="padding:6px 12px;margin:0;font-size:16px;" title="Agrandir le texte">A+</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:4px;background:var(--surface-sunken);border:1px solid var(--border);border-radius:999px;padding:4px;">
+        <button class="mode-chip" id="readingSpeedDownBtn" style="padding:6px 12px;margin:0;" title="Ralentir la lecture">🐢</button>
+        <span id="readingSpeedLabel" style="font-size:12px;font-weight:800;color:var(--text-dim);min-width:34px;text-align:center;">${readingRate.toFixed(2)}×</span>
+        <button class="mode-chip" id="readingSpeedUpBtn" style="padding:6px 12px;margin:0;" title="Accélérer la lecture">🐇</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:2px;background:var(--surface-sunken);border:1px solid var(--border);border-radius:999px;padding:4px;">
+        <button class="mode-chip ${readingVoiceGender === null ? 'active' : ''}" id="readingVoiceRandomBtn" style="padding:6px 10px;margin:0;" title="Voix aléatoire">🎲</button>
+        <button class="mode-chip ${readingVoiceGender === 'f' ? 'active' : ''}" id="readingVoiceFBtn" style="padding:6px 10px;margin:0;" title="Voix féminine">👩</button>
+        <button class="mode-chip ${readingVoiceGender === 'm' ? 'active' : ''}" id="readingVoiceMBtn" style="padding:6px 10px;margin:0;" title="Voix masculine">👨</button>
+      </div>
+      <button class="mode-chip" id="readingFullscreenBtn" style="padding:8px 14px;margin:0;" title="Mode plein écran">⛶ Plein écran</button>
+    </div>
+  `;
+}
+function wireReadingToolbar(onChange){
+  const refreshVoiceButtons = () => {
+    document.getElementById('readingVoiceRandomBtn').classList.toggle('active', readingVoiceGender === null);
+    document.getElementById('readingVoiceFBtn').classList.toggle('active', readingVoiceGender === 'f');
+    document.getElementById('readingVoiceMBtn').classList.toggle('active', readingVoiceGender === 'm');
+  };
+  document.getElementById('readingScaleDownBtn').addEventListener('click', () => {
+    const i = Math.max(0, READING_SCALES.indexOf(readingScale) - 1);
+    readingScale = READING_SCALES[i]; saveReadingScale(readingScale); applyReadingScale();
+  });
+  document.getElementById('readingScaleUpBtn').addEventListener('click', () => {
+    const i = Math.min(READING_SCALES.length - 1, READING_SCALES.indexOf(readingScale) + 1);
+    readingScale = READING_SCALES[i]; saveReadingScale(readingScale); applyReadingScale();
+  });
+  document.getElementById('readingSpeedDownBtn').addEventListener('click', () => {
+    const i = Math.max(0, READING_RATES.indexOf(readingRate) - 1);
+    readingRate = READING_RATES[i]; saveReadingRate(readingRate);
+    document.getElementById('readingSpeedLabel').textContent = readingRate.toFixed(2) + '×';
+  });
+  document.getElementById('readingSpeedUpBtn').addEventListener('click', () => {
+    const i = Math.min(READING_RATES.length - 1, READING_RATES.indexOf(readingRate) + 1);
+    readingRate = READING_RATES[i]; saveReadingRate(readingRate);
+    document.getElementById('readingSpeedLabel').textContent = readingRate.toFixed(2) + '×';
+  });
+  document.getElementById('readingVoiceRandomBtn').addEventListener('click', () => { readingVoiceGender = null; saveReadingVoice(null); refreshVoiceButtons(); });
+  document.getElementById('readingVoiceFBtn').addEventListener('click', () => { readingVoiceGender = 'f'; saveReadingVoice('f'); refreshVoiceButtons(); });
+  document.getElementById('readingVoiceMBtn').addEventListener('click', () => { readingVoiceGender = 'm'; saveReadingVoice('m'); refreshVoiceButtons(); });
+  document.getElementById('readingFullscreenBtn').addEventListener('click', () => { if(onChange) onChange(); });
+}
+
+/* ⛶ Mode plein écran de lecture : masque toute l'interface de l'app pour ne garder que le texte,
+   en grand, avec les mêmes réglages (taille, vitesse, voix) et l'écoute avec surbrillance. */
+function openReadingFullscreen(title, text, lang){
+  let overlay = document.getElementById('readingFullscreenOverlay');
+  if(!overlay){
+    overlay = document.createElement('div');
+    overlay.id = 'readingFullscreenOverlay';
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:var(--bg);overflow-y:auto;display:none;';
+    document.body.appendChild(overlay);
+  }
+  overlay.innerHTML = `
+    <div style="max-width:680px;margin:0 auto;padding:20px 18px 60px;">
+      <button id="closeReadingFullscreenBtn" class="chip total" style="cursor:pointer;margin-bottom:14px;">✕ Fermer le plein écran</button>
+      ${buildReadingToolbarHtml()}
+      <div class="word-fr" style="font-size:clamp(20px,4.5vw,26px);margin:10px 0 6px;">${escapeHtml(title)}</div>
+      <button class="mode-chip" id="fullscreenListenBtn" style="margin-bottom:12px;">🔊 Écouter</button>
+      <div class="reading-text" style="text-align:left;">
+        <span id="fullscreenReadingTarget">${escapeHtml(text)}</span>
+      </div>
+    </div>
+  `;
+  overlay.style.display = 'block';
+  document.getElementById('closeReadingFullscreenBtn').addEventListener('click', () => { window.speechSynthesis.cancel(); overlay.style.display = 'none'; });
+  document.getElementById('fullscreenListenBtn').addEventListener('click', () => speakHighlighted(text, lang || 'fr-FR', 'fullscreenReadingTarget'));
+  wireReadingToolbar();
+}
+
 
 const AUTOSPEAK_KEY = 'lexiqueQuiz::autoSpeak';
 function loadAutoSpeak(){
@@ -23074,6 +23213,7 @@ function renderPracticalSheetDetail(id){
     <div class="cat-tag">${sheet.icon} ${escapeHtml(sheet.category)}${isSheetPassed(sheet.id) ? ' · ✅ Validée' : ''}</div>
     <div class="word-fr" style="font-size:clamp(19px,4vw,25px);">${escapeHtml(sheet.title)}</div>
     <div class="word-def" style="margin-top:6px;">${escapeHtml(sheet.intro)}</div>
+    ${buildReadingToolbarHtml()}
     ${bodyHtml}
     ${sheet.note ? `<div style="margin-top:16px;text-align:left;font-size:12.5px;color:var(--text-dim);background:rgba(80,70,229,0.06);border:1px solid rgba(80,70,229,0.18);border-radius:12px;padding:12px 16px;">💡 ${escapeHtml(sheet.note)}</div>` : ''}
     <div style="display:flex;gap:10px;justify-content:center;margin-top:20px;flex-wrap:wrap;">
@@ -23082,6 +23222,18 @@ function renderPracticalSheetDetail(id){
     </div>
   `;
   document.getElementById('backFromSheetDetailBtn').addEventListener('click', homeFn);
+  wireReadingToolbar(() => {
+    let fullText = '';
+    if(sheet.type === 'table'){
+      fullText = sheet.rows.map(r => r.join(' — ')).join('.\n');
+    } else if(sheet.type === 'letter'){
+      fullText = [sheet.subject, ...sheet.body].join('.\n');
+    } else if(sheet.type === 'rule'){
+      fullText = sheet.blocks.map(b => [b.heading, b.text, ...(b.examples||[])].filter(Boolean).join('. ')).join('.\n');
+      if(sheet.table){ fullText += '\n' + sheet.table.rows.map(r => r.join(' — ')).join('.\n'); }
+    }
+    openReadingFullscreen(sheet.title, fullText, 'fr-FR');
+  });
   const sectionList = PRACTICAL_SHEETS.filter(s => (s.section || 'pratique') === (sheet.section || 'pratique'));
   const idx = sectionList.findIndex(s => s.id === id);
   const nextSheet = sectionList[(idx + 1) % sectionList.length];
@@ -23529,6 +23681,7 @@ function renderBouquinageDetail(idx){
   card.innerHTML = `
     <div class="cat-tag">📖 Bouquinage${read ? ' · ✅ Lu' : ''}</div>
     <div class="word-fr" style="font-size:clamp(19px,4vw,24px);">${escapeHtml(t.title)}</div>
+    ${buildReadingToolbarHtml()}
     <button class="mode-chip" id="listenBouquinageBtn" style="margin-top:10px;">🔊 Écouter ce texte</button>
     <div class="reading-text" style="text-align:left;margin-top:12px;">
       <span id="bouquinageReadingTarget">${escapeHtml(t.body)}</span>
@@ -23545,6 +23698,7 @@ function renderBouquinageDetail(idx){
   `;
   document.getElementById('backFromBouquinageDetailBtn').addEventListener('click', renderBouquinageHome);
   document.getElementById('listenBouquinageBtn').addEventListener('click', () => speakHighlighted(t.body + (t.quote ? '. ' + t.quote : ''), 'fr-FR', 'bouquinageReadingTarget'));
+  wireReadingToolbar(() => openReadingFullscreen(t.title, t.body + (t.quote ? '\n\n« ' + t.quote + ' »' : ''), 'fr-FR'));
   document.getElementById('markReadBtn').addEventListener('click', () => {
     if(isBouquinageRead(idx)){ unmarkBouquinageRead(idx); } else { markBouquinageRead(idx); playCorrectSound(); }
     renderBouquinageDetail(idx);
