@@ -672,6 +672,26 @@
   @keyframes glassShine{ 0%,100%{ filter:none;} 50%{ filter:drop-shadow(0 0 8px rgba(61,214,245,0.9)); } }
   .m-blink{ animation:blink 4s infinite; transform-origin:center; }
 
+  /* ============ 📖 LECTURE CONFORTABLE (Bouquinage, Fiches pratiques, Atelier Français) ============
+     Typographie inspirée des liseuses (Kindle) : plus grand, plus espacé, fond légèrement teinté
+     plutôt que blanc pur — plus reposant pour de la lecture prolongée. */
+  .reading-text{
+    font-family:Georgia,'Iowan Old Style','Palatino Linotype',serif;
+    font-size:clamp(17px,3.4vw,19px);
+    line-height:1.9;
+    letter-spacing:0.01em;
+    color:var(--reading-ink,var(--text));
+    background:var(--reading-bg,var(--surface-sunken));
+    border-radius:14px;
+    padding:20px 22px;
+  }
+  .reading-text td, .reading-text th{ font-family:inherit;font-size:inherit;line-height:1.6; }
+  [data-theme="light"] .reading-text, :root .reading-text{ --reading-bg:#F7F1E1; --reading-ink:#3B3226; }
+  [data-theme="dark"] .reading-text{ --reading-bg:#211D16; --reading-ink:#E8E0CE; }
+  .reading-word{ transition:background-color .15s ease,color .15s ease;border-radius:4px;padding:0 1px; }
+  .reading-word.hl{ background:rgba(245,196,60,0.55);color:#2A2210;box-shadow:0 0 0 2px rgba(245,196,60,0.55); }
+  [data-theme="dark"] .reading-word.hl{ background:rgba(245,196,60,0.4);color:#FFF6DC;box-shadow:0 0 0 2px rgba(245,196,60,0.4); }
+
   .mascot-bubble{
     background:var(--surface);color:var(--text);font-family:'Inter',sans-serif;font-weight:800;font-size:14px;
     padding:8px 14px;border-radius:16px 16px 16px 4px;box-shadow:0 4px 0 rgba(0,0,0,0.12);border:1px solid var(--border);
@@ -5187,6 +5207,61 @@ function speak(text, lang, onEnd, rateOverride){
   }catch(e){ ttsSpeaking = false; updateMicButtonUI(); if(onEnd) onEnd(); }
 }
 
+/* 📖✨ Comme speak(), mais découpe le texte en mots à l'intérieur de l'élément ciblé et surligne
+   le mot en cours de lecture au fil de la prononciation (via l'événement "boundary" de la synthèse
+   vocale). Dégrade proprement si le navigateur ne déclenche jamais cet événement : l'audio joue
+   quand même, simplement sans surbrillance. Utilisé pour Bouquinage / Fiches pratiques / Atelier. */
+function speakHighlighted(text, lang, targetElId, onEnd){
+  const el = document.getElementById(targetElId);
+  if(!speechAvailable || !text){ if(onEnd) onEnd(); return; }
+  if(!el){ speak(text, lang, onEnd); return; } // filet de sécurité : au moins l'audio marche
+
+  // Découpe en mots (garde la ponctuation collée), calcule la position de chaque mot dans le texte.
+  const wordRe = /\S+/g;
+  const words = [];
+  let m;
+  while((m = wordRe.exec(text)) !== null){ words.push({ text: m[0], start: m.index, end: m.index + m[0].length }); }
+  el.innerHTML = words.map((w, i) => `<span class="reading-word" data-widx="${i}">${escapeHtml(w.text)}</span>`).join(' ');
+
+  const clearHighlights = () => { el.querySelectorAll('.reading-word.hl').forEach(s => s.classList.remove('hl')); };
+  const highlightAt = (charIndex) => {
+    let idx = words.findIndex(w => charIndex >= w.start && charIndex < w.end);
+    if(idx === -1){ idx = words.findIndex(w => w.start > charIndex) - 1; } // entre deux mots : garde le précédent
+    if(idx < 0) return;
+    clearHighlights();
+    const span = el.querySelector(`[data-widx="${idx}"]`);
+    if(span){ span.classList.add('hl'); span.scrollIntoView({ behavior:'smooth', block:'nearest' }); }
+  };
+
+  try{
+    stopRecognition();
+    window.speechSynthesis.cancel();
+    if(window.speechSynthesis.paused){ window.speechSynthesis.resume(); }
+    ttsSpeaking = true;
+    updateMicButtonUI();
+    setTimeout(() => {
+      try{
+        const u = new SpeechSynthesisUtterance(text);
+        const langCode = lang || 'fr-FR';
+        u.lang = langCode;
+        const prefix = langCode.slice(0,2).toLowerCase();
+        const v = pickVoice(prefix);
+        if(v){ u.voice = v; u.lang = v.lang; }
+        u.rate = 0.92; // un peu plus lent : plus confortable pour suivre la surbrillance
+        u.pitch = 1.0;
+        let finished = false;
+        const finish = () => { if(finished) return; finished = true; ttsSpeaking = false; updateMicButtonUI(); clearHighlights(); if(onEnd) onEnd(); };
+        u.onboundary = (event) => { if(event.name === 'word' || event.charIndex != null){ highlightAt(event.charIndex); } };
+        u.onend = finish;
+        u.onerror = finish;
+        window.speechSynthesis.speak(u);
+        const estMs = Math.max(1500, text.length * 100);
+        setTimeout(finish, estMs);
+      }catch(e){ ttsSpeaking = false; updateMicButtonUI(); if(onEnd) onEnd(); }
+    }, 60);
+  }catch(e){ ttsSpeaking = false; updateMicButtonUI(); if(onEnd) onEnd(); }
+}
+
 const AUTOSPEAK_KEY = 'lexiqueQuiz::autoSpeak';
 function loadAutoSpeak(){
   try{
@@ -7812,6 +7887,185 @@ function endSentenceTypeQuiz(){
    Réutilisé pour Négation, Formation des questions, Accord du participe passé — même principe que
    COD/COI et Types de phrases, mais factorisé pour éviter de dupliquer le code à chaque nouveau sujet. */
 const RECOGNITION_EXERCISES = {
+  ilIlsElleElles: {
+    title:'IL, ILS, ELLE ou ELLES ?', icon:'👤',
+    options:['il (un homme/garçon)','ils (plusieurs, masc.)','elle (une femme/fille)','elles (plusieurs, fém.)'],
+    tip:"IL = une seule personne masculine. ILS = plusieurs personnes (au moins un masculin). ELLE = une seule personne féminine. ELLES = plusieurs personnes, toutes féminines.",
+    examples:[
+      { sentence:"___ joue au football. (un garçon)", correct:"il (un homme/garçon)", rule:"Une seule personne masculine → il." },
+      { sentence:"___ jouent au football. (plusieurs garçons)", correct:"ils (plusieurs, masc.)", rule:"Plusieurs personnes masculines → ils." },
+      { sentence:"___ lit un livre. (une fille)", correct:"elle (une femme/fille)", rule:"Une seule personne féminine → elle." },
+      { sentence:"___ lisent des livres. (plusieurs filles)", correct:"elles (plusieurs, fém.)", rule:"Plusieurs personnes, toutes féminines → elles." },
+    ] },
+  seLeverSeReveiller: {
+    title:'SE LEVER ou SE RÉVEILLER ?', icon:'⏰',
+    options:["se lever (action volontaire)","se réveiller (changement d'état)"],
+    tip:"SE LEVER = quitter son lit pour se mettre debout, action volontaire. SE RÉVEILLER = passer du sommeil à l'éveil, souvent sans le décider.",
+    examples:[
+      { sentence:"Je ___ à 7h tous les matins.", correct:"se lever (action volontaire)", rule:"Action volontaire de quitter le lit → se lever." },
+      { sentence:"Je me suis ___ en sursaut à cause du bruit.", correct:"se réveiller (changement d'état)", rule:"Changement d'état, subi → se réveiller." },
+      { sentence:"Il ___ pour prendre son petit-déjeuner.", correct:"se lever (action volontaire)", rule:"Action volontaire → se lever." },
+      { sentence:"Je me suis ___ tout seul à 6h.", correct:"se réveiller (changement d'état)", rule:"Changement d'état → se réveiller." },
+    ] },
+  siOui: {
+    title:'SI ou OUI ?', icon:'✅',
+    options:['si (condition)','oui (affirmation)'],
+    tip:"SI introduit une condition ou une hypothèse. OUI sert à affirmer, accepter ou répondre positivement.",
+    examples:[
+      { sentence:"___ tu étudies, tu réussiras.", correct:"si (condition)", rule:"Condition → si." },
+      { sentence:"— Veux-tu du thé ? — ___, merci !", correct:"oui (affirmation)", rule:"Réponse positive → oui." },
+      { sentence:"___ demain il pleut, le match sera annulé.", correct:"si (condition)", rule:"Condition → si." },
+      { sentence:"— Es-tu prêt ? — ___, je suis prêt !", correct:"oui (affirmation)", rule:"Réponse positive → oui." },
+    ] },
+  lequelLaquelle: {
+    title:'LEQUEL ou LAQUELLE ?', icon:'❓',
+    options:['lequel (masculin singulier)','laquelle (féminin singulier)'],
+    tip:"LEQUEL pour un nom masculin singulier. LAQUELLE pour un nom féminin singulier.",
+    examples:[
+      { sentence:"___ préfères-tu ? (un livre)", correct:"lequel (masculin singulier)", rule:"« livre » masculin → lequel." },
+      { sentence:"___ est ta voiture ? (une voiture)", correct:"laquelle (féminin singulier)", rule:"« voiture » féminin → laquelle." },
+      { sentence:"___ de ces stylos préfères-tu ?", correct:"lequel (masculin singulier)", rule:"« stylo » masculin → lequel." },
+      { sentence:"___ de ces robes tu choisis ?", correct:"laquelle (féminin singulier)", rule:"« robe » féminin → laquelle." },
+    ] },
+  cestQuiCestQue: {
+    title:"« C'est... qui... » ou « C'est... que... » ?", icon:'🔗',
+    options:["c'est... qui... (sujet)","c'est... que... (objet)"],
+    tip:"C'EST... QUI... met en avant le sujet du verbe. C'EST... QUE... met en avant l'objet ou le complément.",
+    examples:[
+      { sentence:"C'est Julie ___ chante.", correct:"c'est... qui... (sujet)", rule:"« Julie » est sujet de « chante » → qui." },
+      { sentence:"C'est un livre ___ je lis.", correct:"c'est... que... (objet)", rule:"« un livre » est complément de « lis » → que." },
+      { sentence:"C'est mon frère ___ a gagné.", correct:"c'est... qui... (sujet)", rule:"Sujet du verbe → qui." },
+      { sentence:"C'est ce film ___ j'ai vu hier.", correct:"c'est... que... (objet)", rule:"Complément → que." },
+    ] },
+  tuVousDistinction: {
+    title:'TU ou VOUS ?', icon:'🗣️',
+    options:['tu (singulier, informel)','vous (pluriel ou poli)'],
+    tip:"TU s'utilise au singulier, dans un contexte informel, avec une personne que l'on connaît bien. VOUS s'utilise pour plusieurs personnes, ou pour marquer le respect/la politesse envers une personne.",
+    examples:[
+      { sentence:"___ es mon ami.", correct:"tu (singulier, informel)", rule:"Une personne connue, informel → tu." },
+      { sentence:"___ êtes professeur.", correct:"vous (pluriel ou poli)", rule:"Politesse envers une personne → vous." },
+      { sentence:"___ viens avec moi ? (à ton frère)", correct:"tu (singulier, informel)", rule:"Personne proche → tu." },
+      { sentence:"___ allez bien ? (à votre patron)", correct:"vous (pluriel ou poli)", rule:"Politesse → vous." },
+    ] },
+  allerPartir: {
+    title:'ALLER ou PARTIR ?', icon:'🚶',
+    options:["aller (vers un endroit)","partir (à partir d'un endroit)"],
+    tip:"ALLER exprime un mouvement VERS un endroit. PARTIR exprime un mouvement À PARTIR d'un endroit qu'on quitte.",
+    examples:[
+      { sentence:"Je ___ à l'école.", correct:"aller (vers un endroit)", rule:"Mouvement vers un lieu → aller." },
+      { sentence:"Je ___ de la maison.", correct:"partir (à partir d'un endroit)", rule:"Mouvement en quittant un lieu → partir." },
+      { sentence:"Nous ___ au cinéma ce soir.", correct:"aller (vers un endroit)", rule:"Vers un lieu → aller." },
+      { sentence:"Il ___ tôt ce matin.", correct:"partir (à partir d'un endroit)", rule:"Quitter un lieu → partir." },
+    ] },
+  queQuestCeQue: {
+    title:"QUE ou QU'EST-CE QUE ?", icon:'❓',
+    options:["que (remplace un nom/complément)","qu'est-ce que (demande une info)"],
+    tip:"QUE remplace un nom ou un complément dans une question avec inversion. QU'EST-CE QUE sert à demander une information sans inversion.",
+    examples:[
+      { sentence:"___ vois-tu dans la boîte ?", correct:"que (remplace un nom/complément)", rule:"Avec inversion sujet-verbe → que." },
+      { sentence:"___ c'est ?", correct:"qu'est-ce que (demande une info)", rule:"Sans inversion → qu'est-ce que." },
+      { sentence:"___ fais-tu ce soir ?", correct:"que (remplace un nom/complément)", rule:"Avec inversion → que." },
+      { sentence:"___ tu fais ce soir ?", correct:"qu'est-ce que (demande une info)", rule:"Sans inversion → qu'est-ce que." },
+    ] },
+  ailleursPartout: {
+    title:'AILLEURS ou PARTOUT ?', icon:'🌍',
+    options:['ailleurs (autre part)','partout (tous les endroits)'],
+    tip:"AILLEURS = en d'autres endroits, différents de celui dont on parle. PARTOUT = dans tous les endroits, sans exception.",
+    examples:[
+      { sentence:"Je cherche un emploi ___.", correct:"ailleurs (autre part)", rule:"Un autre endroit → ailleurs." },
+      { sentence:"Il y a des problèmes ___ dans le monde.", correct:"partout (tous les endroits)", rule:"Tous les endroits → partout." },
+      { sentence:"Si ce n'est pas ici, c'est ___.", correct:"ailleurs (autre part)", rule:"Un autre endroit → ailleurs." },
+      { sentence:"On trouve ce produit ___ maintenant.", correct:"partout (tous les endroits)", rule:"Tous les endroits → partout." },
+    ] },
+  quelquechoseQuelquun: {
+    title:"QUELQUE CHOSE ou QUELQU'UN ?", icon:'❔',
+    options:['quelque chose (une chose)',"quelqu'un (une personne)"],
+    tip:"QUELQUE CHOSE désigne une chose, un objet, une idée. QUELQU'UN désigne une personne.",
+    examples:[
+      { sentence:"J'ai ___ à te dire.", correct:"quelque chose (une chose)", rule:"Une idée/chose → quelque chose." },
+      { sentence:"Il y a ___ à la porte.", correct:"quelqu'un (une personne)", rule:"Une personne → quelqu'un." },
+      { sentence:"J'ai vu ___ d'étrange.", correct:"quelque chose (une chose)", rule:"Une chose → quelque chose." },
+      { sentence:"___ a appelé pour toi.", correct:"quelqu'un (une personne)", rule:"Une personne → quelqu'un." },
+    ] },
+  siConditionAffirmation: {
+    title:'SI condition ou SI affirmation ?', icon:'↔️',
+    options:['si condition (hypothèse)','si affirmation (réponse à une négation)'],
+    tip:"SI CONDITION exprime une condition ou une hypothèse. SI AFFIRMATION répond positivement à une question posée à la forme négative.",
+    examples:[
+      { sentence:"___ tu étudies, tu réussiras.", correct:"si condition (hypothèse)", rule:"Hypothèse → si condition." },
+      { sentence:"— Tu n'es pas prêt ? — ___ ! Allons-y !", correct:"si affirmation (réponse à une négation)", rule:"Réponse positive à une question négative → si affirmation." },
+      { sentence:"___ il pleut, nous resterons à la maison.", correct:"si condition (hypothèse)", rule:"Hypothèse → si condition." },
+    ] },
+  falloirDevoir: {
+    title:'FALLOIR ou DEVOIR ?', icon:'⚖️',
+    options:['falloir (impersonnel, il faut)','devoir (personnel, je/tu/il dois)'],
+    tip:"FALLOIR est un verbe impersonnel (« il faut »), pour une nécessité générale sans préciser qui. DEVOIR est personnel, pour une obligation qui concerne une personne précise.",
+    examples:[
+      { sentence:"Il ___ étudier pour réussir.", correct:"falloir (impersonnel, il faut)", rule:"Nécessité générale, impersonnel → il faut." },
+      { sentence:"Je ___ finir mon devoir.", correct:"devoir (personnel, je/tu/il dois)", rule:"Obligation personnelle → je dois." },
+      { sentence:"Il ___ du courage pour réussir.", correct:"falloir (impersonnel, il faut)", rule:"Nécessité générale → il faut." },
+      { sentence:"Tu ___ appeler tes parents.", correct:"devoir (personnel, je/tu/il dois)", rule:"Obligation personnelle → tu dois." },
+    ] },
+  venirArriver: {
+    title:'VENIR ou ARRIVER ?', icon:'🚗',
+    options:['venir (se déplacer vers soi)','arriver (atteindre un lieu)'],
+    tip:"VENIR = se déplacer vers soi, vers le locuteur. ARRIVER = atteindre un lieu, une destination.",
+    examples:[
+      { sentence:"Ma sœur ___ chez moi ce soir.", correct:"venir (se déplacer vers soi)", rule:"Mouvement vers le locuteur → venir." },
+      { sentence:"Le train ___ en gare à 10h.", correct:"arriver (atteindre un lieu)", rule:"Atteindre une destination → arriver." },
+      { sentence:"Je ___ te voir ce week-end.", correct:"venir (se déplacer vers soi)", rule:"Vers le locuteur → venir." },
+      { sentence:"Nous sommes ___ à l'hôtel hier soir.", correct:"arriver (atteindre un lieu)", rule:"Destination atteinte → arriver." },
+    ] },
+  sousAuDessous: {
+    title:'SOUS ou AU-DESSOUS ?', icon:'⬇️',
+    options:['sous (en contact)','au-dessous (sans contact, plus bas)'],
+    tip:"SOUS indique un contact direct avec l'objet du dessus. AU-DESSOUS indique une position plus basse, mais SANS contact.",
+    examples:[
+      { sentence:"Le chat est ___ la table. (touche le sol sous la table)", correct:"sous (en contact)", rule:"En contact avec le dessous → sous." },
+      { sentence:"Le chat est ___ de la table. (dans une pièce en dessous)", correct:"au-dessous (sans contact, plus bas)", rule:"Plus bas, sans contact → au-dessous." },
+      { sentence:"Les chaussures sont ___ le lit.", correct:"sous (en contact)", rule:"En contact → sous." },
+    ] },
+  surAuDessus: {
+    title:'SUR ou AU-DESSUS ?', icon:'⬆️',
+    options:['sur (en contact)','au-dessus (sans contact, plus haut)'],
+    tip:"SUR indique un contact direct avec la surface d'un objet. AU-DESSUS indique une position plus haute, mais SANS contact.",
+    examples:[
+      { sentence:"Le livre est ___ la table.", correct:"sur (en contact)", rule:"En contact avec la surface → sur." },
+      { sentence:"L'avion vole ___ des nuages.", correct:"au-dessus (sans contact, plus haut)", rule:"Plus haut, sans contact → au-dessus." },
+      { sentence:"Le vase est ___ l'étagère.", correct:"sur (en contact)", rule:"En contact → sur." },
+      { sentence:"Le tableau est ___ du canapé.", correct:"au-dessus (sans contact, plus haut)", rule:"Plus haut, sans contact → au-dessus." },
+    ] },
+  jeterLancer: {
+    title:'JETER ou LANCER ?', icon:'🗑️',
+    options:['jeter (se débarrasser)',"lancer (envoyer vers quelqu'un)"],
+    tip:"JETER = se débarrasser de quelque chose, ce qui est jeté ne revient pas. LANCER = envoyer quelque chose loin, vers quelqu'un ou quelque chose, avec force ou habileté.",
+    examples:[
+      { sentence:"Je ___ le papier à la poubelle.", correct:"jeter (se débarrasser)", rule:"Se débarrasser → jeter." },
+      { sentence:"Il ___ un ballon à son ami.", correct:"lancer (envoyer vers quelqu'un)", rule:"Envoyer vers quelqu'un → lancer." },
+      { sentence:"Ne ___ pas tes vieux vêtements !", correct:"jeter (se débarrasser)", rule:"Se débarrasser → jeter." },
+      { sentence:"Elle ___ le javelot très loin.", correct:"lancer (envoyer vers quelqu'un)", rule:"Envoyer loin → lancer." },
+    ] },
+  porterApporterEmporter: {
+    title:'PORTER, APPORTER ou EMPORTER ?', icon:'🎒',
+    options:['porter (sur soi)',"apporter (à quelqu'un/un endroit)","emporter (pour l'emmener ailleurs)"],
+    tip:"PORTER = avoir/transporter sur soi. APPORTER = amener quelque chose à quelqu'un ou à un endroit. EMPORTER = prendre quelque chose pour l'emmener ailleurs avec soi.",
+    examples:[
+      { sentence:"Je ___ des lunettes.", correct:"porter (sur soi)", rule:"Sur soi → porter." },
+      { sentence:"J'___ un gâteau à ma mère.", correct:"apporter (à quelqu'un/un endroit)", rule:"Amener à quelqu'un → apporter." },
+      { sentence:"J'___ mon déjeuner au bureau.", correct:"emporter (pour l'emmener ailleurs)", rule:"Prendre pour emmener ailleurs → emporter." },
+      { sentence:"Elle ___ son bébé dans ses bras.", correct:"porter (sur soi)", rule:"Sur soi → porter." },
+      { sentence:"N'oublie pas d'___ ton parapluie.", correct:"emporter (pour l'emmener ailleurs)", rule:"Emmener ailleurs avec soi → emporter." },
+    ] },
+  cestCeSontCetaitCetaient: {
+    title:"C'EST, CE SONT, C'ÉTAIT ou C'ÉTAIENT ?", icon:'🕰️',
+    options:["c'est (présent, sing.)","ce sont (présent, plur.)","c'était (imparfait, sing.)","c'étaient (imparfait, plur.)"],
+    tip:"C'EST = présent singulier. CE SONT = présent pluriel. C'ÉTAIT = imparfait singulier. C'ÉTAIENT = imparfait pluriel.",
+    examples:[
+      { sentence:"___ un chat.", correct:"c'est (présent, sing.)", rule:"Présent, une chose → c'est." },
+      { sentence:"___ des chiens.", correct:"ce sont (présent, plur.)", rule:"Présent, plusieurs choses → ce sont." },
+      { sentence:"___ mon frère quand il était petit.", correct:"c'était (imparfait, sing.)", rule:"Imparfait, une personne → c'était." },
+      { sentence:"___ mes amis à l'école primaire.", correct:"c'étaient (imparfait, plur.)", rule:"Imparfait, plusieurs personnes → c'étaient." },
+    ] },
   peuPeutPeux: {
     title:'PEU, PEUT ou PEUX ?', icon:'🔤',
     options:['peu (petite quantité)','peut (il/elle peut)','peux (je/tu peux)'],
@@ -21393,6 +21647,1322 @@ const PRACTICAL_SHEETS = [
     ],
     note: "À retenir : parler de → dont ; avoir besoin de → dont ; se souvenir de → dont.",
   },
+  // ============ 🏛️ ATELIER FRANÇAIS — compilation Polybelingua (vocabulaire & grammaire) ============
+  {
+    id: 'poly-verbes-etat',
+    section: 'atelier',
+    category: 'Grammaire',
+    icon: '💭',
+    title: "Les verbes d'état",
+    intro: "Les verbes d'état décrivent un état, un sentiment, une opinion ou une situation (plutôt qu'une action).",
+    type: 'table',
+    columns: ['Verbe', 'Exemple'],
+    rows: [
+      ['Être', 'Je suis fatigué.'],
+      ["Avoir l'air", 'Elle a l\'air heureuse.'],
+      ['Paraître', 'Ce film paraît intéressant.'],
+      ["Avoir envie de", "J'ai envie de manger une glace."],
+      ['Préférer', 'Je préfère le thé au café.'],
+      ['Croire', "Je crois qu'il a raison."],
+      ['Savoir', 'Je sais parler français.'],
+      ['Vouloir', 'Je veux réussir mes examens.'],
+      ['Devoir', 'Je dois travailler ce soir.'],
+      ['Aimer', "J'aime passer du temps avec mes amis."],
+    ],
+  },
+  {
+    id: 'poly-syn-filmer',
+    section: 'atelier',
+    category: 'Vocabulaire A1-C2',
+    icon: '🎥',
+    title: 'Synonymes du verbe FILMER (A1 → C2)',
+    intro: "Six verbes pour dire « filmer », du plus simple au plus soutenu.",
+    type: 'table',
+    columns: ['Niveau · Verbe', 'Exemple'],
+    rows: [
+      ['A1 · Enregistrer', "J'enregistre un vidéo de mes vacances."],
+      ['A2 · Tourner', 'Nous tournons un clip pour l\'école.'],
+      ['B1 · Capter', 'La caméra capte chaque détail.'],
+      ['B2 · Réaliser (un tournage)', 'Nous réalisons un court métrage ce week-end.'],
+      ['C1 · Immortaliser', 'Il immortalise les instants les plus précieux.'],
+      ['C2 · Documenter', 'Le documentaire documente la vie dans cette région.'],
+    ],
+  },
+  {
+    id: 'poly-syn-fermer',
+    section: 'atelier',
+    category: 'Vocabulaire A1-C2',
+    icon: '🚪',
+    title: 'Synonymes du verbe FERMER (A1 → C2)',
+    intro: "Six verbes pour dire « fermer », du plus simple au plus soutenu.",
+    type: 'table',
+    columns: ['Niveau · Verbe', 'Exemple'],
+    rows: [
+      ['A1 · Fermer', 'Je ferme la fenêtre.'],
+      ['A2 · Clôturer', 'Le magasin clôture à 19 heures.'],
+      ['B1 · Verrouiller', 'Je verrouille la porte avant de partir.'],
+      ['B2 · Condamner', 'Le bâtiment a été condamné.'],
+      ['C1 · Refermer', "Après le meeting, il a refermé le dossier."],
+      ['C2 · Sceller', "Le tribunal a scellé l'enquête."],
+    ],
+  },
+  {
+    id: 'poly-syn-comprendre',
+    section: 'atelier',
+    category: 'Vocabulaire A1-C2',
+    icon: '🧠',
+    title: 'Synonymes du verbe COMPRENDRE (A1 → C2)',
+    intro: "Six verbes pour dire « comprendre », du plus simple au plus soutenu.",
+    type: 'table',
+    columns: ['Niveau · Verbe', 'Exemple'],
+    rows: [
+      ['A1 · Comprendre', 'Je comprends la consigne.'],
+      ['A2 · Saisir', 'Il saisit vite les idées principales.'],
+      ['B1 · Cerner', 'Il cerne bien les enjeux du problème.'],
+      ["B2 · S'approprier", "Elle s'approprie très vite les nouvelles notions."],
+      ['C1 · Décrypter', 'Il décrypte parfaitement ce texte complexe.'],
+      ["C2 · S'imprégner", "Il s'imprègne totalement de la pensée de l'auteur."],
+    ],
+  },
+  {
+    id: 'poly-syn-aider',
+    section: 'atelier',
+    category: 'Vocabulaire A1-C2',
+    icon: '🤝',
+    title: 'Synonymes du verbe AIDER (A1 → C2)',
+    intro: "Six verbes pour dire « aider », du plus simple au plus soutenu.",
+    type: 'table',
+    columns: ['Niveau · Verbe', 'Exemple'],
+    rows: [
+      ['A1 · Aider', 'J\'aide ma sœur à faire ses devoirs.'],
+      ['A2 · Assister', 'Elle assiste le professeur pendant le cours.'],
+      ['B1 · Soutenir', 'Ses amis le soutiennent dans les moments difficiles.'],
+      ['B2 · Appuyer', 'Le rapport est appuyé par des chiffres solides.'],
+      ['C1 · Favoriser', 'Un bon mentor favorise la réussite de ses élèves.'],
+      ['C2 · Secourir', "Les secouristes ont secouru les victimes de l'accident."],
+    ],
+  },
+  {
+    id: 'poly-syn-donner',
+    section: 'atelier',
+    category: 'Vocabulaire A1-C2',
+    icon: '🎁',
+    title: 'Synonymes du verbe DONNER (A1 → C2)',
+    intro: "Six verbes pour dire « donner », du plus simple au plus soutenu.",
+    type: 'table',
+    columns: ['Niveau · Verbe', 'Exemple'],
+    rows: [
+      ['A1 · Offrir', "J'offre un cadeau à mon ami."],
+      ['A2 · Remettre', 'Je remets le document au professeur.'],
+      ['B1 · Accorder', 'Le médecin lui accorde un arrêt de travail.'],
+      ['B2 · Attribuer', 'On lui attribue la responsabilité du projet.'],
+      ['C1 · Octroyer', 'Le gouvernement octroie des subventions aux entreprises.'],
+      ['C2 · Céder', 'Il cède sa place à une personne âgée.'],
+    ],
+  },
+  {
+    id: 'poly-verbes-nautique',
+    section: 'atelier',
+    category: 'Vocabulaire thématique',
+    icon: '🏄',
+    title: 'Verbes relatifs au sport nautique',
+    intro: "Six verbes pour parler des sports nautiques.",
+    type: 'table',
+    columns: ['Verbe', 'Exemple'],
+    rows: [
+      ['Naviguer', 'Je navigue sur la mer avec mon voilier.'],
+      ['Pagayer', 'Je pagaye en kayak le long de la côte.'],
+      ['Plancher (à voile)', 'Je planche sur les vagues avec ma planche à voile.'],
+      ['Plonger', 'Je plonge pour explorer les fonds marins.'],
+      ['Surfer', 'Je surfe sur les vagues près de la plage.'],
+      ['Kiter', 'Je kite sur l\'eau dans le vent.'],
+    ],
+  },
+  {
+    id: 'poly-verbes-gymnastique',
+    section: 'atelier',
+    category: 'Vocabulaire thématique',
+    icon: '🤸',
+    title: 'Verbes relatifs à la gymnastique',
+    intro: "Six verbes pour parler de la gymnastique.",
+    type: 'table',
+    columns: ['Verbe', 'Exemple'],
+    rows: [
+      ["S'échauffer", "Je m'échauffe avant chaque entraînement."],
+      ['Sauter', 'Je saute avec puissance et légèreté.'],
+      ['Tourner', 'Je tourne sur moi-même avec contrôle.'],
+      ["S'équilibrer", "Je m'équilibre sur la poutre avec concentration."],
+      ['Faire une roulade', 'Je fais une roulade en avant sur le tapis.'],
+      ['Attraper', "J'attrape l'agrès avec précision."],
+    ],
+  },
+  {
+    id: 'poly-verbes-patisserie',
+    section: 'atelier',
+    category: 'Vocabulaire thématique',
+    icon: '🧁',
+    title: 'Verbes relatifs à la pâtisserie',
+    intro: "Six verbes pour parler de la pâtisserie.",
+    type: 'table',
+    columns: ['Verbe', 'Exemple'],
+    rows: [
+      ['Mélanger', 'Je mélange la farine, le sucre et les œufs.'],
+      ['Fouetter', "Je fouette les œufs jusqu'à ce qu'ils moussent."],
+      ['Incorporer', 'J\'incorpore délicatement la farine à la préparation.'],
+      ['Cuire', 'Je cuis le gâteau au four pendant 30 minutes.'],
+      ['Décorer', 'Je décore le gâteau avec de la crème et des fruits.'],
+      ['Laisser refroidir', 'Je laisse refroidir le gâteau avant de le servir.'],
+    ],
+  },
+  {
+    id: 'poly-il-ils-elle-elles',
+    section: 'atelier',
+    category: 'Grammaire',
+    icon: '👤',
+    title: 'IL/ILS et ELLE/ELLES',
+    intro: "Une seule personne, ou plusieurs : quatre pronoms à bien distinguer.",
+    type: 'rule',
+    recoKey: 'ilIlsElleElles',
+    blocks: [
+      { heading: 'IL (singulier)', text: "Une seule personne (un garçon ou un homme).", examples: ['Il joue au football.'] },
+      { heading: 'ILS (pluriel)', text: "Plusieurs personnes.", examples: ['Ils jouent au football.'] },
+      { heading: 'ELLE (singulier)', text: "Une seule personne (une fille ou une femme).", examples: ['Elle lit un livre.'] },
+      { heading: 'ELLES (pluriel)', text: "Plusieurs personnes (filles ou femmes).", examples: ['Elles lisent des livres.'] },
+    ],
+    note: "Il/Elle = une seule personne · Ils/Elles = plusieurs personnes.",
+  },
+  {
+    id: 'poly-je-nous',
+    section: 'atelier',
+    category: 'Grammaire',
+    icon: '🙋',
+    title: 'JE vs NOUS',
+    intro: "Une astuce simple pour choisir entre le singulier et le pluriel.",
+    type: 'rule',
+    blocks: [
+      { heading: 'JE (singulier)', text: "Une seule personne, moi.", examples: ["Je m'appelle Lucas.", "J'étudie le français chaque jour."] },
+      { heading: 'NOUS (pluriel)', text: "Plusieurs personnes.", examples: ['Nous sommes amis.', 'Nous étudions le français ensemble.'] },
+    ],
+    note: "Astuce : remplace « je » par « nous ». Si la phrase a toujours du sens avec plusieurs personnes, utilise « nous » !",
+  },
+  {
+    id: 'poly-syn-communiquer',
+    section: 'atelier',
+    category: 'Vocabulaire',
+    icon: '💬',
+    title: 'Synonymes de COMMUNIQUER',
+    intro: "Six verbes pour varier autour du thème de la communication.",
+    type: 'table',
+    columns: ['Verbe', 'Exemple'],
+    rows: [
+      ['Échanger', 'Nous échangeons nos idées chaque jour.'],
+      ['Partager', 'Elle partage ses photos avec ses amis.'],
+      ['Transmettre', 'Le professeur transmet son savoir avec passion.'],
+      ['Informer', 'Les journalistes informent le public chaque jour.'],
+      ['Dialoguer', 'Ils dialoguent pour trouver des solutions ensemble.'],
+      ['Se faire comprendre', 'Il parle lentement pour se faire comprendre.'],
+    ],
+  },
+  {
+    id: 'poly-promener-balader',
+    section: 'atelier',
+    category: 'Vocabulaire',
+    icon: '🚶',
+    title: 'SE PROMENER vs SE BALADER',
+    intro: "Deux verbes proches, une nuance de registre et d'ampleur.",
+    type: 'rule',
+    blocks: [
+      { heading: 'SE PROMENER', text: "Se déplacer à pied, tranquillement, sans but précis, pour le plaisir. Idée clé : prendre le temps, apprécier, être dans l'instant.", examples: ['Je me promène dans le parc tous les dimanches.', "Nous nous sommes promenés le long de la rivière."] },
+      { heading: 'SE BALADER', text: "Se déplacer à pied, souvent sans but précis, dans un lieu plus large ou varié. Plus informel. Idée clé : aller ici et là, explorer.", examples: ["On s'est baladés dans les rues de ce village.", "Je me suis baladé en forêt pendant deux heures."] },
+    ],
+  },
+  {
+    id: 'poly-lever-reveiller',
+    section: 'atelier',
+    category: 'Grammaire',
+    icon: '⏰',
+    title: 'SE LEVER vs SE RÉVEILLER',
+    intro: "Une action volontaire, ou un changement d'état subi.",
+    type: 'rule',
+    recoKey: 'seLeverSeReveiller',
+    blocks: [
+      { heading: 'SE LEVER', text: "Quitter son lit pour se mettre debout. Action volontaire.", examples: ['Je me lève à 7h tous les matins.'] },
+      { heading: 'SE RÉVEILLER', text: "Passer de l'état de sommeil à l'état d'éveil. Changement d'état, souvent sans le décider.", examples: ["Je me suis réveillé tout seul à 6h."] },
+    ],
+    note: "On se lève volontairement / On se réveille, souvent sans le vouloir.",
+  },
+  {
+    id: 'poly-si-oui',
+    section: 'atelier',
+    category: 'Grammaire',
+    icon: '✅',
+    title: 'SI vs OUI',
+    intro: "Introduire une condition, ou affirmer positivement.",
+    type: 'rule',
+    recoKey: 'siOui',
+    blocks: [
+      { heading: 'SI', text: "Sert à introduire une condition ou une hypothèse.", examples: ['Si tu étudies, tu réussiras.', 'Si demain il pleut, le match sera annulé.'] },
+      { heading: 'OUI', text: "Sert à affirmer, accepter ou répondre positivement.", examples: ['— Veux-tu du thé ? — Oui, merci !'] },
+    ],
+  },
+  {
+    id: 'poly-connecteurs-base',
+    section: 'atelier',
+    category: 'Grammaire',
+    icon: '🔗',
+    title: '10 connecteurs logiques (résumé de base)',
+    intro: "Les connecteurs les plus courants pour lier des idées.",
+    type: 'table',
+    columns: ['Connecteur', 'Exemple'],
+    rows: [
+      ['Et', "J'aime le café et le thé."],
+      ['Mais', 'Il est intelligent, mais très timide.'],
+      ['Donc', 'Il étudie beaucoup, donc il réussit.'],
+      ['Car', 'Je reste à la maison, car je suis malade.'],
+      ['Cependant', 'Il voulait y aller, cependant il a changé d\'avis.'],
+      ['Parce que', "Elle est en retard parce qu'il y a eu un embouteillage."],
+      ['Alors', 'Il avait faim, alors il a mangé.'],
+      ['En effet', 'Ce film est intéressant. En effet, il a reçu plusieurs prix.'],
+      ['Si', 'Si tu travailles bien, tu auras de bons résultats.'],
+      ['Par conséquent', 'Il a plu toute la nuit ; par conséquent, le match est annulé.'],
+    ],
+  },
+  {
+    id: 'poly-texte-chien',
+    section: 'atelier',
+    category: 'Lecture',
+    icon: '🐕',
+    title: 'Texte de lecture — Mon animal préféré : le chien',
+    intro: "Un texte simple avec 10 questions de compréhension pour t'entraîner.",
+    type: 'rule',
+    blocks: [
+      { heading: 'Texte', text: "Mon animal préféré est le chien. Le chien est un animal fidèle et gentil. Il vit avec les humains depuis très longtemps. Il existe beaucoup de races de chiens : le labrador, le berger allemand, le bulldog, le caniche et bien d'autres. Les chiens sont intelligents. Ils apprennent vite et comprennent ce que les humains veulent. J'aime jouer avec mon chien. Nous allons nous promener ensemble dans le parc. Le chien a besoin d'attention, de nourriture, d'eau et d'exercice tous les jours. Prendre soin d'un chien, c'est aussi avoir des responsabilités. Pour moi, le chien est le meilleur ami de l'homme." },
+      { heading: 'Questions (réponses en gras)', text: "1. Quel est l'animal préféré ? a) Le chat b) Le chien ✓ c) Le lapin — 2. Comment est le chien ? a) Méchant b) Fidèle et gentil ✓ c) Petit — 3. Depuis combien de temps vit-il avec les humains ? Depuis longtemps ✓ — 4. Que fait-on avec son chien au parc ? On joue et on se promène ✓ — 5. De quoi a-t-il besoin chaque jour ? D'attention, nourriture, eau et exercice ✓ — 6. Pourquoi apprennent-ils vite ? Parce qu'ils sont intelligents ✓ — 7. Races citées ? Labrador, berger allemand, caniche ✓ — 8. Avoir un chien, c'est aussi... Avoir des responsabilités ✓ — 9. Que comprend le chien ? Ce que les humains veulent ✓ — 10. Comment l'auteur le voit-il ? Comme le meilleur ami de l'homme ✓" },
+    ],
+  },
+  {
+    id: 'poly-syn-demander',
+    section: 'atelier',
+    category: 'Vocabulaire A1-C2',
+    icon: '❓',
+    title: 'Synonymes du verbe DEMANDER (A1 → C2)',
+    intro: "Six verbes pour dire « demander », du plus simple au plus soutenu.",
+    type: 'table',
+    columns: ['Niveau · Verbe', 'Exemple'],
+    rows: [
+      ['A1 · Poser une question', 'Je pose une question au professeur.'],
+      ['A2 · Demander', 'Je demande de l\'aide à mon voisin.'],
+      ['B1 · Solliciter', 'Je sollicite une bourse pour mes études.'],
+      ['B2 · Requérir', 'L\'entreprise requiert des documents supplémentaires.'],
+      ['C1 · Enquérir', 'Le journaliste enquête et enquérit sur les faits.'],
+      ['C2 · Supplier à', 'Il supplie à ses besoins en demandant de l\'aide.'],
+    ],
+  },
+  {
+    id: 'poly-syn-copier',
+    section: 'atelier',
+    category: 'Vocabulaire A1-C2',
+    icon: '📋',
+    title: 'Synonymes du verbe COPIER (A1 → C2)',
+    intro: "Six verbes pour dire « copier », du plus simple au plus soutenu.",
+    type: 'table',
+    columns: ['Niveau · Verbe', 'Exemple'],
+    rows: [
+      ['A1 · Reproduire', 'Je reproduis la phrase sur mon cahier.'],
+      ['A2 · Dupliquer', 'Je duplique ce fichier sur la clé USB.'],
+      ['B1 · Imiter', 'Il imite le style de cet artiste.'],
+      ['B2 · Calquer', 'Elle calque le dessin à partir du plan.'],
+      ['C1 · Emprunter', "L'auteur emprunte des idées à plusieurs philosophes."],
+      ['C2 · Plagier', 'Le plagiat est une faute grave.'],
+    ],
+  },
+  {
+    id: 'poly-syn-faire',
+    section: 'atelier',
+    category: 'Vocabulaire A1-C2',
+    icon: '🛠️',
+    title: 'Synonymes du verbe FAIRE (A1 → C2)',
+    intro: "Six verbes pour dire « faire », du plus simple au plus soutenu.",
+    type: 'table',
+    columns: ['Niveau · Verbe', 'Exemple'],
+    rows: [
+      ['A1 · Réaliser', 'Je réalise un gâteau.'],
+      ['A2 · Effectuer', "J'effectue mes devoirs."],
+      ['B1 · Accomplir', 'Il accomplit sa mission.'],
+      ['B2 · Concevoir / Créer', 'Ils conçoivent un nouveau produit.'],
+      ['C1 · Entreprendre', 'Elle entreprend de grands projets.'],
+      ['C2 · Exécuter', 'L\'équipe exécute le plan à la perfection.'],
+    ],
+  },
+  {
+    id: 'poly-syn-voir',
+    section: 'atelier',
+    category: 'Vocabulaire A1-C2',
+    icon: '👀',
+    title: 'Synonymes du verbe VOIR (A1 → C2)',
+    intro: "Six verbes pour dire « voir », du plus simple au plus soutenu.",
+    type: 'table',
+    columns: ['Niveau · Verbe', 'Exemple'],
+    rows: [
+      ['A1 · Regarder', 'Je regarde un film.'],
+      ['A2 · Observer', "J'observe les oiseaux."],
+      ['B1 · Apercevoir', "J'aperçois un bateau au loin."],
+      ['B2 · Entrevoir', "J'entrevois une solution au problème."],
+      ['C1 · Constater', "Je constate une amélioration."],
+      ['C2 · Percevoir', "Je perçois l'atmosphère changée dans la pièce."],
+    ],
+  },
+  {
+    id: 'poly-syn-ouvrir',
+    section: 'atelier',
+    category: 'Vocabulaire A1-C2',
+    icon: '🔓',
+    title: 'Synonymes du verbe OUVRIR (A1 → C2)',
+    intro: "Six verbes pour dire « ouvrir », du plus simple au plus soutenu.",
+    type: 'table',
+    columns: ['Niveau · Verbe', 'Exemple'],
+    rows: [
+      ['A1 · Ouvrir', "J'ouvre la fenêtre."],
+      ['A2 · Déboîter', 'Je déboîte la bouteille.'],
+      ['B1 · Déverrouiller', 'Je déverrouille la porte.'],
+      ['B2 · Déplier', "J'ouvre la carte pour voir le plan."],
+      ['C1 · Entrouvrir', 'Il entrouvre la porte et regarde.'],
+      ['C2 · Déclencher / Initier', 'La réunion ouvre la voie à de nouvelles idées.'],
+    ],
+  },
+  {
+    id: 'poly-syn-marcher',
+    section: 'atelier',
+    category: 'Vocabulaire A1-C2',
+    icon: '🚶',
+    title: 'Synonymes du verbe MARCHER (A1 → C2)',
+    intro: "Six verbes pour dire « marcher », du plus simple au plus soutenu.",
+    type: 'table',
+    columns: ['Niveau · Verbe', 'Exemple'],
+    rows: [
+      ['A1 · Marcher', 'Je marche tous les jours.'],
+      ['A2 · Se promener', 'Nous nous promenons dans le parc.'],
+      ['B1 · Déambuler', 'Il déambule dans les rues de la ville.'],
+      ['B2 · Filer à pied', 'Il a filé à pied pour ne pas rater son bus.'],
+      ['C1 · Traverser à pied', 'Nous avons traversé la ville à pied.'],
+      ['C2 · Fouler le sol', 'Il foule le sol avec confiance.'],
+    ],
+  },
+  {
+    id: 'poly-syn-avoir',
+    section: 'atelier',
+    category: 'Vocabulaire A1-C2',
+    icon: '🎒',
+    title: 'Synonymes du verbe AVOIR (A1 → C2)',
+    intro: "Six verbes pour dire « avoir », du plus simple au plus soutenu.",
+    type: 'table',
+    columns: ['Niveau · Verbe', 'Exemple'],
+    rows: [
+      ['A1 · Avoir', "J'ai un chat."],
+      ['A2 · Posséder', 'Elle possède une voiture.'],
+      ['B1 · Détenir', 'Il détient un brevet.'],
+      ['B2 · Disposer de', "Nous disposons d'une salle de réunion."],
+      ['C1 · Jouir de', "Ils jouissent d'une excellente réputation."],
+      ['C2 · Être pourvu de', 'Ce document est pourvu d\'informations précieuses.'],
+    ],
+  },
+  {
+    id: 'poly-syn-prendre',
+    section: 'atelier',
+    category: 'Vocabulaire A1-C2',
+    icon: '✋',
+    title: 'Synonymes du verbe PRENDRE (A1 → C2)',
+    intro: "Six verbes pour dire « prendre », du plus simple au plus soutenu.",
+    type: 'table',
+    columns: ['Niveau · Verbe', 'Exemple'],
+    rows: [
+      ['A1 · Prendre', 'Je prends mon livre.'],
+      ['A2 · Choisir', 'Elle choisit un gâteau.'],
+      ['B1 · Prendre possession de', 'Il prend possession de la maison.'],
+      ['B2 · Emporter', "N'oublie pas d'emporter ton parapluie."],
+      ['C1 · Assumer', 'Il a assumé la direction du projet.'],
+      ["C2 · S'emparer de", "Elle s'est emparée de l'opportunité."],
+    ],
+  },
+  {
+    id: 'poly-syn-apprendre',
+    section: 'atelier',
+    category: 'Vocabulaire A1-C2',
+    icon: '📚',
+    title: 'Synonymes du verbe APPRENDRE (A1 → C2)',
+    intro: "Six verbes pour dire « apprendre », du plus simple au plus soutenu.",
+    type: 'table',
+    columns: ['Niveau · Verbe', 'Exemple'],
+    rows: [
+      ['A1 · Apprendre', "J'apprends le français tous les jours."],
+      ['A2 · Étudier', 'Elle étudie ses leçons chaque soir.'],
+      ['B1 · Acquérir', "On acquiert de l'expérience avec le temps."],
+      ['B2 · Maîtriser', "Il a maîtrisé l'anglais après plusieurs années."],
+      ['C1 · Approfondir', 'Elle approfondit ses connaissances en sciences.'],
+      ["C2 · S'instruire", 'Il s\'instruit chaque jour par lecture et curiosité.'],
+    ],
+  },
+  {
+    id: 'poly-syn-travailler',
+    section: 'atelier',
+    category: 'Vocabulaire A1-C2',
+    icon: '💼',
+    title: 'Synonymes du verbe TRAVAILLER (A1 → C2)',
+    intro: "Six verbes pour dire « travailler », du plus simple au plus soutenu.",
+    type: 'table',
+    columns: ['Niveau · Verbe', 'Exemple'],
+    rows: [
+      ['A1 · Travailler', 'Je travaille dans un magasin.'],
+      ['A2 · Exercer', "Elle exerce le métier d'infirmière."],
+      ['B1 · Œuvrer', "Il œuvre pour la protection de l'environnement."],
+      ['B2 · Collaborer', 'Nous collaborons sur ce nouveau projet.'],
+      ["C1 · S'investir", "Elle s'investit pleinement dans son entreprise."],
+      ['C2 · Accomplir', 'Il a accompli un travail remarquable.'],
+    ],
+  },
+  {
+    id: 'poly-syn-lire',
+    section: 'atelier',
+    category: 'Vocabulaire A1-C2',
+    icon: '📖',
+    title: 'Synonymes du verbe LIRE (A1 → C2)',
+    intro: "Six verbes pour dire « lire », du plus simple au plus soutenu.",
+    type: 'table',
+    columns: ['Niveau · Verbe', 'Exemple'],
+    rows: [
+      ['A1 · Lire', 'Je lis un livre avant de dormir.'],
+      ['A2 · Déchiffrer', 'Il déchiffre le texte lentement.'],
+      ['B1 · Parcourir', 'Je parcours le journal chaque matin.'],
+      ['B2 · Étudier', 'Elle étudie le chapitre plusieurs fois.'],
+      ['C1 · Analyser (un texte)', 'Il analyse le roman avec beaucoup d\'attention.'],
+      ['C2 · Interpréter', "Elle interprète le poème en tenant compte du contexte historique."],
+    ],
+  },
+  {
+    id: 'poly-syn-ecrire',
+    section: 'atelier',
+    category: 'Vocabulaire A1-C2',
+    icon: '✍️',
+    title: 'Synonymes du verbe ÉCRIRE (A1 → C2)',
+    intro: "Six verbes pour dire « écrire », du plus simple au plus soutenu.",
+    type: 'table',
+    columns: ['Niveau · Verbe', 'Exemple'],
+    rows: [
+      ['A1 · Écrire', "J'écris une lettre à ma grand-mère."],
+      ['A2 · Rédiger', 'Il rédige un compte rendu de la réunion.'],
+      ['B1 · Composer', 'Elle compose un poème pour le concours.'],
+      ['B2 · Rédiger (un texte)', 'Il rédige un article pour le magazine.'],
+      ['C1 · Consigner', 'Elle consigne ses idées dans un carnet.'],
+      ['C2 · Coucher sur le papier', 'Il couche sur le papier ses souvenirs d\'enfance.'],
+    ],
+  },
+  {
+    id: 'poly-syn-parler',
+    section: 'atelier',
+    category: 'Vocabulaire A1-C2',
+    icon: '🗣️',
+    title: 'Synonymes du verbe PARLER (A1 → C2)',
+    intro: "Six verbes pour dire « parler », du plus simple au plus soutenu.",
+    type: 'table',
+    columns: ['Niveau · Verbe', 'Exemple'],
+    rows: [
+      ['A1 · Dire', 'Il dit la vérité.'],
+      ['A2 · Parler', 'Nous parlons français.'],
+      ["B1 · S'exprimer", "Elle s'exprime très bien en public."],
+      ['B2 · Discuter', 'Ils discutent du projet.'],
+      ['C1 · Évoquer', 'Il a évoqué ce sujet sans entrer dans les détails.'],
+      ["C2 · S'exprimer avec éloquence", "Il s'exprime avec éloquence et captive son auditoire."],
+    ],
+  },
+  {
+    id: 'poly-cest-cetait',
+    section: 'atelier',
+    category: 'Grammaire',
+    icon: '🕰️',
+    title: '« C\'est, ce sont » vs « C\'était, c\'étaient »',
+    intro: "Présent ou imparfait, singulier ou pluriel : quatre formes à distinguer.",
+    type: 'rule',
+    recoKey: 'cestCeSontCetaitCetaient',
+    blocks: [
+      { heading: "C'EST", text: "Présent, singulier.", examples: ['C\'est un chat.'] },
+      { heading: 'CE SONT', text: "Présent, pluriel.", examples: ['Ce sont des chiens.'] },
+      { heading: "C'ÉTAIT", text: "Imparfait, singulier.", examples: ['C\'était mon frère quand il était petit.'] },
+      { heading: "C'ÉTAIENT", text: "Imparfait, pluriel.", examples: ["C'étaient mes amis à l'école primaire."] },
+    ],
+  },
+  {
+    id: 'poly-fatigue',
+    section: 'atelier',
+    category: 'Expressions par niveau',
+    icon: '😴',
+    title: 'Expressions utiles pour exprimer la fatigue',
+    intro: "Du plus simple au plus soutenu, par niveau A1 à B2.",
+    type: 'rule',
+    blocks: [
+      { heading: 'A1', text: "", examples: ['Je suis fatigué(e).', 'J\'ai sommeil.', 'Je suis épuisé(e).'] },
+      { heading: 'A2', text: "", examples: ["Je me sens vraiment épuisé(e) aujourd'hui.", "Je suis à bout de forces.", "Je suis crevé(e)."] },
+      { heading: 'B1', text: "", examples: ["Je suis à bout.", "Je me sens vidé(e).", "Je traîne la patte depuis ce matin."] },
+      { heading: 'B2', text: "", examples: ["Je suis à bout de nerfs et de forces.", "Ma batterie est à plat.", "Je mérite vraiment du repos."] },
+    ],
+    note: "Conseils pour combattre la fatigue : dormez suffisamment, buvez de l'eau régulièrement, faites du sport, mangez équilibré, gérez votre stress, faites des pauses écrans.",
+  },
+  {
+    id: 'poly-futur-b1b2',
+    section: 'atelier',
+    category: 'Expression orale',
+    icon: '🔮',
+    title: 'Parler de son futur — Niveaux B1 et B2',
+    intro: "Des expressions pour parler de projets, d'ambitions et de plans à long terme.",
+    type: 'rule',
+    blocks: [
+      { heading: 'B1', text: "", examples: ["Projets : Je compte changer de travail dans les deux prochaines années.", "Avenir proche : La semaine prochaine, je vais assister à un séminaire."] },
+      { heading: 'B2', text: "", examples: ["Ambitions : Mon ambition est d'avoir un impact positif dans mon domaine.", "Plans à long terme : À long terme, je me vois vivre dans un pays où la qualité de vie est élevée."] },
+    ],
+    note: "Expressions utiles : Je pense que... / À mon avis... / Il est probable que... / J'ai l'intention de... / Mon but est de... / Je me vois...",
+  },
+  {
+    id: 'poly-expressions-a1a2',
+    section: 'atelier',
+    category: 'Expression orale',
+    icon: '💬',
+    title: 'Expressions courantes pour les niveaux A1 et A2',
+    intro: "Le vocabulaire de survie pour les débutants.",
+    type: 'rule',
+    blocks: [
+      { heading: 'A1', text: "", examples: ['Bonjour !', 'Comment ça va ?', "Je ne comprends pas.", "Pouvez-vous répéter ?", 'Merci beaucoup !', 'Au revoir !'] },
+      { heading: 'A2', text: "", examples: ['Je pense que...', 'À mon avis...', "Je suis d'accord.", 'Je ne suis pas d\'accord.', "C'est une bonne idée !", 'À bientôt !'] },
+    ],
+  },
+  {
+    id: 'poly-syn-manger',
+    section: 'atelier',
+    category: 'Vocabulaire A1-C2',
+    icon: '🍽️',
+    title: 'Synonymes du verbe MANGER (A1 → C2)',
+    intro: "Six verbes pour dire « manger », du plus simple au plus soutenu.",
+    type: 'table',
+    columns: ['Niveau · Verbe', 'Exemple'],
+    rows: [
+      ['A1 · Prendre un repas', 'Je prends le déjeuner à 7 heures.'],
+      ['A2 · Déjeuner', 'Nous déjeunons au restaurant.'],
+      ['B1 · Se nourrir', 'Il est important de bien se nourrir.'],
+      ['B2 · Sustenter', 'Cette soupe sustente les voyageurs fatigués.'],
+      ['C1 · Consommer', 'Il a consommé tout son dessert.'],
+      ['C2 · Dévorer', 'Il a dévoré son livre et son sandwich !'],
+    ],
+  },
+  {
+    id: 'poly-syn-habiter',
+    section: 'atelier',
+    category: 'Vocabulaire A1-C2',
+    icon: '🏠',
+    title: 'Synonymes du verbe HABITER (A1 → C2)',
+    intro: "Six verbes pour dire « habiter », du plus simple au plus soutenu.",
+    type: 'table',
+    columns: ['Niveau · Verbe', 'Exemple'],
+    rows: [
+      ['A1 · Vivre dans', 'Je vis dans une maison.'],
+      ['A2 · Résider', 'Il réside à Lyon.'],
+      ['B1 · Se loger', 'Nous nous logeons dans un bel appartement.'],
+      ['B2 · Occuper un lieu', 'Ils occupent une grande maison à la campagne.'],
+      ['C1 · Être établi dans', 'Il est établi dans cette région depuis des années.'],
+      ["C2 · S'implanter", "L'entreprise s'est implantée dans plusieurs pays."],
+    ],
+  },
+  {
+    id: 'poly-lequel-laquelle',
+    section: 'atelier',
+    category: 'Grammaire',
+    icon: '❓',
+    title: 'LEQUEL vs LAQUELLE',
+    intro: "Masculin ou féminin singulier : un pronom pour faire un choix.",
+    type: 'rule',
+    recoKey: 'lequelLaquelle',
+    blocks: [
+      { heading: 'LEQUEL (masculin singulier)', text: "", examples: ['Lequel préfères-tu ?'] },
+      { heading: 'LAQUELLE (féminin singulier)', text: "", examples: ['Laquelle est ta voiture ?'] },
+    ],
+  },
+  {
+    id: 'poly-cest-qui-cest-que',
+    section: 'atelier',
+    category: 'Grammaire',
+    icon: '🔗',
+    title: '« C\'est... qui... » vs « C\'est... que... »',
+    intro: "Mettre en valeur le sujet, ou l'objet d'une phrase.",
+    type: 'rule',
+    recoKey: 'cestQuiCestQue',
+    blocks: [
+      { heading: "C'EST... QUI... (sujet)", text: "", examples: ["C'est Julie qui chante."] },
+      { heading: "C'EST... QUE... (objet/information)", text: "", examples: ["C'est un livre que je lis."] },
+    ],
+  },
+  {
+    id: 'poly-sports-disciplines',
+    section: 'atelier',
+    category: 'Vocabulaire thématique',
+    icon: '⚽',
+    title: 'Verbes relatifs aux sports (par discipline)',
+    intro: "Un résumé des 6 verbes-clés pour chaque discipline sportive.",
+    type: 'table',
+    columns: ['Discipline', 'Les 6 verbes'],
+    rows: [
+      ['Cyclisme', 'Pédaler, Grimper, Descendre, Tourner, Freiner, Dépasser'],
+      ['Hockey', 'Patiner, Passer, Tirer, Contrôler, Défendre, Marquer'],
+      ['Tennis de table', 'Servir, Renvoyer, Smasher, Lifter, Placer, Bloquer'],
+      ['Patinage artistique', 'Glisser, Tourner, Sauter, Pirouetter, Poser, Exprimer'],
+      ['Rallye', 'Démarrer, Accélérer, Freiner, Tourner, Passer, Terminer'],
+      ['Course à pied', 'Courir, Accélérer, Dépasser, Tenir, Sprinter, Récupérer'],
+      ['Cricket', 'Battre, Lancer, Attraper, Faire courir, Éliminer, Marquer'],
+      ['Badminton', 'Servir, Dégager, Smasher, Amortir, Placer, Défendre'],
+      ['Tennis', 'Servir, Retourner, Frapper, Voléer, Lobber, Smasher'],
+      ['Rugby', 'Passer, Courir, Plaquer, Franchir, Soutenir, Marquer'],
+      ['Football', 'Passer, Dribbler, Tirer, Défendre, Intercepter, Marquer'],
+      ['Gymnastique', "S'échauffer, Sauter, Tourner, S'équilibrer, Faire une roulade, Attraper"],
+    ],
+  },
+  {
+    id: 'poly-texte-docteur',
+    section: 'atelier',
+    category: 'Lecture',
+    icon: '👨‍⚕️',
+    title: 'Texte de lecture — Le docteur',
+    intro: "Un texte simple avec 10 questions de compréhension.",
+    type: 'rule',
+    blocks: [
+      { heading: 'Texte', text: "Le docteur est un médecin. Il aide les personnes malades. Il travaille à l'hôpital ou dans son cabinet. Le docteur porte une blouse blanche. Il écoute ses patients et leur donne des conseils pour être en bonne santé. Il est gentil, patient et très attentif. Il veut toujours aider les autres." },
+      { heading: 'Questions (réponses en gras)', text: "1. Métier ? Docteur ✓ — 2. Où travaille-t-il ? À l'hôpital ou dans son cabinet ✓ — 3. Que porte-t-il ? Une blouse blanche ✓ — 4. Que fait-il ? Il aide les personnes malades ✓ — 5. Comment est-il ? Gentil et patient ✓ — 6. Que donne-t-il aux patients ? Des conseils pour être en bonne santé ✓ — 7. Où le trouve-t-on ? À l'hôpital ou dans son cabinet ✓ — 8. Qui veut-il aider ? Les personnes malades ✓ — 9. Que doit-il faire avec ses patients ? Les écouter ✓ — 10. Quel est son but ? Aider les autres ✓" },
+    ],
+  },
+  {
+    id: 'poly-verbes-contextes',
+    section: 'atelier',
+    category: 'Vocabulaire thématique',
+    icon: '🎭',
+    title: 'Verbes de contexte (concert, dépannage, shopping)',
+    intro: "Trois situations courantes, avec leurs verbes-clés.",
+    type: 'rule',
+    blocks: [
+      { heading: 'Salle de concert', text: "", examples: ['Entrer', "S'installer", 'Écouter', 'Applaudir', 'Interpréter', 'Quitter'] },
+      { heading: 'Dépannage', text: "", examples: ['Diagnostiquer', 'Vérifier', 'Réparer', 'Remplacer', 'Régler', 'Tester'] },
+      { heading: 'Shopping', text: "", examples: ['Choisir', 'Essayer', 'Acheter', 'Payer', 'Découvrir', 'Emporter'] },
+    ],
+  },
+  {
+    id: 'poly-tu-vous',
+    section: 'atelier',
+    category: 'Grammaire',
+    icon: '🗣️',
+    title: 'TU vs VOUS',
+    intro: "Singulier informel, ou pluriel/poli : une distinction essentielle.",
+    type: 'rule',
+    recoKey: 'tuVousDistinction',
+    blocks: [
+      { heading: 'TU', text: "Singulier, informel : pour une seule personne que tu connais bien.", examples: ['Tu es mon ami.'] },
+      { heading: 'VOUS', text: "Pluriel, formel/poli : pour plusieurs personnes ou une personne à qui l'on montre du respect.", examples: ['Vous êtes professeur.'] },
+    ],
+    note: "Astuce : en général, commencez par « vous » avec une personne que vous ne connaissez pas.",
+  },
+  {
+    id: 'poly-syn-diriger',
+    section: 'atelier',
+    category: 'Vocabulaire',
+    icon: '👑',
+    title: '6 synonymes du verbe DIRIGER',
+    intro: "Pour varier autour du thème du commandement et de la gestion.",
+    type: 'table',
+    columns: ['Verbe', 'Exemple'],
+    rows: [
+      ['Commander', 'Le capitaine commande son équipe avec assurance.'],
+      ['Conduire', 'Elle conduit le projet vers le succès.'],
+      ['Guider', 'Le guide nous dirige sur le bon chemin.'],
+      ['Orchestrer', "Le chef d'orchestre orchestre chaque détail du concert."],
+      ['Piloter', 'Il pilote l\'entreprise avec stratégie et rigueur.'],
+      ['Superviser', 'Elle supervise les travaux pour assurer la qualité.'],
+    ],
+  },
+  {
+    id: 'poly-syn-essayer',
+    section: 'atelier',
+    category: 'Vocabulaire',
+    icon: '🎯',
+    title: '6 synonymes du verbe ESSAYER',
+    intro: "Pour varier autour du thème de la tentative.",
+    type: 'table',
+    columns: ['Verbe', 'Exemple'],
+    rows: [
+      ['Tenter', 'Il tente d\'atteindre le centre de la cible.'],
+      ['Se lancer', 'Elle se lance dans l\'escalade pour la première fois.'],
+      ['Faire un essai', 'Le scientifique fait un essai pour vérifier son hypothèse.'],
+      ['Tâcher de', 'Elle tâche de comprendre ce chapitre difficile.'],
+      ["S'employer à", 'Il s\'emploie à jouer du piano chaque jour.'],
+      ['Se risquer à', 'Elle se risque à parler devant un grand public.'],
+    ],
+  },
+  {
+    id: 'poly-syn-regarder',
+    section: 'atelier',
+    category: 'Vocabulaire',
+    icon: '👁️',
+    title: '8 synonymes de REGARDER',
+    intro: "Huit verbes pour ne plus toujours dire « regarder ».",
+    type: 'table',
+    columns: ['Verbe', 'Exemple'],
+    rows: [
+      ['Observer', "J'observe les oiseaux dans le jardin."],
+      ['Fixer', 'Il fixe la flamme de la bougie.'],
+      ['Admirer', 'Elle admire le paysage époustouflant.'],
+      ['Surveiller', 'Il surveille les enfants qui jouent.'],
+      ['Apercevoir', "J'aperçois un voilier au loin."],
+      ['Contempler', 'Il contemple le coucher de soleil.'],
+      ['Examiner', 'Elle examine la plante à la loupe.'],
+      ['Considérer', 'Il considère toutes les options.'],
+    ],
+  },
+  {
+    id: 'poly-faux-amis',
+    section: 'atelier',
+    category: 'Vocabulaire',
+    icon: '🎭',
+    title: 'Faux amis en français et en anglais',
+    intro: "Des mots qui se ressemblent mais qui n'ont pas le même sens en français et en anglais.",
+    type: 'rule',
+    blocks: [
+      { heading: 'Les faux amis courants', text: "", examples: [
+        'CONFIDENT ≠ CONFIDENT : FR = personne de confiance / EN = sûr de soi.',
+        'ACTUELLEMENT ≠ ACTUALLY : FR = en ce moment / EN = en fait.',
+        'ASSISTER ≠ TO ASSIST : FR = être présent / EN = aider.',
+        'DEMANDER ≠ TO DEMAND : FR = poser une question / EN = exiger.',
+        'ACTUEL ≠ ACTUAL : FR = présent / EN = réel.',
+        'LIBRAIRIE ≠ LIBRARY : FR = magasin de livres / EN = bibliothèque.',
+        'PRÉTENDRE ≠ PRETEND : FR = affirmer / EN = faire semblant.',
+        'DÉBAT ≠ DEBATE : FR = discussion / EN = débat formel argumenté.',
+        'AGENDA ≠ AGENDA : FR = carnet de rendez-vous / EN = ordre du jour.',
+        'SENSIBLE ≠ SENSIBLE : FR = émotif / EN = raisonnable.',
+      ] },
+    ],
+    note: "Faites attention au contexte ! Un faux ami peut changer tout le sens de votre phrase.",
+  },
+  {
+    id: 'poly-si-condition-affirmation',
+    section: 'atelier',
+    category: 'Grammaire',
+    icon: '↔️',
+    title: 'SI CONDITION vs SI AFFIRMATION',
+    intro: "Une hypothèse, ou une réponse positive à une question négative.",
+    type: 'rule',
+    recoKey: 'siConditionAffirmation',
+    blocks: [
+      { heading: 'SI CONDITION', text: "Exprime une condition ou une hypothèse.", examples: ['Si tu étudies, tu réussiras.'] },
+      { heading: 'SI AFFIRMATION', text: "Exprime une affirmation positive répondant à une question négative.", examples: ['Es-tu prêt ? — Si ! Allons-y !'] },
+    ],
+  },
+  {
+    id: 'poly-expressions-courir',
+    section: 'atelier',
+    category: 'Expressions',
+    icon: '🏃',
+    title: '10 expressions avec COURIR',
+    intro: "Des expressions imagées autour du verbe courir.",
+    type: 'table',
+    columns: ['Expression', 'Traduction'],
+    rows: [
+      ['Courir après le temps', 'To be running out of time'],
+      ['Courir partout', 'To be running around everywhere'],
+      ['Courir un risque', 'To run a risk'],
+      ['Courir la chance', 'To take a chance'],
+      ['Courir après un rêve', 'To chase a dream'],
+      ['Avoir le cœur qui court', 'To have a racing heart'],
+      ['Courir les rues', 'To roam the streets'],
+      ['Courir derrière quelqu\'un', 'To chase after someone'],
+    ],
+  },
+  {
+    id: 'poly-textes-gastronomie-fetes',
+    section: 'atelier',
+    category: 'Lecture',
+    icon: '🍷',
+    title: 'Textes de lecture — gastronomie, fêtes, anniversaire',
+    intro: "Trois courts textes culturels sur la France.",
+    type: 'rule',
+    blocks: [
+      { heading: 'La gastronomie française', text: "Célèbre dans le monde entier : chaque région a ses spécialités (bouillabaisse à Marseille, choucroute en Alsace, crêpes en Bretagne, fromage en Normandie). Les repas suivent l'ordre : entrée, plat principal, dessert. C'est un art de vivre qui rassemble les gens." },
+      { heading: 'La célébration des fêtes en France', text: "1er janvier : jour de l'An. 14 juillet : fête nationale (défilés, concerts, feux d'artifice). 25 décembre : Noël (repas en famille, cadeaux). 1er mai : muguet porte-bonheur." },
+      { heading: "La célébration d'un anniversaire", text: "Jour où une personne est née, célébré avec famille et amis : messages, cadeaux, gâteau avec bougies, chant « Joyeux anniversaire ! », jeux et partage." },
+    ],
+  },
+  {
+    id: 'poly-exprimer-desir',
+    section: 'atelier',
+    category: 'Expression orale',
+    icon: '💫',
+    title: 'Exprimer le désir',
+    intro: "Neuf façons de dire ce que l'on veut, du plus simple au plus soutenu.",
+    type: 'table',
+    columns: ['Expression', 'Exemple'],
+    rows: [
+      ['Je veux...', 'Je veux une nouvelle voiture.'],
+      ['Je souhaite...', 'Je souhaite passer des vacances à la mer.'],
+      ["J'aimerais...", "J'aimerais un gâteau au chocolat."],
+      ['Je désire...', 'Je désire réussir mes études.'],
+      ["J'ai envie de...", "J'ai envie de manger une pizza."],
+      ['Je rêve de...', 'Je rêve de visiter Paris.'],
+      ['Je voudrais...', "Je voudrais un livre, s'il vous plaît."],
+      ["J'aspire à...", 'J\'aspire à devenir médecin.'],
+    ],
+  },
+  {
+    id: 'poly-exprimer-doute',
+    section: 'atelier',
+    category: 'Expression orale',
+    icon: '🤔',
+    title: 'Exprimer le doute',
+    intro: "Neuf façons de nuancer une affirmation.",
+    type: 'table',
+    columns: ['Expression', 'Exemple'],
+    rows: [
+      ["Je ne suis pas sûr(e).", 'Je ne suis pas sûr de la réponse.'],
+      ['Je doute que...', "Je doute qu'il vienne à la réunion."],
+      ["Je ne pense pas que...", "Je ne pense pas qu'elle ait raison."],
+      ['Peut-être que...', "Peut-être qu'il pleuvra demain."],
+      ['Il se peut que...', "Il se peut qu'il ait oublié mes clés."],
+      ['Je ne sais pas si...', "Je ne sais pas si c'est une bonne idée."],
+      ["J'ai un doute sur...", 'J\'ai un doute sur ton information.'],
+      ["Je ne suis pas convaincu(e).", "Je ne suis pas convaincu par ton idée."],
+    ],
+  },
+  {
+    id: 'poly-moyens-transport',
+    section: 'atelier',
+    category: 'Vocabulaire thématique',
+    icon: '🚗',
+    title: 'Les moyens de transport',
+    intro: "Le vocabulaire complet des moyens de transport.",
+    type: 'rule',
+    blocks: [
+      { heading: 'Vocabulaire', text: "", examples: ['La voiture', 'La moto', 'Le vélo', 'La trottinette', 'Le bus', 'Le tramway', 'Le métro', 'Le train', "L'avion", "L'hélicoptère", 'Le bateau', 'Le ferry', 'Le taxi', 'Le camion', "L'ambulance", 'Le camion de pompiers', 'Le car scolaire', 'La montgolfière', 'Le téléphérique', 'Le scooter électrique'] },
+    ],
+  },
+  {
+    id: 'poly-aller-partir',
+    section: 'atelier',
+    category: 'Grammaire',
+    icon: '🚶',
+    title: 'ALLER vs PARTIR',
+    intro: "Mouvement vers un lieu, ou mouvement en le quittant.",
+    type: 'rule',
+    recoKey: 'allerPartir',
+    blocks: [
+      { heading: 'ALLER', text: "Mouvement vers un endroit.", examples: ["Je vais à l'école."] },
+      { heading: 'PARTIR', text: "Mouvement à partir d'un endroit (on le quitte).", examples: ['Je pars de la maison.'] },
+    ],
+  },
+  {
+    id: 'poly-que-questcQue',
+    section: 'atelier',
+    category: 'Grammaire',
+    icon: '❓',
+    title: 'Que vs Qu\'est-ce que',
+    intro: "Deux façons de poser une question, avec ou sans inversion.",
+    type: 'rule',
+    recoKey: 'queQuestCeQue',
+    blocks: [
+      { heading: 'QUE', text: "Remplace un nom ou un complément.", examples: ['Que vois-tu dans la boîte ?'] },
+      { heading: "QU'EST-CE QUE", text: "Sert à demander des informations.", examples: ["Qu'est-ce que c'est ?"] },
+    ],
+  },
+  {
+    id: 'poly-cest-pronoms-toniques',
+    section: 'atelier',
+    category: 'Grammaire',
+    icon: '👤',
+    title: "10 phrases avec C'est + pronoms toniques",
+    intro: "Les pronoms toniques après « c'est ».",
+    type: 'rule',
+    blocks: [
+      { heading: 'Les 7 formes', text: "", examples: ["C'est moi", "C'est toi", "C'est lui", "C'est elle", "C'est nous", "C'est vous", "C'est eux"] },
+    ],
+  },
+  {
+    id: 'poly-ca-fait',
+    section: 'atelier',
+    category: 'Grammaire',
+    icon: '⏳',
+    title: 'ÇA FAIT...',
+    intro: "Une expression polyvalente pour la durée, le résultat, la quantité ou la conséquence.",
+    type: 'rule',
+    blocks: [
+      { heading: 'Usages', text: "", examples: ['Ça fait une semaine que je suis ici. (durée)', 'Ça fait 20 euros. (quantité)', 'Ça fait mal. (conséquence)', "Ça fait 10 minutes que j'attends. (durée)"] },
+    ],
+  },
+  {
+    id: 'poly-ailleurs-partout',
+    section: 'atelier',
+    category: 'Grammaire',
+    icon: '🌍',
+    title: 'AILLEURS vs PARTOUT',
+    intro: "En d'autres endroits, ou dans tous les endroits sans exception.",
+    type: 'rule',
+    recoKey: 'ailleursPartout',
+    blocks: [
+      { heading: 'AILLEURS', text: "En d'autres endroits, différents de celui dont on parle.", examples: ['Je cherche un emploi ailleurs.'] },
+      { heading: 'PARTOUT', text: "Dans tous les endroits, sans exception.", examples: ['Il y a des problèmes partout dans le monde.'] },
+    ],
+  },
+  {
+    id: 'poly-quelquechose-quelquun',
+    section: 'atelier',
+    category: 'Grammaire',
+    icon: '❔',
+    title: 'QUELQUE CHOSE vs QUELQU\'UN',
+    intro: "Une chose, ou une personne.",
+    type: 'rule',
+    recoKey: 'quelquechoseQuelquun',
+    blocks: [
+      { heading: 'QUELQUE CHOSE', text: "Désigne une chose, un objet, une idée.", examples: ["J'ai quelque chose à te dire."] },
+      { heading: "QUELQU'UN", text: "Désigne une personne.", examples: ['Il y a quelqu\'un à la porte.'] },
+    ],
+  },
+  {
+    id: 'poly-futur-a1a2',
+    section: 'atelier',
+    category: 'Expression orale',
+    icon: '🔮',
+    title: 'Parler de son futur — Niveaux A1 et A2',
+    intro: "Des structures simples pour parler de l'avenir.",
+    type: 'rule',
+    blocks: [
+      { heading: 'A1', text: "", examples: ['Je veux étudier le français.', 'Je vais travailler.', "Demain, je vais au cinéma."] },
+      { heading: 'A2', text: "", examples: ["J'aimerais devenir médecin.", "Mon objectif est de réussir mes études.", "Je pourrais étudier à l'université."] },
+    ],
+  },
+  {
+    id: 'poly-expressions-prendre',
+    section: 'atelier',
+    category: 'Expressions',
+    icon: '✋',
+    title: 'Expressions avec le verbe PRENDRE',
+    intro: "Dix expressions courantes construites avec « prendre ».",
+    type: 'table',
+    columns: ['Expression', 'Traduction'],
+    rows: [
+      ['Prendre son temps', 'Take your time'],
+      ['Prendre une décision', 'Make a decision'],
+      ['Prendre soin de quelqu\'un', 'Take care of someone'],
+      ['Prendre un risque', 'Take a risk'],
+      ['Prendre un rendez-vous', 'Make an appointment'],
+      ['Prendre quelque chose pour acquis', 'Take something for granted'],
+      ['Prendre la parole', 'Take the floor / Speak'],
+      ["Prendre l'habitude de", 'Get into the habit of'],
+      ['Prendre congé', 'Take leave / Say goodbye'],
+    ],
+  },
+  {
+    id: 'poly-expressions-themes-a1a2',
+    section: 'atelier',
+    category: 'Expression orale',
+    icon: '🗂️',
+    title: 'Expressions courantes par thème (A1-A2)',
+    intro: "Un répertoire de formules classées par situation du quotidien.",
+    type: 'rule',
+    blocks: [
+      { heading: 'Saluer', text: "", examples: ['Bonjour !', 'Salut !', 'Au revoir !'] },
+      { heading: 'Se présenter', text: "", examples: ["Je m'appelle...", "J'ai ... ans.", 'Je suis étudiant(e).'] },
+      { heading: 'Remercier / S\'excuser', text: "", examples: ['Merci beaucoup !', 'De rien !', "Je suis désolé(e)."] },
+      { heading: 'Donner son avis', text: "", examples: ['Je pense que...', 'À mon avis...', "Je suis d'accord."] },
+      { heading: 'Faire des achats', text: "", examples: ['Combien ça coûte ?', "C'est trop cher.", 'Je prends ça.'] },
+    ],
+  },
+  {
+    id: 'poly-connecteurs-vue-ensemble',
+    section: 'atelier',
+    category: 'Connecteurs logiques',
+    icon: '🗺️',
+    title: 'Vue d\'ensemble des connecteurs logiques par fonction',
+    intro: "Une carte complète des connecteurs, classés par fonction logique.",
+    type: 'table',
+    columns: ['Fonction', 'Connecteurs courants'],
+    rows: [
+      ['Addition', 'et, aussi, également, en plus, de plus, par ailleurs'],
+      ['Opposition', 'mais, cependant, toutefois, en revanche, par contre'],
+      ['Cause', 'parce que, car, puisque, comme'],
+      ['Conséquence', "donc, ainsi, alors, c'est pourquoi"],
+      ['Condition', 'si, à condition que, pourvu que'],
+      ['Concession', 'même si, bien que, quoi que, malgré'],
+      ['Exemple', 'par exemple, notamment, comme'],
+      ['Énumération', "d'abord, ensuite, enfin, pour commencer"],
+    ],
+    note: "Bien que fatigué, il a terminé son travail. Il pleuvait beaucoup, nous sommes restés à la maison.",
+  },
+  {
+    id: 'poly-connecteurs-exemple',
+    section: 'atelier',
+    category: 'Connecteurs logiques',
+    icon: '💡',
+    title: 'Connecteurs pour donner un exemple',
+    intro: "Huit connecteurs pour illustrer ou clarifier une idée.",
+    type: 'table',
+    columns: ['Connecteur', 'Exemple'],
+    rows: [
+      ['Par exemple', 'Beaucoup de fruits sont bons pour la santé, par exemple la pomme, la banane ou l\'orange.'],
+      ['Comme', "J'aime plusieurs sports, comme le football et le tennis."],
+      ['Notamment', "Il aime les langues étrangères, notamment l'anglais et l'espagnol."],
+      ['À savoir', "Il existe plusieurs sources d'énergie, à savoir le solaire, l'éolien et l'hydraulique."],
+      ['En particulier', 'Il apprécie les légumes, en particulier les épinards et les brocolis.'],
+      ['Tel que', "Il utilise des outils modernes, tels que l'ordinateur et la tablette."],
+      ['Prenons', "Prenons l'exemple d'un arbre : il purifie l'air et offre de l'ombre."],
+      ["À titre d'exemple", "On peut visiter plusieurs villes, à titre d'exemple Paris, Lyon ou Nice."],
+    ],
+    note: "Un bon exemple rend ton message plus clair et plus mémorable !",
+  },
+  {
+    id: 'poly-connecteurs-concession',
+    section: 'atelier',
+    category: 'Connecteurs logiques',
+    icon: '⚖️',
+    title: 'Connecteurs pour exprimer la concession',
+    intro: "Huit connecteurs pour introduire une idée contraire qui n'empêche pas le résultat.",
+    type: 'table',
+    columns: ['Connecteur', 'Exemple'],
+    rows: [
+      ['Bien que', 'Bien que fatigué, il a terminé son travail.'],
+      ['Même si', 'Même si tu es débutant, tu peux réussir.'],
+      ['Malgré', 'Malgré la pluie, nous sommes sortis.'],
+      ['En dépit de', 'En dépit de son âge, il court le marathon.'],
+      ['Quoi que / Quel que', "Quoi que tu dises, je ne changerai pas d'avis."],
+      ['Alors que', 'Il veut sortir, alors que je préfère rester.'],
+      ['Pourtant', "Il n'a pas beaucoup étudié, pourtant il a eu une bonne note."],
+      ['Bien que ... cependant', 'Bien qu\'il soit malade, cependant il est venu au travail.'],
+    ],
+    note: "Les connecteurs de concession introduisent une idée contraire, mais le résultat reste valable.",
+  },
+  {
+    id: 'poly-connecteurs-condition',
+    section: 'atelier',
+    category: 'Connecteurs logiques',
+    icon: '🔀',
+    title: 'Connecteurs pour exprimer la condition',
+    intro: "Huit connecteurs pour exprimer une condition nécessaire.",
+    type: 'table',
+    columns: ['Connecteur', 'Exemple'],
+    rows: [
+      ['Si', 'Si tu étudies, tu réussiras.'],
+      ['Si... alors', 'Si tu viens, alors nous irons au cinéma.'],
+      ['À condition que', 'Tu peux sortir à condition que tu finisses tes devoirs.'],
+      ['Pourvu que', 'Nous partirons en voyage pourvu que le temps soit beau.'],
+      ['À moins que', "Nous irons à la plage, à moins qu'il ne pleuve."],
+      ['Dès lors que', 'Dès lors que tu as compris, tu peux passer à l\'exercice.'],
+      ['En cas de', 'En cas de problème, appelle-moi.'],
+      ['À condition de', 'Le projet réussira à condition de bien s\'organiser.'],
+    ],
+  },
+  {
+    id: 'poly-connecteurs-consequence',
+    section: 'atelier',
+    category: 'Connecteurs logiques',
+    icon: '➡️',
+    title: 'Connecteurs pour exprimer la conséquence',
+    intro: "Huit connecteurs pour montrer le résultat ou l'effet d'une action.",
+    type: 'table',
+    columns: ['Connecteur', 'Exemple'],
+    rows: [
+      ['Donc', 'Il a beaucoup étudié, donc il a réussi son examen.'],
+      ['Ainsi', 'Il pleuvait fort, ainsi le match a été reporté.'],
+      ['Par conséquent', "Il n'a pas révisé, par conséquent il a échoué."],
+      ['De ce fait', 'Le train a été supprimé. De ce fait, nous avons pris le bus.'],
+      ['Par suite', 'Il était fatigué. Par suite, il s\'est couché tôt.'],
+      ['En conséquence', 'La route est bloquée. En conséquence, nous arriverons en retard.'],
+      ["C'est pourquoi", "Il travaille dur tous les jours, c'est pourquoi il progresse vite."],
+      ['Si bien que', "Il a tellement couru qu'il est épuisé, si bien qu'il ne peut plus parler."],
+    ],
+  },
+  {
+    id: 'poly-connecteurs-opposition',
+    section: 'atelier',
+    category: 'Connecteurs logiques',
+    icon: '↔️',
+    title: "Connecteurs pour exprimer l'opposition",
+    intro: "Huit connecteurs pour opposer deux idées.",
+    type: 'table',
+    columns: ['Connecteur', 'Exemple'],
+    rows: [
+      ['Mais', 'Il voulait sortir, mais il pleuvait.'],
+      ['Cependant', 'Elle était fatiguée. Cependant, elle a continué.'],
+      ['Pourtant', "Il dit qu'il n'a pas faim, pourtant il a tout mangé."],
+      ['Toutefois', 'Il est intelligent, toutefois il manque de confiance.'],
+      ['En revanche', "Le voyage était cher. En revanche, l'expérience était inoubliable."],
+      ['Par contre', "J'aime le café. Par contre, je n'aime pas le thé."],
+      ['Néanmoins', 'Le chemin est long. Néanmoins, nous avançons.'],
+      ['Alors que', 'Il travaille le jour, alors que son frère étudie le soir.'],
+    ],
+  },
+  {
+    id: 'poly-connecteurs-addition',
+    section: 'atelier',
+    category: 'Connecteurs logiques',
+    icon: '➕',
+    title: "Connecteurs pour exprimer l'addition",
+    intro: "Sept connecteurs pour ajouter une idée.",
+    type: 'table',
+    columns: ['Connecteur', 'Exemple'],
+    rows: [
+      ['Et', 'J\'aime le chocolat et la vanille.'],
+      ['Aussi', 'Il parle anglais, et il parle aussi espagnol.'],
+      ['Également', 'Elle est intelligente et également très travailleuse.'],
+      ['En plus', 'Le cours est intéressant. En plus, le professeur est gentil.'],
+      ['De plus', 'Il est rapide. De plus, il est très précis.'],
+      ['Par ailleurs', 'Le film est drôle. Par ailleurs, les acteurs sont excellents.'],
+      ["D'abord... ensuite...", "D'abord, j'ai acheté du pain. Ensuite, j'ai acheté du lait."],
+    ],
+    note: "Varier les connecteurs rend ton texte plus clair, plus fluide et plus agréable à lire !",
+  },
+  {
+    id: 'poly-connecteurs-cause',
+    section: 'atelier',
+    category: 'Connecteurs logiques',
+    icon: '🔍',
+    title: 'Connecteurs pour exprimer la cause',
+    intro: "Huit connecteurs pour introduire la raison d'un fait.",
+    type: 'table',
+    columns: ['Connecteur', 'Exemple'],
+    rows: [
+      ['Parce que', 'Je reste à la maison parce qu\'il pleut.'],
+      ['Car', "Il a échoué à l'examen, car il n'a pas étudié."],
+      ['Puisque', 'Puisqu\'il fait beau, allons à la plage.'],
+      ['Étant donné que', 'Étant donné que tu es malade, tu devrais te reposer.'],
+      ['À cause de', 'Le match a été annulé à cause de la pluie.'],
+      ['Grâce à', "Grâce à ton aide, j'ai réussi mon projet."],
+      ['En raison de', 'En raison de la circulation, nous sommes en retard.'],
+      ['Dû à', 'Le vol a été retardé dû à un problème technique.'],
+    ],
+    note: "Choisis le connecteur qui correspond le mieux au lien entre la cause et la conséquence.",
+  },
+  {
+    id: 'poly-connecteurs-enumeration',
+    section: 'atelier',
+    category: 'Connecteurs logiques',
+    icon: '📋',
+    title: "Connecteurs pour exprimer l'énumération",
+    intro: "Sept connecteurs pour présenter une liste d'éléments.",
+    type: 'table',
+    columns: ['Connecteur', 'Exemple'],
+    rows: [
+      ["D'abord", "D'abord, j'ai acheté du pain, ensuite du lait et enfin des œufs."],
+      ['Ensuite', "D'abord, nous avons visité le musée, ensuite nous sommes allés au parc."],
+      ['Puis', "Dans ma valise, j'ai mis des vêtements, puis des livres."],
+      ['Enfin', 'Nous avons visité la ville, le château et enfin le port.'],
+      ['Notamment', "J'aime plusieurs fruits, notamment la pomme, la banane et l'orange."],
+      ['Entre autres', 'Il y a plusieurs façons de se détendre : entre autres, lire, écouter de la musique.'],
+    ],
+    note: "Une bonne énumération rend ton texte plus organisé et plus agréable à lire.",
+  },
+  {
+    id: 'poly-porter-apporter-emporter',
+    section: 'atelier',
+    category: 'Grammaire',
+    icon: '🎒',
+    title: 'PORTER vs APPORTER vs EMPORTER',
+    intro: "Trois verbes de la même famille, à ne pas confondre.",
+    type: 'rule',
+    recoKey: 'porterApporterEmporter',
+    blocks: [
+      { heading: 'PORTER', text: "Transporter quelque chose sur soi ou en le portant.", examples: ['Il porte un colis lourd.', 'Je porte des lunettes.'] },
+      { heading: 'APPORTER', text: "Amener quelque chose à quelqu'un ou à un endroit.", examples: ["J'apporte un gâteau à ma mère."] },
+      { heading: 'EMPORTER', text: "Prendre quelque chose pour l'emmener ailleurs avec soi.", examples: ["J'emporte mon déjeuner au bureau."] },
+    ],
+    note: "Porter → sur soi · Apporter → à quelqu'un / à un endroit · Emporter → pour emmener ailleurs avec soi.",
+  },
+  {
+    id: 'poly-pronoms-relatifs-2',
+    section: 'atelier',
+    category: 'Grammaire',
+    icon: '🔗',
+    title: 'Les pronoms relatifs (synthèse)',
+    intro: "Relier deux idées en donnant plus d'informations, sans répéter le nom.",
+    type: 'table',
+    columns: ['Pronom', 'Exemple'],
+    rows: [
+      ['Qui (sujet)', 'C\'est ma sœur qui habite à Lyon.'],
+      ['Que (complément)', "J'ai lu le livre que tu m'as prêté."],
+      ['Où (lieu/moment)', "Voici la maison où j'ai grandi."],
+      ['Lequel (choix)', 'Lequel de ces stylos préfères-tu ?'],
+      ['Dont (possession)', 'C\'est le frère dont tu m\'as parlé.'],
+      ['Auquel (à + lequel)', 'Le cours auquel j\'assiste est très intéressant.'],
+    ],
+    note: "Le pronom relatif remplace un nom déjà mentionné et évite la répétition.",
+  },
+  {
+    id: 'poly-falloir-devoir',
+    section: 'atelier',
+    category: 'Grammaire',
+    icon: '⚖️',
+    title: 'FALLOIR vs DEVOIR',
+    intro: "Une nécessité impersonnelle générale, ou une obligation personnelle.",
+    type: 'rule',
+    recoKey: 'falloirDevoir',
+    blocks: [
+      { heading: 'FALLOIR', text: "Verbe impersonnel. Exprime une nécessité, une obligation générale ; on ne connaît pas la personne concernée. Ne se conjugue qu'à la 3e personne du singulier (« il faut »).", examples: ['Il faut étudier pour réussir.', "Il faut du courage pour surmonter les difficultés."] },
+      { heading: 'DEVOIR', text: "Verbe personnel. Exprime une obligation personnelle ; on connaît la personne qui doit agir.", examples: ['Je dois finir mon devoir.', 'Tu dois appeler tes parents.'] },
+    ],
+    note: "Astuce : remplace par « il est nécessaire que... » pour FALLOIR ; par « j'ai l'obligation de... » pour DEVOIR.",
+  },
+  {
+    id: 'poly-venir-arriver',
+    section: 'atelier',
+    category: 'Grammaire',
+    icon: '🚗',
+    title: 'VENIR vs ARRIVER',
+    intro: "Se déplacer vers soi, ou atteindre une destination.",
+    type: 'rule',
+    recoKey: 'venirArriver',
+    blocks: [
+      { heading: 'VENIR', text: "Se déplacer vers soi, vers l'endroit où l'on est (mouvement vers le locuteur).", examples: ['Ma sœur vient chez moi ce soir.'] },
+      { heading: 'ARRIVER', text: "Atteindre un lieu, arriver à destination.", examples: ['Le train arrive en gare à 10h.'] },
+    ],
+  },
+  {
+    id: 'poly-sous-au-dessous',
+    section: 'atelier',
+    category: 'Grammaire',
+    icon: '⬇️',
+    title: 'SOUS vs AU-DESSOUS',
+    intro: "Avec ou sans contact : une nuance de position spatiale.",
+    type: 'rule',
+    recoKey: 'sousAuDessous',
+    blocks: [
+      { heading: 'SOUS', text: "Indique qu'une personne ou une chose est en dessous d'un objet, EN CONTACT avec celui-ci.", examples: ['Le chat est sous la table.'] },
+      { heading: 'AU-DESSOUS', text: "Indique qu'une personne ou une chose est plus bas que l'objet, SANS le toucher.", examples: ['Le chat est au-dessous de la table.'] },
+    ],
+  },
+  {
+    id: 'poly-sur-au-dessus',
+    section: 'atelier',
+    category: 'Grammaire',
+    icon: '⬆️',
+    title: 'SUR vs AU-DESSUS',
+    intro: "Avec ou sans contact : une nuance de position spatiale.",
+    type: 'rule',
+    recoKey: 'surAuDessus',
+    blocks: [
+      { heading: 'SUR', text: "Indique qu'une personne ou une chose est EN CONTACT avec la surface d'un objet.", examples: ['Le livre est sur la table.'] },
+      { heading: 'AU-DESSUS', text: "Indique qu'une personne ou une chose est plus haute que l'objet, SANS le toucher.", examples: ["L'avion vole au-dessus des nuages."] },
+    ],
+  },
+  {
+    id: 'poly-jeter-lancer',
+    section: 'atelier',
+    category: 'Grammaire',
+    icon: '🗑️',
+    title: 'JETER vs LANCER',
+    intro: "Se débarrasser de quelque chose, ou l'envoyer vers quelqu'un.",
+    type: 'rule',
+    recoKey: 'jeterLancer',
+    blocks: [
+      { heading: 'JETER', text: "Se débarrasser de quelque chose en le faisant aller loin, souvent sans précaution ; ce que l'on jette ne revient pas.", examples: ['Je jette le papier à la poubelle.'] },
+      { heading: 'LANCER', text: "Envoyer quelque chose loin, en le faisant voyager dans les airs avec force ou habileté ; ce que l'on lance va vers quelqu'un ou quelque chose.", examples: ['Il lance un ballon à son ami.'] },
+    ],
+    note: "Astuce : se débarrasser → jeter. Envoyer vers quelqu'un → lancer.",
+  },
 ];
 
 function renderSheetsHomeBySection(section, catTag, heroTitle, heroSubtitle){
@@ -21441,16 +23011,16 @@ function renderAtelierHome(){
 
 function buildSheetTableHtml(columns, rows, speakableCols){
   return `
-    <div style="overflow-x:auto;margin-top:12px;">
-      <table style="width:100%;border-collapse:collapse;font-size:13.5px;">
+    <div class="reading-text" style="overflow-x:auto;margin-top:12px;padding:14px 16px;">
+      <table style="width:100%;border-collapse:collapse;font-size:0.85em;">
         <thead>
-          <tr>${columns.map(c => `<th style="text-align:left;padding:8px 10px;border-bottom:2px solid var(--border);color:var(--text-dim);font-size:11.5px;">${escapeHtml(c)}</th>`).join('')}</tr>
+          <tr>${columns.map(c => `<th style="text-align:left;padding:8px 10px;border-bottom:2px solid var(--border);color:var(--text-dim);font-size:0.7em;font-family:'Inter',sans-serif;">${escapeHtml(c)}</th>`).join('')}</tr>
         </thead>
         <tbody>
           ${rows.map((r, ri) => `<tr>${r.map((cell,i) => {
             const canSpeak = !speakableCols || speakableCols.includes(i);
-            return `<td style="padding:8px 10px;border-bottom:1px solid var(--border);${i===r.length-1 && r.length>2 ? 'font-weight:700;color:var(--purple);' : ''}">
-              ${escapeHtml(cell)}${canSpeak ? `<button class="speak-btn small" data-speak-cell="${ri}:${i}" style="margin-left:6px;vertical-align:middle;">${SPEAK_SVG_SMALL}</button>` : ''}
+            return `<td style="padding:10px;border-bottom:1px solid var(--border);${i===r.length-1 && r.length>2 ? 'font-weight:700;color:var(--purple);' : ''}">
+              <span id="sheetCellTarget-${ri}-${i}">${escapeHtml(cell)}</span>${canSpeak ? `<button class="speak-btn small" data-speak-cell="${ri}:${i}" style="margin-left:6px;vertical-align:middle;">${SPEAK_SVG_SMALL}</button>` : ''}
             </td>`;
           }).join('')}</tr>`).join('')}
         </tbody>
@@ -21478,11 +23048,12 @@ function renderPracticalSheetDetail(id){
   } else if(sheet.type === 'letter'){
     bodyHtml = `
       <button class="mode-chip" id="speakWholeLetterBtn" style="margin-top:10px;">🔊 Écouter toute la lettre</button>
-      <div style="text-align:left;background:var(--surface-sunken);border:1px solid var(--border);border-radius:14px;padding:18px 20px;margin-top:10px;font-size:13.5px;line-height:1.7;">
-        <div style="font-weight:800;margin-bottom:10px;color:var(--text);">${escapeHtml(sheet.subject)}
+      <div class="reading-text" style="text-align:left;margin-top:10px;">
+        <div style="font-weight:800;margin-bottom:10px;color:var(--text);font-family:'Inter',sans-serif;font-size:0.8em;">
+          <span id="letterSubjectTarget">${escapeHtml(sheet.subject)}</span>
           <button class="speak-btn small" data-speak-para="-1" style="margin-left:6px;vertical-align:middle;">${SPEAK_SVG_SMALL}</button>
         </div>
-        ${sheet.body.map((p,i) => `<p style="margin:0 0 10px;">${escapeHtml(p)} <button class="speak-btn small" data-speak-para="${i}" style="vertical-align:middle;">${SPEAK_SVG_SMALL}</button></p>`).join('')}
+        ${sheet.body.map((p,i) => `<p style="margin:0 0 14px;"><span id="letterParaTarget-${i}">${escapeHtml(p)}</span> <button class="speak-btn small" data-speak-para="${i}" style="vertical-align:middle;">${SPEAK_SVG_SMALL}</button></p>`).join('')}
       </div>
       <div style="margin-top:12px;font-size:12.5px;color:var(--text-dim);text-align:left;">
         <b>Champs à compléter :</b> ${sheet.fields.map(f => escapeHtml(f)).join(' · ')}
@@ -21490,10 +23061,10 @@ function renderPracticalSheetDetail(id){
     `;
   } else if(sheet.type === 'rule'){
     bodyHtml = sheet.blocks.map((b, bi) => `
-      <div style="text-align:left;margin-top:14px;">
-        <div style="font-weight:800;color:var(--purple);font-size:13.5px;">${escapeHtml(b.heading)}</div>
-        <div style="font-size:13.5px;color:var(--text);margin-top:4px;line-height:1.6;">${escapeHtml(b.text)}</div>
-        ${b.examples ? `<ul style="margin:8px 0 0;padding-left:20px;font-size:13px;color:var(--text-dim);">${b.examples.map((ex,ei) => `<li style="margin-bottom:4px;">${escapeHtml(ex)} <button class="speak-btn small" data-speak-block="${bi}:${ei}" style="vertical-align:middle;">${SPEAK_SVG_SMALL}</button></li>`).join('')}</ul>` : ''}
+      <div class="reading-text" style="text-align:left;margin-top:14px;">
+        <div style="font-weight:800;color:var(--purple);font-size:0.82em;font-family:'Inter',sans-serif;">${escapeHtml(b.heading)}</div>
+        <div style="margin-top:6px;"><span id="blockTextTarget-${bi}">${escapeHtml(b.text)}</span></div>
+        ${b.examples ? `<ul style="margin:10px 0 0;padding-left:20px;">${b.examples.map((ex,ei) => `<li style="margin-bottom:6px;"><span id="blockExTarget-${bi}-${ei}">${escapeHtml(ex)}</span> <button class="speak-btn small" data-speak-block="${bi}:${ei}" style="vertical-align:middle;">${SPEAK_SVG_SMALL}</button></li>`).join('')}</ul>` : ''}
       </div>
     `).join('');
     if(sheet.table){ bodyHtml += buildSheetTableHtml(sheet.table.columns, sheet.table.rows, [0]); }
@@ -21529,26 +23100,27 @@ function renderPracticalSheetDetail(id){
     btn.addEventListener('click', () => {
       const [ri, ci] = btn.dataset.speakCell.split(':').map(Number);
       const rows = sheet.type === 'rule' ? sheet.table.rows : sheet.rows;
-      speak(rows[ri][ci], 'fr-FR');
+      speakHighlighted(rows[ri][ci], 'fr-FR', `sheetCellTarget-${ri}-${ci}`);
     });
   });
   const speakWholeLetterBtn = document.getElementById('speakWholeLetterBtn');
   if(speakWholeLetterBtn){
     speakWholeLetterBtn.addEventListener('click', () => {
       const full = [sheet.subject, ...sheet.body].join('. ');
-      speak(full, 'fr-FR');
+      speakHighlighted(full, 'fr-FR', 'letterSubjectTarget');
     });
   }
   card.querySelectorAll('[data-speak-para]').forEach(btn => {
     btn.addEventListener('click', () => {
       const i = parseInt(btn.dataset.speakPara, 10);
-      speak(i === -1 ? sheet.subject : sheet.body[i], 'fr-FR');
+      const targetId = i === -1 ? 'letterSubjectTarget' : `letterParaTarget-${i}`;
+      speakHighlighted(i === -1 ? sheet.subject : sheet.body[i], 'fr-FR', targetId);
     });
   });
   card.querySelectorAll('[data-speak-block]').forEach(btn => {
     btn.addEventListener('click', () => {
       const [bi, ei] = btn.dataset.speakBlock.split(':').map(Number);
-      speak(sheet.blocks[bi].examples[ei], 'fr-FR');
+      speakHighlighted(sheet.blocks[bi].examples[ei], 'fr-FR', `blockExTarget-${bi}-${ei}`);
     });
   });
   startSectionReading(sheet.section === 'atelier' ? 'atelier' : 'fiche');
@@ -21958,8 +23530,8 @@ function renderBouquinageDetail(idx){
     <div class="cat-tag">📖 Bouquinage${read ? ' · ✅ Lu' : ''}</div>
     <div class="word-fr" style="font-size:clamp(19px,4vw,24px);">${escapeHtml(t.title)}</div>
     <button class="mode-chip" id="listenBouquinageBtn" style="margin-top:10px;">🔊 Écouter ce texte</button>
-    <div style="text-align:left;background:var(--surface-sunken);border:1px solid var(--border);border-radius:14px;padding:18px 20px;margin-top:12px;font-size:14px;line-height:1.75;color:var(--text);">
-      ${escapeHtml(t.body)}
+    <div class="reading-text" style="text-align:left;margin-top:12px;">
+      <span id="bouquinageReadingTarget">${escapeHtml(t.body)}</span>
     </div>
     ${t.quote ? `<div style="margin-top:14px;font-style:italic;color:var(--purple);font-weight:700;font-size:13.5px;">« ${escapeHtml(t.quote)} »</div>` : ''}
     <button class="restart-btn" id="markReadBtn" style="margin:16px auto 0;${read ? 'background:var(--surface-sunken);border:1px solid rgba(34,197,94,0.5);color:#16A34A;box-shadow:none;' : 'background:linear-gradient(135deg,#22C55E,#16A34A);border-color:#15803D;'}">
@@ -21972,7 +23544,7 @@ function renderBouquinageDetail(idx){
     </div>
   `;
   document.getElementById('backFromBouquinageDetailBtn').addEventListener('click', renderBouquinageHome);
-  document.getElementById('listenBouquinageBtn').addEventListener('click', () => speak(t.body + (t.quote ? '. ' + t.quote : ''), 'fr-FR'));
+  document.getElementById('listenBouquinageBtn').addEventListener('click', () => speakHighlighted(t.body + (t.quote ? '. ' + t.quote : ''), 'fr-FR', 'bouquinageReadingTarget'));
   document.getElementById('markReadBtn').addEventListener('click', () => {
     if(isBouquinageRead(idx)){ unmarkBouquinageRead(idx); } else { markBouquinageRead(idx); playCorrectSound(); }
     renderBouquinageDetail(idx);
