@@ -2633,11 +2633,14 @@ function getDailyQuests(){
   const lessons = dailyLog[todayKey()] || 0;
   const s = dailyStats[todayKey()] || { seconds:0, passed:0, xp:0, modesPlayed:[], bySubject:{} };
   const timeGoalSec = questSettings.timeGoalMin * 60;
+  const readingModes = ['bouquinage', 'fiche', 'atelier'];
+  const didReading = (s.modesPlayed || []).some(m => readingModes.includes(m));
   const quests = [
     { icon:'📗', label:`Termine ${questSettings.lessonGoal} exercice${questSettings.lessonGoal>1?'s':''} (tous modes)`, cur:Math.min(lessons, questSettings.lessonGoal), goal:questSettings.lessonGoal },
     { icon:'⏱️', label:`Passe ${questSettings.timeGoalMin} min à apprendre`, cur:Math.min(s.seconds, timeGoalSec), goal:timeGoalSec, isTime:true },
     { icon:'🏆', label:`Réussis 90%+ dans ${questSettings.passGoal} bloc${questSettings.passGoal>1?'s':''}`, cur:Math.min(s.passed, questSettings.passGoal), goal:questSettings.passGoal },
     { icon:'⚖️', label:'Touche à 2 matières différentes (vocabulaire, conjugaison, grammaire, orthographe)', cur:Math.min(Object.keys(s.bySubject || {}).length, 2), goal:2 },
+    { icon:'📖', label:'Passe du temps en Bouquinage, Fiches pratiques ou Atelier Français', cur:didReading ? 1 : 0, goal:1 },
   ];
   if(questSettings.modesGoal > 0){
     const modesCount = (s.modesPlayed || []).length;
@@ -6327,10 +6330,11 @@ function buildDeck(blockIndex){
 /* ============ 🎓 CENTRE D'ENTRAÎNEMENT (mots déjà vus, par blocs de 30) ============ */
 const REVIEW_BLOCK_SIZE = 30;
 const TRAINING_TYPES = {
+  classic: { emoji:'🎯', label:'Classique',    mode:'classic', pool:'all' },
   speak:   { emoji:'🎤', label:'Prononciation', mode:'speak',  pool:'all' },
   errors:  { emoji:'⚠️', label:'Erreurs',       mode:'speak',  pool:'errors' },
-  pairs:   { emoji:'🧩', label:'Paires',         mode:'pairs',  pool:'all' },
-  repeat:  { emoji:'🎧', label:'Écoute',         mode:'repeat', pool:'all' },
+  pairs:   { emoji:'🧩', label:'Paires chrono', mode:'pairs',  pool:'all' },
+  repeat:  { emoji:'🎧', label:'Répétition',    mode:'repeat', pool:'all' },
   srs:     { emoji:'🧠', label:'Révision espacée', mode:'classic', pool:'srs' },
 };
 function getTrainingWords(poolType){
