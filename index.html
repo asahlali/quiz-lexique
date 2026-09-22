@@ -2553,8 +2553,13 @@ function loadQuestSettings(){
       lessonGoal: s.lessonGoal || QUEST_LESSON_GOAL_DEFAULT,
       modesGoal: s.modesGoal || 0, // 0 = défi désactivé
       fullMasteryGoal: s.fullMasteryGoal !== undefined ? s.fullMasteryGoal : 7, // 0 = défi désactivé
+      // 🎯 Objectifs configurables par section — 0 = section non exigée aujourd'hui.
+      bouquinageGoal: s.bouquinageGoal !== undefined ? s.bouquinageGoal : 1,
+      ficheGoal: s.ficheGoal !== undefined ? s.ficheGoal : 1,
+      atelierGoal: s.atelierGoal !== undefined ? s.atelierGoal : 1,
+      avanceGoal: s.avanceGoal !== undefined ? s.avanceGoal : 0,
     };
-  }catch(e){ return { timeGoalMin:5, passGoal:QUEST_PASS_GOAL_DEFAULT, lessonGoal:QUEST_LESSON_GOAL_DEFAULT, modesGoal:0, fullMasteryGoal:7 }; }
+  }catch(e){ return { timeGoalMin:5, passGoal:QUEST_PASS_GOAL_DEFAULT, lessonGoal:QUEST_LESSON_GOAL_DEFAULT, modesGoal:0, fullMasteryGoal:7, bouquinageGoal:1, ficheGoal:1, atelierGoal:1, avanceGoal:0 }; }
 }
 function saveQuestSettings(){ try{ localStorage.setItem(nsKey(QUEST_SETTINGS_KEY), JSON.stringify(questSettings)); }catch(e){} }
 let questSettings = loadQuestSettings();
@@ -2633,15 +2638,29 @@ function getDailyQuests(){
   const lessons = dailyLog[todayKey()] || 0;
   const s = dailyStats[todayKey()] || { seconds:0, passed:0, xp:0, modesPlayed:[], bySubject:{} };
   const timeGoalSec = questSettings.timeGoalMin * 60;
-  const readingModes = ['bouquinage', 'fiche', 'atelier'];
-  const didReading = (s.modesPlayed || []).some(m => readingModes.includes(m));
   const quests = [
     { icon:'📗', label:`Termine ${questSettings.lessonGoal} exercice${questSettings.lessonGoal>1?'s':''} (tous modes)`, cur:Math.min(lessons, questSettings.lessonGoal), goal:questSettings.lessonGoal },
     { icon:'⏱️', label:`Passe ${questSettings.timeGoalMin} min à apprendre`, cur:Math.min(s.seconds, timeGoalSec), goal:timeGoalSec, isTime:true },
     { icon:'🏆', label:`Réussis 90%+ dans ${questSettings.passGoal} bloc${questSettings.passGoal>1?'s':''}`, cur:Math.min(s.passed, questSettings.passGoal), goal:questSettings.passGoal },
     { icon:'⚖️', label:'Touche à 2 matières différentes (vocabulaire, conjugaison, grammaire, orthographe)', cur:Math.min(Object.keys(s.bySubject || {}).length, 2), goal:2 },
-    { icon:'📖', label:'Passe du temps en Bouquinage, Fiches pratiques ou Atelier Français', cur:didReading ? 1 : 0, goal:1 },
   ];
+  // 🎯 Objectifs configurables par section — chacun réglable (ou désactivable à 0) dans les réglages.
+  if(questSettings.bouquinageGoal > 0){
+    const n = countTodayBouquinageRead();
+    quests.push({ icon:'📖', label:`Lis ${questSettings.bouquinageGoal} texte${questSettings.bouquinageGoal>1?'s':''} en Bouquinage`, cur:Math.min(n, questSettings.bouquinageGoal), goal:questSettings.bouquinageGoal });
+  }
+  if(questSettings.ficheGoal > 0){
+    const n = countTodayPassedInSection('pratique');
+    quests.push({ icon:'📎', label:`Termine ${questSettings.ficheGoal} fiche${questSettings.ficheGoal>1?'s':''} pratique${questSettings.ficheGoal>1?'s':''}`, cur:Math.min(n, questSettings.ficheGoal), goal:questSettings.ficheGoal });
+  }
+  if(questSettings.atelierGoal > 0){
+    const n = countTodayPassedInSection('atelier');
+    quests.push({ icon:'🏛️', label:`Termine ${questSettings.atelierGoal} fiche${questSettings.atelierGoal>1?'s':''} d'Atelier Français`, cur:Math.min(n, questSettings.atelierGoal), goal:questSettings.atelierGoal });
+  }
+  if(questSettings.avanceGoal > 0){
+    const n = countTodayPassedInSection('avance');
+    quests.push({ icon:'🎓', label:`Termine ${questSettings.avanceGoal} fiche${questSettings.avanceGoal>1?'s':''} de Grammaire Avancée`, cur:Math.min(n, questSettings.avanceGoal), goal:questSettings.avanceGoal });
+  }
   if(questSettings.modesGoal > 0){
     const modesCount = (s.modesPlayed || []).length;
     quests.push({ icon:'🎭', label:`Complète ${questSettings.modesGoal} modes différents`, cur:Math.min(modesCount, questSettings.modesGoal), goal:questSettings.modesGoal });
@@ -6416,6 +6435,26 @@ function renderQuestSettings(){
       </div>
     </div>
 
+    <div class="cat-tag" style="margin-top:18px;">🎯 Objectifs par section (0 = pas exigé aujourd'hui)</div>
+    <div class="pm-summary" style="margin-top:8px;">
+      <div class="pm-row" style="flex-direction:column;align-items:flex-start;gap:8px;">
+        <span>📖 Textes à lire en Bouquinage</span>
+        <input type="number" id="qsBouquinage" class="search-input" min="0" max="20" value="${questSettings.bouquinageGoal}" style="max-width:120px;">
+      </div>
+      <div class="pm-row" style="flex-direction:column;align-items:flex-start;gap:8px;">
+        <span>📎 Fiches pratiques à terminer</span>
+        <input type="number" id="qsFiche" class="search-input" min="0" max="20" value="${questSettings.ficheGoal}" style="max-width:120px;">
+      </div>
+      <div class="pm-row" style="flex-direction:column;align-items:flex-start;gap:8px;">
+        <span>🏛️ Fiches d'Atelier Français à terminer</span>
+        <input type="number" id="qsAtelier" class="search-input" min="0" max="20" value="${questSettings.atelierGoal}" style="max-width:120px;">
+      </div>
+      <div class="pm-row" style="flex-direction:column;align-items:flex-start;gap:8px;">
+        <span>🎓 Fiches de Grammaire Avancée à terminer</span>
+        <input type="number" id="qsAvance" class="search-input" min="0" max="20" value="${questSettings.avanceGoal}" style="max-width:120px;">
+      </div>
+    </div>
+
     <div style="display:flex;gap:12px;justify-content:center;margin-top:20px;flex-wrap:wrap;">
       <button class="restart-btn" id="qsSaveBtn">✓ Enregistrer</button>
       <button class="restart-btn" id="qsResetBtn" style="background:var(--surface-sunken);border:1px solid var(--border);color:var(--text);box-shadow:none;">↺ Valeurs par défaut</button>
@@ -6428,14 +6467,18 @@ function renderQuestSettings(){
     const pass = Math.max(1, parseInt(document.getElementById('qsPass').value, 10) || 2);
     const modes = Math.max(0, parseInt(document.getElementById('qsModes').value, 10) || 0);
     const fullMastery = Math.max(0, parseInt(document.getElementById('qsFullMastery').value, 10) || 0);
-    questSettings = { lessonGoal: lesson, timeGoalMin: time, passGoal: pass, modesGoal: modes, fullMasteryGoal: fullMastery };
+    const bouquinage = Math.max(0, parseInt(document.getElementById('qsBouquinage').value, 10) || 0);
+    const fiche = Math.max(0, parseInt(document.getElementById('qsFiche').value, 10) || 0);
+    const atelier = Math.max(0, parseInt(document.getElementById('qsAtelier').value, 10) || 0);
+    const avance = Math.max(0, parseInt(document.getElementById('qsAvance').value, 10) || 0);
+    questSettings = { lessonGoal: lesson, timeGoalMin: time, passGoal: pass, modesGoal: modes, fullMasteryGoal: fullMastery, bouquinageGoal: bouquinage, ficheGoal: fiche, atelierGoal: atelier, avanceGoal: avance };
     saveQuestSettings();
     cloudAutoPush();
     setStatus('🎯 Objectifs mis à jour !', 'ok');
     renderBlockSelect();
   });
   document.getElementById('qsResetBtn').addEventListener('click', () => {
-    questSettings = { lessonGoal: QUEST_LESSON_GOAL_DEFAULT, timeGoalMin: 5, passGoal: QUEST_PASS_GOAL_DEFAULT, modesGoal: 0, fullMasteryGoal: 7 };
+    questSettings = { lessonGoal: QUEST_LESSON_GOAL_DEFAULT, timeGoalMin: 5, passGoal: QUEST_PASS_GOAL_DEFAULT, modesGoal: 0, fullMasteryGoal: 7, bouquinageGoal: 1, ficheGoal: 1, atelierGoal: 1, avanceGoal: 0 };
     saveQuestSettings();
     cloudAutoPush();
     renderQuestSettings();
@@ -8094,6 +8137,219 @@ function endSentenceTypeQuiz(){
    Réutilisé pour Négation, Formation des questions, Accord du participe passé — même principe que
    COD/COI et Types de phrases, mais factorisé pour éviter de dupliquer le code à chaque nouveau sujet. */
 const RECOGNITION_EXERCISES = {
+  partialPartiel: {
+    title:'PARTIAL ou PARTIEL ?', icon:'⚖️',
+    options:['partial (tendancieux)','partiel (incomplet)'],
+    tip:"PARTIAL = qui prend parti sans souci de vérité, tendancieux. PARTIEL = qui constitue une partie d'un tout, incomplet.",
+    examples:[
+      { sentence:"Un historien ne doit pas être ___.", correct:"partial (tendancieux)", rule:"Prendre parti sans souci de vérité → partial." },
+      { sentence:"On aura un résultat ___ des élections.", correct:"partiel (incomplet)", rule:"Une partie d'un tout, incomplet → partiel." },
+    ] },
+  recouvrirRecouvrer: {
+    title:'RECOUVRIR ou RECOUVRER ?', icon:'🧥',
+    options:['recouvrir (couvrir)','recouvrer (récupérer)'],
+    tip:"RECOUVRIR = couvrir, cacher, dissimuler. RECOUVRER = rentrer en possession de ce qu'on n'a plus, récupérer.",
+    examples:[
+      { sentence:"La poussière ___ait tout.", correct:"recouvrir (couvrir)", rule:"Couvrir → recouvrir." },
+      { sentence:"Il a ___ ses forces après sa maladie.", correct:"recouvrer (récupérer)", rule:"Rentrer en possession de → recouvrer." },
+      { sentence:"Il a enfin ___ son portefeuille perdu.", correct:"recouvrer (récupérer)", rule:"Récupérer → recouvrer." },
+    ] },
+  metsAJourAuJour: {
+    title:'METTRE À JOUR ou METTRE AU JOUR ?', icon:'📅',
+    options:['mettre à jour (actualiser)','mettre au jour (dévoiler)'],
+    tip:"METTRE À JOUR = rendre actuel, adapter avec des informations récentes. METTRE AU JOUR = dévoiler, faire apparaître ce qui était caché.",
+    examples:[
+      { sentence:"Vous pouvez ___ beaucoup d'applications.", correct:"mettre à jour (actualiser)", rule:"Rendre actuel → mettre à jour." },
+      { sentence:"La construction du métro a ___ des ruines romaines.", correct:"mettre au jour (dévoiler)", rule:"Faire apparaître ce qui était caché → mettre au jour." },
+    ] },
+  toutACoupToutDunCoup: {
+    title:'TOUT À COUP ou TOUT D\'UN COUP ?', icon:'💥',
+    options:['tout à coup (soudain)','tout d\'un coup (en une fois)'],
+    tip:"TOUT À COUP = soudain, de façon inattendue. TOUT D'UN COUP = d'un seul coup, tout en une fois.",
+    examples:[
+      { sentence:"___, il a sorti un revolver.", correct:"tout à coup (soudain)", rule:"Soudain → tout à coup." },
+      { sentence:"La maison s'est écroulée ___.", correct:"tout d'un coup (en une fois)", rule:"En une seule fois → tout d'un coup." },
+    ] },
+  deNouveauANouveau: {
+    title:'DE NOUVEAU ou À NOUVEAU ?', icon:'🔁',
+    options:['de nouveau (encore une fois, pareil)','à nouveau (encore une fois, différemment)'],
+    tip:"DE NOUVEAU = encore une fois (répétition à l'identique). À NOUVEAU = encore une fois mais différemment (on recommence autrement).",
+    examples:[
+      { sentence:"Elle a téléphoné ___.", correct:"de nouveau (encore une fois, pareil)", rule:"Répétition simple → de nouveau." },
+      { sentence:"Ils doivent faire tous les exercices ___.", correct:"à nouveau (encore une fois, différemment)", rule:"Recommencer autrement → à nouveau." },
+    ] },
+  parLaSuiteParSuiteDe: {
+    title:'PAR LA SUITE ou PAR SUITE DE ?', icon:'➡️',
+    options:['par la suite (ensuite)','par suite de (à cause de)'],
+    tip:"PAR LA SUITE = ensuite, plus tard. PAR SUITE DE = à cause de.",
+    examples:[
+      { sentence:"Vous ne pourrez plus le modifier ___.", correct:"par la suite (ensuite)", rule:"Plus tard → par la suite." },
+      { sentence:"Les vols sont annulés ___ du mauvais temps.", correct:"par suite de (à cause de)", rule:"À cause de → par suite de." },
+    ] },
+  halerHaler: {
+    title:'HÂLER ou HALER ?', icon:'☀️',
+    options:['hâler (brunir au soleil)','haler (tirer avec un cordage)'],
+    tip:"HÂLER (avec accent circonflexe) = brunir la peau sous l'effet du soleil. HALER (sans accent) = tirer avec force, généralement à l'aide d'un cordage (domaine maritime).",
+    examples:[
+      { sentence:"Le soleil lui a ___ le visage.", correct:"hâler (brunir au soleil)", rule:"Brunir sous le soleil → hâler." },
+      { sentence:"Les marins ___ent le bateau jusqu'au quai.", correct:"haler (tirer avec un cordage)", rule:"Tirer avec un cordage → haler." },
+    ] },
+  censeSense: {
+    title:'CENSÉ ou SENSÉ ?', icon:'🧠',
+    options:['censé (supposé)','sensé (raisonnable)'],
+    tip:"CENSÉ = supposé, considéré comme devant être/faire quelque chose (souvent + infinitif). SENSÉ = qui a du bon sens, raisonnable (contient « sens »).",
+    examples:[
+      { sentence:"Il est ___ arriver à huit heures.", correct:"censé (supposé)", rule:"Supposé faire quelque chose → censé." },
+      { sentence:"C'est une personne ___.", correct:"sensé (raisonnable)", rule:"Qui a du bon sens → sensé." },
+      { sentence:"Vous êtes ___s connaître cette règle.", correct:"censé (supposé)", rule:"Supposé → censé." },
+    ] },
+  premicesPremisses: {
+    title:'PRÉMICES ou PRÉMISSES ?', icon:'🌅',
+    options:['prémices (premiers signes)','prémisses (point de départ d\'un raisonnement)'],
+    tip:"PRÉMICES = premiers signes, premières manifestations. PRÉMISSES = propositions ou éléments de départ sur lesquels repose un raisonnement.",
+    examples:[
+      { sentence:"On observe les ___ d'un changement.", correct:"prémices (premiers signes)", rule:"Premiers signes → prémices." },
+      { sentence:"Le raisonnement repose sur des ___ erronées.", correct:"prémisses (point de départ d'un raisonnement)", rule:"Point de départ d'un raisonnement → prémisses." },
+    ] },
+  pecheurPecheur: {
+    title:'PÉCHEUR ou PÊCHEUR ?', icon:'🎣',
+    options:['pécheur (qui commet un péché)','pêcheur (qui pratique la pêche)'],
+    tip:"PÉCHEUR (sans accent circonflexe) = personne qui commet un péché. PÊCHEUR (avec accent circonflexe) = personne qui pratique la pêche.",
+    examples:[
+      { sentence:"Un ___ demande pardon.", correct:"pécheur (qui commet un péché)", rule:"Qui commet un péché → pécheur." },
+      { sentence:"Les ___s rentrent au port.", correct:"pêcheur (qui pratique la pêche)", rule:"Qui pratique la pêche → pêcheur." },
+    ] },
+  encontreRencontre: {
+    title:'À L\'ENCONTRE DE ou À LA RENCONTRE DE ?', icon:'↔️',
+    options:['à l\'encontre de (contre)','à la rencontre de (vers, pour rencontrer)'],
+    tip:"À L'ENCONTRE DE = contre, en opposition à. À LA RENCONTRE DE = vers quelqu'un pour le rencontrer.",
+    examples:[
+      { sentence:"Cette décision va ___ nos principes.", correct:"à l'encontre de (contre)", rule:"Opposition → à l'encontre de." },
+      { sentence:"Elle est allée ___ ses invités.", correct:"à la rencontre de (vers, pour rencontrer)", rule:"Mouvement vers quelqu'un → à la rencontre de." },
+    ] },
+  faveurFaveur: {
+    title:'À LA FAVEUR DE ou EN FAVEUR DE ?', icon:'🌙',
+    options:['à la faveur de (en profitant de)','en faveur de (au profit de, pour)'],
+    tip:"À LA FAVEUR DE = en profitant de, à l'occasion d'une circonstance favorable. EN FAVEUR DE = pour, au profit de (soutien, bénéficiaire).",
+    examples:[
+      { sentence:"___ la nuit, les prisonniers se sont échappés.", correct:"à la faveur de (en profitant de)", rule:"En profitant d'une circonstance → à la faveur de." },
+      { sentence:"La majorité a voté ___ la réforme.", correct:"en faveur de (au profit de, pour)", rule:"Soutien, pour → en faveur de." },
+    ] },
+  sansCesseIncessamment: {
+    title:'SANS CESSE ou INCESSAMMENT ?', icon:'⏳',
+    options:['sans cesse (continuellement)','incessamment (très prochainement)'],
+    tip:"SANS CESSE = continuellement, de façon répétée. INCESSAMMENT = aujourd'hui, le plus souvent très prochainement, sous peu.",
+    examples:[
+      { sentence:"Il se plaint ___.", correct:"sans cesse (continuellement)", rule:"Continuellement → sans cesse." },
+      { sentence:"Les résultats seront publiés ___.", correct:"incessamment (très prochainement)", rule:"Très prochainement → incessamment." },
+    ] },
+  davantageDavantages: {
+    title:'DAVANTAGE ou D\'AVANTAGE(S) ?', icon:'➕',
+    options:['davantage (= plus, adverbe)','d\'avantage(s) (= de bénéfice, nom)'],
+    tip:"DAVANTAGE (un seul mot) = adverbe signifiant « plus » (remplaçable par « plus »). D'AVANTAGE(S) = de + nom « avantage(s) » = de bénéfice, d'intérêt.",
+    examples:[
+      { sentence:"Il faut travailler ___.", correct:"davantage (= plus, adverbe)", rule:"Remplaçable par « plus » → davantage." },
+      { sentence:"Cette solution offre beaucoup ___.", correct:"d'avantage(s) (= de bénéfice, nom)", rule:"De bénéfices → d'avantages." },
+      { sentence:"Je ne vois pas ___ à cette solution.", correct:"d'avantage(s) (= de bénéfice, nom)", rule:"De bénéfice → d'avantage." },
+    ] },
+  entreParmi: {
+    title:'ENTRE ou PARMI ?', icon:'👥',
+    options:['entre (éléments individualisés)','parmi (appartenance à un ensemble)'],
+    tip:"ENTRE met en relation des éléments individualisés qu'on distingue. PARMI indique qu'un élément fait partie d'un ensemble.",
+    examples:[
+      { sentence:"Il hésite ___ trois solutions.", correct:"entre (éléments individualisés)", rule:"Éléments distingués et comparés → entre." },
+      { sentence:"___ les candidats, trois ont été retenus.", correct:"parmi (appartenance à un ensemble)", rule:"Fait partie d'un ensemble → parmi." },
+    ] },
+  fauteDeADefautDe: {
+    title:'FAUTE DE ou À DÉFAUT DE ?', icon:'🔀',
+    options:['faute de (cause : par manque de)','à défaut de (solution de remplacement)'],
+    tip:"FAUTE DE exprime la cause due à un manque (= par manque de). À DÉFAUT DE exprime une solution de remplacement en l'absence de quelque chose.",
+    examples:[
+      { sentence:"___ temps, nous avons annulé la réunion.", correct:"faute de (cause : par manque de)", rule:"Cause due à un manque → faute de." },
+      { sentence:"___ voiture, nous prendrons le train.", correct:"à défaut de (solution de remplacement)", rule:"Solution de remplacement → à défaut de." },
+    ] },
+  ceQuiCeQuil: {
+    title:'CE QUI ou CE QU\'IL ?', icon:'❓',
+    options:['ce qui (construction personnelle)','ce qu\'il (construction impersonnelle)'],
+    tip:"CE QUI = construction personnelle, le verbe exprime une action attribuée à un sujet réel non-humain. CE QU'IL = construction impersonnelle, « il » ne renvoie à personne.",
+    examples:[
+      { sentence:"Je sais ___ faut faire.", correct:"ce qu'il (construction impersonnelle)", rule:"« il faut » est impersonnel → ce qu'il." },
+      { sentence:"Je vois ___ arrive.", correct:"ce qui (construction personnelle)", rule:"Sujet réel non-humain → ce qui." },
+    ] },
+  balladeBalade: {
+    title:'BALLADE ou BALADE ?', icon:'🚶',
+    options:['ballade (poème/chanson)','balade (promenade)'],
+    tip:"BALLADE (deux L) = poème à forme fixe ou chanson. BALADE (un seul L) = promenade.",
+    examples:[
+      { sentence:"Les enfants sont sortis faire une ___ dans les bois.", correct:"balade (promenade)", rule:"Promenade → balade." },
+      { sentence:"« La ___ des pendus » de Villon.", correct:"ballade (poème/chanson)", rule:"Poème à forme fixe → ballade." },
+    ] },
+  desDepuis: {
+    title:'DÈS ou DEPUIS ?', icon:'⏱️',
+    options:['dès (point de départ)','depuis (situation toujours actuelle)'],
+    tip:"DÈS + moment met l'accent sur le point de départ, souvent avec une idée d'immédiateté. DEPUIS + moment présente une situation commencée et toujours valable maintenant.",
+    examples:[
+      { sentence:"Il pleut ___ ce matin.", correct:"depuis (situation toujours actuelle)", rule:"Situation qui continue → depuis." },
+      { sentence:"___ son arrivée, il s'est mis au travail.", correct:"dès (point de départ)", rule:"Point de départ, immédiateté → dès." },
+      { sentence:"Il travaille ici ___ 2022.", correct:"depuis (situation toujours actuelle)", rule:"Toujours valable maintenant → depuis." },
+    ] },
+  enDansTemps: {
+    title:'EN ou DANS ? (le temps)', icon:'⏰',
+    options:['en (temps nécessaire pour faire)','dans (moment futur, après un délai)'],
+    tip:"EN + durée = temps nécessaire pour accomplir une action. DANS + durée = moment où une action aura lieu, après un délai.",
+    examples:[
+      { sentence:"Il a terminé son travail ___ deux heures.", correct:"en (temps nécessaire pour faire)", rule:"Temps nécessaire → en." },
+      { sentence:"Je reviens ___ une heure.", correct:"dans (moment futur, après un délai)", rule:"Moment futur après un délai → dans." },
+      { sentence:"Le spectacle commence ___ dix minutes.", correct:"dans (moment futur, après un délai)", rule:"Après un délai → dans." },
+    ] },
+  enPendant: {
+    title:'EN ou PENDANT ?', icon:'⏳',
+    options:['en (temps nécessaire, résultat)','pendant (durée du déroulement)'],
+    tip:"EN + durée = temps nécessaire pour accomplir une action, achevée au terme de cette durée. PENDANT + durée = durée pendant laquelle une action se déroule, sans insister sur le résultat.",
+    examples:[
+      { sentence:"Il a appris à conduire ___ six mois.", correct:"en (temps nécessaire, résultat)", rule:"Temps nécessaire, achevé → en." },
+      { sentence:"Il a conduit ___ six heures.", correct:"pendant (durée du déroulement)", rule:"Durée du déroulement → pendant." },
+    ] },
+  plutotPlusTot: {
+    title:'PLUTÔT ou PLUS TÔT ?', icon:'⏱️',
+    options:['plutôt (préférence, un mot)','plus tôt (avant, deux mots)'],
+    tip:"PLUTÔT (un mot) exprime une préférence ou une nuance. PLUS TÔT (deux mots) signifie avant, plus vite que prévu — remplaçable par « plus tard » pour vérifier le sens.",
+    examples:[
+      { sentence:"Ils ont choisi d'aller au cinéma ___ qu'au théâtre.", correct:"plutôt (préférence, un mot)", rule:"Préférence → plutôt." },
+      { sentence:"Il est arrivé ___ que prévu.", correct:"plus tôt (avant, deux mots)", rule:"Avant l'heure prévue → plus tôt." },
+    ] },
+  aCeMomentEnCeMoment: {
+    title:'À CE MOMENT ou EN CE MOMENT ?', icon:'🕐',
+    options:['à ce moment (à une certaine époque)','en ce moment (maintenant)'],
+    tip:"À CE MOMENT(-LÀ) = à un certain moment, à cette époque (passé ou futur). EN CE MOMENT = maintenant, actuellement.",
+    examples:[
+      { sentence:"Mais ___-là, je n'étais pas à la maison.", correct:"à ce moment (à une certaine époque)", rule:"À cette époque passée → à ce moment(-là)." },
+      { sentence:"___ je ne travaille pas, je suis en congé.", correct:"en ce moment (maintenant)", rule:"Maintenant → en ce moment." },
+    ] },
+  ceciCela: {
+    title:'CECI ou CELA ?', icon:'👉',
+    options:['ceci (proche, ce qui va suivre)','cela (éloigné, ce qui vient d\'être dit)'],
+    tip:"CECI désigne ce qui est proche ou ce qui va suivre dans le discours. CELA désigne ce qui est éloigné ou ce qui vient d'être dit.",
+    examples:[
+      { sentence:"Écoutez bien ___ : la règle est importante.", correct:"ceci (proche, ce qui va suivre)", rule:"Annonce ce qui va suivre → ceci." },
+      { sentence:"Tu as oublié de fermer la porte. ___ peut être dangereux.", correct:"cela (éloigné, ce qui vient d'être dit)", rule:"Reprend ce qui vient d'être dit → cela." },
+    ] },
+  quoiQueQuoique: {
+    title:'QUOI QUE ou QUOIQUE ?', icon:'🔀',
+    options:['quoi que (quelle que soit la chose que)','quoique (bien que)'],
+    tip:"QUOI QUE (deux mots) = quelle que soit la chose que, + subjonctif. QUOIQUE (un mot) = bien que.",
+    examples:[
+      { sentence:"___ il dise, je maintiendrai ma décision.", correct:"quoi que (quelle que soit la chose que)", rule:"Quelle que soit la chose → quoi que." },
+      { sentence:"___ fatigué, il continue à travailler.", correct:"quoique (bien que)", rule:"Bien que → quoique." },
+    ] },
+  aFortioriDavantage: {
+    title:'SI TANT EST QUE ou TANT ET SI BIEN QUE ?', icon:'🔗',
+    options:['si tant est que (hypothèse)','tant et si bien que (conséquence)'],
+    tip:"SI TANT EST QUE + subjonctif = hypothèse (à supposer que). TANT ET SI BIEN QUE + indicatif = conséquence (de telle manière que).",
+    examples:[
+      { sentence:"Ils seront acceptés ___ ils soient actifs.", correct:"si tant est que (hypothèse)", rule:"Hypothèse → si tant est que." },
+      { sentence:"Il a insisté ___ il a fini par me convaincre.", correct:"tant et si bien que (conséquence)", rule:"Conséquence → tant et si bien que." },
+    ] },
   ilIlsElleElles: {
     title:'IL, ILS, ELLE ou ELLES ?', icon:'👤',
     options:['il (un homme/garçon)','ils (plusieurs, masc.)','elle (une femme/fille)','elles (plusieurs, fém.)'],
@@ -11342,7 +11598,7 @@ function saveBouquinageRead(read){
 }
 function markBouquinageRead(idx){
   const read = loadBouquinageRead();
-  read[idx] = true;
+  read[idx] = { read: true, lastAt: Date.now() };
   saveBouquinageRead(read);
 }
 function unmarkBouquinageRead(idx){
@@ -11353,6 +11609,24 @@ function unmarkBouquinageRead(idx){
 function isBouquinageRead(idx){
   const read = loadBouquinageRead();
   return !!read[idx];
+}
+/* 🎯 Compte combien d'éléments d'une catégorie ont été marqués faits AUJOURD'HUI — utilisé par
+   les objectifs configurables (1 Bouquinage, 1 Fiche, 1 Atelier, 1 Grammaire avancée…). */
+function isTodayTimestamp(ts){
+  if(!ts) return false;
+  return todayKey(new Date(ts)) === todayKey();
+}
+function countTodayBouquinageRead(){
+  const read = loadBouquinageRead();
+  return Object.values(read).filter(v => v && isTodayTimestamp(v.lastAt)).length;
+}
+function countTodayPassedInSection(section){
+  const results = loadSheetResults();
+  return Object.entries(results).filter(([sheetId, r]) => {
+    if(!r || !r.passed || !isTodayTimestamp(r.lastAt)) return false;
+    const sheet = PRACTICAL_SHEETS.find(s => s.id === sheetId);
+    return sheet && (sheet.section || 'pratique') === section;
+  }).length;
 }
 
 function blockBestPct(i){
@@ -11569,6 +11843,9 @@ function renderBlockSelect(){
       <button class="restart-btn" id="bouquinageBtn" style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#7C3AED,#5B21B6);color:#fff;box-shadow:0 4px 0 #4C1D95;">
         📖 Bouquinage
       </button>
+      <button class="restart-btn" id="avanceBtn" style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#0F766E,#115E59);color:#fff;box-shadow:0 4px 0 #134E4A;">
+        🎓 Grammaire Avancée
+      </button>
       ${toReviewCount > 0 ? `
       <button class="restart-btn" id="startReviewBtn" style="display:flex;align-items:center;gap:8px;">
         ⚠️ ${toReviewCount} mot${toReviewCount>1?'s':''} à revoir
@@ -11697,6 +11974,7 @@ function renderBlockSelect(){
   document.getElementById('practicalSheetsBtn').addEventListener('click', () => renderPracticalSheetsHome());
   document.getElementById('atelierBtn').addEventListener('click', () => renderAtelierHome());
   document.getElementById('bouquinageBtn').addEventListener('click', () => renderBouquinageHome());
+  document.getElementById('avanceBtn').addEventListener('click', () => renderGrammaireAvanceeHome());
   const questsHead = document.getElementById('questsHead');
   const questsChevron = document.getElementById('questsChevron');
   if(questsChevron){ questsChevron.style.transform = questsCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)'; }
@@ -23170,6 +23448,877 @@ const PRACTICAL_SHEETS = [
     ],
     note: "Astuce : se débarrasser → jeter. Envoyer vers quelqu'un → lancer.",
   },
+  // ============ 🎓 GRAMMAIRE AVANCÉE (B2-C1-C2) — compilation "Fiches de grammaire et de vocabulaire" ============
+  {
+    id: 'avance-gre-peutetre-plutot',
+    section: 'avance',
+    category: 'Locutions et adverbes',
+    icon: '💬',
+    title: '« Gré », « peut-être », « plutôt / plus tôt »',
+    intro: "Trois points de vocabulaire et de syntaxe soutenus, très fréquents à l'écrit.",
+    type: 'rule',
+    recoKey: 'plutotPlusTot',
+    blocks: [
+      { heading: '« Gré » dans les expressions figées', text: "Savoir gré (être reconnaissant) ; de bon gré / contre son gré (sans contrainte / contre sa volonté) ; au gré de (à la merci de, selon la convenance de) ; de gré à gré (à l'amiable).", examples: ['Je vous saurais gré de me répondre.', "S'il ne veut pas venir de bon gré, nous le punirons.", 'Je me laisse emporter au gré de mon imagination.', 'Ils traitent de gré à gré avec leurs patrons.'] },
+      { heading: '« Peut-être » : la position dans la phrase', text: "En tête de phrase : avec inversion (soutenu) ou avec « peut-être que » sans inversion. Au milieu/à la fin : jamais d'inversion. Devant un infinitif.", examples: ['Peut-être viendra-t-elle demain.', 'Peut-être que tu as raison.', 'Elle viendra peut-être demain.', 'Elle va peut-être partir.'] },
+      { heading: 'PLUTÔT vs PLUS TÔT', text: "Plutôt (un mot) = préférence, nuance, « assez ». Plus tôt (deux mots) = avant, plus vite que prévu — astuce : remplacer par « plus tard » pour vérifier.", examples: ['Ils ont choisi d\'aller au cinéma plutôt qu\'au théâtre.', 'Il fait plutôt chaud.', 'Il est arrivé plus tôt que prévu.'] },
+    ],
+  },
+  {
+    id: 'avance-locutions-prepositives-or',
+    section: 'avance',
+    category: 'Locutions et adverbes',
+    icon: '🔗',
+    title: 'Locutions prépositives et les valeurs de « or »',
+    intro: "Les couples au-dessus/au-dessous, par-dessus/par-dessous, et les trois emplois du mot « or ».",
+    type: 'rule',
+    blocks: [
+      { heading: 'Locutions prépositives de position', text: "Au-dessus de (plus haut) ; au-dessous de (plus bas) ; par-dessus (couvrir/passer au-dessus) ; par-dessous (passer/glisser en dessous).", examples: ['Le nuage est au-dessus de la maison.', 'Le sous-sol est au-dessous du rez-de-chaussée.', 'Il a mis un manteau par-dessus sa chemise.', 'Le chien est passé par-dessous la table.'] },
+      { heading: '« Or » : opposition / contraste', text: "Contradiction entre dire et faire, surprise par rapport aux attentes.", examples: ['Il disait qu\'il n\'avait pas faim. Or, il a mangé tout le gâteau !'] },
+      { heading: '« Or » : transition logique', text: "Constatation inattendue qui modifie la perception initiale.", examples: ["J'avais vérifié toutes les pièces avant de partir. Or, j'avais oublié la clé."] },
+      { heading: '« Or » : rappel d\'un fait connu', text: "Utilisé pour justifier une observation ou une conclusion.", examples: ["Les règles interdisent le téléphone au volant. Or, il était en train de répondre à un appel."] },
+    ],
+  },
+  {
+    id: 'avance-collocations-soi',
+    section: 'avance',
+    category: 'Locutions et adverbes',
+    icon: '🧩',
+    title: 'Collocations et le pronom « soi »',
+    intro: "Les associations de mots naturelles, et les trois emplois du pronom réfléchi « soi ».",
+    type: 'rule',
+    blocks: [
+      { heading: 'Collocations courantes', text: "Une collocation est une association fréquente et naturelle de mots.", examples: ['prendre une décision', 'avoir raison / tort', 'commettre une erreur', 'donner un conseil', 'rendre service', 'avoir lieu', 'poser une question', 'mener une vie'] },
+      { heading: '« Soi » : sujet indéterminé', text: "On, nul, personne, chacun…", examples: ['Dans la vie, c\'est chacun pour soi.'] },
+      { heading: '« Soi » : sujet non exprimé', text: "Infinitif ou forme impersonnelle.", examples: ['Avoir du temps pour soi.'] },
+      { heading: '« Soi » : complément d\'un nom', text: "", examples: ['L\'estime de soi est une composante fondamentale de la personnalité.'] },
+    ],
+  },
+  {
+    id: 'avance-quelquun-quitte-aussi',
+    section: 'avance',
+    category: 'Locutions et adverbes',
+    icon: '🔀',
+    title: '« Quelqu\'un de », « quitte à », « aussi » (inversion)',
+    intro: "Trois constructions à connaître pour éviter des erreurs fréquentes.",
+    type: 'rule',
+    blocks: [
+      { heading: 'Quelqu\'un de… / Quelque chose de…', text: "Toujours suivi d'un adjectif masculin.", examples: ['Elle est quelqu\'un de sérieux.', 'La nature est quelque chose de beau.'] },
+      { heading: 'Quitte à + infinitif', text: "Au risque de.", examples: ['Il va acheter cette maison, quitte à s\'endetter pour 10 ans.'] },
+      { heading: 'Quitte à… autant…', text: "Puisque c'est inévitable, autant le faire entièrement.", examples: ['Quitte à aller en ville, autant en profiter pour passer par la banque.'] },
+      { heading: '« Aussi » adverbe vs conjonction', text: "Adverbe (également) : pas d'inversion. Conjonction en tête de phrase (= c'est pourquoi) : inversion du sujet.", examples: ['Nicole est absente et Sylvie aussi.', 'Il y a une grève de transports. Aussi tous les vols sont-ils annulés.'] },
+    ],
+  },
+  {
+    id: 'avance-ainsi-pres-sinon',
+    section: 'avance',
+    category: 'Locutions et adverbes',
+    icon: '🔗',
+    title: '« Ainsi », « près / proche », « sinon »',
+    intro: "Trois points fréquents à l'écrit soutenu.",
+    type: 'rule',
+    blocks: [
+      { heading: '« Ainsi » en tête de phrase', text: "De cette manière, par conséquent. Peut entraîner l'inversion (soutenu), mais ce n'est pas obligatoire.", examples: ['Ainsi pouvons-nous conclure que…', 'Ainsi, nous pouvons conclure que… (sans inversion, avec virgule)'] },
+      { heading: 'PRÈS DE vs PROCHE DE', text: "Près de (invariable, proximité spatiale, avec un verbe d'action). Proche de (adjectif variable, proximité temporelle/spatiale/affective, avec être/sembler).", examples: ['Je passe les vacances près de Nice.', 'La fin est proche. Je me sens proche de lui.'] },
+      { heading: '« Sinon » : quatre sens', text: "Hypothèse négative (autrement) ; menace ; restriction (sauf) ; alternative (ou).", examples: ['Dépêchez-vous, sinon vous manquerez le train !', 'Que pouvons-nous demander sinon un peu de calme ?'] },
+    ],
+  },
+  {
+    id: 'avance-guere-jamais-apeine',
+    section: 'avance',
+    category: 'Locutions et adverbes',
+    icon: '📉',
+    title: '« Guère », « jamais », « à peine »',
+    intro: "Trois adverbes de faible degré ou de nuance temporelle.",
+    type: 'rule',
+    blocks: [
+      { heading: '« Guère » : faible degré', text: "Quantité (pas beaucoup), intensité (pas très) ou fréquence (pas souvent) — s'emploie surtout avec « ne », registre soutenu.", examples: ['Nous ne recevons guère de visiteurs.', 'Ce film n\'est guère intéressant.'] },
+      { heading: '« Jamais » : sens négatif et positif', text: "Sens négatif (à aucun moment) ou sens positif (à un moment quelconque, dans une question/condition).", examples: ['Ils ne sortent jamais.', 'Avez-vous jamais éprouvé une émotion pareille ?'] },
+      { heading: '« À peine » : trois sens', text: "À l'instant, venir juste de ; difficilement, presque pas ; tout juste.", examples: ["L'été commence à peine.", "J'ai à peine dormi.", 'Il a à peine quinze ans.'] },
+    ],
+  },
+  {
+    id: 'avance-moment-expressions',
+    section: 'avance',
+    category: 'Locutions et adverbes',
+    icon: '🕐',
+    title: 'Les expressions avec « moment »',
+    intro: "Cinq locutions courantes, plus la distinction essentielle « à ce moment » / « en ce moment ».",
+    type: 'rule',
+    recoKey: 'aCeMomentEnCeMoment',
+    blocks: [
+      { heading: 'Cinq expressions avec « moment »', text: "Par moments (parfois) ; pour le moment (en attendant) ; dans un moment (dans un instant) ; à tout moment (sans arrêt) ; sur le moment (à l'instant précis).", examples: ['Par moments, j\'ai l\'impression de vivre dans un film.', 'Pour le moment, il faut continuer à prendre des précautions.'] },
+      { heading: 'À CE MOMENT vs EN CE MOMENT', text: "À ce moment(-là) = à cette époque (passé/futur). En ce moment = maintenant, actuellement.", examples: ['Marie est passée me voir. Mais à ce moment-là, je n\'étais pas à la maison.', 'En ce moment je ne travaille pas.'] },
+      { heading: 'DU MOMENT QUE vs AU MOMENT OÙ', text: "Du moment que (cause : puisque). Au moment où (instant à partir duquel se déroule une action).", examples: ['Du moment que tu ne veux pas m\'aider, je vais contacter quelqu\'un d\'autre.', 'Il est arrivé au moment où je me disposais à sortir.'] },
+    ],
+  },
+  {
+    id: 'avance-vraiment-quoiquilensoit-encoreque',
+    section: 'avance',
+    category: 'Locutions et adverbes',
+    icon: '🔀',
+    title: '« Vraiment », « quoi qu\'il en soit », « encore que »',
+    intro: "Des nuances fines de négation et de concession.",
+    type: 'rule',
+    recoKey: 'quoiQueQuoique',
+    blocks: [
+      { heading: 'Position de « vraiment » dans la négation', text: "Change le sens selon la place par rapport au 2e élément de la négation.", examples: ['Cet exercice n\'est vraiment pas compliqué. (= pas du tout compliqué)', 'Cet exercice n\'est pas vraiment compliqué. (= pas tout à fait compliqué)'] },
+      { heading: 'QUOI QU\'IL EN SOIT', text: "Peu importe ce qui vient d'être dit, ce qui suit reste valable. Construction : quoi que + subjonctif.", examples: ['Je ne sais pas s\'il viendra. Quoi qu\'il en soit, nous commencerons à huit heures.'] },
+      { heading: 'ENCORE QUE', text: "Introduit une restriction ou une nuance à l'énoncé précédent (à distinguer de « mais », opposition directe).", examples: ['Il est très motivé. Encore que cela ne dure jamais longtemps.'] },
+    ],
+  },
+  {
+    id: 'avance-afortiori-toujours-bien',
+    section: 'avance',
+    category: 'Locutions et adverbes',
+    icon: '📈',
+    title: '« A fortiori », les emplois de « toujours » et de « bien »',
+    intro: "Une locution soutenue et deux adverbes aux sens multiples.",
+    type: 'rule',
+    blocks: [
+      { heading: 'A FORTIORI', text: "= à plus forte raison. Registre soutenu, introduit une conclusion encore plus évidente.", examples: ['Il ne peut déjà pas payer son loyer ; a fortiori, il ne peut pas acheter un appartement.'] },
+      { heading: '« Toujours » : six emplois', text: "Permanence, répétition, persistance (= encore), progression (= de plus en plus), concession (= avoir beau), possibilité qui demeure.", examples: ['Je t\'aimerai toujours.', 'Il habite toujours à Paris. (= encore)', 'Les prix sont toujours plus élevés.', 'Tu peux toujours protester, je ne changerai pas d\'avis.'] },
+      { heading: '« Bien » : cinq sens', text: "Manière, intensité (très), confirmation (effectivement), estimation (au moins), souhait atténué (volontiers).", examples: ['Elle parle bien français.', 'Il est bien fatigué.', 'C\'est bien lui que j\'ai vu.', 'Il y avait bien cent personnes.'] },
+    ],
+  },
+  {
+    id: 'avance-juste-justement-ceci-cela',
+    section: 'avance',
+    category: 'Locutions et adverbes',
+    icon: '🎯',
+    title: '« Juste / justement », « ceci / cela »',
+    intro: "Deux paires à ne pas confondre, très fréquentes à l'oral comme à l'écrit.",
+    type: 'rule',
+    recoKey: 'ceciCela',
+    blocks: [
+      { heading: 'JUSTE vs JUSTEMENT', text: "Juste = seulement (valeur restrictive), ou exactement. Justement = précisément (mise en relief, coïncidence).", examples: ['Je veux juste vous poser une question.', 'Il est arrivé juste à midi.', 'Je voulais justement vous parler de ce problème.'] },
+      { heading: 'CECI vs CELA', text: "Ceci désigne ce qui est proche ou ce qui va suivre. Cela désigne ce qui est éloigné ou ce qui vient d'être dit — dans le français courant, « cela » est beaucoup plus fréquent.", examples: ['Écoutez bien ceci : la règle est importante.', 'Tu as oublié de fermer la porte. Cela peut être dangereux.'] },
+    ],
+  },
+  {
+    id: 'avance-paronymes-1',
+    section: 'avance',
+    category: 'Paronymes',
+    icon: '🔍',
+    title: 'Partial/partiel, recouvrir/recouvrer, mettre à jour/au jour',
+    intro: "Trois paires de mots à ne surtout pas confondre.",
+    type: 'rule',
+    recoKey: 'partialPartiel',
+    blocks: [
+      { heading: 'PARTIAL vs PARTIEL', text: "Partial = qui prend parti sans souci de vérité, tendancieux. Partiel = qui constitue une partie d'un tout, incomplet.", examples: ['Un historien ne doit pas être partial.', 'Ce soir, on aura un résultat partiel des élections.'] },
+      { heading: 'RECOUVRIR vs RECOUVRER', text: "Recouvrir = couvrir, cacher, dissimuler. Recouvrer = rentrer en possession de ce qu'on n'a plus.", examples: ['Il voulait recouvrir son tatouage avec un oiseau.', 'Il a recouvré ses forces après cinq mois de confinement.'] },
+      { heading: 'METTRE À JOUR vs METTRE AU JOUR', text: "Mettre à jour = rendre actuel. Mettre au jour = dévoiler, faire apparaître ce qui était caché.", examples: ['Vous pouvez mettre à jour beaucoup d\'applications.', 'La construction du métro a mis au jour des ruines romaines.'] },
+    ],
+  },
+  {
+    id: 'avance-paronymes-2',
+    section: 'avance',
+    category: 'Paronymes',
+    icon: '🔤',
+    title: 'Mots à double genre, chiffre/nombre/numéro',
+    intro: "Des mots au genre flexible, et trois notions numériques à distinguer.",
+    type: 'rule',
+    blocks: [
+      { heading: 'Mots à double genre', text: "Certains mots acceptent indifféremment le masculin ou le féminin.", examples: ['un/une après-midi', 'aréna', 'hymne', 'interview', 'pamplemousse', 'parka', 'synopsis'] },
+      { heading: 'CHIFFRE vs NOMBRE vs NUMÉRO', text: "Chiffre = symbole qui représente les nombres. Nombre = valeur ou quantité. Numéro = identifiant, ordre dans une série.", examples: ['Le 2 est mon chiffre de chance.', 'Le nombre 24 est formé des chiffres 2 et 4.', 'Le numéro de passeport.'] },
+      { heading: 'DEUXIÈME vs SECOND', text: "Même sens. Deuxième quand l'énumération comporte plus de deux éléments ; second quand il n'y en a que deux.", examples: ['Paul est leur deuxième fils.', "C'était pendant la seconde guerre mondiale.", 'Seconde chance, second souffle, seconde nature.'] },
+    ],
+  },
+  {
+    id: 'avance-paronymes-3',
+    section: 'avance',
+    category: 'Paronymes',
+    icon: '✅',
+    title: 'Vrai/véritable/véridique, compliqué/complexe, continuation/continuité',
+    intro: "Trois trios et paires de nuances proches.",
+    type: 'rule',
+    blocks: [
+      { heading: 'VRAI, VÉRITABLE, VÉRIDIQUE', text: "Vrai = réel, authentique. Véritable = réellement ce que l'on dit, non falsifié. Véridique = qui dit la vérité.", examples: ['Marc est un vrai/véritable ami.', 'C\'est du cuir véritable.', 'Son témoignage était véridique.'] },
+      { heading: 'COMPLIQUÉ vs COMPLEXE', text: "Compliqué = beaucoup d'éléments difficiles à analyser, confus. Complexe = composé d'éléments aux rapports différents.", examples: ['Je suis dans une situation amoureuse compliquée.', 'Le cerveau humain est un organe complexe.'] },
+      { heading: 'CONTINUATION vs CONTINUITÉ', text: "Continuation = action de poursuivre. Continuité = état de ce qui est continu, non interrompu.", examples: ['L\'écriture est la continuation de la vie.', 'Il a fallu assurer la continuité pédagogique.'] },
+    ],
+  },
+  {
+    id: 'avance-paronymes-4',
+    section: 'avance',
+    category: 'Paronymes',
+    icon: '🆕',
+    title: 'Nouveau/neuf, jadis/naguère, colorer/colorier/coloriser',
+    intro: "Des nuances de fraîcheur, d'ancienneté et de mise en couleur.",
+    type: 'rule',
+    blocks: [
+      { heading: 'NOUVEAU vs NEUF', text: "Nouveau = qui vient d'apparaître ou remplace quelqu'un/quelque chose. Neuf = qui n'a jamais/peu servi.", examples: ['Un nouveau vaccin.', 'Une maison neuve.', 'Une nouvelle voiture (qui remplace celle qu\'on a) vs une voiture neuve (qui vient d\'être fabriquée).'] },
+      { heading: 'JADIS vs NAGUÈRE', text: "Jadis = il y a très longtemps. Naguère = il y a très peu de temps. (Autrefois est plus standard.)", examples: ['Jadis, tous les continents formaient un supercontinent.', 'Naguère, les appels internationaux coûtaient cher.'] },
+      { heading: 'COLORER, COLORIER, COLORISER', text: "Colorer = donner une couleur. Colorier = appliquer des couleurs sur une surface. Coloriser = mettre en couleur un film noir et blanc.", examples: ['Un festival de montgolfières colore le ciel.', 'Les enfants adorent les albums à colorier.', 'Il est possible de coloriser des photos noir et blanc.'] },
+    ],
+  },
+  {
+    id: 'avance-paronymes-5',
+    section: 'avance',
+    category: 'Paronymes',
+    icon: '⏰',
+    title: 'Tout à coup/tout d\'un coup, de nouveau/à nouveau, par la suite/par suite de',
+    intro: "Trois paires temporelles et logiques à distinguer.",
+    type: 'rule',
+    recoKey: 'toutACoupToutDunCoup',
+    blocks: [
+      { heading: 'TOUT À COUP vs TOUT D\'UN COUP', text: "Tout à coup = soudain. Tout d'un coup = d'un seul coup, tout en une fois.", examples: ['Tout à coup, il a sorti un revolver.', 'La maison s\'est écroulée tout d\'un coup.'] },
+      { heading: 'DE NOUVEAU vs À NOUVEAU', text: "De nouveau = encore une fois. À nouveau = encore une fois mais différemment.", examples: ['Elle a téléphoné de nouveau.', 'Ils doivent faire tous les exercices à nouveau.'] },
+      { heading: 'PAR LA SUITE vs PAR SUITE DE', text: "Par la suite = ensuite, plus tard. Par suite de = à cause de.", examples: ['Vous ne pourrez plus le modifier par la suite.', 'Les vols sont annulés par suite du mauvais temps.'] },
+    ],
+  },
+  {
+    id: 'avance-paronymes-6',
+    section: 'avance',
+    category: 'Paronymes',
+    icon: '🩺',
+    title: 'Humain/humanitaire/humaniste, endémie/épidémie/pandémie, éclaircir/éclairer',
+    intro: "Trois familles de mots proches, fréquentes à l'écrit informatif.",
+    type: 'rule',
+    blocks: [
+      { heading: 'HUMAIN, HUMANITAIRE, HUMANISTE', text: "Humain = propre à l'homme, compréhensif. Humanitaire = qui vise à améliorer les conditions de vie. Humaniste = relatif à l'humanisme philosophique.", examples: ['Une erreur humaine.', 'Un voyage humanitaire.', 'Rabelais était un écrivain humaniste.'] },
+      { heading: 'ENDÉMIE, ÉPIDÉMIE, PANDÉMIE', text: "Endémie = présence habituelle d'une maladie dans une région. Épidémie = croissance rapide dans une région. Pandémie = épidémie dépassant les frontières.", examples: [] },
+      { heading: 'ÉCLAIRCIR vs ÉCLAIRER', text: "Éclaircir = rendre plus clair, élucider. Éclairer = donner de la clarté ; informer, expliquer.", examples: ['Le détective a éclairci l\'énigme.', 'Le Ministre a éclairé la population sur l\'évolution de la pandémie.'] },
+    ],
+  },
+  {
+    id: 'avance-paronymes-7',
+    section: 'avance',
+    category: 'Paronymes',
+    icon: '📐',
+    title: 'Inclination/inclinaison, enfantin/infantile, dédoubler/redoubler, prolongation/prolongement',
+    intro: "Quatre paires morphologiquement proches mais sémantiquement distinctes.",
+    type: 'rule',
+    blocks: [
+      { heading: 'INCLINATION vs INCLINAISON', text: "Inclination = goût, affection, mouvement du corps. Inclinaison = état de ce qui est incliné par rapport à un axe.", examples: ['J\'avais une forte inclination pour deux métiers.', 'L\'inclinaison du toit varie selon les zones climatiques.'] },
+      { heading: 'ENFANTIN vs INFANTILE', text: "Enfantin = relatif au monde de l'enfance, simple. Infantile = (médecine) relatif à l'enfant en bas âge ; péjoratif pour un adulte (immature).", examples: ['Il a un visage enfantin.', 'Son mari a un comportement infantile.'] },
+      { heading: 'DÉDOUBLER vs REDOUBLER', text: "Dédoubler = partager, diviser en deux (scolaire/organisationnel). Redoubler = multiplier par deux, augmenter l'intensité ; suivre une classe une 2e fois.", examples: ['Cette classe est très nombreuse. Il faut la dédoubler.', 'Son fils a redoublé sa quatrième.'] },
+      { heading: 'PROLONGATION vs PROLONGEMENT', text: "Prolongation = notion de durée (temps). Prolongement = accroissement dans l'espace.", examples: ['Une prolongation de séjour.', 'Des travaux de prolongement de la route.'] },
+    ],
+  },
+  {
+    id: 'avance-paronymes-8',
+    section: 'avance',
+    category: 'Paronymes',
+    icon: '🔬',
+    title: 'Familial/familier, compréhensible/compréhensif, infecter/infester',
+    intro: "Trois paires d'adjectifs à la finale trompeuse.",
+    type: 'rule',
+    blocks: [
+      { heading: 'FAMILIAL vs FAMILIER', text: "Familial (masc. plur. familiaux) = qui concerne la famille. Familier = connu, habituel ; ou impoli.", examples: ['Les conflits familiaux.', 'Sa voix m\'est familière.', 'Il est trop familier avec sa voisine.'] },
+      { heading: 'COMPRÉHENSIBLE vs COMPRÉHENSIF', text: "Compréhensible = qui peut se comprendre, clair. Compréhensif = qui comprend les autres avec sympathie, bienveillant.", examples: ['Son attitude est compréhensible.', 'Ce professeur est vraiment compréhensif.'] },
+      { heading: 'INFECTER vs INFESTER', text: "Infecter = provoquer une infection par contamination. Infester = envahir (sans idée d'infection).", examples: ['Ma blessure s\'est infectée.', 'Une jungle infestée de moustiques.'] },
+    ],
+  },
+  {
+    id: 'avance-paronymes-9',
+    section: 'avance',
+    category: 'Paronymes',
+    icon: '🎼',
+    title: 'Ballade/balade, à l\'encontre/à la rencontre, à la faveur/en faveur',
+    intro: "Trois paires très pièges, souvent confondues à l'écrit.",
+    type: 'rule',
+    recoKey: 'balladeBalade',
+    blocks: [
+      { heading: 'BALLADE vs BALADE', text: "Ballade (deux L) = poème à forme fixe / chanson. Balade (un L) = promenade.", examples: ['« La ballade des pendus » de François Villon.', 'Les enfants sont sortis faire une balade dans les bois.'] },
+      { heading: 'À L\'ENCONTRE DE vs À LA RENCONTRE DE', text: "À l'encontre de = contre, en opposition à. À la rencontre de = vers quelqu'un pour le rencontrer.", examples: ['Cette décision va à l\'encontre de nos principes.', 'Elle est allée à la rencontre de ses invités.'] },
+      { heading: 'À LA FAVEUR DE vs EN FAVEUR DE', text: "À la faveur de = en profitant de, à l'occasion d'une circonstance favorable. En faveur de = pour, au profit de.", examples: ['À la faveur de la nuit, les prisonniers se sont échappés.', 'La majorité des députés a voté en faveur de la réforme.'] },
+    ],
+  },
+  {
+    id: 'avance-paronymes-10',
+    section: 'avance',
+    category: 'Paronymes',
+    icon: '🔢',
+    title: 'Sans cesse/incessamment, entre/parmi, davantage/d\'avantage(s)',
+    intro: "Trois distinctions fines, fréquentes en expression écrite soutenue.",
+    type: 'rule',
+    recoKey: 'sansCesseIncessamment',
+    blocks: [
+      { heading: 'SANS CESSE vs INCESSAMMENT', text: "Sans cesse = continuellement. Incessamment = aujourd'hui, très prochainement (sens ancien : sans cesse, aujourd'hui littéraire/vieilli).", examples: ['Il se plaint sans cesse.', 'Les résultats seront publiés incessamment.'] },
+      { heading: 'ENTRE vs PARMI', text: "Entre met en relation des éléments individualisés. Parmi indique l'appartenance à un ensemble.", examples: ['Il hésite entre trois solutions.', 'Parmi les candidats, trois ont été retenus.'] },
+      { heading: 'DAVANTAGE vs D\'AVANTAGE(S)', text: "Davantage (adverbe) = plus. D'avantage(s) (de + nom) = de bénéfice, d'intérêt.", examples: ['Il faut travailler davantage.', 'Je ne vois pas d\'avantage à cette solution.'] },
+    ],
+  },
+  {
+    id: 'avance-paronymes-11',
+    section: 'avance',
+    category: 'Paronymes',
+    icon: '🎣',
+    title: 'Hâler/haler, censé/sensé, prémices/prémisses, pécheur/pêcheur',
+    intro: "Quatre paires d'homophones ou quasi-homophones classiques des dictées avancées.",
+    type: 'rule',
+    recoKey: 'halerHaler',
+    blocks: [
+      { heading: 'HÂLER vs HALER', text: "Hâler (avec accent) = brunir la peau au soleil. Haler (sans accent) = tirer avec un cordage (maritime).", examples: ['Le soleil lui a hâlé le visage.', 'Les marins halent le bateau jusqu\'au quai.'] },
+      { heading: 'CENSÉ vs SENSÉ', text: "Censé = supposé (+ infinitif). Sensé = qui a du bon sens (contient « sens »).", examples: ['Il est censé arriver à huit heures.', 'C\'est une personne sensée.'] },
+      { heading: 'PRÉMICES vs PRÉMISSES', text: "Prémices = premiers signes. Prémisses = point de départ d'un raisonnement.", examples: ['Les prémices d\'une crise.', 'Le raisonnement repose sur des prémisses erronées.'] },
+      { heading: 'PÉCHEUR vs PÊCHEUR', text: "Pécheur (sans accent circonflexe) = qui commet un péché. Pêcheur (avec) = qui pratique la pêche.", examples: ['Un pécheur demande pardon.', 'Les pêcheurs rentrent au port.'] },
+    ],
+  },
+  {
+    id: 'avance-paronymes-12',
+    section: 'avance',
+    category: 'Paronymes',
+    icon: '🏙️',
+    title: 'Attirant/attractif, exposé/exposition, savoir/connaître',
+    intro: "Trois distinctions utiles à l'oral comme à l'écrit.",
+    type: 'rule',
+    blocks: [
+      { heading: 'ATTIRANT vs ATTRACTIF', text: "Attirant = qui attire, séduit (surtout personne/chose). Attractif = qui possède des caractéristiques attirantes (offre, prix, lieu).", examples: ['Une personne attirante.', 'Des prix attractifs.'] },
+      { heading: 'UN EXPOSÉ vs UNE EXPOSITION', text: "Exposé = présentation orale/écrite d'un sujet (scolaire). Exposition = présentation au public d'œuvres/objets.", examples: ['Demain, je fais un exposé sur Victor Hugo.', 'Nous avons visité une exposition de photographies.'] },
+      { heading: 'SAVOIR vs CONNAÎTRE', text: "Savoir = posséder une information (avec infinitif, proposition, mot interrogatif). Connaître = avoir une connaissance de quelqu'un/quelque chose.", examples: ['Je sais qui il est.', 'Je connais Paul.', 'Je sais son nom mais je ne le connais pas personnellement.'] },
+    ],
+  },
+  {
+    id: 'avance-paronymes-13',
+    section: 'avance',
+    category: 'Paronymes',
+    icon: '📝',
+    title: 'Différent/différant, pli/pliage, vacances/séjour/villégiature',
+    intro: "Des nuances de registre et de sens souvent négligées.",
+    type: 'rule',
+    blocks: [
+      { heading: 'DIFFÉRENT vs DIFFÉRANT', text: "Différent (adjectif) = qui n'est pas le même. Différant (participe présent de différer, rare) = qui diffère.", examples: ['Nous avons des opinions différentes.', 'Les deux rapports, différant sur plusieurs points, ont été réexaminés.'] },
+      { heading: 'PLI vs PLIAGE', text: "Pli = marque produite en repliant (le résultat). Pliage = action ou technique de plier (l'action).", examples: ['Cette chemise a un pli sur la manche.', 'Le pliage de cette carte est très simple.'] },
+      { heading: 'VACANCES, SÉJOUR, VILLÉGIATURE', text: "Vacances = période de repos. Séjour = temps passé dans un lieu. Villégiature (soutenu) = séjour de repos dans un lieu agréable.", examples: ['Nous partons en vacances en août.', 'Nous avons effectué un séjour de deux semaines en Bretagne.', 'Cette station balnéaire est un haut lieu de villégiature.'] },
+    ],
+  },
+  {
+    id: 'avance-paronymes-14',
+    section: 'avance',
+    category: 'Paronymes',
+    icon: '📦',
+    title: 'Passage/passation, arrivée/arrivage, humeur/humour, essai/essayage',
+    intro: "Quatre paires de noms dérivés du même verbe mais de sens différent.",
+    type: 'rule',
+    blocks: [
+      { heading: 'PASSAGE vs PASSATION', text: "Passage = action de passer. Passation = transmission officielle (pouvoir, contrat, test).", examples: ['Le passage des piétons est interdit.', 'La passation de pouvoirs aura lieu lundi.'] },
+      { heading: 'ARRIVÉE vs ARRIVAGE', text: "Arrivée = arrivée d'une personne, d'un véhicule. Arrivage = quantité de marchandises qui arrive.", examples: ['L\'arrivée du train est annoncée.', 'Un arrivage de fruits frais est attendu.'] },
+      { heading: 'HUMEUR vs HUMOUR', text: "Humeur = état d'esprit. Humour = capacité à faire rire.", examples: ['Elle est de bonne humeur ce matin.', 'Il a beaucoup d\'humour.'] },
+      { heading: 'ESSAI vs ESSAYAGE', text: "Essai = tentative, test. Essayage = action d'essayer un vêtement.", examples: ['Fais un essai avant de choisir.', 'L\'essayage de la robe a duré une heure.'] },
+    ],
+  },
+  {
+    id: 'avance-commemorer-celebrer',
+    section: 'avance',
+    category: 'Paronymes',
+    icon: '🎉',
+    title: 'Commémorer, célébrer, rendre hommage',
+    intro: "Trois façons de marquer un événement, avec des nuances distinctes.",
+    type: 'rule',
+    blocks: [
+      { heading: 'Les trois nuances', text: "Commémorer = se souvenir officiellement (mémoire collective). Célébrer = marquer un événement avec joie. Rendre hommage à = montrer son respect ou sa reconnaissance.", examples: ['On commémore la fin de la guerre.', 'On célèbre un anniversaire.', 'Les élèves rendent hommage à leur professeur.'] },
+    ],
+  },
+  {
+    id: 'avance-duree-present',
+    section: 'avance',
+    category: 'Expression du temps',
+    icon: '⏱️',
+    title: 'La durée au présent : depuis, pour, pendant, en',
+    intro: "Quatre prépositions temporelles à ne pas confondre.",
+    type: 'rule',
+    blocks: [
+      { heading: 'DEPUIS', text: "Origine d'une action/situation toujours actuelle.", examples: ['Je suis marié depuis 10 ans.'] },
+      { heading: 'POUR', text: "Durée prévue.", examples: ["J'ai du travail pour trois semaines."] },
+      { heading: 'PENDANT', text: "Durée d'une action.", examples: ['Nous faisons des exercices pendant dix minutes.'] },
+      { heading: 'EN', text: "Durée de réalisation.", examples: ['Je fais le ménage en 30 minutes.'] },
+    ],
+  },
+  {
+    id: 'avance-des-depuis-en-dans-pendant',
+    section: 'avance',
+    category: 'Expression du temps',
+    icon: '⏳',
+    title: 'Dès/depuis, en/dans, en/pendant',
+    intro: "Trois distinctions temporelles fines, très fréquentes en production écrite.",
+    type: 'rule',
+    recoKey: 'desDepuis',
+    blocks: [
+      { heading: 'DÈS vs DEPUIS', text: "Dès + moment met l'accent sur le point de départ (immédiateté). Depuis + moment présente une situation toujours valable maintenant.", examples: ['Dès son arrivée, il s\'est mis au travail.', 'Il travaille ici depuis 2022.'] },
+      { heading: 'EN vs DANS (localisation dans le temps)', text: "En + durée = temps nécessaire pour accomplir une action. Dans + durée = moment où une action aura lieu, après un délai.", examples: ['Il a terminé son travail en deux heures.', 'Je reviens dans une heure.'] },
+      { heading: 'EN vs PENDANT', text: "En + durée = temps nécessaire, résultat achevé. Pendant + durée = durée du déroulement, sans insister sur le résultat.", examples: ['Il a appris à conduire en six mois.', 'Il a conduit pendant six heures.'] },
+    ],
+  },
+  {
+    id: 'avance-simultaneite-apres-infinitif',
+    section: 'avance',
+    category: 'Expression du temps',
+    icon: '🔀',
+    title: 'La simultanéité et « après + infinitif passé »',
+    intro: "Conjonctions de simultanéité, et la construction pour deux actions successives.",
+    type: 'rule',
+    blocks: [
+      { heading: 'Simultanéité : trois conjonctions', text: "Tant que / aussi longtemps que (deux actions qui durent ensemble) ; à mesure que (deux actions qui évoluent ensemble) ; chaque fois que (deux actions qui se répètent ensemble).", examples: ["Tant qu'il y a de la vie, il y a de l'espoir.", 'L\'inquiétude grandit à mesure que le temps passe.', 'Chaque fois que je te vois, c\'est une joie.'] },
+      { heading: 'APRÈS + infinitif passé', text: "Deux actions successives, même sujet grammatical. Attention à l'auxiliaire du participe passé !", examples: ['Après avoir fait les courses, je suis rentrée chez moi.', 'Après m\'être levée, j\'ai pris une douche.'] },
+    ],
+  },
+  {
+    id: 'avance-cause-prepositions',
+    section: 'avance',
+    category: 'Cause, conséquence, condition',
+    icon: '🔍',
+    title: "Exprimer la cause : le choix des prépositions",
+    intro: "DE, POUR, PAR : chacune correspond à un type de cause.",
+    type: 'rule',
+    blocks: [
+      { heading: 'DE — cause émotionnelle/physique', text: "", examples: ['trembler de peur', 'mourir de rire'] },
+      { heading: 'POUR — sanction ou reconnaissance', text: "", examples: ['condamné pour corruption', 'récompensé pour acte d\'héroïsme', 'condamné pour avoir tué sa femme (+ infinitif passé)'] },
+      { heading: 'PAR — réglementation ou sentiment général', text: "", examples: ['par mesure de sécurité', 'par amour, par haine'] },
+    ],
+  },
+  {
+    id: 'avance-faute-de-sous-pretexte-histoire-de',
+    section: 'avance',
+    category: 'Cause, conséquence, condition',
+    icon: '🎯',
+    title: 'Faute de/à défaut de, sous prétexte de/que, histoire de',
+    intro: "Trois constructions causales fines.",
+    type: 'rule',
+    recoKey: 'fauteDeADefautDe',
+    blocks: [
+      { heading: 'FAUTE DE vs À DÉFAUT DE', text: "Faute de = cause due à un manque. À défaut de = solution de remplacement en l'absence de quelque chose.", examples: ['Faute de temps, nous avons annulé la réunion.', 'À défaut de voiture, nous prendrons le train.'] },
+      { heading: 'SOUS PRÉTEXTE DE + infinitif vs QUE + proposition', text: "De + infinitif : même sujet. Que + proposition : sujet identique ou différent.", examples: ['Il est parti sous prétexte d\'avoir un rendez-vous.', 'Il est parti sous prétexte que sa femme était malade.'] },
+      { heading: 'HISTOIRE DE + infinitif', text: "Faire quelque chose pour un objectif limité (≈ juste pour), surtout à l'oral.", examples: ['Je sors histoire de prendre l\'air.', 'On va boire un café histoire de discuter un peu.'] },
+    ],
+  },
+  {
+    id: 'avance-dautant-plus-noms-cause',
+    section: 'avance',
+    category: 'Cause, conséquence, condition',
+    icon: '➕',
+    title: '« D\'autant plus que » et les noms de cause',
+    intro: "Intensifier une cause, et les nuances entre fondements, motifs, mobile, motivation.",
+    type: 'rule',
+    blocks: [
+      { heading: 'D\'AUTANT PLUS/MOINS/MIEUX QUE', text: "Une cause s'ajoute à une autre en introduisant une idée d'intensité.", examples: ['Ce soir, elle est d\'autant plus fatiguée qu\'elle est rentrée du bureau à pied.', 'Elle parle d\'autant mieux le français qu\'elle a vécu cinq ans à Paris.'] },
+      { heading: 'Noms de cause : fondements, motifs, mobile, motivation', text: "Fondements = bases solides (institutions, valeurs). Motifs = raisons précises et exprimées. Mobile = raison secrète, cachée. Motivation = élan intérieur.", examples: ['Les fondements de la démocratie.', 'Il a donné les motifs de son refus.', 'On cherche encore le mobile de ce crime.', 'La motivation des élèves est essentielle.'] },
+    ],
+  },
+  {
+    id: 'avance-verbes-cause-effort',
+    section: 'avance',
+    category: 'Cause, conséquence, condition',
+    icon: '💪',
+    title: 'Verbes de cause et d\'effort en vue d\'un but',
+    intro: "Engendrer/susciter/générer/motiver, et s'efforcer/s'évertuer/s'ingénier.",
+    type: 'rule',
+    blocks: [
+      { heading: 'Quatre verbes de cause', text: "Engendrer (produire progressivement) ; susciter (faire naître un sentiment, immédiat) ; générer (résultat mesurable, économique/technique) ; motiver (justifier, ou donner envie).", examples: ['Le manque de sommeil engendre de la fatigue.', 'Son discours a suscité de nombreuses réactions.', 'Cette activité génère beaucoup de revenus.'] },
+      { heading: 'Trois verbes d\'effort (gradation)', text: "S'efforcer de (courant à soutenu) ; s'évertuer à (soutenu, persévérance) ; s'ingénier à (très soutenu, ingéniosité).", examples: ['Il s\'efforce de rester calme.', 'Elle s\'évertue à convaincre ses collègues.', 'Il s\'ingénie à trouver une solution originale.'] },
+    ],
+  },
+  {
+    id: 'avance-consequence-expressions',
+    section: 'avance',
+    category: 'Cause, conséquence, condition',
+    icon: '➡️',
+    title: 'Expressions de conséquence : dès lors, du coup, et les elliptiques',
+    intro: "Des connecteurs de conséquence, du plus soutenu au plus familier.",
+    type: 'rule',
+    blocks: [
+      { heading: 'DÈS LORS vs DU COUP', text: "Dès lors (soutenu) = résultat lié au temps ou à un argument. Du coup (familier) = conséquence brusque, inattendue.", examples: ['Dès lors, les déplacements entre les régions sont autorisés.', 'J\'ai eu un malaise. Du coup, j\'ai fini aux urgences.'] },
+      { heading: 'Expressions elliptiques de conséquence', text: "Morale de l'histoire ; d'où ; résultat : ; total : (familier) ; bilan : (presse).", examples: ['Il a été très malade. D\'où sa fatigue.', 'Un camion dérape sur l\'autoroute. Bilan : cinq morts.'] },
+      { heading: 'Noms de conséquence', text: "Conséquence (terme général) ; effet (résultat mesurable) ; fruit (résultat positif d'un effort) ; retentissement (répercussion médiatique).", examples: ['Cette décision a eu de graves conséquences.', 'Ce succès est le fruit de sa persévérance.', 'Cette affaire a eu un grand retentissement médiatique.'] },
+    ],
+  },
+  {
+    id: 'avance-condition-locutions-conjonctions',
+    section: 'avance',
+    category: 'Cause, conséquence, condition',
+    icon: '🔀',
+    title: 'Expression de la condition : locutions et conjonctions',
+    intro: "Avec/sans + nom, en cas de, et les conjonctions à condition que/pourvu que/pour peu que/au cas où.",
+    type: 'rule',
+    blocks: [
+      { heading: 'Prépositions + nom', text: "Avec (si + moyen) ; sans (hypothèse négative) ; en cas de (au cas où) ; à défaut de (hypothèse négative + substitution).", examples: ['Avec ce médicament, vous vous sentirez rajeunir.', 'En cas de symptômes, appelez le 15 !'] },
+      { heading: 'Conjonctions + subjonctif', text: "À condition que (valeur générale) ; pourvu que (condition nécessaire) ; pour peu que (condition minimale) ; à supposer que (hypothèse choisie).", examples: ['Je te prêterai mon livre à condition que tu me le rendes demain.', 'Pour peu qu\'il fasse beau, nous déjeunerons dehors.'] },
+      { heading: 'AU CAS OÙ + conditionnel', text: "Exprime une éventualité. Ni subjonctif ni futur après « au cas où ».", examples: ['Au cas où vous auriez besoin d\'aide, appelez-moi.'] },
+    ],
+  },
+  {
+    id: 'avance-negation-combinaisons-articles',
+    section: 'avance',
+    category: 'Négation',
+    icon: '🚫',
+    title: 'Combinaisons de négations et articles en phrase négative',
+    intro: "Cumuler plusieurs mots négatifs, et le passage de l'article partitif à « de ».",
+    type: 'rule',
+    blocks: [
+      { heading: 'Combinaisons de négations', text: "Ne… jamais personne ; ne… personne nulle part ; ne… plus personne ; ne… jamais rien ; ne… rien nulle part.", examples: ['Il n\'invite jamais personne.', 'Je n\'attends plus personne.'] },
+      { heading: 'Articles en phrase négative', text: "L'article partitif/indéfini devient « de » en négation — sauf si on oppose deux noms.", examples: ["J'ai de la chance → Je n'ai pas de chance.", 'Il n\'a pas mangé de la viande mais du poisson.'] },
+    ],
+  },
+  {
+    id: 'avance-negation-restrictive-explicite',
+    section: 'avance',
+    category: 'Négation',
+    icon: '⚠️',
+    title: 'Négation à valeur positive, et le « ne » employé seul',
+    intro: "Ne… que, non sans, rien que ; et le « ne » explétif du registre soutenu.",
+    type: 'rule',
+    blocks: [
+      { heading: 'Constructions négatives à valeur positive', text: "Ne… que (seulement) ; non sans (soutenu, avec) ; rien que (seulement).", examples: ['Je ne bois que de l\'eau.', 'Cet étudiant a réussi, non sans difficulté.', 'Il retient toutes ses leçons rien qu\'en écoutant le professeur.'] },
+      { heading: '« Ne » employé seul (soutenu)', text: "Avec cesser/oser/pouvoir/savoir ; dans une subordonnée en « si » ; après « cela fait… que ».", examples: ['Il ne cesse de pleuvoir.', 'Si je ne me trompe, il est parti à 5 heures.'] },
+      { heading: 'Le « ne » explétif', text: "Renforce antériorité, crainte ou inégalité, sans valeur négative. Après avant que/sans que/à moins que ; après une crainte ; après un comparatif d'inégalité.", examples: ['Rentrez avant qu\'il ne soit trop tard.', 'Il craint qu\'elle ne veuille partir.', 'Elle est moins timide qu\'elle ne le semble.'] },
+    ],
+  },
+  {
+    id: 'avance-verbes-se-passer-croire-compter',
+    section: 'avance',
+    category: 'Constructions verbales',
+    icon: '🔀',
+    title: 'Les constructions de « se passer », « croire », « compter »',
+    intro: "Trois verbes aux constructions multiples selon la préposition.",
+    type: 'rule',
+    blocks: [
+      { heading: 'SE PASSER', text: "S'écouler (temps) ; avoir lieu ; se passer qqch (échanger) ; se passer de (se priver).", examples: ['Les jours se passent lentement.', 'L\'action se passe en 1959.', 'Peu de gens peuvent se passer d\'écrans.'] },
+      { heading: 'CROIRE', text: "Croire qqn (estimer vrai) ; croire à qqn (se fier) ; croire qqch (tenir pour vrai) ; croire à qqch (foi en son efficacité) ; croire en (confiance).", examples: ['Je ne crois pas ton frère.', 'Il ne faut pas croire aux voyants.', 'Je crois en Dieu.'] },
+      { heading: 'COMPTER', text: "Compter qqch/qqn (quantité) ; compter pour (avoir de l'importance) ; compter sur (s'appuyer) ; compter avec (tenir compte de).", examples: ['Avez-vous compté les étudiants absents ?', 'Votre opinion compte beaucoup pour nous.', 'Nous comptons sur lui.'] },
+    ],
+  },
+  {
+    id: 'avance-decider-refuser-essayer-pronominal',
+    section: 'avance',
+    category: 'Constructions verbales',
+    icon: '🎯',
+    title: '« Décider », et les constructions pronominales (se refuser à, se décider à)',
+    intro: "Un verbe à quatre constructions, et la nuance entre forme simple et forme pronominale.",
+    type: 'rule',
+    blocks: [
+      { heading: 'DÉCIDER : quatre constructions', text: "Décider qqch (décréter) ; décider de qqch (choisir) ; décider qqn à faire (déterminer) ; décider de/que (prendre une décision).", examples: ['Le gouvernement a décidé le confinement.', 'Le gouvernement a décidé de fermer les écoles.'] },
+      { heading: 'Forme simple vs forme pronominale', text: "Refuser de / se refuser à ; décider de / se décider à ; essayer de / s'essayer à — la forme pronominale indique souvent un moment d'hésitation.", examples: ['Il refuse de parler en public.', 'Il s\'est refusé à collaborer.', 'Il s\'est décidé à démissionner.'] },
+    ],
+  },
+  {
+    id: 'avance-pardonner-avoir-affaire',
+    section: 'avance',
+    category: 'Constructions verbales',
+    icon: '🤝',
+    title: '« Pardonner » et « avoir affaire / avoir à faire »',
+    intro: "Une construction verbale complexe et une paire souvent confondue.",
+    type: 'rule',
+    blocks: [
+      { heading: 'PARDONNER', text: "Construction de référence : pardonner qqch à qqn (la faute = COD, la personne = COI).", examples: ['Je lui pardonne son erreur.', 'Je pardonne à Paul.', 'Je lui pardonne d\'avoir menti.'] },
+      { heading: 'Le piège « pardonner quelqu\'un »', text: "Attesté chez certains écrivains mais rare et à éviter dans l'usage soigné — en revanche le passif avec une personne est correct.", examples: ['Paul est pardonné.', 'Vous êtes tout pardonné.'] },
+      { heading: 'AVOIR AFFAIRE vs AVOIR À FAIRE', text: "Avoir affaire = se trouver en présence de quelqu'un. Avoir à faire = avoir du travail à réaliser.", examples: ['Il aura affaire à mon frère.', 'J\'ai beaucoup de choses à faire.'] },
+    ],
+  },
+  {
+    id: 'avance-suppression-article-pronominalisation',
+    section: 'avance',
+    category: 'Constructions verbales',
+    icon: '🔤',
+    title: 'Suppression de l\'article, et pronominalisation (lui / y / à lui)',
+    intro: "Les locutions verbales sans article, et le choix entre lui, y et à lui.",
+    type: 'rule',
+    blocks: [
+      { heading: 'Suppression de l\'article', text: "J'ai faim, soif, sommeil, envie, mal, honte, confiance — sans article. Article rétabli si le nom est qualifié.", examples: ['j\'ai une faim de loup', 'une confiance aveugle'] },
+      { heading: 'Pronominalisation : LUI / Y / À LUI', text: "À quelqu'un → lui (téléphoner à qqn). À quelque chose / lieu → y (réfléchir à qqch, aller à Paris). Double construction (penser, s'opposer) → y pour une chose, à lui/elle pour une personne.", examples: ['Tu téléphoneras à Paul ? Oui, je lui téléphonerai.', 'Vous allez à Paris ? Oui, j\'y vais.', 'Il s\'oppose à son frère ? Oui, il s\'oppose à lui.'] },
+    ],
+  },
+  {
+    id: 'avance-verbes-infinitif-preposition',
+    section: 'avance',
+    category: 'Constructions verbales',
+    icon: '📐',
+    title: 'Verbes + infinitif : sans préposition, à, ou de',
+    intro: "Le classement des verbes transitifs selon la préposition exigée devant l'infinitif.",
+    type: 'rule',
+    blocks: [
+      { heading: 'Sans préposition', text: "Adorer, détester, espérer, aimer, souhaiter, désirer, oser.", examples: ['J\'adore faire du sport.'] },
+      { heading: 'Avec « à »', text: "Commencer, chercher, apprendre, continuer, réussir.", examples: ['Je commence à travailler.'] },
+      { heading: 'Avec « de »', text: "Accepter, choisir, conseiller, décider, essayer, oublier, permettre, promettre, refuser, regretter, se rappeler…", examples: ['Elle a accepté de se marier avec lui.'] },
+      { heading: 'À CE QUE + subjonctif', text: "S'attendre à ce que, s'opposer à ce que, tenir à ce que, veiller à ce que — suivi d'une proposition (vs à + nom).", examples: ['Je m\'attends à ce qu\'il vienne.', 'Veillez à ce que tout se passe bien.'] },
+    ],
+  },
+  {
+    id: 'avance-infinitif-meme-sujet',
+    section: 'avance',
+    category: 'Constructions verbales',
+    icon: '🎭',
+    title: 'L\'infinitif avec un sujet identique : trois cas',
+    intro: "Croire/espérer, vouloir/désirer, refuser/accepter : trois logiques différentes.",
+    type: 'rule',
+    blocks: [
+      { heading: 'Croire, penser, espérer, estimer', text: "La construction infinitive peut remplacer une proposition en « que », sans être obligatoire.", examples: ['J\'espère pouvoir partir. (= J\'espère que je pourrai partir.)'] },
+      { heading: 'Vouloir, désirer', text: "Infinitif obligatoire si même sujet. Avec deux sujets différents : que + subjonctif.", examples: ['Je veux partir.', 'Je veux que vous partiez.'] },
+      { heading: 'Refuser, accepter', text: "De + infinitif, systématiquement.", examples: ['Il refuse de partir.', 'Elle accepte de venir.'] },
+    ],
+  },
+  {
+    id: 'avance-toucher-ressortir',
+    section: 'avance',
+    category: 'Constructions verbales',
+    icon: '👆',
+    title: '« Toucher » (cinq régimes) et « ressortir de / à »',
+    intro: "Un verbe aux cinq sens selon sa construction, et une distinction de conjugaison rare.",
+    type: 'rule',
+    blocks: [
+      { heading: 'TOUCHER : cinq constructions', text: "Toucher + COD (contact) ; toucher à + nom/infinitif (modifier, aborder) ; toucher + personne (émouvoir) ; toucher à + domaine (concerner) ; toucher + somme (recevoir).", examples: ['Ne touchez pas cette œuvre.', 'Ne touchez pas aux réglages.', 'Son témoignage m\'a beaucoup touché.', 'Elle touche un salaire mensuel.'] },
+      { heading: 'RESSORTIR DE vs RESSORTIR À', text: "Ressortir de (se conjugue comme sortir) = provenir de, découler de. Ressortir à (se conjugue comme finir : il ressortit) = relever de la compétence de.", examples: ['Cette conclusion ressort de l\'analyse des données.', 'Cette affaire ressortit à la justice militaire.'] },
+    ],
+  },
+  {
+    id: 'avance-facile-a-dire-avoir-beau',
+    section: 'avance',
+    category: 'Constructions verbales',
+    icon: '💬',
+    title: '« Facile à / il est facile de » et « avoir beau »',
+    intro: "Deux tournures fréquentes pour exprimer la facilité et l'effort vain.",
+    type: 'rule',
+    blocks: [
+      { heading: 'FACILE À vs IL EST FACILE DE', text: "Facile à + infinitif : le sujet désigne ce sur quoi porte l'action. Il est facile de + infinitif : construction impersonnelle.", examples: ['Cette règle est facile à comprendre.', 'Il est facile de comprendre cette règle.'] },
+      { heading: 'AVOIR BEAU + infinitif', text: "Fournir des efforts en vain (= bien que). Aux temps composés : deux constructions possibles. La négation porte sur l'infinitif, pas sur « avoir beau ».", examples: ['Elle a beau faire du régime, elle ne maigrit pas.', 'J\'ai eu beau lui répéter…', 'J\'ai beau ne pas être très douée pour les langues, je regarde toujours les films en VO.'] },
+    ],
+  },
+  {
+    id: 'avance-voix-passive-agent',
+    section: 'avance',
+    category: 'Voix passive, gérondif, participe présent',
+    icon: '🔄',
+    title: 'Voix passive : le complément d\'agent avec « de »',
+    intro: "Quand utiliser « de » plutôt que « par » pour introduire l'agent.",
+    type: 'rule',
+    blocks: [
+      { heading: 'Quatre cas d\'emploi de « de »', text: "Verbe de sentiment (aimer, détester) ; verbe de description (couvrir, entourer) ; verbe d'opération intellectuelle (connaître, ignorer) ; verbe de localisation (accompagner, suivre).", examples: ['Il est respecté de tous les étudiants.', 'La salle était décorée de ballons.', 'Cet acteur est connu de tout le monde.', 'La conférence sera suivie d\'un débat.'] },
+      { heading: 'Quand hésiter, utilisez PAR', text: "Dans certains cas, par et de sont tous deux possibles. Tendance : par (général) → de (cas particuliers).", examples: ['Il est connu de/par tous.'] },
+    ],
+  },
+  {
+    id: 'avance-se-faire-infinitif',
+    section: 'avance',
+    category: 'Voix passive, gérondif, participe présent',
+    icon: '🎬',
+    title: '« Se faire + infinitif »',
+    intro: "Dire qu'une action a été réalisée par quelqu'un d'autre — trois nuances.",
+    type: 'rule',
+    blocks: [
+      { heading: 'Trois nuances', text: "Sur demande/intervention ; sans le vouloir ; action recherchée sur soi ou en sa faveur.", examples: ['Je me suis fait tatouer.', 'Il s\'est fait voler.', 'Nous nous faisons livrer le repas.'] },
+      { heading: 'Remarques', text: "Le verbe après « se faire » est à l'infinitif ; le participe « fait » reste invariable.", examples: ['Je me suis fait couper les cheveux.', 'Elle s\'est fait rembourser ses billets.'] },
+    ],
+  },
+  {
+    id: 'avance-gerondif-participe-present',
+    section: 'avance',
+    category: 'Voix passive, gérondif, participe présent',
+    icon: '📝',
+    title: 'Gérondif vs participe présent',
+    intro: "Une différence essentielle : le sujet doit-il être le même dans les deux propositions ?",
+    type: 'rule',
+    blocks: [
+      { heading: 'Gérondif (en + participe présent)', text: "Simultanéité, manière, condition. Le sujet grammatical doit être le MÊME pour les deux propositions.", examples: ['Il fait les devoirs en écoutant de la musique.', 'Il parle en bégayant.', 'En faisant le travail en groupe, nous ferons plus vite.'] },
+      { heading: 'Participe présent (sans « en »)', text: "Cause, condition, postériorité, ou relative (« qui »). Le sujet peut être différent du sujet principal.", examples: ['Les ouvriers faisant grève, l\'usine est fermée.', 'Les touristes possédant un passeport étranger doivent se présenter au guichet 7.'] },
+      { heading: 'Piège classique', text: "« J'ai vu Michel en traversant la rue » → c'est MOI qui traversais (gérondif = même sujet que le verbe principal).", examples: [] },
+    ],
+  },
+  {
+    id: 'avance-son-e-t-euphonique-inversion',
+    section: 'avance',
+    category: 'Voix passive, gérondif, participe présent',
+    icon: '🔊',
+    title: 'Infinitif ou participe (-er/-é), le « t » euphonique, l\'inversion après adverbes',
+    intro: "Trois points d'orthographe et de syntaxe soutenue.",
+    type: 'rule',
+    blocks: [
+      { heading: '-ER ou -É ?', text: "Astuce : remplacer par un verbe d'un autre groupe (rire/ri pour vérifier).", examples: ['Elle voulait pleurer (rire) → infinitif.', 'Elle semblait épuisée (abattue) → participe passé.'] },
+      { heading: 'Le « t » euphonique', text: "Ajouté entre le verbe et il/elle/on en cas d'inversion, quand le verbe se termine par -e muet ou -a.", examples: ['Parle-t-il français ?', 'Dansa-t-elle avec le Prince ?', 'Finira-t-on par comprendre ?'] },
+      { heading: 'Inversion après certains adverbes en tête de phrase', text: "Peut-être, sans doute, ainsi, aussi, à peine, encore, du moins, en vain — registre soutenu.", examples: ['Peut-être viendra-t-il demain.', 'Sans doute est-elle déjà partie.'] },
+    ],
+  },
+  {
+    id: 'avance-mise-en-relief',
+    section: 'avance',
+    category: 'Mise en relief',
+    icon: '🎯',
+    title: 'La mise en relief du sujet et du COD',
+    intro: "Les tournures « c'est… qui » et « c'est… que » selon la fonction et l'animation.",
+    type: 'rule',
+    recoKey: 'cestQuiCestQue',
+    blocks: [
+      { heading: 'Mise en relief du sujet', text: "Sujet humain : « C'est… qui ». Sujet non humain : « C'est… qui » ou « Ce qui…, c'est ».", examples: ['C\'est Paul qui est arrivé.', 'C\'est son attitude qui me gêne. — Ce qui me gêne, c\'est son attitude.'] },
+      { heading: 'Mise en relief du COD', text: "COD humain : « C'est… que ». COD non humain : « C'est… que » ou « Ce que…, c'est ».", examples: ['C\'est Paul que je vais voir.', 'C\'est une réponse rapide que je voudrais. — Ce que je voudrais, c\'est une réponse rapide.'] },
+    ],
+  },
+  {
+    id: 'avance-homophones-er-ver',
+    section: 'avance',
+    category: 'Vocabulaire, homophones et suffixes',
+    icon: '🔤',
+    title: 'Homophones : air/aire/ère/erre/hère et verre/ver/vers/vert/vair',
+    intro: "Deux familles d'homophones classiques, à connaître pour l'orthographe.",
+    type: 'rule',
+    blocks: [
+      { heading: 'AIR, AIRE, ÈRE, ERRE, HÈRE', text: "Air = mélange de gaz/aspect/mélodie. Aire = surface/nid de rapaces. Ère = époque. Erre (verbe errer) = déambuler. Hère = homme misérable/jeune cerf.", examples: ['L\'air de la mer est frais.', 'Une aire de repos.', 'L\'ère Victorienne.', 'J\'erre sans trouver mon chemin.'] },
+      { heading: 'VERRE, VER, VERS, VERT, VAIR', text: "Verre = matière transparente/récipient. Ver = animal invertébré. Vers (prép.) = en direction de ; ou unité de poème. Vair = fourrure blanche et grise.", examples: ['Un verre de vin.', 'Le ver est dans le fruit.', 'Vers le sud.', 'Les pantoufles de Cendrillon (en vair).'] },
+    ],
+  },
+  {
+    id: 'avance-homophones-aout-ravir',
+    section: 'avance',
+    category: 'Vocabulaire, homophones et suffixes',
+    icon: '📅',
+    title: 'Août/ou/où/houe/houx, et les deux sens de « ravir »',
+    intro: "Une famille d'homophones, et un verbe à deux sens opposés.",
+    type: 'rule',
+    recoKey: 'ouOu',
+    blocks: [
+      { heading: 'AOÛT, OU, OÙ, HOUE, HOUX', text: "Août = huitième mois. Ou = conjonction. Où = pronom relatif/adverbe interrogatif. Houe = outil agricole. Houx = plante.", examples: ['Le père ou la mère.', 'La ville où je suis née.', 'Le houx est un arbuste.'] },
+      { heading: 'RAVIR : deux sens', text: "Enchanter, faire plaisir. OU : enlever, dérober, emporter de force (contre son gré).", examples: ['Cette nouvelle m\'a ravi.', 'Le voleur lui a ravi son portefeuille.', 'La guerre lui a ravi son fils.'] },
+    ],
+  },
+  {
+    id: 'avance-plus-prononciation',
+    section: 'avance',
+    category: 'Vocabulaire, homophones et suffixes',
+    icon: '🔊',
+    title: '« Plus » : le sens change, la prononciation aussi',
+    intro: "Trois prononciations différentes selon le sens de « plus ».",
+    type: 'rule',
+    blocks: [
+      { heading: 'PLUS = davantage', text: "/plys/ après « que » ou en fin de groupe ; /ply/ devant un adjectif (sauf liaison /plyz/).", examples: ["J'en veux plus. (/plys/)", 'Il travaille plus que toi. (/plys/)', 'Il est plus grand. (/ply/)', 'Il est plus intelligent. (liaison /plyz/)'] },
+      { heading: 'NE… PLUS = cessation', text: "Le « s » ne se prononce pas.", examples: ["Je n'en veux plus. (/ply/)"] },
+    ],
+  },
+  {
+    id: 'avance-calembours',
+    section: 'avance',
+    category: 'Vocabulaire, homophones et suffixes',
+    icon: '😄',
+    title: 'Comprendre les calembours français',
+    intro: "Les mécanismes derrière les jeux de mots : homophonie, polysémie, expressions figées détournées.",
+    type: 'rule',
+    blocks: [
+      { heading: 'Trois mécanismes des calembours', text: "Homophonie (deux mots se prononcent pareil) ; polysémie (un mot, plusieurs sens) ; expressions figées détournées.", examples: ['« détroit » ↔ « des trois » (homophonie)', '« le Diable » (Satan) / « un diable » (chariot) (polysémie)', '« changer de chêne » ← « changer de chaîne » (expression détournée)'] },
+      { heading: 'Pourquoi c\'est difficile en langue étrangère', text: "Il faut mobiliser simultanément le lexique, la prononciation, les expressions figées, les doubles sens et les références culturelles — un bon indicateur de maîtrise avancée du français." },
+    ],
+  },
+  {
+    id: 'avance-paraphrase-prefixes-negatifs',
+    section: 'avance',
+    category: 'Vocabulaire, homophones et suffixes',
+    icon: '🔤',
+    title: 'Paraphrase/périphrase, et les préfixes négatifs',
+    intro: "Deux notions de reformulation, et les quatre préfixes pour former le contraire d'un adjectif.",
+    type: 'rule',
+    blocks: [
+      { heading: 'PARAPHRASE vs PÉRIPHRASE', text: "Paraphrase = explication développée d'un texte (devient plagiat si on reprend des idées sans citer). Périphrase = expression par plusieurs mots d'une notion qu'un seul mot pourrait exprimer.", examples: ['« La ville lumière » désigne Paris. (périphrase)'] },
+      { heading: 'Préfixes négatifs', text: "In-/im-/il-/ir- (opposition) ; a- (absence, privation) ; dé-/dés- (privation, inversion) ; non- (négation simple).", examples: ['actif → inactif', 'possible → impossible', 'normal → anormal', 'agréable → désagréable', 'violent → non-violent'] },
+    ],
+  },
+  {
+    id: 'avance-noms-ee-adjectifs-position',
+    section: 'avance',
+    category: 'Vocabulaire, homophones et suffixes',
+    icon: '📐',
+    title: 'Les noms féminins en -ée, et les adjectifs qui changent de sens selon la position',
+    intro: "Une régularité morphologique, et six adjectifs à sens double.",
+    type: 'rule',
+    blocks: [
+      { heading: 'Les noms féminins en -ée', text: "Action/résultat (arriver → arrivée) ; période (an → année, jour → journée) ; contenu/quantité (cuillère → cuillerée). Exceptions en -é : la clé, l\'acné, la psyché.", examples: ['une arrivée', 'une journée', 'une cuillerée'] },
+      { heading: 'Adjectifs qui changent de sens selon la position', text: "Ancien, certain, simple, différent, nul, seul — le sens change avant/après le nom.", examples: ['mon ancien compte (celui d\'avant) vs un quartier ancien (vieux)', 'un simple geste vs un exercice simple', 'un seul enfant (rien qu\'un) vs un enfant seul (isolé)'] },
+    ],
+  },
+  {
+    id: 'avance-radicaux-suffixes-grecs-latins',
+    section: 'avance',
+    category: 'Vocabulaire, homophones et suffixes',
+    icon: '🏛️',
+    title: 'Radicaux latins et suffixes grecs',
+    intro: "Décomposer le vocabulaire savant grâce à ses racines.",
+    type: 'table',
+    columns: ['Radical/Suffixe', 'Sens · Exemple'],
+    rows: [
+      ['agri-', 'le champ · agriculteur'],
+      ['aqu-', "l'eau · aquaplane"],
+      ['-cide', 'qui tue · infanticide'],
+      ['-culteur', 'celui qui cultive · apiculteur'],
+      ['-fère', 'qui porte · mammifère'],
+      ['-forme', 'qui a la forme de · plateforme'],
+      ['-fuge', 'qui fuit/fait fuir · centrifuge'],
+      ['omni', 'tout · omniprésent'],
+      ['-vore', 'qui se nourrit · carnivore'],
+      ['-algie', 'douleur · névralgie'],
+      ['-céphale', 'tête · bicéphale'],
+      ['-cratie', 'pouvoir · autocratie'],
+      ['-gène', 'qui génère · allergène'],
+      ['-gramme', 'signe · diagramme'],
+      ['-ite', 'inflammation · bronchite'],
+      ['-logie', 'science, étude · sociologie'],
+      ['-manie', 'obsession · pyromanie'],
+      ['-pathie', 'maladie · cardiopathie'],
+      ['-phage', 'qui mange · chronophage'],
+      ['-phile', 'qui aime · cinéphile'],
+      ['-thérapie', 'soin · kinésithérapie'],
+    ],
+  },
+  {
+    id: 'avance-adverbes-ment',
+    section: 'avance',
+    category: 'Vocabulaire, homophones et suffixes',
+    icon: '📝',
+    title: 'Les adverbes en -ment',
+    intro: "La formation générale et les particularités avec accent aigu.",
+    type: 'rule',
+    blocks: [
+      { heading: 'Formation générale', text: "Se construisent à partir d'un adjectif.", examples: ['calme → calmement', 'vrai → vraiment', 'doux → doucement'] },
+      { heading: 'Particularités (accent aigu)', text: "", examples: ['commode → commodément', 'confus → confusément', 'énorme → énormément', 'précis → précisément', 'profond → profondément'] },
+    ],
+  },
+  {
+    id: 'avance-conjugaison-ayer-defectifs',
+    section: 'avance',
+    category: 'Conjugaison',
+    icon: '✏️',
+    title: 'Les verbes en -AYER, et les verbes défectifs',
+    intro: "Une double conjugaison possible, et six verbes à la conjugaison incomplète.",
+    type: 'rule',
+    blocks: [
+      { heading: 'Les verbes en -AYER', text: "Balayer, effrayer, essayer, payer… peuvent conserver le Y ou le remplacer par un I devant un e muet — double conjugaison possible.", examples: ["j'essaie / j'essaye", 'tu essaies / tu essayes', 'nous essayons (jamais essayons se change)'] },
+      { heading: 'Les verbes défectifs', text: "Falloir, s'agir, pleuvoir (impersonnels) ; gésir, seoir, échoir (conjugaison très incomplète).", examples: ['Il faut partir.', 'Il s\'agit d\'un problème.', 'Il pleut depuis ce matin.', 'Les ruines gisent au fond de la vallée.', 'Cette couleur vous sied parfaitement.'] },
+    ],
+  },
+  {
+    id: 'avance-probable-possible-subjonctif-relative',
+    section: 'avance',
+    category: 'Divers',
+    icon: '🎲',
+    title: 'Probable/possible, et le subjonctif après les relatives',
+    intro: "Indicatif ou subjonctif selon le degré de certitude, et un cas d'emploi avancé du subjonctif.",
+    type: 'rule',
+    blocks: [
+      { heading: 'IL EST PROBABLE QUE vs IL EST POSSIBLE QUE', text: "Probable + indicatif (vraisemblable). Possible + subjonctif (simple possibilité). Gradation : possible → probable → certain.", examples: ['Il est probable qu\'il viendra demain.', 'Il est possible qu\'il vienne demain.'] },
+      { heading: 'Le subjonctif après les relatives', text: "Apparaît quand l'antécédent est recherché/souhaité, nié/mis en doute, ou après un superlatif/expression restrictive.", examples: ['Je cherche quelqu\'un qui puisse m\'aider.', 'Je ne connais personne qui puisse résoudre ce problème.', 'C\'est le meilleur film que j\'aie vu cette année.'] },
+    ],
+  },
+  {
+    id: 'avance-ce-qui-ce-quil-concession-verbes',
+    section: 'avance',
+    category: 'Divers',
+    icon: '🔀',
+    title: '« Ce qui / ce qu\'il », et quatre verbes de concession',
+    intro: "Une distinction subtile, et quatre nuances pour admettre un point en argumentation.",
+    type: 'rule',
+    recoKey: 'ceQuiCeQuil',
+    blocks: [
+      { heading: 'CE QUI vs CE QU\'IL', text: "Ce qui = construction personnelle (sujet non-humain réel). Ce qu'il = construction impersonnelle (« il » ne renvoie à personne).", examples: ['Je vois ce qui arrive.', 'Je sais ce qu\'il faut faire. (« il faut » impersonnel)'] },
+      { heading: 'Quatre verbes de concession', text: "Concéder (admettre pour l'argumentation) ; admettre (accepter, neutre) ; reconnaître (accepter après examen) ; nuancer (limiter la portée).", examples: ['Je vous concède que la solution est séduisante, mais elle reste coûteuse.', 'J\'admets que cette décision était nécessaire.', 'Il reconnaît que ses résultats sont insuffisants.'] },
+    ],
+  },
+  {
+    id: 'avance-quest-ce-qui-desaccord',
+    section: 'avance',
+    category: 'Divers',
+    icon: '❓',
+    title: 'Qu\'est-ce qui/que, qui est-ce qui/que — et argumenter son désaccord',
+    intro: "Les quatre formes interrogatives complètes, et quatre verbes pour contester.",
+    type: 'rule',
+    blocks: [
+      { heading: 'Les quatre formes interrogatives', text: "Qui est-ce qui (sujet, personne) ; qu'est-ce qui (sujet, chose) ; qui est-ce que (COD, personne) ; qu'est-ce que (COD, chose).", examples: ['Qui est-ce qui est arrivé ? — C\'est Paul.', 'Qu\'est-ce qui fait ce bruit ? — C\'est le moteur.', 'Qui est-ce que tu cherches ?', 'Qu\'est-ce que vous voulez ?'] },
+      { heading: 'Quatre verbes pour argumenter son désaccord', text: "S'opposer à (manifester une position contraire) ; contester (remettre en cause la validité) ; contredire (dire le contraire) ; réfuter (démontrer l'erreur par un raisonnement).", examples: ['Plusieurs habitants s\'opposent à ce projet.', 'L\'avocat conteste cette interprétation des faits.', 'Ces résultats contredisent les conclusions de l\'étude.', 'L\'auteur réfute cette hypothèse point par point.'] },
+    ],
+  },
 ];
 
 function renderSheetsHomeBySection(section, catTag, heroTitle, heroSubtitle){
@@ -23215,6 +24364,9 @@ function renderPracticalSheetsHome(){
 function renderAtelierHome(){
   renderSheetsHomeBySection('atelier', '🏛️ Atelier Français', 'Cours, exercices et jeux', "Grammaire, orthographe, expressions familières — avec exercices et écoute (lot 1)");
 }
+function renderGrammaireAvanceeHome(){
+  renderSheetsHomeBySection('avance', '🎓 Grammaire Avancée', 'Niveau B2-C1-C2', "Paronymes, nuances fines, constructions verbales, mise en relief — pour aller plus loin");
+}
 
 function buildSheetTableHtml(columns, rows, speakableCols){
   return `
@@ -23241,7 +24393,7 @@ function renderPracticalSheetDetail(id){
   document.body.classList.remove('quiz-active');
   isHomeScreen = false;
   const sheet = PRACTICAL_SHEETS.find(s => s.id === id);
-  const homeFn = (sheet && sheet.section === 'atelier') ? renderAtelierHome : renderPracticalSheetsHome;
+  const homeFn = sheet && sheet.section === 'atelier' ? renderAtelierHome : sheet && sheet.section === 'avance' ? renderGrammaireAvanceeHome : renderPracticalSheetsHome;
   if(!sheet){ homeFn(); return; }
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromSheetDetailBtn" style="cursor:pointer;">← Toutes les fiches</button>`;
   document.getElementById('progressFill').style.width = '100%';
