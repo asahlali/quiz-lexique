@@ -11846,6 +11846,9 @@ function renderBlockSelect(){
       <button class="restart-btn" id="avanceBtn" style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#0F766E,#115E59);color:#fff;box-shadow:0 4px 0 #134E4A;">
         🎓 Grammaire Avancée
       </button>
+      <button class="restart-btn" id="oratoireBtn" style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#B45309,#92400E);color:#fff;box-shadow:0 4px 0 #78350F;">
+        🎤 Art Oratoire
+      </button>
       ${toReviewCount > 0 ? `
       <button class="restart-btn" id="startReviewBtn" style="display:flex;align-items:center;gap:8px;">
         ⚠️ ${toReviewCount} mot${toReviewCount>1?'s':''} à revoir
@@ -11975,6 +11978,7 @@ function renderBlockSelect(){
   document.getElementById('atelierBtn').addEventListener('click', () => renderAtelierHome());
   document.getElementById('bouquinageBtn').addEventListener('click', () => renderBouquinageHome());
   document.getElementById('avanceBtn').addEventListener('click', () => renderGrammaireAvanceeHome());
+  document.getElementById('oratoireBtn').addEventListener('click', () => renderArtOratoireHome());
   const questsHead = document.getElementById('questsHead');
   const questsChevron = document.getElementById('questsChevron');
   if(questsChevron){ questsChevron.style.transform = questsCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)'; }
@@ -24319,6 +24323,204 @@ const PRACTICAL_SHEETS = [
       { heading: 'Quatre verbes pour argumenter son désaccord', text: "S'opposer à (manifester une position contraire) ; contester (remettre en cause la validité) ; contredire (dire le contraire) ; réfuter (démontrer l'erreur par un raisonnement).", examples: ['Plusieurs habitants s\'opposent à ce projet.', 'L\'avocat conteste cette interprétation des faits.', 'Ces résultats contredisent les conclusions de l\'étude.', 'L\'auteur réfute cette hypothèse point par point.'] },
     ],
   },
+  // ============ 🎤 ART ORATOIRE — inspiré du "Traité pratique de diction française" (Paul Esquier, 1898) ============
+  {
+    id: 'orat-utilite-diction',
+    section: 'oratoire',
+    category: 'Fondamentaux',
+    icon: '🎯',
+    title: "L'utilité d'une bonne diction",
+    intro: "Pourquoi travailler sa diction, même en dehors de la scène ou du métier d'orateur.",
+    type: 'rule',
+    blocks: [
+      { heading: "Ce qu'apporte une bonne diction", text: "Une diction soignée permet de faire comprendre nettement sa pensée : elle donne au langage de l'élégance, de la clarté et du charme. Une prononciation correcte et un parler agréable inspirent aussi confiance et sympathie dans toutes les relations sociales, pas seulement sur scène." },
+      { heading: "Un travail qui s'apprend", text: "Une diction irréprochable n'est presque jamais un don naturel : elle s'acquiert par un travail progressif — d'abord sur la respiration et la sonorité de la voix, puis sur l'articulation des consonnes, enfin sur les nuances de l'expression." },
+    ],
+  },
+  {
+    id: 'orat-respiration',
+    section: 'oratoire',
+    category: 'Fondamentaux',
+    icon: '🫁',
+    title: 'La respiration, socle de la bonne diction',
+    intro: "Bien respirer conditionne la sonorité de la voix et la clarté du débit.",
+    type: 'rule',
+    blocks: [
+      { heading: 'Respirer de la poitrine', text: "On respire de la poitrine, et non du ventre, pour garantir la sûreté et la sonorité de la voix." },
+      { heading: 'Respirer selon le sens de la phrase', text: "On ne respire pas à chaque virgule au hasard : on respire davantage aux points, un peu moins aux points-virgules et deux-points, et très peu aux virgules — toujours en suivant le sens plutôt qu'en hachant la phrase." },
+      { heading: 'Ne jamais s\'essouffler', text: "Il ne faut jamais laisser la provision d'air s'épuiser complètement avant de reprendre son souffle : on renouvelle l'air discrètement pour soutenir la voix sans effort ni fatigue visible." },
+    ],
+    note: "Une bonne respiration est le levier qui permet de nuancer le débit sans jamais fatiguer ni la voix ni l'auditeur.",
+  },
+  {
+    id: 'orat-articulation-vibration',
+    section: 'oratoire',
+    category: 'Fondamentaux',
+    icon: '👄',
+    title: "Articulation et vibration : assouplir la langue",
+    intro: "Deux exercices classiques pour gagner en netteté et en légèreté d'élocution.",
+    type: 'rule',
+    blocks: [
+      { heading: "L'articulation", text: "Un travail répété sur les consonnes (répéter des séries comme « be fe me pe ve », « ne le te de re »), d'abord lentement puis de plus en plus vite, donne à la langue et aux lèvres l'élasticité nécessaire pour parler avec facilité et légèreté." },
+      { heading: 'La vibration (le « r »)', text: "Un tremblement léger de la pointe de la langue — jamais de la base contre le palais, ce qui grasserait le son — produit un doux frôlement qui donne du relief à la parole sans tomber dans le « r » roulé, lourd et peu distingué." },
+      { heading: "L'articulation gutturale à éviter", text: "Quand la langue recule et se rapproche du voile du palais, elle bloque le passage de l'air : la voix devient étouffée et peu claire. Les exercices de respiration et de vibration aident à corriger ce défaut." },
+    ],
+  },
+  {
+    id: 'orat-vices-begaiement-grasseyement',
+    section: 'oratoire',
+    category: 'Défauts de prononciation',
+    icon: '⚠️',
+    title: 'Bégaiement et grasseyement : origines et corrections',
+    intro: "Deux défauts fréquents, avec leur cause probable et la piste pour les corriger.",
+    type: 'rule',
+    blocks: [
+      { heading: 'Le bégaiement', text: "Provient souvent d'une faiblesse des muscles de la langue, d'une précipitation à vouloir parler, ou d'une timidité excessive. On le corrige par des exercices lents et répétés sur les consonnes, prononcées d'abord à voix basse ou en chantant (le bégaiement disparaît alors), puis progressivement à voix haute et en accélérant." },
+      { heading: 'Le grasseyement', text: "Se corrige par les exercices de vibration : un tremblement léger et régulier de la pointe de la langue, jamais une contraction de sa base contre le palais." },
+    ],
+    note: "Un travail patient et régulier vient à bout de la plupart de ces défauts, même s'ils semblent tenaces au départ.",
+  },
+  {
+    id: 'orat-vices-sifflement-chuintement',
+    section: 'oratoire',
+    category: 'Défauts de prononciation',
+    icon: '🐍',
+    title: 'Sifflement, chuintement et zézaiement (blézité)',
+    intro: "Trois défauts liés à la prononciation des sifflantes (s, z, ch, j).",
+    type: 'rule',
+    blocks: [
+      { heading: 'Le sifflement', text: "Se travaille par des séries répétées sur c, s, z, x, j, ch — d'abord lentement, puis de plus en plus vite." },
+      { heading: 'Le chuintement', text: "Consiste à mal prononcer j, ch, s et z. Il se corrige par les mêmes exercices d'articulation, en insistant sur des phrases riches en sifflantes." },
+      { heading: 'La blézité (zézaiement)', text: "Se corrige en s'exerçant d'abord sur les linguales et labiales avec un e muet (« ne, le, te, de » puis « be, fe, me, pe »), puis sur des séries de j/ch et enfin de c/s/x, en articulant nettement avec le bord de la langue contre la mâchoire supérieure." },
+    ],
+    note: "Des phrases riches en sifflantes, répétées de plus en plus vite, sont un excellent exercice pour ces trois défauts.",
+  },
+  {
+    id: 'orat-liaisons',
+    section: 'oratoire',
+    category: 'Prononciation',
+    icon: '🔗',
+    title: 'Les liaisons : ni les oublier, ni en abuser',
+    intro: "L'art de la liaison tient dans une juste mesure, guidée par l'oreille plutôt que par une règle rigide.",
+    type: 'rule',
+    blocks: [
+      { heading: 'Les liaisons naturelles', text: "Certaines liaisons s'imposent d'elles-mêmes et rendent le discours plus fluide et harmonieux : elles enchaînent naturellement les mots sans effort particulier." },
+      { heading: 'Éviter l\'excès inverse', text: "À l'opposé, multiplier les liaisons de façon artificielle ou les placer là où elles ne sont pas naturelles produit un effet précieux et maniéré, qui choque autant que leur absence totale." },
+    ],
+    note: "La meilleure règle reste le tact et l'oreille : une liaison doit couler naturellement, jamais paraître forcée.",
+  },
+  {
+    id: 'orat-lecture-haute-voix',
+    section: 'oratoire',
+    category: 'Application pratique',
+    icon: '📖',
+    title: 'Bien lire à voix haute',
+    intro: "Quatre principes pour une lecture publique claire et vivante.",
+    type: 'rule',
+    blocks: [
+      { heading: 'Voir la phrase avant de la dire', text: "Il faut anticiper mentalement le sens de chaque phrase pour lui donner le bon mouvement : accélérer ou ralentir le débit, varier les intonations selon la ponctuation." },
+      { heading: 'Respirer adroitement', text: "La ponctuation indique où respirer sans que l'auditeur s'en aperçoive — ce qui permet de soutenir la voix avec toute la force et la souplesse nécessaires." },
+      { heading: 'Rester naturel dans l\'attitude', text: "On ne fait pas de grands gestes en lisant ; il suffit d'être assis ou debout confortablement, le buste droit." },
+      { heading: 'Se pénétrer du sujet', text: "Comprendre vraiment ce qu'on lit permet de colorer le débit et de lui donner de la vie, plutôt que de réciter mécaniquement." },
+    ],
+  },
+  {
+    id: 'orat-discours-pauses',
+    section: 'oratoire',
+    category: 'Discours et action oratoire',
+    icon: '🗣️',
+    title: 'Le discours : éviter la monotonie',
+    intro: "L'orateur doit constamment veiller à varier son débit pour capter et garder l'attention.",
+    type: 'rule',
+    blocks: [
+      { heading: 'Varier pour captiver', text: "La voix doit alterner oppositions et accents de conviction pour éviter la monotonie, qui est le pire ennemi de l'orateur : sans variation, même un excellent argumentaire perd son impact." },
+      { heading: 'Parler fort sans jamais crier', text: "L'orateur peut hausser la voix, mais ne doit jamais crier ; il peut presser son débit, mais doit toujours garder une clarté absolue pour ne pas fatiguer l'écoute." },
+      { heading: 'Les temps de repos (silences)', text: "Au-delà de la ponctuation, la pensée elle-même dicte des silences : s'arrêter pour souligner ce qu'on vient de dire, ou pour mieux attirer l'attention sur ce qui va suivre. Ces silences demandent une juste mesure, une question de tact." },
+    ],
+  },
+  {
+    id: 'orat-dire-vers',
+    section: 'oratoire',
+    category: 'Discours et action oratoire',
+    icon: '📜',
+    title: 'Comment dire des vers',
+    intro: "La poésie ne se récite ni comme de la prose plate, ni en psalmodiant de façon monotone.",
+    type: 'rule',
+    blocks: [
+      { heading: 'Respecter le rythme sans psalmodier', text: "Les vers doivent être dits avec l'ampleur et le mouvement propres à leur rythme, en évitant à la fois l'emphase excessive et la monotonie de l'hémistiche systématiquement souligné." },
+      { heading: 'Ne pas écourter les syllabes muettes', text: "Sous prétexte de naturel, on ne doit jamais « écloper » un vers en avalant ses syllabes muettes — sauf dans les cas d'élision prévus." },
+      { heading: 'Éviter le hiatus disgracieux', text: "Quand un vers se termine par une voyelle et que le suivant commence aussi par une voyelle, un très léger intervalle évite un enchaînement désagréable à l'oreille." },
+    ],
+    note: "On doit déclamer la poésie en poète : ni comme de la prose, ni comme une mélopée artificielle.",
+  },
+  {
+    id: 'orat-jeu-acteur',
+    section: 'oratoire',
+    category: "Art de la scène",
+    icon: '🎭',
+    title: "Le jeu de l'acteur : s'assimiler au personnage",
+    intro: "Jouer juste demande bien plus que de dire un texte correctement.",
+    type: 'rule',
+    blocks: [
+      { heading: "S'identifier au personnage", text: "Il faut se mettre à la place du personnage pour traduire ses sentiments avec sincérité et émotion, plutôt que réciter un texte appris par cœur." },
+      { heading: 'La réflexion avant tout', text: "Ce n'est qu'en réfléchissant vraiment à ce qu'on dit — en se le formulant mentalement avant de le prononcer — que la voix et le visage traduisent l'émotion juste plutôt qu'un débit mécanique." },
+      { heading: 'Éviter la précipitation dans les répliques', text: "Répondre avant la fin d'une question, sauf situation particulière, trahit un texte récité par cœur plutôt qu'une écoute réelle — ce qui nuit à l'illusion théâtrale." },
+    ],
+  },
+  {
+    id: 'orat-ecouter-scene',
+    section: 'oratoire',
+    category: 'Art de la scène',
+    icon: '👂',
+    title: 'Savoir écouter sur scène',
+    intro: "Un détail souvent négligé, mais essentiel pour rester crédible dans un rôle.",
+    type: 'rule',
+    blocks: [
+      { heading: "Écouter, c'est continuer de jouer", text: "Même sans texte à dire, le comédien doit continuer d'exprimer par le visage et l'attitude : approuver, s'étonner, s'attendrir, se méfier — selon ce que dit son interlocuteur." },
+      { heading: "Ne pas s'isoler entre les répliques", text: "Un acteur qui « attend sa réplique » avec une expression neutre, sans réagir à ce qui se dit, casse l'illusion et prouve son manque de conviction dans le rôle." },
+    ],
+  },
+  {
+    id: 'orat-gestes',
+    section: 'oratoire',
+    category: 'Art de la scène',
+    icon: '👋',
+    title: 'Le geste : un usage mesuré',
+    intro: "Le geste doit accompagner la pensée, jamais la remplacer ou la parasiter.",
+    type: 'rule',
+    blocks: [
+      { heading: 'Un geste toujours motivé', text: "Le geste doit concorder avec les paroles et les sentiments exprimés ; il vient naturellement, de façon presque instinctive, et sert à donner du relief à ce qu'on dit — pas à décorer chaque phrase." },
+      { heading: "L'orateur en use davantage que l'acteur", text: "Privé de l'aide d'une action scénique, l'orateur doit davantage recourir au geste ample pour se faire comprendre ; l'acteur, lui, n'y a recours que pour les élans les plus forts de la passion." },
+      { heading: 'Simplicité et grâce', text: "Le geste doit rester simple et aisé, aller de préférence en courbe plutôt qu'en ligne droite, et les mains sont plus gracieuses vues de profil, doigts non écartés." },
+    ],
+  },
+  {
+    id: 'orat-silences-maintien',
+    section: 'oratoire',
+    category: 'Art de la scène',
+    icon: '🤫',
+    title: 'Les silences et le maintien',
+    intro: "Ce qui n'est pas dit peut être aussi éloquent que la parole elle-même.",
+    type: 'rule',
+    blocks: [
+      { heading: "L'éloquence du silence", text: "Un temps d'arrêt bien placé, porté par la seule expression du visage et de l'attitude, capte l'attention du public presque autant qu'une réplique — à condition de garder une juste mesure." },
+      { heading: 'Le maintien, reflet de la conviction', text: "Le maintien doit toujours être en accord avec ce qu'on exprime ; il naît de la sincérité et de l'émotion réelle plutôt que d'une pose apprise, et s'affine avec l'observation et l'habitude." },
+    ],
+  },
+  {
+    id: 'orat-qualites-sceniques',
+    section: 'oratoire',
+    category: 'Art de la scène',
+    icon: '⭐',
+    title: 'Les qualités requises pour bien parler en public',
+    intro: "Un résumé des qualités qui, réunies, forment un bon orateur ou un bon comédien.",
+    type: 'rule',
+    blocks: [
+      { heading: 'Les qualités essentielles', text: "Une articulation claire, une voix modulée et bien placée, le sens de l'à-propos (savoir ajuster son discours au moment), une physionomie expressive, de l'aisance dans les mouvements, et surtout une bonne dose de réflexion et d'observation.", examples: [] },
+      { heading: 'Le talent ne suffit pas sans travail', text: "Même un talent naturel reste incomplet sans l'étude méthodique de la diction : l'intuition seule ne remplace jamais un entraînement sérieux et réfléchi." },
+    ],
+    note: "Se juger soi-même avec exigence, observer, comparer et réfléchir sans relâche : c'est ce travail patient — plus que le seul talent inné — qui forme un orateur accompli.",
+  },
 ];
 
 function renderSheetsHomeBySection(section, catTag, heroTitle, heroSubtitle){
@@ -24367,6 +24569,9 @@ function renderAtelierHome(){
 function renderGrammaireAvanceeHome(){
   renderSheetsHomeBySection('avance', '🎓 Grammaire Avancée', 'Niveau B2-C1-C2', "Paronymes, nuances fines, constructions verbales, mise en relief — pour aller plus loin");
 }
+function renderArtOratoireHome(){
+  renderSheetsHomeBySection('oratoire', '🎤 Art Oratoire', 'Diction, voix, art de la scène', "Respiration, articulation, défauts de prononciation, discours, lecture à voix haute et jeu de l'acteur");
+}
 
 function buildSheetTableHtml(columns, rows, speakableCols){
   return `
@@ -24393,7 +24598,8 @@ function renderPracticalSheetDetail(id){
   document.body.classList.remove('quiz-active');
   isHomeScreen = false;
   const sheet = PRACTICAL_SHEETS.find(s => s.id === id);
-  const homeFn = sheet && sheet.section === 'atelier' ? renderAtelierHome : sheet && sheet.section === 'avance' ? renderGrammaireAvanceeHome : renderPracticalSheetsHome;
+  const homeFnMap = { atelier: renderAtelierHome, avance: renderGrammaireAvanceeHome, oratoire: renderArtOratoireHome };
+  const homeFn = (sheet && homeFnMap[sheet.section]) || renderPracticalSheetsHome;
   if(!sheet){ homeFn(); return; }
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromSheetDetailBtn" style="cursor:pointer;">← Toutes les fiches</button>`;
   document.getElementById('progressFill').style.width = '100%';
