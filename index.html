@@ -1018,8 +1018,43 @@
     color:var(--ink);margin:0 0 10px;
   }
   .hero-title .grad{
-    background:linear-gradient(90deg,var(--purple),var(--pink) 55%,var(--green));
+    background:linear-gradient(90deg,var(--purple),var(--pink) 35%,var(--green) 65%,var(--purple));
+    background-size:200% auto;
     -webkit-background-clip:text;background-clip:text;color:transparent;
+    animation:gradientShimmer 4s linear infinite;
+    display:inline-block;
+  }
+  @keyframes gradientShimmer{
+    0%{ background-position:0% center; }
+    100%{ background-position:200% center; }
+  }
+  .hero-name-pop{ animation:heroNamePop .55s cubic-bezier(.34,1.56,.64,1); }
+  @keyframes heroNamePop{
+    0%{ transform:scale(0.7); }
+    55%{ transform:scale(1.18); }
+    100%{ transform:scale(1); }
+  }
+  .hero-fox-wiggle{ display:inline-block;animation:foxWiggle 2.6s ease-in-out infinite;transform-origin:70% 75%; }
+  @keyframes foxWiggle{
+    0%,46%,100%{ transform:rotate(0deg) scale(1); }
+    50%{ transform:rotate(-12deg) scale(1.08); }
+    58%{ transform:rotate(10deg) scale(1.08); }
+    64%{ transform:rotate(-6deg) scale(1.04); }
+    70%{ transform:rotate(0deg) scale(1); }
+  }
+  .hero-mascot-glow{
+    position:absolute;inset:-16px;border-radius:50%;z-index:-1;pointer-events:none;
+    background:radial-gradient(circle,rgba(249,115,22,0.38),transparent 70%);
+    animation:mascotGlowPulse 3.2s ease-in-out infinite;
+  }
+  @keyframes mascotGlowPulse{
+    0%,100%{ opacity:0.35;transform:scale(0.88); }
+    50%{ opacity:0.85;transform:scale(1.18); }
+  }
+  .hero-badge{ animation:heroBadgeFloat 3s ease-in-out infinite; }
+  @keyframes heroBadgeFloat{
+    0%,100%{ transform:translateY(0); }
+    50%{ transform:translateY(-3px); }
   }
   .hero-sub{ font-size:15.5px;color:var(--text-dim);font-weight:700;max-width:440px;margin:0 auto 18px; }
   .hero-mascot{ width:96px;height:96px;margin:0 auto 6px;animation:mascotIdle 3.2s ease-in-out infinite; }
@@ -5803,6 +5838,10 @@ function startMascotCycle(){
     if(nameMale && nameFemale){
       nameMale.style.opacity = showingFemale ? '0.4' : '1';
       nameFemale.style.opacity = showingFemale ? '1' : '0.4';
+      const activeEl = showingFemale ? nameFemale : nameMale;
+      activeEl.classList.remove('hero-name-pop');
+      void activeEl.offsetWidth; // force le navigateur à relancer l'animation depuis le début
+      activeEl.classList.add('hero-name-pop');
     }
   }, 10000);
 }
@@ -6505,6 +6544,47 @@ let radioMusicOn = loadRadioMusicPref();
 function loadQuestsCollapsed(){ try{ return localStorage.getItem('lexiqueQuiz::questsCollapsed') === '1'; }catch(e){ return false; } }
 function saveQuestsCollapsed(v){ try{ localStorage.setItem('lexiqueQuiz::questsCollapsed', v ? '1' : '0'); }catch(e){} }
 let questsCollapsed = loadQuestsCollapsed();
+
+/* ============ 🗂️ Sections repliables de l'accueil ============
+   Regroupe les ~20 boutons de modules/jeux en catégories qu'on ouvre/ferme au clic — pour que
+   l'accueil reste lisible même avec beaucoup de contenu. L'état ouvert/fermé de chaque section
+   est mémorisé par compte, comme pour les Défis du jour. */
+const HOME_SECTIONS_KEY = 'lexiqueQuiz::homeSectionsCollapsed';
+function loadHomeSectionsCollapsed(){
+  try{
+    const raw = localStorage.getItem(nsKey(HOME_SECTIONS_KEY));
+    return raw ? JSON.parse(raw) : { quick: false, modules: true, fiches: true, daily: true, jeux: true };
+  }catch(e){ return { quick: false, modules: true, fiches: true, daily: true, jeux: true }; }
+}
+function saveHomeSectionsCollapsed(){ try{ localStorage.setItem(nsKey(HOME_SECTIONS_KEY), JSON.stringify(homeSectionsCollapsed)); }catch(e){} }
+let homeSectionsCollapsed = loadHomeSectionsCollapsed();
+
+function buildHomeSectionHtml(id, icon, title, bodyHtml){
+  const collapsed = !!homeSectionsCollapsed[id];
+  return `
+    <div class="quests-card" style="margin-top:12px;">
+      <div class="quests-head" id="homeSecHead-${id}" style="cursor:pointer;">
+        <span>${icon} ${title}</span>
+        <span id="homeSecChevron-${id}" style="transition:transform .2s;display:inline-block;color:var(--text-dim);transform:rotate(${collapsed ? '-90deg' : '0deg'});">▾</span>
+      </div>
+      <div id="homeSecBody-${id}" style="display:${collapsed ? 'none' : 'block'};padding-top:10px;">
+        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">${bodyHtml}</div>
+      </div>
+    </div>
+  `;
+}
+function wireHomeSectionToggle(id){
+  const head = document.getElementById(`homeSecHead-${id}`);
+  if(!head) return;
+  head.addEventListener('click', () => {
+    homeSectionsCollapsed[id] = !homeSectionsCollapsed[id];
+    saveHomeSectionsCollapsed();
+    const body = document.getElementById(`homeSecBody-${id}`);
+    const chevron = document.getElementById(`homeSecChevron-${id}`);
+    if(body){ body.style.display = homeSectionsCollapsed[id] ? 'none' : 'block'; }
+    if(chevron){ chevron.style.transform = homeSectionsCollapsed[id] ? 'rotate(-90deg)' : 'rotate(0deg)'; }
+  });
+}
 let radioAudioCtx = null;
 let radioMusicNodes = null; // { masterGain, filter, timer }
 const RADIO_AMBIENT_SCALE = [130.81, 146.83, 164.81, 196.00, 220.00, 261.63]; // gamme pentatonique douce, grave
@@ -11703,6 +11783,7 @@ function renderBlockSelect(){
   card.innerHTML = `
     <div class="hero">
       <div class="hero-mascot" id="heroMascotContainer" aria-hidden="true" style="position:relative;width:96px;height:96px;margin:0 auto;">
+        <div class="hero-mascot-glow"></div>
         <svg id="mascotMale" viewBox="0 0 120 120" width="96" height="96" style="position:absolute;top:0;left:0;transition:opacity .6s ease, transform .6s ease;">
           <ellipse cx="60" cy="112" rx="30" ry="6" fill="rgba(0,0,0,0.10)"/>
           <defs>
@@ -11753,7 +11834,7 @@ function renderBlockSelect(){
         </svg>
       </div>
       <div class="hero-badge">Français ↔ Arabe · ${WORDS.length} mots</div>
-      <div class="hero-title">Apprends avec <span class="grad" id="heroNameMale" style="transition:opacity .6s ease;">To3aylib</span> <span class="grad" style="opacity:0.5;">&amp;</span> <span class="grad" id="heroNameFemale" style="opacity:0.4;transition:opacity .6s ease;">To3ayliba</span> 🦊</div>
+      <div class="hero-title">Apprends avec <span class="grad" id="heroNameMale" style="transition:opacity .6s ease;">To3aylib</span> <span class="grad" style="opacity:0.5;">&amp;</span> <span class="grad" id="heroNameFemale" style="opacity:0.4;transition:opacity .6s ease;">To3ayliba</span> <span class="hero-fox-wiggle">🦊</span></div>
       <div class="hero-sub">${motto}</div>
       <button class="restart-btn" id="startNextBlockBtn" style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#F97316,#EA580C);border-color:#B45309;font-size:15px;padding:13px 30px;">▶ Commencer</button>
       <div id="resumeSessionSlot"></div>
@@ -11811,55 +11892,48 @@ function renderBlockSelect(){
       <div class="stat-box gold" id="statMasteredBox" style="cursor:pointer;"><div class="stat-num">${masteredCount2}</div><div class="stat-lbl">maîtrisés ⭐</div></div>
       <div class="stat-box warn" id="statReviewBox" style="cursor:pointer;"><div class="stat-num">${toReviewCount}</div><div class="stat-lbl">à revoir</div></div>
     </div>
-    <div style="font-family:'Inter',sans-serif;font-weight:800;color:var(--purple);margin:16px 0 8px;font-size:14px;text-align:center;letter-spacing:.02em;text-transform:uppercase;">🎮 Entraînement & jeux</div>
-    <div style="display:flex;gap:10px;justify-content:center;margin:0 0 6px;flex-wrap:wrap;">
-      <button class="restart-btn" id="trainingCenterBtn" style="display:flex;align-items:center;gap:8px;background:var(--surface-sunken);border:1px solid var(--border);color:var(--purple);box-shadow:none;">
-        🎓 Centre d'entraînement
-      </button>
-      <button class="restart-btn" id="radioBtn" style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#1E1B4B,#3730A3);color:#fff;box-shadow:0 4px 0 #0F172A;">
-        🎧 Radio
-      </button>
-      <button class="restart-btn" id="conjugationBtn" style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#0D9488,#0F766E);color:#fff;box-shadow:0 4px 0 #115E59;">
-        📖 Conjugaison
-      </button>
-      <button class="restart-btn" id="grammarBtn" style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#8B5CF6,#7C3AED);color:#fff;box-shadow:0 4px 0 #5B21B6;">
-        📐 Grammaire
-      </button>
-      <button class="restart-btn" id="orthoBtn" style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#0D9488,#0D7A6E);color:#fff;box-shadow:0 4px 0 #065F51;">
-        ✏️ Orthographe
-      </button>
-      <button class="restart-btn" id="dailyReadingBtn" style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#334155,#1E293B);color:#fff;box-shadow:0 4px 0 #0F172A;">
-        📰 Lecture du jour
-      </button>
-      <button class="restart-btn" id="dailyLessonBtn" style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#7C3AED,#5B21B6);color:#fff;box-shadow:0 4px 0 #4C1D95;">
-        📖 Leçon du jour
-      </button>
-      <button class="restart-btn" id="practicalSheetsBtn" style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#EA580C,#C2410C);color:#fff;box-shadow:0 4px 0 #9A3412;">
-        📎 Fiches pratiques
-      </button>
-      <button class="restart-btn" id="atelierBtn" style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#DC2626,#B91C1C);color:#fff;box-shadow:0 4px 0 #7F1D1D;">
-        🏛️ Atelier Français
-      </button>
-      <button class="restart-btn" id="bouquinageBtn" style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#7C3AED,#5B21B6);color:#fff;box-shadow:0 4px 0 #4C1D95;">
-        📖 Bouquinage
-      </button>
-      <button class="restart-btn" id="avanceBtn" style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#0F766E,#115E59);color:#fff;box-shadow:0 4px 0 #134E4A;">
-        🎓 Grammaire Avancée
-      </button>
-      <button class="restart-btn" id="oratoireBtn" style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#B45309,#92400E);color:#fff;box-shadow:0 4px 0 #78350F;">
-        🎤 Art Oratoire
-      </button>
-      ${toReviewCount > 0 ? `
-      <button class="restart-btn" id="startReviewBtn" style="display:flex;align-items:center;gap:8px;">
+    <div style="font-family:'Inter',sans-serif;font-weight:800;color:var(--purple);margin:16px 0 0;font-size:14px;text-align:center;letter-spacing:.02em;text-transform:uppercase;">🎮 Entraînement & jeux</div>
+    ${toReviewCount > 0 ? `
+    <div style="text-align:center;margin-top:10px;">
+      <button class="restart-btn" id="startReviewBtn" style="display:inline-flex;align-items:center;gap:8px;">
         ⚠️ ${toReviewCount} mot${toReviewCount>1?'s':''} à revoir
-      </button>` : ''}
+      </button>
+    </div>` : ''}
+
+    ${buildHomeSectionHtml('quick', '⚡', 'Révision rapide', `
       <button class="mode-chip" id="blitzBtn" style="background:linear-gradient(135deg,#F59E0B,#EF4444);color:#fff;border:none;">⚡ Blitz 60s</button>
       <button class="mode-chip" id="swipeBtn" style="background:linear-gradient(135deg,#EC4899,#8B5CF6);color:#fff;border:none;">👆 Swipe</button>
       <button class="mode-chip" id="flashcardsBtn" style="background:linear-gradient(135deg,#0EA5A4,#0891B2);color:#fff;border:none;">🃏 Flashcards</button>
       <button class="mode-chip" id="associationBtn" style="background:linear-gradient(135deg,#22C55E,#16A34A);color:#fff;border:none;">🧠 Association</button>
       <button class="mode-chip" id="dailyChallengeBtn" style="background:linear-gradient(135deg,#6366F1,#4F46E5);color:#fff;border:none;">📅 Défi du jour</button>
       <button class="mode-chip" id="badgesBtn" style="background:linear-gradient(135deg,#FBBF24,#F59E0B);color:#fff;border:none;">🏅 Badges</button>
-    </div>
+    `)}
+
+    ${buildHomeSectionHtml('modules', '🎓', "Modules d'entraînement", `
+      <button class="restart-btn" id="trainingCenterBtn" style="display:flex;align-items:center;gap:8px;background:var(--surface-sunken);border:1px solid var(--border);color:var(--purple);box-shadow:none;">🎓 Centre d'entraînement</button>
+      <button class="restart-btn" id="conjugationBtn" style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#0D9488,#0F766E);color:#fff;box-shadow:0 4px 0 #115E59;">📖 Conjugaison</button>
+      <button class="restart-btn" id="grammarBtn" style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#8B5CF6,#7C3AED);color:#fff;box-shadow:0 4px 0 #5B21B6;">📐 Grammaire</button>
+      <button class="restart-btn" id="orthoBtn" style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#0D9488,#0D7A6E);color:#fff;box-shadow:0 4px 0 #065F51;">✏️ Orthographe</button>
+    `)}
+
+    ${buildHomeSectionHtml('fiches', '📚', 'Fiches & lecture', `
+      <button class="restart-btn" id="practicalSheetsBtn" style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#EA580C,#C2410C);color:#fff;box-shadow:0 4px 0 #9A3412;">📎 Fiches pratiques</button>
+      <button class="restart-btn" id="atelierBtn" style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#DC2626,#B91C1C);color:#fff;box-shadow:0 4px 0 #7F1D1D;">🏛️ Atelier Français</button>
+      <button class="restart-btn" id="bouquinageBtn" style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#7C3AED,#5B21B6);color:#fff;box-shadow:0 4px 0 #4C1D95;">📖 Bouquinage</button>
+      <button class="restart-btn" id="avanceBtn" style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#0F766E,#115E59);color:#fff;box-shadow:0 4px 0 #134E4A;">🎓 Grammaire Avancée</button>
+      <button class="restart-btn" id="oratoireBtn" style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#B45309,#92400E);color:#fff;box-shadow:0 4px 0 #78350F;">🎤 Art Oratoire</button>
+      <button class="restart-btn" id="situationsBtn" style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#BE185D,#9D174D);color:#fff;box-shadow:0 4px 0 #831843;">💬 Expressions B2-C1</button>
+    `)}
+
+    ${buildHomeSectionHtml('daily', '📰', 'Rendez-vous du jour', `
+      <button class="restart-btn" id="dailyReadingBtn" style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#334155,#1E293B);color:#fff;box-shadow:0 4px 0 #0F172A;">📰 Lecture du jour</button>
+      <button class="restart-btn" id="dailyLessonBtn" style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#7C3AED,#5B21B6);color:#fff;box-shadow:0 4px 0 #4C1D95;">📖 Leçon du jour</button>
+    `)}
+
+    ${buildHomeSectionHtml('jeux', '🧩', 'Jeux & extras', `
+      <button class="restart-btn" id="jeuxMotsBtn" style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#65A30D,#4D7C0F);color:#fff;box-shadow:0 4px 0 #3F6212;">🧩 Jeux de mots</button>
+      <button class="restart-btn" id="radioBtn" style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#1E1B4B,#3730A3);color:#fff;box-shadow:0 4px 0 #0F172A;">🎧 Radio</button>
+    `)}
 
     <div class="lexicon-progress-card">
       <div class="lexicon-progress-head">
@@ -11968,6 +12042,7 @@ function renderBlockSelect(){
       `<span class="lexicon-legend-item"><span class="lexicon-legend-dot" style="background:${s.color};"></span>${s.label} <b>${s.count}</b></span>`
     ).join('');
   })();
+  ['quick','modules','fiches','daily','jeux'].forEach(wireHomeSectionToggle);
   document.getElementById('trainingCenterBtn').addEventListener('click', () => renderTrainingCenter());
   document.getElementById('conjugationBtn').addEventListener('click', () => renderConjugationHome());
   document.getElementById('grammarBtn').addEventListener('click', () => renderGrammarHome());
@@ -11979,6 +12054,8 @@ function renderBlockSelect(){
   document.getElementById('bouquinageBtn').addEventListener('click', () => renderBouquinageHome());
   document.getElementById('avanceBtn').addEventListener('click', () => renderGrammaireAvanceeHome());
   document.getElementById('oratoireBtn').addEventListener('click', () => renderArtOratoireHome());
+  document.getElementById('situationsBtn').addEventListener('click', () => renderSituationsHome());
+  document.getElementById('jeuxMotsBtn').addEventListener('click', () => renderJeuxMotsHome());
   const questsHead = document.getElementById('questsHead');
   const questsChevron = document.getElementById('questsChevron');
   if(questsChevron){ questsChevron.style.transform = questsCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)'; }
@@ -12422,6 +12499,48 @@ function speechMatches(transcript, expected){
   // ou distance courte sur la phrase entière (mots composés)
   if(levenshtein(t, e) <= (e.length <= 7 ? 2 : 3)) return true;
   return false;
+}
+
+/* 🎤 Pratique orale légère, indépendante du flux de quiz principal (n'utilise ni "answered" ni
+   "handleSpeakResult") : pour un bouton mic posé sur une fiche (tableau d'expressions, etc.). Compare
+   ce qui est reconnu au texte attendu avec la même tolérance que le mode Prononciation, et affiche
+   le résultat dans l'élément ciblé sans jamais interrompre ou modifier une partie de quiz en cours. */
+function checkExpressionPronunciation(text, lang, btnId, feedbackElId){
+  if(!speechRecoAvailable) return;
+  const btn = document.getElementById(btnId);
+  const feedback = document.getElementById(feedbackElId);
+  if(!btn || !feedback) return;
+  let localRecognition;
+  try{
+    localRecognition = new SpeechRec();
+    localRecognition.lang = lang || 'fr-FR';
+    localRecognition.interimResults = false;
+    localRecognition.maxAlternatives = 3;
+  }catch(e){ return; }
+
+  btn.classList.add('listening');
+  feedback.textContent = '🎧 Écoute...';
+  feedback.style.color = 'var(--text-dim)';
+
+  localRecognition.onresult = (ev) => {
+    let alts = [];
+    for(let i=0;i<ev.results[0].length;i++){ alts.push(ev.results[0][i].transcript); }
+    const heard = alts[0] || '';
+    const ok = alts.some(a => speechMatches(a, text));
+    feedback.textContent = ok ? `✅ Bien dit ! (« ${heard} »)` : `🔁 Réessaie — j'ai entendu « ${heard} »`;
+    feedback.style.color = ok ? '#16A34A' : '#DC2626';
+  };
+  localRecognition.onerror = (ev) => {
+    btn.classList.remove('listening');
+    feedback.textContent = ev.error === 'not-allowed' || ev.error === 'service-not-allowed'
+      ? '🚫 Micro refusé — autorise-le dans ton navigateur.'
+      : ev.error === 'no-speech' ? '🤫 Rien entendu, réessaie.' : 'Réessaie.';
+    feedback.style.color = 'var(--text-dim)';
+  };
+  localRecognition.onend = () => { btn.classList.remove('listening'); };
+
+  try{ localRecognition.start(); }
+  catch(e){ btn.classList.remove('listening'); feedback.textContent = ''; }
 }
 
 function renderSpeakCard(){
@@ -24521,8 +24640,2082 @@ const PRACTICAL_SHEETS = [
     ],
     note: "Se juger soi-même avec exigence, observer, comparer et réfléchir sans relâche : c'est ce travail patient — plus que le seul talent inné — qui forme un orateur accompli.",
   },
+  // ============ 💬 EXPRESSIONS B2-C1 — fiches originales, par situation de communication ============
+  {
+    id: 'sit-conflit-diplomatie',
+    section: 'situations',
+    category: 'Conflit et diplomatie',
+    icon: '🤝',
+    title: 'Gérer un conflit avec diplomatie',
+    intro: "Des expressions pour parler d'une tension, la désamorcer, ou au contraire constater qu'elle s'aggrave.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    rows: [
+      ['Le climat est électrique', 'Une tension palpable, prête à éclater'],
+      ['Ça sent le roussi', 'Signe annonciateur d\'un conflit'],
+      ['Le torchon brûle', 'Une dispute est en cours entre deux personnes'],
+      ['Crever l\'abcès', 'Affronter un problème pour le résoudre définitivement'],
+      ['Mettre de l\'eau dans son vin', 'Faire des concessions, adoucir sa position'],
+      ['Trouver un terrain d\'entente', 'Parvenir à un compromis'],
+      ['Lâcher du lest', 'Faire une concession'],
+      ['Camper sur ses positions', 'Refuser de changer d\'avis'],
+    ],
+    note: "Dialogue original : « — On ne peut plus continuer comme ça, le torchon brûle entre nos deux équipes. — Je sais, il va falloir crever l'abcès avant la fin de la semaine. »",
+  },
+  {
+    id: 'sit-plaisanter-mentir',
+    section: 'situations',
+    category: 'Plaisanteries et mensonges',
+    icon: '😏',
+    title: 'Distinguer la plaisanterie du mensonge',
+    intro: "Le vocabulaire pour parler d'un canular, d'une blague, ou d'un mensonge plus sérieux.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    rows: [
+      ['Monter un canular', 'Organiser une farce, une blague élaborée'],
+      ['Faire marcher quelqu\'un', 'Le tromper pour rire, par plaisanterie'],
+      ['Ne pas tenir la route', '(une excuse) Ne pas être crédible'],
+      ['Enjoliver les faits', 'Embellir la vérité à son avantage'],
+      ['Mentir avec aplomb', 'Mentir avec une assurance déconcertante'],
+      ['Quelque chose cloche', 'Il y a une incohérence, un détail suspect'],
+      ['Une histoire qui ne colle pas', 'Un récit qui contredit une autre version'],
+    ],
+  },
+  {
+    id: 'sit-allusions',
+    section: 'situations',
+    category: 'Allusions et sous-entendus',
+    icon: '🕵️',
+    title: 'Comprendre ce qui n\'est pas dit',
+    intro: "Parler à mots couverts, deviner un sous-entendu, ou au contraire jouer la carte de la franchise.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    rows: [
+      ['Laisser entendre', 'Suggérer sans affirmer clairement'],
+      ['Tourner autour du pot', 'Éviter d\'aborder le sujet directement'],
+      ['Comprendre à demi-mot', 'Saisir une allusion sans explication complète'],
+      ['Faire un dessin (à qqn)', 'Expliquer en détail — souvent employé à la négative'],
+      ['Le dire franchement', 'Parler sans détour ni ménagement'],
+      ['Ne pas y aller par quatre chemins', 'Être direct, sans détour'],
+    ],
+  },
+  {
+    id: 'sit-debat-opinion',
+    section: 'situations',
+    category: 'Débat et opinion',
+    icon: '🗳️',
+    title: 'Défendre une opinion dans un débat',
+    intro: "Introduire son point de vue, nuancer, ou marquer un désaccord courtois.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    rows: [
+      ['À mon sens', 'Selon mon opinion'],
+      ['Nuancer un constat', 'Apporter des précisions qui modèrent une affirmation'],
+      ['Ne pas avoir tort sur un point', 'Reconnaître une part de vérité chez l\'interlocuteur'],
+      ['Il y a du vrai dans ce que vous dites', 'Reconnaître partiellement un argument'],
+      ['Ne pas partager une analyse', 'Exprimer un désaccord'],
+      ['Contredire quelqu\'un', 'S\'opposer à son opinion'],
+    ],
+  },
+  {
+    id: 'sit-dire-taire',
+    section: 'situations',
+    category: 'Dire ou taire un secret',
+    icon: '🤐',
+    title: 'Garder ou révéler un secret',
+    intro: "Comment promettre la discrétion, ou au contraire signaler qu'une information a fuité.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    rows: [
+      ['En toute confidence', 'De manière strictement privée'],
+      ['Motus et bouche cousue', 'Garder un secret absolu'],
+      ['S\'ébruiter', '(une information) Devenir connue malgré la discrétion voulue'],
+      ['Un secret éventé', 'Un secret qui a été découvert'],
+      ['Ne pas s\'étendre sur un sujet', 'Refuser d\'en dire davantage'],
+      ['Son jardin secret', 'Ce qu\'on garde strictement pour soi'],
+    ],
+  },
+  {
+    id: 'sit-reagir-commenter',
+    section: 'situations',
+    category: 'Réagir et commenter',
+    icon: '💭',
+    title: 'Réagir à une nouvelle ou une situation',
+    intro: "Exprimer la surprise, l'agacement, ou l'indignation face à un événement.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    rows: [
+      ['Ça alors !', 'Exprime une forte surprise'],
+      ['Ne pas en revenir', 'Être stupéfait'],
+      ['Il y a de quoi devenir chèvre', 'Situation exaspérante'],
+      ['Devenir lassant, à force', 'Finir par agacer à répétition'],
+      ['Un peu fort de café', 'Une situation exagérée, inacceptable'],
+      ['On aura tout vu', 'Expression d\'indignation face à l\'absurde'],
+    ],
+  },
+  {
+    id: 'sit-projet',
+    section: 'situations',
+    category: 'Parler d\'un projet',
+    icon: '📊',
+    title: 'Suivre l\'avancement d\'un projet',
+    intro: "Le vocabulaire pour demander où en est un projet, ou pour signaler un blocage.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    rows: [
+      ['Vous en êtes où ?', 'Demande informelle de l\'état d\'avancement'],
+      ['Le projet prend forme', 'Il commence à se concrétiser'],
+      ['Être sur la bonne voie', 'Progresser dans la bonne direction'],
+      ['Être au point mort', 'Complètement bloqué, sans avancée'],
+      ['Tourner en rond', 'Ne faire aucun progrès malgré les efforts'],
+      ['Avancer comme prévu', 'Respecter le calendrier fixé'],
+    ],
+  },
+  {
+    id: 'sit-evaluer-travail',
+    section: 'situations',
+    category: 'Évaluer un travail',
+    icon: '📝',
+    title: 'Juger la qualité d\'un travail',
+    intro: "Formuler une critique constructive, ou au contraire un compliment sincère.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    rows: [
+      ['Manquer de rigueur', 'Ne pas être suffisamment sérieux, méthodique'],
+      ['Un travail bâclé', 'Fait rapidement et sans soin'],
+      ['Manquer de profondeur', 'Rester superficiel'],
+      ['Tenir la route', '(une idée) Être solide, convaincante'],
+      ['Chapeau !', 'Expression d\'admiration pour un travail réussi'],
+      ['Formuler des éloges', 'Faire des compliments'],
+    ],
+  },
+  {
+    id: 'sit-preference-indifference',
+    section: 'situations',
+    category: 'Préférence et indifférence',
+    icon: '⚖️',
+    title: 'Exprimer une préférence ou une indifférence',
+    intro: "Dire ce qu'on préfère, ou au contraire signaler que quelque chose nous est égal.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    rows: [
+      ['Avoir un penchant pour', 'Préférer nettement quelque chose'],
+      ['Le cœur balance', 'Hésiter entre deux préférences'],
+      ['Ça m\'est égal', 'Exprime l\'indifférence'],
+      ['Ne pas avoir d\'avis tranché', 'Ne pas avoir de préférence claire'],
+      ['Très peu pour moi', 'Refus poli d\'une proposition'],
+      ['Il n\'en est pas question', 'Refus catégorique'],
+    ],
+  },
+  {
+    id: 'sit-gaffes-erreurs',
+    section: 'situations',
+    category: 'Gaffes et erreurs',
+    icon: '🙈',
+    title: 'Parler d\'une gaffe ou d\'une erreur',
+    intro: "Reconnaître une bévue, s'excuser, ou rattraper la situation.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    rows: [
+      ['Mettre les pieds dans le plat', 'Faire une gaffe, dire une chose maladroite'],
+      ['Rattraper le coup', 'Réparer une erreur après coup'],
+      ['S\'en sortir avec une pirouette', 'Se tirer habilement d\'une situation embarrassante'],
+      ['Par pure inadvertance', 'Sans faire exprès'],
+      ['Ce n\'était pas intentionnel', 'L\'erreur n\'était pas volontaire'],
+      ['Quelle maladresse !', 'Exclamation après une gaffe'],
+    ],
+  },
+  {
+    id: 'sit-comportements',
+    section: 'situations',
+    category: 'Les comportements humains',
+    icon: '👤',
+    title: 'Décrire le comportement d\'une personne',
+    intro: "Du portrait élogieux au portrait plus sévère, comment qualifier une attitude.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    rows: [
+      ['Foncièrement honnête', 'Honnête par nature, profondément'],
+      ['Avoir un sale caractère', 'Être difficile, désagréable de nature'],
+      ['Se montrer cassant', 'Parler sèchement, sans ménagement'],
+      ['Couper les ponts avec quelqu\'un', 'Rompre définitivement une relation'],
+      ['Ne plus s\'adresser la parole', 'Être fâché au point de ne plus se parler'],
+      ['Rester bienveillant malgré l\'exigence', 'Combiner fermeté et gentillesse'],
+    ],
+  },
+  {
+    id: 'sit-illusions-realite',
+    section: 'situations',
+    category: 'Illusions, apparences et réalité',
+    icon: '🎭',
+    title: 'Distinguer l\'apparence de la réalité',
+    intro: "Se méfier des faux-semblants, ou au contraire retomber sur terre après une désillusion.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    rows: [
+      ['Se bercer d\'illusions', 'Se faire de fausses espérances'],
+      ['Le vernis craque', 'La vraie personnalité apparaît derrière une façade'],
+      ['Tomber des nues', 'Être extrêmement surpris en découvrant une vérité'],
+      ['Garder les pieds sur terre', 'Rester réaliste, lucide'],
+      ['Faire la part des choses', 'Distinguer ce qui est important de ce qui ne l\'est pas'],
+      ['Se faire de fausses idées', 'Avoir une perception erronée de la réalité'],
+    ],
+  },
+  {
+    id: 'sit-manieres-moyens',
+    section: 'situations',
+    category: 'Manières et moyens d\'agir',
+    icon: '🛠️',
+    title: 'Décrire la manière de faire quelque chose',
+    intro: "S'y prendre bien ou mal, procéder méthodiquement ou au contraire à la va-vite.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    rows: [
+      ['Avoir le chic pour', 'Savoir faire quelque chose avec talent naturel'],
+      ['Procéder étape par étape', 'Avancer méthodiquement'],
+      ['S\'y prendre n\'importe comment', 'Agir de façon désorganisée'],
+      ['Foncer tête baissée', 'Agir sans réfléchir aux conséquences'],
+      ['Par quel biais', 'Par quel moyen, quelle voie'],
+      ['Grâce à un ami commun', 'Par l\'intermédiaire d\'une relation partagée'],
+    ],
+  },
+  {
+    id: 'sit-decouragement-perseverance',
+    section: 'situations',
+    category: 'Découragement et persévérance',
+    icon: '💪',
+    title: 'Parler du découragement et de la persévérance',
+    intro: "Exprimer l'envie d'abandonner, ou au contraire la détermination à continuer.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    rows: [
+      ['Ne pas voir le bout du tunnel', 'Ne pas percevoir la fin d\'une difficulté'],
+      ['Avoir envie de tout laisser tomber', 'Être tenté d\'abandonner'],
+      ['Ne jamais baisser les bras', 'Ne jamais abandonner'],
+      ['S\'accrocher envers et contre tout', 'Persévérer malgré tous les obstacles'],
+      ['Ne lâche rien !', 'Encouragement à continuer sans faiblir'],
+      ['Le plus dur est derrière toi', 'Encouragement : la difficulté diminue'],
+    ],
+  },
+  {
+    id: 'sit-soucis-apprehensions',
+    section: 'situations',
+    category: 'Soucis et appréhensions',
+    icon: '😟',
+    title: 'Exprimer un souci ou une appréhension',
+    intro: "Parler d'une inquiétude, ou au contraire rassurer quelqu'un.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    rows: [
+      ['Se faire un sang d\'encre', 'S\'inquiéter énormément'],
+      ['Peser sur l\'esprit', '(un souci) Occuper constamment les pensées'],
+      ['Tout va rentrer dans l\'ordre', 'Formule rassurante'],
+      ['Il n\'y a pas de quoi s\'alarmer', 'Rassurer sur la gravité d\'une situation'],
+      ['Avoir la peur de sa vie', 'Éprouver une peur extrême et soudaine'],
+      ['Le trac', 'La peur ressentie avant de se produire en public'],
+    ],
+  },
+  {
+    id: 'sit-sentiments',
+    section: 'situations',
+    category: 'Exprimer ses sentiments',
+    icon: '❤️',
+    title: 'Nommer et exprimer ses sentiments',
+    intro: "Du vocabulaire pour parler de ses émotions avec nuance, sans excès ni retenue excessive.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    rows: [
+      ['Marquer profondément', 'Avoir un impact émotionnel fort et durable'],
+      ['Éprouver de la reconnaissance', 'Ressentir de la gratitude'],
+      ['Garder ses sentiments pour soi', 'Ne pas exprimer ses émotions'],
+      ['Avoir du mal à extérioriser', 'Difficulté à montrer ses émotions'],
+      ['Des liens qui se distendent', 'Une relation qui s\'affaiblit avec le temps'],
+      ['Une épreuve qui rapproche', 'Un événement difficile qui renforce un lien'],
+    ],
+  },
+  {
+    id: 'sit-nuancer-attenuer',
+    section: 'situations',
+    category: 'Nuancer et atténuer',
+    icon: '🎚️',
+    title: 'Nuancer ses propos',
+    intro: "Des tournures pour adoucir une affirmation ou préciser sa pensée sans excès de certitude.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    rows: [
+      ['Dans une certaine mesure', 'Partiellement, avec des réserves'],
+      ['Rejoindre une analyse', 'Être d\'accord avec une opinion'],
+      ['À vue de nez', 'Selon une estimation approximative'],
+      ['À peu de chose près', 'Presque exactement, avec une petite marge'],
+      ['Tout est affaire de point de vue', 'Cela dépend de la perspective adoptée'],
+      ['Ne pas noircir le tableau', 'Ne pas exagérer les aspects négatifs'],
+    ],
+  },
+  {
+    id: 'sit-expliquer-comprendre',
+    section: 'situations',
+    category: 'Expliquer et comprendre',
+    icon: '💡',
+    title: 'Demander ou donner une explication',
+    intro: "Formuler une demande de clarification, ou signaler qu'on a enfin compris.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    rows: [
+      ['Éclairer quelqu\'un sur un point', 'Donner une explication claire'],
+      ['Ne pas saisir la logique', 'Ne pas comprendre le raisonnement'],
+      ['Tout s\'éclaircir', 'Comprendre soudainement après une confusion'],
+      ['Ça fait tilt', 'Un déclic de compréhension se produit'],
+      ['Ça me dépasse', 'Je ne comprends absolument pas'],
+      ['Nager en pleine confusion', 'Être complètement perdu, désorienté'],
+    ],
+  },
+  // ============ 🌍 THÈMES C1-C2 — fiches originales, inspirées d'un plan de cahier d'exercices ============
+  {
+    id: 'c1c2-explorer-monde',
+    section: 'situations',
+    category: 'Le tour du monde en français',
+    icon: '🌍',
+    title: 'Explorer le monde et en rendre compte',
+    intro: "Du vocabulaire pour raconter un voyage et un choc culturel.",
+    type: 'table',
+    columns: ['Terme', 'Sens'],
+    rows: [
+      ['Un choc culturel', 'Le trouble ressenti face à des usages très différents des siens'],
+      ['Un impair', 'Une maladresse commise par ignorance des usages locaux'],
+      ['Les us et coutumes', 'Les habitudes et traditions propres à un lieu'],
+      ['Dépayser', 'Donner une sensation de changement total de cadre'],
+      ['S\'acclimater', 'S\'habituer progressivement à un nouvel environnement'],
+      ['Un carnet de voyage', 'Un récit personnel tenu au fil d\'un déplacement'],
+    ],
+  },
+  {
+    id: 'c1c2-cohabiter-cultures',
+    section: 'situations',
+    category: 'Le tour du monde en français',
+    icon: '🤝',
+    title: 'Cohabiter avec d\'autres cultures',
+    intro: "Exprimer l'étonnement face à une différence culturelle, avec plus ou moins de retenue.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    rows: [
+      ['Ça m\'a scié', "(familier) Ça m'a beaucoup surpris"],
+      ['Rester scotché devant quelque chose', '(familier) Être fasciné, stupéfait'],
+      ['Être déconcerté par', 'Être troublé, ne plus savoir comment réagir'],
+      ['Un malentendu culturel', 'Une incompréhension due à des repères différents'],
+      ['S\'adapter aux usages locaux', 'Modifier son comportement selon le contexte'],
+      ['Faire preuve d\'ouverture d\'esprit', 'Accepter et comprendre la différence'],
+    ],
+  },
+  {
+    id: 'c1c2-humour',
+    section: 'situations',
+    category: 'Le tour du monde en français',
+    icon: '😄',
+    title: 'Faire de l\'humour',
+    intro: "Le vocabulaire des figures de style et des jeux de mots.",
+    type: 'table',
+    columns: ['Terme', 'Sens'],
+    rows: [
+      ['Un oxymore', 'Association de deux mots de sens contraire (ex. un silence assourdissant)'],
+      ['Une litote', "Dire peu pour suggérer beaucoup (ex. « ce n'est pas mauvais » pour dire que c'est très bon)"],
+      ['Une hyperbole', 'Une exagération volontaire'],
+      ['Une antiphrase', "Dire le contraire de ce qu'on pense, souvent par ironie"],
+      ['Un jeu de mots', 'Une plaisanterie fondée sur la ressemblance ou le double sens des mots'],
+      ['Le second degré', "L'humour qui ne doit pas être pris au premier sens"],
+    ],
+  },
+  {
+    id: 'c1c2-espace-francophone',
+    section: 'situations',
+    category: 'Le tour du monde en français',
+    icon: '🗣️',
+    title: 'Communiquer dans l\'espace francophone',
+    intro: "Le français varie d'un pays à l'autre : quelques repères de vocabulaire.",
+    type: 'table',
+    columns: ['Terme', 'Sens'],
+    rows: [
+      ['La francophonie', 'L\'ensemble des pays et populations où le français est parlé'],
+      ['Un régionalisme', 'Un mot ou une expression propre à une région'],
+      ['Un accent', 'La manière particulière de prononcer une langue selon l\'origine du locuteur'],
+      ['Le français standard', 'La forme de référence, enseignée et comprise partout'],
+      ['Une variante lexicale', 'Un mot différent pour désigner la même réalité selon le pays'],
+    ],
+  },
+  {
+    id: 'c1c2-presse-francophone',
+    section: 'situations',
+    category: 'Le tour du monde en français',
+    icon: '📰',
+    title: 'Lire la presse francophone',
+    intro: "Le vocabulaire de base pour aborder un article de presse.",
+    type: 'table',
+    columns: ['Terme', 'Sens'],
+    rows: [
+      ['Un éditorial', 'Un article qui exprime l\'opinion du journal'],
+      ['Une dépêche', 'Une information brève transmise par une agence de presse'],
+      ['Un chapô', 'Le court texte d\'introduction qui résume l\'article'],
+      ['Une source', 'La personne ou l\'organisme à l\'origine d\'une information'],
+      ['Recouper une information', 'Vérifier une information en la comparant à d\'autres sources'],
+      ['La ligne éditoriale', 'L\'orientation générale d\'un média'],
+    ],
+  },
+  {
+    id: 'c1c2-monde-virtuel',
+    section: 'situations',
+    category: 'Mille et une connexions',
+    icon: '💻',
+    title: 'Faire face au monde virtuel',
+    intro: "Le vocabulaire du numérique et de ses excès.",
+    type: 'table',
+    columns: ['Terme', 'Sens'],
+    rows: [
+      ['La dépendance numérique', 'L\'incapacité à se passer des écrans'],
+      ['Un avatar', 'Une représentation virtuelle de soi en ligne'],
+      ['Décrocher (des écrans)', 'Se déconnecter volontairement'],
+      ['Une bulle informationnelle', 'Un environnement où l\'on ne voit que des contenus qui confirment ses idées'],
+      ['La surinformation', 'Un excès d\'informations qui nuit à la compréhension'],
+    ],
+  },
+  {
+    id: 'c1c2-reseaux-sociaux',
+    section: 'situations',
+    category: 'Mille et une connexions',
+    icon: '📱',
+    title: 'Gérer ses réseaux sociaux',
+    intro: "Le vocabulaire des interactions en ligne.",
+    type: 'table',
+    columns: ['Terme', 'Sens'],
+    rows: [
+      ['Un abonné', 'Une personne qui suit un compte'],
+      ['Publier un contenu', 'Mettre en ligne une photo, un texte, une vidéo'],
+      ['Un influenceur', 'Une personne dont l\'avis en ligne a un impact sur son public'],
+      ['Faire le buzz', 'Attirer soudainement une grande attention en ligne'],
+      ['Se désabonner', 'Cesser de suivre un compte'],
+      ['La réputation numérique', 'L\'image qu\'une personne renvoie en ligne'],
+    ],
+  },
+  {
+    id: 'c1c2-reagir-danger',
+    section: 'situations',
+    category: 'Mille et une connexions',
+    icon: '⚠️',
+    title: 'Réagir face au danger',
+    intro: "Exprimer une alerte ou décrire un comportement de prudence.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    rows: [
+      ['Tirer la sonnette d\'alarme', 'Signaler publiquement un danger imminent'],
+      ['Prendre ses précautions', 'Agir pour se protéger d\'un risque'],
+      ['Un réflexe de survie', 'Une réaction instinctive face à un danger'],
+      ['Se mettre à l\'abri', 'Chercher un endroit sûr'],
+      ['Minimiser un risque', 'Sous-estimer volontairement un danger'],
+      ['Garder son sang-froid', 'Rester calme malgré la situation dangereuse'],
+    ],
+  },
+  {
+    id: 'c1c2-jouer-medias',
+    section: 'situations',
+    category: 'Mille et une connexions',
+    icon: '🎮',
+    title: 'Jouer avec les médias',
+    intro: "Le vocabulaire du détournement humoristique et de la satire.",
+    type: 'table',
+    columns: ['Terme', 'Sens'],
+    rows: [
+      ['Une parodie', 'Une imitation comique d\'une œuvre ou d\'un style'],
+      ['Un détournement', 'L\'utilisation d\'une image ou d\'un texte à des fins différentes de l\'original'],
+      ['La satire', 'Une critique moqueuse d\'une personne ou d\'une situation'],
+      ['Le second degré', 'Un ton qui ne doit pas être pris au sens littéral'],
+      ['Un montage', 'Une image ou vidéo modifiée pour créer un effet'],
+    ],
+  },
+  {
+    id: 'c1c2-presse-ecrite',
+    section: 'situations',
+    category: 'Mille et une connexions',
+    icon: '📄',
+    title: 'Tirer parti de la presse écrite',
+    intro: "Le vocabulaire de l'analyse critique d'un article.",
+    type: 'table',
+    columns: ['Terme', 'Sens'],
+    rows: [
+      ['Un point de vue', 'La perspective adoptée par l\'auteur d\'un article'],
+      ['Une source fiable', 'Une origine d\'information digne de confiance'],
+      ['Prendre du recul', 'Analyser une information avec distance critique'],
+      ['Une opinion tranchée', 'Un avis affirmé sans nuance'],
+      ['Un fait vérifié', 'Une information confirmée par plusieurs sources'],
+    ],
+  },
+  {
+    id: 'c1c2-etudier-former',
+    section: 'situations',
+    category: 'Études et travail',
+    icon: '🎓',
+    title: 'Étudier et se former',
+    intro: "Le vocabulaire du parcours académique.",
+    type: 'table',
+    columns: ['Terme', 'Sens'],
+    rows: [
+      ['Un cursus', 'Un parcours d\'études organisé'],
+      ['Décrocher un diplôme', 'Obtenir un diplôme après des efforts'],
+      ['Redoubler', 'Refaire une année scolaire non validée'],
+      ['La formation continue', 'Des études poursuivies en parallèle d\'une activité professionnelle'],
+      ['Plancher sur un sujet', '(familier) Travailler intensément sur un sujet précis'],
+      ['Un décrochage scolaire', 'L\'abandon progressif ou soudain de la scolarité'],
+    ],
+  },
+  {
+    id: 'c1c2-monde-travail',
+    section: 'situations',
+    category: 'Études et travail',
+    icon: '💼',
+    title: 'Se confronter au monde du travail',
+    intro: "Le vocabulaire de l'insertion professionnelle.",
+    type: 'table',
+    columns: ['Terme', 'Sens'],
+    rows: [
+      ['Décrocher un entretien', 'Obtenir un rendez-vous pour un poste'],
+      ['Une période d\'essai', 'Le temps pendant lequel employeur et salarié se testent mutuellement'],
+      ['Le marché de l\'emploi', 'L\'état général des offres et demandes de travail'],
+      ['Être surqualifié(e)', 'Avoir des compétences supérieures à celles requises pour un poste'],
+      ['Une reconversion', 'Un changement complet d\'orientation professionnelle'],
+    ],
+  },
+  {
+    id: 'c1c2-entreprise-interne',
+    section: 'situations',
+    category: 'Études et travail',
+    icon: '🏢',
+    title: 'Communiquer en entreprise (en interne)',
+    intro: "Le vocabulaire des échanges au sein d'une équipe.",
+    type: 'table',
+    columns: ['Terme', 'Sens'],
+    rows: [
+      ['Une note de service', 'Un document interne informant le personnel'],
+      ['Un compte rendu', 'Le résumé écrit d\'une réunion'],
+      ['La hiérarchie', 'L\'organisation des niveaux de responsabilité'],
+      ['Remonter une information', 'Transmettre une information à un niveau supérieur'],
+      ['Un brief', '(familier) Une réunion courte donnant des instructions'],
+    ],
+  },
+  {
+    id: 'c1c2-entreprise-externe',
+    section: 'situations',
+    category: 'Études et travail',
+    icon: '📤',
+    title: 'Communiquer en entreprise (à l\'externe)',
+    intro: "Le vocabulaire des échanges avec des partenaires ou clients.",
+    type: 'table',
+    columns: ['Terme', 'Sens'],
+    rows: [
+      ['Un interlocuteur', 'La personne avec qui l\'on communique'],
+      ['Un devis', 'Une estimation écrite du coût d\'une prestation'],
+      ['Négocier un contrat', 'Discuter les termes d\'un accord avant signature'],
+      ['Un partenariat', 'Une collaboration entre deux entités'],
+      ['Soigner son image de marque', 'Veiller à la perception publique de son entreprise'],
+    ],
+  },
+  {
+    id: 'c1c2-structurer-activite',
+    section: 'situations',
+    category: 'Études et travail',
+    icon: '📋',
+    title: 'Structurer une activité professionnelle',
+    intro: "Le vocabulaire de l'organisation du travail.",
+    type: 'table',
+    columns: ['Terme', 'Sens'],
+    rows: [
+      ['Établir un planning', 'Organiser les tâches dans le temps'],
+      ['Prioriser', 'Déterminer ce qui doit être fait en premier'],
+      ['Déléguer une tâche', 'Confier une responsabilité à quelqu\'un d\'autre'],
+      ['Un cahier des charges', 'Le document qui définit les exigences d\'un projet'],
+      ['Optimiser un processus', 'Améliorer l\'efficacité d\'une méthode de travail'],
+    ],
+  },
+  {
+    id: 'c1c2-prolonger-existence',
+    section: 'situations',
+    category: 'La nature humaine et la science',
+    icon: '🧬',
+    title: 'Prolonger son existence',
+    intro: "Le vocabulaire de la longévité et du bien-être.",
+    type: 'table',
+    columns: ['Terme', 'Sens'],
+    rows: [
+      ['L\'espérance de vie', 'La durée moyenne de vie estimée d\'une population'],
+      ['Le vieillissement', 'Le processus naturel de l\'avancée en âge'],
+      ['La longévité', 'La durée exceptionnellement longue d\'une vie'],
+      ['Prévenir une maladie', 'Agir en amont pour éviter son apparition'],
+      ['Un mode de vie sain', 'Des habitudes favorables à la santé'],
+    ],
+  },
+  {
+    id: 'c1c2-inquieter-sante',
+    section: 'situations',
+    category: 'La nature humaine et la science',
+    icon: '🩺',
+    title: 'S\'inquiéter de sa santé',
+    intro: "Le vocabulaire de la consultation médicale et du diagnostic.",
+    type: 'table',
+    columns: ['Terme', 'Sens'],
+    rows: [
+      ['Un symptôme', 'Un signe qui révèle une maladie'],
+      ['Un diagnostic', 'L\'identification d\'une maladie par un médecin'],
+      ['Consulter', 'Voir un médecin pour un avis'],
+      ['Se faire du souci', 'S\'inquiéter'],
+      ['Un bilan de santé', 'Un ensemble d\'examens pour évaluer l\'état général'],
+    ],
+  },
+  {
+    id: 'c1c2-psychisme',
+    section: 'situations',
+    category: 'La nature humaine et la science',
+    icon: '🧠',
+    title: 'Comprendre son psychisme',
+    intro: "Le vocabulaire du fonctionnement psychologique.",
+    type: 'table',
+    columns: ['Terme', 'Sens'],
+    rows: [
+      ['L\'inconscient', 'La part de l\'esprit qui échappe à la conscience'],
+      ['Un mécanisme de défense', 'Une stratégie psychologique inconsciente de protection'],
+      ['Prendre du recul', 'Analyser une situation avec distance émotionnelle'],
+      ['La résilience', 'La capacité à surmonter une épreuve psychologique'],
+      ['Se faire une raison', 'Accepter une situation qu\'on ne peut changer'],
+    ],
+  },
+  {
+    id: 'c1c2-phenomene-naturel',
+    section: 'situations',
+    category: 'La nature humaine et la science',
+    icon: '🌋',
+    title: 'S\'interroger sur un phénomène naturel',
+    intro: "Le vocabulaire de l'observation scientifique.",
+    type: 'table',
+    columns: ['Terme', 'Sens'],
+    rows: [
+      ['Une hypothèse', 'Une explication provisoire à vérifier'],
+      ['Un phénomène', 'Un fait observable que l\'on cherche à comprendre'],
+      ['Une expérience', 'Un test destiné à vérifier une hypothèse'],
+      ['Un consensus scientifique', 'Un accord largement partagé entre chercheurs'],
+      ['Une donnée', 'Une information recueillie par observation ou mesure'],
+    ],
+  },
+  {
+    id: 'c1c2-avenir-humanite',
+    section: 'situations',
+    category: 'La nature humaine et la science',
+    icon: '🚀',
+    title: 'Se projeter dans l\'avenir de l\'humanité',
+    intro: "Le vocabulaire des grandes questions d'avenir.",
+    type: 'table',
+    columns: ['Terme', 'Sens'],
+    rows: [
+      ['L\'intelligence artificielle', 'Des systèmes informatiques capables d\'apprendre et de raisonner'],
+      ['Une avancée technologique', 'Un progrès significatif dans un domaine technique'],
+      ['Un scénario catastrophe', 'Une hypothèse pessimiste sur l\'avenir'],
+      ['La transition écologique', 'Le passage vers un mode de vie plus durable'],
+      ['Anticiper un risque', 'Prévoir un danger avant qu\'il ne survienne'],
+    ],
+  },
+  {
+    id: 'c1c2-partager-valeurs',
+    section: 'situations',
+    category: 'Citoyenneté',
+    icon: '🤲',
+    title: 'Faire partager des valeurs',
+    intro: "Le vocabulaire de la transmission de principes.",
+    type: 'table',
+    columns: ['Terme', 'Sens'],
+    rows: [
+      ['Une valeur', 'Un principe considéré comme important, fondamental'],
+      ['Transmettre', 'Faire passer un savoir ou une valeur à d\'autres'],
+      ['Prêcher par l\'exemple', 'Montrer ses valeurs par son propre comportement'],
+      ['Le civisme', 'Le respect des règles de la vie en société'],
+      ['Sensibiliser', 'Faire prendre conscience d\'un enjeu'],
+    ],
+  },
+  {
+    id: 'c1c2-justice',
+    section: 'situations',
+    category: 'Citoyenneté',
+    icon: '⚖️',
+    title: 'S\'engager pour la justice',
+    intro: "Le vocabulaire de l'engagement en faveur de l'équité.",
+    type: 'table',
+    columns: ['Terme', 'Sens'],
+    rows: [
+      ['Une injustice', 'Une situation contraire à l\'équité'],
+      ['Militer', 'Agir activement pour une cause'],
+      ['Une association caritative', 'Une organisation qui vient en aide à ceux qui en ont besoin'],
+      ['Dénoncer un abus', 'Signaler publiquement une injustice'],
+      ['Faire valoir ses droits', 'Réclamer ce qui nous est dû légalement'],
+    ],
+  },
+  {
+    id: 'c1c2-politique',
+    section: 'situations',
+    category: 'Citoyenneté',
+    icon: '🗳️',
+    title: 'S\'investir politiquement',
+    intro: "Le vocabulaire de la participation citoyenne.",
+    type: 'table',
+    columns: ['Terme', 'Sens'],
+    rows: [
+      ['Voter', 'Exprimer son choix lors d\'une élection'],
+      ['S\'abstenir', 'Ne pas participer à un vote'],
+      ['Un programme électoral', 'L\'ensemble des propositions d\'un candidat'],
+      ['Militer dans un parti', 'S\'engager activement au sein d\'une formation politique'],
+      ['La participation citoyenne', 'L\'implication des habitants dans la vie publique'],
+    ],
+  },
+  {
+    id: 'c1c2-contester',
+    section: 'situations',
+    category: 'Citoyenneté',
+    icon: '✊',
+    title: 'Contester',
+    intro: "Le vocabulaire de la protestation et de la remise en cause.",
+    type: 'table',
+    columns: ['Terme', 'Sens'],
+    rows: [
+      ['Manifester', 'Exprimer publiquement son désaccord, souvent dans la rue'],
+      ['Une pétition', 'Un texte signé collectivement pour réclamer un changement'],
+      ['Remettre en cause', 'Contester la validité de quelque chose'],
+      ['Un mouvement de grève', 'Un arrêt collectif du travail pour revendiquer'],
+      ['S\'opposer à une décision', 'Refuser une mesure prise par une autorité'],
+    ],
+  },
+  {
+    id: 'c1c2-indigner',
+    section: 'situations',
+    category: 'Citoyenneté',
+    icon: '😠',
+    title: 'S\'indigner',
+    intro: "Le vocabulaire de la révolte morale.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    rows: [
+      ['C\'est un scandale !', 'Exprime une forte indignation'],
+      ['Ça me révolte', 'Provoque en moi une colère morale profonde'],
+      ['Être outré(e) par', 'Être choqué(e), indigné(e)'],
+      ['Ne pas fermer les yeux sur', 'Refuser d\'ignorer une injustice'],
+      ['Un sursaut d\'indignation', 'Une réaction collective soudaine face à une injustice'],
+    ],
+  },
+  {
+    id: 'c1c2-lieu-touristique',
+    section: 'situations',
+    category: 'La culture',
+    icon: '🗼',
+    title: 'Évoquer un lieu touristique',
+    intro: "Le vocabulaire de la description touristique.",
+    type: 'table',
+    columns: ['Terme', 'Sens'],
+    rows: [
+      ['Un site incontournable', 'Un lieu qu\'il faut absolument visiter'],
+      ['Hors des sentiers battus', 'Loin des circuits touristiques habituels'],
+      ['Un panorama', 'Une vue d\'ensemble sur un paysage'],
+      ['Un office de tourisme', 'Un organisme qui informe les visiteurs'],
+      ['Une curiosité locale', 'Un attrait particulier propre à un lieu'],
+    ],
+  },
+  {
+    id: 'c1c2-septieme-art',
+    section: 'situations',
+    category: 'La culture',
+    icon: '🎬',
+    title: 'Parler du 7e art',
+    intro: "Le vocabulaire du cinéma.",
+    type: 'table',
+    columns: ['Terme', 'Sens'],
+    rows: [
+      ['Un scénario', 'Le texte qui structure une œuvre cinématographique'],
+      ['Un réalisateur', 'La personne qui dirige la création d\'un film'],
+      ['Un huis clos', 'Une intrigue qui se déroule dans un lieu fermé'],
+      ['Une bande-annonce', 'Un extrait promotionnel diffusé avant la sortie'],
+      ['Un film à gros budget', 'Une production disposant de moyens financiers importants'],
+    ],
+  },
+  {
+    id: 'c1c2-critique-artistique',
+    section: 'situations',
+    category: 'La culture',
+    icon: '🖼️',
+    title: 'La critique artistique',
+    intro: "Le vocabulaire du jugement esthétique.",
+    type: 'table',
+    columns: ['Terme', 'Sens'],
+    rows: [
+      ['Ciselé', 'Travaillé avec une grande finesse'],
+      ['Bouleversant', 'Qui émeut profondément'],
+      ['Convenu', 'Sans originalité, prévisible'],
+      ['Indigeste', 'Difficile à suivre, trop chargé'],
+      ['Audacieux', 'Original, prenant des risques créatifs'],
+    ],
+  },
+  {
+    id: 'c1c2-patrimoine',
+    section: 'situations',
+    category: 'La culture',
+    icon: '🏛️',
+    title: 'Mettre en lumière le patrimoine',
+    intro: "Le vocabulaire du patrimoine architectural.",
+    type: 'table',
+    columns: ['Terme', 'Sens'],
+    rows: [
+      ['Le patrimoine', 'L\'ensemble des biens culturels hérités du passé'],
+      ['Un édifice', 'Une construction de grande dimension'],
+      ['Restaurer', 'Remettre en état un monument ancien'],
+      ['Un vitrail', 'Une composition décorative en verre coloré'],
+      ['Classé monument historique', 'Officiellement reconnu et protégé pour sa valeur patrimoniale'],
+    ],
+  },
+  {
+    id: 'c1c2-gastronomie',
+    section: 'situations',
+    category: 'La culture',
+    icon: '🍷',
+    title: 'Apprécier la gastronomie',
+    intro: "Le vocabulaire de la dégustation.",
+    type: 'table',
+    columns: ['Terme', 'Sens'],
+    rows: [
+      ['Un mets', 'Un plat raffiné'],
+      ['Une saveur', 'Le goût perçu d\'un aliment'],
+      ['Un terroir', 'Une région caractérisée par ses produits typiques'],
+      ['Relever un plat', 'Ajouter des épices ou assaisonnements'],
+      ['Un accord mets-vin', 'L\'association harmonieuse d\'un plat et d\'un vin'],
+    ],
+  },
+  {
+    id: 'c1c2-ame-soeur',
+    section: 'situations',
+    category: 'Relations humaines',
+    icon: '💑',
+    title: 'Trouver l\'âme sœur',
+    intro: "Le vocabulaire, du plus familier au plus soutenu, pour parler d'amour.",
+    type: 'table',
+    columns: ['Registre · Expression', 'Sens'],
+    rows: [
+      ['Familier · Craquer pour quelqu\'un', 'Ressentir une attirance soudaine'],
+      ['Familier · Larguer quelqu\'un', 'Rompre avec quelqu\'un'],
+      ['Courant · Rompre', 'Mettre fin à une relation'],
+      ['Courant · Se marier', 'Officialiser son union'],
+      ['Soutenu · Convoler', 'Se marier (registre élégant)'],
+      ['Soutenu · S\'éprendre de quelqu\'un', 'Tomber amoureux, avec élégance'],
+    ],
+  },
+  {
+    id: 'c1c2-liens-intergenerationnels',
+    section: 'situations',
+    category: 'Relations humaines',
+    icon: '👵',
+    title: 'Tisser des liens intergénérationnels',
+    intro: "Le vocabulaire des relations entre générations.",
+    type: 'table',
+    columns: ['Terme', 'Sens'],
+    rows: [
+      ['Le fossé des générations', 'Les différences de repères entre jeunes et anciens'],
+      ['Transmettre un savoir-faire', 'Enseigner une compétence pratique aux plus jeunes'],
+      ['Un aîné', 'Une personne plus âgée'],
+      ['Une tradition familiale', 'Une pratique perpétuée de génération en génération'],
+      ['S\'enrichir mutuellement', 'Apprendre l\'un de l\'autre malgré les différences d\'âge'],
+    ],
+  },
+  {
+    id: 'c1c2-desirer-autre',
+    section: 'situations',
+    category: 'Relations humaines',
+    icon: '🔥',
+    title: 'Désirer l\'autre',
+    intro: "Le vocabulaire soutenu du désir et de la passion.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    rows: [
+      ['Éprouver un amour intense et passionné', 'Ressentir un amour très fort'],
+      ['Écouter quelqu\'un avec admiration, sans perdre un mot', 'Être entièrement absorbé par les paroles de l\'autre'],
+      ['Être entièrement possédé par le désir', 'Ne plus penser qu\'à l\'autre personne'],
+      ['Un regard soutenu', 'Un regard prolongé, chargé de sens'],
+      ['Une alchimie entre deux personnes', 'Une entente naturelle et profonde'],
+    ],
+  },
+  {
+    id: 'c1c2-famille-de-coeur',
+    section: 'situations',
+    category: 'Relations humaines',
+    icon: '👨‍👩‍👧‍👦',
+    title: 'Choisir sa famille de cœur',
+    intro: "Le vocabulaire des liens choisis, au-delà du sang.",
+    type: 'table',
+    columns: ['Terme', 'Sens'],
+    rows: [
+      ['Une famille de cœur', 'Des proches choisis, sans lien de sang'],
+      ['Un lien indéfectible', 'Une relation solide, qui ne peut être rompue'],
+      ['Considérer quelqu\'un comme sa famille', 'Le traiter avec la même affection qu\'un parent'],
+      ['Une amitié fidèle', 'Une amitié durable et loyale'],
+      ['Faire partie de l\'entourage proche', 'Être parmi les relations les plus intimes'],
+    ],
+  },
+  {
+    id: 'c1c2-aimer-soi',
+    section: 'situations',
+    category: 'Relations humaines',
+    icon: '💖',
+    title: 'S\'aimer soi-même',
+    intro: "Le vocabulaire, familier et soutenu, de la confiance en soi et de la vanité.",
+    type: 'table',
+    columns: ['Registre · Terme', 'Sens'],
+    rows: [
+      ['Soutenu · Fat', 'Vaniteux, content de soi de façon excessive'],
+      ['Soutenu · Imbu de lui-même', 'Excessivement convaincu de sa propre valeur'],
+      ['Familier · Avoir la grosse tête', 'Devenir prétentieux après un succès'],
+      ['Courant · Modeste', 'Qui ne met pas en avant ses qualités'],
+      ['Courant · Sans prétention', 'Simple, sans chercher à se valoriser'],
+      ['Positif · L\'estime de soi', 'La confiance juste et saine en sa propre valeur'],
+    ],
+  },
+  {
+    id: 'c1c2-lieu-vie',
+    section: 'situations',
+    category: 'Le bonheur',
+    icon: '🏡',
+    title: 'Choisir son lieu de vie',
+    intro: "Le vocabulaire de l'immobilier, entre l'annonce et la réalité.",
+    type: 'table',
+    columns: ['Expression dans l\'annonce', 'Ce que cela signifie souvent'],
+    rows: [
+      ['Charme de l\'ancien', 'Des travaux sont probablement nécessaires'],
+      ['Cosy', 'C\'est petit'],
+      ['Calme absolu', 'C\'est isolé, loin de tout'],
+      ['À rénover entièrement', 'Tout est à refaire'],
+      ['Petit prix', 'Petit et bon marché, souvent avec des défauts'],
+    ],
+  },
+  {
+    id: 'c1c2-passions',
+    section: 'situations',
+    category: 'Le bonheur',
+    icon: '🎨',
+    title: 'Partager ses passions',
+    intro: "Le vocabulaire de la vente aux enchères et de la passion collectionneuse.",
+    type: 'table',
+    columns: ['Terme', 'Sens'],
+    rows: [
+      ['Un commissaire-priseur', 'La personne qui dirige une vente aux enchères'],
+      ['Un lot', 'Un objet ou ensemble d\'objets mis en vente'],
+      ['La mise à prix', 'Le prix de départ d\'une enchère'],
+      ['Enchérir', 'Proposer un prix plus élevé que le précédent'],
+      ['Adjugé !', 'Formule annonçant la vente définitive à l\'acheteur'],
+    ],
+  },
+  {
+    id: 'c1c2-philosopher-bonheur',
+    section: 'situations',
+    category: 'Le bonheur',
+    icon: '🌸',
+    title: 'Philosopher sur le bonheur',
+    intro: "Des expressions imagées, du familier au soutenu, pour parler du bonheur.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    rows: [
+      ['Voir la vie en rose', 'Être optimiste, heureux'],
+      ['Être aux anges', 'Être extrêmement heureux'],
+      ['Se sentir comme un poisson dans l\'eau', 'Se sentir parfaitement à l\'aise quelque part'],
+      ['Être sur un petit nuage', 'Être dans un état de bonheur léger et flottant'],
+      ['L\'épicurisme', 'Une philosophie qui valorise les plaisirs simples et mesurés'],
+      ['Le stoïcisme', 'Une philosophie prônant l\'acceptation sereine de ce qu\'on ne peut changer'],
+    ],
+  },
+  {
+    id: 'c1c2-se-souvenir',
+    section: 'situations',
+    category: 'Le bonheur',
+    icon: '🕰️',
+    title: 'Se souvenir',
+    intro: "Le vocabulaire de la mémoire et de l'héritage.",
+    type: 'table',
+    columns: ['Terme', 'Sens'],
+    rows: [
+      ['Un souvenir impérissable', 'Un souvenir qui ne s\'efface jamais'],
+      ['Léguer', 'Transmettre un bien par testament'],
+      ['Un héritage', 'Ce qui est transmis d\'une génération à l\'autre'],
+      ['Se remémorer', 'Faire revenir un souvenir à l\'esprit'],
+      ['Un notaire', 'Un officier public qui authentifie les actes juridiques (dont les testaments)'],
+    ],
+  },
+  // ============ 🗣️ EXPRESSIONS IMAGÉES — 60 expressions classiques, classées par thème ============
+  {
+    id: 'expr-animaux',
+    section: 'situations',
+    category: 'Expressions imagées',
+    icon: '🐾',
+    title: 'Les expressions avec des animaux',
+    intro: "Dix expressions animalières très courantes en français. Écoute-les, puis entraîne-toi à les prononcer avec le micro.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    micCol: 0,
+    rows: [
+      ['Dormir comme un loir', 'Dormir profondément et longtemps'],
+      ['Être une poule mouillée', 'Être peureux'],
+      ['Avoir une mémoire d\'éléphant', 'Avoir une excellente mémoire'],
+      ['Poser un lapin', 'Ne pas venir à un rendez-vous'],
+      ['Avoir un chat dans la gorge', 'Avoir la voix enrouée'],
+      ['Quand les poules auront des dents', 'Jamais'],
+      ['Être fier comme un paon', 'Être très fier, orgueilleux'],
+      ['Il n\'y a pas un chat', 'Il n\'y a personne'],
+      ['Avoir d\'autres chats à fouetter', 'Avoir des choses plus importantes à faire'],
+      ['Donner sa langue au chat', 'Renoncer à trouver la réponse'],
+    ],
+  },
+  {
+    id: 'expr-corps',
+    section: 'situations',
+    category: 'Expressions imagées',
+    icon: '💪',
+    title: 'Les expressions avec le corps',
+    intro: "Dix expressions construites autour de parties du corps.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    micCol: 0,
+    rows: [
+      ['Coûter les yeux de la tête', 'Coûter très cher'],
+      ['Avoir le bras long', 'Avoir de l\'influence, des relations'],
+      ['Casser les pieds à quelqu\'un', 'Ennuyer, agacer quelqu\'un'],
+      ['Mettre les pieds dans le plat', 'Aborder maladroitement un sujet délicat'],
+      ['Avoir la tête dans les nuages', 'Être distrait, rêveur'],
+      ['Tirer les vers du nez', 'Faire parler quelqu\'un habilement'],
+      ['Se mettre le doigt dans l\'œil', 'Se tromper complètement'],
+      ['Avoir le cœur sur la main', 'Être très généreux'],
+      ['Avoir les dents longues', 'Être très ambitieux'],
+      ['Donner un coup de main', 'Aider'],
+    ],
+  },
+  {
+    id: 'expr-nourriture',
+    section: 'situations',
+    category: 'Expressions imagées',
+    icon: '🍎',
+    title: 'Les expressions avec la nourriture',
+    intro: "Dix expressions gourmandes du quotidien.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    micCol: 0,
+    rows: [
+      ['Tomber dans les pommes', 'S\'évanouir'],
+      ['Raconter des salades', 'Mentir, inventer des histoires'],
+      ['Être haut comme trois pommes', 'Être tout petit'],
+      ['Ne pas être dans son assiette', 'Ne pas se sentir bien'],
+      ['C\'est du gâteau', 'C\'est très facile'],
+      ['Mettre du beurre dans les épinards', 'Améliorer sa situation financière'],
+      ['En faire tout un fromage', 'Exagérer l\'importance d\'une chose'],
+      ['Avoir la pêche (ou la frite)', 'Être en pleine forme'],
+      ['Couper la poire en deux', 'Faire un compromis'],
+      ['Tourner au vinaigre', 'Mal tourner, se dégrader'],
+    ],
+  },
+  {
+    id: 'expr-couleurs',
+    section: 'situations',
+    category: 'Expressions imagées',
+    icon: '🎨',
+    title: 'Les expressions avec les couleurs',
+    intro: "Dix expressions colorées, pour décrire un état ou une réaction.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    micCol: 0,
+    rows: [
+      ['Rire jaune', 'Rire sans en avoir envie, par politesse'],
+      ['Voir rouge', 'Se mettre en colère'],
+      ['Être vert (de peur, de rage, de jalousie)', 'Éprouver une émotion très forte'],
+      ['Voir la vie en rose', 'Être optimiste'],
+      ['Passer une nuit blanche', 'Ne pas dormir de la nuit'],
+      ['Broyer du noir', 'Être triste, avoir des idées sombres'],
+      ['Travailler au noir', 'Travailler sans être déclaré'],
+      ['Donner carte blanche', 'Laisser toute liberté d\'agir'],
+      ['Être fleur bleue', 'Être très sentimental, romantique'],
+      ['Montrer patte blanche', 'Prouver qu\'on a le droit d\'entrer'],
+    ],
+  },
+  {
+    id: 'expr-vie-quotidienne',
+    section: 'situations',
+    category: 'Expressions imagées',
+    icon: '📅',
+    title: 'Les expressions de la vie de tous les jours',
+    intro: "Dix expressions imagées très employées au quotidien.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    micCol: 0,
+    rows: [
+      ['Tourner autour du pot', 'Ne pas aller droit au but'],
+      ['Être dans de beaux draps', 'Être dans une situation difficile'],
+      ['Tomber des nues', 'Être très surpris'],
+      ['Tirer son épingle du jeu', 'Se sortir habilement d\'une situation'],
+      ['Avoir un poil dans la main', 'Être paresseux'],
+      ['Chercher une aiguille dans une botte de foin', 'Chercher une chose presque introuvable'],
+      ['Faire la grasse matinée', 'Se lever tard'],
+      ['Il pleut des cordes', 'Il pleut très fort'],
+      ['Mettre la charrue avant les bœufs', 'Faire les choses dans le mauvais ordre'],
+      ['Mettre les points sur les i', 'S\'expliquer clairement et fermement'],
+    ],
+  },
+  {
+    id: 'expr-histoire-mythologie',
+    section: 'situations',
+    category: 'Expressions imagées',
+    icon: '🏺',
+    title: 'Expressions venues de l\'Histoire et de la mythologie',
+    intro: "Dix expressions dont l'origine remonte à l'Antiquité ou à des événements historiques.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    micCol: 0,
+    rows: [
+      ['Franchir le Rubicon', 'Prendre une décision sans retour possible'],
+      ['Alea jacta est', 'Le sort en est jeté : la décision est prise'],
+      ['Tomber de Charybde en Scylla', 'Échapper à un danger pour tomber dans un pire'],
+      ['Le talon d\'Achille', 'Le point faible de quelqu\'un'],
+      ['Ouvrir la boîte de Pandore', 'Déclencher une série de malheurs'],
+      ['Un travail de Romain', 'Un travail énorme'],
+      ['Tous les chemins mènent à Rome', 'Il y a plusieurs moyens d\'arriver au même but'],
+      ['Rome ne s\'est pas faite en un jour', 'Les grandes choses demandent du temps'],
+      ['Une victoire à la Pyrrhus', 'Une victoire qui coûte trop cher'],
+      ['Le supplice de Tantale', 'Désirer une chose proche sans jamais l\'obtenir'],
+    ],
+  },
+  // ============ 🎙️ PHONÉTIQUE AVANCÉE (B2-C1) — rythme, liaisons, intonation ============
+  {
+    id: 'phon-rythme-accent',
+    section: 'oratoire',
+    category: 'Phonétique avancée',
+    icon: '🥁',
+    title: 'Le rythme et l\'accent du français',
+    intro: "Contrairement à beaucoup de langues, le français n'accentue pas un mot précis : il accentue la fin d'un groupe de sens.",
+    type: 'rule',
+    blocks: [
+      { heading: 'Des syllabes de durée égale', text: "En français, toutes les syllabes ont à peu près la même durée — contrairement à des langues qui allongent certaines syllabes accentuées." },
+      { heading: 'L\'accent tombe sur le groupe, pas sur le mot', text: "L'accent tonique se place sur la dernière syllabe prononcée d'un groupe rythmique (un ensemble de mots formant une unité de sens), pas sur un mot isolé.", examples: ['Je suis conTENT.', 'C\'est une idée intéresSANTE.', 'Le président de la RépuBLIQUE.'] },
+      { heading: 'Les groupes consonne + r/l', text: "Des consonnes suivies de r ou l (pr, bl, tr, fl, cr, gl...) forment un bloc qu'on ne sépare jamais à l'oral.", examples: ['pro-blème (2 syllabes, pas pro-b-lème)', 'ta-bleau'] },
+    ],
+    note: "Découper une phrase en groupes rythmiques dépend du débit : plus on parle vite, plus les groupes s'allongent.",
+  },
+  {
+    id: 'phon-liaisons-types',
+    section: 'oratoire',
+    category: 'Phonétique avancée',
+    icon: '🔗',
+    title: 'Enchaînements et liaisons : les trois mécanismes',
+    intro: "À l'intérieur d'un groupe rythmique, les mots s'enchaînent sans pause — mais pas toujours de la même façon.",
+    type: 'rule',
+    micCol: 0,
+    blocks: [
+      { heading: 'Enchaînement consonantique', text: "Une consonne finale déjà prononcée passe simplement à la syllabe suivante, sans rien changer.", examples: ['Elle arrive. → [ɛ.la.ʁiv]'] },
+      { heading: 'Enchaînement vocalique', text: "Deux voyelles se suivent sans aucune coupure entre elles.", examples: ['Il a été. → [i.la.e.te]'] },
+      { heading: 'La liaison proprement dite', text: "Une consonne finale normalement muette redevient audible devant une voyelle. Elle peut être obligatoire (toujours faite), facultative (registre plus soutenu si on la fait), ou interdite (jamais faite, même devant une voyelle).", examples: ['les amis → [le.za.mi] (obligatoire)', 'pas encore → « pas‿encore » (facultative, plus soutenu)', 'les / héros (interdite, h aspiré)'] },
+    ],
+  },
+  {
+    id: 'phon-liaisons-classification',
+    section: 'oratoire',
+    category: 'Phonétique avancée',
+    icon: '✅',
+    title: 'Classer une liaison : obligatoire, facultative ou interdite',
+    intro: "Dix cas concrets pour s'entraîner à reconnaître le type de liaison.",
+    type: 'table',
+    columns: ['Cas', 'Type de liaison'],
+    micCol: 0,
+    rows: [
+      ['les enfants', 'Obligatoire — article + nom'],
+      ['un grand homme', 'Obligatoire — adjectif + nom'],
+      ['des haricots', 'Interdite — h aspiré'],
+      ['Jean est arrivé', 'Interdite — jamais après un nom sujet'],
+      ['ils ont', 'Obligatoire — pronom + verbe'],
+      ['et après', 'Interdite — jamais après « et »'],
+      ['quand il pleut', 'Obligatoire — quand + il'],
+      ['un enfant intelligent', 'Interdite — nom singulier + adjectif'],
+      ['Comment allez-vous ?', 'Obligatoire — expression figée'],
+      ['vous avez', 'Obligatoire — pronom + verbe'],
+    ],
+  },
+  {
+    id: 'phon-h-aspire',
+    section: 'oratoire',
+    category: 'Phonétique avancée',
+    icon: '🚫',
+    title: 'H aspiré ou h muet ?',
+    intro: "Devant un h aspiré, pas de liaison ni d'élision. Devant un h muet, la liaison et l'élision se font normalement.",
+    type: 'table',
+    columns: ['Mot', 'H aspiré ou muet'],
+    micCol: 0,
+    rows: [
+      ['un héros', 'Aspiré → un / héros, pas de liaison'],
+      ['les hommes', 'Muet → les‿hommes, liaison'],
+      ['des haricots', 'Aspiré → des / haricots'],
+      ['les hôtels', 'Muet → les‿hôtels'],
+      ['les hiboux', 'Aspiré → les / hiboux'],
+      ['les habitants', 'Muet → les‿habitants'],
+      ['les hasards', 'Aspiré → les / hasards'],
+      ['les huîtres', 'Muet → les‿huîtres'],
+    ],
+    note: "Il n'existe pas de règle visuelle fiable pour deviner si un h est aspiré ou muet — cela s'apprend mot par mot, avec l'usage.",
+  },
+  {
+    id: 'phon-e-muet',
+    section: 'oratoire',
+    category: 'Phonétique avancée',
+    icon: '👻',
+    title: 'Le e muet [ə] : quand tombe-t-il ?',
+    intro: "En français courant, le e muet tombe souvent — sauf quand sa chute forcerait à prononcer trois consonnes d'affilée.",
+    type: 'rule',
+    blocks: [
+      { heading: 'Après une seule consonne prononcée', text: "Le e muet tombe souvent, car sa suppression ne crée pas de groupe consonantique difficile.", examples: ['sam(e)di', 'la f(e)nêtre', 'ach(e)ter'] },
+      { heading: 'Après deux consonnes prononcées', text: "Le e muet se garde, car sa chute créerait trois consonnes à la suite, difficiles à enchaîner.", examples: ['vendredi (le e se garde)', 'une fenêtre (le e se garde)'] },
+      { heading: 'En début de phrase', text: "Le e muet se garde plus souvent qu'ailleurs dans la phrase.", examples: ['Demain, je pars. (le e de « demain » se garde)'] },
+      { heading: 'Dans une suite de e muets', text: "On en garde généralement un sur deux, en alternance.", examples: ['Je n(e) sais pas. — ou : J(e) ne sais pas.'] },
+    ],
+  },
+  {
+    id: 'phon-intonation-declarative',
+    section: 'oratoire',
+    category: 'Phonétique avancée',
+    icon: '📈',
+    title: 'L\'intonation déclarative et le détachement',
+    intro: "La mélodie de la voix structure la phrase française autant que la ponctuation à l'écrit.",
+    type: 'rule',
+    blocks: [
+      { heading: 'La montée puis la descente', text: "Dans une phrase affirmative, la voix monte (↗) à la fin de chaque groupe rythmique non final, et descend (↘) à la fin de la phrase entière.", examples: ['Demain ↗, on part en vacances ↘.'] },
+      { heading: 'Le détachement', text: "Un élément mis en relief (au début, à la fin, ou en incise) se dit souvent sur un ton plus bas et plat, surtout en fin de phrase.", examples: ['Ce film, je l\'adore. (détachement initial)', 'Il est délicieux, ce gâteau. (détachement final)', 'Ma sœur, elle, n\'aime pas le café. (détachement interne, pronom tonique)'] },
+    ],
+  },
+  {
+    id: 'phon-interrogation',
+    section: 'oratoire',
+    category: 'Phonétique avancée',
+    icon: '❓',
+    title: 'Poser une question : trois registres, deux mélodies',
+    intro: "La même question peut se construire de trois façons, avec une intonation qui varie selon la position du mot interrogatif.",
+    type: 'rule',
+    micCol: null,
+    blocks: [
+      { heading: 'Question totale (réponse oui/non)', text: "La voix monte à la fin de la phrase.", examples: ['Tu viens ? ↗'] },
+      { heading: 'Question partielle, mot interrogatif en tête', text: "La voix part haut puis descend — registre courant à soutenu.", examples: ['Où vas-tu ? ↘'] },
+      { heading: 'Mot interrogatif en fin de phrase (familier)', text: "La voix monte à la fin — registre familier.", examples: ['Tu vas où ? ↗'] },
+      { heading: 'Trois façons de poser la même question', text: "Intonation seule (familier/courant), « est-ce que » (courant), inversion du sujet (soutenu).", examples: ['Tu pars demain ? / Est-ce que tu pars demain ? / Pars-tu demain ?'] },
+    ],
+  },
+  {
+    id: 'phon-imperatif-emotions',
+    section: 'oratoire',
+    category: 'Phonétique avancée',
+    icon: '❗',
+    title: 'Impératif, émotions et accent d\'insistance',
+    intro: "Comment la voix exprime un ordre, une émotion, ou met un mot en valeur.",
+    type: 'rule',
+    micCol: null,
+    blocks: [
+      { heading: 'L\'ordre', text: "Se dit sur une intonation descendante et ferme. Pour adoucir un ordre, on utilise une question, le conditionnel, ou « s'il te plaît ».", examples: ['Ferme la porte ! (ferme) → Tu pourrais fermer la porte, s\'il te plaît ? (adouci)'] },
+      { heading: 'L\'accent d\'insistance', text: "Contrairement à l'accent normal (fin de groupe), l'accent d'insistance tombe sur la première syllabe du mot qui commence par une consonne — pour exprimer une émotion forte.", examples: ['formidable → FORmidable', 'incroyable → inCROYable', 'absolument → abSOlument'] },
+      { heading: 'L\'accent de contraste', text: "Dans une réponse qui corrige ou oppose une information, l'insistance porte sur le mot qui change.", examples: ['— Tu pars lundi ? — Non, MARDI.', '— C\'est ton vélo ? — Non, c\'est le vélo de mon FRÈRE.'] },
+    ],
+  },
+  {
+    id: 'phon-interjections',
+    section: 'oratoire',
+    category: 'Phonétique avancée',
+    icon: '😲',
+    title: 'Les interjections et leurs émotions',
+    intro: "De courtes exclamations qui expriment une émotion précise, sans phrase complète.",
+    type: 'table',
+    columns: ['Interjection', 'Émotion exprimée'],
+    micCol: 0,
+    rows: [
+      ['Aïe !', 'Douleur'],
+      ['Chut !', 'Demande de silence'],
+      ['Beurk !', 'Dégoût'],
+      ['Ouf !', 'Soulagement'],
+      ['Miam !', 'Plaisir de manger'],
+      ['Pfff...', 'Lassitude'],
+      ['Oups !', 'Erreur, maladresse'],
+      ['Bof...', 'Indifférence'],
+    ],
+  },
+  {
+    id: 'phon-oral-familier',
+    section: 'oratoire',
+    category: 'Phonétique avancée',
+    icon: '💬',
+    title: 'Reconnaître le français oral familier',
+    intro: "À l'oral familier, on supprime souvent certains sons pour aller plus vite.",
+    type: 'table',
+    columns: ['Forme familière', 'Français standard'],
+    micCol: 0,
+    rows: [
+      ['J\'sais pas.', 'Je ne sais pas.'],
+      ['Y a personne.', 'Il n\'y a personne.'],
+      ['Chuis crevé.', 'Je suis très fatigué.'],
+      ['T\'as vu ?', 'Tu as vu ?'],
+      ['Faut qu\'j\'y aille.', 'Il faut que j\'y aille.'],
+    ],
+    note: "En style familier, on supprime souvent le « ne » de la négation, certains e muets, le l de « il/ils » devant une consonne, et parfois le r final après une consonne.",
+  },
+  {
+    id: 'phon-lecture-voix-haute',
+    section: 'oratoire',
+    category: 'Phonétique avancée',
+    icon: '📖',
+    title: 'Préparer une lecture à voix haute',
+    intro: "La méthode pour préparer un texte avant de le lire : repérer les liaisons, les e muets, et les groupes rythmiques.",
+    type: 'rule',
+    blocks: [
+      { heading: 'Repérer les liaisons obligatoires', text: "Marquer mentalement (ou par écrit) les liaisons qui doivent être faites, pour ne pas les oublier en lisant.", examples: ['les‿enfants, ils‿avaient, ils‿ont, quand‿il'] },
+      { heading: 'Repérer les liaisons interdites', text: "Ne jamais lier après « et », ni devant un h aspiré, ni après un nom sujet singulier.", examples: ["il n'y a jamais de liaison après « et »"] },
+      { heading: 'Marquer les e muets qui tombent', text: "En lecture courante, plusieurs e muets tombent — mais pas tous en lecture soignée.", examples: ['d(e)vant, p(e)tite'] },
+      { heading: 'Découper en groupes rythmiques', text: "Repérer où placer les petites pauses qui structurent le sens de la phrase, avant de lire à voix haute." },
+    ],
+    note: "S'enregistrer en lisant, puis se réécouter, est l'un des meilleurs moyens de progresser en prononciation.",
+  },
+  // ============ 💼 FRANÇAIS DES AFFAIRES (A2-B1) — communication professionnelle ============
+  {
+    id: 'aff-presenter-accueillir',
+    section: 'situations',
+    category: 'Français des affaires',
+    icon: '🤝',
+    title: 'Se présenter et accueillir',
+    intro: "Les formules de base pour se présenter et accueillir un visiteur en contexte professionnel.",
+    type: 'table',
+    columns: ['Situation', 'Expression'],
+    micCol: 1,
+    rows: [
+      ['Se présenter', "Je suis responsable de... / Je travaille chez... depuis..."],
+      ['Présenter quelqu\'un', 'Je vous présente M. Dupont, notre directeur commercial.'],
+      ['Répondre à une présentation', 'Enchanté(e). / Ravi(e) de faire votre connaissance.'],
+      ['Présenter l\'entreprise', 'Nous sommes spécialisés dans... / Notre société a été créée en...'],
+      ['Accueillir un visiteur', 'Bienvenue chez... / Vous avez fait bon voyage ?'],
+      ['Proposer une boisson', 'Je peux vous proposer un café ?'],
+    ],
+  },
+  {
+    id: 'aff-telephone',
+    section: 'situations',
+    category: 'Français des affaires',
+    icon: '📞',
+    title: 'Au téléphone',
+    intro: "Répondre, demander quelqu'un, faire patienter, prendre un message.",
+    type: 'table',
+    columns: ['Situation', 'Expression'],
+    micCol: 1,
+    rows: [
+      ['Répondre', 'Société Novatech, bonjour.'],
+      ['Demander quelqu\'un', 'Pourrais-je parler à M. Dupont, s\'il vous plaît ?'],
+      ['Faire patienter', 'Ne quittez pas, je vous le passe.'],
+      ['Personne absente', 'Il est en réunion. / Elle est en déplacement.'],
+      ['Prendre un message', 'C\'est de la part de qui ? / Pouvez-vous épeler votre nom ?'],
+      ['Prendre rendez-vous', 'Seriez-vous disponible mardi ? / C\'est noté.'],
+    ],
+  },
+  {
+    id: 'aff-courriel',
+    section: 'situations',
+    category: 'Français des affaires',
+    icon: '📧',
+    title: 'Le courriel professionnel',
+    intro: "Registre formel ou neutre : comment ouvrir, demander, et conclure un courriel selon le contexte.",
+    type: 'table',
+    columns: ['Partie du courriel', 'Formule'],
+    micCol: 1,
+    rows: [
+      ['Salutation formelle', 'Madame, Monsieur,'],
+      ['Salutation neutre', 'Bonjour Madame Roux,'],
+      ['Introduction formelle', 'Je me permets de vous contacter au sujet de...'],
+      ['Demande formelle', 'Je vous serais reconnaissant(e) de bien vouloir...'],
+      ['Pièce jointe', 'Veuillez trouver en pièce jointe...'],
+      ['Conclusion formelle', 'Je reste à votre disposition pour tout renseignement complémentaire.'],
+      ['Formule finale très formelle', 'Je vous prie d\'agréer, Madame, Monsieur, l\'expression de mes salutations distinguées.'],
+      ['Formule finale neutre', 'Cordialement,'],
+    ],
+  },
+  {
+    id: 'aff-reunions',
+    section: 'situations',
+    category: 'Français des affaires',
+    icon: '🗓️',
+    title: 'Les réunions',
+    intro: "Ouvrir une réunion, donner la parole, exprimer son accord ou son désaccord, conclure.",
+    type: 'table',
+    columns: ['Situation', 'Expression'],
+    micCol: 1,
+    rows: [
+      ['Ouvrir la réunion', 'L\'objectif de cette réunion est de...'],
+      ['Donner la parole', 'Qu\'en pensez-vous, Sophie ?'],
+      ['Donner son avis', 'Il me semble que... / Personnellement, je trouve que...'],
+      ['Être d\'accord', 'Je suis tout à fait d\'accord.'],
+      ['Ne pas être d\'accord', 'Je ne suis pas tout à fait d\'accord.'],
+      ['Proposer', 'Et si on... ? / On pourrait...'],
+      ['Conclure', 'Pour résumer... / Nous avons donc décidé de...'],
+    ],
+  },
+  {
+    id: 'aff-clients-expressions',
+    section: 'situations',
+    category: 'Français des affaires',
+    icon: '📦',
+    title: 'Clients et fournisseurs : les expressions',
+    intro: "Demander un devis, passer commande, formuler ou répondre à une réclamation.",
+    type: 'table',
+    columns: ['Situation', 'Expression'],
+    micCol: 1,
+    rows: [
+      ['Demander un devis', 'Quels sont vos délais de livraison ?'],
+      ['Passer commande', 'Nous vous confirmons notre commande n°...'],
+      ['Réclamation', 'La marchandise est arrivée endommagée.'],
+      ['Répondre à une réclamation', 'Nous vous prions de nous excuser pour ce désagrément.'],
+      ['Négocier', 'Pouvez-vous faire un effort sur le prix ?'],
+      ['Refuser une négociation', 'C\'est notre dernier prix.'],
+    ],
+  },
+  {
+    id: 'aff-clients-vocabulaire',
+    section: 'situations',
+    category: 'Français des affaires',
+    icon: '🧾',
+    title: 'Clients et fournisseurs : le vocabulaire',
+    intro: "Les documents et étapes d'une transaction commerciale.",
+    type: 'table',
+    columns: ['Terme', 'Définition'],
+    micCol: 0,
+    rows: [
+      ['Un devis', 'Une estimation détaillée du prix avant la commande'],
+      ['Une facture', 'Le document qui demande le paiement d\'un achat'],
+      ['Une remise', 'Une réduction de prix'],
+      ['Un avoir', 'Une somme remboursée sous forme de crédit pour un prochain achat'],
+      ['Un bon de livraison', 'Le document signé qui confirme la réception d\'une livraison'],
+    ],
+    note: "Ordre habituel d'un achat : la demande de devis → le devis → la commande → la livraison → la facture → le paiement.",
+  },
+  {
+    id: 'aff-deplacements',
+    section: 'situations',
+    category: 'Français des affaires',
+    icon: '✈️',
+    title: 'Les déplacements professionnels',
+    intro: "Réserver, se renseigner, modifier ou annuler une réservation.",
+    type: 'table',
+    columns: ['Situation', 'Expression'],
+    micCol: 1,
+    rows: [
+      ['Réserver', 'Je voudrais réserver une chambre simple pour deux nuits.'],
+      ['Demander des informations', 'Le petit-déjeuner est-il compris ?'],
+      ['Modifier une réservation', 'Je souhaiterais modifier ma réservation.'],
+      ['Annuler', 'Je dois malheureusement annuler.'],
+      ['Note de frais', 'N\'oubliez pas de garder les justificatifs.'],
+    ],
+  },
+  {
+    id: 'aff-emploi',
+    section: 'situations',
+    category: 'Français des affaires',
+    icon: '💼',
+    title: 'L\'emploi et la vie au travail',
+    intro: "Candidater, réussir un entretien, demander un congé.",
+    type: 'table',
+    columns: ['Situation', 'Expression'],
+    micCol: 1,
+    rows: [
+      ['Candidater', 'Votre offre a retenu toute mon attention.'],
+      ['Entretien : parcours', 'Parlez-moi de votre parcours.'],
+      ['Entretien : qualités', 'Quelles sont vos qualités ?'],
+      ['Demander un congé', 'Je souhaiterais poser mes congés du... au...'],
+      ['Signaler une absence', 'Je suis malade, je ne pourrai pas venir aujourd\'hui.'],
+    ],
+  },
+  {
+    id: 'aff-contrats',
+    section: 'situations',
+    category: 'Français des affaires',
+    icon: '📄',
+    title: 'Le vocabulaire du contrat de travail',
+    intro: "Les termes essentiels pour comprendre un contrat.",
+    type: 'table',
+    columns: ['Terme', 'Sens'],
+    micCol: 0,
+    rows: [
+      ['Un CDI', 'Un contrat de travail sans date de fin'],
+      ['Un CDD', 'Un contrat avec une date de fin précise'],
+      ['Un stage', 'Une période où l\'étudiant découvre le monde du travail'],
+      ['Le salaire brut', 'Le salaire avant les cotisations sociales'],
+      ['La période d\'essai', 'La période où employeur et salarié peuvent arrêter le contrat facilement'],
+    ],
+  },
+  {
+    id: 'aff-presenter-chiffres',
+    section: 'situations',
+    category: 'Français des affaires',
+    icon: '📊',
+    title: 'Présenter des chiffres',
+    intro: "Le vocabulaire pour décrire une évolution : hausse, baisse, ou stabilité.",
+    type: 'rule',
+    micCol: null,
+    blocks: [
+      { heading: '↗ La hausse', text: "Verbes : augmenter, progresser, croître, grimper. Noms : une hausse, une augmentation, une progression.", examples: ['Le chiffre d\'affaires progresse régulièrement.', 'Les bénéfices ont grimpé.'] },
+      { heading: '↘ La baisse', text: "Verbes : baisser, diminuer, chuter, reculer. Noms : une baisse, une diminution, une chute, un recul.", examples: ['Les ventes ont chuté de 20 %.', 'Les coûts ont nettement reculé.'] },
+      { heading: '→ La stabilité', text: "Verbes : rester stable, se stabiliser, stagner. Noms : une stabilité, une stagnation.", examples: ['Le nombre de clients stagne depuis un an.'] },
+      { heading: 'DE et À avec un chiffre', text: "DE introduit l'écart. À introduit le résultat final.", examples: ['Les ventes ont augmenté de 15 %.', 'Le chiffre d\'affaires est passé de 2 à 2,5 millions d\'euros.'] },
+    ],
+  },
+  // ============ 🧩 SITUATIONS ET INTERACTIONS — fiches originales inspirées de thèmes de communication B2-C1 ============
+  {
+    id: 'u-quantites',
+    section: 'situations',
+    category: 'Situations concrètes',
+    icon: '📏',
+    title: 'Parler des quantités',
+    intro: "Exprimer une quantité approximative, une grande ou une petite quantité.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    micCol: 0,
+    rows: [
+      ['Une bonne poignée de', 'Une quantité approximative, à peu près une poignée'],
+      ['Un tas de choses à faire', 'Beaucoup de choses'],
+      ['Une goutte d\'eau dans l\'océan', 'Une quantité insignifiante par rapport au tout'],
+      ['Ça se compte sur les doigts d\'une main', 'C\'est très peu nombreux'],
+      ['À foison', 'En grande quantité'],
+      ['Une infime partie', 'Une toute petite proportion'],
+      ['La quasi-totalité', 'Presque tout'],
+      ['Une quantité négligeable', 'Une quantité trop petite pour compter'],
+    ],
+  },
+  {
+    id: 'u-decrire',
+    section: 'situations',
+    category: 'Situations concrètes',
+    icon: '🖊️',
+    title: 'Décrire une personne ou un lieu',
+    intro: "Le vocabulaire pour rendre une description plus précise et plus vivante.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    micCol: 0,
+    rows: [
+      ['Avoir un physique passe-partout', 'Avoir une apparence banale, sans trait marquant'],
+      ['Un lieu chargé d\'histoire', 'Un endroit qui porte les traces visibles du passé'],
+      ['Un visage qui ne s\'oublie pas', 'Un visage marquant, mémorable'],
+      ['Un décor à couper le souffle', 'Un paysage impressionnant de beauté'],
+      ['Sans prétention', 'Simple, sans chercher à impressionner'],
+      ['Dégager une certaine prestance', 'Avoir une allure imposante et élégante'],
+    ],
+  },
+  {
+    id: 'u-objets',
+    section: 'situations',
+    category: 'Situations concrètes',
+    icon: '🔧',
+    title: 'Parler des objets',
+    intro: "Décrire l'état, l'usage ou la qualité d'un objet.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    micCol: 0,
+    rows: [
+      ['Un objet increvable', 'Un objet extrêmement résistant, qui dure très longtemps'],
+      ['Ça ne sert strictement à rien', 'C\'est complètement inutile'],
+      ['C\'est du solide', 'C\'est de bonne qualité, fiable'],
+      ['Un gadget', 'Un objet amusant mais peu utile'],
+      ['Être encombrant', 'Prendre trop de place'],
+      ['Tomber en désuétude', 'Ne plus être utilisé, devenir démodé'],
+    ],
+  },
+  {
+    id: 'u-pannes-reparations',
+    section: 'situations',
+    category: 'Situations concrètes',
+    icon: '🛠️',
+    title: 'Pannes et réparations',
+    intro: "Signaler un dysfonctionnement, ou décrire une réparation.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    micCol: 0,
+    rows: [
+      ['Tomber en panne', 'S\'arrêter de fonctionner soudainement'],
+      ['Ça a rendu l\'âme', '(familier) L\'appareil est définitivement hors d\'usage'],
+      ['Bricoler une solution', 'Réparer de façon provisoire et improvisée'],
+      ['Ça fait des siennes', '(familier) L\'appareil fonctionne mal, de façon récurrente'],
+      ['Remettre en état', 'Réparer complètement pour un fonctionnement normal'],
+      ['Un vice de fabrication', 'Un défaut présent dès la construction de l\'objet'],
+    ],
+  },
+  {
+    id: 'u-cuisine-repas',
+    section: 'situations',
+    category: 'Situations concrètes',
+    icon: '🍳',
+    title: 'Parler de cuisine et de repas',
+    intro: "Le vocabulaire pour décrire un plat ou un moment de repas.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    micCol: 0,
+    rows: [
+      ['Un plat mijoté', 'Un plat cuit lentement, avec soin'],
+      ['Manger sur le pouce', 'Manger rapidement, sans prendre le temps'],
+      ['Un repas copieux', 'Un repas abondant'],
+      ['Se resservir', 'Reprendre une deuxième portion'],
+      ['Faire honneur au repas', 'Manger avec grand plaisir et appétit'],
+      ['Avoir un petit creux', 'Avoir une légère faim'],
+    ],
+  },
+  {
+    id: 'u-meteo',
+    section: 'situations',
+    category: 'Situations concrètes',
+    icon: '🌦️',
+    title: 'La météo',
+    intro: "Décrire le temps qu'il fait, au-delà du vocabulaire de base.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    micCol: 0,
+    rows: [
+      ['Un temps maussade', 'Un temps gris et triste'],
+      ['Un froid mordant', 'Un froid très vif, intense'],
+      ['Une chaleur écrasante', 'Une chaleur très forte, pénible'],
+      ['Le ciel se dégage', 'Les nuages disparaissent, le temps s\'améliore'],
+      ['Un temps changeant', 'Un temps qui varie rapidement dans la journée'],
+      ['Une éclaircie', 'Une période de beau temps entre deux périodes nuageuses'],
+    ],
+  },
+  {
+    id: 'u-etat-general',
+    section: 'situations',
+    category: 'Situations concrètes',
+    icon: '🩹',
+    title: 'L\'état général (forme, fatigue, santé)',
+    intro: "Décrire comment on se sent physiquement, au quotidien.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    micCol: 0,
+    rows: [
+      ['Être en petite forme', 'Ne pas se sentir très bien, sans être malade'],
+      ['Être sur les rotules', '(familier) Être épuisé'],
+      ['Avoir la forme olympique', 'Être en excellente forme physique'],
+      ['Se sentir patraque', '(familier) Se sentir un peu malade, sans gravité'],
+      ['Récupérer', 'Retrouver ses forces après un effort ou une fatigue'],
+      ['Être sur pied', 'Être rétabli, en état de fonctionner normalement'],
+    ],
+  },
+  {
+    id: 'u-mouvements',
+    section: 'situations',
+    category: 'Situations concrètes',
+    icon: '🏃',
+    title: 'Les mouvements',
+    intro: "Le vocabulaire pour décrire une manière de se déplacer.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    micCol: 0,
+    rows: [
+      ['Se faufiler', 'Se déplacer habilement entre des obstacles ou des personnes'],
+      ['Marcher d\'un pas décidé', 'Marcher avec assurance et détermination'],
+      ['Filer à toute allure', 'Partir très rapidement'],
+      ['Traîner des pieds', 'Marcher lentement, sans envie'],
+      ['Se précipiter', 'Se dépêcher, agir dans l\'urgence'],
+      ['Avancer à tâtons', 'Se déplacer prudemment, sans bien voir'],
+    ],
+  },
+  {
+    id: 'u-nouvelles',
+    section: 'situations',
+    category: 'Interactions',
+    icon: '📰',
+    title: 'Demander ou donner des nouvelles',
+    intro: "Comment s'informer de la vie de quelqu'un, ou en donner soi-même.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    micCol: 0,
+    rows: [
+      ['Quoi de neuf ?', 'Demande familière de nouvelles récentes'],
+      ['Donner de ses nouvelles', 'Informer les autres de sa propre situation'],
+      ['Être sans nouvelles de quelqu\'un', 'Ne plus avoir de contact avec quelqu\'un depuis longtemps'],
+      ['Ça suit son cours', 'La situation évolue normalement, sans changement notable'],
+      ['Tenir quelqu\'un au courant', 'Informer régulièrement quelqu\'un de l\'évolution d\'une situation'],
+      ['Reprendre contact', 'Renouer une relation après une période sans échange'],
+    ],
+  },
+  {
+    id: 'u-aider',
+    section: 'situations',
+    category: 'Interactions',
+    icon: '🆘',
+    title: 'Aider',
+    intro: "Proposer, demander ou refuser de l'aide.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    micCol: 0,
+    rows: [
+      ['Donner un coup de pouce', 'Aider un peu, de façon ponctuelle'],
+      ['Voler au secours de quelqu\'un', 'Aider rapidement une personne en difficulté'],
+      ['Se débrouiller seul', 'Réussir sans l\'aide de personne'],
+      ['Je suis là si besoin', 'Formule qui propose une aide disponible'],
+      ['Prêter main-forte', 'Aider physiquement dans une tâche'],
+      ['Décliner une proposition d\'aide', 'Refuser poliment une aide offerte'],
+    ],
+  },
+  {
+    id: 'u-demander-accepter-refuser',
+    section: 'situations',
+    category: 'Interactions',
+    icon: '🙋',
+    title: 'Demander, accepter, refuser',
+    intro: "Les formules pour faire une demande, y répondre positivement ou négativement.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    micCol: 0,
+    rows: [
+      ['Solliciter une faveur', 'Demander quelque chose de particulier, poliment'],
+      ['Ça tombe bien', 'Réponse positive : la demande arrive à un bon moment'],
+      ['Ça m\'arrangerait', 'Formule pour exprimer une préférence, une demande douce'],
+      ['Je crains que ce ne soit pas possible', 'Refus poli et formel'],
+      ['Accepter de bon cœur', 'Accepter avec plaisir, sans réticence'],
+      ['Refuser catégoriquement', 'Refuser fermement, sans possibilité de négociation'],
+    ],
+  },
+  {
+    id: 'u-reunions-conferences',
+    section: 'situations',
+    category: 'Interactions',
+    icon: '🎤',
+    title: 'Réunions, conférences',
+    intro: "Le vocabulaire des grands rassemblements professionnels ou publics.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    micCol: 0,
+    rows: [
+      ['Prendre la parole', 'Commencer à s\'exprimer devant un public'],
+      ['Un auditoire attentif', 'Un public qui écoute avec attention'],
+      ['Faire un tour de table', 'Donner la parole successivement à chaque participant'],
+      ['Clore un débat', 'Mettre fin officiellement à une discussion'],
+      ['Un échange nourri', 'Une discussion riche, avec beaucoup d\'interventions'],
+      ['Un intervenant', 'Une personne qui prend la parole lors d\'un événement'],
+    ],
+  },
+  {
+    id: 'u-responsabilites',
+    section: 'situations',
+    category: 'Interactions',
+    icon: '⚖️',
+    title: 'Les responsabilités',
+    intro: "Assumer, partager, ou rejeter une responsabilité.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    micCol: 0,
+    rows: [
+      ['Endosser la responsabilité de', 'Accepter d\'être tenu responsable de quelque chose'],
+      ['Se décharger d\'une tâche', 'Confier une responsabilité à quelqu\'un d\'autre'],
+      ['Rejeter la faute sur quelqu\'un', 'Attribuer la responsabilité d\'une erreur à autrui'],
+      ['Être garant de', 'Répondre personnellement de quelque chose'],
+      ['Prendre les choses en main', 'Assumer activement la direction d\'une situation'],
+      ['Se défausser', 'Éviter de porter une responsabilité qui nous incombe'],
+    ],
+  },
+  {
+    id: 'u-reflechir-argumenter',
+    section: 'situations',
+    category: 'Raisonnement',
+    icon: '🧩',
+    title: 'Réfléchir, argumenter',
+    intro: "Construire et présenter un raisonnement solide.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    micCol: 0,
+    rows: [
+      ['Peser le pour et le contre', 'Évaluer soigneusement les avantages et les inconvénients'],
+      ['Un argument de poids', 'Un argument particulièrement convaincant'],
+      ['Suivre un raisonnement', 'Comprendre la logique d\'un argumentaire'],
+      ['Avancer un argument', 'Présenter une raison à l\'appui d\'une thèse'],
+      ['Se contredire', 'Affirmer une chose puis son contraire'],
+      ['Tenir la route', '(un raisonnement) Être logique et solide'],
+    ],
+  },
+  {
+    id: 'u-comparaisons',
+    section: 'situations',
+    category: 'Raisonnement',
+    icon: '⚖️',
+    title: 'Établir des comparaisons',
+    intro: "Le vocabulaire pour comparer deux éléments avec nuance.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    micCol: 0,
+    rows: [
+      ['N\'avoir rien à voir avec', 'Être complètement différent de'],
+      ['Être comparable à', 'Présenter des points communs suffisants pour une comparaison'],
+      ['Faire pâle figure à côté de', 'Sembler nettement moins bien en comparaison'],
+      ['Être à des années-lumière de', 'Être extrêmement différent, très éloigné'],
+      ['Mettre sur le même plan', 'Considérer deux choses comme équivalentes'],
+      ['Sans commune mesure', 'Impossible à comparer, tant la différence est grande'],
+    ],
+  },
+  {
+    id: 'u-incredulite-certitudes',
+    section: 'situations',
+    category: 'Raisonnement',
+    icon: '🤨',
+    title: 'Incrédulité et certitudes',
+    intro: "Exprimer le doute, ou au contraire une conviction ferme.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    micCol: 0,
+    rows: [
+      ['J\'ai du mal à y croire', 'Exprime une forte incrédulité'],
+      ['Ça me paraît difficile à croire', 'Formule polie de doute'],
+      ['Il n\'y a pas l\'ombre d\'un doute', 'Expression d\'une certitude absolue'],
+      ['Mettre sa main à couper', 'Être tellement sûr qu\'on prend un risque pour l\'affirmer'],
+      ['Être dubitatif', 'Éprouver un doute, une hésitation'],
+      ['C\'est écrit noir sur blanc', 'C\'est prouvé, indiscutable'],
+    ],
+  },
+  {
+    id: 'u-causes-excuses-consequences',
+    section: 'situations',
+    category: 'Raisonnement',
+    icon: '🔀',
+    title: 'Causes, excuses et conséquences',
+    intro: "Expliquer une cause, présenter une excuse, ou tirer une conséquence.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    micCol: 0,
+    rows: [
+      ['Être à l\'origine de', 'Être la cause première de quelque chose'],
+      ['Trouver une excuse bidon', '(familier) Inventer une justification peu crédible'],
+      ['Ça n\'explique pas tout', 'La cause avancée ne suffit pas à tout justifier'],
+      ['Découler de', 'Résulter naturellement de quelque chose'],
+      ['Servir de prétexte', 'Être utilisé comme fausse raison'],
+      ['Avoir des répercussions', 'Entraîner des conséquences, parfois indirectes'],
+    ],
+  },
+  {
+    id: 'u-conditions-hypotheses',
+    section: 'situations',
+    category: 'Raisonnement',
+    icon: '🎲',
+    title: 'Conditions, hypothèses, probabilités',
+    intro: "Exprimer une éventualité, ou évaluer la probabilité d'un événement.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    micCol: 0,
+    rows: [
+      ['Il y a de fortes chances que', 'C\'est très probable'],
+      ['Ça reste à voir', 'Rien n\'est encore certain'],
+      ['Dans l\'hypothèse où', 'Si jamais, en supposant que'],
+      ['Il n\'est pas exclu que', 'C\'est une possibilité qu\'on ne peut pas écarter'],
+      ['À toutes fins utiles', 'Par précaution, au cas où ce serait utile'],
+      ['C\'est peu probable', 'Il y a peu de chances que cela arrive'],
+    ],
+  },
+  {
+    id: 'u-risques-dangers',
+    section: 'situations',
+    category: 'Travail, société',
+    icon: '⚠️',
+    title: 'Risques, dangers, nécessités',
+    intro: "Évaluer un danger, ou souligner une nécessité.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    micCol: 0,
+    rows: [
+      ['Courir un risque', 'S\'exposer à un danger potentiel'],
+      ['Jouer avec le feu', 'Prendre un risque imprudent'],
+      ['Il est impératif de', 'C\'est absolument nécessaire de'],
+      ['Prendre ses précautions', 'Agir pour se protéger d\'un danger'],
+      ['Un mal nécessaire', 'Quelque chose de désagréable mais indispensable'],
+      ['Ne rien laisser au hasard', 'Tout prévoir avec soin pour éviter les risques'],
+    ],
+  },
+  {
+    id: 'u-action-inaction',
+    section: 'situations',
+    category: 'Travail, société',
+    icon: '⏯️',
+    title: 'Action et inaction',
+    intro: "Décrire l'engagement dans l'action, ou au contraire la passivité.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    micCol: 0,
+    rows: [
+      ['Prendre les devants', 'Agir en premier, avant que la situation ne l\'impose'],
+      ['Rester les bras croisés', 'Ne rien faire face à une situation qui demande une action'],
+      ['Passer à l\'action', 'Cesser de réfléchir pour commencer à agir'],
+      ['Traîner en longueur', 'Prendre beaucoup plus de temps que nécessaire'],
+      ['Remettre à plus tard', 'Reporter une action au lieu de l\'entreprendre'],
+      ['Agir dans l\'urgence', 'Agir rapidement, sous la pression du temps'],
+    ],
+  },
+  {
+    id: 'u-reussites-echecs',
+    section: 'situations',
+    category: 'Travail, société',
+    icon: '🏆',
+    title: 'Réussites et échecs',
+    intro: "Célébrer un succès, ou évoquer un échec avec justesse.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    micCol: 0,
+    rows: [
+      ['Décrocher la timbale', '(familier) Réussir quelque chose de convoité'],
+      ['Essuyer un échec', 'Subir un échec'],
+      ['Réussir haut la main', 'Réussir facilement et brillamment'],
+      ['Tirer les leçons d\'un échec', 'Apprendre de ses erreurs pour progresser'],
+      ['Un coup dans l\'eau', 'Une tentative qui échoue complètement'],
+      ['Atteindre son objectif', 'Réussir ce qu\'on s\'était fixé'],
+    ],
+  },
+  {
+    id: 'u-connaissances-competences',
+    section: 'situations',
+    category: 'Travail, société',
+    icon: '🎓',
+    title: 'Connaissances et compétences',
+    intro: "Décrire un savoir ou une compétence, ou son absence.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    micCol: 0,
+    rows: [
+      ['Maîtriser un sujet sur le bout des doigts', 'Connaître un sujet parfaitement'],
+      ['Avoir des lacunes', 'Manquer de connaissances dans un domaine'],
+      ['Être calé en quelque chose', '(familier) Être très compétent dans un domaine'],
+      ['Toucher sa bille', '(familier) Être compétent, savoir s\'y prendre'],
+      ['Ne pas y connaître grand-chose', 'Avoir peu de connaissances sur un sujet'],
+      ['Un savoir-faire reconnu', 'Une compétence pratique largement appréciée'],
+    ],
+  },
+  {
+    id: 'u-emploi',
+    section: 'situations',
+    category: 'Travail, société',
+    icon: '💼',
+    title: 'L\'emploi',
+    intro: "Le vocabulaire de la vie professionnelle et du marché du travail.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    micCol: 0,
+    rows: [
+      ['Être sur le carreau', '(familier) Se retrouver au chômage'],
+      ['Décrocher un poste', 'Obtenir un emploi'],
+      ['Gravir les échelons', 'Progresser dans la hiérarchie professionnelle'],
+      ['Un poste taillé sur mesure', 'Un emploi parfaitement adapté à son profil'],
+      ['Être débordé', 'Avoir trop de travail à gérer'],
+      ['Faire le point sur sa carrière', 'Évaluer où on en est professionnellement'],
+    ],
+  },
+  {
+    id: 'u-argent',
+    section: 'situations',
+    category: 'Travail, société',
+    icon: '💰',
+    title: 'L\'argent',
+    intro: "Le vocabulaire imagé de l'argent, du familier au soutenu.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    micCol: 0,
+    rows: [
+      ['Être fauché', '(familier) Ne plus avoir d\'argent'],
+      ['Mettre de l\'argent de côté', 'Épargner'],
+      ['Vivre au-dessus de ses moyens', 'Dépenser plus que ce qu\'on gagne'],
+      ['Ça coûte une fortune', 'C\'est très cher'],
+      ['Gagner sa vie', 'Avoir un revenu suffisant grâce à son travail'],
+      ['Faire des économies', 'Réduire ses dépenses pour épargner'],
+    ],
+  },
+  {
+    id: 'u-temps-qui-passe',
+    section: 'situations',
+    category: 'Passage du temps',
+    icon: '⏳',
+    title: 'Le temps qui passe',
+    intro: "Le vocabulaire imagé de la fuite du temps.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    micCol: 0,
+    rows: [
+      ['Le temps file à toute allure', 'Le temps passe très vite'],
+      ['Ça remonte à des lustres', '(familier) C\'était il y a très longtemps'],
+      ['D\'ici peu', 'Bientôt, dans un futur proche'],
+      ['Au fil du temps', 'Progressivement, avec le temps qui passe'],
+      ['Avec le recul', 'En regardant les choses après un certain temps'],
+      ['Le temps est compté', 'Il reste très peu de temps disponible'],
+    ],
+  },
+  {
+    id: 'u-memoire-oubli-regrets',
+    section: 'situations',
+    category: 'Passage du temps',
+    icon: '🧠',
+    title: 'Mémoire, oubli, regrets',
+    intro: "Le vocabulaire du souvenir, de l'oubli et du regret.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    micCol: 0,
+    rows: [
+      ['Avoir un trou de mémoire', 'Oublier momentanément quelque chose'],
+      ['Ça me revient', 'Je me souviens soudainement de quelque chose'],
+      ['Tourner la page', 'Passer à autre chose après un événement du passé'],
+      ['Avoir des regrets', 'Regretter une décision ou une occasion manquée'],
+      ['Se remémorer', 'Faire revenir un souvenir précis à l\'esprit'],
+      ['Tirer un trait sur le passé', 'Décider de ne plus penser à quelque chose de révolu'],
+    ],
+  },
+  {
+    id: 'u-hasard-fatalisme',
+    section: 'situations',
+    category: 'Passage du temps',
+    icon: '🍀',
+    title: 'Hasards, fatalisme et opportunités',
+    intro: "Parler de la chance, du destin, ou d'une occasion à saisir.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    micCol: 0,
+    rows: [
+      ['Tomber pile au bon moment', 'Arriver ou se produire à l\'instant idéal, par chance'],
+      ['C\'était écrit', 'Cela devait arriver, comme si le destin l\'avait décidé'],
+      ['Saisir une occasion', 'Profiter d\'une opportunité qui se présente'],
+      ['Un coup du sort', 'Un événement imprévu, souvent malheureux'],
+      ['Laisser passer sa chance', 'Ne pas profiter d\'une opportunité'],
+      ['Le fruit du hasard', 'Un résultat dû uniquement à la coïncidence'],
+    ],
+  },
+  {
+    id: 'u-effets-de-mode',
+    section: 'situations',
+    category: 'Passage du temps',
+    icon: '👗',
+    title: 'Effets de mode',
+    intro: "Le vocabulaire des tendances passagères.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    micCol: 0,
+    rows: [
+      ['C\'est très tendance', 'C\'est actuellement à la mode'],
+      ['Un effet de mode passager', 'Une tendance qui ne durera pas'],
+      ['Être dépassé', 'Ne plus être à la mode'],
+      ['Faire un retour en force', '(une mode) Redevenir populaire après une période d\'oubli'],
+      ['Suivre le mouvement', 'Adopter une tendance parce que les autres le font'],
+      ['Se démoder', 'Perdre progressivement sa popularité'],
+    ],
+  },
+  {
+    id: 'u-perspectives-avenir',
+    section: 'situations',
+    category: 'Passage du temps',
+    icon: '🔭',
+    title: 'Perspectives d\'avenir',
+    intro: "Envisager l'avenir avec optimisme, inquiétude, ou détermination.",
+    type: 'table',
+    columns: ['Expression', 'Sens'],
+    micCol: 0,
+    rows: [
+      ['Avoir de belles perspectives', 'Avoir un avenir prometteur'],
+      ['Se projeter dans l\'avenir', 'Imaginer sa situation future'],
+      ['L\'avenir est incertain', 'On ne sait pas ce qui va se passer'],
+      ['Voir plus loin', 'Anticiper au-delà de la situation immédiate'],
+      ['Ouvrir de nouvelles perspectives', 'Créer de nouvelles possibilités pour l\'avenir'],
+      ['Vivre au jour le jour', 'Ne pas se projeter, se concentrer sur le présent'],
+    ],
+  },
 ];
-
 function renderSheetsHomeBySection(section, catTag, heroTitle, heroSubtitle){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
@@ -24572,8 +26765,552 @@ function renderGrammaireAvanceeHome(){
 function renderArtOratoireHome(){
   renderSheetsHomeBySection('oratoire', '🎤 Art Oratoire', 'Diction, voix, art de la scène', "Respiration, articulation, défauts de prononciation, discours, lecture à voix haute et jeu de l'acteur");
 }
+function renderSituationsHome(){
+  renderSheetsHomeBySection('situations', '💬 Expressions B2-C1', 'Communiquer avec nuance', "Conflit, opinion, sentiments, illusions, découragement... des expressions idiomatiques classées par situation");
+}
 
-function buildSheetTableHtml(columns, rows, speakableCols){
+/* ============ 🧩 JEUX DE MOTS — inspiré du cahier "Le français en s'amusant" ============
+   Mots mêlés (grille cliquable), anagrammes, charades et jeu de l'intrus, avec vraie interactivité. */
+
+const WORD_SEARCH_PUZZLES = [
+  {
+    title: 'Les mots de la grammaire',
+    grid: [
+      ['E','D','O','M','I','E','N','R','P','I','W','N'],
+      ['L','L','V','M','H','E','C','F','R','A','E','H'],
+      ['C','V','H','A','P','E','S','F','O','C','I','J'],
+      ['I','A','E','N','R','B','L','T','N','C','S','K'],
+      ['T','E','W','Q','T','R','U','V','O','O','X','B'],
+      ['R','O','Y','V','Z','E','R','M','M','R','M','M'],
+      ['A','M','D','P','U','V','M','O','N','D','M','B'],
+      ['G','C','G','O','F','T','E','M','P','S','D','K'],
+      ['T','B','D','A','D','J','E','C','T','I','F','A'],
+      ['S','A','D','V','E','R','B','E','E','R','D','L'],
+      ['T','S','U','J','E','T','A','C','G','T','M','E'],
+      ['U','I','L','T','L','P','D','D','P','O','P','P'],
+    ],
+    words: ['VERBE','ADJECTIF','ADVERBE','PRONOM','SUJET','ARTICLE','NOM','ACCORD','TEMPS','MODE'],
+  },
+];
+
+const ANAGRAMMES = [
+  { scrambled: 'CHIEN', hint: 'un abri pour chien', answer: 'NICHE' },
+  { scrambled: 'MAIRE', hint: 'un sentiment tendre (verbe)', answer: 'AIMER' },
+  { scrambled: 'ROSE', hint: 'avoir le courage de (verbe)', answer: 'OSER' },
+  { scrambled: 'ÉCRAN', hint: 'une partie du squelette', answer: 'CRÂNE' },
+  { scrambled: 'PLATINE', hint: 'un petit village (familier)', answer: 'PATELIN' },
+  { scrambled: 'MONTRE', hint: 'un guide, un conseiller', answer: 'MENTOR' },
+  { scrambled: 'REID', hint: 'un verbe de parole', answer: 'DIRE' },
+  { scrambled: 'RIRECE', hint: 'un verbe de l\'écrit', answer: 'ÉCRIRE' },
+  { scrambled: 'RITOR', hint: 'le contraire de « entrer »', answer: 'SORTIR' },
+  { scrambled: 'REVIVAR', hint: 'le contraire de « partir »', answer: 'ARRIVER' },
+];
+
+const CHARADES = [
+  { riddle: "Mon premier miaule. Mon second recouvre le corps. Mon tout se porte sur la tête.", answer: 'CHAPEAU', explanation: 'chat + peau' },
+  { riddle: "Mon premier est le contraire de « haut ». Mon second est le contraire de « tard ». Mon tout flotte sur l'eau.", answer: 'BATEAU', explanation: 'bas + tôt' },
+  { riddle: "Mon premier miaule. Mon second se boit. Mon tout est la demeure d'un roi.", answer: 'CHÂTEAU', explanation: 'chat + eau' },
+  { riddle: "Mon premier est une note de musique. Mon second est la note suivante. Mon tout brille comme l'or.", answer: 'DORÉ', explanation: 'do + ré' },
+  { riddle: "Mon premier est un oiseau noir et blanc. Mon second est un déterminant possessif. Mon tout marche sur le trottoir.", answer: 'PIÉTON', explanation: 'pie + ton' },
+];
+
+const JEUX_INTRUS = [
+  { words: ['bijou','caillou','chou','clou'], oddIdx: 3, explanation: '« clou » fait « clous » au pluriel ; les trois autres font « -oux ».' },
+  { words: ['bal','cheval','journal','animal'], oddIdx: 0, explanation: '« bal » fait « bals » ; les trois autres font « -aux ».' },
+  { words: ['travail','vitrail','détail','corail'], oddIdx: 2, explanation: '« détail » fait « détails » ; les trois autres font « -aux ».' },
+  { words: ['festival','carnaval','cheval','chacal'], oddIdx: 2, explanation: '« cheval » fait « chevaux » ; les trois autres prennent un simple « s ».' },
+  { words: ['terre','terrain','terrasse','terrible'], oddIdx: 3, explanation: '« terrible » vient du latin « terrere » (effrayer), sans rapport avec « terre ».' },
+  { words: ['mer','marin','maritime','mercredi'], oddIdx: 3, explanation: '« mercredi » vient du dieu Mercure, sans rapport avec « mer ».' },
+  { words: ['lait','laitier','allaiter','laid'], oddIdx: 3, explanation: '« laid » n\'a aucun rapport avec le lait.' },
+  { words: ['je chantai','tu chantas','il chanta','nous chantions'], oddIdx: 3, explanation: '« nous chantions » est à l\'imparfait ; les trois autres sont au passé simple.' },
+  { words: ['je finirai','tu finiras','il finirait','nous finirons'], oddIdx: 2, explanation: '« il finirait » est au conditionnel présent ; les trois autres sont au futur.' },
+  { words: ['que je sois','que tu aies','qu\'il fasse','il fait'], oddIdx: 3, explanation: '« il fait » est à l\'indicatif présent ; les trois autres sont au subjonctif.' },
+  { words: ['j\'avais pris','tu avais vu','il eut fini','nous avions dit'], oddIdx: 2, explanation: '« il eut fini » est au passé antérieur ; les trois autres sont au plus-que-parfait.' },
+];
+
+function renderJeuxMotsHome(){
+  clearQuestionTimer();
+  document.body.classList.remove('quiz-active');
+  isHomeScreen = false;
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromJeuxBtn" style="cursor:pointer;">← Retour</button>`;
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('footerNote').textContent = '';
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="cat-tag">🧩 Jeux de mots</div>
+    <div class="word-fr" style="font-size:clamp(19px,4vw,25px);">Le français en s'amusant</div>
+    <div class="word-def" style="margin-top:6px;">Mots mêlés, anagrammes, charades, intrus... choisis un jeu.</div>
+    <div style="display:flex;flex-direction:column;gap:12px;margin-top:20px;">
+      <button class="restart-btn" id="goMotsMelesBtn" style="background:linear-gradient(135deg,#0EA5E9,#0284C7);box-shadow:0 4px 0 #075985;">🔍 Mots mêlés</button>
+      <button class="restart-btn" id="goAnagrammesBtn" style="background:linear-gradient(135deg,#8B5CF6,#7C3AED);box-shadow:0 4px 0 #5B21B6;">🔤 Anagrammes</button>
+      <button class="restart-btn" id="goCharadesBtn" style="background:linear-gradient(135deg,#F59E0B,#D97706);box-shadow:0 4px 0 #B45309;">🎭 Charades</button>
+      <button class="restart-btn" id="goIntrusBtn" style="background:linear-gradient(135deg,#EF4444,#DC2626);box-shadow:0 4px 0 #B91C1C;">🎯 L'intrus</button>
+      <button class="restart-btn" id="goMotMystereBtn" style="background:linear-gradient(135deg,#14B8A6,#0D9488);box-shadow:0 4px 0 #0F766E;">🗝️ Mot mystère</button>
+      <button class="restart-btn" id="goTexteATrousBtn" style="background:linear-gradient(135deg,#6366F1,#4F46E5);box-shadow:0 4px 0 #3730A3;">📝 Textes à trous</button>
+      <button class="restart-btn" id="goQCMFinalBtn" style="background:linear-gradient(135deg,#78716C,#57534E);box-shadow:0 4px 0 #44403C;">🏁 QCM final</button>
+    </div>
+  `;
+  document.getElementById('backFromJeuxBtn').addEventListener('click', renderBlockSelect);
+  document.getElementById('goMotsMelesBtn').addEventListener('click', () => renderMotsMeles(0));
+  document.getElementById('goAnagrammesBtn').addEventListener('click', () => renderAnagrammeGame(0));
+  document.getElementById('goCharadesBtn').addEventListener('click', () => renderCharadeGame(0));
+  document.getElementById('goIntrusBtn').addEventListener('click', () => renderIntrusGame(0));
+  document.getElementById('goMotMystereBtn').addEventListener('click', () => renderMotMystere());
+  document.getElementById('goTexteATrousBtn').addEventListener('click', () => renderTexteATrous(0));
+  document.getElementById('goQCMFinalBtn').addEventListener('click', () => renderQCMFinal(0));
+}
+
+/* --- 🔍 Mots mêlés : clique la première lettre d'un mot, puis sa dernière lettre. --- */
+let wordSearchState = null;
+function renderMotsMeles(puzzleIdx){
+  clearQuestionTimer();
+  document.body.classList.add('quiz-active');
+  isHomeScreen = false;
+  wordSearchState = { puzzleIdx, found: [], selection: [], startTime: Date.now() };
+  renderWordSearchCard();
+}
+function renderWordSearchCard(){
+  const st = wordSearchState;
+  const puzzle = WORD_SEARCH_PUZZLES[st.puzzleIdx];
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromWSBtn" style="cursor:pointer;">← Jeux de mots</button>`;
+  document.getElementById('progressFill').style.width = Math.round((st.found.length / puzzle.words.length) * 100) + '%';
+  document.getElementById('footerNote').textContent = `${st.found.length}/${puzzle.words.length} mots trouvés`;
+  const allFound = st.found.length === puzzle.words.length;
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="cat-tag">🔍 Mots mêlés</div>
+    <div class="word-fr" style="font-size:clamp(17px,4vw,21px);">${escapeHtml(puzzle.title)}</div>
+    <div class="word-def" style="margin-top:4px;font-size:12.5px;">Clique la 1<sup>re</sup> lettre d'un mot, puis sa dernière lettre (horizontal, vertical ou diagonal).</div>
+    <div style="overflow-x:auto;margin:16px 0;display:flex;justify-content:center;">
+      <div id="wsGrid" style="display:inline-grid;grid-template-columns:repeat(${puzzle.grid[0].length}, 26px);gap:2px;background:var(--border);padding:3px;border-radius:8px;">
+        ${puzzle.grid.map((row,r) => row.map((letter,c) => {
+          const foundEntry = st.found.find(w => w.cells.some(cell => cell.r===r && cell.c===c));
+          const selected = st.selection.some(s => s.r===r && s.c===c);
+          const bg = foundEntry ? '#16A34A' : selected ? 'var(--purple)' : 'var(--surface)';
+          const col = foundEntry || selected ? '#fff' : 'var(--text)';
+          return `<button class="ws-cell" data-r="${r}" data-c="${c}" style="width:26px;height:26px;font-size:12px;font-weight:800;border:none;border-radius:4px;cursor:pointer;background:${bg};color:${col};padding:0;">${letter}</button>`;
+        }).join('')).join('')}
+      </div>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;">
+      ${puzzle.words.map(w => {
+        const isFound = st.found.some(f => f.word === w);
+        return `<span class="mode-chip" style="${isFound ? 'background:#16A34A;color:#fff;text-decoration:line-through;' : ''}">${escapeHtml(w)}</span>`;
+      }).join('')}
+    </div>
+    ${allFound ? `
+      <div style="margin-top:20px;text-align:center;">
+        <div style="font-size:40px;">🎉</div>
+        <div class="word-fr" style="margin-top:8px;">Bravo, tous les mots sont trouvés !</div>
+        <button class="restart-btn" id="wsRestartBtn" style="margin-top:14px;">🔁 Recommencer</button>
+      </div>
+    ` : ''}
+  `;
+  document.getElementById('backFromWSBtn').addEventListener('click', renderJeuxMotsHome);
+  card.querySelectorAll('.ws-cell').forEach(btn => {
+    btn.addEventListener('click', () => wsHandleCellClick(parseInt(btn.dataset.r,10), parseInt(btn.dataset.c,10)));
+  });
+  const restartBtn = document.getElementById('wsRestartBtn');
+  if(restartBtn) restartBtn.addEventListener('click', () => renderMotsMeles(st.puzzleIdx));
+  if(allFound){
+    recordDailyActivity();
+    recordDailyStats(computeActiveDurationSec(st.startTime), true, 0, 'jeuxmots');
+  }
+}
+function wsHandleCellClick(r, c){
+  const st = wordSearchState;
+  if(st.selection.length === 0){
+    st.selection = [{r,c}];
+    renderWordSearchCard();
+    return;
+  }
+  const start = st.selection[0];
+  if(start.r === r && start.c === c){ st.selection = []; renderWordSearchCard(); return; }
+  const dr = Math.sign(r - start.r);
+  const dc = Math.sign(c - start.c);
+  const dist = Math.max(Math.abs(r - start.r), Math.abs(c - start.c));
+  const validLine = (r - start.r === dr*dist) && (c - start.c === dc*dist);
+  if(!validLine){ st.selection = [{r,c}]; renderWordSearchCard(); return; }
+  const cells = [];
+  for(let i=0;i<=dist;i++){ cells.push({ r: start.r + dr*i, c: start.c + dc*i }); }
+  wsCheckSelection(cells);
+}
+function wsCheckSelection(cells){
+  const st = wordSearchState;
+  const puzzle = WORD_SEARCH_PUZZLES[st.puzzleIdx];
+  const letters = cells.map(({r,c}) => puzzle.grid[r][c]).join('');
+  const reversed = letters.split('').reverse().join('');
+  const match = puzzle.words.find(w => (w === letters || w === reversed) && !st.found.some(f => f.word === w));
+  if(match){ st.found.push({ word: match, cells }); }
+  st.selection = [];
+  renderWordSearchCard();
+}
+
+/* --- 🔤 Anagrammes : mêmes lettres, autre mot. --- */
+let anagrammeState = null;
+function renderAnagrammeGame(idx){
+  clearQuestionTimer();
+  document.body.classList.add('quiz-active');
+  isHomeScreen = false;
+  anagrammeState = { idx, revealed: false, correct: false };
+  renderAnagrammeCard();
+}
+function renderAnagrammeCard(){
+  const st = anagrammeState;
+  const item = ANAGRAMMES[st.idx];
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromAnagBtn" style="cursor:pointer;">← Jeux de mots</button>`;
+  document.getElementById('progressFill').style.width = Math.round(((st.idx+1)/ANAGRAMMES.length)*100) + '%';
+  document.getElementById('footerNote').textContent = `Anagramme ${st.idx+1}/${ANAGRAMMES.length}`;
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="cat-tag">🔤 Anagrammes</div>
+    <div class="word-def">Avec les mêmes lettres, trouve un autre mot :</div>
+    <div class="word-fr" style="font-size:clamp(26px,7vw,38px);letter-spacing:4px;margin:14px 0;">${escapeHtml(item.scrambled)}</div>
+    <div class="word-def">💡 Indice : ${escapeHtml(item.hint)}</div>
+    <input type="text" id="anagInput" class="search-input" placeholder="Ta réponse..." style="max-width:220px;margin:14px auto 0;display:block;text-align:center;font-size:16px;" ${st.revealed ? 'disabled' : ''}>
+    <div id="anagFeedback" style="min-height:24px;font-weight:700;margin-top:8px;">${st.revealed ? `La réponse était : <span style="color:var(--purple);">${escapeHtml(item.answer)}</span>` : ''}</div>
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:10px;">
+      ${!st.revealed ? `<button class="restart-btn" id="anagCheckBtn">✓ Vérifier</button><button class="restart-btn" id="anagRevealBtn" style="background:var(--surface-sunken);border:1px solid var(--border);color:var(--text);box-shadow:none;">👁️ Révéler</button>` : `<button class="restart-btn" id="anagNextBtn">${st.idx+1 < ANAGRAMMES.length ? 'Suivant →' : 'Terminer'}</button>`}
+    </div>
+  `;
+  document.getElementById('backFromAnagBtn').addEventListener('click', renderJeuxMotsHome);
+  const input = document.getElementById('anagInput');
+  const feedback = document.getElementById('anagFeedback');
+  const check = () => {
+    if(normalizeForSearch(input.value) === normalizeForSearch(item.answer)){
+      feedback.innerHTML = '✅ Bravo !';
+      feedback.style.color = '#16A34A';
+      st.revealed = true; st.correct = true;
+      renderAnagrammeCard();
+    } else {
+      feedback.textContent = '❌ Pas encore, réessaie.';
+      feedback.style.color = '#DC2626';
+    }
+  };
+  const checkBtn = document.getElementById('anagCheckBtn');
+  if(checkBtn) checkBtn.addEventListener('click', check);
+  if(input){ input.focus(); input.addEventListener('keydown', (e) => { if(e.key === 'Enter') check(); }); }
+  const revealBtn = document.getElementById('anagRevealBtn');
+  if(revealBtn) revealBtn.addEventListener('click', () => { st.revealed = true; renderAnagrammeCard(); });
+  const nextBtn = document.getElementById('anagNextBtn');
+  if(nextBtn) nextBtn.addEventListener('click', () => {
+    if(st.idx + 1 < ANAGRAMMES.length){ renderAnagrammeGame(st.idx + 1); }
+    else { recordDailyActivity(); renderJeuxMotsHome(); }
+  });
+}
+
+/* --- 🎭 Charades --- */
+let charadeState = null;
+function renderCharadeGame(idx){
+  clearQuestionTimer();
+  document.body.classList.add('quiz-active');
+  isHomeScreen = false;
+  charadeState = { idx, revealed: false };
+  renderCharadeCard();
+}
+function renderCharadeCard(){
+  const st = charadeState;
+  const item = CHARADES[st.idx];
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromCharBtn" style="cursor:pointer;">← Jeux de mots</button>`;
+  document.getElementById('progressFill').style.width = Math.round(((st.idx+1)/CHARADES.length)*100) + '%';
+  document.getElementById('footerNote').textContent = `Charade ${st.idx+1}/${CHARADES.length}`;
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="cat-tag">🎭 Charades</div>
+    <div class="word-def" style="font-size:15px;line-height:1.7;margin:14px 0;">${escapeHtml(item.riddle)}</div>
+    ${st.revealed ? `
+      <div class="word-fr" style="color:var(--purple);margin:14px 0;">${escapeHtml(item.answer)}</div>
+      <div class="word-def">(${escapeHtml(item.explanation)})</div>
+      <button class="restart-btn" id="charNextBtn" style="margin-top:14px;">${st.idx+1 < CHARADES.length ? 'Suivant →' : 'Terminer'}</button>
+    ` : `
+      <button class="restart-btn" id="charRevealBtn">👁️ Révéler la réponse</button>
+    `}
+  `;
+  document.getElementById('backFromCharBtn').addEventListener('click', renderJeuxMotsHome);
+  const revealBtn = document.getElementById('charRevealBtn');
+  if(revealBtn) revealBtn.addEventListener('click', () => { st.revealed = true; renderCharadeCard(); });
+  const nextBtn = document.getElementById('charNextBtn');
+  if(nextBtn) nextBtn.addEventListener('click', () => {
+    if(st.idx + 1 < CHARADES.length){ renderCharadeGame(st.idx + 1); }
+    else { recordDailyActivity(); renderJeuxMotsHome(); }
+  });
+}
+
+/* --- 🎯 L'intrus --- */
+let intrusState = null;
+function renderIntrusGame(idx){
+  clearQuestionTimer();
+  document.body.classList.add('quiz-active');
+  isHomeScreen = false;
+  intrusState = { idx, answered: false, selectedIdx: null };
+  renderIntrusCard();
+}
+function renderIntrusCard(){
+  const st = intrusState;
+  const item = JEUX_INTRUS[st.idx];
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromIntrusBtn" style="cursor:pointer;">← Jeux de mots</button>`;
+  document.getElementById('progressFill').style.width = Math.round(((st.idx+1)/JEUX_INTRUS.length)*100) + '%';
+  document.getElementById('footerNote').textContent = `Intrus ${st.idx+1}/${JEUX_INTRUS.length}`;
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="cat-tag">🎯 Trouve l'intrus</div>
+    <div class="word-def" style="margin:10px 0;">Un mot ne va pas avec les autres. Lequel ?</div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px;">
+      ${item.words.map((w,i) => {
+        let extra = '';
+        if(st.answered){
+          if(i === item.oddIdx) extra = 'background:#16A34A;color:#fff;';
+          else if(i === st.selectedIdx) extra = 'background:#DC2626;color:#fff;';
+        }
+        return `<button class="opt" data-idx="${i}" style="${extra}" ${st.answered ? 'disabled' : ''}>${escapeHtml(w)}</button>`;
+      }).join('')}
+    </div>
+    ${st.answered ? `
+      <div class="word-def" style="margin-top:14px;">${escapeHtml(item.explanation)}</div>
+      <button class="restart-btn" id="intrusNextBtn" style="margin-top:14px;">${st.idx+1 < JEUX_INTRUS.length ? 'Suivant →' : 'Terminer'}</button>
+    ` : ''}
+  `;
+  document.getElementById('backFromIntrusBtn').addEventListener('click', renderJeuxMotsHome);
+  card.querySelectorAll('[data-idx]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if(st.answered) return;
+      st.selectedIdx = parseInt(btn.dataset.idx,10);
+      st.answered = true;
+      renderIntrusCard();
+    });
+  });
+  const nextBtn = document.getElementById('intrusNextBtn');
+  if(nextBtn) nextBtn.addEventListener('click', () => {
+    if(st.idx + 1 < JEUX_INTRUS.length){ renderIntrusGame(st.idx + 1); }
+    else { recordDailyActivity(); renderJeuxMotsHome(); }
+  });
+}
+
+/* --- 🗝️ Mot mystère : trouve chaque forme conjuguée, les premières lettres révèlent le mot mystère. --- */
+const MOT_MYSTERE = {
+  title: 'Le mot mystère de la conjugaison',
+  clues: [
+    { instruction: 'faire, 1re personne du pluriel, présent', answer: 'FAISONS' },
+    { instruction: 'utiliser, 3e personne du singulier, passé simple', answer: 'UTILISA' },
+    { instruction: 'tenir, 3e personne du singulier, futur simple', answer: 'TIENDRA' },
+    { instruction: 'unir, 2e personne du pluriel, présent', answer: 'UNISSEZ' },
+    { instruction: 'recevoir, 3e personne du singulier, passé simple', answer: 'REÇUT' },
+  ],
+  mysteryWord: 'FUTUR',
+};
+let motMystereState = null;
+function renderMotMystere(){
+  clearQuestionTimer();
+  document.body.classList.add('quiz-active');
+  isHomeScreen = false;
+  motMystereState = { answers: MOT_MYSTERE.clues.map(() => ''), checked: MOT_MYSTERE.clues.map(() => null), solved: false };
+  renderMotMystereCard();
+}
+function renderMotMystereCard(){
+  const st = motMystereState;
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromMMBtn" style="cursor:pointer;">← Jeux de mots</button>`;
+  const nCorrect = st.checked.filter(c => c === true).length;
+  document.getElementById('progressFill').style.width = Math.round((nCorrect / MOT_MYSTERE.clues.length) * 100) + '%';
+  document.getElementById('footerNote').textContent = `${nCorrect}/${MOT_MYSTERE.clues.length} formes trouvées`;
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="cat-tag">🗝️ Mot mystère</div>
+    <div class="word-fr" style="font-size:clamp(17px,4vw,21px);">${escapeHtml(MOT_MYSTERE.title)}</div>
+    <div class="word-def" style="margin:8px 0 14px;">Conjugue chaque verbe. Les premières lettres, mises bout à bout, forment un mot en rapport avec la conjugaison.</div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      ${MOT_MYSTERE.clues.map((clue, i) => {
+        const state = st.checked[i];
+        const borderColor = state === true ? '#16A34A' : state === false ? '#DC2626' : 'var(--border)';
+        return `<div style="display:flex;align-items:center;gap:10px;">
+          <span style="min-width:26px;font-weight:800;color:var(--purple);">${i+1}.</span>
+          <span style="flex:1;font-size:13px;">${escapeHtml(clue.instruction)}</span>
+          <input type="text" class="search-input mm-input" data-idx="${i}" value="${escapeHtml(st.answers[i])}" style="max-width:130px;border-color:${borderColor};" ${state === true ? 'disabled' : ''}>
+        </div>`;
+      }).join('')}
+    </div>
+    <button class="restart-btn" id="mmCheckBtn" style="margin-top:16px;">✓ Vérifier</button>
+    ${st.solved ? `
+      <div style="margin-top:20px;text-align:center;">
+        <div style="font-size:36px;">🎉</div>
+        <div class="word-def">Le mot mystère était :</div>
+        <div class="word-fr" style="font-size:clamp(24px,6vw,32px);letter-spacing:6px;color:var(--purple);margin-top:6px;">${escapeHtml(MOT_MYSTERE.mysteryWord)}</div>
+        <button class="restart-btn" id="mmRestartBtn" style="margin-top:14px;">🔁 Recommencer</button>
+      </div>
+    ` : ''}
+  `;
+  document.getElementById('backFromMMBtn').addEventListener('click', renderJeuxMotsHome);
+  card.querySelectorAll('.mm-input').forEach(inp => {
+    inp.addEventListener('input', () => { st.answers[parseInt(inp.dataset.idx,10)] = inp.value; });
+  });
+  document.getElementById('mmCheckBtn').addEventListener('click', () => {
+    MOT_MYSTERE.clues.forEach((clue, i) => {
+      st.checked[i] = normalizeForSearch(st.answers[i]) === normalizeForSearch(clue.answer);
+    });
+    if(st.checked.every(c => c === true)){ st.solved = true; recordDailyActivity(); }
+    renderMotMystereCard();
+  });
+  const restartBtn = document.getElementById('mmRestartBtn');
+  if(restartBtn) restartBtn.addEventListener('click', renderMotMystere);
+}
+
+/* --- 📝 Textes à trous : complète le texte avec la bonne forme du verbe indiqué. --- */
+const TEXTES_A_TROUS = [
+  {
+    title: 'Accord du participe passé',
+    parts: ["Les lettres que j'ai ", " sont enfin arrivées. Mes cousines sont ", " tôt ce matin. Hier, nous avons ", " des fraises. Les fleurs qu'il a ", " sont déjà ", ". Mes deux frères se sont ", " longtemps au téléphone."],
+    blanks: [
+      { hint: 'écrire', answer: 'écrites' },
+      { hint: 'partir', answer: 'parties' },
+      { hint: 'manger', answer: 'mangé' },
+      { hint: 'cueillir', answer: 'cueillies' },
+      { hint: 'faner', answer: 'fanées' },
+      { hint: 'se parler', answer: 'parlé' },
+    ],
+  },
+  {
+    title: 'Le bon temps verbal',
+    parts: ["Si j'", " le temps, je viendrais. Quand tu ", " ton travail, tu m'appelleras. Il faut que nous ", " tôt. Ce jour-là, il ", " toute la journée."],
+    blanks: [
+      { hint: 'avoir — imparfait', answer: 'avais' },
+      { hint: 'finir — futur antérieur', answer: 'auras fini' },
+      { hint: 'partir — subjonctif présent', answer: 'partions' },
+      { hint: 'pleuvoir — passé simple', answer: 'plut' },
+    ],
+  },
+];
+let texteATrousState = null;
+function renderTexteATrous(idx){
+  clearQuestionTimer();
+  document.body.classList.add('quiz-active');
+  isHomeScreen = false;
+  const item = TEXTES_A_TROUS[idx];
+  texteATrousState = { idx, answers: item.blanks.map(() => ''), checked: item.blanks.map(() => null) };
+  renderTexteATrousCard();
+}
+function renderTexteATrousCard(){
+  const st = texteATrousState;
+  const item = TEXTES_A_TROUS[st.idx];
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromTATBtn" style="cursor:pointer;">← Jeux de mots</button>`;
+  const nCorrect = st.checked.filter(c => c === true).length;
+  document.getElementById('progressFill').style.width = Math.round(((st.idx+1)/TEXTES_A_TROUS.length)*100) + '%';
+  document.getElementById('footerNote').textContent = `Texte ${st.idx+1}/${TEXTES_A_TROUS.length} · ${nCorrect}/${item.blanks.length} trous corrects`;
+  const card = document.getElementById('quizCard');
+  const textHtml = item.parts.map((part, i) => {
+    if(i === item.parts.length - 1) return escapeHtml(part);
+    const state = st.checked[i];
+    const borderColor = state === true ? '#16A34A' : state === false ? '#DC2626' : 'var(--border)';
+    return `${escapeHtml(part)}<input type="text" class="search-input tat-input" data-idx="${i}" value="${escapeHtml(st.answers[i])}" title="${escapeHtml(item.blanks[i].hint)}" style="display:inline-block;width:110px;margin:0 2px;border-color:${borderColor};text-align:center;font-size:13px;" ${state === true ? 'disabled' : ''}>`;
+  }).join('');
+  const allCorrect = st.checked.every(c => c === true);
+  card.innerHTML = `
+    <div class="cat-tag">📝 Texte à trous</div>
+    <div class="word-fr" style="font-size:clamp(17px,4vw,21px);">${escapeHtml(item.title)}</div>
+    <div class="reading-text" style="text-align:left;margin-top:14px;line-height:2.1;">${textHtml}</div>
+    <div class="word-def" style="margin-top:8px;font-size:12px;">💡 Survole ou touche un champ pour voir l'indice (l'infinitif du verbe attendu).</div>
+    <button class="restart-btn" id="tatCheckBtn" style="margin-top:14px;">✓ Vérifier</button>
+    ${allCorrect ? `
+      <div style="margin-top:16px;text-align:center;">
+        <div style="font-size:32px;">🎉</div>
+        <div class="word-fr">Tous les trous sont corrects !</div>
+        <button class="restart-btn" id="tatNextBtn" style="margin-top:12px;">${st.idx+1 < TEXTES_A_TROUS.length ? 'Texte suivant →' : 'Terminer'}</button>
+      </div>
+    ` : ''}
+  `;
+  document.getElementById('backFromTATBtn').addEventListener('click', renderJeuxMotsHome);
+  card.querySelectorAll('.tat-input').forEach(inp => {
+    inp.addEventListener('input', () => { st.answers[parseInt(inp.dataset.idx,10)] = inp.value; });
+  });
+  document.getElementById('tatCheckBtn').addEventListener('click', () => {
+    item.blanks.forEach((blank, i) => {
+      st.checked[i] = normalizeForSearch(st.answers[i]) === normalizeForSearch(blank.answer);
+    });
+    if(st.checked.every(c => c === true)){ recordDailyActivity(); }
+    renderTexteATrousCard();
+  });
+  const nextBtn = document.getElementById('tatNextBtn');
+  if(nextBtn) nextBtn.addEventListener('click', () => {
+    if(st.idx + 1 < TEXTES_A_TROUS.length){ renderTexteATrous(st.idx + 1); }
+    else { renderJeuxMotsHome(); }
+  });
+}
+
+/* --- 🏁 Le grand QCM final --- */
+const QCM_FINAL = [
+  { question: 'Quel mot est un adverbe ?', options: ['rapide', 'rapidement', 'rapidité'], correctIdx: 1 },
+  { question: 'Quelle phrase est correcte ?', options: ['Je me rappelle de ce jour.', 'Je me rappelle ce jour.', 'Je me rappelle à ce jour.'], correctIdx: 1 },
+  { question: '« Nous ___ fini. »', options: ['avons', 'sommes', 'étions'], correctIdx: 0 },
+  { question: 'Le pluriel de « un œil » est :', options: ['des œils', 'des yeux', 'des œux'], correctIdx: 1 },
+  { question: 'Un synonyme de « rapidement » :', options: ['lentement', 'promptement', 'prudemment'], correctIdx: 1 },
+];
+let qcmFinalState = null;
+function renderQCMFinal(idx){
+  clearQuestionTimer();
+  document.body.classList.add('quiz-active');
+  isHomeScreen = false;
+  if(idx === 0){ qcmFinalState = { idx: 0, score: 0, answered: false, selectedIdx: null }; }
+  else { qcmFinalState.idx = idx; qcmFinalState.answered = false; qcmFinalState.selectedIdx = null; }
+  renderQCMFinalCard();
+}
+function renderQCMFinalCard(){
+  const st = qcmFinalState;
+  const item = QCM_FINAL[st.idx];
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromQCMBtn" style="cursor:pointer;">← Jeux de mots</button><span class="chip">${st.score}/${QCM_FINAL.length}</span>`;
+  document.getElementById('progressFill').style.width = Math.round(((st.idx+1)/QCM_FINAL.length)*100) + '%';
+  document.getElementById('footerNote').textContent = `Question ${st.idx+1}/${QCM_FINAL.length}`;
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="cat-tag">🏁 QCM final</div>
+    <div class="word-fr" style="font-size:clamp(16px,4vw,19px);margin-bottom:14px;">${escapeHtml(item.question)}</div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      ${item.options.map((opt,i) => {
+        let extra = '';
+        if(st.answered){
+          if(i === item.correctIdx) extra = 'background:#16A34A;color:#fff;';
+          else if(i === st.selectedIdx) extra = 'background:#DC2626;color:#fff;';
+        }
+        return `<button class="opt" data-idx="${i}" style="${extra}" ${st.answered ? 'disabled' : ''}>${escapeHtml(opt)}</button>`;
+      }).join('')}
+    </div>
+    ${st.answered ? `<button class="restart-btn" id="qcmNextBtn" style="margin-top:16px;">${st.idx+1 < QCM_FINAL.length ? 'Suivant →' : 'Voir le résultat'}</button>` : ''}
+  `;
+  document.getElementById('backFromQCMBtn').addEventListener('click', renderJeuxMotsHome);
+  card.querySelectorAll('[data-idx]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if(st.answered) return;
+      st.selectedIdx = parseInt(btn.dataset.idx,10);
+      st.answered = true;
+      if(st.selectedIdx === item.correctIdx) st.score++;
+      renderQCMFinalCard();
+    });
+  });
+  const nextBtn = document.getElementById('qcmNextBtn');
+  if(nextBtn) nextBtn.addEventListener('click', () => {
+    if(st.idx + 1 < QCM_FINAL.length){ renderQCMFinal(st.idx + 1); }
+    else { renderQCMFinalResult(); }
+  });
+}
+function renderQCMFinalResult(){
+  const st = qcmFinalState;
+  const pct = Math.round((st.score / QCM_FINAL.length) * 100);
+  recordDailyActivity();
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromQCMResBtn" style="cursor:pointer;">← Jeux de mots</button>`;
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('footerNote').textContent = '';
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div style="text-align:center;">
+      <div style="font-size:44px;">${pct >= 80 ? '🏆' : pct >= 50 ? '👍' : '💪'}</div>
+      <div class="word-fr" style="margin-top:8px;">Score final : ${st.score}/${QCM_FINAL.length}</div>
+      <button class="restart-btn" id="qcmRestartBtn" style="margin-top:16px;">🔁 Recommencer</button>
+    </div>
+  `;
+  document.getElementById('backFromQCMResBtn').addEventListener('click', renderJeuxMotsHome);
+  document.getElementById('qcmRestartBtn').addEventListener('click', () => renderQCMFinal(0));
+}
+
+
+
+function buildSheetTableHtml(columns, rows, speakableCols, micCol){
   return `
     <div class="reading-text" style="overflow-x:auto;margin-top:12px;padding:14px 16px;">
       <table style="width:100%;border-collapse:collapse;font-size:0.85em;">
@@ -24583,8 +27320,9 @@ function buildSheetTableHtml(columns, rows, speakableCols){
         <tbody>
           ${rows.map((r, ri) => `<tr>${r.map((cell,i) => {
             const canSpeak = !speakableCols || speakableCols.includes(i);
+            const canMic = micCol != null && i === micCol && speechRecoAvailable;
             return `<td style="padding:10px;border-bottom:1px solid var(--border);${i===r.length-1 && r.length>2 ? 'font-weight:700;color:var(--purple);' : ''}">
-              <span id="sheetCellTarget-${ri}-${i}">${escapeHtml(cell)}</span>${canSpeak ? `<button class="speak-btn small" data-speak-cell="${ri}:${i}" style="margin-left:6px;vertical-align:middle;">${SPEAK_SVG_SMALL}</button>` : ''}
+              <span id="sheetCellTarget-${ri}-${i}">${escapeHtml(cell)}</span>${canSpeak ? `<button class="speak-btn small" data-speak-cell="${ri}:${i}" style="margin-left:6px;vertical-align:middle;">${SPEAK_SVG_SMALL}</button>` : ''}${canMic ? ` <button class="speak-btn small" id="micCellBtn-${ri}-${i}" data-mic-cell="${ri}:${i}" title="S'entraîner à l'oral" style="margin-left:2px;vertical-align:middle;">🎤</button><div id="micCellFeedback-${ri}-${i}" style="font-size:11px;margin-top:4px;min-height:14px;"></div>` : ''}
             </td>`;
           }).join('')}</tr>`).join('')}
         </tbody>
@@ -24598,7 +27336,7 @@ function renderPracticalSheetDetail(id){
   document.body.classList.remove('quiz-active');
   isHomeScreen = false;
   const sheet = PRACTICAL_SHEETS.find(s => s.id === id);
-  const homeFnMap = { atelier: renderAtelierHome, avance: renderGrammaireAvanceeHome, oratoire: renderArtOratoireHome };
+  const homeFnMap = { atelier: renderAtelierHome, avance: renderGrammaireAvanceeHome, oratoire: renderArtOratoireHome, situations: renderSituationsHome };
   const homeFn = (sheet && homeFnMap[sheet.section]) || renderPracticalSheetsHome;
   if(!sheet){ homeFn(); return; }
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromSheetDetailBtn" style="cursor:pointer;">← Toutes les fiches</button>`;
@@ -24614,7 +27352,7 @@ function renderPracticalSheetDetail(id){
 
   let bodyHtml = '';
   if(sheet.type === 'table'){
-    bodyHtml = buildSheetTableHtml(sheet.columns, sheet.rows);
+    bodyHtml = buildSheetTableHtml(sheet.columns, sheet.rows, null, sheet.micCol);
   } else if(sheet.type === 'letter'){
     bodyHtml = `
       <button class="mode-chip" id="speakWholeLetterBtn" style="margin-top:10px;">🔊 Écouter toute la lettre</button>
@@ -24684,6 +27422,13 @@ function renderPracticalSheetDetail(id){
       const [ri, ci] = btn.dataset.speakCell.split(':').map(Number);
       const rows = sheet.type === 'rule' ? sheet.table.rows : sheet.rows;
       speakHighlighted(rows[ri][ci], 'fr-FR', `sheetCellTarget-${ri}-${ci}`);
+    });
+  });
+  card.querySelectorAll('[data-mic-cell]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const [ri, ci] = btn.dataset.micCell.split(':').map(Number);
+      const rows = sheet.type === 'rule' ? sheet.table.rows : sheet.rows;
+      checkExpressionPronunciation(rows[ri][ci], 'fr-FR', `micCellBtn-${ri}-${ci}`, `micCellFeedback-${ri}-${ci}`);
     });
   });
   const speakWholeLetterBtn = document.getElementById('speakWholeLetterBtn');
