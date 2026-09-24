@@ -640,7 +640,7 @@
   .mascot-zone{
     display:flex;align-items:flex-end;gap:12px;justify-content:center;
     margin:0 0 -18px 0;position:relative;z-index:5;min-height:84px;
-    pointer-events:none;
+    pointer-events:none;perspective:700px;
   }
   .mascot-zone{ display:none; }
   body.quiz-active .mascot-zone{ display:flex; }
@@ -720,6 +720,7 @@
       radial-gradient(800px 600px at 100% 110%, rgba(234,88,12,0.14), transparent 55%),
       var(--bg-secondary);
     transition:opacity .55s cubic-bezier(.4,0,.2,1), visibility .55s;
+    perspective:900px;
   }
   .splash-screen.hide{ opacity:0;visibility:hidden;pointer-events:none; }
 
@@ -740,14 +741,22 @@
   .splash-mascot-emoji{ font-size:78px;line-height:1;filter:drop-shadow(0 5px 8px rgba(0,0,0,0.3)); }
 
   .splash-fox{
-    animation:splashEntrance .9s cubic-bezier(.16,1,.3,1) both, splashBreathe 3.4s ease-in-out .9s infinite;
+    animation:splashEntrance .9s cubic-bezier(.16,1,.3,1) both, splashFlipY 1s ease-in-out .9s 3, splashBreathe 3.4s ease-in-out 3.9s infinite;
     filter:drop-shadow(0 14px 22px rgba(0,0,0,0.18));
+    transform-style:preserve-3d;
   }
   @keyframes splashEntrance{
     0%{ opacity:0;transform:translateY(26px) scale(.72) rotate(-6deg); }
     55%{ opacity:1;transform:translateY(-6px) scale(1.05) rotate(2deg); }
     78%{ transform:translateY(2px) scale(.99) rotate(-1deg); }
     100%{ opacity:1;transform:translateY(0) scale(1) rotate(0); }
+  }
+  /* 🌀 Flip horizontal sur l'axe Y (comme une pièce qui tourne) — joué 3 fois juste après l'entrée,
+     avant que la mascotte ne se pose sur sa respiration lente habituelle. */
+  @keyframes splashFlipY{
+    0%{ transform:translateY(0) scale(1) rotateY(0deg); }
+    50%{ transform:translateY(-5px) scale(1.05) rotateY(180deg); }
+    100%{ transform:translateY(0) scale(1) rotateY(360deg); }
   }
   @keyframes splashBreathe{
     0%,100%{ transform:translateY(0) scale(1); }
@@ -1017,6 +1026,15 @@
     font-family:'Inter',sans-serif;font-weight:800;font-size:clamp(30px,6.5vw,50px);line-height:1.03;
     color:var(--ink);margin:0 0 10px;
   }
+  /* ⌨️ Curseur clignotant de l'effet machine à écrire du titre d'accueil. */
+  .type-cursor{
+    display:inline-block;width:3px;height:0.85em;margin-left:2px;background:var(--purple);
+    animation:typeCursorBlink .8s step-end infinite;
+    vertical-align:text-bottom;
+  }
+  @keyframes typeCursorBlink{ 0%,100%{ opacity:1; } 50%{ opacity:0; } }
+  .type-cursor.fading{ animation:typeCursorBlink .8s step-end infinite, typeCursorFade .5s ease .1s forwards; }
+  @keyframes typeCursorFade{ to{ opacity:0;width:0;margin:0; } }
   .hero-title .grad{
     background:linear-gradient(90deg,var(--purple),var(--pink) 35%,var(--green) 65%,var(--purple));
     background-size:200% auto;
@@ -1516,13 +1534,15 @@
   }
   @keyframes mouthTalk{ 0%,100%{ transform:scaleY(1);} 50%{ transform:scaleY(1.7);} }
 
-  .mascot.roam{ animation:mascotRoam 2.3s ease-in-out; }
+  .mascot.roam{ animation:mascotRoam 1.9s cubic-bezier(.45,1.4,.4,1) 1; }
   @keyframes mascotRoam{
-    0%{ transform:translateX(0) rotate(0);}
-    22%{ transform:translateX(-42px) rotate(-6deg);}
-    50%{ transform:translateX(34px) rotate(5deg);}
-    78%{ transform:translateX(-16px) rotate(-3deg);}
-    100%{ transform:translateX(0) rotate(0);}
+    0%{ transform:translateX(0) translateY(0) rotateY(0deg) scale(1,1);}
+    12%{ transform:translateX(-20px) translateY(2px) rotateY(-60deg) scale(1.14,0.84);}
+    22%{ transform:translateX(-42px) translateY(-10px) rotateY(-140deg) scale(0.86,1.18);}
+    50%{ transform:translateX(34px) translateY(-16px) rotateY(140deg) scale(0.84,1.22);}
+    65%{ transform:translateX(20px) translateY(2px) rotateY(80deg) scale(1.16,0.82);}
+    78%{ transform:translateX(-16px) translateY(-6px) rotateY(-40deg) scale(0.94,1.1);}
+    100%{ transform:translateX(0) translateY(0) rotateY(0deg) scale(1,1);}
   }
   .mascot.peekaboo{ animation:mascotPeekaboo 1.7s ease-in-out; }
   @keyframes mascotPeekaboo{
@@ -1532,11 +1552,15 @@
     78%{ opacity:1; transform:translateY(-8px) scale(1.1) rotate(4deg);}
     100%{ opacity:1; transform:translateY(0) scale(1) rotate(0);}
   }
-  .mascot.spin{ animation:mascotSpin 1s ease-in-out; }
+  /* 🎈 Rebond façon ballon gonflable : la mascotte s'écrase (squash) au sol et s'étire (stretch) en
+     l'air, tout en tournant sur l'axe Y — un vrai rebond élastique 3D plutôt qu'une rotation plate. */
+  .mascot.spin{ animation:mascotSpin .85s cubic-bezier(.3,.9,.4,1) 1; }
   @keyframes mascotSpin{
-    0%{ transform:rotate(0) scale(1);}
-    50%{ transform:rotate(180deg) scale(.85);}
-    100%{ transform:rotate(360deg) scale(1);}
+    0%{ transform:translateY(0) rotateY(0deg) scale(1,1);}
+    20%{ transform:translateY(5px) rotateY(50deg) scale(1.18,0.8);}
+    45%{ transform:translateY(-14px) rotateY(180deg) scale(0.8,1.22);}
+    70%{ transform:translateY(5px) rotateY(300deg) scale(1.14,0.84);}
+    100%{ transform:translateY(0) rotateY(360deg) scale(1,1);}
   }
   .mascot.sparkle{ animation:mascotSparkle .9s ease-in-out; }
   @keyframes mascotSparkle{
@@ -5829,7 +5853,7 @@ function mascotRoam(){
   const m = document.getElementById('mascot');
   if(!m || !document.body.classList.contains('quiz-active')) return;
   m.classList.remove('roam'); void m.offsetWidth; m.classList.add('roam');
-  setTimeout(() => m.classList.remove('roam'), 2400);
+  setTimeout(() => m.classList.remove('roam'), 1900);
 }
 /* Disparaît un instant puis réapparaît (façon "coucou"). */
 function mascotPeekaboo(){
@@ -5845,7 +5869,7 @@ function mascotSpin(){
   const m = document.getElementById('mascot');
   if(!m || !document.body.classList.contains('quiz-active')) return;
   m.classList.remove('spin'); void m.offsetWidth; m.classList.add('spin');
-  setTimeout(() => m.classList.remove('spin'), 1100);
+  setTimeout(() => m.classList.remove('spin'), 850);
 }
 function mascotCheer(){
   if(!document.body.classList.contains('quiz-active')) return;
@@ -5920,6 +5944,60 @@ let mascotCycleIntervalId = null;
 function stopMascotCycle(){
   if(mascotCycleIntervalId){ clearInterval(mascotCycleIntervalId); mascotCycleIntervalId = null; }
 }
+/* ⌨️ Effet machine à écrire professionnel sur le titre d'accueil : lettre après lettre, avec un
+   curseur clignotant qui suit puis s'efface en douceur une fois le texte complet affiché. Ne joue
+   qu'une seule fois par session (via le drapeau heroTitleTyped) — les re-rendus suivants de l'écran
+   d'accueil affichent directement le titre final, pour ne pas retaper à chaque navigation. */
+let heroTitleTyped = false;
+function typewriterHeroTitle(){
+  const el = document.getElementById('heroTitle');
+  if(!el || heroTitleTyped) return;
+  heroTitleTyped = true;
+  const segments = [
+    { text: 'Apprends avec ' },
+    { text: 'To3aylib', tag: true, cls: 'grad', id: 'heroNameMale', style: 'transition:opacity .6s ease;' },
+    { text: ' ' },
+    { text: '&', tag: true, cls: 'grad', style: 'opacity:0.5;' },
+    { text: ' ' },
+    { text: 'To3ayliba', tag: true, cls: 'grad', id: 'heroNameFemale', style: 'opacity:0.4;transition:opacity .6s ease;' },
+    { text: ' ' },
+    { text: '🦊', tag: true, cls: 'hero-fox-wiggle' },
+  ];
+  el.innerHTML = '<span class="type-cursor" id="heroTypeCursor"></span>';
+  const cursor = document.getElementById('heroTypeCursor');
+  let segIdx = 0, charIdx = 0;
+
+  function typeStep(){
+    if(!cursor || !cursor.isConnected) return; // l'écran a changé entre-temps
+    if(segIdx >= segments.length){
+      setTimeout(() => { cursor.classList.add('fading'); setTimeout(() => cursor.remove(), 550); }, 500);
+      return;
+    }
+    const seg = segments[segIdx];
+    if(seg.tag){
+      // Nom stylé ou emoji : révélé d'un coup pour un rendu net (pas lettre par lettre).
+      const span = document.createElement('span');
+      span.className = seg.cls;
+      if(seg.id) span.id = seg.id;
+      if(seg.style) span.setAttribute('style', seg.style);
+      span.textContent = seg.text;
+      el.insertBefore(span, cursor);
+      segIdx++; charIdx = 0;
+      setTimeout(typeStep, 90);
+      return;
+    }
+    if(charIdx < seg.text.length){
+      el.insertBefore(document.createTextNode(seg.text[charIdx]), cursor);
+      charIdx++;
+      setTimeout(typeStep, 30 + Math.random()*26); // cadence vive et légèrement irrégulière, effet "pro"
+    } else {
+      segIdx++; charIdx = 0;
+      setTimeout(typeStep, 45);
+    }
+  }
+  typeStep();
+}
+
 function startMascotCycle(){
   stopMascotCycle(); // jamais deux cycles en parallèle
   let showingFemale = false;
@@ -11928,7 +12006,7 @@ function renderBlockSelect(){
         </svg>
       </div>
       <div class="hero-badge">Français ↔ Arabe · ${WORDS.length} mots</div>
-      <div class="hero-title">Apprends avec <span class="grad" id="heroNameMale" style="transition:opacity .6s ease;">To3aylib</span> <span class="grad" style="opacity:0.5;">&amp;</span> <span class="grad" id="heroNameFemale" style="opacity:0.4;transition:opacity .6s ease;">To3ayliba</span> <span class="hero-fox-wiggle">🦊</span></div>
+      <div class="hero-title" id="heroTitle">Apprends avec <span class="grad" id="heroNameMale" style="transition:opacity .6s ease;">To3aylib</span> <span class="grad" style="opacity:0.5;">&amp;</span> <span class="grad" id="heroNameFemale" style="opacity:0.4;transition:opacity .6s ease;">To3ayliba</span> <span class="hero-fox-wiggle">🦊</span></div>
       <div class="hero-sub">${motto}</div>
       <button class="restart-btn" id="startNextBlockBtn" style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#F97316,#EA580C);border-color:#B45309;font-size:15px;padding:13px 30px;">▶ Commencer</button>
       <div id="resumeSessionSlot"></div>
@@ -12492,6 +12570,7 @@ function renderBlockSelect(){
     }
   });
   startMascotCycle();
+  typewriterHeroTitle();
 }
 
 function focusReveal(revealWrap){
@@ -31574,16 +31653,16 @@ setInterval(() => {
 
 // Encouragements et animations aléatoires de la mascotte pendant le jeu
 function scheduleMascotAntics(){
-  const delay = 3500 + Math.random() * 6000; // entre 3,5 et 9,5 secondes : la mascotte est bien plus vivante
+  const delay = 2400 + Math.random() * 4200; // entre 2,4 et 6,6 secondes : la mascotte ne reste jamais longtemps figée
   setTimeout(() => {
     if(document.body.classList.contains('quiz-active') && !ttsSpeaking){
       const r = Math.random();
-      if(r < 0.18) mascotDance();
-      else if(r < 0.36) mascotRoam();
-      else if(r < 0.52) mascotPeekaboo();
-      else if(r < 0.66) mascotSpin();
-      else if(r < 0.80) mascotSparkle();
-      else if(r < 0.94) mascotCheer();
+      if(r < 0.14) mascotDance();
+      else if(r < 0.40) mascotRoam();      // flip 3D (rotateY) + déplacement latéral
+      else if(r < 0.56) mascotPeekaboo();
+      else if(r < 0.80) mascotSpin();      // flip 3D (rotateY) sur place, rapide
+      else if(r < 0.90) mascotSparkle();
+      else if(r < 0.97) mascotCheer();
       else mascotWave();
     }
     scheduleMascotAntics();
