@@ -2578,23 +2578,48 @@ function grantStreakFreezeIfMilestone(streak){
 const QUEST_PASS_GOAL_DEFAULT = 2;     // 2 leçons ≥90%
 const QUEST_LESSON_GOAL_DEFAULT = 1;   // 1 leçon
 const QUEST_SETTINGS_KEY = 'lexiqueQuiz::questSettings';
+/* ============ 🗂️ Registre central des sections de fiches ============
+   Source unique de vérité pour tout module basé sur PRACTICAL_SHEETS (+ Bouquinage, à part).
+   Pour ajouter un futur module au système de défis du jour et aux réglages, il suffit d'ajouter
+   UNE entrée ici — rien à toucher ailleurs (getDailyQuests, renderQuestSettings s'adaptent seuls). */
+const SHEET_SECTIONS = [
+  { key: 'bouquinage', icon: '📖', defaultGoal: 1, count: () => countTodayBouquinageRead(), settingLabel: 'Textes à lire en Bouquinage', questLabel: (g) => `Lis ${g} texte${g>1?'s':''} en Bouquinage` },
+  { key: 'pratique', icon: '📎', defaultGoal: 1, count: () => countTodayPassedInSection('pratique'), settingLabel: 'Fiches pratiques à terminer', questLabel: (g) => `Termine ${g} fiche${g>1?'s':''} pratique${g>1?'s':''}` },
+  { key: 'atelier', icon: '🏛️', defaultGoal: 1, count: () => countTodayPassedInSection('atelier'), settingLabel: "Fiches d'Atelier Français à terminer", questLabel: (g) => `Termine ${g} fiche${g>1?'s':''} d'Atelier Français` },
+  { key: 'conjugaison', icon: '🔤', defaultGoal: 0, count: () => countTodayPassedInSection('conjugaison'), settingLabel: 'Fiches de Conjugaison à terminer', questLabel: (g) => `Termine ${g} fiche${g>1?'s':''} de Conjugaison` },
+  { key: 'avance', icon: '🎓', defaultGoal: 0, count: () => countTodayPassedInSection('avance'), settingLabel: 'Fiches de Grammaire Avancée à terminer', questLabel: (g) => `Termine ${g} fiche${g>1?'s':''} de Grammaire Avancée` },
+  { key: 'oratoire', icon: '🎤', defaultGoal: 0, count: () => countTodayPassedInSection('oratoire'), settingLabel: "Fiches d'Art Oratoire à terminer", questLabel: (g) => `Termine ${g} fiche${g>1?'s':''} d'Art Oratoire` },
+  { key: 'situations', icon: '💬', defaultGoal: 0, count: () => countTodayPassedInSection('situations'), settingLabel: 'Fiches Expressions B2-C1 à terminer', questLabel: (g) => `Termine ${g} fiche${g>1?'s':''} Expressions B2-C1` },
+];
+function defaultSectionGoals(){
+  const g = {};
+  SHEET_SECTIONS.forEach(sec => { g[sec.key] = sec.defaultGoal; });
+  return g;
+}
 function loadQuestSettings(){
   try{
     const raw = localStorage.getItem(nsKey(QUEST_SETTINGS_KEY));
     const s = raw ? JSON.parse(raw) : {};
+    const sectionGoals = {};
+    SHEET_SECTIONS.forEach(sec => {
+      // Migration douce : reprend l'ancien champ nommé (ex. ficheGoal) s'il existe encore dans une
+      // sauvegarde antérieure, sinon la nouvelle clé dynamique, sinon la valeur par défaut du module.
+      const legacyKey = sec.key + 'Goal';
+      if(s.sectionGoals && s.sectionGoals[sec.key] !== undefined){ sectionGoals[sec.key] = s.sectionGoals[sec.key]; }
+      else if(s[legacyKey] !== undefined){ sectionGoals[sec.key] = s[legacyKey]; }
+      else { sectionGoals[sec.key] = sec.defaultGoal; }
+    });
     return {
       timeGoalMin: s.timeGoalMin || 5,
       passGoal: s.passGoal || QUEST_PASS_GOAL_DEFAULT,
       lessonGoal: s.lessonGoal || QUEST_LESSON_GOAL_DEFAULT,
       modesGoal: s.modesGoal || 0, // 0 = défi désactivé
       fullMasteryGoal: s.fullMasteryGoal !== undefined ? s.fullMasteryGoal : 7, // 0 = défi désactivé
-      // 🎯 Objectifs configurables par section — 0 = section non exigée aujourd'hui.
-      bouquinageGoal: s.bouquinageGoal !== undefined ? s.bouquinageGoal : 1,
-      ficheGoal: s.ficheGoal !== undefined ? s.ficheGoal : 1,
-      atelierGoal: s.atelierGoal !== undefined ? s.atelierGoal : 1,
-      avanceGoal: s.avanceGoal !== undefined ? s.avanceGoal : 0,
+      sectionGoals, // 🎯 objectifs par section, 0 = section non exigée aujourd'hui
     };
-  }catch(e){ return { timeGoalMin:5, passGoal:QUEST_PASS_GOAL_DEFAULT, lessonGoal:QUEST_LESSON_GOAL_DEFAULT, modesGoal:0, fullMasteryGoal:7, bouquinageGoal:1, ficheGoal:1, atelierGoal:1, avanceGoal:0 }; }
+  }catch(e){
+    return { timeGoalMin:5, passGoal:QUEST_PASS_GOAL_DEFAULT, lessonGoal:QUEST_LESSON_GOAL_DEFAULT, modesGoal:0, fullMasteryGoal:7, sectionGoals: defaultSectionGoals() };
+  }
 }
 function saveQuestSettings(){ try{ localStorage.setItem(nsKey(QUEST_SETTINGS_KEY), JSON.stringify(questSettings)); }catch(e){} }
 let questSettings = loadQuestSettings();
@@ -2679,23 +2704,15 @@ function getDailyQuests(){
     { icon:'🏆', label:`Réussis 90%+ dans ${questSettings.passGoal} bloc${questSettings.passGoal>1?'s':''}`, cur:Math.min(s.passed, questSettings.passGoal), goal:questSettings.passGoal },
     { icon:'⚖️', label:'Touche à 2 matières différentes (vocabulaire, conjugaison, grammaire, orthographe)', cur:Math.min(Object.keys(s.bySubject || {}).length, 2), goal:2 },
   ];
-  // 🎯 Objectifs configurables par section — chacun réglable (ou désactivable à 0) dans les réglages.
-  if(questSettings.bouquinageGoal > 0){
-    const n = countTodayBouquinageRead();
-    quests.push({ icon:'📖', label:`Lis ${questSettings.bouquinageGoal} texte${questSettings.bouquinageGoal>1?'s':''} en Bouquinage`, cur:Math.min(n, questSettings.bouquinageGoal), goal:questSettings.bouquinageGoal });
-  }
-  if(questSettings.ficheGoal > 0){
-    const n = countTodayPassedInSection('pratique');
-    quests.push({ icon:'📎', label:`Termine ${questSettings.ficheGoal} fiche${questSettings.ficheGoal>1?'s':''} pratique${questSettings.ficheGoal>1?'s':''}`, cur:Math.min(n, questSettings.ficheGoal), goal:questSettings.ficheGoal });
-  }
-  if(questSettings.atelierGoal > 0){
-    const n = countTodayPassedInSection('atelier');
-    quests.push({ icon:'🏛️', label:`Termine ${questSettings.atelierGoal} fiche${questSettings.atelierGoal>1?'s':''} d'Atelier Français`, cur:Math.min(n, questSettings.atelierGoal), goal:questSettings.atelierGoal });
-  }
-  if(questSettings.avanceGoal > 0){
-    const n = countTodayPassedInSection('avance');
-    quests.push({ icon:'🎓', label:`Termine ${questSettings.avanceGoal} fiche${questSettings.avanceGoal>1?'s':''} de Grammaire Avancée`, cur:Math.min(n, questSettings.avanceGoal), goal:questSettings.avanceGoal });
-  }
+  // 🎯 Objectifs configurables par section — dynamique via le registre SHEET_SECTIONS : un futur
+  // module ajouté à ce registre apparaît ici automatiquement, sans autre modification.
+  SHEET_SECTIONS.forEach(sec => {
+    const goal = questSettings.sectionGoals[sec.key] ?? sec.defaultGoal;
+    if(goal > 0){
+      const n = sec.count();
+      quests.push({ icon: sec.icon, label: sec.questLabel(goal), cur: Math.min(n, goal), goal });
+    }
+  });
   if(questSettings.modesGoal > 0){
     const modesCount = (s.modesPlayed || []).length;
     quests.push({ icon:'🎭', label:`Complète ${questSettings.modesGoal} modes différents`, cur:Math.min(modesCount, questSettings.modesGoal), goal:questSettings.modesGoal });
@@ -6476,22 +6493,12 @@ function renderQuestSettings(){
 
     <div class="cat-tag" style="margin-top:18px;">🎯 Objectifs par section (0 = pas exigé aujourd'hui)</div>
     <div class="pm-summary" style="margin-top:8px;">
+      ${SHEET_SECTIONS.map(sec => `
       <div class="pm-row" style="flex-direction:column;align-items:flex-start;gap:8px;">
-        <span>📖 Textes à lire en Bouquinage</span>
-        <input type="number" id="qsBouquinage" class="search-input" min="0" max="20" value="${questSettings.bouquinageGoal}" style="max-width:120px;">
+        <span>${sec.icon} ${sec.settingLabel}</span>
+        <input type="number" id="qsSection-${sec.key}" class="search-input" min="0" max="20" value="${questSettings.sectionGoals[sec.key] ?? sec.defaultGoal}" style="max-width:120px;">
       </div>
-      <div class="pm-row" style="flex-direction:column;align-items:flex-start;gap:8px;">
-        <span>📎 Fiches pratiques à terminer</span>
-        <input type="number" id="qsFiche" class="search-input" min="0" max="20" value="${questSettings.ficheGoal}" style="max-width:120px;">
-      </div>
-      <div class="pm-row" style="flex-direction:column;align-items:flex-start;gap:8px;">
-        <span>🏛️ Fiches d'Atelier Français à terminer</span>
-        <input type="number" id="qsAtelier" class="search-input" min="0" max="20" value="${questSettings.atelierGoal}" style="max-width:120px;">
-      </div>
-      <div class="pm-row" style="flex-direction:column;align-items:flex-start;gap:8px;">
-        <span>🎓 Fiches de Grammaire Avancée à terminer</span>
-        <input type="number" id="qsAvance" class="search-input" min="0" max="20" value="${questSettings.avanceGoal}" style="max-width:120px;">
-      </div>
+      `).join('')}
     </div>
 
     <div style="display:flex;gap:12px;justify-content:center;margin-top:20px;flex-wrap:wrap;">
@@ -6506,18 +6513,19 @@ function renderQuestSettings(){
     const pass = Math.max(1, parseInt(document.getElementById('qsPass').value, 10) || 2);
     const modes = Math.max(0, parseInt(document.getElementById('qsModes').value, 10) || 0);
     const fullMastery = Math.max(0, parseInt(document.getElementById('qsFullMastery').value, 10) || 0);
-    const bouquinage = Math.max(0, parseInt(document.getElementById('qsBouquinage').value, 10) || 0);
-    const fiche = Math.max(0, parseInt(document.getElementById('qsFiche').value, 10) || 0);
-    const atelier = Math.max(0, parseInt(document.getElementById('qsAtelier').value, 10) || 0);
-    const avance = Math.max(0, parseInt(document.getElementById('qsAvance').value, 10) || 0);
-    questSettings = { lessonGoal: lesson, timeGoalMin: time, passGoal: pass, modesGoal: modes, fullMasteryGoal: fullMastery, bouquinageGoal: bouquinage, ficheGoal: fiche, atelierGoal: atelier, avanceGoal: avance };
+    const sectionGoals = {};
+    SHEET_SECTIONS.forEach(sec => {
+      const el = document.getElementById(`qsSection-${sec.key}`);
+      sectionGoals[sec.key] = Math.max(0, parseInt(el.value, 10) || 0);
+    });
+    questSettings = { lessonGoal: lesson, timeGoalMin: time, passGoal: pass, modesGoal: modes, fullMasteryGoal: fullMastery, sectionGoals };
     saveQuestSettings();
     cloudAutoPush();
     setStatus('🎯 Objectifs mis à jour !', 'ok');
     renderBlockSelect();
   });
   document.getElementById('qsResetBtn').addEventListener('click', () => {
-    questSettings = { lessonGoal: QUEST_LESSON_GOAL_DEFAULT, timeGoalMin: 5, passGoal: QUEST_PASS_GOAL_DEFAULT, modesGoal: 0, fullMasteryGoal: 7, bouquinageGoal: 1, ficheGoal: 1, atelierGoal: 1, avanceGoal: 0 };
+    questSettings = { lessonGoal: QUEST_LESSON_GOAL_DEFAULT, timeGoalMin: 5, passGoal: QUEST_PASS_GOAL_DEFAULT, modesGoal: 0, fullMasteryGoal: 7, sectionGoals: defaultSectionGoals() };
     saveQuestSettings();
     cloudAutoPush();
     renderQuestSettings();
@@ -11116,7 +11124,7 @@ function renderProgress(){
 }
 
 function normalizeForSearch(s){
-  return String(s).toLowerCase()
+  return String(s).trim().toLowerCase()
     .normalize('NFD').replace(/[\u0300-\u036f]/g, ''); // strip accents for FR search
 }
 
@@ -28268,6 +28276,86 @@ const PRACTICAL_SHEETS = [
     ],
     note: "Astuce pour distinguer 2e et 3e groupe en -ir : dites « nous » au présent. Nous finissons (2e groupe) vs nous partons (3e groupe, pas de -iss-).",
   },
+  // ============ 🎓 TCF — Expression écrite et orale ============
+  {
+    id: 'tcf-expression-ecrite',
+    section: 'situations',
+    category: 'Préparation au TCF',
+    icon: '✍️',
+    title: 'TCF — Réussir l\'expression écrite',
+    intro: "Les 3 tâches de l'épreuve, avec les repères de longueur et les critères d'évaluation.",
+    type: 'rule',
+    blocks: [
+      { heading: 'Tâche 1 — Message (60 à 120 mots)', text: "Décrire, raconter, inviter, s'excuser à un ami, un voisin, un collègue.", examples: ["Ex. : inviter à un dîner (date, heure, adresse, demander d'apporter quelque chose)"] },
+      { heading: 'Tâche 2 — Article, courrier, compte rendu (120 à 150 mots)', text: "Raconter une expérience, donner son avis, pour un blog, un journal ou un forum.", examples: ["Ex. : répondre sur un forum — appli ou professeur pour apprendre une langue ?"] },
+      { heading: 'Tâche 3 — Comparer deux points de vue (120 à 180 mots)', text: "Partie 1 (40-60 mots) : présenter le thème et les deux points de vue avec ses propres mots. Partie 2 (80-120 mots) : donner son opinion et la justifier." },
+      { heading: 'Critères d\'évaluation', text: "Respect de la consigne et du nombre de mots · cohérence et connecteurs (d'abord, ensuite, cependant, donc, en conclusion) · richesse du vocabulaire · correction grammaticale · adaptation au destinataire (tu/vous, formules d'ouverture et de clôture)." },
+    ],
+    note: "Trop court ou trop long, c'est pénalisé : vise le milieu de la fourchette annoncée.",
+  },
+  {
+    id: 'tcf-sujets-ecrite',
+    section: 'situations',
+    category: 'Préparation au TCF',
+    icon: '📝',
+    title: 'TCF — Sujets d\'entraînement à l\'écrit',
+    intro: "Des sujets classés par tâche pour s'entraîner.",
+    type: 'rule',
+    blocks: [
+      { heading: 'Tâche 1 — Message', text: "", examples: [
+        "Invite un(e) ami(e) à un dîner samedi soir : date, heure, adresse, demande d'apporter quelque chose.",
+        "Excuse-toi auprès d'un collègue pour un rendez-vous manqué et propose une autre date.",
+        "Décris ton nouvel appartement et ton quartier à un(e) ami(e).",
+      ] },
+      { heading: 'Tâche 2 — Article, courrier', text: "", examples: [
+        "Raconte une fête traditionnelle de ton pays pour un blog de voyageurs.",
+        "Réponds sur un forum : faut-il apprendre une langue avec une appli ou un professeur ?",
+        "Écris la critique d'un film ou d'un livre qui t'a marqué.",
+      ] },
+      { heading: 'Tâche 3 — Comparer deux points de vue', text: "", examples: [
+        "Faut-il interdire les téléphones portables à l'école ?",
+        "Le télétravail : liberté ou isolement ?",
+        "Faut-il rendre les transports en commun gratuits ?",
+        "Les voyages en avion doivent-ils être limités pour protéger le climat ?",
+      ] },
+    ],
+  },
+  {
+    id: 'tcf-expression-orale',
+    section: 'situations',
+    category: 'Préparation au TCF',
+    icon: '🎤',
+    title: 'TCF — Réussir l\'expression orale',
+    intro: "Les 3 tâches face à un examinateur, avec un plan conseillé pour la tâche 3.",
+    type: 'rule',
+    blocks: [
+      { heading: 'Tâche 1 — Entretien dirigé', text: "L'examinateur pose des questions sur toi : présentation, ville, travail, pourquoi le français, loisirs, famille, projets. Prépare une présentation de 1-2 minutes, mais sans l'apprendre mot à mot." },
+      { heading: 'Tâche 2 — Obtenir des informations', text: "Une situation t'est donnée ; tu poses les questions à l'examinateur, qui joue un rôle. Varie la forme : Est-ce que... ? / Quel est... ? / Pourriez-vous me dire... ? Réagis aux réponses (D'accord, et... / Ah bon ? Pourquoi ?)." },
+      { heading: 'Tâche 3 — Exprimer un point de vue', text: "Plan conseillé : 1. Introduction (reformule le sujet, annonce ton opinion). 2. Deux ou trois arguments, chacun avec un exemple. 3. Nuance (Certes... mais... / Il est vrai que... cependant...). 4. Conclusion." },
+    ],
+  },
+  {
+    id: 'tcf-sujets-orale',
+    section: 'situations',
+    category: 'Préparation au TCF',
+    icon: '🗣️',
+    title: 'TCF — Sujets d\'entraînement à l\'oral',
+    intro: "Des situations et sujets pour s'entraîner aux tâches 2 et 3.",
+    type: 'rule',
+    blocks: [
+      { heading: 'Tâche 2 — Situations', text: "", examples: [
+        "Tu veux t'inscrire dans une salle de sport : horaires, prix, activités, conditions.",
+        "Tu cherches un appartement : loyer, charges, quartier, disponibilité, visite.",
+        "Tu organises un week-end avec un ami : destination, transport, budget, logement.",
+      ] },
+      { heading: 'Tâche 3 — Sujets d\'opinion', text: "", examples: [
+        "Les réseaux sociaux rapprochent-ils ou éloignent-ils les gens ?",
+        "Vaut-il mieux vivre en ville ou à la campagne ?",
+        "Faut-il apprendre plusieurs langues étrangères dès le plus jeune âge ?",
+        "Le travail est-il la chose la plus importante dans la vie ?",
+      ] },
+    ],
+  },
 ];
 function renderSheetsHomeBySection(section, catTag, heroTitle, heroSubtitle){
   clearQuestionTimer();
@@ -28405,6 +28493,9 @@ function renderJeuxMotsHome(){
       <button class="restart-btn" id="goTexteATrousBtn" style="background:linear-gradient(135deg,#6366F1,#4F46E5);box-shadow:0 4px 0 #3730A3;">📝 Textes à trous</button>
       <button class="restart-btn" id="goQCMFinalBtn" style="background:linear-gradient(135deg,#78716C,#57534E);box-shadow:0 4px 0 #44403C;">🏁 QCM final</button>
       <button class="restart-btn" id="goConjugueBtn" style="background:linear-gradient(135deg,#059669,#047857);box-shadow:0 4px 0 #065F46;">🎯 Conjugue !</button>
+      <button class="restart-btn" id="goTcfStructBtn" style="background:linear-gradient(135deg,#DB2777,#BE185D);box-shadow:0 4px 0 #9D174D;">🎓 TCF — Structures</button>
+      <button class="restart-btn" id="goTcfOralBtn" style="background:linear-gradient(135deg,#7C3AED,#6D28D9);box-shadow:0 4px 0 #5B21B6;">🎧 TCF — Oral</button>
+      <button class="restart-btn" id="goTcfEcritBtn" style="background:linear-gradient(135deg,#2563EB,#1D4ED8);box-shadow:0 4px 0 #1E40AF;">📄 TCF — Écrit</button>
     </div>
   `;
   document.getElementById('backFromJeuxBtn').addEventListener('click', renderBlockSelect);
@@ -28416,6 +28507,9 @@ function renderJeuxMotsHome(){
   document.getElementById('goTexteATrousBtn').addEventListener('click', () => renderTexteATrous(0));
   document.getElementById('goQCMFinalBtn').addEventListener('click', () => renderQCMFinal(0));
   document.getElementById('goConjugueBtn').addEventListener('click', () => renderConjugueGame());
+  document.getElementById('goTcfStructBtn').addEventListener('click', () => renderTCFQuiz('structures', 0));
+  document.getElementById('goTcfOralBtn').addEventListener('click', () => renderTCFQuiz('oral', 0));
+  document.getElementById('goTcfEcritBtn').addEventListener('click', () => renderTCFQuiz('ecrit', 0));
 }
 
 /* --- 🔍 Mots mêlés : clique la première lettre d'un mot, puis sa dernière lettre. --- */
@@ -28424,7 +28518,7 @@ function renderMotsMeles(puzzleIdx){
   clearQuestionTimer();
   document.body.classList.add('quiz-active');
   isHomeScreen = false;
-  wordSearchState = { puzzleIdx, found: [], selection: [], startTime: Date.now() };
+  wordSearchState = { puzzleIdx, found: [], selection: [], startTime: Date.now(), zoom: 1, showWords: false };
   renderWordSearchCard();
 }
 function renderWordSearchCard(){
@@ -28435,27 +28529,42 @@ function renderWordSearchCard(){
   document.getElementById('footerNote').textContent = `${st.found.length}/${puzzle.words.length} mots trouvés`;
   const allFound = st.found.length === puzzle.words.length;
   const card = document.getElementById('quizCard');
+  const nCols = puzzle.grid[0].length;
+  const baseCellSize = nCols > 10 ? 32 : 38;
+  const cellSize = Math.round(baseCellSize * st.zoom);
   card.innerHTML = `
     <div class="cat-tag">🔍 Mots mêlés</div>
     <div class="word-fr" style="font-size:clamp(17px,4vw,21px);">${escapeHtml(puzzle.title)}</div>
-    <div class="word-def" style="margin-top:4px;font-size:12.5px;">Clique la 1<sup>re</sup> lettre d'un mot, puis sa dernière lettre (horizontal, vertical ou diagonal).</div>
-    <div style="overflow-x:auto;margin:16px 0;display:flex;justify-content:center;">
-      <div id="wsGrid" style="display:inline-grid;grid-template-columns:repeat(${puzzle.grid[0].length}, 26px);gap:2px;background:var(--border);padding:3px;border-radius:8px;">
+    <div class="word-def" style="margin-top:4px;font-size:13px;">
+      ${st.selection.length === 1 ? '👉 Touche maintenant la <b>dernière</b> lettre du mot.' : '👉 Touche la <b>première</b> lettre d\'un mot (horizontal, vertical ou diagonal).'}
+    </div>
+    <div style="display:flex;gap:8px;justify-content:center;margin:10px 0;">
+      <button class="mode-chip" id="wsZoomOutBtn" ${st.zoom <= 0.6 ? 'disabled' : ''}>➖ Dézoomer</button>
+      <button class="mode-chip" id="wsZoomInBtn" ${st.zoom >= 1.8 ? 'disabled' : ''}>➕ Zoomer</button>
+    </div>
+    <div style="overflow:auto;margin:16px 0;display:flex;justify-content:center;-webkit-overflow-scrolling:touch;max-height:60vh;">
+      <div id="wsGrid" style="display:inline-grid;grid-template-columns:repeat(${nCols}, ${cellSize}px);gap:3px;background:var(--border);padding:4px;border-radius:10px;touch-action:manipulation;user-select:none;-webkit-user-select:none;">
         ${puzzle.grid.map((row,r) => row.map((letter,c) => {
           const foundEntry = st.found.find(w => w.cells.some(cell => cell.r===r && cell.c===c));
           const selected = st.selection.some(s => s.r===r && s.c===c);
           const bg = foundEntry ? '#16A34A' : selected ? 'var(--purple)' : 'var(--surface)';
           const col = foundEntry || selected ? '#fff' : 'var(--text)';
-          return `<button class="ws-cell" data-r="${r}" data-c="${c}" style="width:26px;height:26px;font-size:12px;font-weight:800;border:none;border-radius:4px;cursor:pointer;background:${bg};color:${col};padding:0;">${letter}</button>`;
+          return `<button type="button" class="ws-cell" data-r="${r}" data-c="${c}" style="width:${cellSize}px;height:${cellSize}px;font-size:${Math.round(cellSize*0.4)}px;font-weight:800;border:none;border-radius:6px;cursor:pointer;background:${bg};color:${col};padding:0;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">${letter}</button>`;
         }).join('')).join('')}
       </div>
     </div>
+    ${st.selection.length === 1 ? `<div style="text-align:center;margin-bottom:8px;"><button class="mode-chip" id="wsCancelBtn">✕ Annuler ma sélection</button></div>` : ''}
+    <div style="text-align:center;">
+      <button class="mode-chip" id="wsToggleWordsBtn" style="margin-bottom:8px;">${st.showWords ? '🙈 Masquer les mots' : `👁️ Voir les ${puzzle.words.length} mots à trouver`}</button>
+    </div>
+    ${st.showWords ? `
     <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;">
       ${puzzle.words.map(w => {
         const isFound = st.found.some(f => f.word === w);
         return `<span class="mode-chip" style="${isFound ? 'background:#16A34A;color:#fff;text-decoration:line-through;' : ''}">${escapeHtml(w)}</span>`;
       }).join('')}
     </div>
+    ` : ''}
     ${allFound ? `
       <div style="margin-top:20px;text-align:center;">
         <div style="font-size:40px;">🎉</div>
@@ -28466,10 +28575,15 @@ function renderWordSearchCard(){
   `;
   document.getElementById('backFromWSBtn').addEventListener('click', renderJeuxMotsHome);
   card.querySelectorAll('.ws-cell').forEach(btn => {
-    btn.addEventListener('click', () => wsHandleCellClick(parseInt(btn.dataset.r,10), parseInt(btn.dataset.c,10)));
+    btn.addEventListener('click', (e) => { e.preventDefault(); wsHandleCellClick(parseInt(btn.dataset.r,10), parseInt(btn.dataset.c,10)); });
   });
+  const cancelBtn = document.getElementById('wsCancelBtn');
+  if(cancelBtn) cancelBtn.addEventListener('click', () => { st.selection = []; renderWordSearchCard(); });
   const restartBtn = document.getElementById('wsRestartBtn');
   if(restartBtn) restartBtn.addEventListener('click', () => renderMotsMeles(st.puzzleIdx));
+  document.getElementById('wsZoomInBtn').addEventListener('click', () => { st.zoom = Math.min(1.8, +(st.zoom + 0.2).toFixed(2)); renderWordSearchCard(); });
+  document.getElementById('wsZoomOutBtn').addEventListener('click', () => { st.zoom = Math.max(0.6, +(st.zoom - 0.2).toFixed(2)); renderWordSearchCard(); });
+  document.getElementById('wsToggleWordsBtn').addEventListener('click', () => { st.showWords = !st.showWords; renderWordSearchCard(); });
   if(allFound){
     recordDailyActivity();
     recordDailyStats(computeActiveDurationSec(st.startTime), true, 0, 'jeuxmots');
@@ -28523,9 +28637,9 @@ function renderAnagrammeCard(){
   card.innerHTML = `
     <div class="cat-tag">🔤 Anagrammes</div>
     <div class="word-def">Avec les mêmes lettres, trouve un autre mot :</div>
-    <div class="word-fr" style="font-size:clamp(26px,7vw,38px);letter-spacing:4px;margin:14px 0;">${escapeHtml(item.scrambled)}</div>
+    <div class="word-fr" style="font-size:clamp(26px,7vw,38px);letter-spacing:4px;margin:14px 0;${st.correct ? 'color:#16A34A;' : ''}">${escapeHtml(item.scrambled)}</div>
     <div class="word-def">💡 Indice : ${escapeHtml(item.hint)}</div>
-    <input type="text" id="anagInput" class="search-input" placeholder="Ta réponse..." style="max-width:220px;margin:14px auto 0;display:block;text-align:center;font-size:16px;" ${st.revealed ? 'disabled' : ''}>
+    <input type="text" id="anagInput" class="search-input" placeholder="Ta réponse..." style="max-width:220px;margin:14px auto 0;display:block;text-align:center;font-size:16px;${st.correct ? 'border-color:#16A34A;background:rgba(22,163,74,0.08);color:#16A34A;font-weight:700;' : ''}" ${st.revealed ? 'disabled' : ''}>
     <div id="anagFeedback" style="min-height:24px;font-weight:700;margin-top:8px;">${st.revealed ? `La réponse était : <span style="color:var(--purple);">${escapeHtml(item.answer)}</span>` : ''}</div>
     <div style="display:flex;gap:10px;justify-content:center;margin-top:10px;">
       ${!st.revealed ? `<button class="restart-btn" id="anagCheckBtn">✓ Vérifier</button><button class="restart-btn" id="anagRevealBtn" style="background:var(--surface-sunken);border:1px solid var(--border);color:var(--text);box-shadow:none;">👁️ Révéler</button>` : `<button class="restart-btn" id="anagNextBtn">${st.idx+1 < ANAGRAMMES.length ? 'Suivant →' : 'Terminer'}</button>`}
@@ -28536,11 +28650,13 @@ function renderAnagrammeCard(){
   const feedback = document.getElementById('anagFeedback');
   const check = () => {
     if(normalizeForSearch(input.value) === normalizeForSearch(item.answer)){
+      playCorrectSound();
       feedback.innerHTML = '✅ Bravo !';
       feedback.style.color = '#16A34A';
       st.revealed = true; st.correct = true;
       renderAnagrammeCard();
     } else {
+      playWrongSound();
       feedback.textContent = '❌ Pas encore, réessaie.';
       feedback.style.color = '#DC2626';
     }
@@ -28993,6 +29109,136 @@ function renderConjugueResult(){
   document.getElementById('backFromCGResBtn').addEventListener('click', renderJeuxMotsHome);
   document.getElementById('cgRestartBtn').addEventListener('click', renderConjugueGame);
 }
+
+/* ============ 🎓 PRÉPARATION AU TCF — trois épreuves QCM interactives ============ */
+const TCF_STRUCTURES = [
+  { level: 'A1', question: "Je ___ étudiant en informatique.", options: ['suis','ai','es','est'], correctIdx: 0 },
+  { level: 'A1', question: "Hier, nous ___ au cinéma.", options: ['allons','sommes allés','avons allé','irons'], correctIdx: 1 },
+  { level: 'A1', question: "Il n'y a plus ___ lait dans le frigo.", options: ['du','le','de','des'], correctIdx: 2 },
+  { level: 'A2', question: "C'est la collègue ___ je t'ai parlé.", options: ['que','qui','où','dont'], correctIdx: 3 },
+  { level: 'A2', question: "Tu as vu Paul ? — Oui, je ___ ai parlé hier.", options: ["l'",'lui','le','y'], correctIdx: 1 },
+  { level: 'A2', question: "Elle chante ___ que son frère.", options: ['meilleur','mieux','plus bien','bonne'], correctIdx: 1 },
+  { level: 'B1', question: "Si j'avais le temps, je ___ davantage.", options: ['lis','lirai','lirais','lise'], correctIdx: 2 },
+  { level: 'B1', question: "Il faut que tu ___ à l'heure demain.", options: ['viens','viennes','viendras','venir'], correctIdx: 1 },
+  { level: 'B1', question: "Je pense souvent ___ mes vacances au Maroc.", options: ['de','à','en','sur'], correctIdx: 1 },
+  { level: 'B1', question: "Quand il ___, nous passerons à table.", options: ['arrive','arriverait','arrivera','arrivait'], correctIdx: 2 },
+  { level: 'B1', question: "Il m'a demandé ___ je voulais pour mon anniversaire.", options: ['que','ce que',"qu'",'si que'], correctIdx: 1 },
+  { level: 'B2', question: "Les lettres qu'il a ___ sont enfin arrivées.", options: ['écrit','écrits','écrite','écrites'], correctIdx: 3 },
+  { level: 'B2', question: "___ il pleuve, nous sortirons quand même.", options: ["Bien qu'","Parce qu'","Puisqu'","Dès qu'"], correctIdx: 0 },
+  { level: 'B2', question: "___ la pluie, le match a eu lieu.", options: ['Malgré','Bien que','Grâce à','Puisque'], correctIdx: 0 },
+  { level: 'B2', question: "Le projet ___ par la direction la semaine dernière.", options: ['a validé','est validé','validait','a été validé'], correctIdx: 3 },
+  { level: 'C1', question: "Il aurait fallu qu'il ___ plus tôt.", options: ['part','partait','soit parti','partira'], correctIdx: 2 },
+  { level: 'C1', question: "Quoi qu'il en ___, nous maintenons notre décision.", options: ['est','soit','sera','serait'], correctIdx: 1 },
+  { level: 'C1', question: "À peine ___ arrivé qu'il repartit.", options: ['était-il','est-il','a-t-il','fut-il'], correctIdx: 3 },
+];
+
+const TCF_ORAL = [
+  { level: 'A1', audio: "Bonjour, je voudrais un café et un croissant, s'il vous plaît.", question: "Où est la personne ?", options: ['À la gare.','Au café.','À la banque.','À la pharmacie.'], correctIdx: 1 },
+  { level: 'A1', audio: "Mesdames et messieurs, le train à destination de Lyon partira du quai 7 à 14 h 20.", question: "À quelle heure part le train ?", options: ['À 7 h.','À 14 h.','À 14 h 20.','À 7 h 20.'], correctIdx: 2 },
+  { level: 'A1', audio: "Tu viens avec nous ce soir ? Non, désolée, je suis un peu malade. Je reste à la maison.", question: "Que fait la personne ce soir ?", options: ['Elle reste chez elle.','Elle sort avec des amis.','Elle va chez le médecin.','Elle travaille.'], correctIdx: 0 },
+  { level: 'A2', audio: "Bonjour Madame Alami, c'est le garage Dupuis. Votre voiture est prête. Vous pouvez venir la chercher demain à partir de 9 heures. Attention, le garage est fermé le samedi. Bonne journée !", question: "Quand Mme Alami peut-elle récupérer sa voiture ?", options: ["Aujourd'hui.",'Samedi.','Lundi.','Demain matin.'], correctIdx: 3 },
+  { level: 'A2', audio: "Bonjour, je voudrais échanger ce pull, il est trop petit. Vous avez le ticket de caisse ? Oui, le voici. Alors pas de problème, vous pouvez prendre la taille au-dessus.", question: "Pourquoi le client est-il venu au magasin ?", options: ['Pour se faire rembourser.','Pour acheter un cadeau.','Pour changer la taille.',"Pour se plaindre."], correctIdx: 2 },
+  { level: 'A2', audio: "La bibliothèque municipale sera fermée du 1er au 15 août pour travaux. Pendant cette période, vous pourrez rendre vos livres dans la boîte située à l'entrée.", question: "Que peut-on faire pendant la fermeture ?", options: ['Rendre des livres.','Emprunter des livres.','Travailler sur place.',"S'inscrire."], correctIdx: 0 },
+  { level: 'B1', audio: "Selon une enquête récente, de plus en plus de Français vont travailler à vélo. Dans les grandes villes, leur nombre a doublé en cinq ans, notamment grâce aux nouvelles pistes cyclables. Mais à la campagne, la voiture reste indispensable.", question: "Qu'apprend-on dans ce reportage ?", options: ['Le vélo remplace la voiture partout.', "L'usage du vélo augmente surtout dans les grandes villes.","Les pistes cyclables sont dangereuses.","Les Français n'aiment pas le vélo."], correctIdx: 1 },
+  { level: 'B1', audio: "Alors, ton nouveau poste, ça se passe bien ? Le travail est intéressant et l'équipe est sympa, mais je passe deux heures par jour dans les transports. Je commence à penser à déménager.", question: "Quel est le problème de la femme ?", options: ['Le travail est ennuyeux.','Le salaire est trop bas.','Les collègues sont désagréables.','Le trajet est trop long.'], correctIdx: 3 },
+  { level: 'B1', audio: "Bonne nouvelle pour les amateurs d'art : le musée propose désormais des visites nocturnes tous les jeudis jusqu'à 22 heures. L'entrée reste gratuite pour les moins de 26 ans.", question: "Quelle est la nouveauté proposée ?", options: ['Une ouverture le soir.', "L'entrée gratuite pour tous.", 'Une fermeture le jeudi.', 'De nouvelles salles.'], correctIdx: 0 },
+  { level: 'B2', audio: "On nous répète qu'il faut ralentir, déconnecter, prendre le temps. Pourtant, les applications de méditation, censées nous apaiser, nous envoient des notifications toute la journée. Beau paradoxe : nous voilà pressés d'être zen.", question: "Sur quel ton cette chronique est-elle construite ?", options: ['Ironique.','Enthousiaste.','Neutre et technique.','Triste.'], correctIdx: 0 },
+  { level: 'B2', audio: "Pourquoi avez-vous quitté la finance pour ouvrir une boulangerie ? Je gagnais bien ma vie, mais je ne voyais jamais le résultat concret de mon travail. Aujourd'hui, je gagne moins, mais quand un client revient pour mon pain, je sais pourquoi je me lève le matin.", question: "Qu'est-ce qui a motivé ce changement de métier ?", options: ["L'envie de gagner plus.",'Un licenciement.',"Le besoin d'un travail concret et utile.",'Une raison familiale.'], correctIdx: 2 },
+  { level: 'B2', audio: "Les villes qui ont rendu leurs transports en commun gratuits constatent une hausse de la fréquentation. Mais les spécialistes restent partagés : les nouveaux usagers sont souvent d'anciens piétons ou cyclistes, et beaucoup moins souvent des automobilistes.", question: "Quelle réserve les spécialistes expriment-ils ?", options: ["La gratuité coûte trop cher.",'La gratuité fait peu reculer la voiture.','Les bus restent vides.','Les piétons protestent.'], correctIdx: 1 },
+  { level: 'C1', audio: "Le philosophe distingue la solitude, qu'il juge féconde parce qu'elle permet le dialogue avec soi-même, de l'isolement, qui prive l'individu de toute reconnaissance. L'une s'épanouit, l'autre s'endure.", question: "D'après le document, que pense le philosophe ?", options: ["La solitude et l'isolement sont synonymes.",'Il faut éviter toute solitude.',"L'isolement est toujours choisi.","La solitude peut être enrichissante, contrairement à l'isolement."], correctIdx: 3 },
+  { level: 'C1', audio: "Loin de sonner le glas du livre papier, la liseuse semble avoir créé de nouveaux lecteurs, qui, une fois conquis par la lecture, reviennent volontiers à l'objet imprimé.", question: "Que suggère cet extrait ?", options: ["La liseuse a fait disparaître le livre papier.","Les lecteurs abandonnent le papier.","La liseuse a attiré de nouveaux lecteurs, qui lisent aussi sur papier.","Les liseuses sont trop chères."], correctIdx: 2 },
+];
+
+const TCF_ECRIT = [
+  { level: 'A1', text: "PHARMACIE FERMÉE LE DIMANCHE\nPharmacie de garde : 12, rue Victor-Hugo.", question: "Le dimanche, où peut-on acheter des médicaments ?", options: ['Dans cette pharmacie.', "À l'hôpital.", 'Rue Victor-Hugo.', 'Nulle part.'], correctIdx: 2 },
+  { level: 'A1', text: "Salut Inès ! Je suis en retard, commence à manger sans moi. J'arrive vers 20 h 30. Karim", question: "Que doit faire Inès ?", options: ['Attendre Karim pour manger.', 'Appeler Karim.', 'Partir.', 'Commencer le repas.'], correctIdx: 3 },
+  { level: 'A2', text: "Étudiant en master de mathématiques donne cours particuliers, niveau collège et lycée. Déplacement à domicile. 20 € l'heure, premier cours offert.", question: "Que propose cette annonce ?", options: ['Un cours de groupe gratuit.', 'Des cours individuels, dont le premier est gratuit.', 'Un emploi pour un étudiant.', 'Des cours à l\'université.'], correctIdx: 1 },
+  { level: 'A2', text: "Chers parents, en raison de la grève des transports, la sortie au zoo prévue vendredi est reportée au mardi suivant. Merci de prévoir un pique-nique.", question: "Pourquoi la sortie est-elle reportée ?", options: ['À cause de la météo.', "À cause d'une grève.", 'Parce que le zoo est fermé.', 'Parce que la directrice est absente.'], correctIdx: 1 },
+  { level: 'B1', text: "Le coworking séduit les indépendants. De plus en plus de travailleurs indépendants quittent leur salon pour s'installer dans des espaces de coworking. Leur principale motivation : rompre l'isolement et rencontrer d'autres professionnels. Mais un poste de travail coûte en moyenne entre 150 et 300 euros par mois.", question: "Quel est le principal avantage du coworking ?", options: ['Le prix.', 'Le calme.', 'Le contact avec d\'autres professionnels.', 'La proximité du domicile.'], correctIdx: 2 },
+  { level: 'B1', text: "Le coworking séduit les indépendants. [même texte]", question: "Qu'est-ce qui freine certains indépendants ?", options: ['Le coût.', 'Le bruit.', 'Les horaires.', 'Le manque de places.'], correctIdx: 0 },
+  { level: 'B2', text: "Le télétravail a longtemps été présenté comme la solution miracle. Mais à force de le célébrer, on oublie ce qu'il fait perdre : les échanges informels, l'apprentissage au contact des plus expérimentés. Plutôt que de choisir, sans doute faudrait-il inventer un modèle hybride.", question: "Quelle est la position de l'auteur ?", options: ['Il est totalement opposé au télétravail.', 'Il reconnaît ses avantages mais souligne ses limites.', 'Il pense qu\'il doit devenir obligatoire.', 'Il ne donne pas d\'avis.'], correctIdx: 1 },
+  { level: 'B2', text: "Le télétravail... [même texte]", question: "Que propose l'auteur ?", options: ['De supprimer le télétravail.', 'De revenir au bureau à temps plein.', 'De combiner bureau et télétravail selon les situations.', "De laisser chaque salarié choisir."], correctIdx: 2 },
+  { level: 'C1', text: "Nous vivons dans une économie où la ressource la plus convoitée n'est plus le pétrole ni l'or, mais notre attention. Il serait réducteur d'accuser la seule technologie : ces dispositifs exploitent des mécanismes psychologiques bien antérieurs au numérique.", question: "Quelle est la thèse de l'auteur ?", options: ['La technologie est seule responsable.', 'Il faut interdire les applications.', 'Pour gérer notre attention, il faut comprendre nos mécanismes psychologiques.', "L'attention n'a aucune valeur économique."], correctIdx: 2 },
+  { level: 'C1', text: "...reprendre la main sur notre attention suppose donc moins de diaboliser les écrans que de comprendre ce qui, en nous, les rend si irrésistibles.", question: "Dans ce texte, « reprendre la main sur » signifie :", options: ['Retrouver le contrôle de.', 'Abandonner.', 'Toucher de nouveau.', 'Partager.'], correctIdx: 0 },
+];
+
+let tcfState = null;
+function renderTCFQuiz(dataName, idx){
+  clearQuestionTimer();
+  document.body.classList.add('quiz-active');
+  isHomeScreen = false;
+  const data = { structures: TCF_STRUCTURES, oral: TCF_ORAL, ecrit: TCF_ECRIT }[dataName];
+  if(idx === 0){ tcfState = { dataName, idx: 0, score: 0, answered: false, selectedIdx: null }; }
+  else { tcfState.idx = idx; tcfState.answered = false; tcfState.selectedIdx = null; }
+  renderTCFCard();
+}
+function renderTCFCard(){
+  const st = tcfState;
+  const data = { structures: TCF_STRUCTURES, oral: TCF_ORAL, ecrit: TCF_ECRIT }[st.dataName];
+  const item = data[st.idx];
+  const titles = { structures: '🧩 TCF — Structures de la langue', oral: '🎧 TCF — Compréhension orale', ecrit: '📄 TCF — Compréhension écrite' };
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromTCFBtn" style="cursor:pointer;">← Jeux de mots</button><span class="chip">${st.score}/${data.length}</span>`;
+  document.getElementById('progressFill').style.width = Math.round(((st.idx+1)/data.length)*100) + '%';
+  document.getElementById('footerNote').textContent = `Question ${st.idx+1}/${data.length} · niveau ${item.level}`;
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="cat-tag">${titles[st.dataName]}</div>
+    ${item.audio ? `
+      <button class="mode-chip" id="tcfListenBtn" style="margin-bottom:12px;">🔊 Écouter le document</button>
+      <div style="display:none;" id="tcfAudioTarget">${escapeHtml(item.audio)}</div>
+    ` : ''}
+    ${item.text ? `<div class="reading-text" style="text-align:left;margin-bottom:14px;font-size:14px;">${escapeHtml(item.text)}</div>` : ''}
+    <div class="word-fr" style="font-size:clamp(15px,3.6vw,18px);margin-bottom:14px;">${escapeHtml(item.question)}</div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      ${item.options.map((opt,i) => {
+        let extra = '';
+        if(st.answered){
+          if(i === item.correctIdx) extra = 'background:#16A34A;color:#fff;';
+          else if(i === st.selectedIdx) extra = 'background:#DC2626;color:#fff;';
+        }
+        return `<button class="opt" data-idx="${i}" style="${extra}" ${st.answered ? 'disabled' : ''}>${escapeHtml(opt)}</button>`;
+      }).join('')}
+    </div>
+    ${st.answered ? `<button class="restart-btn" id="tcfNextBtn" style="margin-top:16px;">${st.idx+1 < data.length ? 'Suivant →' : 'Voir le résultat'}</button>` : ''}
+  `;
+  document.getElementById('backFromTCFBtn').addEventListener('click', renderJeuxMotsHome);
+  const listenBtn = document.getElementById('tcfListenBtn');
+  if(listenBtn) listenBtn.addEventListener('click', () => speak(item.audio, 'fr-FR'));
+  card.querySelectorAll('[data-idx]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if(st.answered) return;
+      st.selectedIdx = parseInt(btn.dataset.idx,10);
+      st.answered = true;
+      if(st.selectedIdx === item.correctIdx) st.score++;
+      renderTCFCard();
+    });
+  });
+  const nextBtn = document.getElementById('tcfNextBtn');
+  if(nextBtn) nextBtn.addEventListener('click', () => {
+    if(st.idx + 1 < data.length){ renderTCFQuiz(st.dataName, st.idx + 1); }
+    else { renderTCFResult(); }
+  });
+}
+function renderTCFResult(){
+  const st = tcfState;
+  const data = { structures: TCF_STRUCTURES, oral: TCF_ORAL, ecrit: TCF_ECRIT }[st.dataName];
+  const pct = Math.round((st.score / data.length) * 100);
+  recordDailyActivity();
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromTCFResBtn" style="cursor:pointer;">← Jeux de mots</button>`;
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('footerNote').textContent = '';
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div style="text-align:center;">
+      <div style="font-size:44px;">${pct >= 80 ? '🏆' : pct >= 50 ? '👍' : '💪'}</div>
+      <div class="word-fr" style="margin-top:8px;">Score final : ${st.score}/${data.length}</div>
+      <button class="restart-btn" id="tcfRestartBtn" style="margin-top:16px;">🔁 Recommencer</button>
+    </div>
+  `;
+  document.getElementById('backFromTCFResBtn').addEventListener('click', renderJeuxMotsHome);
+  document.getElementById('tcfRestartBtn').addEventListener('click', () => renderTCFQuiz(st.dataName, 0));
+}
+
 
 
 
