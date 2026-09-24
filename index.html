@@ -5938,39 +5938,54 @@ function hideMascotBubble(){
   if(bubble) bubble.classList.remove('show');
 }
 
-/* 🦊🦊 Alterne les deux mascottes (To3aylib / To3ayliba) sur l'écran d'accueil toutes les 10s,
-   avec un fondu doux, et met en valeur le nom correspondant dans le titre. */
+/* 🦊🦊 Alterne les deux mascottes (visage mâle/femelle) sur l'écran d'accueil toutes les 10s, avec
+   un fondu doux. La mise en valeur des noms est désormais gérée par la boucle machine à écrire
+   ci-dessous, qui retape le titre entier à chaque bascule. */
 let mascotCycleIntervalId = null;
 function stopMascotCycle(){
   if(mascotCycleIntervalId){ clearInterval(mascotCycleIntervalId); mascotCycleIntervalId = null; }
 }
-/* ⌨️ Effet machine à écrire professionnel sur le titre d'accueil : lettre après lettre, avec un
-   curseur clignotant qui suit puis s'efface en douceur une fois le texte complet affiché. Ne joue
-   qu'une seule fois par session (via le drapeau heroTitleTyped) — les re-rendus suivants de l'écran
-   d'accueil affichent directement le titre final, pour ne pas retaper à chaque navigation. */
-let heroTitleTyped = false;
-function typewriterHeroTitle(){
-  const el = document.getElementById('heroTitle');
-  if(!el || heroTitleTyped) return;
-  heroTitleTyped = true;
-  const segments = [
+/* ⌨️ Effet machine à écrire professionnel sur le titre d'accueil, en boucle infinie : tape "Apprends
+   avec Souky & Abdel", laisse le temps de lire, efface tout, puis retape "Apprends avec To3aylib &
+   To3ayliba" — et recommence indéfiniment, chaque bascule rejouant le même effet lettre par lettre
+   avec curseur clignotant. Une seule boucle active à la fois (heroTitleLoopActive), et elle s'arrête
+   proprement dès que l'écran d'accueil n'est plus affiché (le cursor n'est alors plus dans le DOM). */
+const HERO_NAME_PAIRS = [
+  { male: 'Souky', female: 'Abdel' },
+  { male: 'To3aylib', female: 'To3ayliba' },
+];
+let heroPairIdx = 0;
+let heroTitleLoopActive = false;
+function buildHeroTitleSegments(pair){
+  return [
     { text: 'Apprends avec ' },
-    { text: 'To3aylib', tag: true, cls: 'grad', id: 'heroNameMale', style: 'transition:opacity .6s ease;' },
+    { text: pair.male, tag: true, cls: 'grad', id: 'heroNameMale', style: 'transition:opacity .6s ease;' },
     { text: ' ' },
     { text: '&', tag: true, cls: 'grad', style: 'opacity:0.5;' },
     { text: ' ' },
-    { text: 'To3ayliba', tag: true, cls: 'grad', id: 'heroNameFemale', style: 'opacity:0.4;transition:opacity .6s ease;' },
+    { text: pair.female, tag: true, cls: 'grad', id: 'heroNameFemale', style: 'opacity:0.4;transition:opacity .6s ease;' },
     { text: ' ' },
     { text: '🦊', tag: true, cls: 'hero-fox-wiggle' },
   ];
+}
+function typewriterHeroTitle(){
+  const el = document.getElementById('heroTitle');
+  if(!el || heroTitleLoopActive) return; // une boucle tourne déjà, ne pas en démarrer une seconde
+  heroTitleLoopActive = true;
+  runHeroTypeCycle();
+}
+function runHeroTypeCycle(){
+  const el = document.getElementById('heroTitle');
+  if(!el || !el.isConnected){ heroTitleLoopActive = false; return; } // écran changé : on arrête proprement
+  const segments = buildHeroTitleSegments(HERO_NAME_PAIRS[heroPairIdx]);
   el.innerHTML = '<span class="type-cursor" id="heroTypeCursor"></span>';
   const cursor = document.getElementById('heroTypeCursor');
   let segIdx = 0, charIdx = 0;
 
   function typeStep(){
-    if(!cursor || !cursor.isConnected) return; // l'écran a changé entre-temps
+    if(!cursor || !cursor.isConnected){ heroTitleLoopActive = false; return; }
     if(segIdx >= segments.length){
-      setTimeout(() => { cursor.classList.add('fading'); setTimeout(() => cursor.remove(), 550); }, 500);
+      setTimeout(eraseStep, 2600); // pause de lecture avant d'effacer et de passer à l'autre paire
       return;
     }
     const seg = segments[segIdx];
@@ -5995,6 +6010,24 @@ function typewriterHeroTitle(){
       setTimeout(typeStep, 45);
     }
   }
+
+  function eraseStep(){
+    if(!cursor || !cursor.isConnected){ heroTitleLoopActive = false; return; }
+    const prevNode = cursor.previousSibling;
+    if(prevNode){
+      // Un nœud texte perd un caractère à la fois ; un span (nom ou emoji) disparaît d'un coup.
+      if(prevNode.nodeType === Node.TEXT_NODE && prevNode.textContent.length > 1){
+        prevNode.textContent = prevNode.textContent.slice(0, -1);
+      } else {
+        prevNode.remove();
+      }
+      setTimeout(eraseStep, 16);
+    } else {
+      heroPairIdx = (heroPairIdx + 1) % HERO_NAME_PAIRS.length; // passe à l'autre paire de noms
+      setTimeout(runHeroTypeCycle, 350);
+    }
+  }
+
   typeStep();
 }
 
@@ -6005,21 +6038,11 @@ function startMascotCycle(){
     showingFemale = !showingFemale;
     const male = document.getElementById('mascotMale');
     const female = document.getElementById('mascotFemale');
-    const nameMale = document.getElementById('heroNameMale');
-    const nameFemale = document.getElementById('heroNameFemale');
     if(!male || !female){ stopMascotCycle(); return; } // l'écran a changé entre-temps
     male.style.opacity = showingFemale ? '0' : '1';
     male.style.transform = showingFemale ? 'scale(0.85) rotate(-6deg)' : 'scale(1) rotate(0deg)';
     female.style.opacity = showingFemale ? '1' : '0';
     female.style.transform = showingFemale ? 'scale(1) rotate(0deg)' : 'scale(0.85) rotate(6deg)';
-    if(nameMale && nameFemale){
-      nameMale.style.opacity = showingFemale ? '0.4' : '1';
-      nameFemale.style.opacity = showingFemale ? '1' : '0.4';
-      const activeEl = showingFemale ? nameFemale : nameMale;
-      activeEl.classList.remove('hero-name-pop');
-      void activeEl.offsetWidth; // force le navigateur à relancer l'animation depuis le début
-      activeEl.classList.add('hero-name-pop');
-    }
   }, 10000);
 }
 
@@ -12006,7 +12029,7 @@ function renderBlockSelect(){
         </svg>
       </div>
       <div class="hero-badge">Français ↔ Arabe · ${WORDS.length} mots</div>
-      <div class="hero-title" id="heroTitle">Apprends avec <span class="grad" id="heroNameMale" style="transition:opacity .6s ease;">To3aylib</span> <span class="grad" style="opacity:0.5;">&amp;</span> <span class="grad" id="heroNameFemale" style="opacity:0.4;transition:opacity .6s ease;">To3ayliba</span> <span class="hero-fox-wiggle">🦊</span></div>
+      <div class="hero-title" id="heroTitle">Apprends avec <span class="grad" id="heroNameMale" style="transition:opacity .6s ease;">Souky</span> <span class="grad" style="opacity:0.5;">&amp;</span> <span class="grad" id="heroNameFemale" style="opacity:0.4;transition:opacity .6s ease;">Abdel</span> <span class="hero-fox-wiggle">🦊</span></div>
       <div class="hero-sub">${motto}</div>
       <button class="restart-btn" id="startNextBlockBtn" style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#F97316,#EA580C);border-color:#B45309;font-size:15px;padding:13px 30px;">▶ Commencer</button>
       <div id="resumeSessionSlot"></div>
