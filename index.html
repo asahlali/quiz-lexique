@@ -1321,6 +1321,8 @@
     background:var(--surface);border:1px solid var(--border);
   }
   .day-cell.met{ background:rgba(251,191,36,0.14);border-color:rgba(251,146,60,0.4); }
+  .day-cell.frozen{ background:rgba(59,130,246,0.14);border:2px solid #3B82F6;box-shadow:0 0 0 3px rgba(59,130,246,0.12); }
+  .day-cell.frozen .day-lbl, .day-cell.frozen .day-num{ color:#2563EB; }
   .day-cell.today{ border:2px solid var(--purple); }
   .day-lbl{ font-size:10px;font-weight:800;color:var(--text-dim);text-transform:uppercase; }
   .day-dot{ font-size:15px;line-height:1;height:17px; }
@@ -2624,24 +2626,73 @@ function loadFrozenDays(){ try{ const raw = localStorage.getItem(nsKey(FROZEN_DA
 function saveFrozenDays(){ try{ localStorage.setItem(nsKey(FROZEN_DAYS_KEY), JSON.stringify(frozenDays)); }catch(e){} }
 let streakFreezes = loadStreakFreezes();
 let frozenDays = loadFrozenDays();
-function goalMetOn(dateKey){ return (dailyLog[dateKey] || 0) >= DAILY_GOAL || !!frozenDays[dateKey]; }
+/* 📅 Un jour compte dans la série dès qu'il y a eu une VRAIE activité ce jour-là, quelle que soit
+   la partie de l'app utilisée : bloc terminé, mais aussi temps d'apprentissage enregistré (Radio,
+   jeux, lecture...), fiche validée ou texte de Bouquinage lu. Avant, seuls certains écrans
+   comptaient : un jour passé uniquement sur la Radio ou les jeux cassait la série. */
+let extraActiveDaysCache = null, extraActiveDaysAt = 0;
+function extraActiveDays(){
+  if(extraActiveDaysCache && Date.now() - extraActiveDaysAt < 5000) return extraActiveDaysCache;
+  const set = new Set();
+  try{
+    const ds = (typeof dailyStats !== 'undefined' && dailyStats) || {};
+    Object.keys(ds).forEach(k => { const d = ds[k] || {}; if((d.seconds || 0) >= 60 || (d.passed || 0) > 0 || (d.xp || 0) > 0) set.add(k); });
+    const sr = loadSheetResults();
+    Object.values(sr).forEach(r => { if(r && r.passed && r.lastAt) set.add(todayKey(new Date(r.lastAt))); });
+    const br = loadBouquinageRead();
+    Object.values(br).forEach(r => { if(r && r.lastAt) set.add(todayKey(new Date(r.lastAt))); });
+  }catch(e){}
+  extraActiveDaysCache = set; extraActiveDaysAt = Date.now();
+  return set;
+}
+function dayWasActive(dateKey){ return (dailyLog[dateKey] || 0) >= DAILY_GOAL || extraActiveDays().has(dateKey); }
+function isDayFrozen(dateKey){ return !!frozenDays[dateKey] && !dayWasActive(dateKey); }
+function goalMetOn(dateKey){ return dayWasActive(dateKey) || !!frozenDays[dateKey]; }
+/* Tous les jours connus (activité ou vie utilisée), pour le record et le total. */
+function allStreakDayKeys(){
+  const keys = new Set([...Object.keys(dailyLog), ...Object.keys(frozenDays), ...extraActiveDays()]);
+  return [...keys].filter(k => goalMetOn(k));
+}
 /* ❄️ Gèle automatiquement un jour manqué (hier) si une série était en cours et qu'il reste des vies,
    pour ne pas perdre la série d'affilée. Appelé une fois au chargement de l'app. */
 function autoApplyStreakFreeze(){
-  const y = new Date(); y.setDate(y.getDate() - 1);
-  const yKey = todayKey(y);
-  if(goalMetOn(yKey)) return; // hier était déjà bon (ou déjà gelé)
-  const beforeY = new Date(y); beforeY.setDate(beforeY.getDate() - 1);
-  if(!goalMetOn(todayKey(beforeY))) return; // pas de série active à protéger avant-hier
-  if(streakFreezes <= 0) return;
-  frozenDays[yKey] = true;
-  streakFreezes--;
-  saveFrozenDays();
-  saveStreakFreezes();
-  // ⚠️ Pas de cloudAutoPush() ici : cette fonction s'exécute juste avant autoSyncOnLoad() au
-  // démarrage, qui pousse déjà toutes les données locales (dont celles-ci) une seule fois.
-  // Un second envoi concurrent ici a pu provoquer des échecs de synchro (verrou du script Apps Script).
+  // ❄️ Utilise les vies pour boucher les jours manqués (1 vie = 1 jour), même s'il y en a plusieurs
+  // d'affilée, tant qu'une série existait avant le trou. Aujourd'hui n'est jamais gelé (il reste
+  // la journée pour le faire). On remonte jusqu'à 60 jours pour réparer aussi un trou plus ancien.
+  extraActiveDaysCache = null;
+  let changed = false;
+  // 💰 Remboursement : un jour gelé où on découvre finalement une activité (ex. faite sur un autre
+  // appareil, arrivée avec la synchro) n'avait pas besoin de vie → on la rend.
+  Object.keys(frozenDays).forEach(k => {
+    if(frozenDays[k] && dayWasActive(k)){ delete frozenDays[k]; streakFreezes++; changed = true; }
+  });
+  const d = new Date(); d.setDate(d.getDate() - 1); // on part d'hier
+  let guard = 0;
+  while(guard++ < 60 && streakFreezes > 0){
+    // 1) traverse les jours déjà bons
+    while(guard++ < 60 && goalMetOn(todayKey(d))){ d.setDate(d.getDate() - 1); }
+    // 2) mesure le trou (jours manqués consécutifs)
+    const gap = [];
+    const probe = new Date(d);
+    while(gap.length < 60 && !goalMetOn(todayKey(probe))){ gap.push(todayKey(probe)); probe.setDate(probe.getDate() - 1); }
+    // 3) y a-t-il une série avant le trou ? sinon rien à protéger
+    if(gap.length === 0 || gap.length >= 60 || !goalMetOn(todayKey(probe))) break;
+    if(gap.length > streakFreezes) break; // pas assez de vies pour sauver ce trou
+    gap.forEach(k => { frozenDays[k] = true; });
+    streakFreezes -= gap.length;
+    changed = true;
+    d.setTime(probe.getTime());
+  }
+  if(changed){
+    saveFrozenDays();
+    saveStreakFreezes();
+    if(typeof setStatus === 'function'){ setTimeout(() => setStatus('❄️ Des vies ont été utilisées pour protéger ta série de jours d\'affilée.', 'ok'), 1500); }
+  }
+  // ⚠️ Pas de cloudAutoPush() ici au démarrage : autoSyncOnLoad() pousse déjà toutes les données.
+  return changed;
 }
+// Revérifie aussi quand on revient sur l'app (ex. laissée ouverte pendant la nuit)
+document.addEventListener('visibilitychange', () => { if(!document.hidden){ try{ if(autoApplyStreakFreeze() && isHomeScreen) renderBlockSelect(); }catch(e){} } });
 /* 🎁 Gagne une nouvelle vie tous les 7 jours d'affilée (une seule fois par palier). */
 function grantStreakFreezeIfMilestone(streak){
   const lastGranted = parseInt(localStorage.getItem(nsKey('lexiqueQuiz::lastFreezeGrant')) || '0', 10);
@@ -2838,7 +2889,7 @@ function computeStreak(){
   return streak;
 }
 function computeBestStreak(){
-  const keys = Object.keys(dailyLog).filter(k => goalMetOn(k)).sort();
+  const keys = allStreakDayKeys().sort();
   let best = 0, cur = 0, prev = null;
   for(const k of keys){
     if(prev){
@@ -2850,7 +2901,7 @@ function computeBestStreak(){
   }
   return best;
 }
-function daysActiveTotal(){ return Object.keys(dailyLog).filter(k => goalMetOn(k)).length; }
+function daysActiveTotal(){ return allStreakDayKeys().filter(k => dayWasActive(k)).length; }
 
 /* Bandeau des 7 derniers jours avec état de l'objectif. */
 function buildWeekStripHtml(){
@@ -2861,12 +2912,13 @@ function buildWeekStripHtml(){
     const d = new Date(today);
     d.setDate(today.getDate() - i);
     const k = todayKey(d);
-    const met = goalMetOn(k);
+    const frozen = isDayFrozen(k);
+    const met = goalMetOn(k) && !frozen;
     const isToday = (i === 0);
     cells.push(`
-      <div class="day-cell ${met ? 'met' : ''} ${isToday ? 'today' : ''}">
+      <div class="day-cell ${met ? 'met' : ''} ${frozen ? 'frozen' : ''} ${isToday ? 'today' : ''}" ${frozen ? 'title="Jour sauvé par une vie ❄️"' : ''}>
         <div class="day-lbl">${labels[d.getDay()]}</div>
-        <div class="day-dot">${met ? '🔥' : (isToday ? '·' : '')}</div>
+        <div class="day-dot">${frozen ? '❄️' : (met ? '🔥' : (isToday ? '·' : ''))}</div>
         <div class="day-num">${d.getDate()}</div>
       </div>`);
   }
@@ -15275,6 +15327,13 @@ function mergeRemoteData(remote){
         if(m){ saveCustomBlocks(customBlocks); changed = true; }
       }
 
+    } else if(baseKey === FROZEN_DAYS_KEY){
+      // ❄️ Jours sauvés par une vie : union (un jour gelé sur un appareil reste gelé partout)
+      const remoteFrozen = safeParse(rv, {});
+      let m = false;
+      Object.keys(remoteFrozen).forEach(k => { if(remoteFrozen[k] && !frozenDays[k]){ frozenDays[k] = true; m = true; } });
+      if(m){ saveFrozenDays(); changed = true; }
+
     } else if(baseKey === QUEST_SETTINGS_KEY){
       // 🎯 Objectifs : on garde le réglage le PLUS RÉCENT (avant, le cloud écrasait systématiquement
       // un objectif modifié localement si l'envoi n'avait pas encore eu lieu → retour aux anciennes valeurs).
@@ -15463,6 +15522,7 @@ async function autoSyncOnLoad(){
     const changed = await cloudPull();
     await cloudPush();
     setStatus(changed ? '☁️ Synchronisé — nouvelles données récupérées !' : '☁️ Synchronisé.', 'ok');
+    if(changed){ try{ if(autoApplyStreakFreeze()) cloudPushPending = true; }catch(e){} } // données d'un autre appareil : on revérifie la série
     if(changed && isHomeScreen){ renderBlockSelect(); }
   }catch(e){
     setStatus('☁️ Synchro impossible : ' + (e && e.message ? e.message : 'erreur inconnue'), 'err');
