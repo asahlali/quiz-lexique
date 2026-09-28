@@ -647,6 +647,20 @@
   .mascot{ transform-origin:bottom center; animation:mascotIdle 3.2s ease-in-out infinite; filter:drop-shadow(0 8px 10px rgba(0,0,0,0.18)); }
   .mascot svg{ display:block; }
   .m-shadow{ fill:rgba(0,0,0,0.12); }
+  /* ===== Mascotte 3D réaliste ===== */
+  .mascot{ transform-style:preserve-3d; }
+  .mascot > svg, .mascot-3d-wrap{
+    transform:perspective(420px) rotateX(var(--tx,0deg)) rotateY(var(--ty,0deg)) translateZ(0);
+    transition:transform .45s cubic-bezier(.2,.8,.2,1); transform-style:preserve-3d; will-change:transform;
+  }
+  .mascot-3d-wrap{ position:absolute; inset:0; }
+  .mascot > svg{ overflow:visible; }
+  .m-eyes, .hero-pupil{ transform:translate(var(--px,0px), var(--py,0px)); transition:transform .18s ease-out; }
+  .m-eyes.blink, .hero-pupil.blink{ transform:translate(var(--px,0px), var(--py,0px)) scaleY(.1); transform-box:fill-box; transform-origin:center; transition:transform .07s ease-in; }
+  .m-spec{ transform-box:fill-box; transform-origin:center; translate:calc(var(--sx,0) * -3px) calc(var(--sy,0) * -3px); transition:translate .45s ease; }
+  .m-shadow{ transform-box:fill-box; transform-origin:center; translate:calc(var(--sx,0) * 4px) 0; transition:translate .45s ease; }
+  .mascot-3d-wrap svg{ filter:drop-shadow(calc(var(--sx,0) * -4px) 10px 10px rgba(124,45,18,.28)); }
+  @media (prefers-reduced-motion: reduce){ .mascot > svg, .mascot-3d-wrap, .m-eyes, .hero-pupil{ transition:none; transform:none; } }
   @keyframes mascotIdle{
     0%,100%{ transform:translateY(0) rotate(0deg); }
     50%{ transform:translateY(-6px) rotate(-1.5deg); }
@@ -1677,19 +1691,19 @@
       <ellipse class="splash-shadow" cx="60" cy="112" rx="28" ry="6"/>
       <g class="splash-fox-body">
         <defs>
-          <linearGradient id="splashBody" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FB923C"/><stop offset="1" stop-color="#EA580C"/></linearGradient>
+          <radialGradient id="splashBody" cx="0.38" cy="0.3" r="0.78" fx="0.34" fy="0.24"><stop offset="0" stop-color="#FED7AA"/><stop offset="0.28" stop-color="#FB923C"/><stop offset="0.72" stop-color="#EA580C"/><stop offset="1" stop-color="#9A3412"/></radialGradient><radialGradient id="splashBodySpec" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#fff" stop-opacity="0.85"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient><radialGradient id="splashBodyAO" cx="0.5" cy="0.35" r="0.65"><stop offset="0.6" stop-color="#431407" stop-opacity="0"/><stop offset="1" stop-color="#431407" stop-opacity="0.35"/></radialGradient>
           <linearGradient id="splashEar" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F97316"/><stop offset="1" stop-color="#B45309"/></linearGradient>
         </defs>
         <path class="splash-ear splash-ear-l" d="M20 36 L33 3 L45 38 Z" fill="url(#splashEar)"/>
         <path class="splash-ear splash-ear-r" d="M100 36 L87 3 L75 38 Z" fill="url(#splashEar)"/>
         <path d="M26 31 L33 13 L39 32 Z" fill="#FFF7ED"/>
         <path d="M94 31 L87 13 L81 32 Z" fill="#FFF7ED"/>
-        <ellipse cx="60" cy="68" rx="40" ry="42" fill="url(#splashBody)"/>
+        <ellipse cx="60" cy="68" rx="40" ry="42" fill="url(#splashBody)"/><ellipse class="m-ao" cx="60" cy="68" rx="40" ry="42" fill="url(#splashBodyAO)"/><ellipse class="m-spec" cx="42" cy="40" rx="13" ry="8" transform="rotate(-28 42 40)" fill="url(#splashBodySpec)"/>
         <path d="M60 46 C78 46 88 62 84 82 C81 96 71 100 60 100 C49 100 39 96 36 82 C32 62 42 46 60 46 Z" fill="#FFF7ED" opacity="0.95"/>
         <g class="splash-glasses">
           <circle cx="46" cy="60" r="17" fill="#fff" stroke="#431407" stroke-width="3"/>
           <circle cx="76" cy="60" r="17" fill="#fff" stroke="#431407" stroke-width="3"/>
-          <line x1="61" y1="60" x2="63" y2="60" stroke="#431407" stroke-width="3"/>
+          <line x1="61" y1="60" x2="63" y2="60" stroke="#431407" stroke-width="3"/><path class="m-glare" d="M35 52 Q40 45 48 45" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" opacity="0.7"/><path class="m-glare" d="M65 52 Q70 45 78 45" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" opacity="0.7"/>
           <circle class="splash-pupil" cx="46" cy="61" r="7" fill="#431407"/>
           <circle class="splash-pupil" cx="76" cy="61" r="7" fill="#431407"/>
           <circle cx="49" cy="58" r="2.4" fill="#fff"/><circle cx="79" cy="58" r="2.4" fill="#fff"/>
@@ -1745,9 +1759,7 @@
         <ellipse class="m-shadow" cx="60" cy="112" rx="30" ry="6"/>
         <g class="m-body">
           <defs>
-            <linearGradient id="mbody" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stop-color="#FB923C"/><stop offset="1" stop-color="#EA580C"/>
-            </linearGradient>
+            <radialGradient id="mbody" cx="0.38" cy="0.3" r="0.78" fx="0.34" fy="0.24"><stop offset="0" stop-color="#FED7AA"/><stop offset="0.28" stop-color="#FB923C"/><stop offset="0.72" stop-color="#EA580C"/><stop offset="1" stop-color="#9A3412"/></radialGradient><radialGradient id="mbodySpec" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#fff" stop-opacity="0.85"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient><radialGradient id="mbodyAO" cx="0.5" cy="0.35" r="0.65"><stop offset="0.6" stop-color="#431407" stop-opacity="0"/><stop offset="1" stop-color="#431407" stop-opacity="0.35"/></radialGradient>
             <linearGradient id="mear" x1="0" y1="0" x2="1" y2="1">
               <stop offset="0" stop-color="#F97316"/><stop offset="1" stop-color="#B45309"/>
             </linearGradient>
@@ -1756,16 +1768,16 @@
           <path d="M100 36 L87 3 L75 38 Z" fill="url(#mear)"/>
           <path d="M26 31 L33 13 L39 32 Z" fill="#FFF7ED"/>
           <path d="M94 31 L87 13 L81 32 Z" fill="#FFF7ED"/>
-          <ellipse cx="60" cy="68" rx="40" ry="42" fill="url(#mbody)"/>
+          <ellipse cx="60" cy="68" rx="40" ry="42" fill="url(#mbody)"/><ellipse class="m-ao" cx="60" cy="68" rx="40" ry="42" fill="url(#mbodyAO)"/><ellipse class="m-spec" cx="42" cy="40" rx="13" ry="8" transform="rotate(-28 42 40)" fill="url(#mbodySpec)"/>
           <path d="M60 46 C78 46 88 62 84 82 C81 96 71 100 60 100 C49 100 39 96 36 82 C32 62 42 46 60 46 Z" fill="#FFF7ED" opacity="0.95"/>
           <g class="m-glasses">
             <circle cx="46" cy="60" r="17" fill="#fff" stroke="#431407" stroke-width="3"/>
             <circle cx="76" cy="60" r="17" fill="#fff" stroke="#431407" stroke-width="3"/>
-            <line x1="61" y1="60" x2="63" y2="60" stroke="#431407" stroke-width="3"/>
-            <circle class="m-pupil" cx="46" cy="61" r="7" fill="#431407"/>
+            <line x1="61" y1="60" x2="63" y2="60" stroke="#431407" stroke-width="3"/><path class="m-glare" d="M35 52 Q40 45 48 45" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" opacity="0.7"/><path class="m-glare" d="M65 52 Q70 45 78 45" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" opacity="0.7"/>
+            <g class="m-eyes"><circle class="m-pupil" cx="46" cy="61" r="7" fill="#431407"/>
             <circle class="m-pupil" cx="76" cy="61" r="7" fill="#431407"/>
             <circle cx="49" cy="58" r="2.4" fill="#fff"/>
-            <circle cx="79" cy="58" r="2.4" fill="#fff"/>
+            <circle cx="79" cy="58" r="2.4" fill="#fff"/></g>
           </g>
           <ellipse cx="60" cy="79" rx="5.5" ry="4" fill="#431407"/>
           <path class="m-smile" d="M50 88 Q60 96 70 88" fill="none" stroke="#431407" stroke-width="3.2" stroke-linecap="round"/>
@@ -5806,19 +5818,19 @@ const MASCOT_SVG_INNER = `<svg viewBox="0 0 120 120" width="82" height="82">
   <ellipse class="m-shadow" cx="60" cy="112" rx="30" ry="6"/>
   <g class="m-body">
     <defs>
-      <linearGradient id="mbodyCeleb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FB923C"/><stop offset="1" stop-color="#EA580C"/></linearGradient>
+      <radialGradient id="mbodyCeleb" cx="0.38" cy="0.3" r="0.78" fx="0.34" fy="0.24"><stop offset="0" stop-color="#FED7AA"/><stop offset="0.28" stop-color="#FB923C"/><stop offset="0.72" stop-color="#EA580C"/><stop offset="1" stop-color="#9A3412"/></radialGradient><radialGradient id="mbodyCelebSpec" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#fff" stop-opacity="0.85"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient><radialGradient id="mbodyCelebAO" cx="0.5" cy="0.35" r="0.65"><stop offset="0.6" stop-color="#431407" stop-opacity="0"/><stop offset="1" stop-color="#431407" stop-opacity="0.35"/></radialGradient>
       <linearGradient id="mearCeleb" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F97316"/><stop offset="1" stop-color="#B45309"/></linearGradient>
     </defs>
     <path d="M20 36 L33 3 L45 38 Z" fill="url(#mearCeleb)"/>
     <path d="M100 36 L87 3 L75 38 Z" fill="url(#mearCeleb)"/>
     <path d="M26 31 L33 13 L39 32 Z" fill="#FFF7ED"/>
     <path d="M94 31 L87 13 L81 32 Z" fill="#FFF7ED"/>
-    <ellipse cx="60" cy="68" rx="40" ry="42" fill="url(#mbodyCeleb)"/>
+    <ellipse cx="60" cy="68" rx="40" ry="42" fill="url(#mbodyCeleb)"/><ellipse class="m-ao" cx="60" cy="68" rx="40" ry="42" fill="url(#mbodyCelebAO)"/><ellipse class="m-spec" cx="42" cy="40" rx="13" ry="8" transform="rotate(-28 42 40)" fill="url(#mbodyCelebSpec)"/>
     <path d="M60 46 C78 46 88 62 84 82 C81 96 71 100 60 100 C49 100 39 96 36 82 C32 62 42 46 60 46 Z" fill="#FFF7ED" opacity="0.95"/>
     <g class="m-glasses">
       <circle cx="46" cy="60" r="17" fill="#fff" stroke="#431407" stroke-width="3"/>
       <circle cx="76" cy="60" r="17" fill="#fff" stroke="#431407" stroke-width="3"/>
-      <line x1="61" y1="60" x2="63" y2="60" stroke="#431407" stroke-width="3"/>
+      <line x1="61" y1="60" x2="63" y2="60" stroke="#431407" stroke-width="3"/><path class="m-glare" d="M35 52 Q40 45 48 45" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" opacity="0.7"/><path class="m-glare" d="M65 52 Q70 45 78 45" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" opacity="0.7"/>
       <circle class="m-pupil" cx="46" cy="61" r="7" fill="#431407"/>
       <circle class="m-pupil" cx="76" cy="61" r="7" fill="#431407"/>
       <circle cx="49" cy="58" r="2.4" fill="#fff"/><circle cx="79" cy="58" r="2.4" fill="#fff"/>
@@ -11979,23 +11991,23 @@ function renderBlockSelect(){
     <div class="hero">
       <div class="hero-mascot" id="heroMascotContainer" aria-hidden="true" style="position:relative;width:96px;height:96px;margin:0 auto;">
         <div class="hero-mascot-glow"></div>
+        <div class="mascot-3d-wrap" id="heroMascot3d">
         <svg id="mascotMale" viewBox="0 0 120 120" width="96" height="96" style="position:absolute;top:0;left:0;transition:opacity .6s ease, transform .6s ease;">
           <ellipse cx="60" cy="112" rx="30" ry="6" fill="rgba(0,0,0,0.10)"/>
           <defs>
-            <linearGradient id="hbody" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FB923C"/><stop offset="1" stop-color="#EA580C"/></linearGradient>
+            <radialGradient id="hbody" cx="0.38" cy="0.3" r="0.78" fx="0.34" fy="0.24"><stop offset="0" stop-color="#FED7AA"/><stop offset="0.28" stop-color="#FB923C"/><stop offset="0.72" stop-color="#EA580C"/><stop offset="1" stop-color="#9A3412"/></radialGradient><radialGradient id="hbodySpec" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#fff" stop-opacity="0.85"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient><radialGradient id="hbodyAO" cx="0.5" cy="0.35" r="0.65"><stop offset="0.6" stop-color="#431407" stop-opacity="0"/><stop offset="1" stop-color="#431407" stop-opacity="0.35"/></radialGradient>
             <linearGradient id="hear" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F97316"/><stop offset="1" stop-color="#B45309"/></linearGradient>
           </defs>
           <path d="M20 36 L33 3 L45 38 Z" fill="url(#hear)"/>
           <path d="M100 36 L87 3 L75 38 Z" fill="url(#hear)"/>
           <path d="M26 31 L33 13 L39 32 Z" fill="#FFF7ED"/>
           <path d="M94 31 L87 13 L81 32 Z" fill="#FFF7ED"/>
-          <ellipse cx="60" cy="68" rx="40" ry="42" fill="url(#hbody)"/>
+          <ellipse cx="60" cy="68" rx="40" ry="42" fill="url(#hbody)"/><ellipse class="m-ao" cx="60" cy="68" rx="40" ry="42" fill="url(#hbodyAO)"/><ellipse class="m-spec" cx="42" cy="40" rx="13" ry="8" transform="rotate(-28 42 40)" fill="url(#hbodySpec)"/>
           <path d="M60 46 C78 46 88 62 84 82 C81 96 71 100 60 100 C49 100 39 96 36 82 C32 62 42 46 60 46 Z" fill="#FFF7ED" opacity="0.95"/>
           <circle cx="46" cy="60" r="17" fill="#fff" stroke="#431407" stroke-width="3"/>
           <circle cx="76" cy="60" r="17" fill="#fff" stroke="#431407" stroke-width="3"/>
-          <line x1="61" y1="60" x2="63" y2="60" stroke="#431407" stroke-width="3"/>
-          <circle cx="46" cy="61" r="7" fill="#431407"/><circle cx="76" cy="61" r="7" fill="#431407"/>
-          <circle cx="49" cy="58" r="2.4" fill="#fff"/><circle cx="79" cy="58" r="2.4" fill="#fff"/>
+          <line x1="61" y1="60" x2="63" y2="60" stroke="#431407" stroke-width="3"/><path class="m-glare" d="M35 52 Q40 45 48 45" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" opacity="0.7"/><path class="m-glare" d="M65 52 Q70 45 78 45" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" opacity="0.7"/>
+          <g class="hero-pupil"><circle cx="46" cy="61" r="7" fill="#431407"/><circle cx="76" cy="61" r="7" fill="#431407"/><circle cx="49" cy="58" r="2.4" fill="#fff"/><circle cx="79" cy="58" r="2.4" fill="#fff"/></g>
           <ellipse cx="60" cy="79" rx="5.5" ry="4" fill="#431407"/>
           <path d="M50 88 Q60 96 70 88" fill="none" stroke="#431407" stroke-width="3.2" stroke-linecap="round"/>
           <ellipse cx="33" cy="82" rx="6" ry="4" fill="#FDBA74" opacity="0.75"/>
@@ -12004,20 +12016,19 @@ function renderBlockSelect(){
         <svg id="mascotFemale" viewBox="0 0 120 120" width="96" height="96" style="position:absolute;top:0;left:0;opacity:0;transform:scale(0.85) rotate(6deg);transition:opacity .6s ease, transform .6s ease;">
           <ellipse cx="60" cy="112" rx="30" ry="6" fill="rgba(0,0,0,0.10)"/>
           <defs>
-            <linearGradient id="hbody2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FB923C"/><stop offset="1" stop-color="#EA580C"/></linearGradient>
+            <radialGradient id="hbody2" cx="0.38" cy="0.3" r="0.78" fx="0.34" fy="0.24"><stop offset="0" stop-color="#FED7AA"/><stop offset="0.28" stop-color="#FB923C"/><stop offset="0.72" stop-color="#EA580C"/><stop offset="1" stop-color="#9A3412"/></radialGradient><radialGradient id="hbody2Spec" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#fff" stop-opacity="0.85"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient><radialGradient id="hbody2AO" cx="0.5" cy="0.35" r="0.65"><stop offset="0.6" stop-color="#431407" stop-opacity="0"/><stop offset="1" stop-color="#431407" stop-opacity="0.35"/></radialGradient>
             <linearGradient id="hear2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F97316"/><stop offset="1" stop-color="#B45309"/></linearGradient>
           </defs>
           <path d="M20 36 L33 3 L45 38 Z" fill="url(#hear2)"/>
           <path d="M100 36 L87 3 L75 38 Z" fill="url(#hear2)"/>
           <path d="M26 31 L33 13 L39 32 Z" fill="#FFF7ED"/>
           <path d="M94 31 L87 13 L81 32 Z" fill="#FFF7ED"/>
-          <ellipse cx="60" cy="68" rx="40" ry="42" fill="url(#hbody2)"/>
+          <ellipse cx="60" cy="68" rx="40" ry="42" fill="url(#hbody2)"/><ellipse class="m-ao" cx="60" cy="68" rx="40" ry="42" fill="url(#hbody2AO)"/><ellipse class="m-spec" cx="42" cy="40" rx="13" ry="8" transform="rotate(-28 42 40)" fill="url(#hbody2Spec)"/>
           <path d="M60 46 C78 46 88 62 84 82 C81 96 71 100 60 100 C49 100 39 96 36 82 C32 62 42 46 60 46 Z" fill="#FFF7ED" opacity="0.95"/>
           <circle cx="46" cy="60" r="17" fill="#fff" stroke="#431407" stroke-width="3"/>
           <circle cx="76" cy="60" r="17" fill="#fff" stroke="#431407" stroke-width="3"/>
-          <line x1="61" y1="60" x2="63" y2="60" stroke="#431407" stroke-width="3"/>
-          <circle cx="46" cy="61" r="7" fill="#431407"/><circle cx="76" cy="61" r="7" fill="#431407"/>
-          <circle cx="49" cy="58" r="2.4" fill="#fff"/><circle cx="79" cy="58" r="2.4" fill="#fff"/>
+          <line x1="61" y1="60" x2="63" y2="60" stroke="#431407" stroke-width="3"/><path class="m-glare" d="M35 52 Q40 45 48 45" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" opacity="0.7"/><path class="m-glare" d="M65 52 Q70 45 78 45" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" opacity="0.7"/>
+          <g class="hero-pupil"><circle cx="46" cy="61" r="7" fill="#431407"/><circle cx="76" cy="61" r="7" fill="#431407"/><circle cx="49" cy="58" r="2.4" fill="#fff"/><circle cx="79" cy="58" r="2.4" fill="#fff"/></g>
           <ellipse cx="60" cy="79" rx="5.5" ry="4" fill="#431407"/>
           <path d="M50 88 Q60 96 70 88" fill="none" stroke="#431407" stroke-width="3.2" stroke-linecap="round"/>
           <ellipse cx="33" cy="82" rx="6" ry="4" fill="#FDBA74" opacity="0.75"/>
@@ -12027,6 +12038,7 @@ function renderBlockSelect(){
           <path d="M60 30 C64 24 72 24 74 31 C76 24 84 26 82 34 C80 40 68 42 60 30 Z" fill="#EC4899"/>
           <circle cx="72" cy="31" r="3" fill="#F472B6"/>
         </svg>
+        </div>
       </div>
       <div class="hero-badge">Français ↔ Arabe · ${WORDS.length} mots</div>
       <div class="hero-title" id="heroTitle">Apprends avec <span class="grad" id="heroNameMale" style="transition:opacity .6s ease;">Souky</span> <span class="grad" style="opacity:0.5;">&amp;</span> <span class="grad" id="heroNameFemale" style="opacity:0.4;transition:opacity .6s ease;">Abdel</span> <span class="hero-fox-wiggle">🦊</span></div>
@@ -31699,6 +31711,57 @@ function mascotSparkle(){
   setTimeout(() => m.classList.remove('sparkle'), 900);
 }
 scheduleMascotAntics();
+
+/* ===== Mascotte 3D : suit le doigt/curseur, regarde, cligne, respire ===== */
+(function initMascot3D(){
+  if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  let px=null, py=null, lastMove=0, raf=0, wanderT=0;
+  const targets = () => [document.getElementById('mascot'), document.getElementById('heroMascot3d')].filter(el => el && el.offsetParent !== null);
+  function apply(){
+    raf=0;
+    const now=performance.now();
+    targets().forEach(el => {
+      const r=el.getBoundingClientRect();
+      let nx, ny;
+      if(px===null || now-lastMove>3000){
+        // flânerie douce quand personne ne bouge
+        wanderT += 0.016;
+        nx=Math.sin(wanderT*0.9)*0.55; ny=Math.sin(wanderT*0.6+1)*0.35;
+      } else {
+        const cx=r.left+r.width/2, cy=r.top+r.height/2;
+        nx=Math.max(-1,Math.min(1,(px-cx)/(window.innerWidth*0.45)));
+        ny=Math.max(-1,Math.min(1,(py-cy)/(window.innerHeight*0.45)));
+      }
+      const host = el.id==='heroMascot3d' ? el : el;
+      host.style.setProperty('--ty', (nx*24).toFixed(2)+'deg');
+      host.style.setProperty('--tx', (-ny*16).toFixed(2)+'deg');
+      host.style.setProperty('--px', (nx*3.5).toFixed(2)+'px');
+      host.style.setProperty('--py', (ny*3).toFixed(2)+'px');
+      host.style.setProperty('--sx', nx.toFixed(3));
+      host.style.setProperty('--sy', ny.toFixed(3));
+    });
+  }
+  function onPoint(e){
+    const t = e.touches ? e.touches[0] : e;
+    if(!t) return;
+    px=t.clientX; py=t.clientY; lastMove=performance.now();
+    if(!raf) raf=requestAnimationFrame(apply);
+  }
+  window.addEventListener('pointermove', onPoint, {passive:true});
+  window.addEventListener('pointerdown', onPoint, {passive:true});
+  window.addEventListener('touchmove', onPoint, {passive:true});
+  // boucle de flânerie (légère, 20 fps suffisent grâce aux transitions CSS)
+  setInterval(() => { if(document.hidden) return; if(px===null || performance.now()-lastMove>3000){ if(!raf) raf=requestAnimationFrame(apply); } }, 50);
+  // clignements naturels (parfois double)
+  function blink(){
+    const eyes=document.querySelectorAll('.m-eyes, .hero-pupil');
+    eyes.forEach(g => g.classList.add('blink'));
+    setTimeout(() => eyes.forEach(g => g.classList.remove('blink')), 130);
+    if(Math.random()<0.25) setTimeout(() => { eyes.forEach(g => g.classList.add('blink')); setTimeout(() => eyes.forEach(g => g.classList.remove('blink')), 120); }, 260);
+    setTimeout(blink, 2800 + Math.random()*3400);
+  }
+  setTimeout(blink, 2000);
+})();
 </script>
 </body>
 </html>
