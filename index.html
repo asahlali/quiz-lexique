@@ -191,6 +191,18 @@
   .lexicon-legend-item b{ color:var(--text);font-weight:800; }
   .lexicon-legend-dot{ width:9px;height:9px;border-radius:50%;display:inline-block; }
 
+  .quest-peek-fab{
+    position:fixed; left:14px; bottom:90px; z-index:41; width:46px; height:46px; border-radius:50%; border:none; cursor:pointer;
+    background:linear-gradient(135deg,#F59E0B,#EA580C); color:#fff; font-size:20px; box-shadow:0 4px 14px rgba(234,88,12,.4);
+    display:flex; align-items:center; justify-content:center; transition:transform .15s;
+  }
+  .quest-peek-fab:active{ transform:scale(.92); }
+  .quest-peek-badge{
+    position:absolute; top:-4px; right:-4px; min-width:20px; height:20px; padding:0 5px; border-radius:10px;
+    background:#DC2626; color:#fff; font:800 11px/20px 'Inter',sans-serif; border:2px solid var(--surface, #fff);
+  }
+  .quest-peek-badge:empty{ display:none; }
+  .quest-peek-badge.done{ background:#16A34A; }
   .home-nav-arrows{
     position:fixed; right:16px; bottom:90px; z-index:40; display:flex; flex-direction:column; gap:10px;
   }
@@ -1826,6 +1838,16 @@
     <div id="summaryOverlayBody"></div>
   </div>
 </div>
+<div class="summary-overlay" id="questPeekOverlay">
+  <div class="summary-box">
+    <div class="summary-box-head">
+      <span>🎯 Mes objectifs du jour</span>
+      <button id="closeQuestPeekBtn" title="Fermer">✕</button>
+    </div>
+    <div id="questPeekBody"></div>
+  </div>
+</div>
+<button id="questPeekFab" class="quest-peek-fab" title="Voir mes objectifs restants" aria-label="Voir mes objectifs restants" style="display:none;">📋<span id="questPeekBadge" class="quest-peek-badge"></span></button>
 <div class="summary-overlay" id="modeSuggestOverlay">
   <div class="summary-box">
     <div class="summary-box-head">
@@ -2142,6 +2164,7 @@ let peekPlayToken = 0;
 
 function renderBlockWordsPeek(words, title, onBack){
   clearQuestionTimer();
+  startSectionReading('ecoute'); // 🎧 le temps passé à revoir/écouter les mots compte dans l'objectif du jour
   document.body.classList.remove('quiz-active');
   isHomeScreen = false;
   stopPeekPlay();
@@ -4917,14 +4940,41 @@ let blockStartTime = 0;
    pour éviter des durées absurdes (ex: "832 min" pour une session laissée en pause). */
 let totalHiddenMs = 0;
 let hiddenSince = document.hidden ? Date.now() : null;
-document.addEventListener('visibilitychange', () => {
-  if(document.hidden){
-    hiddenSince = Date.now();
-  } else if(hiddenSince){
-    totalHiddenMs += Date.now() - hiddenSince;
-    hiddenSince = null;
+/* 🎧 Exception importante : si l'app est réduite PENDANT une écoute (Radio, « Écouter cette
+   liste », lecture vocale en cours), ce temps d'apprentissage COMPTE quand même — tu apprends
+   en écoutant, même écran réduit ou sans toucher au téléphone. Plafonné à 30 min d'affilée
+   en arrière-plan pour éviter un compteur qui tourne dans le vide si le système a coupé le son. */
+function isAudioLearning(){
+  try{
+    if(typeof peekPlayState !== 'undefined' && peekPlayState && peekPlayState.playing) return true;
+    if(typeof radioState !== 'undefined' && radioState && radioState.playing) return true;
+    if(window.speechSynthesis && window.speechSynthesis.speaking) return true;
+  }catch(e){}
+  return false;
+}
+const HIDDEN_AUDIO_MAX_MS = 30 * 60000;
+let activityLastSampleAt = Date.now();
+let activityWasHidden = document.hidden;
+let hiddenAudioRunMs = 0;
+function sampleActivity(){
+  const now = Date.now();
+  const dt = Math.max(0, now - activityLastSampleAt);
+  activityLastSampleAt = now;
+  const audio = isAudioLearning();
+  if(activityWasHidden){
+    if(audio && dt < 5 * 60000 && hiddenAudioRunMs < HIDDEN_AUDIO_MAX_MS){
+      hiddenAudioRunMs += dt; // écoute en arrière-plan : compté comme du temps actif
+    } else {
+      totalHiddenMs += dt;
+    }
+  } else {
+    hiddenAudioRunMs = 0;
   }
-});
+  activityWasHidden = document.hidden;
+  if(audio){ markUserInteraction(); } // écouter = être actif, même sans toucher l'écran
+}
+document.addEventListener('visibilitychange', sampleActivity);
+setInterval(sampleActivity, 2000);
 /* ⏱️ Idem pour l'inactivité SANS changer d'écran : si on reste longtemps sans rien toucher
    (plus qu'une marge normale de réflexion), le temps au-delà de cette marge n'est pas compté. */
 const IDLE_GRACE_MS = 60000; // 60s de marge de réflexion tolérée entre deux actions
@@ -4941,8 +4991,8 @@ function markUserInteraction(){
    Plafonné à 3h par sécurité, au cas où un cas limite échapperait quand même au calcul. */
 function computeActiveDurationSec(startMs){
   if(!startMs) return 0;
+  sampleActivity(); // met à jour le temps caché jusqu'à maintenant (en tenant compte de l'écoute)
   let hiddenMs = totalHiddenMs;
-  if(hiddenSince){ hiddenMs += Date.now() - hiddenSince; } // toujours caché au moment du calcul (rare)
   let idleMs = totalIdleMs;
   const currentGap = Date.now() - lastInteractionAt;
   if(currentGap > IDLE_GRACE_MS){ idleMs += (currentGap - IDLE_GRACE_MS); } // inactif au moment du calcul
@@ -11877,6 +11927,22 @@ function markSheetPassed(sheetId, pct){
   results[sheetId] = { passed: true, pct: Math.max(pct, prevBest), lastAt: Date.now() };
   saveSheetResults(results);
 }
+function unmarkSheetPassed(sheetId){
+  const results = loadSheetResults();
+  delete results[sheetId];
+  saveSheetResults(results);
+}
+/* Met à jour le badge « ✅ Validée » et le bouton Valider/Dévalider de la fiche ouverte. */
+function refreshSheetValidateUi(sheetId){
+  const done = isSheetPassed(sheetId);
+  const tag = document.getElementById('sheetValidatedTag');
+  if(tag) tag.textContent = done ? ' · ✅ Validée' : '';
+  const btn = document.getElementById('sheetValidateToggleBtn');
+  if(btn){
+    btn.textContent = done ? '↩️ Dévalider (ouverte par erreur)' : '✅ Marquer comme faite';
+    btn.classList.toggle('active', !done);
+  }
+}
 function isSheetPassed(sheetId){
   const results = loadSheetResults();
   return !!(results[sheetId] && results[sheetId].passed);
@@ -11960,6 +12026,85 @@ let homeScrollY = 0;
 window.addEventListener('scroll', () => {
   if(document.getElementById('lexiconProgressBar')){ homeScrollY = window.scrollY; }
 }, { passive: true });
+
+/* ============ 🎯 NAVIGATION RAPIDE (boutons flottants 🎯 / ⬆️) ============
+   Sur l'accueil : 🎯 descend au prochain bloc à faire. Sur les autres écrans (fiches, Bouquinage,
+   jeux...) : 🎯 descend à « l'objectif » de l'écran — prochaine fiche/texte à valider, bouton
+   Valider, ou zone de réponse d'un jeu. Chaque écran peut déclarer sa cible via setQuickNavTarget(),
+   sinon une cible générique est trouvée automatiquement. */
+function expandCollapsedAncestors(el){
+  let e = el ? el.parentElement : null;
+  while(e && e !== document.body){
+    if(e.id && e.id.startsWith('homeSecBody-') && getComputedStyle(e).display === 'none'){
+      const secId = e.id.slice('homeSecBody-'.length);
+      homeSectionsCollapsed[secId] = false;
+      try{ saveHomeSectionsCollapsed(); }catch(err){}
+      e.style.display = 'block';
+      const chev = document.getElementById(`homeSecChevron-${secId}`);
+      if(chev){ chev.style.transform = 'rotate(0deg)'; }
+    } else if(getComputedStyle(e).display === 'none'){
+      e.style.display = ''; // autre conteneur replié : on le rouvre pour pouvoir y descendre
+    }
+    e = e.parentElement;
+  }
+}
+function quickNavJumpTo(el){
+  if(!el){ setStatus('🎉 Tout est fait ici — bravo !', 'ok'); return; }
+  expandCollapsedAncestors(el);
+  requestAnimationFrame(() => {
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    el.classList.remove('jump-highlight'); void el.offsetWidth; el.classList.add('jump-highlight');
+    setTimeout(() => el.classList.remove('jump-highlight'), 1600);
+  });
+}
+let quickNavFinder = null;
+function setQuickNavTarget(finder){ quickNavFinder = finder; ensureQuickNav(true); }
+function isElVisible(el){ return !!(el && el.offsetParent !== null && !el.disabled); }
+function genericQuickNavTarget(){
+  const selectors = [
+    '#quizCard .opt:not(.disabled):not(.faded):not(.correct)',
+    '#quizCard input:not([disabled]):not([type=hidden]):not([type=range])',
+    '#quizCard textarea:not([disabled])',
+    '#quizCard .next-btn',
+    '#quizCard .restart-btn',
+  ];
+  for(const sel of selectors){
+    const el = [...document.querySelectorAll(sel)].find(isElVisible);
+    if(el) return el;
+  }
+  return null;
+}
+function ensureQuickNav(force){
+  if(isHomeScreen) return;
+  const existing = document.getElementById('homeNavArrows');
+  if(existing && existing.dataset.kind === 'home') return;
+  const card = document.getElementById('quizCard');
+  const tallEnough = document.documentElement.scrollHeight > window.innerHeight * 1.25;
+  if(!card || (!tallEnough && !force)){ return; }
+  if(existing && existing.dataset.kind === 'screen') return;
+  const nav = existing || document.createElement('div');
+  nav.id = 'homeNavArrows';
+  nav.className = 'home-nav-arrows';
+  nav.dataset.kind = 'screen';
+  nav.innerHTML = `
+    <button class="home-nav-arrow" id="quickNavGoalBtn" title="Aller à l'objectif">🎯</button>
+    <button class="home-nav-arrow" id="quickNavTopBtn" title="Remonter en haut">⬆️</button>
+  `;
+  if(!existing) document.body.appendChild(nav);
+  nav.querySelector('#quickNavTopBtn').addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+  nav.querySelector('#quickNavGoalBtn').addEventListener('click', () => {
+    let el = null;
+    try{ el = quickNavFinder ? quickNavFinder() : null; }catch(e){ el = null; }
+    if(!el && !quickNavFinder) el = genericQuickNavTarget();
+    quickNavJumpTo(el);
+  });
+}
+(function watchQuickNav(){
+  let t = null;
+  const obs = new MutationObserver(() => { clearTimeout(t); t = setTimeout(() => ensureQuickNav(false), 250); });
+  const start = () => { const c = document.getElementById('quizCard'); if(c) obs.observe(c, { childList:true, subtree:true }); };
+  if(document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', start); } else { start(); }
+})();
 
 function renderBlockSelect(){
   clearQuestionTimer();
@@ -12601,15 +12746,14 @@ function renderBlockSelect(){
   document.getElementById('jumpToTopBtn').addEventListener('click', () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
+  navArrows.dataset.kind = 'home';
   document.getElementById('jumpToMyBlockBtn').addEventListener('click', () => {
     const idx = findNextBlockToPlay();
     if(idx === null) return;
-    const el = document.querySelector(`[data-block="${idx}"]`);
-    if(el){
-      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      el.classList.remove('jump-highlight'); void el.offsetWidth; el.classList.add('jump-highlight');
-      setTimeout(() => el.classList.remove('jump-highlight'), 1600);
-    }
+    // le bloc peut être masqué par un filtre de catégorie : on prend alors le 1er bloc à faire visible
+    let el = document.querySelector(`[data-block="${idx}"]`);
+    if(!el){ el = [...document.querySelectorAll('[data-block]')].find(b => { const i = parseInt(b.dataset.block, 10); return isBlockUnlocked(i) && !isBlockPassed(i); }) || document.querySelector('[data-block]'); }
+    quickNavJumpTo(el);
   });
   startMascotCycle();
   typewriterHeroTitle();
@@ -14200,6 +14344,26 @@ function startQuestionTimer(onTimeout, seconds){
   fill.style.transition = `width ${secs}s linear`;
   fill.style.width = '0%';
   questionTimer = setTimeout(onTimeout, secs * 1000);
+  questionTimerInfo = { cb: onTimeout, end: Date.now() + secs * 1000, paused: null };
+}
+/* ⏸️ Pause / reprise du chrono de question (ex. pendant qu'on consulte ses objectifs du jour). */
+let questionTimerInfo = null;
+function pauseQuestionTimer(){
+  if(!questionTimer || !questionTimerInfo || questionTimerInfo.paused !== null) return false;
+  clearTimeout(questionTimer); questionTimer = null;
+  questionTimerInfo.paused = Math.max(0, questionTimerInfo.end - Date.now());
+  const fill = document.getElementById('quizTimerFill');
+  if(fill){ const w = getComputedStyle(fill).width; fill.style.transition = 'none'; fill.style.width = w; }
+  return true;
+}
+function resumeQuestionTimer(){
+  if(!questionTimerInfo || questionTimerInfo.paused === null) return;
+  const remaining = questionTimerInfo.paused;
+  questionTimerInfo.paused = null;
+  questionTimerInfo.end = Date.now() + remaining;
+  const fill = document.getElementById('quizTimerFill');
+  if(fill){ void fill.offsetWidth; fill.style.transition = `width ${remaining/1000}s linear`; fill.style.width = '0%'; }
+  questionTimer = setTimeout(questionTimerInfo.cb, remaining);
 }
 /* 📖🏛️📎 Compte le temps passé à simplement LIRE (Bouquinage, Fiches pratiques, Atelier
    Français) dans les objectifs du jour — pas seulement le temps passé sur un exercice.
@@ -14207,13 +14371,27 @@ function startQuestionTimer(onTimeout, seconds){
    précédent (via clearQuestionTimer) puis en arme un nouveau pour lui-même. */
 let sectionReadingStart = null;
 let sectionReadingMode = null;
-function startSectionReading(mode){
+let sectionReadingHiddenBase = 0, sectionReadingIdleBase = 0;
+function startSectionReading(mode, isContinuation){
+  sampleActivity();
+  if(!isContinuation) markUserInteraction(); // nouvel écran = action de l'utilisateur
   sectionReadingStart = Date.now();
   sectionReadingMode = mode;
+  // 📌 point de départ des compteurs : on ne retire que le temps caché/inactif survenu PENDANT
+  // cette lecture (avant, tout le temps caché depuis le début de la session était retiré, et le
+  // compteur du jour restait bloqué après avoir réduit l'appli une seule fois).
+  sectionReadingHiddenBase = totalHiddenMs;
+  sectionReadingIdleBase = totalIdleMs;
 }
 function flushSectionReading(){
   if(!sectionReadingStart) return;
-  const seconds = computeActiveDurationSec(sectionReadingStart);
+  sampleActivity();
+  const now = Date.now();
+  let idleMs = Math.max(0, totalIdleMs - sectionReadingIdleBase); // (compteurs remis à zéro ailleurs → jamais négatif)
+  const gap = now - lastInteractionAt;
+  if(gap > IDLE_GRACE_MS){ idleMs += Math.min(gap - IDLE_GRACE_MS, now - sectionReadingStart); }
+  const hiddenMs = Math.max(0, totalHiddenMs - sectionReadingHiddenBase);
+  const seconds = Math.min(10800, Math.round(Math.max(0, (now - sectionReadingStart) - hiddenMs - idleMs) / 1000));
   const mode = sectionReadingMode;
   sectionReadingStart = null;
   sectionReadingMode = null;
@@ -14221,13 +14399,27 @@ function flushSectionReading(){
   recordDailyActivity();
   recordDailyStats(seconds, false, 0, mode); // pas de succès/XP pour la simple lecture, juste le temps
 }
+// ⏱️ Toutes les minutes, on enregistre le temps de lecture/écoute en cours sans attendre de
+// quitter l'écran : le compteur du jour avance en direct (et une longue écoute n'est plus plafonnée).
+setInterval(() => {
+  if(!sectionReadingStart) return;
+  const mode = sectionReadingMode;
+  flushSectionReading();
+  startSectionReading(mode, true);
+  if(typeof updateLiveQuestTime === 'function') updateLiveQuestTime();
+}, 60000);
 function clearQuestionTimer(){
   if(questionTimer){ clearTimeout(questionTimer); questionTimer = null; }
+  if(typeof questionTimerInfo !== 'undefined') questionTimerInfo = null;
+  // on quitte l'écran courant : une fiche ouverte n'est plus validée automatiquement en arrière-plan
+  if(window.__sheetAutoValidateTimer){ clearTimeout(window.__sheetAutoValidateTimer); window.__sheetAutoValidateTimer = null; }
+  window.__currentSheetDetailId = null;
   clearAutoAdvance();
   stopMascotCycle();
   flushSectionReading();
   const navArrows = document.getElementById('homeNavArrows');
   if(navArrows){ navArrows.remove(); } // recréées fraîches par renderBlockSelect si on reste bien à l'accueil
+  quickNavFinder = null; // chaque écran redéclare sa propre cible « objectif »
   const fill = document.getElementById('quizTimerFill');
   if(fill){
     const w = getComputedStyle(fill).width;
@@ -28633,6 +28825,7 @@ function renderSheetsHomeBySection(section, catTag, heroTitle, heroSubtitle){
   card.querySelectorAll('[data-sheet]').forEach(btn => {
     btn.addEventListener('click', () => renderPracticalSheetDetail(btn.dataset.sheet));
   });
+  setQuickNavTarget(() => [...card.querySelectorAll('[data-sheet]')].find(b => !isSheetPassed(b.dataset.sheet)) || null);
   startSectionReading(section === 'atelier' || section === 'conjugaison' ? 'atelier' : 'fiche');
 }
 function renderPracticalSheetsHome(){
@@ -29519,11 +29712,21 @@ function renderPracticalSheetDetail(id){
   document.getElementById('footerNote').textContent = '';
   const card = document.getElementById('quizCard');
   const canQuiz = sheet.type === 'table' || sheet.recoKey; // 🎯 les tableaux et les règles à choix binaire sont "entraînables"
+  // 📖 Fiche sans exercice (règle descriptive, lettre type...) : la lecture EST l'accomplissement.
+  // Elle n'est plus validée dès l'ouverture (un clic par erreur la comptait) mais seulement après
+  // 20 s de lecture réelle sur la fiche — et elle reste dévalidable à la main (bouton en bas).
+  if(window.__sheetAutoValidateTimer){ clearTimeout(window.__sheetAutoValidateTimer); window.__sheetAutoValidateTimer = null; }
   if(!canQuiz && !isSheetPassed(sheet.id)){
-    // 📖 Pas d'exercice possible pour cette fiche (règle purement descriptive, lettre type...) :
-    // la lecture EST l'accomplissement — on la marque automatiquement comme faite.
-    markSheetPassed(sheet.id, 100);
+    window.__sheetAutoValidateTimer = setTimeout(() => {
+      window.__sheetAutoValidateTimer = null;
+      if(window.__currentSheetDetailId !== sheet.id || isSheetPassed(sheet.id) || window.__sheetManuallyUnvalidated === sheet.id) return;
+      markSheetPassed(sheet.id, 100);
+      refreshSheetValidateUi(sheet.id);
+      setStatus('✅ Fiche lue — validée automatiquement (tu peux la dévalider en bas).', 'ok');
+    }, 20000);
   }
+  window.__currentSheetDetailId = sheet.id;
+  window.__sheetManuallyUnvalidated = null; // nouvelle visite : le choix « dévalider » ne vaut que pour la visite en cours
 
   let bodyHtml = '';
   if(sheet.type === 'table'){
@@ -29554,7 +29757,7 @@ function renderPracticalSheetDetail(id){
   }
 
   card.innerHTML = `
-    <div class="cat-tag">${sheet.icon} ${escapeHtml(sheet.category)}${isSheetPassed(sheet.id) ? ' · ✅ Validée' : ''}</div>
+    <div class="cat-tag">${sheet.icon} ${escapeHtml(sheet.category)}<span id="sheetValidatedTag">${isSheetPassed(sheet.id) ? ' · ✅ Validée' : ''}</span></div>
     <div class="word-fr" style="font-size:clamp(19px,4vw,25px);">${escapeHtml(sheet.title)}</div>
     <div class="word-def" style="margin-top:6px;">${escapeHtml(sheet.intro)}</div>
     ${buildReadingToolbarHtml()}
@@ -29564,7 +29767,27 @@ function renderPracticalSheetDetail(id){
       ${canQuiz ? `<button class="restart-btn" id="sheetPracticeBtn" style="margin:0;background:linear-gradient(135deg,#EA580C,#C2410C);border-color:#9A3412;">🎯 S'entraîner</button>` : ''}
       <button class="restart-btn" id="nextSheetBtn" style="margin:0;background:var(--surface-sunken);border:1px solid var(--border);color:var(--purple);box-shadow:none;">Fiche suivante →</button>
     </div>
+    <div style="display:flex;justify-content:center;margin-top:12px;">
+      <button class="mode-chip" id="sheetValidateToggleBtn" style="font-weight:800;"></button>
+    </div>
   `;
+  refreshSheetValidateUi(sheet.id);
+  setQuickNavTarget(() => isSheetPassed(sheet.id) ? document.getElementById('nextSheetBtn') : document.getElementById('sheetValidateToggleBtn'));
+  document.getElementById('sheetValidateToggleBtn').addEventListener('click', () => {
+    if(isSheetPassed(sheet.id)){
+      unmarkSheetPassed(sheet.id);
+      window.__sheetManuallyUnvalidated = sheet.id; // pas de re-validation automatique pendant cette visite
+      if(window.__sheetAutoValidateTimer){ clearTimeout(window.__sheetAutoValidateTimer); window.__sheetAutoValidateTimer = null; }
+      setStatus('↩️ Fiche dévalidée — elle ne compte plus dans tes objectifs.', 'ok');
+    } else {
+      markSheetPassed(sheet.id, 100);
+      window.__sheetManuallyUnvalidated = null;
+      playCorrectSound();
+      setStatus('✅ Fiche validée !', 'ok');
+    }
+    refreshSheetValidateUi(sheet.id);
+    if(typeof cloudAutoPush === 'function') cloudAutoPush();
+  });
   document.getElementById('backFromSheetDetailBtn').addEventListener('click', homeFn);
   wireReadingToolbar(() => {
     let fullText = '';
@@ -30016,6 +30239,7 @@ function renderBouquinageHome(){
   card.querySelectorAll('[data-bouq]').forEach(btn => {
     btn.addEventListener('click', () => renderBouquinageDetail(parseInt(btn.dataset.bouq, 10)));
   });
+  setQuickNavTarget(() => [...card.querySelectorAll('[data-bouq]')].find(b => !isBouquinageRead(parseInt(b.dataset.bouq, 10))) || null);
   startSectionReading('bouquinage');
 }
 function renderBouquinageDetail(idx){
@@ -30057,6 +30281,7 @@ function renderBouquinageDetail(idx){
   if(idx > 0){ document.getElementById('bouquinagePrevBtn').addEventListener('click', () => renderBouquinageDetail(idx - 1)); }
   if(idx < BOUQUINAGE_TEXTS.length - 1){ document.getElementById('bouquinageNextBtn').addEventListener('click', () => renderBouquinageDetail(idx + 1)); }
   document.getElementById('bouquinageRandomDetailBtn').addEventListener('click', () => renderBouquinageDetail(Math.floor(Math.random() * BOUQUINAGE_TEXTS.length)));
+  setQuickNavTarget(() => document.getElementById(isBouquinageRead(idx) && idx < BOUQUINAGE_TEXTS.length - 1 ? 'bouquinageNextBtn' : 'markReadBtn'));
   startSectionReading('bouquinage');
 }
 
@@ -31738,6 +31963,97 @@ function mascotSparkle(){
   setTimeout(() => m.classList.remove('sparkle'), 900);
 }
 scheduleMascotAntics();
+
+/* ============ 🎯 OBJECTIFS DU JOUR — consultables depuis n'importe quel mode ============
+   Bouton flottant (en bas à gauche) visible partout sauf sur l'accueil (qui les affiche déjà).
+   Le badge montre le nombre de défis restants ; un appui ouvre la liste, avec le temps de la
+   partie en cours déjà inclus. Le chrono de question est mis en pause pendant la consultation. */
+function questsWithLiveTime(){
+  // enregistre la lecture/écoute en cours pour que le compteur soit à jour
+  if(typeof sectionReadingStart !== 'undefined' && sectionReadingStart){
+    const m = sectionReadingMode; flushSectionReading(); startSectionReading(m, true);
+  }
+  const quests = getDailyQuests();
+  let liveSec = 0;
+  if(document.body.classList.contains('quiz-active') && blockStartTime){
+    liveSec = Math.min(900, computeActiveDurationSec(blockStartTime)); // partie en cours, pas encore enregistrée
+  }
+  if(liveSec > 0){
+    const tq = quests.find(q => q.isTime);
+    if(tq){ tq.cur = Math.min(tq.goal, tq.cur + liveSec); tq.live = true; }
+  }
+  return quests;
+}
+function refreshQuestPeekFab(){
+  const fab = document.getElementById('questPeekFab');
+  if(!fab) return;
+  const cardTxt = (document.getElementById('quizCard')?.textContent || '');
+  const onHome = !!isHomeScreen || !!document.getElementById('lexiconProgressBar')
+    || cardTxt.includes('Quelle application veux-tu utiliser') // écran de choix d'application
+    || appMode === 'qcm'; // QcmVISION : les défis du jour sont ceux de VocabVISION
+  const overlayOpen = document.getElementById('questPeekOverlay')?.classList.contains('show');
+  fab.style.display = (onHome && !overlayOpen) ? 'none' : 'flex';
+  if(onHome) return;
+  try{
+    const left = getDailyQuests().filter(q => q.cur < q.goal).length;
+    const badge = document.getElementById('questPeekBadge');
+    badge.textContent = left > 0 ? String(left) : '✓';
+    badge.classList.toggle('done', left === 0);
+  }catch(e){}
+}
+let questPeekPausedTimer = false;
+function openQuestPeek(){
+  const body = document.getElementById('questPeekBody');
+  const overlay = document.getElementById('questPeekOverlay');
+  if(!body || !overlay) return;
+  questPeekPausedTimer = pauseQuestionTimer();
+  const quests = questsWithLiveTime();
+  const left = quests.filter(q => q.cur < q.goal);
+  const done = quests.filter(q => q.cur >= q.goal);
+  const row = (q) => {
+    const isDone = q.cur >= q.goal;
+    const pct = Math.round((q.cur / q.goal) * 100);
+    const curTxt = q.isTime ? fmtDuration(q.cur) : q.cur;
+    const goalTxt = q.isTime ? fmtDuration(q.goal) : q.goal;
+    const rest = q.isTime ? `encore ${fmtDuration(q.goal - q.cur)}` : `encore ${q.goal - q.cur}`;
+    return `<div class="quest-row">
+      <div class="quest-ic ${isDone ? 'done' : ''}">${isDone ? '✅' : q.icon}</div>
+      <div class="quest-main">
+        <div class="quest-label">${q.label}${!isDone ? ` <span style="color:#EA580C;font-weight:800;">· ${rest}</span>` : ''}${q.live ? ' <span style="font-size:11px;color:var(--text-dim);">(partie en cours incluse)</span>' : ''}</div>
+        <div class="quest-bar"><div class="quest-bar-fill" style="width:${pct}%;"></div><span class="quest-bar-txt">${curTxt} / ${goalTxt}</span></div>
+      </div>
+    </div>`;
+  };
+  body.innerHTML = `
+    <div style="padding:2px 4px 12px;text-align:left;">
+      ${left.length === 0
+        ? `<div class="quests-alldone">🎉 Tous les défis du jour sont faits !</div>`
+        : `<div style="font-size:13px;color:var(--text-dim);font-weight:700;margin-bottom:6px;">⏳ Il te reste ${left.length} défi${left.length>1?'s':''} :</div>${left.map(row).join('')}`}
+      ${done.length ? `<div style="font-size:13px;color:var(--text-dim);font-weight:700;margin:14px 0 6px;">✅ Déjà faits (${done.length})</div>${done.map(row).join('')}` : ''}
+      ${questPeekPausedTimer ? `<div style="margin-top:12px;font-size:12px;color:var(--text-dim);text-align:center;">⏸️ Le chrono de la question est en pause.</div>` : ''}
+      <button class="restart-btn" id="questPeekResumeBtn" style="margin:14px auto 0;display:block;">▶ Reprendre</button>
+    </div>`;
+  document.getElementById('questPeekResumeBtn').addEventListener('click', closeQuestPeek);
+  overlay.classList.add('show');
+}
+function closeQuestPeek(){
+  const overlay = document.getElementById('questPeekOverlay');
+  if(overlay) overlay.classList.remove('show');
+  if(questPeekPausedTimer){ questPeekPausedTimer = false; resumeQuestionTimer(); }
+  refreshQuestPeekFab();
+}
+(function initQuestPeek(){
+  const fab = document.getElementById('questPeekFab');
+  if(!fab) return;
+  fab.addEventListener('click', openQuestPeek);
+  document.getElementById('closeQuestPeekBtn').addEventListener('click', closeQuestPeek);
+  document.getElementById('questPeekOverlay').addEventListener('click', (e) => { if(e.target.id === 'questPeekOverlay') closeQuestPeek(); });
+  let t = null;
+  const card = document.getElementById('quizCard');
+  if(card){ new MutationObserver(() => { clearTimeout(t); t = setTimeout(refreshQuestPeekFab, 300); }).observe(card, { childList:true }); }
+  setInterval(refreshQuestPeekFab, 15000);
+  refreshQuestPeekFab();
+})();
 
 /* ===== Mascotte 3D : suit le doigt/curseur, regarde, cligne, respire ===== */
 (function initMascot3D(){
