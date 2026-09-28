@@ -2391,6 +2391,10 @@ const PEEK_SUGGEST_MODES = [
   { mode:'chrono',  label:'⚡ Chrono Vrai/Faux' },
   { mode:'speak',   label:'🎤 Prononciation' },
   { mode:'blank',   label:'🕳️ Phrase à trous' },
+  { mode:'pairs',   label:'🧩 Paires chrono' },
+  { mode:'dialogue',label:'🔀 Mots en ordre' },
+  { mode:'repeat',  label:'🗣️ Répétition' },
+  { mode:'listen',  label:'🎧 Dictée' },
 ];
 function showModeSuggestPopup(words){
   if(!words || words.length < 2) return; // pas assez de mots pour un mode digne de ce nom
@@ -2400,7 +2404,7 @@ function showModeSuggestPopup(words){
   body.innerHTML = `
     <div style="padding:4px 4px 16px;text-align:center;">
       <div style="font-size:14px;color:var(--text-dim);margin-bottom:14px;">Tu viens d'écouter ${words.length} mots — tu veux t'entraîner dessus tout de suite ?</div>
-      <div style="display:flex;flex-direction:column;gap:10px;">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;">
         ${PEEK_SUGGEST_MODES.map(m => `<button class="opt" data-suggest-mode="${m.mode}" style="padding:13px 16px;font-weight:800;">${m.label}</button>`).join('')}
       </div>
     </div>
@@ -2416,6 +2420,8 @@ function showModeSuggestPopup(words){
 function hideModeSuggestPopup(){
   const overlay = document.getElementById('modeSuggestOverlay');
   if(overlay){ overlay.classList.remove('show'); }
+  const body = document.getElementById('modeSuggestBody');
+  if(body){ body.innerHTML = ''; } // évite que ses boutons .opt soient confondus avec ceux du quiz
 }
 /* Démarre n'importe quel mode de jeu directement avec une liste de mots arbitraire (ex. celle
    qu'on vient de "peek"/écouter), sans passer par un bloc ou un bloc personnalisé enregistré. */
@@ -2667,12 +2673,13 @@ function loadQuestSettings(){
       modesGoal: s.modesGoal || 0, // 0 = défi désactivé
       fullMasteryGoal: s.fullMasteryGoal !== undefined ? s.fullMasteryGoal : 7, // 0 = défi désactivé
       sectionGoals, // 🎯 objectifs par section, 0 = section non exigée aujourd'hui
+      updatedAt: s.updatedAt || 0, // 🕒 date du dernier réglage : la synchro garde toujours le plus récent
     };
   }catch(e){
     return { timeGoalMin:5, passGoal:QUEST_PASS_GOAL_DEFAULT, lessonGoal:QUEST_LESSON_GOAL_DEFAULT, modesGoal:0, fullMasteryGoal:7, sectionGoals: defaultSectionGoals() };
   }
 }
-function saveQuestSettings(){ try{ localStorage.setItem(nsKey(QUEST_SETTINGS_KEY), JSON.stringify(questSettings)); }catch(e){} }
+function saveQuestSettings(){ questSettings.updatedAt = Date.now(); try{ localStorage.setItem(nsKey(QUEST_SETTINGS_KEY), JSON.stringify(questSettings)); }catch(e){} }
 let questSettings = loadQuestSettings();
 /* Nombre de blocs (normaux + personnalisés) déjà réussis à ≥90% dans TOUS les modes de jeu. */
 function countFullyMasteredBlocks(){
@@ -14040,7 +14047,7 @@ function renderClassicCard(){
     <div class="reveal" id="revealWrap"></div>
   `;
   document.getElementById('speakWordBtn').addEventListener('click', () => speak(word.fr, 'fr-FR'));
-  document.querySelectorAll('.opt').forEach(btn => {
+  document.querySelectorAll('#quizCard .opt').forEach(btn => {
     btn.addEventListener('click', () => handleAnswer(parseInt(btn.dataset.i)));
   });
   renderProgress();
@@ -14079,7 +14086,7 @@ function renderBlankCard(){
   document.getElementById('speakWordBtn').addEventListener('click', () => {
     speak(word.ex.replace(/~/g, word.fr), 'fr-FR');
   });
-  document.querySelectorAll('.opt').forEach(btn => {
+  document.querySelectorAll('#quizCard .opt').forEach(btn => {
     btn.addEventListener('click', () => handleAnswer(parseInt(btn.dataset.i)));
   });
   renderProgress();
@@ -14338,7 +14345,7 @@ function handleAnswer(i){
     queue.push(w);
   }
 
-  document.querySelectorAll('.opt').forEach((btn, bi) => {
+  document.querySelectorAll('#quizCard .opt').forEach((btn, bi) => {
     btn.classList.add('disabled');
     if(options[bi].fr === word.fr){ btn.classList.add('correct'); }
     else if(!timedOut && bi === i){ btn.classList.add('wrong'); }
@@ -15076,6 +15083,19 @@ function mergeRemoteData(remote){
         if(m){ saveCustomBlocks(customBlocks); changed = true; }
       }
 
+    } else if(baseKey === QUEST_SETTINGS_KEY){
+      // 🎯 Objectifs : on garde le réglage le PLUS RÉCENT (avant, le cloud écrasait systématiquement
+      // un objectif modifié localement si l'envoi n'avait pas encore eu lieu → retour aux anciennes valeurs).
+      const remoteQS = safeParse(rv, null);
+      const localRaw = (()=>{ try{ return localStorage.getItem(key); }catch(e){ return null; } })();
+      const localQS = localRaw ? safeParse(localRaw, null) : null;
+      if(remoteQS && (!localQS || (remoteQS.updatedAt||0) > (localQS.updatedAt||0))){
+        try{ localStorage.setItem(key, rv); }catch(e){}
+        changed = true;
+      } else if(localQS && (!remoteQS || (localQS.updatedAt||0) > (remoteQS.updatedAt||0))){
+        window.__pendingQuestPush = true; // le local est plus récent : on le renverra au cloud
+      }
+
     } else if(baseKey === BLOCK_TITLES_KEY){
       // Union des titres personnalisés : un renommage fait sur un autre appareil vient compléter
       // les nôtres, sans jamais écraser un titre déjà présent localement.
@@ -15118,13 +15138,19 @@ function mergeRemoteData(remote){
   return changed;
 }
 
+let cloudPushPending = false;
 function cloudAutoPush(){
-  if(!getSyncUrl() || syncBusy) return;
+  if(!getSyncUrl()) return;
+  if(syncBusy){ cloudPushPending = true; return; } // ⏳ une synchro tourne déjà : on renverra juste après, au lieu de perdre la modif
   syncBusy = true;
+  cloudPushPending = false;
   cloudPush()
     .then(() => { setStatus('☁️ Scores synchronisés.', 'ok'); pushLeaderboardEntry(); })
     .catch((e) => { setStatus('☁️ Synchro impossible : ' + (e && e.message ? e.message : 'erreur inconnue'), 'err'); console.error('Sync push error:', e); })
-    .finally(() => { syncBusy = false; });
+    .finally(() => {
+      syncBusy = false;
+      if(cloudPushPending || window.__pendingQuestPush){ window.__pendingQuestPush = false; setTimeout(cloudAutoPush, 1500); }
+    });
 }
 
 /* ============ 🏆 CLASSEMENT JOURNALIER ============
@@ -15252,6 +15278,7 @@ async function autoSyncOnLoad(){
   }finally{
     syncBusy = false;
     setSyncIndicator(false);
+    if(cloudPushPending){ setTimeout(cloudAutoPush, 1500); } // une modif faite pendant la synchro part maintenant
   }
 }
 
