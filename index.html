@@ -659,6 +659,15 @@
   .mascot{ transform-origin:bottom center; animation:mascotIdle 3.2s ease-in-out infinite; filter:drop-shadow(0 8px 10px rgba(0,0,0,0.18)); }
   .mascot svg{ display:block; }
   .m-shadow{ fill:rgba(0,0,0,0.12); }
+  /* ===== 🦊 Mascotte 3D temps réel (WebGL) ===== */
+  .fox3d-canvas{ position:absolute; left:50%; top:50%; transform:translate(-50%,-56%); pointer-events:none; z-index:2; }
+  .mascot.fox3d-on{ position:relative; }
+  .mascot.fox3d-on, .mascot.fox3d-on.happy, .mascot.fox3d-on.sad{ animation:none; filter:none; }
+  .mascot.fox3d-on > svg{ visibility:hidden; }
+  .mascot.fox3d-on .fox3d-canvas{ width:150px !important; height:150px !important; transform:translate(-50%,-68%); }
+  #heroMascotContainer.fox3d-on{ animation:heroFadeUp .6s cubic-bezier(.16,1,.3,1) both !important; }
+  #heroMascotContainer.fox3d-on .mascot-3d-wrap{ visibility:hidden; }
+  #heroMascotContainer.fox3d-on .fox3d-canvas{ width:176px !important; height:176px !important; transform:translate(-50%,-67%); }
   /* ===== Mascotte 3D réaliste ===== */
   .mascot{ transform-style:preserve-3d; }
   .mascot > svg, .mascot-3d-wrap{
@@ -12417,6 +12426,7 @@ function renderBlockSelect(){
       <button class="restart-btn" id="situationsBtn" style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#BE185D,#9D174D);color:#fff;box-shadow:0 4px 0 #831843;">💬 Expressions B2-C1</button>
       <button class="restart-btn" id="entrepriseBtn" style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#1D4ED8,#1E3A8A);color:#fff;box-shadow:0 4px 0 #172554;">🏢 Français en entreprise</button>
       <button class="restart-btn" id="redactionBtn" style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#8B5CF6,#6D28D9);color:#fff;box-shadow:0 4px 0 #4C1D95;">✍️ Rédiger & communiquer</button>
+      <button class="restart-btn" id="bescherelleBtn" style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#2563EB,#7C3AED);color:#fff;box-shadow:0 4px 0 #3730A3;">📘 Grammaire & conjugaison</button>
     `)}
 
     ${buildHomeSectionHtml('daily', '📰', 'Rendez-vous du jour', `
@@ -12556,6 +12566,7 @@ function renderBlockSelect(){
   document.getElementById('situationsBtn').addEventListener('click', () => renderSituationsHome());
   document.getElementById('entrepriseBtn').addEventListener('click', () => renderEntrepriseHub());
   document.getElementById('redactionBtn').addEventListener('click', () => renderRedactionHub());
+  document.getElementById('bescherelleBtn').addEventListener('click', () => renderBescherelleHub());
   document.getElementById('jeuxMotsBtn').addEventListener('click', () => renderJeuxMotsHome());
   const questsHead = document.getElementById('questsHead');
   const questsChevron = document.getElementById('questsChevron');
@@ -29014,7 +29025,51 @@ const PRACTICAL_SHEETS = [
   {"id": "red-51", "section": "situations", "category": "Rédiger et communiquer", "hub": "redaction", "part": "B", "icon": "🎩", "title": "51 · Le registre de langue", "intro": "À l'écrit pro : registre courant à soutenu, même avec un collègue.", "type": "table", "columns": ["Familier", "Courant · soutenu"], "rows": [["bosser", "travailler · œuvrer"], ["un boulot", "un emploi · un poste"], ["piger", "comprendre · saisir"], ["balancer (un mail)", "envoyer · transmettre"], ["c'est super", "c'est très bien · c'est remarquable"], ["t'inquiète", "ne vous inquiétez pas · soyez rassuré"], ["boucler un dossier", "terminer · finaliser"]], "quizLabel": "Remplace par un registre adapté :", "micCol": 1},
   {"id": "red-52", "section": "situations", "category": "Rédiger et communiquer", "hub": "redaction", "part": "B", "icon": "💭", "title": "52 · Les termes abstraits (nominalisation)", "intro": "Passer du concret à une idée générale — utile en synthèse et en rapport.", "type": "table", "columns": ["Verbe", "Nom abstrait"], "rows": [["décider", "la décision"], ["réduire", "la réduction"], ["évaluer", "l'évaluation"], ["réaliser", "la réalisation"], ["développer", "le développement"], ["rentable", "la rentabilité"], ["croître", "la croissance"], ["piloter", "le pilotage"], ["ouvrir", "l'ouverture"]], "quizLabel": "Quel est le nom abstrait ?", "note": "Les gens partent plus tôt, les arrêts maladie augmentent → la démotivation, l'absentéisme. ⚠️ Chaque idée abstraite doit s'appuyer sur un fait."},
   {"id": "red-53", "section": "situations", "category": "Rédiger et communiquer", "hub": "redaction", "part": "B", "icon": "💶", "title": "53 · Le vocabulaire commercial", "intro": "Les documents et notions qu'on croise dans tout échange commercial.", "type": "table", "columns": ["Terme", "Définition"], "rows": [["devis", "estimation détaillée du prix, avant commande"], ["bon de commande", "document par lequel le client commande"], ["bon de livraison", "document qui accompagne la marchandise"], ["facture", "document qui demande le paiement"], ["avoir", "document qui annule tout ou partie d'une facture"], ["acompte", "partie du prix payée d'avance, qui engage les deux parties"], ["arrhes", "somme versée d'avance ; on peut se désister en la perdant"], ["HT / TTC", "hors taxes / toutes taxes comprises"], ["remise", "réduction sur le prix catalogue"], ["rabais", "réduction pour un défaut"], ["ristourne", "réduction sur le volume annuel"], ["échéance", "date limite de paiement"], ["prospect", "client potentiel"], ["fidélisation", "action de garder ses clients"], ["marge", "différence entre le prix de vente et le coût"], ["fournisseur", "entreprise qui vend à ton entreprise"]], "quizLabel": "Que désigne ce terme ?"},
-  {"id": "red-checklist", "section": "situations", "category": "Rédiger et communiquer", "hub": "redaction", "part": "O", "icon": "✅", "title": "Check-list finale avant d'envoyer", "intro": "À passer avant CHAQUE écrit professionnel.", "type": "rule", "blocks": [{"heading": "Le fond", "text": "", "examples": ["Je sais en une phrase ce que le lecteur doit savoir ou faire.", "L'objet ou le titre est précis.", "L'essentiel est au début.", "Le ton et les formules conviennent au destinataire."]}, {"heading": "La forme", "text": "", "examples": ["Une idée par paragraphe, des phrases de moins de 25 mots.", "Les connecteurs rendent la logique visible.", "Chiffres, noms, dates et pièces jointes vérifiés.", "Pas de mot familier, pas de redondance."]}, {"heading": "La langue et la prudence", "text": "", "examples": ["Accords, homophones et ponctuation vérifiés.", "Relu à tête reposée, idéalement à voix haute.", "Je peux assumer ce message s'il est transféré."]}]}
+  {"id": "red-checklist", "section": "situations", "category": "Rédiger et communiquer", "hub": "redaction", "part": "O", "icon": "✅", "title": "Check-list finale avant d'envoyer", "intro": "À passer avant CHAQUE écrit professionnel.", "type": "rule", "blocks": [{"heading": "Le fond", "text": "", "examples": ["Je sais en une phrase ce que le lecteur doit savoir ou faire.", "L'objet ou le titre est précis.", "L'essentiel est au début.", "Le ton et les formules conviennent au destinataire."]}, {"heading": "La forme", "text": "", "examples": ["Une idée par paragraphe, des phrases de moins de 25 mots.", "Les connecteurs rendent la logique visible.", "Chiffres, noms, dates et pièces jointes vérifiés.", "Pas de mot familier, pas de redondance."]}, {"heading": "La langue et la prudence", "text": "", "examples": ["Accords, homophones et ponctuation vérifiés.", "Relu à tête reposée, idéalement à voix haute.", "Je peux assumer ce message s'il est transféré."]}]},
+  {"id": "bes-g01", "section": "avance", "category": "Grammaire & conjugaison (Bescherelle)", "hub": "bescherelle", "part": "G", "icon": "🧱", "title": "Nature et fonction", "intro": "La nature, c'est ce qu'un mot EST (dictionnaire) ; la fonction, c'est le RÔLE qu'il joue dans une phrase.", "type": "rule", "blocks": [{"heading": "Nature ≠ fonction", "text": "Le même mot garde sa nature mais change de fonction.", "examples": ["Le stage commence lundi. (stage = nom, sujet)", "J'ai trouvé un stage. (stage = nom, COD)"]}, {"heading": "Les 9 natures", "text": "Variables : nom, déterminant, adjectif, pronom, verbe. Invariables : adverbe, préposition, conjonction, interjection.", "examples": []}, {"heading": "Les groupes de mots", "text": "Organisés autour d'un noyau : GN, GV, groupe adjectival, prépositionnel, adverbial.", "examples": ["[le nouveau logiciel de paie]", "[très fier de son équipe]", "[dans la salle de réunion]"]}, {"heading": "La phrase", "text": "Simple = un verbe conjugué ; complexe = plusieurs. Structure : sujet + prédicat + compléments facultatifs.", "examples": []}, {"heading": "Essentiel ou circonstanciel ?", "text": "On essaie de supprimer ou de déplacer : si c'est possible, il est circonstanciel.", "examples": ["Elle travaille à Casablanca depuis 2020. → « depuis 2020 » est circonstanciel."]}]},
+  {"id": "bes-g02", "section": "avance", "category": "Grammaire & conjugaison (Bescherelle)", "hub": "bescherelle", "part": "G", "icon": "⚧", "title": "Le genre des noms : les pièges", "intro": "Pour les objets, le genre est arbitraire : apprends le nom AVEC son article.", "type": "table", "columns": ["Nom", "Genre"], "rows": [["espace", "masculin : un espace"], ["incendie", "masculin : un incendie"], ["pétale", "masculin : un pétale"], ["astérisque", "masculin : un astérisque"], ["en-tête", "masculin : un en-tête"], ["éloge", "masculin : un éloge"], ["intervalle", "masculin : un intervalle"], ["emblème", "masculin : un emblème"], ["interview", "féminin : une interview"], ["oasis", "féminin : une oasis"], ["orbite", "féminin : une orbite"], ["échappatoire", "féminin : une échappatoire"], ["atmosphère", "féminin : une atmosphère"], ["espèce", "féminin : une espèce"], ["azalée", "féminin : une azalée"]], "quizLabel": "Masculin ou féminin ?", "note": "Le sens change avec le genre : un livre (ouvrage) / une livre (poids) · un poste (emploi) / la poste · un mode (manière) / la mode · un tour / une tour · un manche (outil) / une manche (vêtement). Métiers : une ingénieure, une autrice, une cheffe, une professeure."},
+  {"id": "bes-g03", "section": "avance", "category": "Grammaire & conjugaison (Bescherelle)", "hub": "bescherelle", "part": "G", "icon": "🔢", "title": "Le pluriel des noms", "intro": "Règle générale + s, et des séries d'exceptions à connaître.", "type": "table", "columns": ["Singulier", "Pluriel"], "rows": [["un bureau", "des bureaux"], ["un pneu", "des pneus"], ["un journal", "des journaux"], ["un festival", "des festivals"], ["un détail", "des détails"], ["un travail", "des travaux"], ["un trou", "des trous"], ["un bijou", "des bijoux"], ["un prix", "des prix"], ["un œil", "des yeux"], ["un ciel", "des cieux"], ["monsieur", "messieurs"], ["un chef-lieu", "des chefs-lieux"], ["un tire-bouchon", "des tire-bouchons"], ["un arc-en-ciel", "des arcs-en-ciel"]], "quizLabel": "Quel est le pluriel ?", "note": "Les 7 en -oux : bijoux, cailloux, choux, genoux, hiboux, joujoux, poux. Noms composés : seuls le nom et l'adjectif prennent le pluriel."},
+  {"id": "bes-g04", "section": "avance", "category": "Grammaire & conjugaison (Bescherelle)", "hub": "bescherelle", "part": "G", "icon": "🎟️", "title": "Les déterminants", "intro": "Article, démonstratif, possessif, numéral, indéfini, interrogatif/exclamatif.", "type": "table", "columns": ["Type", "Exemple"], "rows": [["article défini (contracté)", "au bureau, du directeur"], ["article indéfini + adjectif avant le nom", "de bons résultats"], ["article partitif", "du temps, de l'énergie"], ["démonstratif", "cet entretien"], ["possessif", "leur contrat"], ["numéral cardinal", "trois candidats"], ["indéfini", "chaque salarié"], ["exclamatif", "Quel talent !"]], "quizLabel": "Quel exemple illustre ce déterminant ?", "note": "La négation transforme l'article : J'ai un stagiaire → Je n'ai pas DE stagiaire (mais avec être : Ce n'est pas UN problème)."},
+  {"id": "bes-g05", "section": "avance", "category": "Grammaire & conjugaison (Bescherelle)", "hub": "bescherelle", "part": "G", "icon": "💯", "title": "Écrire les nombres", "intro": "vingt et cent prennent un s s'ils sont multipliés ET non suivis d'un autre nombre ; mille est invariable.", "type": "table", "columns": ["Nombre", "En lettres"], "rows": [["80", "quatre-vingts"], ["81", "quatre-vingt-un"], ["200", "deux cents"], ["203", "deux cent trois"], ["2000", "deux mille"], ["3 000 000", "trois millions"], ["96", "quatre-vingt-seize"]], "quizLabel": "Comment s'écrit ce nombre ?", "micCol": 1, "note": "millier, million, milliard sont des noms : ils s'accordent. Depuis 1990, on peut relier tous les nombres par des traits d'union : deux-cent-trois."},
+  {"id": "bes-g06", "section": "avance", "category": "Grammaire & conjugaison (Bescherelle)", "hub": "bescherelle", "part": "G", "icon": "🧩", "title": "Les expansions du nom", "intro": "Épithète, complément du nom, relative, apposition.", "type": "rule", "blocks": [{"heading": "Les 4 expansions", "text": "", "examples": ["un contrat temporaire (épithète)", "un contrat de travail (complément du nom)", "le contrat que j'ai signé (relative)", "Leila, notre nouvelle DRH, arrive lundi. (apposition)"]}, {"heading": "Détachée ou non ?", "text": "Entre virgules : information secondaire. Sans virgules : elle restreint le nom.", "examples": ["Les candidats qui parlent arabe seront reçus. (seulement ceux-là)", "Les candidats, qui parlent arabe, seront reçus. (tous)"]}]},
+  {"id": "bes-g07", "section": "avance", "category": "Grammaire & conjugaison (Bescherelle)", "hub": "bescherelle", "part": "G", "icon": "🪞", "title": "Les formes pronominales", "intro": "Réfléchi, réciproque, sens passif, essentiellement pronominal.", "type": "table", "columns": ["Exemple", "Type"], "rows": [["Il se prépare.", "réfléchi"], ["Ils se saluent.", "réciproque"], ["Ce produit se vend bien.", "sens passif"], ["Il se souvient.", "essentiellement pronominal"], ["Elle se maquille.", "réfléchi"], ["Elles se téléphonent.", "réciproque"], ["Le français se parle ici.", "sens passif"], ["Il s'évanouit.", "essentiellement pronominal"]], "quizLabel": "Quel type de pronominal ?"},
+  {"id": "bes-g08", "section": "avance", "category": "Grammaire & conjugaison (Bescherelle)", "hub": "bescherelle", "part": "G", "icon": "🗂️", "title": "Les modes et leur valeur", "intro": "4 modes personnels, 3 impersonnels.", "type": "table", "columns": ["Mode", "Valeur principale"], "rows": [["indicatif", "le réel, le certain"], ["subjonctif", "le possible, le souhaité"], ["conditionnel", "l'hypothétique, l'atténué"], ["impératif", "l'ordre, le conseil"], ["infinitif", "le verbe comme nom"], ["participe", "le verbe comme adjectif"], ["gérondif", "le verbe comme complément circonstanciel"]], "quizLabel": "Quelle est la valeur de ce mode ?", "note": "L'imparfait et le plus-que-parfait du subjonctif sont réservés à la langue littéraire. Les grammaires scolaires rangent souvent le conditionnel dans l'indicatif."},
+  {"id": "bes-g09", "section": "avance", "category": "Grammaire & conjugaison (Bescherelle)", "hub": "bescherelle", "part": "G", "icon": "⏯️", "title": "L'aspect et les périphrases", "intro": "Comment l'action est envisagée dans son déroulement.", "type": "table", "columns": ["Forme", "Sens"], "rows": [["aller + infinitif", "futur proche"], ["venir de + infinitif", "passé récent"], ["être en train de + infinitif", "action en cours"], ["temps composé (j'ai fini)", "accompli"], ["temps simple (je finis)", "non accompli"], ["imparfait (il signait)", "aspect sécant, en cours"], ["passé simple (il signa)", "aspect global"]], "quizLabel": "Quel sens exprime cette forme ?"},
+  {"id": "bes-g10", "section": "avance", "category": "Grammaire & conjugaison (Bescherelle)", "hub": "bescherelle", "part": "G", "icon": "⚖️", "title": "Participe présent ou adjectif verbal ?", "intro": "Participe présent (-ant) invariable, avec un complément ; adjectif verbal variable.", "type": "table", "columns": ["Participe présent", "Adjectif verbal"], "rows": [["convainquant", "convaincant"], ["communiquant", "communicant"], ["fatiguant", "fatigant"], ["négligeant", "négligent"], ["précédant", "précédent"], ["différant", "différent"], ["excellant", "excellent"], ["provoquant", "provocant"]], "quizLabel": "Quel est l'adjectif verbal ?", "note": "des arguments convainquant les membres (participe) ≠ des arguments convaincants (adjectif). Gérondif : son sujet doit être celui du verbe principal — ✅ En relisant, j'ai vu l'erreur."},
+  {"id": "bes-g11", "section": "avance", "category": "Grammaire & conjugaison (Bescherelle)", "hub": "bescherelle", "part": "G", "icon": "🌫️", "title": "Le subjonctif : quand l'employer ?", "intro": "Mode du fait envisagé, non affirmé comme réel.", "type": "rule", "blocks": [{"heading": "Volonté, souhait, ordre", "text": "", "examples": ["Je veux qu'il vienne."]}, {"heading": "Sentiment", "text": "", "examples": ["Je suis content que tu sois là."]}, {"heading": "Doute, négation de l'opinion", "text": "", "examples": ["Je doute qu'il ait raison.", "Je ne crois pas qu'il puisse venir."]}, {"heading": "Nécessité, possibilité", "text": "", "examples": ["Il faut que nous partions.", "Il se peut qu'il pleuve."]}, {"heading": "Certaines conjonctions", "text": "bien que, pour que, avant que, à moins que, sans que, jusqu'à ce que", "examples": []}, {"heading": "Proposition indépendante", "text": "", "examples": ["Qu'il entre !", "Vive la France !"]}]},
+  {"id": "bes-g12", "section": "avance", "category": "Grammaire & conjugaison (Bescherelle)", "hub": "bescherelle", "part": "G", "icon": "⏳", "title": "Les temps de l'indicatif et leur valeur", "intro": "Chaque temps a ses emplois.", "type": "table", "columns": ["Temps", "Exemple"], "rows": [["présent", "Le train part à 8 h."], ["imparfait (politesse)", "Je voulais vous demander un conseil."], ["passé simple", "Il ouvrit la porte et sortit."], ["futur simple (ordre atténué)", "Vous enverrez le devis demain."], ["passé composé", "J'ai terminé le rapport."], ["plus-que-parfait", "Il avait déjà signé quand j'ai appelé."], ["passé antérieur", "Dès qu'il eut fini, il partit."], ["futur antérieur", "Quand tu auras lu, rappelle-moi."]], "quizLabel": "Quel exemple correspond à ce temps ?", "micCol": 1},
+  {"id": "bes-g13", "section": "avance", "category": "Grammaire & conjugaison (Bescherelle)", "hub": "bescherelle", "part": "G", "icon": "🎛️", "title": "Le conditionnel et l'impératif", "intro": "Radical du futur + terminaisons de l'imparfait ; impératif sans sujet.", "type": "rule", "blocks": [{"heading": "Conditionnel : emplois", "text": "Hypothèse, souhait, politesse, information non confirmée, futur dans le passé.", "examples": ["Pourriez-vous m'aider ?", "Le PDG démissionnerait.", "Il a dit qu'il viendrait."]}, {"heading": "Impératif : pas de s au 1er groupe", "text": "…sauf devant EN et Y.", "examples": ["Parle, va, ouvre !", "Parles-en, vas-y !"]}, {"heading": "Impératifs irréguliers", "text": "sois / soyons / soyez · aie / ayons / ayez · sache / sachons / sachez · veuillez", "examples": []}, {"heading": "Pronoms à l'impératif", "text": "Affirmatif : après le verbe avec trait d'union. Négatif : avant le verbe.", "examples": ["Envoie-le-moi.", "Ne me l'envoie pas."]}]},
+  {"id": "bes-g14", "section": "avance", "category": "Grammaire & conjugaison (Bescherelle)", "hub": "bescherelle", "part": "G", "icon": "🤝", "title": "L'accord du verbe avec le sujet", "intro": "Cherche le vrai sujet : « qui est-ce qui ? ».", "type": "table", "columns": ["Phrase", "Forme correcte"], "rows": [["Où (travailler, présent) tes collègues ?", "travaillent"], ["Les dossiers que le directeur m'a transmis (être) incomplets.", "sont"], ["Toi et moi (partir, futur) ensemble.", "partirons"], ["C'est moi qui (avoir) raison.", "ai"], ["C'est vous qui (être) responsables.", "êtes"], ["La plupart (être) venus.", "sont"], ["Plus d'un candidat (avoir) postulé.", "a"], ["Karim ou Nadia (être, futur) élu.", "sera"]], "quizLabel": "Accorde le verbe :"},
+  {"id": "bes-g15", "section": "avance", "category": "Grammaire & conjugaison (Bescherelle)", "hub": "bescherelle", "part": "G", "icon": "✍️", "title": "L'accord du participe passé", "intro": "Sans auxiliaire → nom ; être → sujet ; avoir → COD placé avant ; pronominal → comme avoir.", "type": "table", "columns": ["Phrase", "Participe correct"], "rows": [["Elles sont (arriver).", "arrivées"], ["Les notes que j'ai (prendre).", "prises"], ["J'ai (prendre) des notes.", "pris"], ["Elle s'est (couper).", "coupée"], ["Elle s'est (couper) les cheveux.", "coupé"], ["Des offres ? J'en ai (recevoir) trois.", "reçu"], ["Ils se sont (parler).", "parlé"], ["Elles se sont (enfuir).", "enfuies"], ["Les chaleurs qu'il a (faire).", "fait"], ["La chanteuse que j'ai (entendre) chanter.", "entendue"]], "quizLabel": "Accorde le participe passé :", "note": "Pas d'accord avec EN, avec les verbes impersonnels, ni quand le « se » est COI (se parler, se téléphoner, se succéder, se plaire, se nuire). « Fait » + infinitif est toujours invariable."},
+  {"id": "bes-g16", "section": "avance", "category": "Grammaire & conjugaison (Bescherelle)", "hub": "bescherelle", "part": "G", "icon": "🔌", "title": "Les constructions du verbe", "intro": "Transitif direct, indirect, double, intransitif, attributif, emploi absolu.", "type": "table", "columns": ["Exemple", "Construction"], "rows": [["Elle rédige un rapport.", "transitif direct"], ["Il parle de son projet.", "transitif indirect"], ["J'envoie le devis au client.", "doublement transitif"], ["Le serveur tombe en panne.", "intransitif"], ["Il semble compétent.", "attributif"], ["Il lit beaucoup.", "emploi absolu"]], "quizLabel": "Quelle construction ?", "note": "COD : remplacé par le, la, les. COI : par lui, leur, en, y. Attribut du COD après trouver, juger, nommer… : On l'a nommée directrice."},
+  {"id": "bes-g17", "section": "avance", "category": "Grammaire & conjugaison (Bescherelle)", "hub": "bescherelle", "part": "G", "icon": "👤", "title": "Les pronoms personnels", "intro": "Sujet, COD, COI, tonique, réfléchi — et l'ordre devant le verbe.", "type": "rule", "blocks": [{"heading": "3e personne", "text": "Sujet il/elle/ils/elles · COD le/la/les · COI lui/leur · tonique lui/elle/eux/elles · réfléchi se.", "examples": []}, {"heading": "Ordre devant le verbe", "text": "me/te/se/nous/vous → le/la/les → lui/leur → y → en → VERBE", "examples": ["Il me l'a dit.", "Je le lui donne.", "Il y en a."]}, {"heading": "Le pronom ON", "text": "Vaut « nous » à l'oral ou désigne quelqu'un d'indéterminé ; verbe au singulier.", "examples": ["On est arrivés ensemble.", "On a volé mon badge."]}, {"heading": "Leur ou leurs ?", "text": "Leur pronom (devant un verbe) est invariable ; leur(s) déterminant (devant un nom) s'accorde.", "examples": ["Je leur écris.", "leurs dossiers"]}]},
+  {"id": "bes-g18", "section": "avance", "category": "Grammaire & conjugaison (Bescherelle)", "hub": "bescherelle", "part": "G", "icon": "👉", "title": "Les autres pronoms", "intro": "Possessifs, démonstratifs, indéfinis, interrogatifs, relatifs.", "type": "table", "columns": ["Type", "Exemple"], "rows": [["possessif", "Ton badge fonctionne, le mien non."], ["démonstratif", "Prends celui-ci."], ["indéfini", "Chacun apporte son ordinateur."], ["interrogatif", "Lequel préférez-vous ?"], ["relatif", "Le poste auquel je postule."], ["numéral", "J'en veux deux."]], "quizLabel": "Quel exemple illustre ce pronom ?", "micCol": 1, "note": "Relatifs : qui (sujet), que (COD), dont (de), où (lieu/temps), lequel (après préposition), quoi (antécédent vague : ce à quoi je pense)."},
+  {"id": "bes-g19", "section": "avance", "category": "Grammaire & conjugaison (Bescherelle)", "hub": "bescherelle", "part": "G", "icon": "🎨", "title": "Le féminin des adjectifs", "intro": "Règle générale + e, et des familles de terminaisons.", "type": "table", "columns": ["Masculin", "Féminin"], "rows": [["premier", "première"], ["sérieux", "sérieuse"], ["actif", "active"], ["professionnel", "professionnelle"], ["ancien", "ancienne"], ["complet", "complète"], ["net", "nette"], ["créateur", "créatrice"], ["trompeur", "trompeuse"], ["beau", "belle"], ["vieux", "vieille"], ["long", "longue"], ["frais", "fraîche"], ["sec", "sèche"], ["doux", "douce"], ["faux", "fausse"], ["fou", "folle"]], "quizLabel": "Quel est le féminin ?", "note": "Devant un nom masculin commençant par une voyelle : un bel, nouvel, vieil outil."},
+  {"id": "bes-g20", "section": "avance", "category": "Grammaire & conjugaison (Bescherelle)", "hub": "bescherelle", "part": "G", "icon": "🌈", "title": "Couleurs, demi, comparatif et superlatif", "intro": "Les accords particuliers de l'adjectif.", "type": "rule", "blocks": [{"heading": "Couleurs", "text": "Adjectif simple : accord. Nom employé comme couleur ou adjectif composé : invariable (sauf rose, mauve, pourpre, fauve).", "examples": ["des chemises blanches", "des chemises orange", "des yeux bleu clair"]}, {"heading": "Demi, mi, semi, nu", "text": "Invariables devant le nom (trait d'union) ; demi s'accorde en genre après.", "examples": ["une demi-heure", "deux heures et demie"]}, {"heading": "Comparatifs irréguliers", "text": "bon → meilleur ; mauvais → pire ; petit → moindre (sens abstrait).", "examples": []}, {"heading": "Pléonasmes à éviter", "text": "", "examples": ["❌ plus meilleur", "❌ très excellent", "❌ le plus optimal"]}]},
+  {"id": "bes-g21", "section": "avance", "category": "Grammaire & conjugaison (Bescherelle)", "hub": "bescherelle", "part": "G", "icon": "↔️", "title": "La place de l'adjectif change le sens", "intro": "En général après le nom… mais certains changent de sens selon la place.", "type": "table", "columns": ["Expression", "Sens"], "rows": [["un grand homme", "célèbre"], ["un homme grand", "de haute taille"], ["un ancien bureau", "qui ne l'est plus"], ["un bureau ancien", "vieux"], ["mon propre bureau", "à moi"], ["mon bureau propre", "nettoyé"], ["un seul candidat", "un unique"], ["un candidat seul", "isolé"], ["un succès certain", "sûr"], ["la semaine dernière", "passée"], ["la dernière semaine", "de la série"]], "quizLabel": "Quel est le sens ?"},
+  {"id": "bes-g22", "section": "avance", "category": "Grammaire & conjugaison (Bescherelle)", "hub": "bescherelle", "part": "G", "icon": "🏃", "title": "Former les adverbes en -ment", "intro": "Féminin + -ment, sauf quelques familles.", "type": "table", "columns": ["Adjectif", "Adverbe"], "rows": [["lent", "lentement"], ["poli", "poliment"], ["vrai", "vraiment"], ["constant", "constamment"], ["courant", "couramment"], ["évident", "évidemment"], ["prudent", "prudemment"], ["gentil", "gentiment"], ["précis", "précisément"], ["énorme", "énormément"], ["profond", "profondément"]], "quizLabel": "Quel est l'adverbe ?", "micCol": 1, "note": "-ant → -amment ; -ent → -emment (même prononciation [amɑ̃]). « Tout » adverbe est invariable (ils sont tout contents), sauf devant un féminin commençant par une consonne : elles sont toutes contentes / tout étonnées."},
+  {"id": "bes-g23", "section": "avance", "category": "Grammaire & conjugaison (Bescherelle)", "hub": "bescherelle", "part": "G", "icon": "🔗", "title": "Les mots invariables", "intro": "Préposition, conjonction de coordination, de subordination, adverbe.", "type": "rule", "blocks": [{"heading": "Préposition", "text": "à, de, en, dans, par, pour, sur, avec, sans, chez, malgré, selon… et locutions : à cause de, grâce à, au lieu de.", "examples": []}, {"heading": "Coordination", "text": "mais, ou, et, donc, or, ni, car — relient deux éléments de même fonction.", "examples": []}, {"heading": "Subordination", "text": "que, quand, lorsque, si, comme, puisque, parce que, bien que, pour que, dès que, tandis que…", "examples": []}, {"heading": "Adverbe", "text": "Modifie un verbe, un adjectif, un autre adverbe ou toute la phrase.", "examples": ["travailler vite", "très clair", "trop tard", "Heureusement, tout va bien."]}]},
+  {"id": "bes-g24", "section": "avance", "category": "Grammaire & conjugaison (Bescherelle)", "hub": "bescherelle", "part": "G", "icon": "🔤", "title": "Types et formes de phrases", "intro": "4 types (un seul par phrase) ; formes négative, passive, impersonnelle, emphatique (combinables).", "type": "table", "columns": ["Phrase", "Type / forme"], "rows": [["La réunion est reportée.", "déclarative"], ["La réunion est-elle reportée ?", "interrogative"], ["Reportez la réunion.", "injonctive"], ["Quelle réunion interminable !", "exclamative"], ["Le contrat a été signé par le directeur.", "forme passive"], ["Il manque deux pages.", "forme impersonnelle"], ["C'est Nadia qui a trouvé.", "forme emphatique"], ["Il n'a jamais menti.", "forme négative"]], "quizLabel": "Quel type ou quelle forme ?", "note": "Interrogation : Tu viens ? (familier) · Est-ce que tu viens ? (courant) · Viens-tu ? (soutenu). Inversion complexe : Le client a-t-il répondu ? t euphonique : Viendra-t-elle ? Seuls les verbes transitifs directs passent au passif (sauf obéir, pardonner)."},
+  {"id": "bes-g25", "section": "avance", "category": "Grammaire & conjugaison (Bescherelle)", "hub": "bescherelle", "part": "G", "icon": "🌳", "title": "Subordonnées circonstancielles : quel mode ?", "intro": "Chaque conjonction impose son mode.", "type": "table", "columns": ["Conjonction", "Mode"], "rows": [["dès que", "indicatif"], ["avant que", "subjonctif"], ["jusqu'à ce que", "subjonctif"], ["parce que", "indicatif"], ["si bien que", "indicatif"], ["pour que", "subjonctif"], ["de peur que", "subjonctif"], ["bien que", "subjonctif"], ["alors que", "indicatif"], ["même si", "indicatif"], ["à condition que", "subjonctif"], ["au cas où", "conditionnel"], ["si (condition)", "indicatif"]], "quizLabel": "Quel mode après cette conjonction ?", "note": "Jamais de conditionnel après SI. Participiale : La réunion terminée, chacun est reparti."},
+  {"id": "bes-g26", "section": "avance", "category": "Grammaire & conjugaison (Bescherelle)", "hub": "bescherelle", "part": "G", "icon": "🧬", "title": "Complétives, relatives, interrogatives indirectes", "intro": "Les autres subordonnées.", "type": "rule", "blocks": [{"heading": "Conjonctive en « que »", "text": "Mode selon le verbe principal : opinion/certitude → indicatif ; volonté, doute, sentiment → subjonctif.", "examples": ["Je pense qu'il a raison."]}, {"heading": "Interrogative indirecte", "text": "si, qui, ce que, ce qui, quand… Pas d'inversion, pas de point d'interrogation.", "examples": ["Je me demande s'il viendra."]}, {"heading": "Infinitive", "text": "L'infinitif a son propre sujet (après voir, entendre, laisser, faire).", "examples": ["J'entends les clients se plaindre."]}, {"heading": "Relatives", "text": "Adjective (avec antécédent) ou substantive (sans). Subjonctif après un superlatif.", "examples": ["J'invite qui je veux.", "le meilleur outil que je connaisse"]}, {"heading": "Juxtaposer, coordonner, subordonner", "text": "", "examples": ["Il pleut, la réunion est annulée.", "Il pleut, donc la réunion est annulée.", "La réunion est annulée parce qu'il pleut."]}]},
+  {"id": "bes-g27", "section": "avance", "category": "Grammaire & conjugaison (Bescherelle)", "hub": "bescherelle", "part": "G", "icon": "🧵", "title": "Cohésion du texte : progression et reprises", "intro": "Comment l'information avance et comment on évite les répétitions.", "type": "table", "columns": ["Exemple", "Procédé"], "rows": [["Nadia arrive. Elle ouvre son ordinateur. Elle lit ses mails.", "progression à thème constant"], ["Nadia lit un mail. Ce mail annonce une réunion.", "progression linéaire"], ["L'entreprise compte trois sites. Le premier…", "progression à thème éclaté"], ["le directeur → il", "anaphore pronominale"], ["un stagiaire → ce jeune diplômé", "anaphore infidèle"], ["Les ventes ont chuté. Cette baisse…", "anaphore conceptuelle"], ["un bureau → la fenêtre, le fauteuil", "anaphore associative"]], "quizLabel": "Quel procédé ?"},
+  {"id": "bes-g28", "section": "avance", "category": "Grammaire & conjugaison (Bescherelle)", "hub": "bescherelle", "part": "G", "icon": "🗣️", "title": "Énonciation et discours rapporté", "intro": "Concordance des temps quand le verbe introducteur est au passé.", "type": "table", "columns": ["Discours direct", "Discours indirect"], "rows": [["présent", "imparfait"], ["passé composé", "plus-que-parfait"], ["futur simple", "conditionnel présent"], ["futur antérieur", "conditionnel passé"], ["impératif", "de + infinitif"], ["aujourd'hui", "ce jour-là"], ["hier", "la veille"], ["demain", "le lendemain"], ["la semaine prochaine", "la semaine suivante"]], "quizLabel": "Que devient-il au discours indirect ?", "note": "Direct : Il a dit : « Je signerai demain. » → Indirect : Il a dit qu'il signerait le lendemain. Indirect libre : Il signerait le lendemain, c'était promis. Narrativisé : Il a promis sa signature."},
+  {"id": "bes-c01", "section": "avance", "category": "Grammaire & conjugaison (Bescherelle)", "hub": "bescherelle", "part": "C", "icon": "👪", "title": "Les trois groupes", "intro": "1er : -er (sauf aller) · 2e : -ir avec -issant · 3e : tous les autres.", "type": "table", "columns": ["Verbe", "Groupe"], "rows": [["travailler", "1er groupe"], ["finir", "2e groupe"], ["partir", "3e groupe"], ["aller", "3e groupe"], ["choisir", "2e groupe"], ["prendre", "3e groupe"], ["réussir", "2e groupe"], ["courir", "3e groupe"], ["googler", "1er groupe"], ["voir", "3e groupe"], ["grandir", "2e groupe"], ["ouvrir", "3e groupe"]], "quizLabel": "À quel groupe appartient ce verbe ?", "note": "Astuce : si on peut dire « nous …issons », c'est le 2e groupe (nous finissons ; mais nous partons → 3e). Les verbes nouveaux vont au 1er groupe : scanner, liker, zoomer."},
+  {"id": "bes-c02", "section": "avance", "category": "Grammaire & conjugaison (Bescherelle)", "hub": "bescherelle", "part": "C", "icon": "⭐", "title": "ÊTRE : le tableau clé", "intro": "Les 6 temps essentiels du verbe être.", "type": "table", "columns": ["Personne", "Présent", "Imparfait", "Passé simple", "Futur", "Conditionnel", "Subjonctif"], "rows": [["je", "suis", "étais", "fus", "serai", "serais", "sois"], ["tu", "es", "étais", "fus", "seras", "serais", "sois"], ["il", "est", "était", "fut", "sera", "serait", "soit"], ["nous", "sommes", "étions", "fûmes", "serons", "serions", "soyons"], ["vous", "êtes", "étiez", "fûtes", "serez", "seriez", "soyez"], ["ils", "sont", "étaient", "furent", "seront", "seraient", "soient"]], "quizLabel": "Présent de « être » :", "micCol": 1, "note": "Impératif : sois, soyons, soyez. Participes : étant, été. Temps composés avec AVOIR : j'ai été."},
+  {"id": "bes-c03", "section": "avance", "category": "Grammaire & conjugaison (Bescherelle)", "hub": "bescherelle", "part": "C", "icon": "💎", "title": "AVOIR : le tableau clé", "intro": "Les 6 temps essentiels du verbe avoir.", "type": "table", "columns": ["Personne", "Présent", "Imparfait", "Passé simple", "Futur", "Conditionnel", "Subjonctif"], "rows": [["je", "ai", "avais", "eus", "aurai", "aurais", "aie"], ["tu", "as", "avais", "eus", "auras", "aurais", "aies"], ["il", "a", "avait", "eut", "aura", "aurait", "ait"], ["nous", "avons", "avions", "eûmes", "aurons", "aurions", "ayons"], ["vous", "avez", "aviez", "eûtes", "aurez", "auriez", "ayez"], ["ils", "ont", "avaient", "eurent", "auront", "auraient", "aient"]], "quizLabel": "Présent de « avoir » :", "micCol": 1, "note": "Impératif : aie, ayons, ayez. Participes : ayant, eu."},
+  {"id": "bes-c04", "section": "avance", "category": "Grammaire & conjugaison (Bescherelle)", "hub": "bescherelle", "part": "C", "icon": "❤️", "title": "AIMER : le tableau clé", "intro": "Les 6 temps essentiels du verbe aimer.", "type": "table", "columns": ["Personne", "Présent", "Imparfait", "Passé simple", "Futur", "Conditionnel", "Subjonctif"], "rows": [["je", "aime", "aimais", "aimai", "aimerai", "aimerais", "aime"], ["tu", "aimes", "aimais", "aimas", "aimeras", "aimerais", "aimes"], ["il", "aime", "aimait", "aima", "aimera", "aimerait", "aime"], ["nous", "aimons", "aimions", "aimâmes", "aimerons", "aimerions", "aimions"], ["vous", "aimez", "aimiez", "aimâtes", "aimerez", "aimeriez", "aimiez"], ["ils", "aiment", "aimaient", "aimèrent", "aimeront", "aimeraient", "aiment"]], "quizLabel": "Présent de « aimer » :", "micCol": 1, "note": "Modèle du 1er groupe. Impératif : aime, aimons, aimez. Participes : aimant, aimé(e)(s)."},
+  {"id": "bes-c05", "section": "avance", "category": "Grammaire & conjugaison (Bescherelle)", "hub": "bescherelle", "part": "C", "icon": "🔄", "title": "La voix passive et la forme pronominale", "intro": "Passif = être au temps voulu + participe accordé avec le sujet. Pronominal = temps composés TOUJOURS avec être.", "type": "table", "columns": ["Temps", "Forme passive"], "rows": [["présent", "elle est aimée"], ["imparfait", "elle était aimée"], ["passé composé", "elle a été aimée"], ["futur", "elle sera aimée"], ["conditionnel", "elle serait aimée"], ["subjonctif", "qu'elle soit aimée"]], "quizLabel": "Mets au passif à ce temps :", "micCol": 1, "note": "Le temps du passif est celui de l'auxiliaire : « il a été reçu » = passé composé passif. Pronominal : je me suis aimé(e), ils se sont aimés ; impératif aime-toi, ne t'aime pas."},
+  {"id": "bes-c06", "section": "avance", "category": "Grammaire & conjugaison (Bescherelle)", "hub": "bescherelle", "part": "C", "icon": "🧷", "title": "Les terminaisons des autres temps", "intro": "Imparfait, passé simple, futur, conditionnel, subjonctif, impératif.", "type": "table", "columns": ["Temps", "Terminaisons"], "rows": [["imparfait", "-ais, -ais, -ait, -ions, -iez, -aient"], ["passé simple (1er groupe)", "-ai, -as, -a, -âmes, -âtes, -èrent"], ["passé simple (finir, prendre, voir)", "-is, -is, -it, -îmes, -îtes, -irent"], ["passé simple (vouloir, courir, lire)", "-us, -us, -ut, -ûmes, -ûtes, -urent"], ["passé simple (venir, tenir)", "-ins, -ins, -int, -înmes, -întes, -inrent"], ["futur", "-rai, -ras, -ra, -rons, -rez, -ront"], ["conditionnel", "-rais, -rais, -rait, -rions, -riez, -raient"], ["subjonctif présent", "-e, -es, -e, -ions, -iez, -ent"]], "quizLabel": "Quelles terminaisons ?", "note": "Présent : 1er groupe -e, -es, -e, -ons, -ez, -ent ; 2e -is, -is, -it, -issons, -issez, -issent ; 3e -s, -s, -t/-d (ou -x : veux, peux). Exceptions : vous êtes, faites, dites ; ils sont, ont, font, vont."},
+  {"id": "bes-c07", "section": "avance", "category": "Grammaire & conjugaison (Bescherelle)", "hub": "bescherelle", "part": "C", "icon": "🚀", "title": "Les radicaux du futur", "intro": "À connaître par cœur — le conditionnel utilise le même radical.", "type": "table", "columns": ["Infinitif", "Futur (je)"], "rows": [["être", "je serai"], ["avoir", "j'aurai"], ["aller", "j'irai"], ["faire", "je ferai"], ["pouvoir", "je pourrai"], ["devoir", "je devrai"], ["recevoir", "je recevrai"], ["vouloir", "je voudrai"], ["savoir", "je saurai"], ["venir", "je viendrai"], ["voir", "je verrai"], ["envoyer", "j'enverrai"], ["courir", "je courrai"], ["mourir", "je mourrai"], ["acquérir", "j'acquerrai"], ["falloir", "il faudra"], ["valoir", "je vaudrai"], ["cueillir", "je cueillerai"], ["s'asseoir", "je m'assiérai"]], "quizLabel": "Conjugue au futur :", "micCol": 1},
+  {"id": "bes-c08", "section": "avance", "category": "Grammaire & conjugaison (Bescherelle)", "hub": "bescherelle", "part": "C", "icon": "🌫️", "title": "Les subjonctifs irréguliers", "intro": "Les autres se forment sur le radical de « ils » au présent.", "type": "table", "columns": ["Verbe", "Subjonctif présent"], "rows": [["être", "que je sois"], ["avoir", "que j'aie"], ["aller", "que j'aille"], ["faire", "que je fasse"], ["pouvoir", "que je puisse"], ["savoir", "que je sache"], ["vouloir", "que je veuille"], ["valoir", "que je vaille"], ["falloir", "qu'il faille"]], "quizLabel": "Subjonctif présent :", "micCol": 1},
+  {"id": "bes-c09", "section": "avance", "category": "Grammaire & conjugaison (Bescherelle)", "hub": "bescherelle", "part": "C", "icon": "🛠️", "title": "Les particularités du 1er groupe", "intro": "L'orthographe s'adapte pour garder la prononciation.", "type": "table", "columns": ["Verbe", "Forme piège"], "rows": [["placer (nous, présent)", "nous plaçons"], ["manger (nous, présent)", "nous mangeons"], ["céder (je, présent)", "je cède"], ["acheter (je, présent)", "j'achète"], ["appeler (je, présent)", "j'appelle"], ["jeter (je, présent)", "je jette"], ["employer (je, présent)", "j'emploie"], ["payer (je, présent)", "je paie / je paye"], ["étudier (nous, imparfait)", "nous étudiions"], ["envoyer (nous, imparfait)", "nous envoyions"], ["créer (participe féminin)", "créée"], ["jouer (je, futur)", "je jouerai"]], "quizLabel": "Quelle est la bonne forme ?", "note": "1990 : tous les verbes en -eler/-eter peuvent prendre è (j'épèle, il époussète), SAUF appeler, jeter et leurs dérivés. Naviguer : nous naviguons, mais l'adjectif s'écrit navigant."},
+  {"id": "bes-c10", "section": "avance", "category": "Grammaire & conjugaison (Bescherelle)", "hub": "bescherelle", "part": "C", "icon": "🏁", "title": "Le 2e groupe : finir et haïr", "intro": "Réguliers, avec -iss- au pluriel.", "type": "table", "columns": ["Temps (finir)", "Formes"], "rows": [["présent", "finis, finis, finit, finissons, finissez, finissent"], ["imparfait", "finissais, finissais, finissait, finissions, finissiez, finissaient"], ["passé simple", "finis, finis, finit, finîmes, finîtes, finirent"], ["futur", "finirai, finiras, finira, finirons, finirez, finiront"], ["subjonctif", "que je finisse, que nous finissions"], ["impératif", "finis, finissons, finissez"], ["participes", "finissant, fini(e)"]], "quizLabel": "Conjugue « finir » à ce temps :", "note": "Haïr : le tréma disparaît au singulier du présent et de l'impératif (je hais, tu hais, il hait ; hais) ; nous haïssons ; passé simple sans circonflexe : nous haïmes."},
+  {"id": "bes-c11", "section": "avance", "category": "Grammaire & conjugaison (Bescherelle)", "hub": "bescherelle", "part": "C", "icon": "🦁", "title": "Le 3e groupe : les verbes les plus utiles", "intro": "Présent (je / nous / ils), futur, passé simple, subjonctif, participe passé.", "type": "table", "columns": ["Infinitif", "Présent (je / nous / ils)", "Futur", "Passé simple", "Subjonctif", "Participe"], "rows": [["aller", "vais / allons / vont", "irai", "allai", "aille", "allé"], ["faire", "fais / faisons / font", "ferai", "fis", "fasse", "fait"], ["dire", "dis / disons / disent", "dirai", "dis", "dise", "dit"], ["prendre", "prends / prenons / prennent", "prendrai", "pris", "prenne", "pris"], ["mettre", "mets / mettons / mettent", "mettrai", "mis", "mette", "mis"], ["venir", "viens / venons / viennent", "viendrai", "vins", "vienne", "venu"], ["pouvoir", "peux / pouvons / peuvent", "pourrai", "pus", "puisse", "pu"], ["vouloir", "veux / voulons / veulent", "voudrai", "voulus", "veuille", "voulu"], ["devoir", "dois / devons / doivent", "devrai", "dus", "doive", "dû"], ["savoir", "sais / savons / savent", "saurai", "sus", "sache", "su"], ["voir", "vois / voyons / voient", "verrai", "vis", "voie", "vu"], ["recevoir", "reçois / recevons / reçoivent", "recevrai", "reçus", "reçoive", "reçu"], ["partir", "pars / partons / partent", "partirai", "partis", "parte", "parti"], ["ouvrir", "ouvre / ouvrons / ouvrent", "ouvrirai", "ouvris", "ouvre", "ouvert"], ["courir", "cours / courons / courent", "courrai", "courus", "coure", "couru"], ["mourir", "meurs / mourons / meurent", "mourrai", "mourus", "meure", "mort"], ["connaître", "connais / connaissons / connaissent", "connaîtrai", "connus", "connaisse", "connu"], ["croire", "crois / croyons / croient", "croirai", "crus", "croie", "cru"], ["boire", "bois / buvons / boivent", "boirai", "bus", "boive", "bu"], ["écrire", "écris / écrivons / écrivent", "écrirai", "écrivis", "écrive", "écrit"], ["lire", "lis / lisons / lisent", "lirai", "lus", "lise", "lu"], ["vivre", "vis / vivons / vivent", "vivrai", "vécus", "vive", "vécu"], ["craindre", "crains / craignons / craignent", "craindrai", "craignis", "craigne", "craint"], ["résoudre", "résous / résolvons / résolvent", "résoudrai", "résolus", "résolve", "résolu"], ["vaincre", "vaincs / vainquons / vainquent", "vaincrai", "vainquis", "vainque", "vaincu"], ["conduire", "conduis / conduisons / conduisent", "conduirai", "conduisis", "conduise", "conduit"], ["naître", "nais / naissons / naissent", "naîtrai", "naquis", "naisse", "né"], ["acquérir", "acquiers / acquérons / acquièrent", "acquerrai", "acquis", "acquière", "acquis"], ["s'asseoir", "assieds / asseyons / asseyent", "assiérai", "assis", "asseye", "assis"]], "quizLabel": "Présent (je / nous / ils) :", "note": "Familles : prendre → apprendre, comprendre · mettre → admettre, permettre · venir/tenir → devenir, obtenir · -uire → produire, traduire · -indre → craindre, atteindre. Pièges : il prend (d), mais il craint, il résout ; il met ; il vainc (sans t) ; vous dites, mais vous interdisez."},
+  {"id": "bes-c12", "section": "avance", "category": "Grammaire & conjugaison (Bescherelle)", "hub": "bescherelle", "part": "C", "icon": "🏗️", "title": "Former les temps composés", "intro": "Auxiliaire au temps simple correspondant + participe passé.", "type": "table", "columns": ["Auxiliaire au…", "Temps composé"], "rows": [["présent", "passé composé (j'ai fini)"], ["imparfait", "plus-que-parfait (j'avais fini)"], ["passé simple", "passé antérieur (j'eus fini)"], ["futur", "futur antérieur (j'aurai fini)"], ["conditionnel présent", "conditionnel passé (j'aurais fini)"], ["subjonctif présent", "subjonctif passé (que j'aie fini)"], ["infinitif présent", "infinitif passé (avoir fini)"]], "quizLabel": "Quel temps composé obtient-on ?"},
+  {"id": "bes-c13", "section": "avance", "category": "Grammaire & conjugaison (Bescherelle)", "hub": "bescherelle", "part": "C", "icon": "⚖️", "title": "Être ou avoir ?", "intro": "Être : pronominaux, passif, et ~15 verbes de mouvement ; mais avec un COD ils prennent avoir.", "type": "table", "columns": ["Phrase", "Auxiliaire"], "rows": [["Il ___ sorti.", "est"], ["Il ___ sorti son ordinateur.", "a"], ["Elle ___ montée au 3e étage.", "est"], ["Elle ___ monté les cartons.", "a"], ["Ils ___ passés nous voir.", "sont"], ["Ils ___ passé un examen.", "ont"], ["Nous nous ___ rencontrés.", "sommes"], ["J'___ été malade.", "ai"]], "quizLabel": "Être ou avoir ?", "note": "Verbes avec être : aller, venir, arriver, partir, entrer, sortir, monter, descendre, passer, retourner, tomber, rester, naître, mourir, devenir (+ dérivés)."},
+  {"id": "bes-c14", "section": "avance", "category": "Grammaire & conjugaison (Bescherelle)", "hub": "bescherelle", "part": "C", "icon": "🔍", "title": "Les homophones verbaux", "intro": "Un test pour chaque hésitation.", "type": "table", "columns": ["Hésitation", "Test"], "rows": [["-é / -er / -ez", "remplacer par vendu / vendre / vendez"], ["-ai (passé simple) / -ais (imparfait)", "passer à « il » : il envoya / il envoyait"], ["-rai (futur) / -rais (conditionnel)", "passer à « nous » : enverrons / enverrions"], ["-i / -is / -it (participe)", "mettre au féminin : prise → pris"], ["-ent / -ant", "« ils… » → -ent"], ["peu / peut", "peut = pouvait"], ["quel que / quelque", "quel(le)(s) que + être au subjonctif"]], "quizLabel": "Quel test utiliser ?", "note": "Accent circonflexe : nous fîmes, vous eûtes ; qu'il fût (subjonctif imparfait) ≠ il fut (passé simple) ; dû (mais due, dus)."},
+  {"id": "bes-c15", "section": "avance", "category": "Grammaire & conjugaison (Bescherelle)", "hub": "bescherelle", "part": "C", "icon": "🆕", "title": "Les rectifications de 1990", "intro": "Ancienne et nouvelle orthographe sont TOUTES LES DEUX correctes.", "type": "table", "columns": ["Ancienne", "Nouvelle"], "rows": [["connaître", "connaitre"], ["coût", "cout"], ["je céderai", "je cèderai"], ["il étiquette", "il étiquète"], ["elle s'est laissée tomber", "elle s'est laissé tomber"], ["deux cent trois", "deux-cent-trois"], ["week-end", "weekend"], ["des après-midi", "des après-midis"], ["événement", "évènement"], ["aiguë", "aigüe"], ["asseoir", "assoir"]], "quizLabel": "Quelle est l'orthographe rectifiée ?"},
+  {"id": "bes-memo", "section": "avance", "category": "Grammaire & conjugaison (Bescherelle)", "hub": "bescherelle", "part": "O", "icon": "🧠", "title": "Mémo des 20 pièges", "intro": "À relire avant chaque écrit important.", "type": "rule", "blocks": [{"heading": "Modes", "text": "", "examples": ["Si j'avais (jamais « si j'aurais »).", "Après qu'il est parti (indicatif).", "Bien qu'il soit tard (subjonctif).", "J'espère qu'il viendra (indicatif).", "Je ne pense pas qu'il ait tort (subjonctif)."]}, {"heading": "Accords", "text": "", "examples": ["Participe avec avoir : accord seulement si le COD est avant.", "Ils se sont parlé, téléphoné, succédé : pas d'accord.", "Leur devant un verbe est invariable.", "Tout adverbe : invariable, sauf toute(s) devant un féminin à consonne.", "Plus d'un + singulier ; la plupart + pluriel."]}, {"heading": "Nombres et impératif", "text": "", "examples": ["Quatre-vingts, mais quatre-vingt-un ; mille invariable.", "Parle, va, ouvre (sans s), mais parles-en, vas-y."]}, {"heading": "Conjugaison", "text": "", "examples": ["Vous faites, vous dites.", "Nous envoyions, nous étudiions.", "Il résout, il craint, il vainc.", "J'enverrai, j'acquerrai.", "Va-t-il ? Aime-t-elle ? (et non « va-t'il »)"]}, {"heading": "Vocabulaire", "text": "", "examples": ["Pallier un problème ; se rappeler quelque chose.", "Quelle que soit la raison ; quelques dossiers.", "fatiguant (participe) / fatigant (adjectif)."]}]}
 ];
 function renderSheetsHomeBySection(section, catTag, heroTitle, heroSubtitle){
   clearQuestionTimer();
@@ -29027,7 +29082,9 @@ function renderSheetsHomeBySection(section, catTag, heroTitle, heroSubtitle){
   const card = document.getElementById('quizCard');
   const list = PRACTICAL_SHEETS.filter(s => (s.section || 'pratique') === section && !s.hub); // les modules à part (ex. Entreprise) ont leur propre écran
   const passedCount = list.filter(s => isSheetPassed(s.id)).length;
-  const hubLink = (section === 'situations' && typeof renderEntrepriseHub === 'function')
+  const hubLink = (section === 'avance' && typeof renderBescherelleHub === 'function')
+    ? `<button class="restart-btn" id="goBesHubFromAvBtn" style="margin:14px auto 0;display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#2563EB,#7C3AED);color:#fff;box-shadow:0 4px 0 #3730A3;">📘 Grammaire & conjugaison (Bescherelle) →</button>`
+    : (section === 'situations' && typeof renderEntrepriseHub === 'function')
     ? `<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:14px;"><button class="restart-btn" id="goEntHubFromSitBtn" style="margin:0;display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#1D4ED8,#1E3A8A);color:#fff;box-shadow:0 4px 0 #172554;">🏢 Français en entreprise →</button><button class="restart-btn" id="goRedHubFromSitBtn" style="margin:0;display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#8B5CF6,#6D28D9);color:#fff;box-shadow:0 4px 0 #4C1D95;">✍️ Rédiger & communiquer →</button></div>` : '';
   card.innerHTML = `
     <div class="cat-tag">${catTag}</div>
@@ -29053,6 +29110,8 @@ function renderSheetsHomeBySection(section, catTag, heroTitle, heroSubtitle){
   document.getElementById('backFromSheetsBtn').addEventListener('click', renderBlockSelect);
   const entLink = document.getElementById('goEntHubFromSitBtn');
   if(entLink){ entLink.addEventListener('click', () => renderEntrepriseHub()); }
+  const besLink = document.getElementById('goBesHubFromAvBtn');
+  if(besLink){ besLink.addEventListener('click', () => renderBescherelleHub()); }
   const redLink = document.getElementById('goRedHubFromSitBtn');
   if(redLink){ redLink.addEventListener('click', () => renderRedactionHub()); }
   card.querySelectorAll('[data-sheet]').forEach(btn => {
@@ -29165,6 +29224,8 @@ function renderJeuxMotsHome(){
       <button class="restart-btn" id="goTcfEcritBtn" style="background:linear-gradient(135deg,#2563EB,#1D4ED8);box-shadow:0 4px 0 #1E40AF;">📄 TCF — Écrit</button>
       <button class="restart-btn" id="goEntMissionBtn" style="background:linear-gradient(135deg,#F59E0B,#DC2626);box-shadow:0 4px 0 #991B1B;">🚀 Mission Entreprise</button>
       <button class="restart-btn" id="goRedMissionBtn" style="background:linear-gradient(135deg,#8B5CF6,#DB2777);box-shadow:0 4px 0 #831843;">✍️ Défi Rédaction</button>
+      <button class="restart-btn" id="goBesMissionBtn" style="background:linear-gradient(135deg,#2563EB,#7C3AED);box-shadow:0 4px 0 #3730A3;">📘 Défi Bescherelle</button>
+      <button class="restart-btn" id="goBesConjBtn" style="background:linear-gradient(135deg,#059669,#0D9488);box-shadow:0 4px 0 #065F46;">⌨️ Conjugue-moi</button>
     </div>
   `;
   document.getElementById('backFromJeuxBtn').addEventListener('click', renderBlockSelect);
@@ -29181,6 +29242,8 @@ function renderJeuxMotsHome(){
   document.getElementById('goTcfEcritBtn').addEventListener('click', () => renderTCFQuiz('ecrit', 0));
   document.getElementById('goEntMissionBtn').addEventListener('click', () => startEntMission(ENT_MISSION_CFG));
   document.getElementById('goRedMissionBtn').addEventListener('click', () => startEntMission(RED_MISSION_CFG));
+  document.getElementById('goBesConjBtn').addEventListener('click', () => startBesConj());
+  document.getElementById('goBesMissionBtn').addEventListener('click', () => startEntMission(BES_MISSION_CFG));
 }
 
 /* --- 🔍 Mots mêlés : clique la première lettre d'un mot, puis sa dernière lettre. --- */
@@ -29942,7 +30005,8 @@ function renderPracticalSheetDetail(id){
   isHomeScreen = false;
   const sheet = PRACTICAL_SHEETS.find(s => s.id === id);
   const homeFnMap = { atelier: renderAtelierHome, avance: renderGrammaireAvanceeHome, oratoire: renderArtOratoireHome, situations: renderSituationsHome, conjugaison: renderConjugaisonHome };
-  const homeFn = (sheet && sheet.hub === 'redaction' && typeof renderRedactionHub === 'function') ? renderRedactionHub
+  const homeFn = (sheet && sheet.hub === 'bescherelle' && typeof renderBescherelleHub === 'function') ? renderBescherelleHub
+    : (sheet && sheet.hub === 'redaction' && typeof renderRedactionHub === 'function') ? renderRedactionHub
     : (sheet && sheet.hub === 'entreprise' && typeof renderEntrepriseHub === 'function') ? renderEntrepriseHub
     : ((sheet && homeFnMap[sheet.section]) || renderPracticalSheetsHome);
   if(!sheet){ homeFn(); return; }
@@ -32588,6 +32652,559 @@ function renderRedactionHub(){
   setQuickNavTarget(() => [...card.querySelectorAll('[data-ent-sheet]')].find(b => !isSheetPassed(b.dataset.entSheet)) || null);
   startSectionReading('fiche');
 }
+
+/* ============ 📘 GRAMMAIRE & CONJUGAISON (BESCHERELLE) ============
+   Fiches de révision : partie Grammaire (G), partie Conjugaison (C), Mémo (O). Jeux : « Défi
+   Bescherelle » (QCM à 3 vies), « Un ou une ? » (genre des noms pièges), « ⌨️ Conjugue-moi »
+   (saisie libre de formes conjuguées, 3 vies, combo), noms pièges jouables dans les 8 modes. */
+const BES_GENRE = [{"fr": "espace", "ar": "فضاء", "def": "Nom masculin : lieu, étendue. On dit UN espace.", "ex": "Nous avons aménagé un ~ de détente.", "cat": "Bescherelle · Genre des noms"}, {"fr": "incendie", "ar": "حريق", "def": "Nom masculin : grand feu destructeur. On dit UN incendie.", "ex": "Un ~ a détruit l'entrepôt.", "cat": "Bescherelle · Genre des noms"}, {"fr": "pétale", "ar": "بتلة", "def": "Nom masculin : partie colorée d'une fleur. On dit UN pétale.", "ex": "Un ~ rouge est tombé sur la table.", "cat": "Bescherelle · Genre des noms"}, {"fr": "astérisque", "ar": "علامة النجمة", "def": "Nom masculin : petit signe en étoile (*). On dit UN astérisque.", "ex": "Un ~ renvoie à la note en bas de page.", "cat": "Bescherelle · Genre des noms"}, {"fr": "en-tête", "ar": "ترويسة", "def": "Nom masculin : haut d'une lettre ou d'un document. On dit UN en-tête.", "ex": "Ajoutez un ~ avec le logo de l'entreprise.", "cat": "Bescherelle · Genre des noms"}, {"fr": "éloge", "ar": "مدح", "def": "Nom masculin : discours qui fait l'honneur de quelqu'un. On dit UN éloge.", "ex": "Le directeur a fait un bel ~ de son équipe.", "cat": "Bescherelle · Genre des noms"}, {"fr": "intervalle", "ar": "فاصل", "def": "Nom masculin : écart entre deux choses. On dit UN intervalle.", "ex": "Laissez un ~ de deux jours entre les réunions.", "cat": "Bescherelle · Genre des noms"}, {"fr": "emblème", "ar": "شعار", "def": "Nom masculin : symbole, figure représentative. On dit UN emblème.", "ex": "L'olivier est un ~ de paix.", "cat": "Bescherelle · Genre des noms"}, {"fr": "pore", "ar": "مسام", "def": "Nom masculin : petit trou de la peau. On dit UN pore.", "ex": "Ce produit nettoie chaque ~ de la peau.", "cat": "Bescherelle · Genre des noms"}, {"fr": "tentacule", "ar": "لامسة", "def": "Nom masculin : bras souple de la pieuvre. On dit UN tentacule.", "ex": "La pieuvre a déployé un ~.", "cat": "Bescherelle · Genre des noms"}, {"fr": "interview", "ar": "مقابلة صحفية", "def": "Nom féminin : entretien avec un journaliste. On dit UNE interview.", "ex": "Elle a donné une ~ à la radio.", "cat": "Bescherelle · Genre des noms"}, {"fr": "oasis", "ar": "واحة", "def": "Nom féminin : lieu vert dans le désert. On dit UNE oasis.", "ex": "Nous avons fait une pause dans une ~.", "cat": "Bescherelle · Genre des noms"}, {"fr": "orbite", "ar": "مدار", "def": "Nom féminin : trajectoire autour d'un astre. On dit UNE orbite.", "ex": "Le satellite suit une ~ basse autour de la Terre.", "cat": "Bescherelle · Genre des noms"}, {"fr": "échappatoire", "ar": "مخرج", "def": "Nom féminin : moyen habile de s'en sortir. On dit UNE échappatoire.", "ex": "Il cherche une ~ pour éviter la réunion.", "cat": "Bescherelle · Genre des noms"}, {"fr": "atmosphère", "ar": "الغلاف الجوي", "def": "Nom féminin : air, ambiance. On dit UNE atmosphère.", "ex": "Il règne une ~ détendue au bureau.", "cat": "Bescherelle · Genre des noms"}, {"fr": "espèce", "ar": "نوع", "def": "Nom féminin : catégorie, sorte. On dit UNE espèce.", "ex": "C'est une ~ protégée.", "cat": "Bescherelle · Genre des noms"}, {"fr": "azalée", "ar": "الأزالية", "def": "Nom féminin : arbuste à fleurs. On dit UNE azalée.", "ex": "Elle a offert une ~ rose.", "cat": "Bescherelle · Genre des noms"}, {"fr": "primeur", "ar": "باكورة", "def": "Nom féminin : fait d'être le premier à connaître quelque chose. On dit UNE primeur.", "ex": "Vous aurez la ~ de cette nouvelle.", "cat": "Bescherelle · Genre des noms"}];
+const BES_CONJ = [{"inf": "être", "pres1": "suis", "pres4": "sommes", "pres6": "sont", "fut1": "serai", "ps1": "fus", "subj1": "sois", "pp": "été"}, {"inf": "avoir", "pres1": "ai", "pres4": "avons", "pres6": "ont", "fut1": "aurai", "ps1": "eus", "subj1": "aie", "pp": "eu"}, {"inf": "aller", "pres1": "vais", "pres4": "allons", "pres6": "vont", "fut1": "irai", "ps1": "allai", "subj1": "aille", "pp": "allé"}, {"inf": "faire", "pres1": "fais", "pres4": "faisons", "pres6": "font", "fut1": "ferai", "ps1": "fis", "subj1": "fasse", "pp": "fait"}, {"inf": "dire", "pres1": "dis", "pres4": "disons", "pres6": "disent", "fut1": "dirai", "ps1": "dis", "subj1": "dise", "pp": "dit"}, {"inf": "prendre", "pres1": "prends", "pres4": "prenons", "pres6": "prennent", "fut1": "prendrai", "ps1": "pris", "subj1": "prenne", "pp": "pris"}, {"inf": "mettre", "pres1": "mets", "pres4": "mettons", "pres6": "mettent", "fut1": "mettrai", "ps1": "mis", "subj1": "mette", "pp": "mis"}, {"inf": "venir", "pres1": "viens", "pres4": "venons", "pres6": "viennent", "fut1": "viendrai", "ps1": "vins", "subj1": "vienne", "pp": "venu"}, {"inf": "pouvoir", "pres1": "peux", "pres4": "pouvons", "pres6": "peuvent", "fut1": "pourrai", "ps1": "pus", "subj1": "puisse", "pp": "pu"}, {"inf": "vouloir", "pres1": "veux", "pres4": "voulons", "pres6": "veulent", "fut1": "voudrai", "ps1": "voulus", "subj1": "veuille", "pp": "voulu"}, {"inf": "devoir", "pres1": "dois", "pres4": "devons", "pres6": "doivent", "fut1": "devrai", "ps1": "dus", "subj1": "doive", "pp": "dû"}, {"inf": "savoir", "pres1": "sais", "pres4": "savons", "pres6": "savent", "fut1": "saurai", "ps1": "sus", "subj1": "sache", "pp": "su"}, {"inf": "voir", "pres1": "vois", "pres4": "voyons", "pres6": "voient", "fut1": "verrai", "ps1": "vis", "subj1": "voie", "pp": "vu"}, {"inf": "recevoir", "pres1": "reçois", "pres4": "recevons", "pres6": "reçoivent", "fut1": "recevrai", "ps1": "reçus", "subj1": "reçoive", "pp": "reçu"}, {"inf": "partir", "pres1": "pars", "pres4": "partons", "pres6": "partent", "fut1": "partirai", "ps1": "partis", "subj1": "parte", "pp": "parti"}, {"inf": "ouvrir", "pres1": "ouvre", "pres4": "ouvrons", "pres6": "ouvrent", "fut1": "ouvrirai", "ps1": "ouvris", "subj1": "ouvre", "pp": "ouvert"}, {"inf": "courir", "pres1": "cours", "pres4": "courons", "pres6": "courent", "fut1": "courrai", "ps1": "courus", "subj1": "coure", "pp": "couru"}, {"inf": "connaître", "pres1": "connais", "pres4": "connaissons", "pres6": "connaissent", "fut1": "connaîtrai", "ps1": "connus", "subj1": "connaisse", "pp": "connu"}, {"inf": "croire", "pres1": "crois", "pres4": "croyons", "pres6": "croient", "fut1": "croirai", "ps1": "crus", "subj1": "croie", "pp": "cru"}, {"inf": "boire", "pres1": "bois", "pres4": "buvons", "pres6": "boivent", "fut1": "boirai", "ps1": "bus", "subj1": "boive", "pp": "bu"}, {"inf": "écrire", "pres1": "écris", "pres4": "écrivons", "pres6": "écrivent", "fut1": "écrirai", "ps1": "écrivis", "subj1": "écrive", "pp": "écrit"}, {"inf": "lire", "pres1": "lis", "pres4": "lisons", "pres6": "lisent", "fut1": "lirai", "ps1": "lus", "subj1": "lise", "pp": "lu"}, {"inf": "vivre", "pres1": "vis", "pres4": "vivons", "pres6": "vivent", "fut1": "vivrai", "ps1": "vécus", "subj1": "vive", "pp": "vécu"}, {"inf": "craindre", "pres1": "crains", "pres4": "craignons", "pres6": "craignent", "fut1": "craindrai", "ps1": "craignis", "subj1": "craigne", "pp": "craint"}, {"inf": "résoudre", "pres1": "résous", "pres4": "résolvons", "pres6": "résolvent", "fut1": "résoudrai", "ps1": "résolus", "subj1": "résolve", "pp": "résolu"}, {"inf": "vaincre", "pres1": "vaincs", "pres4": "vainquons", "pres6": "vainquent", "fut1": "vaincrai", "ps1": "vainquis", "subj1": "vainque", "pp": "vaincu"}, {"inf": "conduire", "pres1": "conduis", "pres4": "conduisons", "pres6": "conduisent", "fut1": "conduirai", "ps1": "conduisis", "subj1": "conduise", "pp": "conduit"}, {"inf": "naître", "pres1": "nais", "pres4": "naissons", "pres6": "naissent", "fut1": "naîtrai", "ps1": "naquis", "subj1": "naisse", "pp": "né"}, {"inf": "acquérir", "pres1": "acquiers", "pres4": "acquérons", "pres6": "acquièrent", "fut1": "acquerrai", "ps1": "acquis", "subj1": "acquière", "pp": "acquis"}, {"inf": "envoyer", "pres1": "envoie", "pres4": "envoyons", "pres6": "envoient", "fut1": "enverrai", "ps1": "envoyai", "subj1": "envoie", "pp": "envoyé"}, {"inf": "finir", "pres1": "finis", "pres4": "finissons", "pres6": "finissent", "fut1": "finirai", "ps1": "finis", "subj1": "finisse", "pp": "fini"}, {"inf": "appeler", "pres1": "appelle", "pres4": "appelons", "pres6": "appellent", "fut1": "appellerai", "ps1": "appelai", "subj1": "appelle", "pp": "appelé"}, {"inf": "jeter", "pres1": "jette", "pres4": "jetons", "pres6": "jettent", "fut1": "jetterai", "ps1": "jetai", "subj1": "jette", "pp": "jeté"}, {"inf": "acheter", "pres1": "achète", "pres4": "achetons", "pres6": "achètent", "fut1": "achèterai", "ps1": "achetai", "subj1": "achète", "pp": "acheté"}];
+const BES_QCM = [{"q": "Nature et fonction de « rapport » : « Le directeur lit le rapport. »", "options": ["nom commun, COD de « lit »", "nom commun, sujet", "verbe, COD"], "correctIdx": 0, "explain": "Le directeur lit QUOI ? le rapport → COD."}, {"q": "« Les décisions que nous avons ___ sont définitives. » (prendre)", "options": ["prises", "pris", "prise"], "correctIdx": 0, "explain": "COD « que » (= décisions) placé avant → prises."}, {"q": "« Elles se sont ___ au téléphone. » (parler)", "options": ["parlé", "parlées", "parlés"], "correctIdx": 0, "explain": "On parle À quelqu'un : se = COI → pas d'accord."}, {"q": "« Il faut que vous ___ une demande. » (faire)", "options": ["fassiez", "faites", "ferez"], "correctIdx": 0, "explain": "Il faut que + subjonctif."}, {"q": "Futur de « voir » (je) :", "options": ["je verrai", "je voirai", "je verrais"], "correctIdx": 0, "explain": "voir → verr-."}, {"q": "Futur de « envoyer » (je) :", "options": ["j'enverrai", "j'envoierai", "j'envoyerai"], "correctIdx": 0, "explain": "envoyer → enverr-."}, {"q": "« Quand il ___ terminé, il nous appellera. »", "options": ["aura", "a", "avait"], "correctIdx": 0, "explain": "Futur antérieur : action accomplie avant une autre action future."}, {"q": "« Si tu ___, je serais content. » (venir)", "options": ["venais", "viendrais", "viens"], "correctIdx": 0, "explain": "Si + imparfait → conditionnel. Jamais de conditionnel après si."}, {"q": "Elle a dit : « Je partirai demain. » →", "options": ["Elle a dit qu'elle partirait le lendemain.", "Elle a dit qu'elle partira demain.", "Elle a dit qu'elle partait hier."], "correctIdx": 0, "explain": "Futur → conditionnel ; demain → le lendemain."}, {"q": "« Il ___ sorti son ordinateur. »", "options": ["a", "est", "était"], "correctIdx": 0, "explain": "Sortir + COD → avoir."}, {"q": "80 et 81 en lettres :", "options": ["quatre-vingts ; quatre-vingt-un", "quatre-vingt ; quatre-vingts-un", "quatre-vingts ; quatre-vingts-un"], "correctIdx": 0, "explain": "vingt prend un s seulement s'il n'est suivi d'aucun nombre."}, {"q": "Présent de « résoudre » (il) :", "options": ["il résout", "il résoud", "il résous"], "correctIdx": 0, "explain": "Les verbes en -soudre perdent le d : il résout."}, {"q": "Présent de « vaincre » (il) :", "options": ["il vainc", "il vainct", "il vaint"], "correctIdx": 0, "explain": "Il vainc, sans t."}, {"q": "« Des arguments ___. »", "options": ["convaincants", "convainquants", "convaincant"], "correctIdx": 0, "explain": "Adjectif verbal (sans complément) → convaincants."}, {"q": "« Ce n'est pas Karim qui a appelé ? » : type et formes", "options": ["interrogative ; négative et emphatique", "déclarative ; passive", "exclamative ; impersonnelle"], "correctIdx": 0, "explain": "Point d'interrogation + ne… pas + c'est… qui."}, {"q": "Passif de « Le jury a sélectionné trois candidats » :", "options": ["Trois candidats ont été sélectionnés par le jury.", "Trois candidats sont sélectionnés par le jury.", "Trois candidats ont sélectionné le jury."], "correctIdx": 0, "explain": "Même temps (passé composé) : ont été + participe accordé."}, {"q": "Genre de « espace » :", "options": ["masculin", "féminin"], "correctIdx": 0, "explain": "On dit UN espace."}, {"q": "Genre de « interview » :", "options": ["féminin", "masculin"], "correctIdx": 0, "explain": "On dit UNE interview."}, {"q": "Genre de « oasis » :", "options": ["féminin", "masculin"], "correctIdx": 0, "explain": "On dit UNE oasis."}, {"q": "Genre de « incendie » :", "options": ["masculin", "féminin"], "correctIdx": 0, "explain": "On dit UN incendie."}, {"q": "Pluriel de « festival » :", "options": ["festivals", "festivaux", "festivales"], "correctIdx": 0, "explain": "Exception en -als : bals, festivals, récitals, carnavals, chacals, régals."}, {"q": "Pluriel de « travail » :", "options": ["travaux", "travails", "travailles"], "correctIdx": 0, "explain": "Exception en -aux : baux, coraux, émaux, soupiraux, travaux, vantaux, vitraux."}, {"q": "Pluriel de « bijou » :", "options": ["bijoux", "bijous", "bijoues"], "correctIdx": 0, "explain": "Les 7 en -oux : bijoux, cailloux, choux, genoux, hiboux, joujoux, poux."}, {"q": "Pluriel de « arc-en-ciel » :", "options": ["des arcs-en-ciel", "des arc-en-ciels", "des arcs-en-ciels"], "correctIdx": 0, "explain": "Seul le nom « arc » prend la marque du pluriel."}, {"q": "« Je n'ai pas ___ stagiaire. »", "options": ["de", "un", "du"], "correctIdx": 0, "explain": "La négation transforme l'article indéfini en DE."}, {"q": "« Nous avons obtenu ___ bons résultats. »", "options": ["de", "des", "les"], "correctIdx": 0, "explain": "Des → de devant un adjectif pluriel placé avant le nom."}, {"q": "« C'est moi qui ___ raison. »", "options": ["ai", "a", "avons"], "correctIdx": 0, "explain": "Qui relatif : le verbe s'accorde avec l'antécédent « moi »."}, {"q": "« Plus d'un candidat ___ postulé. »", "options": ["a", "ont", "avaient"], "correctIdx": 0, "explain": "Plus d'un + singulier."}, {"q": "« La plupart ___ venus. »", "options": ["sont", "est", "ont"], "correctIdx": 0, "explain": "La plupart + pluriel."}, {"q": "« Les 100 euros que ça m'a ___. »", "options": ["coûté", "coûtés", "coûtée"], "correctIdx": 0, "explain": "Complément de mesure au sens propre : pas d'accord."}, {"q": "« Ils se sont ___. » (succéder)", "options": ["succédé", "succédés", "succédées"], "correctIdx": 0, "explain": "Se succéder à quelqu'un : se = COI → invariable."}, {"q": "« Elles se sont ___. » (enfuir)", "options": ["enfuies", "enfui", "enfuis"], "correctIdx": 0, "explain": "Essentiellement pronominal : accord avec le sujet."}, {"q": "« Je ___ écris ce soir. » (à mes collègues)", "options": ["leur", "leurs", "les"], "correctIdx": 0, "explain": "Leur pronom devant un verbe : invariable."}, {"q": "Féminin de « complet » :", "options": ["complète", "complette", "complèt"], "correctIdx": 0, "explain": "-et → -ète pour complet, discret, inquiet, secret."}, {"q": "« un ___ outil » (nouveau)", "options": ["nouvel", "nouveau", "nouvelle"], "correctIdx": 0, "explain": "Devant un nom masculin à voyelle : nouvel."}, {"q": "« des chemises ___ » (orange)", "options": ["orange", "oranges", "orangées"], "correctIdx": 0, "explain": "Nom employé comme couleur : invariable."}, {"q": "« Il est midi et ___. »", "options": ["demi", "demie", "demis"], "correctIdx": 0, "explain": "Midi est masculin : demi s'accorde en genre → et demi."}, {"q": "« un grand homme » signifie…", "options": ["un homme célèbre", "un homme de haute taille", "un homme âgé"], "correctIdx": 0, "explain": "Placé avant, « grand » a le sens figuré."}, {"q": "Adverbe de « évident » :", "options": ["évidemment", "évidamment", "évidentement"], "correctIdx": 0, "explain": "-ent → -emment."}, {"q": "Adverbe de « constant » :", "options": ["constamment", "constemment", "constantement"], "correctIdx": 0, "explain": "-ant → -amment."}, {"q": "« Elles sont ___ étonnées. »", "options": ["tout", "toutes", "toute"], "correctIdx": 0, "explain": "Tout adverbe devant une voyelle : invariable."}, {"q": "« Elles sont ___ contentes. »", "options": ["toutes", "tout", "toute"], "correctIdx": 0, "explain": "Devant un féminin commençant par une consonne : toutes."}, {"q": "Impératif de « aller » (tu) + y :", "options": ["vas-y", "va-y", "va-z-y"], "correctIdx": 0, "explain": "On ajoute le s devant y et en."}, {"q": "Impératif de « parler » (tu) :", "options": ["parle", "parles", "parlé"], "correctIdx": 0, "explain": "1er groupe : pas de s à l'impératif."}, {"q": "« Vous ___ bien. » (faire)", "options": ["faites", "faisez", "fêtes"], "correctIdx": 0, "explain": "Exception : vous faites, vous dites."}, {"q": "Imparfait de « étudier » (nous) :", "options": ["nous étudiions", "nous étudions", "nous étudiyons"], "correctIdx": 0, "explain": "Deux i à nous/vous à l'imparfait."}, {"q": "Futur de « acquérir » (je) :", "options": ["j'acquerrai", "j'acquérirai", "j'acquièrerai"], "correctIdx": 0, "explain": "acquérir → acquerr- (deux r)."}, {"q": "« ___-t-il ? » (aller)", "options": ["Va", "Va-t'il", "Vat"], "correctIdx": 0, "explain": "t euphonique entre traits d'union : va-t-il."}, {"q": "« Nous ___ » (placer, présent)", "options": ["plaçons", "placons", "plaçions"], "correctIdx": 0, "explain": "-cer : ç devant a et o."}, {"q": "« J'___ mon collègue. » (appeler, présent)", "options": ["appelle", "appèle", "apelle"], "correctIdx": 0, "explain": "appeler double le l devant un e muet."}, {"q": "« Bien qu'il ___ tard, il a répondu. »", "options": ["soit", "est", "serait"], "correctIdx": 0, "explain": "Bien que + subjonctif."}, {"q": "« Après qu'il ___ parti, nous avons fermé. »", "options": ["est", "soit", "serait"], "correctIdx": 0, "explain": "Après que + indicatif."}, {"q": "« Au cas où il ___ un retard… »", "options": ["y aurait", "y a", "y ait"], "correctIdx": 0, "explain": "Au cas où + conditionnel."}, {"q": "« le meilleur outil que je ___ » (connaître)", "options": ["connaisse", "connais", "connaîtrai"], "correctIdx": 0, "explain": "Relative après un superlatif → subjonctif."}, {"q": "« Je me demande ___ viendra. »", "options": ["s'il", "est-ce qu'il", "viendra-t-il"], "correctIdx": 0, "explain": "Interrogative indirecte : si, sans inversion."}, {"q": "« Nadia lit un mail. Ce mail annonce une réunion. » : progression…", "options": ["linéaire", "à thème constant", "à thème éclaté"], "correctIdx": 0, "explain": "Le propos (un mail) devient le thème suivant."}, {"q": "Au discours indirect, « hier » devient…", "options": ["la veille", "le lendemain", "ce jour-là"], "correctIdx": 0, "explain": "hier → la veille."}, {"q": "« finir » appartient au…", "options": ["2e groupe", "1er groupe", "3e groupe"], "correctIdx": 0, "explain": "nous finissons → -issons → 2e groupe."}, {"q": "« partir » appartient au…", "options": ["3e groupe", "2e groupe", "1er groupe"], "correctIdx": 0, "explain": "nous partons (pas -issons) → 3e groupe."}, {"q": "Orthographe rectifiée de « événement » :", "options": ["évènement", "évenement", "èvènement"], "correctIdx": 0, "explain": "1990 : accent grave selon la prononciation (les deux sont admis)."}];
+const BES_MISSION_CFG = { title:'📘 Défi Bescherelle', qcm: BES_QCM, bestKey:'lexiqueQuiz::besMissionBest', backLabel:'← Grammaire & conjugaison', back: () => renderBescherelleHub() };
+const BES_GENRE_CFG = { title:'🎭 Un ou une ?', qcm: BES_GENRE.map(w => {
+    const masc = /^Nom masculin/.test(w.def);
+    return { q: `« ___ ${w.fr} »`, options: masc ? ['un', 'une'] : ['une', 'un'], correctIdx: 0, explain: w.def };
+  }), bestKey:'lexiqueQuiz::besGenreBest', backLabel:'← Grammaire & conjugaison', back: () => renderBescherelleHub() };
+const BES_CONJ_FORMS = [
+  { key:'pres1', label:'présent', person:'je' }, { key:'pres4', label:'présent', person:'nous' }, { key:'pres6', label:'présent', person:'ils' },
+  { key:'fut1', label:'futur simple', person:'je' }, { key:'ps1', label:'passé simple', person:'je' }, { key:'subj1', label:'subjonctif présent', person:'que je' },
+  { key:'pp', label:'participe passé', person:'' },
+];
+function renderBescherelleHub(){
+  clearQuestionTimer();
+  document.body.classList.remove('quiz-active');
+  currentBlock = null;
+  isHomeScreen = false;
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromBesBtn" style="cursor:pointer;">← Retour</button>`;
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('footerNote').textContent = '';
+  const all = PRACTICAL_SHEETS.filter(s => s.hub === 'bescherelle');
+  const done = all.filter(s => isSheetPassed(s.id)).length;
+  const best = (k) => { try{ return parseInt(localStorage.getItem(nsKey(k)) || '0', 10) || 0; }catch(e){ return 0; } };
+  const part = (p) => all.filter(s => s.part === p);
+  const title = (t) => `<div style="font-family:'Inter',sans-serif;font-weight:800;color:var(--purple);margin:20px 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.03em;">${t}</div>`;
+  const gameBtn = (id, label, sub, grad, shadow) => `<button class="restart-btn" id="${id}" style="margin:0;display:flex;flex-direction:column;align-items:center;gap:2px;background:${grad};box-shadow:0 4px 0 ${shadow};"><span>${label}</span><span style="font-size:11.5px;opacity:.9;font-weight:700;">${sub}</span></button>`;
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="cat-tag">📘 Grammaire & conjugaison</div>
+    <div class="word-fr" style="font-size:clamp(21px,4.5vw,27px);">Le Bescherelle en jeu</div>
+    <div class="word-def" style="margin-top:4px;">${all.length} fiches · ${BES_CONJ.length} verbes à conjuguer · ${BES_QCM.length} questions · ✅ ${done}/${all.length} fiches validées</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:16px;">
+      ${gameBtn('besMissionBtn', '📘 Défi Bescherelle', `3 vies${best(BES_MISSION_CFG.bestKey) ? ' · record ' + best(BES_MISSION_CFG.bestKey) : ''}`, 'linear-gradient(135deg,#2563EB,#7C3AED)', '#3730A3')}
+      ${gameBtn('besConjBtn', '⌨️ Conjugue-moi', `tape la forme${best('lexiqueQuiz::besConjBest') ? ' · record ' + best('lexiqueQuiz::besConjBest') : ''}`, 'linear-gradient(135deg,#059669,#0D9488)', '#065F46')}
+      ${gameBtn('besGenreBtn', '🎭 Un ou une ?', `${BES_GENRE.length} noms pièges`, 'linear-gradient(135deg,#EC4899,#F59E0B)', '#9D174D')}
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:10px;">
+      <button class="mode-chip" id="besGenrePlayBtn">🎮 Noms pièges dans les 8 modes</button>
+      <button class="mode-chip" id="besGenreListenBtn">🎧 Écouter les noms pièges</button>
+    </div>
+    ${title('📐 Partie 1 : Grammaire')}
+    <div style="display:flex;flex-direction:column;gap:8px;">${part('G').map(entSheetBtn).join('')}</div>
+    ${title('🔤 Partie 2 : Conjugaison')}
+    <div style="display:flex;flex-direction:column;gap:8px;">${part('C').map(entSheetBtn).join('')}</div>
+    ${title('🧠 Mémo')}
+    <div style="display:flex;flex-direction:column;gap:8px;">${part('O').map(entSheetBtn).join('')}</div>
+  `;
+  document.getElementById('backFromBesBtn').addEventListener('click', renderBlockSelect);
+  document.getElementById('besMissionBtn').addEventListener('click', () => startEntMission(BES_MISSION_CFG));
+  document.getElementById('besGenreBtn').addEventListener('click', () => startEntMission(BES_GENRE_CFG));
+  document.getElementById('besConjBtn').addEventListener('click', () => startBesConj());
+  document.getElementById('besGenrePlayBtn').addEventListener('click', () => showModeSuggestPopup(BES_GENRE.slice(), '🎭 Les noms au genre piège : choisis ton mode de jeu !'));
+  document.getElementById('besGenreListenBtn').addEventListener('click', () => renderBlockWordsPeek(BES_GENRE.slice(), '🎭 Noms au genre piège', () => renderBescherelleHub()));
+  card.querySelectorAll('[data-ent-sheet]').forEach(b => b.addEventListener('click', () => renderPracticalSheetDetail(b.dataset.entSheet)));
+  setQuickNavTarget(() => [...card.querySelectorAll('[data-ent-sheet]')].find(b => !isSheetPassed(b.dataset.entSheet)) || null);
+  startSectionReading('grammaire');
+}
+
+/* --- ⌨️ Conjugue-moi : 12 formes à taper, 3 vies, combo --- */
+let besConj = null;
+function besNorm(s){ return String(s || '').toLowerCase().replace(/[’`]/g, "'").replace(/\s+/g, ' ').trim(); }
+function besStripPronoun(s){ return s.replace(/^(que |qu')?(je |j'|tu |il |elle |on |nous |vous |ils |elles )/, ''); }
+function startBesConj(){
+  clearQuestionTimer();
+  document.body.classList.add('quiz-active');
+  isHomeScreen = false;
+  const items = [];
+  const used = new Set();
+  while(items.length < 12){
+    const v = BES_CONJ[Math.floor(Math.random() * BES_CONJ.length)];
+    const f = BES_CONJ_FORMS[Math.floor(Math.random() * BES_CONJ_FORMS.length)];
+    const k = v.inf + f.key;
+    if(used.has(k)) continue;
+    used.add(k);
+    items.push({ v, f, answer: v[f.key] });
+  }
+  besConj = { items, idx: 0, lives: 3, score: 0, combo: 0, bestCombo: 0, startTime: Date.now(), answered: false };
+  blockStartTime = Date.now(); totalHiddenMs = 0; totalIdleMs = 0; lastInteractionAt = Date.now();
+  renderBesConjCard();
+}
+function renderBesConjCard(){
+  const st = besConj;
+  if(!st) return;
+  if(st.idx >= st.items.length || st.lives <= 0){ endBesConj(); return; }
+  const it = st.items[st.idx];
+  st.answered = false;
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="besConjExitBtn" style="cursor:pointer;">← Quitter</button><span class="chip">⭐ ${st.score}</span><span class="chip ent-hearts">${entHeartsHtml(st.lives)}</span>${st.combo >= 2 ? `<span class="chip" style="color:#EA580C;">🔥 x${st.combo}</span>` : ''}`;
+  document.getElementById('besConjExitBtn').addEventListener('click', () => { besConj = null; renderBescherelleHub(); });
+  document.getElementById('progressFill').style.width = Math.round((st.idx / st.items.length) * 100) + '%';
+  document.getElementById('footerNote').textContent = `Forme ${st.idx + 1} / ${st.items.length}`;
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="cat-tag">⌨️ Conjugue-moi</div>
+    <div class="word-fr ent-q-pop" style="font-size:clamp(26px,6vw,34px);margin-top:8px;">${escapeHtml(it.v.inf)}</div>
+    <div class="question-line" style="font-size:15px;"><b>${escapeHtml(it.f.label)}</b>${it.f.person ? ` · <b>${escapeHtml(it.f.person)}</b>` : ''}</div>
+    <div style="display:flex;gap:8px;align-items:center;margin-top:14px;">
+      ${it.f.person ? `<span style="font-weight:800;color:var(--text-dim);white-space:nowrap;">${escapeHtml(it.f.person)}</span>` : ''}
+      <input id="besConjInput" class="search-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="tape la forme…" style="flex:1;font-size:18px;">
+    </div>
+    <button class="restart-btn" id="besConjCheck" style="margin-top:14px;">Valider ✓</button>
+    <div class="reveal" id="besConjReveal"></div>
+  `;
+  const input = document.getElementById('besConjInput');
+  const check = () => answerBesConj(input.value);
+  document.getElementById('besConjCheck').addEventListener('click', check);
+  input.addEventListener('keydown', (e) => { if(e.key === 'Enter'){ e.preventDefault(); check(); } });
+  setTimeout(() => { try{ input.focus(); }catch(e){} }, 50);
+}
+function answerBesConj(raw){
+  const st = besConj;
+  if(!st || st.answered) return;
+  const it = st.items[st.idx];
+  const typed = besStripPronoun(besNorm(raw));
+  if(!typed) return;
+  st.answered = true;
+  const expected = besNorm(it.answer);
+  const exact = typed === expected;
+  const noAccent = normalizeForSearch(typed) === normalizeForSearch(expected);
+  const ok = exact || noAccent;
+  if(ok){
+    st.combo++; st.bestCombo = Math.max(st.bestCombo, st.combo);
+    st.score += (exact ? 10 : 6) + Math.min(st.combo - 1, 5) * 2;
+    playCorrectSound(); reactMascot('ok'); vibrate(30);
+    if(st.combo === 3 || st.combo === 6 || st.combo === 10){ try{ celebrate(); }catch(e){} }
+  } else {
+    st.combo = 0; st.lives--;
+    playWrongSound(); reactMascot('ko'); vibrate([40,40,40]);
+    const card = document.getElementById('quizCard');
+    card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake');
+  }
+  bumpCombo(ok);
+  const hearts = document.querySelector('.ent-hearts');
+  if(hearts) hearts.innerHTML = entHeartsHtml(st.lives);
+  document.getElementById('besConjInput').disabled = true;
+  document.getElementById('besConjCheck').style.display = 'none';
+  const full = (it.f.person ? (it.f.person === 'je' && /^[aeéèêiouhy]/i.test(it.answer) ? "j'" : it.f.person + ' ') : '') + it.answer;
+  const reveal = document.getElementById('besConjReveal');
+  reveal.classList.add('show');
+  reveal.innerHTML = `
+    <div class="pass-banner ${ok ? 'ok' : 'ko'}">${ok ? (exact ? '✅ Parfait !' : '✅ Correct… mais attention aux accents !') : (st.lives > 0 ? `💔 Raté — plus que ${st.lives} vie${st.lives > 1 ? 's' : ''}` : '💀 Plus de vies !')}</div>
+    <div class="def-text" style="margin-top:8px;">✍️ <b>${escapeHtml(full)}</b> <button class="speak-btn small" id="besConjSpeak">${SPEAK_SVG_SMALL}</button></div>
+    <button class="next-btn" id="nextBtn">${st.lives > 0 && st.idx + 1 < st.items.length ? 'Suivant →' : 'Voir le résultat'}</button>
+  `;
+  document.getElementById('besConjSpeak').addEventListener('click', () => speak(full, 'fr-FR'));
+  speak(full, 'fr-FR');
+  attachAutoAdvance('nextBtn', () => { st.idx++; renderBesConjCard(); });
+}
+function endBesConj(){
+  const st = besConj;
+  document.body.classList.remove('quiz-active');
+  if(!st){ renderBescherelleHub(); return; }
+  const survived = st.lives > 0;
+  const durationSec = computeActiveDurationSec(st.startTime);
+  const KEY = 'lexiqueQuiz::besConjBest';
+  let best = 0; try{ best = parseInt(localStorage.getItem(nsKey(KEY)) || '0', 10) || 0; }catch(e){}
+  const newRecord = st.score > best;
+  if(newRecord){ try{ localStorage.setItem(nsKey(KEY), String(st.score)); }catch(e){} }
+  recordDailyActivity();
+  recordDailyStats(durationSec, survived, Math.round(st.score / 2), 'conjugaison');
+  if(typeof cloudAutoPush === 'function') cloudAutoPush();
+  if(survived || newRecord){ try{ launchGravityConfetti(); }catch(e){} }
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="besConjEndBack" style="cursor:pointer;">← Grammaire & conjugaison</button>`;
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('footerNote').textContent = '';
+  document.getElementById('quizCard').innerHTML = `
+    <div style="text-align:center;">
+      <div style="font-size:52px;" class="ent-q-pop">${survived ? (st.lives === 3 ? '🏆' : '⌨️') : '🧯'}</div>
+      <div class="word-fr" style="margin-top:6px;">${survived ? (st.lives === 3 ? 'Sans faute !' : 'Bien conjugué !') : 'Encore un effort !'}</div>
+      <div class="word-def" style="margin-top:6px;">⭐ ${st.score} points · meilleur combo 🔥 x${st.bestCombo} · ${entHeartsHtml(st.lives)}</div>
+      ${newRecord ? `<div class="pass-banner ok" style="margin-top:12px;">🥇 Nouveau record : ${st.score} points !</div>` : `<div style="margin-top:10px;font-size:13px;color:var(--text-dim);">Record : ${best} points</div>`}
+      <div style="display:flex;gap:10px;justify-content:center;margin-top:18px;flex-wrap:wrap;">
+        <button class="restart-btn" id="besConjRetry" style="margin:0;">🔁 Rejouer</button>
+        <button class="restart-btn" id="besConjTables" style="margin:0;background:var(--surface-sunken);border:1px solid var(--border);color:var(--purple);box-shadow:none;">📋 Revoir les tableaux</button>
+      </div>
+    </div>
+  `;
+  besConj = null;
+  document.getElementById('besConjEndBack').addEventListener('click', renderBescherelleHub);
+  document.getElementById('besConjRetry').addEventListener('click', startBesConj);
+  document.getElementById('besConjTables').addEventListener('click', () => renderPracticalSheetDetail('bes-c11'));
+}
+
+/* ============ 🦊 MASCOTTE 3D TEMPS RÉEL (Three.js / WebGL) ============
+   Un vrai renard en 3D (volumes, lumières, reflets, ombre portée) rendu en direct :
+   - il suit ton doigt / ta souris de la tête ET des yeux, le corps suit plus lentement ;
+   - respiration, flottement, clignements, oreilles et queue avec inertie (mouvement secondaire) ;
+   - bonne réponse : saut + vrille + yeux rieurs ; erreur : secoue la tête, oreilles tombantes ;
+   - accueil : alterne Abdel 🦊 et Souky 🎀 par une vrille 3D, et saute quand on le touche.
+   Three.js est chargé à la demande depuis un CDN ; sans réseau ou sans WebGL, l'ancienne
+   mascotte SVG reste simplement affichée (aucune régression). */
+const FOX3D_SOURCES = [
+  'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js',
+  'https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js',
+];
+const fox3d = { ready:false, hero:null, quiz:null, pointer:{ x:null, y:null, t:0 }, reduced:false };
+function fox3dLoadThree(){
+  return new Promise((resolve, reject) => {
+    if(window.THREE) return resolve(window.THREE);
+    let i = 0;
+    const next = () => {
+      if(i >= FOX3D_SOURCES.length) return reject(new Error('three indisponible'));
+      const s = document.createElement('script');
+      s.src = FOX3D_SOURCES[i++]; s.async = true; s.crossOrigin = 'anonymous';
+      s.onload = () => window.THREE ? resolve(window.THREE) : next();
+      s.onerror = () => { s.remove(); next(); };
+      document.head.appendChild(s);
+    };
+    next();
+  });
+}
+function fox3dWebGLOk(){
+  try{ const c = document.createElement('canvas'); return !!(window.WebGLRenderingContext && (c.getContext('webgl') || c.getContext('experimental-webgl'))); }
+  catch(e){ return false; }
+}
+function fox3dNoiseTexture(T){
+  const c = document.createElement('canvas'); c.width = c.height = 128;
+  const g = c.getContext('2d'); const img = g.createImageData(128, 128);
+  for(let i = 0; i < img.data.length; i += 4){ const v = 110 + Math.random() * 90; img.data[i] = img.data[i+1] = img.data[i+2] = v; img.data[i+3] = 255; }
+  g.putImageData(img, 0, 0);
+  const t = new T.CanvasTexture(c); t.wrapS = t.wrapT = T.RepeatWrapping; t.repeat.set(3, 3);
+  return t;
+}
+function fox3dShadowTexture(T){
+  const c = document.createElement('canvas'); c.width = c.height = 128;
+  const g = c.getContext('2d');
+  const grd = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+  grd.addColorStop(0, 'rgba(60,25,5,0.55)'); grd.addColorStop(0.5, 'rgba(60,25,5,0.22)'); grd.addColorStop(1, 'rgba(60,25,5,0)');
+  g.fillStyle = grd; g.fillRect(0, 0, 128, 128);
+  return new T.CanvasTexture(c);
+}
+/* Petit « studio photo » : dôme dégradé chaud + softbox, converti en carte d'environnement (reflets réalistes). */
+function fox3dEnvironment(T, renderer){
+  const env = new T.Scene();
+  const geo = new T.SphereGeometry(10, 32, 16);
+  const cols = [];
+  const pos = geo.attributes.position;
+  const top = new T.Color(0xfff4e6), mid = new T.Color(0xffd6ad), bot = new T.Color(0x5a3a24);
+  for(let i = 0; i < pos.count; i++){
+    const y = pos.getY(i) / 10;
+    const c = y > 0 ? mid.clone().lerp(top, y) : mid.clone().lerp(bot, -y);
+    cols.push(c.r, c.g, c.b);
+  }
+  geo.setAttribute('color', new T.Float32BufferAttribute(cols, 3));
+  env.add(new T.Mesh(geo, new T.MeshBasicMaterial({ vertexColors:true, side:T.BackSide })));
+  const box = new T.Mesh(new T.PlaneGeometry(6, 4), new T.MeshBasicMaterial({ color:new T.Color(4, 3.8, 3.5), side:T.DoubleSide }));
+  box.position.set(-5, 5, 6); box.lookAt(0, 0, 0); env.add(box);
+  const rimBox = new T.Mesh(new T.PlaneGeometry(3, 5), new T.MeshBasicMaterial({ color:new T.Color(1.2, 1.8, 3), side:T.DoubleSide }));
+  rimBox.position.set(6, 2, -5); rimBox.lookAt(0, 0, 0); env.add(rimBox);
+  const pm = new T.PMREMGenerator(renderer);
+  const tex = pm.fromScene(env, 0.04).texture;
+  pm.dispose();
+  return tex;
+}
+function fox3dBuild(T){
+  const col = (h) => new T.Color(h).convertSRGBToLinear();
+  const noise = fox3dNoiseTexture(T);
+  const M = {
+    fur: new T.MeshStandardMaterial({ color:col(0xE8550C), roughness:0.6, metalness:0, bumpMap:noise, bumpScale:0.012, envMapIntensity:0.75 }),
+    furDark: new T.MeshStandardMaterial({ color:col(0xA8380A), roughness:0.65, bumpMap:noise, bumpScale:0.012, envMapIntensity:0.7 }),
+    cream: new T.MeshStandardMaterial({ color:col(0xFFF1E2), roughness:0.72, bumpMap:noise, bumpScale:0.01, envMapIntensity:0.7 }),
+    tip: new T.MeshStandardMaterial({ color:col(0x2A1206), roughness:0.55 }),
+    nose: new T.MeshPhysicalMaterial({ color:col(0x1C0B04), roughness:0.18, clearcoat:1, clearcoatRoughness:0.08 }),
+    eyeWhite: new T.MeshPhysicalMaterial({ color:col(0xFFFFFF), roughness:0.1, clearcoat:1, clearcoatRoughness:0.05 }),
+    iris: new T.MeshPhysicalMaterial({ color:col(0x6B3410), roughness:0.2, clearcoat:1 }),
+    pupil: new T.MeshPhysicalMaterial({ color:col(0x0A0402), roughness:0.05, clearcoat:1 }),
+    shine: new T.MeshBasicMaterial({ color:0xffffff }),
+    frame: new T.MeshStandardMaterial({ color:col(0x3B1D0B), roughness:0.28, metalness:0.55 }),
+    lens: new T.MeshPhysicalMaterial({ color:0xffffff, roughness:0, metalness:0, transparent:true, opacity:0.14, envMapIntensity:2.2, depthWrite:false, clearcoat:1 }),
+    blush: new T.MeshStandardMaterial({ color:col(0xFF7A95), roughness:0.8, transparent:true, opacity:0.55, depthWrite:false }),
+    mouth: new T.MeshStandardMaterial({ color:col(0x3B1507), roughness:0.5 }),
+    bow: new T.MeshPhysicalMaterial({ color:col(0xEC4899), roughness:0.4, clearcoat:0.6, clearcoatRoughness:0.2 }),
+  };
+  const S = (r, ws = 40, hs = 28) => new T.SphereGeometry(r, ws, hs);
+  const mesh = (g, m, p, s, parent) => { const o = new T.Mesh(g, m); if(p) o.position.set(p[0], p[1], p[2]); if(s) o.scale.set(s[0], s[1], s[2]); if(parent) parent.add(o); return o; };
+
+  const root = new T.Group();
+  const bodyG = new T.Group(); root.add(bodyG);
+  const headG = new T.Group(); root.add(headG);
+
+  // ---- Corps ----
+  mesh(S(0.62), M.fur, [0, -1.18, -0.05], [1.05, 0.95, 0.95], bodyG);
+  mesh(S(0.42), M.cream, [0, -1.16, 0.36], [1, 0.95, 0.6], bodyG);
+  mesh(S(0.17, 24, 16), M.furDark, [-0.3, -1.72, 0.28], [1, 0.65, 1.25], bodyG);
+  mesh(S(0.17, 24, 16), M.furDark, [0.3, -1.72, 0.28], [1, 0.65, 1.25], bodyG);
+  // ---- Queue (chaîne de sphères, remuée avec inertie) ----
+  const tail = new T.Group(); tail.position.set(0.42, -1.45, -0.38); bodyG.add(tail);
+  [[0.12, 0.05, -0.08, 0.2, M.fur], [0.33, 0.2, -0.14, 0.26, M.fur], [0.48, 0.45, -0.15, 0.28, M.fur], [0.53, 0.72, -0.1, 0.24, M.cream], [0.49, 0.9, -0.05, 0.15, M.cream]]
+    .forEach(([x, y, z, r, m]) => mesh(S(r, 24, 18), m, [x, y, z], null, tail));
+
+  // ---- Tête ----
+  mesh(S(1, 64, 48), M.fur, [0, 0, 0], [1.05, 0.96, 0.95], headG);
+  mesh(S(0.36, 32, 24), M.fur, [-0.82, -0.36, 0.22], [1.2, 0.8, 0.9], headG);  // joues touffues
+  mesh(S(0.36, 32, 24), M.fur, [0.82, -0.36, 0.22], [1.2, 0.8, 0.9], headG);
+  mesh(S(0.42), M.cream, [-0.5, -0.42, 0.55], [1, 0.85, 0.8], headG);          // fourrure blanche du bas du visage
+  mesh(S(0.42), M.cream, [0.5, -0.42, 0.55], [1, 0.85, 0.8], headG);
+  mesh(S(0.36), M.cream, [0, -0.36, 0.8], [1.15, 0.8, 0.95], headG);           // museau
+  mesh(S(0.1, 24, 16), M.nose, [0, -0.24, 1.13], [1.25, 0.9, 1], headG);
+  mesh(S(0.1, 20, 14), M.blush, [-0.62, -0.28, 0.86], [1.2, 0.8, 0.35], headG);
+  mesh(S(0.1, 20, 14), M.blush, [0.62, -0.28, 0.86], [1.2, 0.8, 0.35], headG);
+  const smile = mesh(new T.TorusGeometry(0.13, 0.022, 10, 30, Math.PI), M.mouth, [0, -0.46, 1.08], null, headG);
+  smile.rotation.set(0.35, 0, Math.PI);
+  // houppette sur le crâne
+  const tuft = mesh(new T.ConeGeometry(0.13, 0.32, 20), M.fur, [0.05, 0.98, 0.25], null, headG); tuft.rotation.set(0.5, 0, -0.3);
+
+  // ---- Yeux (blanc + iris + pupille + reflet) ----
+  const eyes = [], irises = [];
+  [-1, 1].forEach(sx => {
+    const eg = new T.Group(); eg.position.set(sx * 0.37, 0.12, 0.8); headG.add(eg);
+    mesh(S(0.21, 32, 24), M.eyeWhite, [0, 0, 0], [1, 1.1, 0.6], eg);
+    const ig = new T.Group(); ig.position.z = 0.1; eg.add(ig);
+    mesh(S(0.12, 28, 20), M.iris, [0, 0, 0], [1, 1, 0.35], ig);
+    mesh(S(0.066, 20, 14), M.pupil, [0, 0, 0.03], [1, 1, 0.3], ig);
+    mesh(S(0.03, 12, 8), M.shine, [0.045, 0.06, 0.07], null, eg);
+    mesh(S(0.014, 10, 6), M.shine, [-0.04, -0.035, 0.07], null, eg);
+    eyes.push(eg); irises.push(ig);
+  });
+  // ---- Lunettes ----
+  const glasses = new T.Group(); headG.add(glasses);
+  [-1, 1].forEach(sx => {
+    const ring = mesh(new T.TorusGeometry(0.28, 0.034, 14, 48), M.frame, [sx * 0.37, 0.12, 0.99], null, glasses);
+    mesh(new T.CircleGeometry(0.27, 40), M.lens, [sx * 0.37, 0.12, 0.985], null, glasses);
+    // branche vers l'oreille
+    const a = new T.Vector3(sx * 0.66, 0.14, 0.93), b = new T.Vector3(sx * 0.93, 0.16, 0.25);
+    const dir = b.clone().sub(a); const len = dir.length();
+    const arm = mesh(new T.CylinderGeometry(0.022, 0.022, len, 8), M.frame, null, null, glasses);
+    arm.position.copy(a.clone().add(b).multiplyScalar(0.5));
+    arm.quaternion.setFromUnitVectors(new T.Vector3(0, 1, 0), dir.normalize());
+    void ring;
+  });
+  const bridge = mesh(new T.CylinderGeometry(0.022, 0.022, 0.2, 8), M.frame, [0, 0.17, 1.02], null, glasses); bridge.rotation.z = Math.PI / 2;
+
+  // ---- Oreilles (pivot = articulation, pour l'inertie) ----
+  const ears = [];
+  [-1, 1].forEach(sx => {
+    const p = new T.Group(); p.position.set(sx * 0.55, 0.7, -0.05); p.rotation.set(-0.1, 0, -sx * 0.35); headG.add(p);
+    mesh(new T.ConeGeometry(0.38, 0.9, 36), M.fur, [0, 0.42, 0], [1, 1, 0.5], p);
+    mesh(new T.ConeGeometry(0.25, 0.62, 30), M.cream, [0, 0.34, 0.1], [1, 1, 0.35], p);
+    mesh(new T.ConeGeometry(0.1, 0.22, 20), M.tip, [0, 0.76, 0], [1, 1, 0.52], p);
+    p.userData.base = -sx * 0.35;
+    ears.push(p);
+  });
+  // ---- Accessoires de Souky : nœud + cils ----
+  const bow = new T.Group(); bow.position.set(0.5, 0.93, 0.38); bow.rotation.set(0.3, -0.2, -0.45); headG.add(bow);
+  [-1, 1].forEach(sx => { const c = mesh(new T.ConeGeometry(0.17, 0.34, 28), M.bow, [sx * 0.16, 0, 0], [1, 1, 0.55], bow); c.rotation.z = sx * Math.PI / 2; });
+  mesh(S(0.08, 20, 14), M.bow, [0, 0, 0.02], null, bow);
+  const lashes = new T.Group(); headG.add(lashes);
+  [-1, 1].forEach(sx => {
+    [0, 1, 2].forEach(k => {
+      const l = mesh(new T.CylinderGeometry(0.012, 0.006, 0.12, 6), M.pupil, [sx * (0.5 + k * 0.035), 0.3 - k * 0.045, 0.9], null, lashes);
+      l.rotation.z = sx * (-0.9 - k * 0.25);
+    });
+  });
+  bow.visible = false; lashes.visible = false;
+  return { root, bodyG, headG, tail, eyes, irises, ears, smile, bow, lashes };
+}
+
+function fox3dCreate(T, sizePx){
+  const canvas = document.createElement('canvas');
+  canvas.className = 'fox3d-canvas';
+  const renderer = new T.WebGLRenderer({ canvas, alpha:true, antialias:true, powerPreference:'low-power', premultipliedAlpha:true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setSize(sizePx, sizePx);
+  renderer.setClearColor(0x000000, 0);
+  renderer.outputEncoding = T.sRGBEncoding;
+  renderer.toneMapping = T.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 0.95;
+  const scene = new T.Scene();
+  scene.environment = fox3dEnvironment(T, renderer);
+  const camera = new T.PerspectiveCamera(30, 1, 0.1, 60);
+  camera.position.set(0, 0.35, 9.2); camera.lookAt(0, 0.05, 0);
+  scene.add(new T.HemisphereLight(0xfff1e0, 0x5b3a22, 0.35));
+  const key = new T.DirectionalLight(0xfff5ea, 1.5); key.position.set(-3.5, 4.5, 5); scene.add(key);
+  const rim = new T.DirectionalLight(0x9fcbff, 1.2); rim.position.set(3.5, 2.5, -4); scene.add(rim);
+  const fill = new T.PointLight(0xffc98f, 0.35); fill.position.set(3, -1, 4); scene.add(fill);
+
+  const f = fox3dBuild(T);
+  scene.add(f.root);
+  const shadow = new T.Mesh(new T.PlaneGeometry(2.8, 2.8), new T.MeshBasicMaterial({ map:fox3dShadowTexture(T), transparent:true, depthWrite:false }));
+  shadow.rotation.x = -Math.PI / 2; shadow.position.y = -1.86; scene.add(shadow);
+
+  const st = {
+    t:0, lookX:0, lookY:0, bodyX:0, prevHeadY:0,
+    intro:0, jumpT:-1, spinT:-1, spinDur:0.9, spinTurns:1, shakeT:-1, happyT:-1, sadT:-1,
+    nextBlink:1.5 + Math.random() * 2, blinkT:-1, nextTwitch:3 + Math.random() * 4, twitchT:-1, twitchEar:0,
+    ears:[{ a:0, v:0 }, { a:0, v:0 }], tail:{ a:0, v:0 }, female:false, swapTo:null, curious:0, nextCurious:5 + Math.random() * 5,
+  };
+  let last = performance.now();
+  const api = {
+    canvas, renderer, st,
+    react(kind){
+      if(kind === 'ok'){ st.jumpT = 0; st.spinT = 0; st.spinTurns = 1; st.spinDur = 0.8; st.happyT = 0; }
+      else if(kind === 'ko'){ st.shakeT = 0; st.sadT = 0; }
+      else if(kind === 'party'){ st.jumpT = 0; st.spinT = 0; st.spinTurns = 2; st.spinDur = 1.1; st.happyT = 0; }
+      else if(kind === 'hop'){ st.jumpT = 0; st.happyT = 0; }
+    },
+    setFemale(on, animated){
+      if(on === st.female && st.swapTo === null) return;
+      if(!animated || fox3d.reduced){ st.female = on; f.bow.visible = on; f.lashes.visible = on; return; }
+      st.swapTo = on; st.spinT = 0; st.spinTurns = 1; st.spinDur = 0.9; st.jumpT = 0;
+    },
+    pop(){ st.intro = 0; },
+  };
+
+  const ease = (x) => x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+  const elastic = (x) => x >= 1 ? 1 : 1 - Math.pow(2, -9 * x) * Math.cos(x * 9.5);
+  function spring(o, target, k, d, dt){ const acc = (target - o.a) * k - o.v * d; o.v += acc * dt; o.a += o.v * dt; }
+
+  function frame(now){
+    requestAnimationFrame(frame);
+    const dt = Math.min(0.05, (now - last) / 1000); last = now;
+    if(document.hidden || !canvas.isConnected || canvas.offsetParent === null) return;
+    st.t += dt;
+    const R = fox3d.reduced ? 0.25 : 1;
+    // --- cible du regard : doigt / souris, sinon flânerie curieuse
+    const rect = canvas.getBoundingClientRect();
+    let tx, ty;
+    const p = fox3d.pointer;
+    if(p.x !== null && performance.now() - p.t < 3500){
+      tx = Math.max(-1, Math.min(1, (p.x - (rect.left + rect.width / 2)) / (window.innerWidth * 0.42)));
+      ty = Math.max(-1, Math.min(1, (p.y - (rect.top + rect.height / 2)) / (window.innerHeight * 0.42)));
+    } else {
+      tx = Math.sin(st.t * 0.45) * 0.55 + Math.sin(st.t * 1.3) * 0.1;
+      ty = Math.sin(st.t * 0.31 + 1) * 0.3;
+    }
+    st.lookX += (tx - st.lookX) * Math.min(1, dt * 5);
+    st.lookY += (ty - st.lookY) * Math.min(1, dt * 5);
+    st.bodyX += (st.lookX - st.bodyX) * Math.min(1, dt * 2);
+    // tête penchée « curieuse » de temps en temps
+    if(st.t > st.nextCurious){ st.curious = (Math.random() < 0.5 ? -1 : 1) * 0.22; st.nextCurious = st.t + 6 + Math.random() * 6; setTimeout(() => { st.curious = 0; }, 1400); }
+
+    // --- intro (pop élastique)
+    st.intro = Math.min(1, st.intro + dt / 0.9);
+    const introS = elastic(st.intro);
+
+    // --- saut + squash & stretch
+    let jumpY = 0, sq = 0;
+    if(st.jumpT >= 0){
+      st.jumpT += dt; const pj = st.jumpT / 0.75;
+      if(pj >= 1){ st.jumpT = -1; }
+      else {
+        jumpY = Math.sin(pj * Math.PI) * 0.75 * R;
+        sq = pj < 0.12 ? -Math.sin(pj / 0.12 * Math.PI) * 0.16 : (pj > 0.88 ? -Math.sin((pj - 0.88) / 0.12 * Math.PI) * 0.18 : Math.sin((pj - 0.12) / 0.76 * Math.PI) * 0.08);
+      }
+    }
+    // --- vrille (spin) + échange Abdel / Souky à mi-course
+    let spin = 0;
+    if(st.spinT >= 0){
+      st.spinT += dt; const ps = Math.min(1, st.spinT / st.spinDur);
+      spin = ease(ps) * Math.PI * 2 * st.spinTurns * (fox3d.reduced ? 0 : 1);
+      if(st.swapTo !== null && ps >= 0.5){ st.female = st.swapTo; f.bow.visible = st.female; f.lashes.visible = st.female; st.swapTo = null; }
+      if(ps >= 1){ st.spinT = -1; }
+    }
+    // --- secousse (erreur)
+    let shake = 0;
+    if(st.shakeT >= 0){ st.shakeT += dt; shake = Math.sin(st.shakeT * 30) * 0.32 * Math.exp(-st.shakeT * 3.2) * R; if(st.shakeT > 1.4) st.shakeT = -1; }
+    if(st.happyT >= 0){ st.happyT += dt; if(st.happyT > 1.3) st.happyT = -1; }
+    if(st.sadT >= 0){ st.sadT += dt; if(st.sadT > 1.6) st.sadT = -1; }
+
+    // --- respiration + flottement
+    const breath = Math.sin(st.t * 2.2) * 0.018 * R;
+    const floatY = Math.sin(st.t * 1.7) * 0.06 * R;
+    f.root.position.y = floatY + jumpY;
+    f.root.scale.set(introS * (1 - sq * 0.6 - breath * 0.5), introS * (1 + sq + breath), introS * (1 - sq * 0.6 - breath * 0.5));
+    f.root.rotation.y = spin + st.bodyX * 0.25;
+    f.headG.rotation.y = st.lookX * 0.5 + shake;
+    f.headG.rotation.x = st.lookY * 0.32 + (st.sadT >= 0 ? 0.18 : 0);
+    f.headG.rotation.z = -st.lookX * 0.1 + st.curious * R + Math.sin(st.t * 0.9) * 0.03 * R;
+    f.bodyG.rotation.y = -st.lookX * 0.12;
+    // --- yeux : iris qui suit, clignement, yeux rieurs
+    f.irises.forEach(ig => { ig.position.x = st.lookX * 0.055; ig.position.y = -st.lookY * 0.045; });
+    if(st.t > st.nextBlink && st.blinkT < 0){ st.blinkT = 0; st.nextBlink = st.t + 2.5 + Math.random() * 3.5 + (Math.random() < 0.2 ? -2.2 : 0); }
+    let eyeS = 1;
+    if(st.blinkT >= 0){ st.blinkT += dt; const pb = st.blinkT / 0.16; eyeS = 1 - 0.92 * Math.sin(Math.min(1, pb) * Math.PI); if(pb >= 1) st.blinkT = -1; }
+    if(st.happyT >= 0) eyeS = Math.min(eyeS, 0.45);
+    f.eyes.forEach(eg => { eg.scale.y += (eyeS - eg.scale.y) * Math.min(1, dt * 30); });
+    f.smile.scale.setScalar(1 + (st.happyT >= 0 ? 0.35 : 0) - (st.sadT >= 0 ? 0.25 : 0));
+    // --- oreilles : inertie + petit frétillement + oreilles basses quand c'est raté
+    const headVel = (f.headG.rotation.y - st.prevHeadY) / Math.max(dt, 0.001); st.prevHeadY = f.headG.rotation.y;
+    if(st.t > st.nextTwitch && st.twitchT < 0){ st.twitchT = 0; st.twitchEar = Math.random() < 0.5 ? 0 : 1; st.nextTwitch = st.t + 3 + Math.random() * 5; }
+    if(st.twitchT >= 0){ st.twitchT += dt; if(st.twitchT > 0.35) st.twitchT = -1; }
+    f.ears.forEach((ear, i) => {
+      const sx = i === 0 ? -1 : 1;
+      let target = -headVel * 0.03 - sx * jumpY * 0.22;          // inertie : les oreilles « traînent » derrière la tête
+      if(st.sadT >= 0) target += -sx * 0.45;                       // oreilles qui tombent
+      if(st.twitchT >= 0 && st.twitchEar === i) target += Math.sin(st.twitchT * 40) * 0.25;
+      spring(st.ears[i], target * R, 140, 9, dt);
+      ear.rotation.z = ear.userData.base + st.ears[i].a;
+    });
+    // --- queue : balancement + inertie
+    const wag = Math.sin(st.t * (st.happyT >= 0 ? 12 : 3)) * (st.happyT >= 0 ? 0.45 : 0.18) * R;
+    spring(st.tail, wag - st.bodyX * 0.3, 60, 6, dt);
+    f.tail.rotation.z = st.tail.a;
+    f.tail.rotation.y = st.tail.a * 0.6;
+    // --- ombre au sol : plus petite et plus claire quand il saute
+    const sh = 1 - Math.min(0.55, (jumpY + floatY) * 0.6);
+    shadow.scale.set(sh * introS, sh * introS, 1);
+    shadow.material.opacity = sh;
+    renderer.render(scene, camera);
+  }
+  requestAnimationFrame(frame);
+  return api;
+}
+
+function fox3dMountHero(){
+  if(!fox3d.ready) return;
+  const box = document.getElementById('heroMascotContainer');
+  if(!box || box.querySelector('.fox3d-canvas')) return;
+  if(!fox3d.hero){ try{ fox3d.hero = fox3dCreate(THREE, 176); }catch(e){ console.warn('fox3d hero', e); return; } }
+  box.classList.add('fox3d-on');
+  box.appendChild(fox3d.hero.canvas);
+  fox3d.hero.pop();
+  if(!box.dataset.fox3dClick){
+    box.dataset.fox3dClick = '1';
+    box.style.cursor = 'pointer';
+    box.addEventListener('click', () => { fox3d.hero && fox3d.hero.react(Math.random() < 0.5 ? 'ok' : 'party'); try{ playCorrectSound(); }catch(e){} });
+  }
+}
+function fox3dMountQuiz(){
+  if(!fox3d.ready || fox3d.quiz) return;
+  const m = document.getElementById('mascot');
+  if(!m) return;
+  try{ fox3d.quiz = fox3dCreate(THREE, 150); }catch(e){ console.warn('fox3d quiz', e); return; }
+  m.classList.add('fox3d-on');
+  m.appendChild(fox3d.quiz.canvas);
+}
+function initFox3D(){
+  if(fox3d.ready || !fox3dWebGLOk()) return;
+  fox3d.reduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  fox3dLoadThree().then(() => {
+    fox3d.ready = true;
+    fox3dMountQuiz();
+    fox3dMountHero();
+    // l'accueil est reconstruit à chaque retour : on y replace le même renard (un seul contexte WebGL)
+    const card = document.getElementById('quizCard');
+    if(card){ new MutationObserver(() => fox3dMountHero()).observe(card, { childList:true }); }
+    // Abdel 🦊 ↔ Souky 🎀 toutes les 10 s, par une vrille 3D
+    setInterval(() => { if(fox3d.hero && fox3d.hero.canvas.isConnected && !document.hidden) fox3d.hero.setFemale(!fox3d.hero.st.female, true); }, 10000);
+    // réactions branchées sur la mascotte existante
+    const origReact = reactMascot;
+    reactMascot = function(kind){ origReact.apply(this, arguments); if(fox3d.quiz) fox3d.quiz.react(kind); };
+    const origMilestone = mascotMilestone;
+    mascotMilestone = function(){ origMilestone.apply(this, arguments); if(fox3d.quiz) fox3d.quiz.react('party'); };
+  }).catch(() => { /* hors ligne ou CDN bloqué : la mascotte SVG reste en place */ });
+}
+['pointermove', 'pointerdown'].forEach(evt => window.addEventListener(evt, (e) => { fox3d.pointer.x = e.clientX; fox3d.pointer.y = e.clientY; fox3d.pointer.t = performance.now(); }, { passive:true }));
+window.addEventListener('touchmove', (e) => { const t = e.touches && e.touches[0]; if(t){ fox3d.pointer.x = t.clientX; fox3d.pointer.y = t.clientY; fox3d.pointer.t = performance.now(); } }, { passive:true });
+setTimeout(initFox3D, 900);
 
 /* ============ ▶ « Go » : ouvre directement le module qui fait avancer un défi du jour ============ */
 function startNextBlockInMode(mode){
