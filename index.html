@@ -1503,6 +1503,18 @@
   .quests-xp{ background:rgba(251,191,36,0.15);color:#B45309;font-size:12.5px;padding:4px 11px;border-radius:999px; }
   .quests-alldone{ background:rgba(16,185,129,0.15);color:var(--green-dark);font-weight:800;font-size:13px;text-align:center;padding:8px;border-radius:12px;margin-bottom:10px; }
   .quest-row{ display:flex;align-items:center;gap:12px;padding:7px 0; }
+  .ent-heart{ display:inline-block; transition:transform .3s; }
+  .ent-heart.lost{ transform:scale(.8); opacity:.55; animation:entHeartLose .5s ease; }
+  @keyframes entHeartLose{ 0%{ transform:scale(1.4); } 60%{ transform:scale(.7); } 100%{ transform:scale(.8); } }
+  .ent-q-pop{ animation:entPop .45s cubic-bezier(.2,1.4,.4,1) both; }
+  @keyframes entPop{ from{ opacity:0; transform:scale(.85) translateY(8px); } to{ opacity:1; transform:none; } }
+  .ent-mission-btn{ animation:heroCtaPulse 2.4s ease-in-out infinite; }
+  .quest-go{
+    flex-shrink:0; border:none; cursor:pointer; border-radius:999px; padding:8px 12px;
+    font:800 12.5px 'Inter',sans-serif; color:#fff; background:linear-gradient(135deg,#F59E0B,#EA580C);
+    box-shadow:0 3px 0 #9A3412; transition:transform .12s;
+  }
+  .quest-go:active{ transform:translateY(2px); box-shadow:0 1px 0 #9A3412; }
   .quest-ic{ font-size:22px;width:30px;text-align:center;flex:none; }
   .quest-main{ flex:1;min-width:0; }
   .quest-label{ font-weight:800;font-size:13px;color:var(--text);margin-bottom:5px; }
@@ -2108,6 +2120,7 @@ function saveCustomBlockResult(blockId, mode, result){
 }
 
 function buildCustomDeck(blockId){
+  customDeckPool = null;
   const block = getCustomBlock(blockId);
   if(!block) return;
   currentBlock = blockId;
@@ -2421,14 +2434,14 @@ const PEEK_SUGGEST_MODES = [
   { mode:'repeat',  label:'🗣️ Répétition' },
   { mode:'listen',  label:'🎧 Dictée' },
 ];
-function showModeSuggestPopup(words){
+function showModeSuggestPopup(words, message){
   if(!words || words.length < 2) return; // pas assez de mots pour un mode digne de ce nom
   const overlay = document.getElementById('modeSuggestOverlay');
   const body = document.getElementById('modeSuggestBody');
   if(!overlay || !body) return;
   body.innerHTML = `
     <div style="padding:4px 4px 16px;text-align:center;">
-      <div style="font-size:14px;color:var(--text-dim);margin-bottom:14px;">Tu viens d'écouter ${words.length} mots — tu veux t'entraîner dessus tout de suite ?</div>
+      <div style="font-size:14px;color:var(--text-dim);margin-bottom:14px;">${message ? escapeHtml(message) : `Tu viens d'écouter ${words.length} mots — tu veux t'entraîner dessus tout de suite ?`}</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;">
         ${PEEK_SUGGEST_MODES.map(m => `<button class="opt" data-suggest-mode="${m.mode}" style="padding:13px 16px;font-weight:800;">${m.label}</button>`).join('')}
       </div>
@@ -2452,6 +2465,7 @@ function hideModeSuggestPopup(){
    qu'on vient de "peek"/écouter), sans passer par un bloc ou un bloc personnalisé enregistré. */
 function startModeWithWords(words, mode){
   gameMode = mode;
+  customDeckPool = words.slice();
   currentBlock = null;
   window.__reviewSession = false;
   window.__customBlockId = null;
@@ -2712,15 +2726,17 @@ const QUEST_SETTINGS_KEY = 'lexiqueQuiz::questSettings';
 /* ============ 🗂️ Registre central des sections de fiches ============
    Source unique de vérité pour tout module basé sur PRACTICAL_SHEETS (+ Bouquinage, à part).
    Pour ajouter un futur module au système de défis du jour et aux réglages, il suffit d'ajouter
-   UNE entrée ici — rien à toucher ailleurs (getDailyQuests, renderQuestSettings s'adaptent seuls). */
+   UNE entrée ici — rien à toucher ailleurs (getDailyQuests, renderQuestSettings s'adaptent seuls).
+   `open` (facultatif) : écran à ouvrir depuis le bouton « Go » d'un défi ; sinon la liste générique
+   des fiches de la section est affichée. */
 const SHEET_SECTIONS = [
-  { key: 'bouquinage', icon: '📖', defaultGoal: 1, count: () => countTodayBouquinageRead(), settingLabel: 'Textes à lire en Bouquinage', questLabel: (g) => `Lis ${g} texte${g>1?'s':''} en Bouquinage` },
-  { key: 'pratique', icon: '📎', defaultGoal: 1, count: () => countTodayPassedInSection('pratique'), settingLabel: 'Fiches pratiques à terminer', questLabel: (g) => `Termine ${g} fiche${g>1?'s':''} pratique${g>1?'s':''}` },
-  { key: 'atelier', icon: '🏛️', defaultGoal: 1, count: () => countTodayPassedInSection('atelier'), settingLabel: "Fiches d'Atelier Français à terminer", questLabel: (g) => `Termine ${g} fiche${g>1?'s':''} d'Atelier Français` },
-  { key: 'conjugaison', icon: '🔤', defaultGoal: 0, count: () => countTodayPassedInSection('conjugaison'), settingLabel: 'Fiches de Conjugaison à terminer', questLabel: (g) => `Termine ${g} fiche${g>1?'s':''} de Conjugaison` },
-  { key: 'avance', icon: '🎓', defaultGoal: 0, count: () => countTodayPassedInSection('avance'), settingLabel: 'Fiches de Grammaire Avancée à terminer', questLabel: (g) => `Termine ${g} fiche${g>1?'s':''} de Grammaire Avancée` },
-  { key: 'oratoire', icon: '🎤', defaultGoal: 0, count: () => countTodayPassedInSection('oratoire'), settingLabel: "Fiches d'Art Oratoire à terminer", questLabel: (g) => `Termine ${g} fiche${g>1?'s':''} d'Art Oratoire` },
-  { key: 'situations', icon: '💬', defaultGoal: 0, count: () => countTodayPassedInSection('situations'), settingLabel: 'Fiches Expressions B2-C1 à terminer', questLabel: (g) => `Termine ${g} fiche${g>1?'s':''} Expressions B2-C1` },
+  { key: 'bouquinage', open: () => renderBouquinageHome(), icon: '📖', defaultGoal: 1, count: () => countTodayBouquinageRead(), settingLabel: 'Textes à lire en Bouquinage', questLabel: (g) => `Lis ${g} texte${g>1?'s':''} en Bouquinage` },
+  { key: 'pratique', open: () => renderPracticalSheetsHome(), icon: '📎', defaultGoal: 1, count: () => countTodayPassedInSection('pratique'), settingLabel: 'Fiches pratiques à terminer', questLabel: (g) => `Termine ${g} fiche${g>1?'s':''} pratique${g>1?'s':''}` },
+  { key: 'atelier', open: () => renderAtelierHome(), icon: '🏛️', defaultGoal: 1, count: () => countTodayPassedInSection('atelier'), settingLabel: "Fiches d'Atelier Français à terminer", questLabel: (g) => `Termine ${g} fiche${g>1?'s':''} d'Atelier Français` },
+  { key: 'conjugaison', open: () => renderConjugaisonHome(), icon: '🔤', defaultGoal: 0, count: () => countTodayPassedInSection('conjugaison'), settingLabel: 'Fiches de Conjugaison à terminer', questLabel: (g) => `Termine ${g} fiche${g>1?'s':''} de Conjugaison` },
+  { key: 'avance', open: () => renderGrammaireAvanceeHome(), icon: '🎓', defaultGoal: 0, count: () => countTodayPassedInSection('avance'), settingLabel: 'Fiches de Grammaire Avancée à terminer', questLabel: (g) => `Termine ${g} fiche${g>1?'s':''} de Grammaire Avancée` },
+  { key: 'oratoire', open: () => renderArtOratoireHome(), icon: '🎤', defaultGoal: 0, count: () => countTodayPassedInSection('oratoire'), settingLabel: "Fiches d'Art Oratoire à terminer", questLabel: (g) => `Termine ${g} fiche${g>1?'s':''} d'Art Oratoire` },
+  { key: 'situations', open: () => renderSituationsHome(), icon: '💬', defaultGoal: 0, count: () => countTodayPassedInSection('situations'), settingLabel: 'Fiches Expressions B2-C1 à terminer', questLabel: (g) => `Termine ${g} fiche${g>1?'s':''} Expressions B2-C1` },
 ];
 function defaultSectionGoals(){
   const g = {};
@@ -2831,10 +2847,10 @@ function getDailyQuests(){
   const s = dailyStats[todayKey()] || { seconds:0, passed:0, xp:0, modesPlayed:[], bySubject:{} };
   const timeGoalSec = questSettings.timeGoalMin * 60;
   const quests = [
-    { icon:'📗', label:`Termine ${questSettings.lessonGoal} exercice${questSettings.lessonGoal>1?'s':''} (tous modes)`, cur:Math.min(lessons, questSettings.lessonGoal), goal:questSettings.lessonGoal },
-    { icon:'⏱️', label:`Passe ${questSettings.timeGoalMin} min à apprendre`, cur:Math.min(s.seconds, timeGoalSec), goal:timeGoalSec, isTime:true },
-    { icon:'🏆', label:`Réussis 90%+ dans ${questSettings.passGoal} bloc${questSettings.passGoal>1?'s':''}`, cur:Math.min(s.passed, questSettings.passGoal), goal:questSettings.passGoal },
-    { icon:'⚖️', label:'Touche à 2 matières différentes (vocabulaire, conjugaison, grammaire, orthographe)', cur:Math.min(Object.keys(s.bySubject || {}).length, 2), goal:2 },
+    { key:'lessons', icon:'📗', label:`Termine ${questSettings.lessonGoal} exercice${questSettings.lessonGoal>1?'s':''} (tous modes)`, cur:Math.min(lessons, questSettings.lessonGoal), goal:questSettings.lessonGoal },
+    { key:'time', icon:'⏱️', label:`Passe ${questSettings.timeGoalMin} min à apprendre`, cur:Math.min(s.seconds, timeGoalSec), goal:timeGoalSec, isTime:true },
+    { key:'pass', icon:'🏆', label:`Réussis 90%+ dans ${questSettings.passGoal} bloc${questSettings.passGoal>1?'s':''}`, cur:Math.min(s.passed, questSettings.passGoal), goal:questSettings.passGoal },
+    { key:'subjects', icon:'⚖️', label:'Touche à 2 matières différentes (vocabulaire, conjugaison, grammaire, orthographe)', cur:Math.min(Object.keys(s.bySubject || {}).length, 2), goal:2 },
   ];
   // 🎯 Objectifs configurables par section — dynamique via le registre SHEET_SECTIONS : un futur
   // module ajouté à ce registre apparaît ici automatiquement, sans autre modification.
@@ -2842,16 +2858,16 @@ function getDailyQuests(){
     const goal = questSettings.sectionGoals[sec.key] ?? sec.defaultGoal;
     if(goal > 0){
       const n = sec.count();
-      quests.push({ icon: sec.icon, label: sec.questLabel(goal), cur: Math.min(n, goal), goal });
+      quests.push({ key:'section:' + sec.key, icon: sec.icon, label: sec.questLabel(goal), cur: Math.min(n, goal), goal });
     }
   });
   if(questSettings.modesGoal > 0){
     const modesCount = (s.modesPlayed || []).length;
-    quests.push({ icon:'🎭', label:`Complète ${questSettings.modesGoal} modes différents`, cur:Math.min(modesCount, questSettings.modesGoal), goal:questSettings.modesGoal });
+    quests.push({ key:'modes', icon:'🎭', label:`Complète ${questSettings.modesGoal} modes différents`, cur:Math.min(modesCount, questSettings.modesGoal), goal:questSettings.modesGoal });
   }
   if(questSettings.fullMasteryGoal > 0){
     const masteredBlocks = countFullyMasteredBlocks();
-    quests.push({ icon:'🥇', label:`Maîtrise ${questSettings.fullMasteryGoal} blocs à 100% (≥90% dans les ${GAME_MODES.length} modes)`, cur:Math.min(masteredBlocks, questSettings.fullMasteryGoal), goal:questSettings.fullMasteryGoal });
+    quests.push({ key:'mastery', icon:'🥇', label:`Maîtrise ${questSettings.fullMasteryGoal} blocs à 100% (≥90% dans les ${GAME_MODES.length} modes)`, cur:Math.min(masteredBlocks, questSettings.fullMasteryGoal), goal:questSettings.fullMasteryGoal });
   }
   return quests;
 }
@@ -6672,8 +6688,10 @@ document.getElementById('resetBtn').addEventListener('click', () => {
 });
 
 /* ---------- Quiz logic ---------- */
+let customDeckPool = null; // mots d'une liste libre (ex. module Entreprise) : distracteurs pris dans le même thème
 function makeOptions(word){
-  const distractors = shuffle(WORDS.filter(w => w.fr !== word.fr && w.def !== word.def)).slice(0,3);
+  const src = (customDeckPool && customDeckPool.length >= 4) ? customDeckPool : WORDS;
+  const distractors = shuffle(src.filter(w => w.fr !== word.fr && w.def !== word.def)).slice(0,3);
   const options = shuffle([word, ...distractors]);
   return options;
 }
@@ -6700,6 +6718,7 @@ function setupDeckFromWords(words){
   lastInteractionAt = Date.now();
 }
 function buildDeck(blockIndex){
+  customDeckPool = null;
   currentBlock = blockIndex;
   window.__reviewSession = false;
   window.__customBlockId = null;
@@ -12292,6 +12311,7 @@ function renderBlockSelect(){
             <div class="quest-label">${q.label}</div>
             <div class="quest-bar"><div class="quest-bar-fill" style="width:${pctq}%;"></div><span class="quest-bar-txt">${curTxt} / ${goalTxt}</span></div>
           </div>
+          ${done ? '' : `<button class="quest-go" data-quest-go="${escapeHtml(q.key)}" title="Y aller">Go ▶</button>`}
         </div>`;
       }).join('')}
       </div>
@@ -12335,6 +12355,7 @@ function renderBlockSelect(){
       <button class="restart-btn" id="avanceBtn" style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#0F766E,#115E59);color:#fff;box-shadow:0 4px 0 #134E4A;">🎓 Grammaire Avancée</button>
       <button class="restart-btn" id="oratoireBtn" style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#B45309,#92400E);color:#fff;box-shadow:0 4px 0 #78350F;">🎤 Art Oratoire</button>
       <button class="restart-btn" id="situationsBtn" style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#BE185D,#9D174D);color:#fff;box-shadow:0 4px 0 #831843;">💬 Expressions B2-C1</button>
+      <button class="restart-btn" id="entrepriseBtn" style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#1D4ED8,#1E3A8A);color:#fff;box-shadow:0 4px 0 #172554;">🏢 Français en entreprise</button>
     `)}
 
     ${buildHomeSectionHtml('daily', '📰', 'Rendez-vous du jour', `
@@ -12472,6 +12493,7 @@ function renderBlockSelect(){
   document.getElementById('avanceBtn').addEventListener('click', () => renderGrammaireAvanceeHome());
   document.getElementById('oratoireBtn').addEventListener('click', () => renderArtOratoireHome());
   document.getElementById('situationsBtn').addEventListener('click', () => renderSituationsHome());
+  document.getElementById('entrepriseBtn').addEventListener('click', () => renderEntrepriseHub());
   document.getElementById('jeuxMotsBtn').addEventListener('click', () => renderJeuxMotsHome());
   const questsHead = document.getElementById('questsHead');
   const questsChevron = document.getElementById('questsChevron');
@@ -28849,6 +28871,45 @@ const PRACTICAL_SHEETS = [
       ] },
     ],
   },
+  {"id": "ent-u1", "section": "situations", "category": "Travailler en entreprise A2/B1", "hub": "entreprise", "icon": "💼", "title": "Unité 1 · Recrutement", "intro": "Parler de son parcours, de ses compétences et de ses souhaits ; lire et rédiger une offre d'emploi.", "type": "rule", "blocks": [{"heading": "Je dois savoir", "text": "Parler de mes aptitudes et de mes souhaits professionnels, raconter mon parcours (formation, postes, dates), lire une offre d'emploi et en rédiger une.", "examples": []}, {"heading": "Imparfait = décor, passé composé = étapes", "text": "L'imparfait décrit le contexte et les habitudes ; le passé composé raconte les étapes précises.", "examples": ["Je travaillais dans une banque, puis j'ai rejoint une start-up en 2020.", "Quand j'étais étudiant, je faisais des petits boulots."]}, {"heading": "Marqueurs de temps", "text": "depuis, il y a, pendant, en, de… à…", "examples": ["Je suis responsable des ventes depuis 2021.", "J'ai été stagiaire pendant six mois."]}, {"heading": "Exprimer un souhait", "text": "je souhaiterais, j'aimerais, mon objectif est de, je rêve de", "examples": ["Je souhaiterais évoluer vers un poste de manager.", "Mon objectif est de travailler à l'international."]}, {"heading": "🎯 Mini-tâche", "text": "Présente ton parcours en 1 minute, avec 3 verbes à l'imparfait et 3 au passé composé. Utilise le micro 🎤 des exemples pour t'entraîner à voix haute.", "examples": []}]},
+  {"id": "ent-u2", "section": "situations", "category": "Travailler en entreprise A2/B1", "hub": "entreprise", "icon": "✈️", "title": "Unité 2 · Voyage professionnel", "intro": "Comprendre un message téléphonique, lire des infos pratiques, demander un devis, raconter un déplacement.", "type": "rule", "blocks": [{"heading": "Je dois savoir", "text": "Comprendre un message laissé au téléphone (qui, quoi, quand, où rappeler), lire des horaires et des conditions, remplir un formulaire, demander un devis, faire le compte rendu d'un déplacement.", "examples": []}, {"heading": "Situer dans l'espace", "text": "à côté de, en face de, au bout de, entre… et…, à gauche / à droite de", "examples": ["La salle de réunion est au bout du couloir, à droite.", "L'hôtel se trouve en face de la gare."]}, {"heading": "Le pronom Y (un lieu)", "text": "Y remplace un lieu introduit par à, dans, chez…", "examples": ["Tu vas à Lyon ? — Oui, j'y vais demain."]}, {"heading": "Le pronom EN (quantité, de + nom)", "text": "EN remplace une quantité ou de + nom.", "examples": ["Des billets ? J'en ai réservé deux.", "Tu reviens du salon ? — Oui, j'en reviens."]}, {"heading": "Types de voyages", "text": "séminaire, salon, voyage de motivation (incentive), mission", "examples": []}, {"heading": "🎯 Mini-tâche", "text": "Écris une demande de devis pour un séminaire de 20 personnes (modèle dans la fiche « Demande de devis »).", "examples": []}]},
+  {"id": "ent-u3", "section": "situations", "category": "Travailler en entreprise A2/B1", "hub": "entreprise", "icon": "📈", "title": "Unité 3 · Entretien d'évaluation", "intro": "Parler de ses qualités et défauts, de son évolution, justifier un besoin de formation.", "type": "rule", "blocks": [{"heading": "Je dois savoir", "text": "Parler de mes qualités et de mes défauts sans me dévaloriser, décrire l'évolution de ma carrière et mes objectifs, justifier un besoin de formation par écrit.", "examples": []}, {"heading": "Les relatifs qui, que, où", "text": "qui = sujet, que = complément, où = lieu ou temps.", "examples": ["C'est un projet qui me motive.", "Le poste que je vise est à Casablanca.", "Je me souviens du jour où j'ai signé."]}, {"heading": "La mise en relief", "text": "C'est… qui / C'est… que / Ce que…, c'est…", "examples": ["C'est moi qui ai piloté ce dossier.", "Ce que j'apprécie, c'est l'autonomie."]}, {"heading": "La négation", "text": "ne… pas / jamais / plus / rien / personne", "examples": ["Je n'ai jamais manqué une échéance.", "Je n'ai rien oublié."]}, {"heading": "L'élision", "text": "Devant une voyelle ou un h muet : j'ai, l'entretien, qu'il, n'est.", "examples": ["L'entretien n'est pas encore fini."]}, {"heading": "🎯 Mini-tâche", "text": "Complète à l'oral : « Ce qui me motive dans mon poste, c'est… » et « Un point que je voudrais améliorer, c'est… ».", "examples": ["Ce qui me motive dans mon poste, c'est le contact avec les clients.", "Un point que je voudrais améliorer, c'est la prise de parole en réunion."]}]},
+  {"id": "ent-u4", "section": "situations", "category": "Travailler en entreprise A2/B1", "hub": "entreprise", "icon": "🌍", "title": "Unité 4 · L'expatriation", "intro": "Exprimer sa motivation pour un poste à l'étranger, demander des précisions, rassurer.", "type": "rule", "blocks": [{"heading": "Je dois savoir", "text": "Exprimer ma motivation pour un poste à l'étranger, demander des précisions à une administration, prévenir quelqu'un et le rassurer, noter un message vocal.", "examples": []}, {"heading": "Le futur simple pour les projets", "text": "je partirai, nous nous installerons, il faudra…", "examples": ["Je partirai en septembre et nous nous installerons près du bureau.", "Il faudra renouveler le titre de séjour."]}, {"heading": "Verbe + infinitif", "text": "Sans préposition : vouloir, pouvoir, devoir, aimer. Avec À : commencer à, réussir à, s'habituer à. Avec DE : décider de, accepter de, essayer de, oublier de.", "examples": ["J'ai décidé d'accepter la mutation.", "Je commence à m'habituer au climat."]}, {"heading": "🎯 Mini-tâche", "text": "Écris 5 phrases au futur sur ta première semaine dans un nouveau pays.", "examples": ["Lundi, j'irai à la préfecture pour mon titre de séjour."]}]},
+  {"id": "ent-u5", "section": "situations", "category": "Travailler en entreprise A2/B1", "hub": "entreprise", "icon": "🧘", "title": "Unité 5 · Bien-être et productivité", "intro": "Exprimer un regret de façon constructive, proposer des améliorations, motiver une équipe.", "type": "rule", "blocks": [{"heading": "Je dois savoir", "text": "Exprimer un regret ou une plainte de façon constructive, proposer des améliorations des conditions de travail, justifier des mesures de motivation.", "examples": []}, {"heading": "Le conditionnel", "text": "Politesse, souhait, conseil.", "examples": ["Pourriez-vous m'envoyer le planning ?", "J'aimerais travailler dans un open space plus calme.", "Vous devriez faire des pauses régulières."]}, {"heading": "Le subjonctif", "text": "Après une nécessité, une volonté ou un sentiment : il faut que, je voudrais que, je regrette que.", "examples": ["Il faut que nous réduisions les réunions inutiles.", "Je regrette que l'équipe soit si fatiguée."]}, {"heading": "DONT = de + nom", "text": "Dont remplace un complément introduit par de.", "examples": ["Le projet dont je parle commence lundi."]}, {"heading": "🎯 Mini-tâche", "text": "Formule 3 propositions pour réduire le stress dans ton équipe avec « il faudrait que » + subjonctif.", "examples": ["Il faudrait que chacun puisse télétravailler un jour par semaine."]}]},
+  {"id": "ent-u6", "section": "situations", "category": "Travailler en entreprise A2/B1", "hub": "entreprise", "icon": "🏗️", "title": "Unité 6 · Entreprise en mouvement", "intro": "Présenter son entreprise, parler d'un changement, faire des hypothèses, approuver ou désapprouver.", "type": "rule", "blocks": [{"heading": "Je dois savoir", "text": "Présenter mon entreprise (activité, taille, chiffres, histoire), parler d'un changement (fusion, réorganisation, déménagement), exprimer espoir ou déception, faire des hypothèses, rédiger un compte rendu.", "examples": []}, {"heading": "L'hypothèse avec SI", "text": "Si + présent → futur (probable). Si + imparfait → conditionnel (imaginaire).", "examples": ["Si le client signe, nous embaucherons deux personnes.", "Si nous fusionnions, nous serions leaders du marché."]}, {"heading": "Les doubles pronoms", "text": "Ordre : me/te/se/nous/vous → le/la/les → lui/leur → y → en.", "examples": ["Le rapport ? Je le lui envoie ce soir.", "Il me l'a expliqué hier.", "Donne-le-moi, s'il te plaît."]}, {"heading": "🎯 Mini-tâche", "text": "« Si mon entreprise fusionnait avec un concurrent, … » : écris 3 conséquences.", "examples": ["Si mon entreprise fusionnait avec un concurrent, nous changerions de nom."]}]},
+  {"id": "ent-u7", "section": "situations", "category": "Travailler en entreprise A2/B1", "hub": "entreprise", "icon": "📣", "title": "Unité 7 · Communication performante", "intro": "Présenter sa fonction, adapter son message et l'outil au public, se justifier en situation de crise.", "type": "rule", "blocks": [{"heading": "Je dois savoir", "text": "Présenter ma fonction clairement, adapter mon message et l'outil (mail, réunion, affichage, intranet) au public, me justifier en situation de crise.", "examples": []}, {"heading": "Les connecteurs logiques", "text": "Cause, conséquence, opposition, but, addition : voir la fiche « Connecteurs logiques ».", "examples": ["Le chantier a pris du retard à cause de la pluie ; c'est pourquoi nous décalons la livraison."]}, {"heading": "Participe passé avec AVOIR", "text": "Il s'accorde avec le COD placé AVANT le verbe.", "examples": ["Les mails que j'ai envoyés sont partis.", "La facture ? Je l'ai payée."]}, {"heading": "🎯 Mini-tâche", "text": "Explique un retard de livraison à un client (registre soutenu), puis à ton équipe (registre courant).", "examples": ["Nous vous prions de bien vouloir nous excuser pour ce retard.", "Les gars, la livraison est décalée, on s'organise !"]}]},
+  {"id": "ent-u8", "section": "situations", "category": "Travailler en entreprise A2/B1", "hub": "entreprise", "icon": "💻", "title": "Unité 8 · Nouvelles formes de travail", "intro": "Comprendre un exposé, donner son avis, rapporter des propos, commenter des statistiques.", "type": "rule", "blocks": [{"heading": "Je dois savoir", "text": "Comprendre un exposé long et prendre des notes, lire un article d'opinion, donner mon avis, rapporter les propos de quelqu'un, commenter des statistiques.", "examples": []}, {"heading": "Le plus-que-parfait", "text": "Une action antérieure à une autre action passée.", "examples": ["Quand il est arrivé, la réunion avait déjà commencé."]}, {"heading": "Le discours rapporté", "text": "Les temps et les repères changent quand le verbe introducteur est au passé.", "examples": ["« Je finirai demain. » → Il a dit qu'il finirait le lendemain."]}, {"heading": "Formes de travail", "text": "télétravail, portage salarial, auto-entreprise, freelance, temps partagé", "examples": []}, {"heading": "🎯 Mini-tâche", "text": "Rapporte au discours indirect ce qu'un collègue t'a dit ce matin.", "examples": ["Mon collègue m'a dit qu'il était en retard et qu'il arriverait vers 10 h."]}]},
+  {"id": "ent-g-temps", "section": "situations", "category": "Travailler en entreprise A2/B1", "hub": "entreprise", "icon": "⏳", "title": "Expressions de temps", "intro": "il y a, depuis, pendant, en, dans : chaque marqueur a son sens.", "type": "table", "columns": ["Phrase", "Marqueur"], "rows": [["J'ai obtenu mon diplôme ___ 5 ans.", "il y a"], ["Je travaille ici ___ 2021.", "depuis"], ["J'ai été stagiaire ___ 6 mois.", "pendant"], ["J'ai rédigé le rapport ___ deux heures.", "en"], ["Je commence ___ une semaine.", "dans"]], "quizLabel": "Quel marqueur de temps complète la phrase ?", "note": "il y a = moment passé · depuis = action qui continue · pendant = durée terminée · en = temps nécessaire · dans = futur."},
+  {"id": "ent-g-imp-pc", "section": "situations", "category": "Travailler en entreprise A2/B1", "hub": "entreprise", "icon": "🕰️", "title": "Imparfait ou passé composé ?", "intro": "Décor, habitude, action en cours → imparfait. Action ponctuelle, événement unique → passé composé.", "type": "table", "columns": ["Phrase", "Forme correcte"], "rows": [["Je (préparer) mon CV quand le recruteur a appelé.", "préparais"], ["Le recruteur m'(appeler) pendant que je préparais mon CV.", "a appelé"], ["Avant, je (travailler) dans une banque.", "travaillais"], ["En 2020, j'(rejoindre) une start-up.", "ai rejoint"], ["Chaque matin, nous (prendre) le métro.", "prenions"], ["Hier, elle (signer) son contrat.", "a signé"]], "quizLabel": "Imparfait ou passé composé ?", "note": "Formation de l'imparfait : radical de « nous » au présent + -ais, -ais, -ait, -ions, -iez, -aient (nous finissons → je finissais). Exception : être → j'étais."},
+  {"id": "ent-g-y-en", "section": "situations", "category": "Travailler en entreprise A2/B1", "hub": "entreprise", "icon": "📍", "title": "Les pronoms Y et EN", "intro": "Y = à / dans / chez + lieu ou à + chose. EN = de + lieu, quantité ou de + chose.", "type": "table", "columns": ["Phrase", "Avec le pronom"], "rows": [["Je vais à Lyon demain.", "J'y vais demain."], ["Je pense à la réunion.", "J'y pense."], ["Je reviens de Paris.", "J'en reviens."], ["J'ai trois collègues.", "J'en ai trois."], ["J'ai besoin de ce dossier.", "J'en ai besoin."], ["Je vais aller au salon.", "Je vais y aller."]], "micCol": 1, "quizLabel": "Remplace par Y ou EN :", "note": "Place : devant le verbe conjugué, ou devant l'infinitif (Je vais y aller)."},
+  {"id": "ent-g-relatifs", "section": "situations", "category": "Travailler en entreprise A2/B1", "hub": "entreprise", "icon": "🔗", "title": "Pronoms relatifs : qui, que, où, dont", "intro": "qui = sujet · que = COD · où = lieu/temps · dont = complément avec de.", "type": "table", "columns": ["Phrase", "Relatif"], "rows": [["La collègue ___ gère le budget.", "qui"], ["Le poste ___ je vise.", "que"], ["L'entreprise ___ je travaille.", "où"], ["Le jour ___ j'ai signé.", "où"], ["Le logiciel ___ j'ai besoin.", "dont"], ["Le projet ___ je parle.", "dont"]], "quizLabel": "Quel pronom relatif ?"},
+  {"id": "ent-g-relief", "section": "situations", "category": "Travailler en entreprise A2/B1", "hub": "entreprise", "icon": "🔦", "title": "Mise en relief et négation", "intro": "C'est… qui / C'est… que / Ce qui, ce que…, c'est… — et les négations ne… pas, jamais, plus, rien, personne, que.", "type": "table", "columns": ["Idée", "Phrase"], "rows": [["Insister sur le sujet (Karim anime)", "C'est Karim qui anime la réunion."], ["Insister sur le moment (demain)", "C'est demain que nous signons."], ["Ce que je préfère", "Ce que je préfère, c'est le travail en équipe."], ["Jamais = à aucun moment", "Je n'ai jamais manqué une échéance."], ["Personne au passé composé", "Je n'ai vu personne."], ["ne… que = seulement", "Je n'ai qu'une question."]], "micCol": 1, "quizLabel": "Quelle phrase correspond ?", "note": "À l'oral familier le « ne » disparaît souvent : garde-le toujours à l'écrit."},
+  {"id": "ent-g-futur", "section": "situations", "category": "Travailler en entreprise A2/B1", "hub": "entreprise", "icon": "🚀", "title": "Futur simple : radicaux irréguliers", "intro": "Infinitif + -ai, -as, -a, -ons, -ez, -ont. Mais attention aux radicaux irréguliers !", "type": "table", "columns": ["Verbe (je)", "Futur"], "rows": [["être", "je serai"], ["avoir", "j'aurai"], ["aller", "j'irai"], ["faire", "je ferai"], ["pouvoir", "je pourrai"], ["venir", "je viendrai"], ["falloir (il)", "il faudra"], ["voir", "je verrai"], ["envoyer", "j'enverrai"]], "micCol": 1, "quizLabel": "Conjugue au futur simple :"},
+  {"id": "ent-g-verbe-prep", "section": "situations", "category": "Travailler en entreprise A2/B1", "hub": "entreprise", "icon": "🧷", "title": "Verbe + (à / de) + infinitif", "intro": "Certains verbes se construisent sans préposition, d'autres avec À ou DE.", "type": "table", "columns": ["Verbe", "Construction"], "rows": [["vouloir", "sans préposition"], ["espérer", "sans préposition"], ["préférer", "sans préposition"], ["commencer", "à + infinitif"], ["réussir", "à + infinitif"], ["s'habituer", "à + infinitif"], ["hésiter", "à + infinitif"], ["décider", "de + infinitif"], ["accepter", "de + infinitif"], ["oublier", "de + infinitif"], ["essayer", "de + infinitif"], ["avoir besoin", "de + infinitif"]], "quizLabel": "Quelle construction ?"},
+  {"id": "ent-g-cond-subj", "section": "situations", "category": "Travailler en entreprise A2/B1", "hub": "entreprise", "icon": "🎭", "title": "Conditionnel et subjonctif", "intro": "Conditionnel : politesse, souhait, conseil. Subjonctif : après il faut que, je veux que, je regrette que, bien que, pour que…", "type": "table", "columns": ["Phrase", "Forme correcte"], "rows": [["(Pouvoir)-vous m'envoyer le devis ?", "Pourriez"], ["Vous (devoir) faire des pauses.", "devriez"], ["Il faut que tu (venir) à la réunion.", "viennes"], ["Je voudrais que vous (faire) une pause.", "fassiez"], ["Je regrette qu'il (partir).", "parte"], ["J'espère que tu (être) là demain.", "seras"], ["Il est important que nous (avoir) un plan.", "ayons"]], "quizLabel": "Choisis la bonne forme :", "note": "Piège : « j'espère que » est suivi de l'INDICATIF (j'espère que tu seras là)."},
+  {"id": "ent-g-hypothese", "section": "situations", "category": "Travailler en entreprise A2/B1", "hub": "entreprise", "icon": "🔮", "title": "L'hypothèse avec SI", "intro": "Si + présent → présent/futur/impératif (réel). Si + imparfait → conditionnel (imaginaire). Si + plus-que-parfait → conditionnel passé (irréel du passé).", "type": "table", "columns": ["Condition", "Résultat"], "rows": [["Si le client accepte,", "nous signerons demain."], ["Si j'avais plus de temps,", "je suivrais une formation."], ["Si nous fusionnions,", "nous serions plus forts."], ["Si tu as une question,", "appelle-moi."], ["Si j'avais su,", "je serais venu plus tôt."]], "micCol": 1, "quizLabel": "Complète l'hypothèse :", "note": "Autres formules : au cas où + conditionnel, à condition que + subjonctif, en cas de + nom."},
+  {"id": "ent-g-doubles", "section": "situations", "category": "Travailler en entreprise A2/B1", "hub": "entreprise", "icon": "🔁", "title": "Les doubles pronoms", "intro": "Ordre : me/te/se/nous/vous → le/la/les → lui/leur → y → en.", "type": "table", "columns": ["Phrase", "Avec deux pronoms"], "rows": [["J'envoie le rapport à Marie.", "Je le lui envoie."], ["Je présente la cliente aux collègues.", "Je la leur présente."], ["Il m'a expliqué le projet.", "Il me l'a expliqué."], ["Je t'envoie le lien.", "Je te l'envoie."], ["Donne-moi le document !", "Donne-le-moi !"], ["Donne des conseils aux stagiaires !", "Donne-leur-en !"]], "micCol": 1, "quizLabel": "Remplace par deux pronoms :"},
+  {"id": "ent-g-connecteurs", "section": "situations", "category": "Travailler en entreprise A2/B1", "hub": "entreprise", "icon": "🧩", "title": "Connecteurs logiques", "intro": "Cause, conséquence, opposition, but, addition : enchaîne tes idées !", "type": "table", "columns": ["Connecteur", "Relation"], "rows": [["parce que", "cause"], ["grâce à", "cause (positive)"], ["à cause de", "cause (négative)"], ["c'est pourquoi", "conséquence"], ["par conséquent", "conséquence"], ["pourtant", "opposition"], ["malgré", "opposition (+ nom)"], ["bien que", "opposition (+ subjonctif)"], ["afin de", "but (+ infinitif)"], ["pour que", "but (+ subjonctif)"], ["en outre", "addition"]], "quizLabel": "Quelle relation logique ?"},
+  {"id": "ent-g-accord", "section": "situations", "category": "Travailler en entreprise A2/B1", "hub": "entreprise", "icon": "✍️", "title": "Accord du participe passé avec AVOIR", "intro": "Pas d'accord en général… sauf avec un COD placé AVANT le verbe. Jamais d'accord avec EN.", "type": "table", "columns": ["Phrase", "Participe correct"], "rows": [["Elle a (signer) le contrat.", "signé"], ["Le contrat ? Elle l'a (signer).", "signé"], ["La lettre ? Elle l'a (signer).", "signée"], ["Les offres que j'ai (recevoir).", "reçues"], ["Les factures ? Je les ai (envoyer).", "envoyées"], ["Des propositions ? J'en ai (recevoir).", "reçu"]], "quizLabel": "Accorde le participe passé :"},
+  {"id": "ent-g-discours", "section": "situations", "category": "Travailler en entreprise A2/B1", "hub": "entreprise", "icon": "🗣️", "title": "Discours rapporté", "intro": "Quand le verbe introducteur est au passé : présent → imparfait, passé composé → plus-que-parfait, futur → conditionnel.", "type": "table", "columns": ["Discours direct", "Discours indirect"], "rows": [["« Je suis fatigué. »", "Il a dit qu'il était fatigué."], ["« J'ai fini le rapport. »", "Elle a dit qu'elle avait fini le rapport."], ["« Nous partirons demain. »", "Ils ont dit qu'ils partiraient le lendemain."], ["« Envoyez le devis ! »", "Il nous a demandé d'envoyer le devis."], ["« Avez-vous signé ? »", "Elle a demandé si nous avions signé."], ["« Qu'est-ce que vous voulez ? »", "Il a demandé ce que nous voulions."]], "micCol": 1, "quizLabel": "Mets au discours indirect :", "note": "Repères : aujourd'hui → ce jour-là, demain → le lendemain, hier → la veille, ici → là. Verbes introducteurs : dire, expliquer, affirmer, annoncer, préciser, demander, répondre, ajouter."},
+  {"id": "ent-phonetique", "section": "situations", "category": "Travailler en entreprise A2/B1", "hub": "entreprise", "icon": "👂", "title": "Phonétique en entreprise", "intro": "Oppositions de sons à répéter avec le micro 🎤 (unités 1, 2, 4, 6, 7).", "type": "table", "columns": ["Opposition", "Paires à répéter"], "rows": [["[u] / [y]", "tout / tu · roue / rue · dessous / dessus"], ["[ɔ̃] / [ɑ̃] / [ɛ̃]", "bon / banc / bain · long / lent / lin"], ["Lettres finales", "grand · petit · avec · chef · bonjour"], ["[j] / [ʒ]", "yeux / jeu"], ["[w] / [ɥ]", "Louis / lui · oui / huit"], ["[v] / [f]", "vous / fou · vin / fin · vendre / fendre"]], "micCol": 1, "quizLabel": "Quelles paires correspondent à ce son ?", "note": "Astuces : [y] = dire [i] en arrondissant les lèvres. Consonnes finales souvent muettes, sauf C, R, F, L (pense à « CaReFuL »). [v] fait vibrer la gorge, [f] non."},
+  {"id": "ent-lex-u1", "section": "situations", "category": "Travailler en entreprise A2/B1", "hub": "entreprise", "icon": "💼", "title": "Lexique U1 · Recrutement", "intro": "Vocabulaire professionnel français → arabe de l'unité « Recrutement ».", "type": "table", "columns": ["Français", "العربية"], "rows": [["un CV (curriculum vitæ)", "سيرة ذاتية"], ["une offre d'emploi", "عرض عمل"], ["une lettre de motivation", "رسالة تحفيزية"], ["un entretien d'embauche", "مقابلة عمل"], ["un candidat, une candidate", "مترشّح، مترشّحة"], ["postuler (à un poste)", "الترشّح (لمنصب)"], ["un recruteur", "مسؤول التوظيف"], ["un CDI / un CDD", "عقد غير محدد المدة / عقد محدد المدة"], ["une période d'essai", "فترة تجريبية"], ["le salaire brut / net", "الراتب الإجمالي / الصافي"], ["les compétences", "الكفاءات"], ["l'expérience professionnelle", "الخبرة المهنية"], ["un stage", "تدريب"], ["un cabinet de recrutement", "مكتب توظيف"]], "micCol": 0, "quizLabel": "Quelle est la traduction en arabe ?", "answerLang": "ar"},
+  {"id": "ent-lex-u2", "section": "situations", "category": "Travailler en entreprise A2/B1", "hub": "entreprise", "icon": "✈️", "title": "Lexique U2 · Voyage professionnel", "intro": "Vocabulaire professionnel français → arabe de l'unité « Voyage professionnel ».", "type": "table", "columns": ["Français", "العربية"], "rows": [["un déplacement professionnel", "تنقّل مهني"], ["un billet aller-retour", "تذكرة ذهاب وإياب"], ["une réservation", "حجز"], ["un devis", "عرض سعر"], ["une note de frais", "بيان المصاريف"], ["un séminaire", "ندوة"], ["un salon professionnel", "معرض مهني"], ["un voyage de motivation", "رحلة تحفيزية"], ["un repas d'affaires", "غداء عمل"], ["un formulaire", "استمارة"], ["laisser un message", "ترك رسالة"], ["rappeler quelqu'un", "معاودة الاتصال بشخص"]], "micCol": 0, "quizLabel": "Quelle est la traduction en arabe ?", "answerLang": "ar"},
+  {"id": "ent-lex-u3", "section": "situations", "category": "Travailler en entreprise A2/B1", "hub": "entreprise", "icon": "📈", "title": "Lexique U3 · Entretien d'évaluation", "intro": "Vocabulaire professionnel français → arabe de l'unité « Entretien d'évaluation ».", "type": "table", "columns": ["Français", "العربية"], "rows": [["l'entretien annuel", "المقابلة السنوية"], ["un objectif", "هدف"], ["une qualité / un défaut", "صفة إيجابية / عيب"], ["une augmentation", "زيادة في الراتب"], ["une promotion", "ترقية"], ["une formation", "تكوين"], ["une demande de formation", "طلب تكوين"], ["évaluer", "قيّم"], ["le supérieur hiérarchique", "الرئيس المباشر"], ["les résultats", "النتائج"], ["progresser", "أحرز تقدّماً"]], "micCol": 0, "quizLabel": "Quelle est la traduction en arabe ?", "answerLang": "ar"},
+  {"id": "ent-lex-u4", "section": "situations", "category": "Travailler en entreprise A2/B1", "hub": "entreprise", "icon": "🌍", "title": "Lexique U4 · L'expatriation", "intro": "Vocabulaire professionnel français → arabe de l'unité « L'expatriation ».", "type": "table", "columns": ["Français", "العربية"], "rows": [["un expatrié", "مغترب"], ["une mutation", "نقل (وظيفي)"], ["un titre de séjour", "بطاقة الإقامة"], ["un permis de travail", "رخصة العمل"], ["les démarches administratives", "الإجراءات الإدارية"], ["la sécurité sociale", "الضمان الاجتماعي"], ["un justificatif", "وثيقة إثبات"], ["déménager", "انتقل (من مسكن)"], ["s'installer", "استقرّ"], ["la prime d'expatriation", "منحة الاغتراب"]], "micCol": 0, "quizLabel": "Quelle est la traduction en arabe ?", "answerLang": "ar"},
+  {"id": "ent-lex-u5", "section": "situations", "category": "Travailler en entreprise A2/B1", "hub": "entreprise", "icon": "🧘", "title": "Lexique U5 · Bien-être et productivité", "intro": "Vocabulaire professionnel français → arabe de l'unité « Bien-être et productivité ».", "type": "table", "columns": ["Français", "العربية"], "rows": [["le stress", "الضغط النفسي"], ["la charge de travail", "عبء العمل"], ["l'épuisement professionnel (burn-out)", "الإرهاق المهني"], ["les conditions de travail", "ظروف العمل"], ["la motivation", "التحفيز"], ["la cohésion d'équipe", "تماسك الفريق"], ["un comité d'entreprise / CSE", "لجنة المؤسسة"], ["un congé", "عطلة"], ["une réclamation", "شكوى"], ["l'ambiance", "الجوّ العام"]], "micCol": 0, "quizLabel": "Quelle est la traduction en arabe ?", "answerLang": "ar"},
+  {"id": "ent-lex-u6", "section": "situations", "category": "Travailler en entreprise A2/B1", "hub": "entreprise", "icon": "🏗️", "title": "Lexique U6 · Entreprise en mouvement", "intro": "Vocabulaire professionnel français → arabe de l'unité « Entreprise en mouvement ».", "type": "table", "columns": ["Français", "العربية"], "rows": [["le chiffre d'affaires", "رقم المعاملات"], ["une fusion", "اندماج"], ["un rachat", "استحواذ"], ["une filiale", "فرع تابع"], ["le siège social", "المقرّ الرئيسي"], ["une restructuration", "إعادة هيكلة"], ["un licenciement", "تسريح"], ["la croissance / la baisse", "النموّ / الانخفاض"], ["un compte rendu de réunion", "محضر اجتماع"], ["l'ordre du jour", "جدول الأعمال"], ["les actionnaires", "المساهمون"]], "micCol": 0, "quizLabel": "Quelle est la traduction en arabe ?", "answerLang": "ar"},
+  {"id": "ent-lex-u7", "section": "situations", "category": "Travailler en entreprise A2/B1", "hub": "entreprise", "icon": "📣", "title": "Lexique U7 · Communication performante", "intro": "Vocabulaire professionnel français → arabe de l'unité « Communication performante ».", "type": "table", "columns": ["Français", "العربية"], "rows": [["la communication interne / externe", "التواصل الداخلي / الخارجي"], ["un destinataire", "المرسَل إليه"], ["une note de service", "مذكّرة مصلحية"], ["un communiqué de presse", "بلاغ صحفي"], ["l'intranet", "الشبكة الداخلية"], ["une situation de crise", "وضعية أزمة"], ["un porte-parole", "ناطق رسمي"], ["une réunion", "اجتماع"], ["convaincre", "أقنع"], ["se justifier", "برّر موقفه"]], "micCol": 0, "quizLabel": "Quelle est la traduction en arabe ?", "answerLang": "ar"},
+  {"id": "ent-lex-u8", "section": "situations", "category": "Travailler en entreprise A2/B1", "hub": "entreprise", "icon": "💻", "title": "Lexique U8 · Nouvelles formes de travail", "intro": "Vocabulaire professionnel français → arabe de l'unité « Nouvelles formes de travail ».", "type": "table", "columns": ["Français", "العربية"], "rows": [["le télétravail", "العمل عن بُعد"], ["le portage salarial", "الحمل الأجري (العمل الحر عبر شركة وسيطة)"], ["un auto-entrepreneur", "مقاول ذاتي"], ["un travailleur indépendant", "عامل مستقل"], ["une reconversion", "إعادة التوجيه المهني"], ["le temps partiel", "العمل بدوام جزئي"], ["un pourcentage", "نسبة مئوية"], ["augmenter / diminuer de X %", "ارتفع / انخفض بـ X٪"], ["une enquête", "دراسة استقصائية"], ["un sondage", "استطلاع رأي"]], "micCol": 0, "quizLabel": "Quelle est la traduction en arabe ?", "answerLang": "ar"},
+  {"id": "ent-expr-soi-tel", "section": "situations", "category": "Travailler en entreprise A2/B1", "hub": "entreprise", "icon": "🗂️", "title": "Boîte à expressions (1) : se présenter, téléphoner, motiver", "intro": "Actes de parole des unités 1 à 4 : à répéter à voix haute !", "type": "table", "columns": ["Situation", "Expression"], "rows": [["Présenter son diplôme", "Je suis titulaire d'un master en gestion."], ["Présenter son expérience", "J'ai cinq ans d'expérience dans la logistique."], ["Se décrire", "Je suis quelqu'un de rigoureux et d'autonome."], ["Point fort / point à améliorer", "Mon point fort, c'est l'organisation ; je dois encore progresser en anglais."], ["Se présenter au téléphone", "Bonjour, ici Sara Benali de la société X. Pourrais-je parler à M. Martin ?"], ["Donner l'objet de l'appel", "Je vous appelle au sujet de la commande n° 245."], ["Demander un rappel", "Pouvez-vous lui dire de me rappeler au 06 12 34 56 78 ?"], ["Transférer un appel", "Ne quittez pas, je vous le passe."], ["Exprimer sa motivation", "Ce poste m'intéresse parce qu'il allie terrain et management."], ["Rassurer", "Ne vous inquiétez pas, tout est prévu."], ["Prévenir", "Je tiens à vous prévenir que la réunion est déplacée."]], "micCol": 1, "quizLabel": "Quelle expression convient ?"},
+  {"id": "ent-expr-avis", "section": "situations", "category": "Travailler en entreprise A2/B1", "hub": "entreprise", "icon": "💬", "title": "Boîte à expressions (2) : regretter, réagir, donner son avis", "intro": "Actes de parole des unités 5 à 8.", "type": "table", "columns": ["Situation", "Expression"], "rows": [["Regretter", "Je regrette que la réunion soit annulée."], ["Se plaindre poliment", "Je ne suis pas satisfait de la qualité du service."], ["Proposer une amélioration", "Il serait souhaitable que nous ayons plus de pauses."], ["Exprimer un espoir", "J'espère que le projet sera validé."], ["Exprimer sa satisfaction", "Nous sommes ravis de ce partenariat."], ["Exprimer une déception", "Je suis déçu que le budget soit réduit."], ["Approuver", "Je suis tout à fait d'accord, c'est une bonne idée."], ["Désapprouver", "Je ne partage pas votre avis."], ["Donner son opinion", "À mon avis, le télétravail améliore la productivité."], ["Nuancer", "Il est vrai que c'est coûteux, mais c'est rentable à long terme."], ["Commenter une hausse", "Le nombre de télétravailleurs a augmenté de 15 %."], ["Commenter une proportion", "Un tiers des salariés travaille à temps partiel."]], "micCol": 1, "quizLabel": "Quelle expression convient ?"},
+  {"id": "ent-ecrit-candidature", "section": "situations", "category": "Travailler en entreprise A2/B1", "hub": "entreprise", "icon": "📧", "title": "Modèle : courriel de candidature", "intro": "Structure type d'un mail de candidature (unité 1).", "type": "letter", "subject": "Objet : Candidature au poste de chef de projet (réf. 2026-CP)", "body": ["Madame, Monsieur,", "Votre offre publiée sur [site] a retenu toute mon attention.", "Titulaire de [diplôme], j'ai travaillé pendant [X] ans comme [poste], où j'ai [réalisation chiffrée].", "Je souhaiterais aujourd'hui mettre mes compétences en [domaine] au service de votre entreprise.", "Je me tiens à votre disposition pour un entretien.", "Veuillez agréer, Madame, Monsieur, mes salutations distinguées."], "fields": ["site", "diplôme", "nombre d'années", "poste", "réalisation chiffrée", "domaine"]},
+  {"id": "ent-ecrit-devis", "section": "situations", "category": "Travailler en entreprise A2/B1", "hub": "entreprise", "icon": "🧾", "title": "Modèle : demande de devis", "intro": "Demander un devis pour un séminaire (unité 2).", "type": "letter", "subject": "Objet : Demande de devis, séminaire du 12 au 14 mars", "body": ["Madame, Monsieur,", "Nous organisons un séminaire pour 20 collaborateurs et souhaiterions recevoir un devis pour : 2 nuits en chambre individuelle, une salle de réunion équipée (vidéoprojecteur, paperboard), les repas du midi et du soir.", "Pourriez-vous nous faire parvenir votre proposition avant le 15 février ?", "Cordialement,"], "fields": ["dates", "nombre de participants", "prestations", "date limite", "nom, fonction, entreprise"]},
+  {"id": "ent-ecrit-formation", "section": "situations", "category": "Travailler en entreprise A2/B1", "hub": "entreprise", "icon": "🎓", "title": "Modèle : demande de formation", "intro": "Justifier un besoin de formation après l'entretien annuel (unité 3).", "type": "letter", "subject": "Objet : Demande de formation, [intitulé]", "body": ["Madame la Responsable des ressources humaines,", "À la suite de mon entretien annuel du [date], je souhaiterais suivre la formation « [intitulé] » proposée par [organisme] du [date] au [date].", "Cette formation me permettrait de [compétence visée], ce qui est nécessaire pour [objectif lié au poste].", "Je vous remercie de l'attention portée à ma demande.", "Cordialement,"], "fields": ["date de l'entretien", "intitulé", "organisme", "dates", "compétence visée", "objectif"]},
+  {"id": "ent-ecrit-cr", "section": "situations", "category": "Travailler en entreprise A2/B1", "hub": "entreprise", "icon": "📝", "title": "Modèle : compte rendu de réunion", "intro": "Plan type d'un compte rendu (unité 6).", "type": "letter", "subject": "COMPTE RENDU — Réunion du [date]", "body": ["Participants : … / Absents excusés : …", "Ordre du jour : 1. … 2. … 3. …", "1. [Point] : constat, échanges, décision.", "2. [Point] : …", "Actions à mener : [qui] fait [quoi] pour [quand].", "Prochaine réunion : [date]. Rédigé par : …"], "fields": ["date", "participants", "points", "décisions", "actions (qui, quoi, quand)"]},
+  {"id": "ent-ecrit-note", "section": "situations", "category": "Travailler en entreprise A2/B1", "hub": "entreprise", "icon": "📌", "title": "Modèle : note de service", "intro": "Informer tout le personnel en quelques phrases (unité 7).", "type": "letter", "subject": "NOTE DE SERVICE n° … — De : Direction · À : Ensemble du personnel · Objet : …", "body": ["[Information en 3-4 phrases : quoi, quand, pourquoi, que faire.]", "Exemple : À compter du lundi 3 novembre, le parking B sera fermé pour travaux pendant deux semaines. Nous vous invitons à utiliser le parking C, accessible par la rue des Lilas. Merci de votre compréhension."], "fields": ["numéro", "date", "objet", "quoi", "quand", "pourquoi", "que faire"]},
+  {"id": "ent-culture", "section": "situations", "category": "Travailler en entreprise A2/B1", "hub": "entreprise", "icon": "🇫🇷", "title": "Repères culturels : l'entreprise en France", "intro": "Sigles et institutions à connaître (vérifie toujours les règles actuelles sur les sites en .gouv.fr).", "type": "table", "columns": ["Repère", "Ce que c'est"], "rows": [["Entretien annuel", "Bilan de l'année et fixation des objectifs avec son responsable."], ["CPF", "Compte personnel de formation, en euros, qui a remplacé le DIF en 2015."], ["CSE", "Comité social et économique : remplace le CE, les délégués du personnel et le CHSCT."], ["MEDEF", "Principale organisation patronale : représente les employeurs."], ["Portage salarial", "Un indépendant trouve ses missions mais est salarié d'une société de portage."], ["Préfecture", "Administration qui délivre les titres de séjour."], ["CPAM", "Caisse primaire d'assurance maladie : rembourse les soins."], ["France Travail", "Organisme public pour l'emploi (ex-Pôle emploi)."], ["URSSAF", "Organisme qui collecte les cotisations sociales."], ["Vouvoiement", "Règle à l'écrit professionnel ; les formules de politesse sont plus longues qu'en anglais."]], "quizLabel": "Que désigne ce repère ?"},
+  {"id": "ent-autoeval", "section": "situations", "category": "Travailler en entreprise A2/B1", "hub": "entreprise", "icon": "✅", "title": "Auto-évaluation A2/B1", "intro": "Coche mentalement ce que tu sais faire — puis va jouer la « Mission Entreprise » pour vérifier !", "type": "rule", "blocks": [{"heading": "Unités 1 à 4", "text": "Je sais…", "examples": ["Raconter mon parcours avec l'imparfait et le passé composé.", "Rédiger une offre d'emploi ou une candidature.", "Comprendre et laisser un message téléphonique.", "Utiliser Y et EN sans hésiter.", "Présenter mes qualités, mes défauts et mes objectifs.", "Rédiger une demande de formation.", "Parler de mes projets au futur."]}, {"heading": "Unités 5 à 8", "text": "Je sais…", "examples": ["Exprimer un regret ou une proposition avec le subjonctif.", "Faire des hypothèses avec SI.", "Rédiger un compte rendu de réunion.", "Enchaîner mes idées avec des connecteurs logiques.", "Accorder le participe passé avec AVOIR.", "Rapporter les paroles de quelqu'un.", "Commenter un graphique ou des statistiques."]}]}
 ];
 function renderSheetsHomeBySection(section, catTag, heroTitle, heroSubtitle){
   clearQuestionTimer();
@@ -28859,12 +28920,15 @@ function renderSheetsHomeBySection(section, catTag, heroTitle, heroSubtitle){
   document.getElementById('progressFill').style.width = '0%';
   document.getElementById('footerNote').textContent = '';
   const card = document.getElementById('quizCard');
-  const list = PRACTICAL_SHEETS.filter(s => (s.section || 'pratique') === section);
+  const list = PRACTICAL_SHEETS.filter(s => (s.section || 'pratique') === section && !s.hub); // les modules à part (ex. Entreprise) ont leur propre écran
   const passedCount = list.filter(s => isSheetPassed(s.id)).length;
+  const hubLink = (section === 'situations' && typeof renderEntrepriseHub === 'function')
+    ? `<button class="restart-btn" id="goEntHubFromSitBtn" style="margin:14px auto 0;display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#1D4ED8,#1E3A8A);color:#fff;box-shadow:0 4px 0 #172554;">🏢 Français en entreprise (A2/B1) →</button>` : '';
   card.innerHTML = `
     <div class="cat-tag">${catTag}</div>
     <div class="word-fr" style="font-size:clamp(22px,4.5vw,28px);">${escapeHtml(heroTitle)}</div>
     <div class="word-def" style="margin-top:4px;">${escapeHtml(heroSubtitle)} · ✅ ${passedCount}/${list.length} validées</div>
+    ${hubLink}
     <div style="display:flex;flex-direction:column;gap:10px;margin-top:18px;text-align:left;">
       ${list.map(s => {
         const passed = isSheetPassed(s.id);
@@ -28882,6 +28946,8 @@ function renderSheetsHomeBySection(section, catTag, heroTitle, heroSubtitle){
     </div>
   `;
   document.getElementById('backFromSheetsBtn').addEventListener('click', renderBlockSelect);
+  const entLink = document.getElementById('goEntHubFromSitBtn');
+  if(entLink){ entLink.addEventListener('click', () => renderEntrepriseHub()); }
   card.querySelectorAll('[data-sheet]').forEach(btn => {
     btn.addEventListener('click', () => renderPracticalSheetDetail(btn.dataset.sheet));
   });
@@ -28990,6 +29056,7 @@ function renderJeuxMotsHome(){
       <button class="restart-btn" id="goTcfStructBtn" style="background:linear-gradient(135deg,#DB2777,#BE185D);box-shadow:0 4px 0 #9D174D;">🎓 TCF — Structures</button>
       <button class="restart-btn" id="goTcfOralBtn" style="background:linear-gradient(135deg,#7C3AED,#6D28D9);box-shadow:0 4px 0 #5B21B6;">🎧 TCF — Oral</button>
       <button class="restart-btn" id="goTcfEcritBtn" style="background:linear-gradient(135deg,#2563EB,#1D4ED8);box-shadow:0 4px 0 #1E40AF;">📄 TCF — Écrit</button>
+      <button class="restart-btn" id="goEntMissionBtn" style="background:linear-gradient(135deg,#F59E0B,#DC2626);box-shadow:0 4px 0 #991B1B;">🚀 Mission Entreprise</button>
     </div>
   `;
   document.getElementById('backFromJeuxBtn').addEventListener('click', renderBlockSelect);
@@ -29004,6 +29071,7 @@ function renderJeuxMotsHome(){
   document.getElementById('goTcfStructBtn').addEventListener('click', () => renderTCFQuiz('structures', 0));
   document.getElementById('goTcfOralBtn').addEventListener('click', () => renderTCFQuiz('oral', 0));
   document.getElementById('goTcfEcritBtn').addEventListener('click', () => renderTCFQuiz('ecrit', 0));
+  document.getElementById('goEntMissionBtn').addEventListener('click', () => startEntMission());
 }
 
 /* --- 🔍 Mots mêlés : clique la première lettre d'un mot, puis sa dernière lettre. --- */
@@ -29765,7 +29833,8 @@ function renderPracticalSheetDetail(id){
   isHomeScreen = false;
   const sheet = PRACTICAL_SHEETS.find(s => s.id === id);
   const homeFnMap = { atelier: renderAtelierHome, avance: renderGrammaireAvanceeHome, oratoire: renderArtOratoireHome, situations: renderSituationsHome, conjugaison: renderConjugaisonHome };
-  const homeFn = (sheet && homeFnMap[sheet.section]) || renderPracticalSheetsHome;
+  const homeFn = (sheet && sheet.hub === 'entreprise' && typeof renderEntrepriseHub === 'function') ? renderEntrepriseHub
+    : ((sheet && homeFnMap[sheet.section]) || renderPracticalSheetsHome);
   if(!sheet){ homeFn(); return; }
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromSheetDetailBtn" style="cursor:pointer;">← Toutes les fiches</button>`;
   document.getElementById('progressFill').style.width = '100%';
@@ -29861,7 +29930,7 @@ function renderPracticalSheetDetail(id){
     }
     openReadingFullscreen(sheet.title, fullText, 'fr-FR');
   });
-  const sectionList = PRACTICAL_SHEETS.filter(s => (s.section || 'pratique') === (sheet.section || 'pratique'));
+  const sectionList = PRACTICAL_SHEETS.filter(s => (s.section || 'pratique') === (sheet.section || 'pratique') && (s.hub || null) === (sheet.hub || null));
   const idx = sectionList.findIndex(s => s.id === id);
   const nextSheet = sectionList[(idx + 1) % sectionList.length];
   document.getElementById('nextSheetBtn').addEventListener('click', () => renderPracticalSheetDetail(nextSheet.id));
@@ -29936,19 +30005,19 @@ function renderSheetQuizCard(){
 
   const row = st.queue[st.idx];
   const prompt = row[0], correct = row[1];
-  const others = st.sheet.rows.map(r => r[1]).filter(v => v !== correct);
+  const others = [...new Set(st.sheet.rows.map(r => r[1]).filter(v => v !== correct))]; // sans doublons
   const distractors = shuffle(others).slice(0, 3);
   const options = shuffle([correct, ...distractors]);
 
   const card = document.getElementById('quizCard');
   card.innerHTML = `
     <div class="cat-tag">${st.sheet.icon} ${escapeHtml(st.sheet.category)}</div>
-    <div class="question-line">Comment dire autrement :</div>
+    <div class="question-line">${escapeHtml(st.sheet.quizLabel || 'Comment dire autrement :')}</div>
     <div class="word-fr" style="font-size:clamp(18px,4vw,23px);">« ${escapeHtml(prompt)} »
       <button class="speak-btn small" id="sheetQPromptSpeak">${SPEAK_SVG_SMALL}</button>
     </div>
     <div class="options" id="sheetQOptions" style="grid-template-columns:repeat(auto-fill,minmax(180px,1fr));margin-top:16px;">
-      ${options.map(o => `<button class="opt" data-opt="${escapeHtml(o)}">${escapeHtml(o)}</button>`).join('')}
+      ${options.map(o => `<button class="opt" data-opt="${escapeHtml(o)}" ${st.sheet.answerLang === 'ar' ? 'dir="rtl" style="font-family:\'Amiri\',\'Noto Naskh Arabic\',serif;font-size:19px;"' : ''}>${escapeHtml(o)}</button>`).join('')}
     </div>
     <div class="reveal" id="sheetQReveal"></div>
   `;
@@ -29980,9 +30049,10 @@ function validateSheetQuiz(chosen, correct, prompt){
     </div>
     <button class="next-btn" id="nextBtn">Suivant →</button>
   `;
-  document.getElementById('sheetQCorrectSpeak').addEventListener('click', () => speak(correct, 'fr-FR'));
+  const ansLang = st.sheet.answerLang === 'ar' ? 'ar-SA' : 'fr-FR';
+  document.getElementById('sheetQCorrectSpeak').addEventListener('click', () => speak(correct, ansLang));
   attachAutoAdvance('nextBtn', () => { st.idx++; renderSheetQuizCard(); });
-  autoSpeakWord(correct, 'fr-FR');
+  autoSpeakWord(correct, ansLang);
 }
 function endSheetQuiz(){
   document.body.classList.remove('quiz-active');
@@ -32024,6 +32094,258 @@ function mascotSparkle(){
 }
 scheduleMascotAntics();
 
+/* ============ 🏢 FRANÇAIS EN ENTREPRISE (A2/B1) ============
+   Module construit à partir des fiches de révision « Travailler en français en entreprise » :
+   8 unités (fiches de cours, grammaire entraînable, lexique FR→AR, expressions, modèles d'écrits,
+   repères culturels) + jeux : lexique jouable dans les 8 modes, et la « Mission Entreprise »
+   (QCM à 3 vies avec combo). Les fiches vivent dans PRACTICAL_SHEETS (section « situations »,
+   champ hub:'entreprise') : elles comptent donc dans les objectifs du jour. */
+const ENT_UNITS = [{"key": "u1", "icon": "💼", "theme": "Recrutement", "skill": "Rechercher un emploi, préparer un entretien"}, {"key": "u2", "icon": "✈️", "theme": "Voyage professionnel", "skill": "Message téléphonique, formulaire, devis"}, {"key": "u3", "icon": "📈", "theme": "Entretien d'évaluation", "skill": "Réussir son entretien annuel, demander une formation"}, {"key": "u4", "icon": "🌍", "theme": "L'expatriation", "skill": "Préparer son départ, démarches administratives"}, {"key": "u5", "icon": "🧘", "theme": "Bien-être et productivité", "skill": "Vaincre le stress, motiver une équipe"}, {"key": "u6", "icon": "🏗️", "theme": "Entreprise en mouvement", "skill": "Présenter son entreprise et son évolution"}, {"key": "u7", "icon": "📣", "theme": "Communication performante", "skill": "Bien communiquer, adapter ses outils"}, {"key": "u8", "icon": "💻", "theme": "Nouvelles formes de travail", "skill": "Reconversion, télétravail, statistiques"}];
+const ENT_WORDS = {"u1": [{"fr": "offre d'emploi", "ar": "عرض عمل", "def": "Annonce qui décrit un poste à pourvoir.", "ex": "J'ai répondu à une ~ publiée hier.", "cat": "Entreprise · Recrutement"}, {"fr": "CV", "ar": "سيرة ذاتية", "def": "Document qui résume la formation et l'expérience.", "ex": "Envoyez votre ~ à jour avant vendredi.", "cat": "Entreprise · Recrutement"}, {"fr": "lettre de motivation", "ar": "رسالة تحفيزية", "def": "Courrier qui explique pourquoi on veut le poste.", "ex": "Sa ~ était courte et convaincante.", "cat": "Entreprise · Recrutement"}, {"fr": "entretien d'embauche", "ar": "مقابلة عمل", "def": "Rencontre entre un recruteur et un candidat.", "ex": "Il prépare son ~ de lundi.", "cat": "Entreprise · Recrutement"}, {"fr": "candidat", "ar": "مترشّح", "def": "Personne qui se présente pour obtenir un poste.", "ex": "Chaque ~ passera un test écrit.", "cat": "Entreprise · Recrutement"}, {"fr": "postuler", "ar": "الترشّح", "def": "Présenter sa candidature à un poste.", "ex": "Elle veut ~ au poste de chef de projet.", "cat": "Entreprise · Recrutement"}, {"fr": "recruteur", "ar": "مسؤول التوظيف", "def": "Personne chargée de sélectionner les candidats.", "ex": "Le ~ m'a rappelé le lendemain.", "cat": "Entreprise · Recrutement"}, {"fr": "CDI", "ar": "عقد غير محدد المدة", "def": "Contrat de travail sans date de fin.", "ex": "Après son stage, elle a signé un ~.", "cat": "Entreprise · Recrutement"}, {"fr": "CDD", "ar": "عقد محدد المدة", "def": "Contrat de travail qui a une date de fin.", "ex": "Il a obtenu un ~ de six mois.", "cat": "Entreprise · Recrutement"}, {"fr": "période d'essai", "ar": "فترة تجريبية", "def": "Premiers mois pendant lesquels le contrat peut être rompu facilement.", "ex": "Ma ~ se termine en mars.", "cat": "Entreprise · Recrutement"}, {"fr": "salaire net", "ar": "الراتب الصافي", "def": "Rémunération réellement versée, après les cotisations.", "ex": "Le ~ est inférieur au salaire brut.", "cat": "Entreprise · Recrutement"}, {"fr": "compétences", "ar": "الكفاءات", "def": "Savoir-faire et connaissances utiles pour un poste.", "ex": "Mettez vos ~ en avant dans votre CV.", "cat": "Entreprise · Recrutement"}, {"fr": "stage", "ar": "تدريب", "def": "Période de formation pratique en entreprise.", "ex": "J'ai fait un ~ de trois mois dans une banque.", "cat": "Entreprise · Recrutement"}, {"fr": "cabinet de recrutement", "ar": "مكتب توظيف", "def": "Société qui recrute pour le compte d'autres entreprises.", "ex": "Un ~ m'a contacté pour un poste à Rabat.", "cat": "Entreprise · Recrutement"}], "u2": [{"fr": "déplacement professionnel", "ar": "تنقّل مهني", "def": "Voyage effectué pour le travail.", "ex": "Il part en ~ à Casablanca.", "cat": "Entreprise · Voyage professionnel"}, {"fr": "billet aller-retour", "ar": "تذكرة ذهاب وإياب", "def": "Titre de transport pour partir et revenir.", "ex": "J'ai pris un ~ Paris-Lyon.", "cat": "Entreprise · Voyage professionnel"}, {"fr": "réservation", "ar": "حجز", "def": "Action de retenir une place ou une chambre à l'avance.", "ex": "Ta ~ d'hôtel est confirmée.", "cat": "Entreprise · Voyage professionnel"}, {"fr": "devis", "ar": "عرض سعر", "def": "Document qui estime le prix d'une prestation avant l'achat.", "ex": "L'hôtel nous a envoyé un ~ pour le séminaire.", "cat": "Entreprise · Voyage professionnel"}, {"fr": "note de frais", "ar": "بيان المصاريف", "def": "Document pour se faire rembourser ses dépenses professionnelles.", "ex": "N'oublie pas de joindre les tickets à ta ~.", "cat": "Entreprise · Voyage professionnel"}, {"fr": "séminaire", "ar": "ندوة", "def": "Réunion de travail de plusieurs jours, souvent hors de l'entreprise.", "ex": "Le ~ annuel aura lieu à Marrakech.", "cat": "Entreprise · Voyage professionnel"}, {"fr": "salon professionnel", "ar": "معرض مهني", "def": "Grande exposition où les entreprises présentent leurs produits.", "ex": "Nous aurons un stand au ~ de l'automobile.", "cat": "Entreprise · Voyage professionnel"}, {"fr": "voyage de motivation", "ar": "رحلة تحفيزية", "def": "Voyage offert aux salariés pour les récompenser.", "ex": "Les meilleurs vendeurs gagnent un ~.", "cat": "Entreprise · Voyage professionnel"}, {"fr": "repas d'affaires", "ar": "غداء عمل", "def": "Déjeuner ou dîner organisé pour parler de travail.", "ex": "Le contrat a été négocié pendant un ~.", "cat": "Entreprise · Voyage professionnel"}, {"fr": "formulaire", "ar": "استمارة", "def": "Document à remplir avec des informations précises.", "ex": "Remplissez ce ~ en lettres majuscules.", "cat": "Entreprise · Voyage professionnel"}, {"fr": "laisser un message", "ar": "ترك رسالة", "def": "Enregistrer une information pour quelqu'un d'absent.", "ex": "Il n'était pas là, alors j'ai dû ~.", "cat": "Entreprise · Voyage professionnel"}, {"fr": "rappeler", "ar": "معاودة الاتصال", "def": "Téléphoner de nouveau à quelqu'un.", "ex": "Pouvez-vous me ~ après 14 h ?", "cat": "Entreprise · Voyage professionnel"}], "u3": [{"fr": "entretien annuel", "ar": "المقابلة السنوية", "def": "Rendez-vous pour faire le bilan de l'année avec son responsable.", "ex": "Mon ~ est prévu jeudi.", "cat": "Entreprise · Entretien d'évaluation"}, {"fr": "objectif", "ar": "هدف", "def": "Résultat que l'on doit atteindre.", "ex": "Mon ~ est d'augmenter les ventes de 10 %.", "cat": "Entreprise · Entretien d'évaluation"}, {"fr": "défaut", "ar": "عيب", "def": "Point faible d'une personne.", "ex": "Mon principal ~ ? Je suis parfois trop perfectionniste.", "cat": "Entreprise · Entretien d'évaluation"}, {"fr": "augmentation", "ar": "زيادة في الراتب", "def": "Hausse du salaire.", "ex": "Elle a obtenu une ~ de 5 %.", "cat": "Entreprise · Entretien d'évaluation"}, {"fr": "promotion", "ar": "ترقية", "def": "Passage à un poste plus élevé.", "ex": "Sa ~ au poste de directeur a surpris tout le monde.", "cat": "Entreprise · Entretien d'évaluation"}, {"fr": "formation", "ar": "تكوين", "def": "Apprentissage pour développer ses compétences.", "ex": "Je souhaite suivre une ~ en gestion de projet.", "cat": "Entreprise · Entretien d'évaluation"}, {"fr": "demande de formation", "ar": "طلب تكوين", "def": "Courrier pour demander à suivre un apprentissage.", "ex": "J'ai envoyé ma ~ aux ressources humaines.", "cat": "Entreprise · Entretien d'évaluation"}, {"fr": "évaluer", "ar": "قيّم", "def": "Juger la qualité d'un travail ou d'une personne.", "ex": "La responsable va ~ nos résultats.", "cat": "Entreprise · Entretien d'évaluation"}, {"fr": "supérieur hiérarchique", "ar": "الرئيس المباشر", "def": "Personne qui dirige directement notre travail.", "ex": "Parlez-en d'abord à votre ~.", "cat": "Entreprise · Entretien d'évaluation"}, {"fr": "résultats", "ar": "النتائج", "def": "Ce que l'on a obtenu à la fin d'une période.", "ex": "Les ~ de l'équipe sont excellents.", "cat": "Entreprise · Entretien d'évaluation"}, {"fr": "progresser", "ar": "أحرز تقدّماً", "def": "S'améliorer, avancer.", "ex": "Je veux ~ en anglais cette année.", "cat": "Entreprise · Entretien d'évaluation"}], "u4": [{"fr": "expatrié", "ar": "مغترب", "def": "Personne qui travaille dans un pays étranger.", "ex": "Cet ~ vit à Dubaï depuis trois ans.", "cat": "Entreprise · L'expatriation"}, {"fr": "mutation", "ar": "نقل وظيفي", "def": "Changement de lieu de travail dans la même entreprise.", "ex": "Il a demandé une ~ à Montréal.", "cat": "Entreprise · L'expatriation"}, {"fr": "titre de séjour", "ar": "بطاقة الإقامة", "def": "Document qui autorise un étranger à vivre dans un pays.", "ex": "Mon ~ doit être renouvelé.", "cat": "Entreprise · L'expatriation"}, {"fr": "permis de travail", "ar": "رخصة العمل", "def": "Autorisation officielle de travailler dans un pays.", "ex": "Sans ~, il ne peut pas être embauché.", "cat": "Entreprise · L'expatriation"}, {"fr": "démarches administratives", "ar": "الإجراءات الإدارية", "def": "Formalités à accomplir auprès d'une administration.", "ex": "Les ~ prennent plusieurs semaines.", "cat": "Entreprise · L'expatriation"}, {"fr": "sécurité sociale", "ar": "الضمان الاجتماعي", "def": "Système public qui rembourse les soins.", "ex": "Inscrivez-vous à la ~ dès votre arrivée.", "cat": "Entreprise · L'expatriation"}, {"fr": "justificatif", "ar": "وثيقة إثبات", "def": "Document qui prouve une information.", "ex": "Il faut un ~ de domicile récent.", "cat": "Entreprise · L'expatriation"}, {"fr": "déménager", "ar": "انتقل من مسكن", "def": "Changer de logement.", "ex": "Nous allons ~ en septembre.", "cat": "Entreprise · L'expatriation"}, {"fr": "s'installer", "ar": "استقرّ", "def": "Commencer à vivre dans un nouveau lieu.", "ex": "Ils veulent ~ près du centre-ville.", "cat": "Entreprise · L'expatriation"}, {"fr": "prime d'expatriation", "ar": "منحة الاغتراب", "def": "Somme versée en plus du salaire pour travailler à l'étranger.", "ex": "La ~ couvre une partie du loyer.", "cat": "Entreprise · L'expatriation"}], "u5": [{"fr": "stress", "ar": "الضغط النفسي", "def": "Tension nerveuse causée par la pression.", "ex": "Le ~ augmente avant les échéances.", "cat": "Entreprise · Bien-être et productivité"}, {"fr": "charge de travail", "ar": "عبء العمل", "def": "Quantité de tâches à accomplir.", "ex": "Sa ~ est trop lourde ce mois-ci.", "cat": "Entreprise · Bien-être et productivité"}, {"fr": "burn-out", "ar": "الإرهاق المهني", "def": "Épuisement physique et mental lié au travail.", "ex": "Elle a fait un ~ après deux ans sans vacances.", "cat": "Entreprise · Bien-être et productivité"}, {"fr": "conditions de travail", "ar": "ظروف العمل", "def": "Environnement et règles dans lesquels on travaille.", "ex": "Les ~ se sont nettement améliorées.", "cat": "Entreprise · Bien-être et productivité"}, {"fr": "motivation", "ar": "التحفيز", "def": "Envie et énergie pour agir.", "ex": "La ~ de l'équipe est au plus haut.", "cat": "Entreprise · Bien-être et productivité"}, {"fr": "cohésion d'équipe", "ar": "تماسك الفريق", "def": "Solidarité et bonne entente dans un groupe.", "ex": "Ce séminaire renforce la ~.", "cat": "Entreprise · Bien-être et productivité"}, {"fr": "CSE", "ar": "لجنة المؤسسة", "def": "Instance qui représente les salariés dans l'entreprise.", "ex": "Le ~ organise une sortie en juin.", "cat": "Entreprise · Bien-être et productivité"}, {"fr": "congé", "ar": "عطلة", "def": "Période où l'on ne travaille pas, avec autorisation.", "ex": "Je suis en ~ la semaine prochaine.", "cat": "Entreprise · Bien-être et productivité"}, {"fr": "réclamation", "ar": "شكوى", "def": "Plainte officielle pour signaler un problème.", "ex": "Le client a déposé une ~.", "cat": "Entreprise · Bien-être et productivité"}, {"fr": "ambiance", "ar": "الجوّ العام", "def": "Atmosphère qui règne dans un lieu.", "ex": "L'~ au bureau est très détendue.", "cat": "Entreprise · Bien-être et productivité"}], "u6": [{"fr": "chiffre d'affaires", "ar": "رقم المعاملات", "def": "Total des ventes d'une entreprise sur une période.", "ex": "Notre ~ a progressé de 8 %.", "cat": "Entreprise · Entreprise en mouvement"}, {"fr": "fusion", "ar": "اندماج", "def": "Union de deux entreprises en une seule.", "ex": "La ~ des deux banques est annoncée.", "cat": "Entreprise · Entreprise en mouvement"}, {"fr": "rachat", "ar": "استحواذ", "def": "Achat d'une entreprise par une autre.", "ex": "Le ~ de la start-up a coûté cher.", "cat": "Entreprise · Entreprise en mouvement"}, {"fr": "filiale", "ar": "فرع تابع", "def": "Entreprise contrôlée par une société mère.", "ex": "Nous avons une ~ au Maroc.", "cat": "Entreprise · Entreprise en mouvement"}, {"fr": "siège social", "ar": "المقرّ الرئيسي", "def": "Adresse officielle et centre de direction d'une entreprise.", "ex": "Le ~ se trouve à Paris.", "cat": "Entreprise · Entreprise en mouvement"}, {"fr": "restructuration", "ar": "إعادة هيكلة", "def": "Réorganisation profonde d'une entreprise.", "ex": "La ~ va toucher trois services.", "cat": "Entreprise · Entreprise en mouvement"}, {"fr": "licenciement", "ar": "تسريح", "def": "Rupture du contrat de travail décidée par l'employeur.", "ex": "Le ~ doit être justifié.", "cat": "Entreprise · Entreprise en mouvement"}, {"fr": "croissance", "ar": "النموّ", "def": "Augmentation de l'activité ou des résultats.", "ex": "La ~ du marché est forte cette année.", "cat": "Entreprise · Entreprise en mouvement"}, {"fr": "compte rendu", "ar": "محضر اجتماع", "def": "Texte qui résume ce qui a été dit et décidé en réunion.", "ex": "Qui rédige le ~ de la réunion ?", "cat": "Entreprise · Entreprise en mouvement"}, {"fr": "ordre du jour", "ar": "جدول الأعمال", "def": "Liste des sujets à traiter pendant une réunion.", "ex": "Le premier point à l'~ est le budget.", "cat": "Entreprise · Entreprise en mouvement"}, {"fr": "actionnaires", "ar": "المساهمون", "def": "Personnes qui possèdent des parts d'une entreprise.", "ex": "Les ~ se réunissent une fois par an.", "cat": "Entreprise · Entreprise en mouvement"}], "u7": [{"fr": "communication interne", "ar": "التواصل الداخلي", "def": "Échanges d'informations entre les salariés d'une entreprise.", "ex": "La ~ passe surtout par l'intranet.", "cat": "Entreprise · Communication performante"}, {"fr": "destinataire", "ar": "المرسَل إليه", "def": "Personne à qui l'on envoie un message.", "ex": "Vérifie le ~ avant d'envoyer le mail.", "cat": "Entreprise · Communication performante"}, {"fr": "note de service", "ar": "مذكّرة مصلحية", "def": "Document interne qui informe le personnel.", "ex": "Une ~ annonce les nouveaux horaires.", "cat": "Entreprise · Communication performante"}, {"fr": "communiqué de presse", "ar": "بلاغ صحفي", "def": "Texte envoyé aux journalistes pour informer le public.", "ex": "L'entreprise a publié un ~ ce matin.", "cat": "Entreprise · Communication performante"}, {"fr": "intranet", "ar": "الشبكة الداخلية", "def": "Réseau informatique réservé aux salariés.", "ex": "Les formulaires sont sur l'~.", "cat": "Entreprise · Communication performante"}, {"fr": "situation de crise", "ar": "وضعية أزمة", "def": "Moment grave qui demande une réaction rapide.", "ex": "En ~, il faut communiquer vite.", "cat": "Entreprise · Communication performante"}, {"fr": "porte-parole", "ar": "ناطق رسمي", "def": "Personne qui parle officiellement au nom d'un groupe.", "ex": "Le ~ répondra aux journalistes.", "cat": "Entreprise · Communication performante"}, {"fr": "réunion", "ar": "اجتماع", "def": "Rencontre organisée pour travailler ensemble.", "ex": "La ~ commence à 9 h.", "cat": "Entreprise · Communication performante"}, {"fr": "convaincre", "ar": "أقنع", "def": "Amener quelqu'un à accepter une idée.", "ex": "Il faut ~ le client avec des chiffres.", "cat": "Entreprise · Communication performante"}, {"fr": "se justifier", "ar": "برّر موقفه", "def": "Donner les raisons de ses actes.", "ex": "Il a dû ~ devant la direction.", "cat": "Entreprise · Communication performante"}], "u8": [{"fr": "télétravail", "ar": "العمل عن بُعد", "def": "Travail fait à distance, souvent depuis chez soi.", "ex": "Je fais du ~ deux jours par semaine.", "cat": "Entreprise · Nouvelles formes de travail"}, {"fr": "portage salarial", "ar": "العمل الحر عبر شركة وسيطة", "def": "Système où un indépendant est salarié d'une société qui facture ses clients.", "ex": "Grâce au ~, il garde une protection sociale.", "cat": "Entreprise · Nouvelles formes de travail"}, {"fr": "auto-entrepreneur", "ar": "مقاول ذاتي", "def": "Personne qui crée une petite entreprise individuelle au régime simplifié.", "ex": "Elle est devenue ~ après son licenciement.", "cat": "Entreprise · Nouvelles formes de travail"}, {"fr": "travailleur indépendant", "ar": "عامل مستقل", "def": "Personne qui travaille à son compte, sans employeur.", "ex": "Un ~ fixe lui-même ses tarifs.", "cat": "Entreprise · Nouvelles formes de travail"}, {"fr": "reconversion", "ar": "إعادة التوجيه المهني", "def": "Changement complet de métier.", "ex": "Sa ~ dans le numérique est une réussite.", "cat": "Entreprise · Nouvelles formes de travail"}, {"fr": "temps partiel", "ar": "العمل بدوام جزئي", "def": "Travail avec moins d'heures qu'un temps plein.", "ex": "Il travaille à ~ pour s'occuper de ses enfants.", "cat": "Entreprise · Nouvelles formes de travail"}, {"fr": "pourcentage", "ar": "نسبة مئوية", "def": "Proportion exprimée sur cent.", "ex": "Quel ~ des salariés télétravaille ?", "cat": "Entreprise · Nouvelles formes de travail"}, {"fr": "enquête", "ar": "دراسة استقصائية", "def": "Étude pour recueillir des informations.", "ex": "Une ~ montre que les salariés veulent plus de flexibilité.", "cat": "Entreprise · Nouvelles formes de travail"}, {"fr": "sondage", "ar": "استطلاع رأي", "def": "Questions posées à un groupe pour connaître son opinion.", "ex": "Selon un ~, 60 % des cadres sont satisfaits.", "cat": "Entreprise · Nouvelles formes de travail"}, {"fr": "augmenter", "ar": "ارتفع", "def": "Devenir plus grand ou plus nombreux.", "ex": "Les ventes vont ~ de 15 %.", "cat": "Entreprise · Nouvelles formes de travail"}]};
+const ENT_QCM = [{"q": "« Je travaille ici ___ trois ans. »", "options": ["depuis", "il y a", "pendant"], "correctIdx": 0, "explain": "Action qui continue encore → depuis."}, {"q": "« J'ai obtenu mon diplôme ___ cinq ans. »", "options": ["il y a", "depuis", "dans"], "correctIdx": 0, "explain": "Moment précis du passé → il y a."}, {"q": "« J'ai été stagiaire ___ six mois. »", "options": ["pendant", "depuis", "il y a"], "correctIdx": 0, "explain": "Durée terminée → pendant."}, {"q": "« J'ai rédigé le rapport ___ deux heures. »", "options": ["en", "depuis", "dans"], "correctIdx": 0, "explain": "Temps nécessaire pour faire l'action → en."}, {"q": "« Je commence mon nouveau poste ___ une semaine. »", "options": ["dans", "il y a", "depuis"], "correctIdx": 0, "explain": "Futur → dans."}, {"q": "« Je ___ mon CV quand le recruteur m'a appelé. »", "options": ["préparais", "ai préparé", "préparerai"], "correctIdx": 0, "explain": "Action en cours interrompue → imparfait."}, {"q": "« Hier, j'___ un entretien à 10 h. »", "options": ["ai passé", "passais", "passerai"], "correctIdx": 0, "explain": "Événement unique et daté → passé composé."}, {"q": "« Tu vas à Lyon ? — Oui, j'___ vais demain. »", "options": ["y", "en", "le"], "correctIdx": 0, "explain": "Y remplace un lieu (à Lyon)."}, {"q": "« Des billets ? J'___ ai réservé deux. »", "options": ["en", "y", "les"], "correctIdx": 0, "explain": "EN remplace une quantité."}, {"q": "« Je pense à la réunion. » →", "options": ["J'y pense.", "J'en pense.", "Je lui pense."], "correctIdx": 0, "explain": "Penser à + chose → y."}, {"q": "« La collègue ___ gère le budget est absente. »", "options": ["qui", "que", "dont"], "correctIdx": 0, "explain": "Sujet du verbe « gère » → qui."}, {"q": "« Le poste ___ je vise est à Paris. »", "options": ["que", "qui", "où"], "correctIdx": 0, "explain": "COD de « vise » → que."}, {"q": "« L'entreprise ___ je travaille recrute. »", "options": ["où", "que", "dont"], "correctIdx": 0, "explain": "Lieu → où."}, {"q": "« Le logiciel ___ j'ai besoin est cher. »", "options": ["dont", "que", "où"], "correctIdx": 0, "explain": "Avoir besoin DE → dont."}, {"q": "« Le dossier ___ je t'ai parlé est prêt. »", "options": ["dont", "que", "où"], "correctIdx": 0, "explain": "Parler DE → dont."}, {"q": "« ___ Karim qui anime la réunion. »", "options": ["C'est", "Ce qui", "Ce que"], "correctIdx": 0, "explain": "Mise en relief du sujet : C'est… qui."}, {"q": "« ___ je préfère, c'est le travail en équipe. »", "options": ["Ce que", "Ce qui", "C'est"], "correctIdx": 0, "explain": "COD de « préfère » → ce que."}, {"q": "Quelle phrase est correcte ?", "options": ["Je n'ai vu personne.", "Je n'ai personne vu.", "Je n'ai pas vu personne."], "correctIdx": 0, "explain": "Au passé composé, « personne » se place après le participe."}, {"q": "« Je n'ai ___ une question. » (= seulement)", "options": ["qu'", "pas", "jamais"], "correctIdx": 0, "explain": "ne… que = seulement."}, {"q": "« L'année prochaine, je ___ à Montréal. »", "options": ["partirai", "partirais", "partais"], "correctIdx": 0, "explain": "Projet futur → futur simple."}, {"q": "« Il ___ remplir beaucoup de formulaires. » (falloir, futur)", "options": ["faudra", "faudrait", "fallait"], "correctIdx": 0, "explain": "falloir → faudr- au futur."}, {"q": "« Nous ___ le dossier demain. » (envoyer)", "options": ["enverrons", "envoierons", "envoyerons"], "correctIdx": 0, "explain": "envoyer → enverr- au futur."}, {"q": "« J'ai décidé ___ accepter l'offre. »", "options": ["d'", "à", "(rien)"], "correctIdx": 0, "explain": "décider DE + infinitif."}, {"q": "« Je commence ___ m'habituer au climat. »", "options": ["à", "de", "(rien)"], "correctIdx": 0, "explain": "commencer À + infinitif."}, {"q": "« Il a oublié ___ signer le contrat. »", "options": ["de", "à", "(rien)"], "correctIdx": 0, "explain": "oublier DE + infinitif."}, {"q": "« Elle espère ___ obtenir le poste. »", "options": ["(rien)", "de", "à"], "correctIdx": 0, "explain": "espérer + infinitif sans préposition."}, {"q": "« ___-vous m'envoyer le devis ? » (politesse)", "options": ["Pourriez", "Pourrez", "Pouviez"], "correctIdx": 0, "explain": "Politesse → conditionnel."}, {"q": "« Vous ___ prendre des pauses. » (conseil)", "options": ["devriez", "devrez", "deviez"], "correctIdx": 0, "explain": "Conseil → conditionnel."}, {"q": "« Il faut que tu ___ à la réunion. »", "options": ["viennes", "viens", "viendras"], "correctIdx": 0, "explain": "Il faut que + subjonctif."}, {"q": "« Je voudrais que vous ___ une pause. »", "options": ["fassiez", "faites", "ferez"], "correctIdx": 0, "explain": "Volonté + subjonctif : que vous fassiez."}, {"q": "« J'espère que tu ___ là demain. »", "options": ["seras", "sois", "serais"], "correctIdx": 0, "explain": "Piège ! espérer que + indicatif."}, {"q": "« Je regrette qu'il ___. »", "options": ["parte", "part", "partira"], "correctIdx": 0, "explain": "Sentiment + subjonctif."}, {"q": "« Si j'___ plus de temps, je suivrais une formation. »", "options": ["avais", "ai", "aurais"], "correctIdx": 0, "explain": "Si + imparfait → conditionnel."}, {"q": "« Si le client accepte, nous ___ le contrat demain. »", "options": ["signerons", "signerions", "signions"], "correctIdx": 0, "explain": "Si + présent → futur."}, {"q": "« Si nous fusionnions, nous ___ plus forts. »", "options": ["serions", "serons", "étions"], "correctIdx": 0, "explain": "Si + imparfait → conditionnel."}, {"q": "« J'envoie le rapport à Marie. » →", "options": ["Je le lui envoie.", "Je lui le envoie.", "Je l'envoie lui."], "correctIdx": 0, "explain": "Ordre : le/la/les avant lui/leur."}, {"q": "« Donne-moi le document ! » →", "options": ["Donne-le-moi !", "Donne-moi-le !", "Me le donne !"], "correctIdx": 0, "explain": "Impératif affirmatif : verbe-le-moi."}, {"q": "« Il m'a expliqué la procédure. » →", "options": ["Il me l'a expliquée.", "Il me l'a expliqué.", "Il me la a expliquée."], "correctIdx": 0, "explain": "COD féminin placé avant → accord : expliquée."}, {"q": "« ___ un problème technique, le projet est en retard. »", "options": ["À cause d'", "Grâce à", "Pour"], "correctIdx": 0, "explain": "Cause négative → à cause de."}, {"q": "« Il a beaucoup travaillé, ___ il a eu une promotion. »", "options": ["c'est pourquoi", "pourtant", "bien que"], "correctIdx": 0, "explain": "Conséquence → c'est pourquoi."}, {"q": "« ___ la crise, les ventes ont augmenté. »", "options": ["Malgré", "Bien que", "Parce que"], "correctIdx": 0, "explain": "Opposition + nom → malgré."}, {"q": "« Je t'écris ___ te prévenir. »", "options": ["pour", "parce que", "donc"], "correctIdx": 0, "explain": "But + infinitif → pour."}, {"q": "« Les factures ? Je les ai ___. »", "options": ["envoyées", "envoyé", "envoyés"], "correctIdx": 0, "explain": "COD « les » (factures, féminin pluriel) avant → envoyées."}, {"q": "« Elle a ___ le contrat. »", "options": ["signé", "signée", "signés"], "correctIdx": 0, "explain": "COD après le verbe → pas d'accord."}, {"q": "« Des propositions ? J'en ai ___. »", "options": ["reçu", "reçues", "reçus"], "correctIdx": 0, "explain": "Jamais d'accord avec EN."}, {"q": "« Quand il est arrivé, la réunion ___ déjà commencé. »", "options": ["avait", "a", "aura"], "correctIdx": 0, "explain": "Antériorité dans le passé → plus-que-parfait."}, {"q": "« Nous partirons demain. » → Ils ont dit qu'ils…", "options": ["partiraient le lendemain", "partiront demain", "partaient hier"], "correctIdx": 0, "explain": "Futur → conditionnel ; demain → le lendemain."}, {"q": "« Je suis fatigué. » → Il a dit qu'il ___ fatigué.", "options": ["était", "est", "sera"], "correctIdx": 0, "explain": "Présent → imparfait."}, {"q": "« Avez-vous signé ? » → Elle a demandé ___ nous avions signé.", "options": ["si", "que", "ce que"], "correctIdx": 0, "explain": "Question oui/non → si."}, {"q": "« Qu'est-ce que vous voulez ? » → Il a demandé ___ je voulais.", "options": ["ce que", "qu'est-ce que", "si"], "correctIdx": 0, "explain": "Qu'est-ce que → ce que."}, {"q": "« Envoyez le rapport ! » → Elle nous a dit ___ le rapport.", "options": ["d'envoyer", "envoyez", "que nous envoyons"], "correctIdx": 0, "explain": "Impératif → de + infinitif."}, {"q": "Dans quel mot la consonne finale se prononce-t-elle ?", "options": ["avec", "grand", "petit"], "correctIdx": 0, "explain": "C, R, F, L se prononcent souvent en finale : pense à « CaReFuL »."}, {"q": "« ___ entretien est demain. »", "options": ["L'", "Le", "La"], "correctIdx": 0, "explain": "Élision devant une voyelle."}, {"q": "Le CPF a remplacé…", "options": ["le DIF", "le CSE", "le MEDEF"], "correctIdx": 0, "explain": "Depuis 2015, le compte personnel de formation remplace le DIF."}, {"q": "Quelle instance représente les salariés dans l'entreprise ?", "options": ["le CSE", "le MEDEF", "l'URSSAF"], "correctIdx": 0, "explain": "Le comité social et économique (CSE)."}, {"q": "Le MEDEF représente…", "options": ["les employeurs", "les salariés", "les demandeurs d'emploi"], "correctIdx": 0, "explain": "C'est la principale organisation patronale."}, {"q": "Quelle formule termine une lettre formelle ?", "options": ["Veuillez agréer, Madame, Monsieur, mes salutations distinguées.", "Bisous et à plus !", "Ciao, bonne journée."], "correctIdx": 0, "explain": "À l'écrit professionnel : formules de politesse complètes et vouvoiement."}, {"q": "« Le nombre de télétravailleurs a ___ de 15 %. »", "options": ["augmenté", "augmentée", "augmentés"], "correctIdx": 0, "explain": "Pas de COD avant : pas d'accord."}];
+const ENT_MISSION_BEST_KEY = 'lexiqueQuiz::entMissionBest';
+
+function entAllWords(){ return ENT_UNITS.flatMap(u => ENT_WORDS[u.key] || []); }
+function entSheets(prefix){ return PRACTICAL_SHEETS.filter(s => s.id.startsWith(prefix)); }
+function entSheetBtn(s){
+  const passed = isSheetPassed(s.id);
+  return `<button class="opt" data-ent-sheet="${s.id}" style="text-align:left;padding:11px 13px;display:flex;align-items:center;gap:10px;${passed ? 'background:rgba(34,197,94,0.12);border-color:rgba(34,197,94,0.4);' : ''}">
+    <span style="font-size:20px;">${s.icon}</span>
+    <span style="flex:1;font-weight:800;font-size:13.5px;color:var(--text);">${escapeHtml(s.title)}</span>
+    ${passed ? '<span style="color:#16A34A;">✅</span>' : ''}
+  </button>`;
+}
+function renderEntrepriseHub(){
+  clearQuestionTimer();
+  document.body.classList.remove('quiz-active');
+  currentBlock = null;
+  isHomeScreen = false;
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromEntBtn" style="cursor:pointer;">← Retour</button>`;
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('footerNote').textContent = '';
+  const all = PRACTICAL_SHEETS.filter(s => s.hub === 'entreprise');
+  const done = all.filter(s => isSheetPassed(s.id)).length;
+  let best = 0; try{ best = parseInt(localStorage.getItem(nsKey(ENT_MISSION_BEST_KEY)) || '0', 10) || 0; }catch(e){}
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="cat-tag">🏢 Français en entreprise · A2/B1</div>
+    <div class="word-fr" style="font-size:clamp(21px,4.5vw,27px);">Travailler en français</div>
+    <div class="word-def" style="margin-top:4px;">8 unités · ${entAllWords().length} mots FR↔AR · ${ENT_QCM.length} questions · ✅ ${done}/${all.length} fiches validées</div>
+
+    <button class="restart-btn ent-mission-btn" id="entMissionBtn" style="margin:16px auto 6px;display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#F59E0B,#DC2626);box-shadow:0 4px 0 #991B1B;">🚀 Mission Entreprise <span style="font-size:12px;opacity:.9;">(3 vies${best ? ` · record ${best}` : ''})</span></button>
+    <button class="mode-chip" id="entAllWordsBtn" style="margin:6px auto 0;display:block;">🎮 Jouer TOUT le lexique (${entAllWords().length} mots)</button>
+
+    <div style="font-family:'Inter',sans-serif;font-weight:800;color:var(--purple);margin:20px 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.03em;">📚 Les 8 unités</div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      ${ENT_UNITS.map((u, i) => {
+        const cours = PRACTICAL_SHEETS.find(s => s.id === 'ent-' + u.key);
+        const lex = PRACTICAL_SHEETS.find(s => s.id === 'ent-lex-' + u.key);
+        const n = (ENT_WORDS[u.key] || []).length;
+        const coursOk = cours && isSheetPassed(cours.id), lexOk = lex && isSheetPassed(lex.id);
+        return `<div class="ent-unit-card" style="border:1px solid var(--border);border-radius:16px;padding:12px 14px;background:var(--surface-sunken);text-align:left;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:26px;">${u.icon}</span>
+            <div style="flex:1;">
+              <div style="font-size:10.5px;color:var(--text-dim);font-weight:800;">UNITÉ ${i+1}</div>
+              <div style="font-weight:800;font-size:15px;color:var(--text);">${escapeHtml(u.theme)}</div>
+              <div style="font-size:12px;color:var(--text-dim);">${escapeHtml(u.skill)}</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;">
+            <button class="mode-chip ${coursOk ? 'active' : ''}" data-ent-sheet="ent-${u.key}">📋 Cours${coursOk ? ' ✅' : ''}</button>
+            <button class="mode-chip ${lexOk ? 'active' : ''}" data-ent-sheet="ent-lex-${u.key}">🇫🇷→🇸🇦 Lexique${lexOk ? ' ✅' : ''}</button>
+            <button class="mode-chip" data-ent-play="${u.key}">🎮 Jouer (${n})</button>
+            <button class="mode-chip" data-ent-listen="${u.key}">🎧 Écouter</button>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+
+    <div style="font-family:'Inter',sans-serif;font-weight:800;color:var(--purple);margin:20px 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.03em;">📐 Grammaire à s'entraîner</div>
+    <div style="display:flex;flex-direction:column;gap:8px;">${entSheets('ent-g-').map(entSheetBtn).join('')}</div>
+
+    <div style="font-family:'Inter',sans-serif;font-weight:800;color:var(--purple);margin:20px 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.03em;">💬 Expressions, phonétique & culture</div>
+    <div style="display:flex;flex-direction:column;gap:8px;">${[...entSheets('ent-expr-'), ...entSheets('ent-phonetique'), ...entSheets('ent-culture')].map(entSheetBtn).join('')}</div>
+
+    <div style="font-family:'Inter',sans-serif;font-weight:800;color:var(--purple);margin:20px 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.03em;">✉️ Modèles d'écrits</div>
+    <div style="display:flex;flex-direction:column;gap:8px;">${[...entSheets('ent-ecrit-'), ...entSheets('ent-autoeval')].map(entSheetBtn).join('')}</div>
+  `;
+  document.getElementById('backFromEntBtn').addEventListener('click', renderBlockSelect);
+  document.getElementById('entMissionBtn').addEventListener('click', () => startEntMission());
+  document.getElementById('entAllWordsBtn').addEventListener('click', () => showModeSuggestPopup(shuffle(entAllWords().slice()), `🏢 ${entAllWords().length} mots du monde de l'entreprise : choisis ton mode de jeu !`));
+  card.querySelectorAll('[data-ent-sheet]').forEach(b => b.addEventListener('click', () => renderPracticalSheetDetail(b.dataset.entSheet)));
+  card.querySelectorAll('[data-ent-play]').forEach(b => b.addEventListener('click', () => {
+    const u = ENT_UNITS.find(x => x.key === b.dataset.entPlay);
+    showModeSuggestPopup((ENT_WORDS[u.key] || []).slice(), `${u.icon} ${u.theme} : choisis ton mode de jeu !`);
+  }));
+  card.querySelectorAll('[data-ent-listen]').forEach(b => b.addEventListener('click', () => {
+    const u = ENT_UNITS.find(x => x.key === b.dataset.entListen);
+    renderBlockWordsPeek((ENT_WORDS[u.key] || []).slice(), `${u.icon} ${u.theme}`, () => renderEntrepriseHub());
+  }));
+  setQuickNavTarget(() => [...card.querySelectorAll('[data-ent-sheet]')].find(b => !isSheetPassed(b.dataset.entSheet)) || null);
+  startSectionReading('fiche');
+}
+
+/* --- 🚀 Mission Entreprise : 15 questions tirées au hasard, 3 vies, combo, explications --- */
+let entMission = null;
+function startEntMission(){
+  clearQuestionTimer();
+  document.body.classList.add('quiz-active');
+  isHomeScreen = false;
+  const pool = shuffle(ENT_QCM.slice()).slice(0, 15).map(q => {
+    const opts = shuffle(q.options.map((o, i) => ({ o, ok: i === q.correctIdx })));
+    return { q: q.q, opts, explain: q.explain };
+  });
+  entMission = { pool, idx: 0, lives: 3, score: 0, combo: 0, bestCombo: 0, startTime: Date.now(), answered: false };
+  blockStartTime = Date.now(); totalHiddenMs = 0; totalIdleMs = 0; lastInteractionAt = Date.now();
+  renderEntMissionCard();
+}
+function entHeartsHtml(n){ return [0,1,2].map(i => `<span class="ent-heart ${i < n ? '' : 'lost'}">${i < n ? '❤️' : '🖤'}</span>`).join(''); }
+function renderEntMissionCard(){
+  const st = entMission;
+  if(!st) return;
+  if(st.idx >= st.pool.length || st.lives <= 0){ endEntMission(); return; }
+  const item = st.pool[st.idx];
+  st.answered = false;
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="entMissionExitBtn" style="cursor:pointer;">← Quitter</button><span class="chip">⭐ ${st.score}</span><span class="chip ent-hearts">${entHeartsHtml(st.lives)}</span>${st.combo >= 2 ? `<span class="chip" style="color:#EA580C;">🔥 x${st.combo}</span>` : ''}`;
+  document.getElementById('entMissionExitBtn').addEventListener('click', () => { entMission = null; renderEntrepriseHub(); });
+  document.getElementById('progressFill').style.width = Math.round((st.idx / st.pool.length) * 100) + '%';
+  document.getElementById('footerNote').textContent = `Question ${st.idx + 1} / ${st.pool.length}`;
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="cat-tag">🚀 Mission Entreprise</div>
+    <div class="word-fr ent-q-pop" style="font-size:clamp(17px,4vw,21px);margin:6px 0 14px;">${escapeHtml(item.q)}</div>
+    <div class="options" id="entOptions" style="grid-template-columns:1fr;">
+      ${item.opts.map((o, i) => `<button class="opt" data-ent-opt="${i}"><span class="opt-key">${i+1}</span>${escapeHtml(o.o)}</button>`).join('')}
+    </div>
+    <div class="reveal" id="entReveal"></div>
+  `;
+  card.querySelectorAll('[data-ent-opt]').forEach(b => b.addEventListener('click', () => answerEntMission(parseInt(b.dataset.entOpt, 10))));
+}
+function answerEntMission(i){
+  const st = entMission;
+  if(!st || st.answered) return;
+  st.answered = true;
+  const item = st.pool[st.idx];
+  const ok = !!item.opts[i].ok;
+  document.querySelectorAll('#entOptions [data-ent-opt]').forEach((b, bi) => {
+    b.style.pointerEvents = 'none';
+    if(item.opts[bi].ok) b.classList.add('correct');
+    else if(bi === i) b.classList.add('wrong');
+    else b.classList.add('faded');
+  });
+  if(ok){
+    st.combo++; st.bestCombo = Math.max(st.bestCombo, st.combo);
+    const gain = 10 + Math.min(st.combo - 1, 5) * 2; // bonus de combo
+    st.score += gain;
+    playCorrectSound(); reactMascot('ok'); vibrate(30);
+    if(st.combo === 3 || st.combo === 6 || st.combo === 10){ try{ celebrate(); }catch(e){} }
+  } else {
+    st.combo = 0; st.lives--;
+    playWrongSound(); reactMascot('ko'); vibrate([40,40,40]);
+    const card = document.getElementById('quizCard');
+    card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake');
+  }
+  bumpCombo(ok);
+  const hearts = document.querySelector('.ent-hearts');
+  if(hearts) hearts.innerHTML = entHeartsHtml(st.lives);
+  const reveal = document.getElementById('entReveal');
+  reveal.classList.add('show');
+  reveal.innerHTML = `
+    <div class="pass-banner ${ok ? 'ok' : 'ko'}">${ok ? (st.combo >= 3 ? `🔥 Combo x${st.combo} ! +${10 + Math.min(st.combo - 1, 5) * 2}` : '✅ Exact ! +10') : (st.lives > 0 ? `💔 Raté — plus que ${st.lives} vie${st.lives > 1 ? 's' : ''}` : '💀 Plus de vies !')}</div>
+    <div class="def-text" style="margin-top:8px;">💡 ${escapeHtml(item.explain)}</div>
+    <button class="next-btn" id="nextBtn">${st.lives > 0 && st.idx + 1 < st.pool.length ? 'Suivant →' : 'Voir le résultat'}</button>
+  `;
+  attachAutoAdvance('nextBtn', () => { st.idx++; renderEntMissionCard(); });
+}
+function endEntMission(){
+  const st = entMission;
+  document.body.classList.remove('quiz-active');
+  if(!st){ renderEntrepriseHub(); return; }
+  const answeredCount = Math.min(st.idx + (st.answered ? 1 : 0), st.pool.length);
+  const survived = st.lives > 0;
+  const durationSec = computeActiveDurationSec(st.startTime);
+  let best = 0; try{ best = parseInt(localStorage.getItem(nsKey(ENT_MISSION_BEST_KEY)) || '0', 10) || 0; }catch(e){}
+  const newRecord = st.score > best;
+  if(newRecord){ try{ localStorage.setItem(nsKey(ENT_MISSION_BEST_KEY), String(st.score)); }catch(e){} }
+  recordDailyActivity();
+  recordDailyStats(durationSec, survived, Math.round(st.score / 2), 'grammaire');
+  if(typeof cloudAutoPush === 'function') cloudAutoPush();
+  if(survived || newRecord){ try{ launchGravityConfetti(); }catch(e){} }
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="entEndBackBtn" style="cursor:pointer;">← Français en entreprise</button>`;
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('footerNote').textContent = '';
+  const title = survived ? (st.lives === 3 ? '🏆 Mission parfaite !' : '🎉 Mission accomplie !') : '💪 Mission échouée… retente ta chance !';
+  document.getElementById('quizCard').innerHTML = `
+    <div style="text-align:center;">
+      <div style="font-size:52px;" class="ent-q-pop">${survived ? (st.lives === 3 ? '🏆' : '🚀') : '🧯'}</div>
+      <div class="word-fr" style="margin-top:6px;">${title}</div>
+      <div class="word-def" style="margin-top:6px;">⭐ ${st.score} points · ${answeredCount} question${answeredCount > 1 ? 's' : ''} · meilleur combo 🔥 x${st.bestCombo} · ${entHeartsHtml(st.lives)}</div>
+      ${newRecord ? `<div class="pass-banner ok" style="margin-top:12px;">🥇 Nouveau record : ${st.score} points !</div>` : `<div style="margin-top:10px;font-size:13px;color:var(--text-dim);">Record : ${best} points</div>`}
+      <div style="display:flex;gap:10px;justify-content:center;margin-top:18px;flex-wrap:wrap;">
+        <button class="restart-btn" id="entRetryBtn" style="margin:0;">🔁 Nouvelle mission</button>
+        <button class="restart-btn" id="entHubBtn" style="margin:0;background:var(--surface-sunken);border:1px solid var(--border);color:var(--purple);box-shadow:none;">📚 Réviser les fiches</button>
+      </div>
+    </div>
+  `;
+  entMission = null;
+  document.getElementById('entEndBackBtn').addEventListener('click', renderEntrepriseHub);
+  document.getElementById('entHubBtn').addEventListener('click', renderEntrepriseHub);
+  document.getElementById('entRetryBtn').addEventListener('click', startEntMission);
+}
+
+/* ============ ▶ « Go » : ouvre directement le module qui fait avancer un défi du jour ============ */
+function startNextBlockInMode(mode){
+  if(mode) gameMode = mode;
+  const idx = findNextBlockToPlay();
+  if(idx === null){ renderBlockSelect(); return; }
+  buildDeck(idx);
+  renderScoreboard();
+  renderCard();
+}
+function goToQuest(key){
+  // on quitte proprement la consultation (le chrono de question ne doit pas reprendre)
+  questPeekPausedTimer = false;
+  const ov = document.getElementById('questPeekOverlay');
+  if(ov) ov.classList.remove('show');
+  const today = dailyStats[todayKey()] || { bySubject:{}, modesPlayed:[] };
+  if(key && key.startsWith('section:')){
+    const secKey = key.slice(8);
+    const sec = SHEET_SECTIONS.find(x => x.key === secKey);
+    if(sec && sec.open){ sec.open(); }
+    else { renderSheetsHomeBySection(secKey, '📎 Fiches', 'Fiches', ''); }
+    // descend directement à la prochaine fiche / au prochain texte à faire
+    setTimeout(() => { if(quickNavFinder){ const el = quickNavFinder(); if(el) quickNavJumpTo(el); } }, 350);
+    return;
+  }
+  if(key === 'subjects'){
+    const touched = Object.keys(today.bySubject || {});
+    const order = [
+      ['vocabulaire', () => startNextBlockInMode()],
+      ['conjugaison', () => renderConjugationHome()],
+      ['grammaire',   () => renderGrammarHome()],
+      ['orthographe', () => renderOrthoHome()],
+    ];
+    const next = order.find(([subj]) => !touched.includes(subj)) || order[1];
+    next[1]();
+    return;
+  }
+  if(key === 'modes'){
+    const played = today.modesPlayed || [];
+    const mode = GAME_MODES.find(m => !played.includes(m)) || gameMode;
+    startNextBlockInMode(mode);
+    return;
+  }
+  // lessons, time, pass, mastery → le prochain bloc à faire, directement
+  startNextBlockInMode();
+}
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest && e.target.closest('[data-quest-go]');
+  if(!btn) return;
+  e.preventDefault(); e.stopPropagation();
+  goToQuest(btn.dataset.questGo);
+});
+
 /* ============ 🎯 OBJECTIFS DU JOUR — consultables depuis n'importe quel mode ============
    Bouton flottant (en bas à gauche) visible partout sauf sur l'accueil (qui les affiche déjà).
    Le badge montre le nombre de défis restants ; un appui ouvre la liste, avec le temps de la
@@ -32082,6 +32404,7 @@ function openQuestPeek(){
         <div class="quest-label">${q.label}${!isDone ? ` <span style="color:#EA580C;font-weight:800;">· ${rest}</span>` : ''}${q.live ? ' <span style="font-size:11px;color:var(--text-dim);">(partie en cours incluse)</span>' : ''}</div>
         <div class="quest-bar"><div class="quest-bar-fill" style="width:${pct}%;"></div><span class="quest-bar-txt">${curTxt} / ${goalTxt}</span></div>
       </div>
+      ${isDone ? '' : `<button class="quest-go" data-quest-go="${escapeHtml(q.key)}" title="Y aller">Go ▶</button>`}
     </div>`;
   };
   body.innerHTML = `
