@@ -2014,6 +2014,84 @@
   .next-btn.fix-next{ background:linear-gradient(135deg,#FF8A1F,#FF4D5E) !important; box-shadow:0 5px 0 #C2410C !important; animation:fixPulse 1.6s ease-in-out infinite; }
   @keyframes fixPulse{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.02); } }
   body:has(.fix-next) #questPeekFab, body:has(.fix-next) #homeNavArrows{ opacity:0; pointer-events:none; transition:opacity .2s; } /* rien ne cache « Suivant » pendant une correction */
+
+  /* ================= 🎵 AUDIOTHÈQUE ================= */
+  .audio-now{ display:none; margin-top:16px; border-radius:24px; padding:16px; color:#fff; text-align:left;
+    background:radial-gradient(circle at 90% 0%, rgba(255,111,181,0.55), transparent 45%), linear-gradient(135deg,#F43F5E,#9D174D 55%,#6D28D9);
+    box-shadow:0 18px 34px -18px rgba(157,23,77,0.7); }
+  .audio-now-top{ display:flex; align-items:center; gap:12px; }
+  .audio-now-ic{ width:48px; height:48px; border-radius:15px; background:rgba(255,255,255,0.2); display:flex; align-items:center; justify-content:center; font-size:24px; flex:none; }
+  .audio-now-t{ font-weight:900; font-size:16.5px; line-height:1.2; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+  .audio-now-p{ font-weight:700; font-size:12.5px; opacity:.85; margin-top:2px; }
+  .audio-seek{ width:100%; margin:14px 0 2px; accent-color:#fff; }
+  .audio-times{ display:flex; justify-content:space-between; font-size:12px; font-weight:800; opacity:.9; }
+  .audio-ctrls{ display:flex; justify-content:center; align-items:center; gap:10px; margin-top:8px; }
+  .audio-btn{ border:none; cursor:pointer; width:46px; height:46px; border-radius:50%; background:rgba(255,255,255,0.18); color:#fff; font-size:16px; font-weight:900; font-family:'Nunito','Inter',sans-serif; transition:transform .12s; }
+  .audio-btn:active{ transform:scale(.9); }
+  .audio-btn.main{ width:64px; height:64px; font-size:24px; background:#fff; color:#BE185D; box-shadow:0 5px 0 rgba(0,0,0,0.2); }
+  .audio-opts{ display:flex; justify-content:center; gap:6px; flex-wrap:wrap; margin-top:12px; }
+  .audio-opts .mode-chip{ background:rgba(255,255,255,0.15); border-color:rgba(255,255,255,0.3); color:#fff; padding:7px 12px; font-size:12.5px; }
+  .audio-opts .mode-chip.active{ background:#fff; color:#BE185D; box-shadow:none; }
+  .audio-pl{ background:var(--surface-sunken); border-radius:20px; margin-bottom:12px; overflow:hidden; border:2px solid var(--border); }
+  .audio-pl-head{ width:100%; display:flex; align-items:center; gap:12px; padding:12px 14px; background:none; border:none; cursor:pointer; text-align:left; color:var(--text); font-family:'Nunito','Inter',sans-serif; }
+  .audio-pl-ic{ width:42px; height:42px; border-radius:13px; background:linear-gradient(135deg,#F43F5E,#9D174D); display:flex; align-items:center; justify-content:center; font-size:21px; flex:none; }
+  .audio-pl-t{ flex:1; font-weight:900; font-size:15.5px; display:flex; flex-direction:column; }
+  .audio-pl-t small{ font-weight:700; font-size:12px; color:var(--text-dim); }
+  .audio-pl-play{ width:38px; height:38px; border-radius:50%; background:#F43F5E; color:#fff; display:flex; align-items:center; justify-content:center; font-size:14px; box-shadow:0 3px 0 #9D174D; flex:none; }
+  .audio-pl-chev{ color:var(--text-dim); transition:transform .2s; }
+  .audio-tracks{ padding:0 8px 8px; }
+  .audio-track{ width:100%; display:flex; align-items:center; gap:10px; padding:10px 10px; border:none; border-radius:14px; background:var(--surface); margin-top:6px; cursor:pointer; text-align:left; color:var(--text); font-family:'Nunito','Inter',sans-serif; font-weight:700; font-size:14px; }
+  .audio-track.cur{ background:linear-gradient(135deg,rgba(244,63,94,0.12),rgba(109,40,217,0.12)); outline:2px solid rgba(244,63,94,0.45); }
+  .audio-track-n{ width:26px; text-align:center; font-weight:900; color:var(--text-dim); flex:none; }
+  .audio-track-t{ flex:1; min-width:0; }
+  .audio-badge{ font-size:11px; font-weight:800; color:#B45309; background:rgba(245,158,11,0.14); padding:3px 8px; border-radius:999px; white-space:nowrap; }
+  .audio-badge.ok{ color:#15803D; background:rgba(34,197,94,0.14); }
+  .audio-size{ font-size:11px; color:var(--text-faint); white-space:nowrap; }
+  .audio-eq{ display:inline-flex; gap:2px; align-items:flex-end; height:14px; }
+  .audio-eq i{ width:3px; background:#F43F5E; border-radius:2px; animation:audioEq .8s ease-in-out infinite; }
+  .audio-eq i:nth-child(2){ animation-delay:.2s; } .audio-eq i:nth-child(3){ animation-delay:.4s; }
+  @keyframes audioEq{ 0%,100%{ height:4px; } 50%{ height:14px; } }
+  .audio-empty{ text-align:center; padding:20px 12px; font-weight:700; color:var(--text-dim); line-height:1.6; }
+  .audio-help{ text-align:left; font-size:13.5px; line-height:1.55; color:var(--text); background:var(--surface-sunken); border:2px dashed var(--border-strong); border-radius:18px; padding:14px 16px; margin-top:12px; }
+  .audio-help ol{ padding-left:20px; margin:8px 0; }
+  .audio-help code, .audio-help pre{ background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:1px 6px; font-size:12px; }
+  .audio-help pre{ padding:10px; overflow-x:auto; white-space:pre; }
+  #audioMini{ position:fixed; left:50%; transform:translateX(-50%); bottom:14px; z-index:45; width:min(94vw,480px); display:none; align-items:center; gap:10px;
+    padding:9px 10px 13px; border-radius:20px; color:#fff; background:linear-gradient(135deg,#F43F5E,#6D28D9); box-shadow:0 14px 30px -12px rgba(109,40,217,0.7); overflow:hidden; }
+  .audio-mini-play{ width:42px; height:42px; border-radius:50%; border:none; background:#fff; color:#BE185D; font-size:17px; cursor:pointer; flex:none; }
+  .audio-mini-txt{ flex:1; min-width:0; cursor:pointer; display:flex; flex-direction:column; line-height:1.2; }
+  .audio-mini-txt b{ font-size:13.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .audio-mini-txt small{ font-size:11.5px; opacity:.85; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .audio-mini-x{ border:none; background:rgba(255,255,255,0.18); color:#fff; width:34px; height:34px; border-radius:50%; cursor:pointer; flex:none; }
+  .audio-mini-bar{ position:absolute; left:0; right:0; bottom:0; height:4px; background:rgba(255,255,255,0.25); }
+  .audio-mini-bar span{ display:block; height:100%; width:0; background:#fff; }
+  body:has(#audioMini[style*="flex"]) #questPeekFab{ bottom:96px; }
+  body:has(#audioMini[style*="flex"]) #homeNavArrows{ bottom:150px; }
+  body:has(#audioMini[style*="flex"]) #questPeekFab{ bottom:150px; }
+  body:has(#audioMini[style*="flex"]){ padding-bottom:150px; }
+
+  /* 🎵 Lecteur compact dans la carte d'accueil */
+  #heroAudioSlot{ width:100%; display:flex; justify-content:center; }
+  @media (min-width:640px){ #heroAudioSlot{ justify-content:flex-start; } }
+  .hero-audio{ margin-top:14px; width:100%; max-width:440px; display:flex; align-items:center; gap:8px; padding:9px 10px; border-radius:20px; text-align:left;
+    background:rgba(255,255,255,0.16); border:1px solid rgba(255,255,255,0.32); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); color:#fff;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.25); animation:heroFadeUp .6s cubic-bezier(.16,1,.3,1) .5s both; }
+  .ha-play{ width:46px; height:46px; flex:none; border:none; border-radius:50%; cursor:pointer; background:#fff; color:#C2185B; font-size:18px; font-weight:900;
+    box-shadow:0 4px 0 rgba(40,15,120,0.3); transition:transform .12s; }
+  .ha-play:active{ transform:translateY(3px); box-shadow:0 1px 0 rgba(40,15,120,0.3); }
+  .ha-txt{ flex:1; min-width:0; display:flex; flex-direction:column; cursor:pointer; line-height:1.2; }
+  .ha-txt b{ font-weight:900; font-size:14.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .ha-txt small{ font-weight:700; font-size:11.5px; opacity:.88; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:1px; }
+  .ha-bar{ display:block; height:4px; border-radius:999px; background:rgba(255,255,255,0.28); margin-top:6px; overflow:hidden; }
+  .ha-bar > span{ display:block; height:100%; width:0; background:#fff; border-radius:999px; transition:width .25s linear; }
+  .ha-btn{ width:34px; height:34px; flex:none; border:none; border-radius:50%; cursor:pointer; background:rgba(255,255,255,0.2); color:#fff; font-size:13px; font-weight:900; }
+  .ha-more{ font-size:22px; line-height:1; background:rgba(255,255,255,0.28); }
+  .hero-audio:not(.loaded) .ha-nav{ display:none; }
+  .ha-eq{ display:none; gap:2px; align-items:flex-end; height:16px; flex:none; }
+  .hero-audio.playing .ha-eq{ display:inline-flex; }
+  .ha-eq i{ width:3px; background:#fff; border-radius:2px; animation:audioEq .8s ease-in-out infinite; }
+  .ha-eq i:nth-child(2){ animation-delay:.2s; } .ha-eq i:nth-child(3){ animation-delay:.4s; }
+  @media (max-width:380px){ .hero-audio .ha-nav{ display:none !important; } }
   @media (prefers-reduced-motion: reduce){ body::before, .tile, .home-stats .stat-box, .hh-deco, .hero-cta{ animation:none !important; } }
 </style>
 </head>
@@ -2196,6 +2274,7 @@
   <div class="menu-group">
     <div class="menu-label">Navigation</div>
     <button class="menu-item" id="switchAppBtn"><span class="mi-ic">🔀</span> Changer d'application</button>
+    <button class="menu-item" id="audioLibMenuBtn"><span class="mi-ic">🎵</span> Audiothèque (MP3)</button>
     <button class="menu-item" id="colorSettingsBtn"><span class="mi-ic">🎨</span> Personnaliser les couleurs</button>
     <button class="menu-item" id="soundSettingsBtn"><span class="mi-ic">🔊</span> Personnaliser les sons</button>
     <button class="menu-item" id="voiceSettingsBtn"><span class="mi-ic">🗣️</span> Voix de lecture</button>
@@ -5324,6 +5403,7 @@ function isAudioLearning(){
   try{
     if(typeof peekPlayState !== 'undefined' && peekPlayState && peekPlayState.playing) return true;
     if(typeof radioState !== 'undefined' && radioState && radioState.playing) return true;
+    if(typeof audioLib !== 'undefined' && audioLib.el && !audioLib.el.paused) return true; // 🎵 Audiothèque
     if(window.speechSynthesis && window.speechSynthesis.speaking) return true;
   }catch(e){}
   return false;
@@ -12700,6 +12780,7 @@ function renderBlockSelect(){
         <div class="hero-sub">${motto}</div>
         <button class="restart-btn hero-cta" id="startNextBlockBtn"><span>${ctaLabel}</span>${ctaSub ? `<small>${ctaSub}</small>` : ''}</button>
         <div id="resumeSessionSlot"></div>
+        <div id="heroAudioSlot"></div>
       </div>
     </section>
 
@@ -12806,6 +12887,7 @@ function renderBlockSelect(){
     ${buildHomeSectionHtml('jeux', '🧩', 'Jeux & extras', `
       ${tile('jeuxMotsBtn', '🧩', 'Jeux de mots', 'Mots mêlés, missions…', '#84CC16', '#4D7C0F')}
       ${tile('radioBtn', '🎧', 'Radio', 'Écoute mains libres', '#4338CA', '#1E1B4B')}
+      ${tile('audioLibBtn', '🎵', 'Audiothèque', 'Tes MP3 en streaming', '#F43F5E', '#9D174D')}
     `)}
 
     <div class="lexicon-progress-card">
@@ -12836,6 +12918,9 @@ function renderBlockSelect(){
   `;
 
   document.getElementById('createCustomBlockBtn').addEventListener('click', () => renderCustomBlockBuilder());
+  // 🎵 lecteur de l'Audiothèque intégré à la carte d'accueil (différé : au tout premier affichage,
+  // le module Audiothèque, défini plus loin dans le script, n'est pas encore initialisé)
+  setTimeout(() => { try{ audioRenderHero(); }catch(e){} }, 0);
   const startNextBlockBtn = document.getElementById('startNextBlockBtn');
   if(startNextBlockBtn){
     startNextBlockBtn.addEventListener('click', () => {
@@ -12939,6 +13024,7 @@ function renderBlockSelect(){
   document.getElementById('redactionBtn').addEventListener('click', () => renderRedactionHub());
   document.getElementById('bescherelleBtn').addEventListener('click', () => renderBescherelleHub());
   document.getElementById('jeuxMotsBtn').addEventListener('click', () => renderJeuxMotsHome());
+  document.getElementById('audioLibBtn').addEventListener('click', () => renderAudioLibrary());
   const questsHead = document.getElementById('questsHead');
   const questsChevron = document.getElementById('questsChevron');
   if(questsChevron){ questsChevron.style.transform = questsCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)'; }
@@ -31955,6 +32041,7 @@ function renderColorSettings(){
 document.getElementById('colorSettingsBtn').addEventListener('click', () => renderColorSettings());
 document.getElementById('soundSettingsBtn').addEventListener('click', () => renderSoundSettings());
 document.getElementById('voiceSettingsBtn').addEventListener('click', () => { if(typeof closeMenu === 'function') closeMenu(); renderVoiceSettings(); });
+document.getElementById('audioLibMenuBtn').addEventListener('click', () => { if(typeof closeMenu === 'function') closeMenu(); renderAudioLibrary(); });
 document.getElementById('authAccountBtn').addEventListener('click', () => {
   const session = getAuthSession();
   renderAuthScreen(session ? 'login' : 'choice');
@@ -33935,6 +34022,444 @@ function advanceAfterAnswer(isCorrect, onNext, delayOk){
   if(reveal && reveal.classList) reveal.classList.add('show');
   fixPanelManualNext(reveal, onNext);
 }
+
+/* ============ 🎵 AUDIOTHÈQUE : tes MP3 en streaming depuis GitHub ============
+   Les fichiers audio sont déposés dans le dossier « audio/ » du dépôt GitHub de l'appli
+   (asahlali/quiz-lexique) et servis par GitHub Pages, qui permet le streaming (lecture pendant
+   le téléchargement, avance rapide). Chaque sous-dossier devient une liste de lecture :
+     audio/Leçons d'arabe/01 - Salutations.mp3   → liste « Leçons d'arabe »
+     audio/Podcast.mp3                            → liste « Divers »
+   Un fichier optionnel audio/playlist.json permet d'imposer titres et ordre (voir l'écran vide).
+   Lecture en arrière-plan + commandes sur l'écran verrouillé (Media Session), reprise là où
+   on s'est arrêté, vitesse réglable, temps d'écoute compté dans les objectifs du jour. */
+const AUDIO_SRC = { owner:'asahlali', repo:'quiz-lexique', branch:'main', folder:'audio', pages:'https://asahlali.github.io/quiz-lexique/' };
+const AUDIO_EXT = /\.(mp3|m4a|aac|ogg|oga|opus|wav|webm|flac)$/i;
+const AUDIO_CACHE_KEY = 'vocabVision.audioLibCache';
+const AUDIO_POS_KEY = 'lexiqueQuiz::audioLibPos';
+const AUDIO_LAST_KEY = 'vocabVision.audioLast';
+const audioLib = { el:null, data:null, pl:-1, tr:-1, error:'', loading:false, speed:1, loopOne:false, autoPaused:false, lastTick:0, pending:0, openPl:{} };
+
+function audioPretty(name){
+  const t = String(name).replace(/\.[^.\/]+$/, '').replace(/_+/g, ' ').replace(/\s+/g, ' ').trim();
+  return t ? t.charAt(0).toUpperCase() + t.slice(1) : name;
+}
+function audioUrl(file){
+  if(/^https?:\/\//i.test(file)) return file;
+  return AUDIO_SRC.pages + file.split('/').map(encodeURIComponent).join('/');
+}
+function audioFmt(sec){
+  if(!isFinite(sec) || sec < 0) sec = 0;
+  const h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60), s = Math.floor(sec % 60);
+  return (h ? h + ':' + String(m).padStart(2, '0') : m) + ':' + String(s).padStart(2, '0');
+}
+function audioLoadPos(){ try{ return JSON.parse(localStorage.getItem(nsKey(AUDIO_POS_KEY)) || '{}'); }catch(e){ return {}; } }
+function audioSavePos(map){ try{ localStorage.setItem(nsKey(AUDIO_POS_KEY), JSON.stringify(map)); }catch(e){} }
+function audioGroup(files){
+  const folder = AUDIO_SRC.folder + '/';
+  const groups = {};
+  files.forEach(f => {
+    const rel = f.path.slice(folder.length);
+    const parts = rel.split('/');
+    const key = parts.length > 1 ? parts[0] : '';
+    (groups[key] = groups[key] || []).push({ file:f.path, title:audioPretty(parts[parts.length - 1]), size:f.size || 0 });
+  });
+  const coll = new Intl.Collator('fr', { numeric:true, sensitivity:'base' });
+  return { playlists: Object.keys(groups).sort((a, b) => (a === '' ? -1 : b === '' ? 1 : coll.compare(a, b))).map(k => ({
+    key:k || '_divers', title:k ? audioPretty(k) : 'Divers', icon:k ? '🎧' : '🎵',
+    tracks:groups[k].sort((a, b) => coll.compare(a.file, b.file)),
+  })) };
+}
+function audioFromManifest(j){
+  const base = AUDIO_SRC.folder + '/';
+  const pls = Array.isArray(j) ? [{ title:'Ma liste', tracks:j }] : (j.playlists || []);
+  return { playlists: pls.map((p, i) => ({
+    key:'m' + i, title:p.title || 'Liste ' + (i + 1), icon:p.icon || '🎧',
+    tracks:(p.tracks || []).map(t => {
+      const file = typeof t === 'string' ? t : (t.file || t.url || '');
+      const full = /^https?:\/\//i.test(file) ? file : base + file.replace(/^\/+/, '');
+      return { file:full, title:(typeof t === 'object' && t.title) || audioPretty(file.split('/').pop()), size:0 };
+    }).filter(t => t.file),
+  })).filter(p => p.tracks.length) };
+}
+async function audioFetchLibrary(force){
+  let cache = null;
+  try{ cache = JSON.parse(localStorage.getItem(AUDIO_CACHE_KEY) || 'null'); }catch(e){}
+  if(!force && cache && Date.now() - cache.at < 10 * 60000) return cache.data;
+  try{
+    let data = null;
+    try{
+      const r = await fetch(AUDIO_SRC.pages + AUDIO_SRC.folder + '/playlist.json?t=' + Date.now());
+      if(r.ok){ data = audioFromManifest(await r.json()); }
+    }catch(e){}
+    if(!data || !data.playlists.length){
+      const r = await fetch(`https://api.github.com/repos/${AUDIO_SRC.owner}/${AUDIO_SRC.repo}/git/trees/${AUDIO_SRC.branch}?recursive=1`);
+      if(!r.ok) throw new Error(r.status === 403 ? 'Limite de GitHub atteinte (60 consultations/heure) : réessaie un peu plus tard.' : `GitHub a répondu ${r.status}.`);
+      const j = await r.json();
+      const files = (j.tree || []).filter(t => t.type === 'blob' && t.path.startsWith(AUDIO_SRC.folder + '/') && AUDIO_EXT.test(t.path));
+      data = audioGroup(files);
+    }
+    try{ localStorage.setItem(AUDIO_CACHE_KEY, JSON.stringify({ at:Date.now(), data })); }catch(e){}
+    audioLib.error = '';
+    return data;
+  }catch(e){
+    if(cache){ audioLib.error = '📴 Liste affichée depuis la mémoire (réseau indisponible).'; return cache.data; }
+    throw e;
+  }
+}
+function audioCurrent(){
+  const d = audioLib.data;
+  if(!d || audioLib.pl < 0) return null;
+  const p = d.playlists[audioLib.pl]; if(!p) return null;
+  return { p, t:p.tracks[audioLib.tr] };
+}
+function audioEnsureEl(){
+  if(audioLib.el) return audioLib.el;
+  const el = new Audio();
+  el.preload = 'metadata';
+  audioLib.el = el;
+  el.addEventListener('timeupdate', () => {
+    const now = Date.now();
+    if(!el.paused){
+      audioLib.pending += Math.min(2, (now - (audioLib.lastTick || now)) / 1000);
+      if(audioLib.pending >= 30) audioFlushTime();
+    }
+    audioLib.lastTick = now;
+    if(Math.floor(el.currentTime) % 5 === 0) audioRememberPos();
+    audioUpdateUI();
+  });
+  el.addEventListener('play', () => { audioLib.lastTick = Date.now(); audioUpdateUI(); });
+  el.addEventListener('pause', () => { audioFlushTime(); audioRememberPos(); audioUpdateUI(); });
+  el.addEventListener('loadedmetadata', () => audioUpdateUI());
+  el.addEventListener('ended', () => {
+    const c = audioCurrent();
+    if(c){ const map = audioLoadPos(); map[c.t.file] = { t:0, done:true }; audioSavePos(map); }
+    if(audioLib.loopOne){ el.currentTime = 0; el.play().catch(() => {}); return; }
+    audioNext(true);
+  });
+  el.addEventListener('error', () => { audioLib.error = "⚠️ Impossible de lire ce fichier (introuvable ou format non pris en charge). Si tu viens de l'ajouter, attends 1 à 2 minutes que GitHub Pages le publie."; audioUpdateUI(); });
+  el.addEventListener('waiting', () => audioUpdateUI());
+  el.addEventListener('playing', () => { audioLib.error = ''; audioUpdateUI(); });
+  return el;
+}
+function audioFlushTime(){
+  const sec = Math.round(audioLib.pending);
+  audioLib.pending = 0;
+  if(sec >= 1){ try{ recordDailyStats(sec, false, 0); }catch(e){} }
+}
+function audioRememberPos(){
+  const c = audioCurrent(); const el = audioLib.el;
+  if(!c || !el || !isFinite(el.duration)) return;
+  const map = audioLoadPos();
+  const prev = map[c.t.file] || {};
+  map[c.t.file] = { t:Math.floor(el.currentTime), done:prev.done || el.currentTime > el.duration - 3 };
+  audioSavePos(map);
+}
+function audioPlay(pl, tr){
+  const d = audioLib.data; if(!d || !d.playlists[pl] || !d.playlists[pl].tracks[tr]) return;
+  const el = audioEnsureEl();
+  if(audioLib.pl >= 0) audioRememberPos();
+  audioLib.pl = pl; audioLib.tr = tr; audioLib.error = ''; audioLib.autoPaused = false;
+  const t = d.playlists[pl].tracks[tr];
+  try{ localStorage.setItem(AUDIO_LAST_KEY, t.file); }catch(e){}
+  el.src = audioUrl(t.file);
+  el.playbackRate = audioLib.speed;
+  const saved = audioLoadPos()[t.file];
+  if(saved && saved.t > 5 && !saved.done){
+    el.addEventListener('loadedmetadata', function once(){ el.removeEventListener('loadedmetadata', once); if(saved.t < el.duration - 5) el.currentTime = saved.t; }, { once:true });
+  }
+  el.play().catch(() => {});
+  audioMediaSession();
+  audioUpdateUI(true);
+}
+function audioToggle(){
+  const el = audioLib.el; if(!el || !el.src) return;
+  if(el.paused){ audioLib.autoPaused = false; el.play().catch(() => {}); } else el.pause();
+}
+function audioNext(auto){
+  const d = audioLib.data; if(!d || audioLib.pl < 0) return;
+  const p = d.playlists[audioLib.pl];
+  if(audioLib.tr + 1 < p.tracks.length) audioPlay(audioLib.pl, audioLib.tr + 1);
+  else if(!auto) audioPlay(audioLib.pl, 0);
+  else audioUpdateUI();
+}
+function audioPrev(){
+  const el = audioLib.el; if(!el) return;
+  if(el.currentTime > 4 || audioLib.tr === 0){ el.currentTime = 0; return; }
+  audioPlay(audioLib.pl, audioLib.tr - 1);
+}
+function audioSkip(sec){ const el = audioLib.el; if(el && isFinite(el.duration)) el.currentTime = Math.max(0, Math.min(el.duration - 0.5, el.currentTime + sec)); }
+function audioStop(){ const el = audioLib.el; if(el){ el.pause(); el.removeAttribute('src'); el.load(); } audioLib.pl = -1; audioLib.tr = -1; audioUpdateUI(); }
+function audioMediaSession(){
+  if(!('mediaSession' in navigator)) return;
+  const c = audioCurrent(); if(!c) return;
+  try{
+    navigator.mediaSession.metadata = new MediaMetadata({ title:c.t.title, artist:'VocabVISION', album:c.p.title, artwork:[{ src:'icon-192.png', sizes:'192x192', type:'image/png' }] });
+    const h = { play:() => audioToggle(), pause:() => audioToggle(), previoustrack:() => audioPrev(), nexttrack:() => audioNext(), seekbackward:() => audioSkip(-10), seekforward:() => audioSkip(10), seekto:(e) => { if(audioLib.el && e.seekTime !== undefined) audioLib.el.currentTime = e.seekTime; } };
+    Object.keys(h).forEach(k => { try{ navigator.mediaSession.setActionHandler(k, h[k]); }catch(e){} });
+  }catch(e){}
+}
+
+/* ---------- Écran Audiothèque ---------- */
+function renderAudioLibrary(forceRefresh){
+  clearQuestionTimer();
+  document.body.classList.remove('quiz-active');
+  currentBlock = null;
+  isHomeScreen = false;
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromAudioBtn" style="cursor:pointer;">← Retour</button>`;
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('footerNote').textContent = '';
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="cat-tag">🎵 Audiothèque</div>
+    <div class="word-fr" style="font-size:clamp(22px,4.5vw,28px);">Tes audios en streaming</div>
+    <div class="word-def" style="margin-top:4px;" id="audioLibSub">Chargement de la liste…</div>
+    <div class="audio-now" id="audioNow"></div>
+    <div id="audioLibMsg"></div>
+    <div id="audioLibList" style="margin-top:14px;"></div>
+    <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:18px;">
+      <button class="mode-chip" id="audioRefreshBtn">🔄 Actualiser la liste</button>
+      <button class="mode-chip" id="audioHelpBtn">➕ Comment ajouter des MP3 ?</button>
+    </div>
+    <div id="audioHelp" style="display:none;"></div>
+  `;
+  document.getElementById('backFromAudioBtn').addEventListener('click', renderBlockSelect);
+  document.getElementById('audioRefreshBtn').addEventListener('click', () => renderAudioLibrary(true));
+  document.getElementById('audioHelpBtn').addEventListener('click', () => {
+    const h = document.getElementById('audioHelp');
+    h.style.display = h.style.display === 'none' ? 'block' : 'none';
+    h.innerHTML = audioHelpHtml();
+  });
+  audioUpdateUI(true);
+  audioLib.loading = true;
+  audioFetchLibrary(!!forceRefresh).then(data => {
+    audioLib.loading = false;
+    // garder la piste en cours si la liste a changé
+    const cur = audioCurrent();
+    audioLib.data = data;
+    if(cur){
+      audioLib.pl = data.playlists.findIndex(p => p.tracks.some(t => t.file === cur.t.file));
+      audioLib.tr = audioLib.pl >= 0 ? data.playlists[audioLib.pl].tracks.findIndex(t => t.file === cur.t.file) : -1;
+      if(audioLib.pl < 0){ audioLib.pl = -1; audioLib.tr = -1; }
+    }
+    audioRenderList();
+  }).catch(err => {
+    audioLib.loading = false;
+    const sub = document.getElementById('audioLibSub');
+    if(sub) sub.textContent = 'Liste indisponible';
+    const msg = document.getElementById('audioLibMsg');
+    if(msg) msg.innerHTML = `<div class="pass-banner ko" style="margin-top:12px;">${escapeHtml(err.message || 'Erreur réseau')}</div>`;
+  });
+}
+function audioHelpHtml(){
+  return `<div class="audio-help">
+    <b>Ajouter des audios (depuis ton téléphone ou ton ordinateur) :</b>
+    <ol>
+      <li>Ouvre <b>github.com/${AUDIO_SRC.owner}/${AUDIO_SRC.repo}</b>.</li>
+      <li>Pour créer une liste : <b>Add file → Create new file</b>, tape le nom <code>audio/Leçons d'arabe/.keep</code> puis <b>Commit changes</b> (ça crée les dossiers).</li>
+      <li>Ouvre ce dossier, puis <b>Add file → Upload files</b> et choisis tes MP3 (sur ordinateur tu peux aussi glisser tout un dossier).</li>
+      <li><b>Commit changes</b>, attends 1 à 2 minutes (publication GitHub Pages), puis touche <b>🔄 Actualiser la liste</b>.</li>
+    </ol>
+    <div>📁 <b>Un sous-dossier = une liste de lecture.</b> Les fichiers sont triés par nom : numérote-les (01, 02…). Formats : MP3, M4A, OGG, WAV. Limite GitHub : 100 Mo par fichier.</div>
+    <div style="margin-top:8px;">⚙️ Optionnel, pour choisir titres et ordre : un fichier <code>audio/playlist.json</code> :</div>
+    <pre>{ "playlists": [
+  { "title": "Leçons d'arabe", "icon": "🕌",
+    "tracks": [
+      { "title": "Leçon 1 · Salutations", "file": "arabe/lecon01.mp3" },
+      "arabe/lecon02.mp3"
+    ] }
+] }</pre>
+    <div>⚠️ Le dépôt est public : n'y mets pas d'audios dont tu n'as pas les droits de diffusion.</div>
+  </div>`;
+}
+function audioRenderList(){
+  const list = document.getElementById('audioLibList');
+  const sub = document.getElementById('audioLibSub');
+  if(!list) return;
+  const d = audioLib.data;
+  const nTracks = d ? d.playlists.reduce((n, p) => n + p.tracks.length, 0) : 0;
+  if(sub) sub.textContent = nTracks ? `${d.playlists.length} liste${d.playlists.length > 1 ? 's' : ''} · ${nTracks} audio${nTracks > 1 ? 's' : ''}` : 'Aucun audio pour le moment';
+  const msg = document.getElementById('audioLibMsg');
+  if(msg) msg.innerHTML = audioLib.error ? `<div class="def-text" style="margin-top:10px;">${escapeHtml(audioLib.error)}</div>` : '';
+  if(!nTracks){
+    list.innerHTML = `<div class="audio-empty">📭 Le dossier <code>${AUDIO_SRC.folder}/</code> du dépôt est vide.<br>Ajoute tes MP3 et ils apparaîtront ici automatiquement.</div>${audioHelpHtml()}`;
+    return;
+  }
+  const pos = audioLoadPos();
+  list.innerHTML = d.playlists.map((p, pi) => {
+    const open = audioLib.openPl[p.key] !== false;
+    const done = p.tracks.filter(t => pos[t.file] && pos[t.file].done).length;
+    return `<div class="audio-pl">
+      <button class="audio-pl-head" data-audio-pl="${pi}">
+        <span class="audio-pl-ic">${p.icon}</span>
+        <span class="audio-pl-t">${escapeHtml(p.title)}<small>${p.tracks.length} audio${p.tracks.length > 1 ? 's' : ''} · ✅ ${done}/${p.tracks.length} écoutés</small></span>
+        <span class="audio-pl-play" data-audio-playall="${pi}" title="Tout écouter">▶</span>
+        <span class="audio-pl-chev" style="transform:rotate(${open ? '0deg' : '-90deg'});">▾</span>
+      </button>
+      <div class="audio-tracks" style="display:${open ? 'block' : 'none'};">
+        ${p.tracks.map((t, ti) => {
+          const s = pos[t.file];
+          const isCur = audioLib.pl === pi && audioLib.tr === ti;
+          const badge = s && s.done ? '<span class="audio-badge ok">✓ écouté</span>' : (s && s.t > 5 ? `<span class="audio-badge">⏯ reprise ${audioFmt(s.t)}</span>` : '');
+          return `<button class="audio-track ${isCur ? 'cur' : ''}" data-audio-track="${pi}|${ti}">
+            <span class="audio-track-n">${isCur ? '<span class="audio-eq"><i></i><i></i><i></i></span>' : ti + 1}</span>
+            <span class="audio-track-t">${escapeHtml(t.title)}</span>
+            ${badge}${t.size ? `<span class="audio-size">${(t.size / 1048576).toFixed(1)} Mo</span>` : ''}
+          </button>`;
+        }).join('')}
+      </div>
+    </div>`;
+  }).join('');
+  list.querySelectorAll('[data-audio-pl]').forEach(b => b.addEventListener('click', (e) => {
+    if(e.target.closest('[data-audio-playall]')) return;
+    const p = d.playlists[+b.dataset.audioPl];
+    audioLib.openPl[p.key] = audioLib.openPl[p.key] === false;
+    audioRenderList();
+  }));
+  list.querySelectorAll('[data-audio-playall]').forEach(b => b.addEventListener('click', (e) => { e.stopPropagation(); audioPlay(+b.dataset.audioPlayall, 0); audioRenderList(); }));
+  list.querySelectorAll('[data-audio-track]').forEach(b => b.addEventListener('click', () => {
+    const [pi, ti] = b.dataset.audioTrack.split('|').map(Number);
+    if(audioLib.pl === pi && audioLib.tr === ti){ audioToggle(); } else { audioPlay(pi, ti); }
+    audioRenderList();
+  }));
+}
+function audioUpdateUI(rebuild){
+  const el = audioLib.el;
+  const c = audioCurrent();
+  // --- carte « en cours » de l'écran Audiothèque
+  const now = document.getElementById('audioNow');
+  if(now){
+    if(!c){ now.innerHTML = ''; now.style.display = 'none'; }
+    else {
+      now.style.display = 'block';
+      if(rebuild || !now.querySelector('#audioSeek')){
+        now.innerHTML = `
+          <div class="audio-now-top"><span class="audio-now-ic">${c.p.icon}</span><div style="min-width:0;flex:1;"><div class="audio-now-t" id="audioNowT"></div><div class="audio-now-p" id="audioNowP"></div></div></div>
+          <input type="range" id="audioSeek" min="0" max="1000" value="0" class="audio-seek">
+          <div class="audio-times"><span id="audioCurT">0:00</span><span id="audioDurT">0:00</span></div>
+          <div class="audio-ctrls">
+            <button class="audio-btn" id="audioPrevBtn" title="Précédent">⏮</button>
+            <button class="audio-btn" id="audioBackBtn" title="-10 s">↺10</button>
+            <button class="audio-btn main" id="audioPlayBtn" title="Lecture / pause">▶</button>
+            <button class="audio-btn" id="audioFwdBtn" title="+10 s">10↻</button>
+            <button class="audio-btn" id="audioNextBtn" title="Suivant">⏭</button>
+          </div>
+          <div class="audio-opts">
+            ${[0.75, 1, 1.25, 1.5].map(s => `<button class="mode-chip ${audioLib.speed === s ? 'active' : ''}" data-audio-speed="${s}">${s}×</button>`).join('')}
+            <button class="mode-chip ${audioLib.loopOne ? 'active' : ''}" id="audioLoopBtn">🔂 Répéter</button>
+          </div>`;
+        now.querySelector('#audioPlayBtn').addEventListener('click', audioToggle);
+        now.querySelector('#audioPrevBtn').addEventListener('click', () => { audioPrev(); audioRenderList(); });
+        now.querySelector('#audioNextBtn').addEventListener('click', () => { audioNext(); audioRenderList(); });
+        now.querySelector('#audioBackBtn').addEventListener('click', () => audioSkip(-10));
+        now.querySelector('#audioFwdBtn').addEventListener('click', () => audioSkip(10));
+        now.querySelector('#audioLoopBtn').addEventListener('click', () => { audioLib.loopOne = !audioLib.loopOne; audioUpdateUI(true); });
+        now.querySelectorAll('[data-audio-speed]').forEach(b => b.addEventListener('click', () => { audioLib.speed = +b.dataset.audioSpeed; if(audioLib.el) audioLib.el.playbackRate = audioLib.speed; audioUpdateUI(true); }));
+        const seek = now.querySelector('#audioSeek');
+        seek.addEventListener('input', () => { if(el && isFinite(el.duration)) el.currentTime = seek.value / 1000 * el.duration; });
+      }
+      const set = (id, v) => { const x = document.getElementById(id); if(x) x.textContent = v; };
+      set('audioNowT', c.t.title); set('audioNowP', c.p.title + (audioLib.error ? '' : (el && el.readyState < 3 && !el.paused ? ' · ⏳ chargement…' : '')));
+      set('audioPlayBtn', el && !el.paused ? '⏸' : '▶');
+      set('audioCurT', audioFmt(el ? el.currentTime : 0)); set('audioDurT', audioFmt(el ? el.duration : 0));
+      const seek = document.getElementById('audioSeek');
+      if(seek && el && isFinite(el.duration) && document.activeElement !== seek) seek.value = Math.round(el.currentTime / el.duration * 1000);
+      if(audioLib.error){ const m = document.getElementById('audioLibMsg'); if(m) m.innerHTML = `<div class="def-text" style="margin-top:10px;">${escapeHtml(audioLib.error)}</div>`; }
+    }
+  }
+  // --- lecteur intégré à la carte d'accueil (hero)
+  const ha = document.getElementById('heroAudio');
+  if(ha){
+    const playing = !!(el && !el.paused);
+    ha.classList.toggle('loaded', !!c);
+    ha.classList.toggle('playing', playing);
+    const setH = (id, v) => { const x = document.getElementById(id); if(x) x.textContent = v; };
+    setH('heroAudioPlay', playing ? '⏸' : '▶');
+    if(c){
+      setH('heroAudioT', c.t.title);
+      setH('heroAudioP', c.p.title + (audioLib.autoPaused ? ' · en pause' : (el && isFinite(el.duration) ? ' · ' + audioFmt(el.currentTime) + ' / ' + audioFmt(el.duration) : '')));
+    } else {
+      const d = audioLib.data;
+      const n = d ? d.playlists.reduce((k, p) => k + p.tracks.length, 0) : 0;
+      setH('heroAudioT', '🎵 Audiothèque');
+      setH('heroAudioP', n ? `${n} audio${n > 1 ? 's' : ''} · touche ▶ pour écouter` : 'Tes MP3 en streaming');
+    }
+    const hb = document.getElementById('heroAudioBar');
+    if(hb) hb.style.width = (c && el && isFinite(el.duration) ? el.currentTime / el.duration * 100 : 0) + '%';
+  }
+  // --- mini-lecteur flottant (ailleurs dans l'appli, ou quand le lecteur de l'accueil n'est plus visible)
+  let mini = document.getElementById('audioMini');
+  const onLibScreen = !!document.getElementById('audioNow');
+  let heroVisible = false;
+  if(ha){ const r = ha.getBoundingClientRect(); heroVisible = r.bottom > 60 && r.top < window.innerHeight - 40; }
+  if(!c || onLibScreen || heroVisible){ if(mini) mini.style.display = 'none'; return; }
+  if(!mini){
+    mini = document.createElement('div');
+    mini.id = 'audioMini';
+    mini.innerHTML = `<button class="audio-mini-play" id="audioMiniPlay">▶</button><div class="audio-mini-txt" id="audioMiniTxt"></div><button class="audio-mini-x" id="audioMiniOpen" title="Ouvrir">🎵</button><button class="audio-mini-x" id="audioMiniClose" title="Arrêter">✕</button><div class="audio-mini-bar"><span id="audioMiniBar"></span></div>`;
+    document.body.appendChild(mini);
+    mini.querySelector('#audioMiniPlay').addEventListener('click', audioToggle);
+    mini.querySelector('#audioMiniOpen').addEventListener('click', () => renderAudioLibrary());
+    mini.querySelector('#audioMiniTxt').addEventListener('click', () => renderAudioLibrary());
+    mini.querySelector('#audioMiniClose').addEventListener('click', audioStop);
+  }
+  mini.style.display = 'flex';
+  mini.querySelector('#audioMiniPlay').textContent = el && !el.paused ? '⏸' : '▶';
+  mini.querySelector('#audioMiniTxt').innerHTML = `<b>${escapeHtml(c.t.title)}</b><small>${escapeHtml(c.p.title)}${audioLib.autoPaused ? ' · en pause pendant l\'exercice' : ''}</small>`;
+  const bar = mini.querySelector('#audioMiniBar');
+  if(bar && el && isFinite(el.duration)) bar.style.width = (el.currentTime / el.duration * 100) + '%';
+}
+// Pendant un exercice (voix de synthèse, micro), l'audio se met en pause tout seul ; on le relance d'un geste.
+new MutationObserver(() => {
+  const el = audioLib.el;
+  if(el && !el.paused && document.body.classList.contains('quiz-active')){ audioLib.autoPaused = true; el.pause(); }
+  audioUpdateUI();
+}).observe(document.body, { attributes:true, attributeFilter:['class'] });
+new MutationObserver(() => audioUpdateUI()).observe(document.getElementById('quizCard'), { childList:true });
+window.addEventListener('pagehide', () => { audioFlushTime(); audioRememberPos(); });
+/* 🎵 Lecteur compact dans la carte d'accueil : ▶ reprend la dernière écoute (ou le 1er audio),
+   un appui sur le titre ou « › » ouvre l'Audiothèque complète (listes, vitesse, répétition…). */
+function audioRenderHero(){
+  const slot = document.getElementById('heroAudioSlot');
+  if(!slot) return;
+  if(!audioLib.data){ try{ const cache = JSON.parse(localStorage.getItem(AUDIO_CACHE_KEY) || 'null'); if(cache && cache.data) audioLib.data = cache.data; }catch(e){} }
+  slot.innerHTML = `
+    <div class="hero-audio" id="heroAudio">
+      <button class="ha-play" id="heroAudioPlay" aria-label="Lecture / pause">▶</button>
+      <div class="ha-txt" id="heroAudioOpen" role="button" tabindex="0">
+        <b id="heroAudioT">🎵 Audiothèque</b>
+        <small id="heroAudioP">Tes MP3 en streaming</small>
+        <span class="ha-bar"><span id="heroAudioBar"></span></span>
+      </div>
+      <span class="ha-eq"><i></i><i></i><i></i></span>
+      <button class="ha-btn ha-nav" id="heroAudioPrev" aria-label="Précédent">⏮</button>
+      <button class="ha-btn ha-nav" id="heroAudioNext" aria-label="Suivant">⏭</button>
+      <button class="ha-btn ha-more" id="heroAudioMore" aria-label="Ouvrir l'Audiothèque">›</button>
+    </div>`;
+  document.getElementById('heroAudioPlay').addEventListener('click', audioHeroPlay);
+  document.getElementById('heroAudioOpen').addEventListener('click', () => renderAudioLibrary());
+  document.getElementById('heroAudioMore').addEventListener('click', () => renderAudioLibrary());
+  document.getElementById('heroAudioPrev').addEventListener('click', () => audioPrev());
+  document.getElementById('heroAudioNext').addEventListener('click', () => audioNext());
+  audioUpdateUI();
+  if(!audioLib.data){ audioFetchLibrary(false).then(d => { if(!audioLib.data) audioLib.data = d; audioUpdateUI(); }).catch(() => {}); }
+}
+async function audioHeroPlay(){
+  if(audioCurrent()){ audioToggle(); return; }
+  let d = audioLib.data;
+  if(!d){
+    const t = document.getElementById('heroAudioP'); if(t) t.textContent = '⏳ Chargement de la liste…';
+    try{ d = audioLib.data = await audioFetchLibrary(false); }catch(e){ renderAudioLibrary(); return; }
+  }
+  const total = d.playlists.reduce((k, p) => k + p.tracks.length, 0);
+  if(!total){ renderAudioLibrary(); return; } // bibliothèque vide : on montre comment ajouter des MP3
+  let last = ''; try{ last = localStorage.getItem(AUDIO_LAST_KEY) || ''; }catch(e){}
+  let pl = 0, tr = 0;
+  if(last){ const i = d.playlists.findIndex(p => p.tracks.some(t => t.file === last)); if(i >= 0){ pl = i; tr = d.playlists[i].tracks.findIndex(t => t.file === last); } }
+  audioPlay(pl, tr);
+}
+let audioScrollRaf = 0;
+window.addEventListener('scroll', () => { if(audioScrollRaf) return; audioScrollRaf = requestAnimationFrame(() => { audioScrollRaf = 0; if(audioLib.el && audioLib.el.src) audioUpdateUI(); }); }, { passive:true });
+
 
 /* ============ ▶ « Go » : ouvre directement le module qui fait avancer un défi du jour ============ */
 function startNextBlockInMode(mode){
