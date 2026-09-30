@@ -2092,6 +2092,96 @@
   .ha-eq i{ width:3px; background:#fff; border-radius:2px; animation:audioEq .8s ease-in-out infinite; }
   .ha-eq i:nth-child(2){ animation-delay:.2s; } .ha-eq i:nth-child(3){ animation-delay:.4s; }
   @media (max-width:380px){ .hero-audio .ha-nav{ display:none !important; } }
+
+  /* 🗂️ Gérer l'Audiothèque (envoi vers GitHub, dossiers) */
+  .audio-manage-btn{ display:inline-flex; align-items:center; gap:8px; margin-top:12px; padding:11px 18px; border:none; border-radius:999px; cursor:pointer;
+    font-family:'Nunito','Inter',sans-serif; font-weight:900; font-size:14.5px; color:#fff; background:linear-gradient(135deg,#F43F5E,#6D28D9); box-shadow:0 4px 0 #4C1D95; transition:transform .12s; }
+  .audio-manage-btn:active{ transform:translateY(3px); box-shadow:0 1px 0 #4C1D95; }
+  .am-connect{ text-align:left; background:var(--surface-sunken); border:2px solid var(--border); border-radius:20px; padding:16px; font-size:14px; line-height:1.55; color:var(--text); }
+  .am-connect ol{ padding-left:20px; margin:8px 0 12px; }
+  .am-connect li{ margin:4px 0; }
+  .am-connect a{ color:#BE185D; font-weight:800; }
+  .am-connect code, .am-status code, .am-safe code{ background:var(--surface); border:1px solid var(--border); border-radius:7px; padding:1px 6px; font-size:12px; }
+  .am-h{ font-weight:900; font-size:15.5px; }
+  .am-h small{ font-weight:700; color:var(--text-dim); font-size:12.5px; }
+  .am-in{ width:100%; box-sizing:border-box; padding:12px 14px; border-radius:14px; border:2px solid var(--border-strong); background:var(--surface); color:var(--text);
+    font-family:'Nunito','Inter',sans-serif; font-size:15px; font-weight:700; outline:none; }
+  .am-in:focus{ border-color:#F43F5E; box-shadow:0 0 0 4px rgba(244,63,94,0.15); }
+  .am-remember{ display:flex; align-items:center; gap:8px; margin-top:10px; font-weight:800; font-size:13.5px; cursor:pointer; }
+  .am-remember input{ width:18px; height:18px; accent-color:#F43F5E; }
+  .am-safe{ margin-top:12px; font-size:12.5px; color:var(--text-dim); font-weight:700; }
+  .am-top{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; font-size:13px; font-weight:700; color:var(--text-dim); text-align:left; }
+  .am-link{ border:none; background:none; color:#BE185D; font-weight:900; font-size:13px; cursor:pointer; text-decoration:underline; font-family:inherit; padding:4px; }
+  .am-crumbs{ display:flex; align-items:center; flex-wrap:wrap; gap:4px; margin:12px 0 10px; padding:9px 12px; border-radius:14px; background:var(--surface-sunken); font-size:14px; text-align:left; }
+  .am-crumb{ border:none; background:none; cursor:pointer; color:#6D28D9; font-weight:900; font-size:14px; font-family:inherit; padding:2px 4px; border-radius:8px; }
+  .am-crumb:hover{ background:rgba(109,40,217,0.1); }
+  .am-sep{ color:var(--text-faint); font-weight:900; }
+  .am-actions{ display:flex; flex-wrap:wrap; gap:8px; }
+  .am-act{ flex:1 1 150px; padding:12px 14px; border-radius:16px; border:2px solid var(--border); background:var(--surface); color:var(--text); cursor:pointer;
+    font-family:'Nunito','Inter',sans-serif; font-weight:900; font-size:14px; box-shadow:0 3px 0 var(--border); transition:transform .12s; }
+  .am-act:active{ transform:translateY(2px); box-shadow:0 1px 0 var(--border); }
+  .am-act.primary{ border:none; color:#fff; background:linear-gradient(135deg,#F43F5E,#6D28D9); box-shadow:0 4px 0 #4C1D95; }
+  .am-file{ position:absolute; width:1px; height:1px; opacity:0; pointer-events:none; }
+  .am-drop{ margin-top:10px; padding:16px; border-radius:18px; border:2.5px dashed var(--border-strong); color:var(--text-dim); font-weight:800; font-size:13.5px; transition:all .15s; }
+  .am-drop.over{ border-color:#F43F5E; background:rgba(244,63,94,0.08); color:#BE185D; transform:scale(1.01); }
+  .am-status{ margin-top:12px; padding:11px 14px; border-radius:14px; font-weight:800; font-size:13.5px; text-align:left; line-height:1.45; }
+  .am-status.ok{ background:rgba(34,197,94,0.13); color:#15803D; }
+  .am-status.ko{ background:rgba(244,63,94,0.12); color:#BE123C; }
+  .am-status.warn{ background:rgba(245,158,11,0.14); color:#B45309; }
+  .am-status.busy{ background:rgba(109,40,217,0.1); color:#6D28D9; display:flex; align-items:center; gap:10px; }
+  .am-spin{ width:16px; height:16px; flex:none; border-radius:50%; border:3px solid rgba(109,40,217,0.25); border-top-color:#6D28D9; animation:amSpin .8s linear infinite; }
+  @keyframes amSpin{ to{ transform:rotate(360deg); } }
+  .am-list{ margin-top:12px; display:flex; flex-direction:column; gap:6px; }
+  .am-row{ display:flex; align-items:center; gap:10px; padding:10px 8px 10px 12px; border-radius:16px; background:var(--surface-sunken); border:2px solid var(--border); cursor:pointer; text-align:left; transition:transform .12s, border-color .12s; }
+  .am-row:hover{ border-color:var(--border-strong); }
+  .am-row:active{ transform:scale(.99); }
+  .am-row.folder .am-ic{ background:linear-gradient(135deg,#FBBF24,#F97316); }
+  .am-ic{ width:38px; height:38px; flex:none; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:19px; background:linear-gradient(135deg,rgba(244,63,94,0.18),rgba(109,40,217,0.18)); }
+  .am-name{ flex:1; min-width:0; display:flex; flex-direction:column; font-weight:800; font-size:14.5px; color:var(--text); word-break:break-word; }
+  .am-name small{ font-weight:700; font-size:12px; color:var(--text-dim); }
+  .am-more{ width:38px; height:38px; flex:none; border:none; border-radius:50%; background:var(--surface); color:var(--text); font-size:18px; font-weight:900; cursor:pointer; }
+  .am-quota{ margin-top:14px; font-size:12.5px; font-weight:700; color:var(--text-dim); text-align:left; }
+  .am-qbar{ height:6px; border-radius:999px; background:var(--surface-sunken); margin-top:6px; overflow:hidden; }
+  .am-qbar span{ display:block; height:100%; border-radius:999px; background:linear-gradient(90deg,#22C55E,#16A34A); }
+  .am-quota.hot .am-qbar span{ background:linear-gradient(90deg,#F59E0B,#EF4444); }
+  .am-queue{ margin-top:12px; padding:14px; border-radius:20px; background:linear-gradient(135deg,rgba(244,63,94,0.08),rgba(109,40,217,0.08)); border:2px solid rgba(244,63,94,0.3); text-align:left; }
+  .am-q{ display:flex; align-items:center; gap:10px; padding:8px 4px; border-bottom:1px dashed var(--border); }
+  .am-q:last-of-type{ border-bottom:none; }
+  .am-q-ic{ width:24px; text-align:center; flex:none; }
+  .am-q-t{ flex:1; min-width:0; display:flex; flex-direction:column; font-weight:800; font-size:13.5px; color:var(--text); word-break:break-word; }
+  .am-q-t small{ font-weight:700; font-size:11.5px; color:var(--text-dim); }
+  .am-q.error .am-q-t small, .am-q.toobig .am-q-t small{ color:#BE123C; }
+  .am-q-bar{ display:block; height:5px; border-radius:999px; background:rgba(109,40,217,0.15); margin-top:5px; overflow:hidden; }
+  .am-q-bar span{ display:block; height:100%; background:linear-gradient(90deg,#F43F5E,#6D28D9); border-radius:999px; transition:width .2s; }
+  .am-q-x{ width:30px; height:30px; flex:none; border:none; border-radius:50%; background:var(--surface); color:var(--text-dim); cursor:pointer; font-weight:900; }
+  .am-q-total{ height:8px; border-radius:999px; background:rgba(109,40,217,0.15); margin-top:10px; overflow:hidden; }
+  .am-q-total span{ display:block; height:100%; background:linear-gradient(90deg,#F43F5E,#6D28D9); border-radius:999px; transition:width .25s; }
+  .am-q-btns{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:12px; }
+  .am-q-btns .restart-btn{ flex:1 1 220px; margin:0; }
+  .am-tip{ margin-top:8px; font-size:12.5px; font-weight:700; color:#B45309; }
+  .am-dlg-ov{ position:fixed; inset:0; z-index:200; background:rgba(15,10,40,0.45); -webkit-backdrop-filter:blur(3px); backdrop-filter:blur(3px);
+    display:flex; align-items:flex-end; justify-content:center; padding:16px; opacity:0; transition:opacity .18s; }
+  .am-dlg-ov.show{ opacity:1; }
+  @media (min-width:640px){ .am-dlg-ov{ align-items:center; } }
+  .am-dlg{ width:min(100%,420px); background:var(--surface); color:var(--text); border-radius:24px; padding:18px; box-shadow:0 24px 60px -20px rgba(0,0,0,0.5);
+    transform:translateY(20px); transition:transform .22s cubic-bezier(.16,1,.3,1); font-family:'Nunito','Inter',sans-serif; }
+  .am-dlg-ov.show .am-dlg{ transform:none; }
+  .am-dlg-t{ font-weight:900; font-size:17px; margin-bottom:8px; word-break:break-word; }
+  .am-dlg-x{ font-size:14px; font-weight:700; color:var(--text-dim); margin-bottom:12px; line-height:1.5; }
+  .am-dlg .am-in{ margin-bottom:12px; }
+  .am-dlg-b{ display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+  .am-dlg-b.stack{ flex-direction:column; }
+  .am-dlg-btn{ flex:1 1 auto; padding:12px 16px; border-radius:14px; border:none; cursor:pointer; font-family:inherit; font-weight:900; font-size:14.5px; color:#fff;
+    background:linear-gradient(135deg,#F43F5E,#6D28D9); box-shadow:0 3px 0 #4C1D95; }
+  .am-dlg-b.stack .am-dlg-btn{ text-align:left; background:var(--surface-sunken); color:var(--text); box-shadow:none; border:2px solid var(--border); }
+  .am-dlg-btn.danger, .am-dlg-b.stack .am-dlg-btn.danger{ background:#FEE2E2; color:#BE123C; box-shadow:none; border:2px solid #FECACA; }
+  .am-dlg-btn.ghost, .am-dlg-b.stack .am-dlg-btn.ghost{ background:none; color:var(--text-dim); box-shadow:none; border:none; text-align:center; }
+  [data-theme="dark"] .am-dlg-btn.danger, [data-theme="dark"] .am-dlg-b.stack .am-dlg-btn.danger{ background:rgba(244,63,94,0.16); color:#FDA4AF; border-color:rgba(244,63,94,0.45); }
+  [data-theme="dark"] .am-link, [data-theme="dark"] .am-connect a{ color:#F9A8D4; }
+  [data-theme="dark"] .am-crumb{ color:#C4B5FD; }
+  [data-theme="dark"] .am-status.ok{ color:#86EFAC; } [data-theme="dark"] .am-status.ko{ color:#FDA4AF; }
+  [data-theme="dark"] .am-status.warn, [data-theme="dark"] .am-tip{ color:#FCD34D; } [data-theme="dark"] .am-status.busy{ color:#C4B5FD; }
+  [data-theme="dark"] .am-q.error .am-q-t small, [data-theme="dark"] .am-q.toobig .am-q-t small{ color:#FDA4AF; }
   @media (prefers-reduced-motion: reduce){ body::before, .tile, .home-stats .stat-box, .hh-deco, .hero-cta{ animation:none !important; } }
 </style>
 </head>
@@ -34081,7 +34171,7 @@ function audioFromManifest(j){
     }).filter(t => t.file),
   })).filter(p => p.tracks.length) };
 }
-async function audioFetchLibrary(force){
+async function audioFetchLibrary(force, treeRef){
   let cache = null;
   try{ cache = JSON.parse(localStorage.getItem(AUDIO_CACHE_KEY) || 'null'); }catch(e){}
   if(!force && cache && Date.now() - cache.at < 10 * 60000) return cache.data;
@@ -34092,7 +34182,11 @@ async function audioFetchLibrary(force){
       if(r.ok){ data = audioFromManifest(await r.json()); }
     }catch(e){}
     if(!data || !data.playlists.length){
-      const r = await fetch(`https://api.github.com/repos/${AUDIO_SRC.owner}/${AUDIO_SRC.repo}/git/trees/${AUDIO_SRC.branch}?recursive=1`);
+      const url = `https://api.github.com/repos/${AUDIO_SRC.owner}/${AUDIO_SRC.repo}/git/trees/${treeRef || AUDIO_SRC.branch}?recursive=1`;
+      // connecté (jeton de « Gérer l'Audiothèque ») : liste toujours fraîche et 5000 consultations/heure au lieu de 60
+      const tok = (typeof ghTokenGet === 'function') ? ghTokenGet() : '';
+      let r = await fetch(url, tok ? { cache:'no-store', headers:{ 'Accept':'application/vnd.github+json', 'Authorization':'Bearer ' + tok } } : (force ? { cache:'no-store' } : undefined));
+      if(tok && r.status === 401) r = await fetch(url, { cache:'no-store' }); // jeton expiré : on lit quand même la liste publique
       if(!r.ok) throw new Error(r.status === 403 ? 'Limite de GitHub atteinte (60 consultations/heure) : réessaie un peu plus tard.' : `GitHub a répondu ${r.status}.`);
       const j = await r.json();
       const files = (j.tree || []).filter(t => t.type === 'blob' && t.path.startsWith(AUDIO_SRC.folder + '/') && AUDIO_EXT.test(t.path));
@@ -34136,7 +34230,17 @@ function audioEnsureEl(){
     if(audioLib.loopOne){ el.currentTime = 0; el.play().catch(() => {}); return; }
     audioNext(true);
   });
-  el.addEventListener('error', () => { audioLib.error = "⚠️ Impossible de lire ce fichier (introuvable ou format non pris en charge). Si tu viens de l'ajouter, attends 1 à 2 minutes que GitHub Pages le publie."; audioUpdateUI(); });
+  el.addEventListener('error', () => {
+    // fichier tout juste envoyé : GitHub Pages ne l'a pas encore publié → lecture directe depuis le dépôt en attendant
+    const c = audioCurrent();
+    if(c && !/^https?:\/\//i.test(c.t.file) && audioLib.rawTry !== c.t.file && String(el.src).indexOf(AUDIO_SRC.pages) === 0){
+      audioLib.rawTry = c.t.file;
+      el.src = `https://raw.githubusercontent.com/${AUDIO_SRC.owner}/${AUDIO_SRC.repo}/${AUDIO_SRC.branch}/` + c.t.file.split('/').map(encodeURIComponent).join('/');
+      el.playbackRate = audioLib.speed;
+      el.play().catch(() => {});
+      return;
+    }
+    audioLib.error = "⚠️ Impossible de lire ce fichier (introuvable ou format non pris en charge). Si tu viens de l'ajouter, attends 1 à 2 minutes que GitHub Pages le publie."; audioUpdateUI(); });
   el.addEventListener('waiting', () => audioUpdateUI());
   el.addEventListener('playing', () => { audioLib.error = ''; audioUpdateUI(); });
   return el;
@@ -34158,7 +34262,7 @@ function audioPlay(pl, tr){
   const d = audioLib.data; if(!d || !d.playlists[pl] || !d.playlists[pl].tracks[tr]) return;
   const el = audioEnsureEl();
   if(audioLib.pl >= 0) audioRememberPos();
-  audioLib.pl = pl; audioLib.tr = tr; audioLib.error = ''; audioLib.autoPaused = false;
+  audioLib.pl = pl; audioLib.tr = tr; audioLib.error = ''; audioLib.autoPaused = false; audioLib.rawTry = '';
   const t = d.playlists[pl].tracks[tr];
   try{ localStorage.setItem(AUDIO_LAST_KEY, t.file); }catch(e){}
   el.src = audioUrl(t.file);
@@ -34213,17 +34317,19 @@ function renderAudioLibrary(forceRefresh){
     <div class="cat-tag">🎵 Audiothèque</div>
     <div class="word-fr" style="font-size:clamp(22px,4.5vw,28px);">Tes audios en streaming</div>
     <div class="word-def" style="margin-top:4px;" id="audioLibSub">Chargement de la liste…</div>
+    <button class="audio-manage-btn" id="audioManageBtn">⬆️ Ajouter · 🗂️ Gérer mes audios</button>
     <div class="audio-now" id="audioNow"></div>
     <div id="audioLibMsg"></div>
     <div id="audioLibList" style="margin-top:14px;"></div>
     <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:18px;">
       <button class="mode-chip" id="audioRefreshBtn">🔄 Actualiser la liste</button>
-      <button class="mode-chip" id="audioHelpBtn">➕ Comment ajouter des MP3 ?</button>
+      <button class="mode-chip" id="audioHelpBtn">❔ Autres façons d'ajouter des MP3</button>
     </div>
     <div id="audioHelp" style="display:none;"></div>
   `;
   document.getElementById('backFromAudioBtn').addEventListener('click', renderBlockSelect);
   document.getElementById('audioRefreshBtn').addEventListener('click', () => renderAudioLibrary(true));
+  document.getElementById('audioManageBtn').addEventListener('click', () => renderAudioManager());
   document.getElementById('audioHelpBtn').addEventListener('click', () => {
     const h = document.getElementById('audioHelp');
     h.style.display = h.style.display === 'none' ? 'block' : 'none';
@@ -34252,14 +34358,15 @@ function renderAudioLibrary(forceRefresh){
 }
 function audioHelpHtml(){
   return `<div class="audio-help">
-    <b>Ajouter des audios (depuis ton téléphone ou ton ordinateur) :</b>
+    <div style="margin-bottom:8px;">⭐ <b>Le plus simple :</b> le bouton <b>⬆️ Ajouter · 🗂️ Gérer mes audios</b> ci-dessus envoie tes MP3 directement depuis l'appli (jusqu'à 95 Mo par fichier) et permet de créer, renommer, déplacer et supprimer dossiers et fichiers.</div>
+    <b>Autre possibilité, depuis le site github.com (25 Mo max par fichier) :</b>
     <ol>
       <li>Ouvre <b>github.com/${AUDIO_SRC.owner}/${AUDIO_SRC.repo}</b>.</li>
       <li>Pour créer une liste : <b>Add file → Create new file</b>, tape le nom <code>audio/Leçons d'arabe/.keep</code> puis <b>Commit changes</b> (ça crée les dossiers).</li>
       <li>Ouvre ce dossier, puis <b>Add file → Upload files</b> et choisis tes MP3 (sur ordinateur tu peux aussi glisser tout un dossier).</li>
       <li><b>Commit changes</b>, attends 1 à 2 minutes (publication GitHub Pages), puis touche <b>🔄 Actualiser la liste</b>.</li>
     </ol>
-    <div>📁 <b>Un sous-dossier = une liste de lecture.</b> Les fichiers sont triés par nom : numérote-les (01, 02…). Formats : MP3, M4A, OGG, WAV. Limite GitHub : 100 Mo par fichier.</div>
+    <div>📁 <b>Un sous-dossier = une liste de lecture.</b> Les fichiers sont triés par nom : numérote-les (01, 02…). Formats : MP3, M4A, OGG, WAV. Limites : 25 Mo par fichier sur github.com, 95 Mo via l'appli.</div>
     <div style="margin-top:8px;">⚙️ Optionnel, pour choisir titres et ordre : un fichier <code>audio/playlist.json</code> :</div>
     <pre>{ "playlists": [
   { "title": "Leçons d'arabe", "icon": "🕌",
@@ -34281,7 +34388,8 @@ function audioRenderList(){
   const msg = document.getElementById('audioLibMsg');
   if(msg) msg.innerHTML = audioLib.error ? `<div class="def-text" style="margin-top:10px;">${escapeHtml(audioLib.error)}</div>` : '';
   if(!nTracks){
-    list.innerHTML = `<div class="audio-empty">📭 Le dossier <code>${AUDIO_SRC.folder}/</code> du dépôt est vide.<br>Ajoute tes MP3 et ils apparaîtront ici automatiquement.</div>${audioHelpHtml()}`;
+    list.innerHTML = `<div class="audio-empty">📭 Ton Audiothèque est vide.<br>Envoie tes MP3 directement depuis l'appli :<br><button class="audio-manage-btn" id="audioManageBtn2">⬆️ Ajouter mes premiers audios</button></div>`;
+    list.querySelector('#audioManageBtn2').addEventListener('click', () => renderAudioManager());
     return;
   }
   const pos = audioLoadPos();
@@ -34460,6 +34568,618 @@ async function audioHeroPlay(){
 let audioScrollRaf = 0;
 window.addEventListener('scroll', () => { if(audioScrollRaf) return; audioScrollRaf = requestAnimationFrame(() => { audioScrollRaf = 0; if(audioLib.el && audioLib.el.src) audioUpdateUI(); }); }, { passive:true });
 
+
+/* ============ 🗂️ GÉRER L'AUDIOTHÈQUE depuis l'appli : envoyer, créer des dossiers, renommer, déplacer, supprimer ============
+   L'appli écrit directement dans le dossier « audio/ » du dépôt GitHub avec un jeton d'accès personnel
+   (« fine-grained token ») limité à CE dépôt et à la seule permission « Contents : Read and write ».
+   • Le jeton reste sur cet appareil : sa clé ne commence pas par « lexiqueQuiz:: », il n'est donc jamais
+     envoyé dans la synchronisation cloud.
+   • Chaque action = UN seul commit (API Git Data : blobs → tree → commit → ref), donc une seule publication
+     GitHub Pages même pour 30 fichiers envoyés d'un coup.
+   • Toutes les écritures sont verrouillées sur « audio/… » : le reste du dépôt (index.html…) n'est jamais touché.
+   • Limite : 95 Mo par fichier (contre 25 Mo en passant par github.com). */
+const GH_TOKEN_KEY = 'vocabVision.ghToken';
+const GH_REPO_API = `https://api.github.com/repos/${AUDIO_SRC.owner}/${AUDIO_SRC.repo}`;
+const audioAdmin = {
+  token:'', path:AUDIO_SRC.folder, entries:null, loading:false, busy:false, busyLabel:'', error:'', notice:'',
+  queue:[], dirty:false, hasManifest:false,
+  maxBytes:95 * 1048576, warnBytes:40 * 1048576, pagesLimit:1024 * 1048576,
+};
+function ghTokenGet(){
+  try{ return sessionStorage.getItem(GH_TOKEN_KEY) || localStorage.getItem(GH_TOKEN_KEY) || ''; }catch(e){ return ''; }
+}
+function ghTokenSet(tok, remember){
+  try{ localStorage.removeItem(GH_TOKEN_KEY); sessionStorage.removeItem(GH_TOKEN_KEY); }catch(e){}
+  if(!tok) return;
+  try{ (remember ? localStorage : sessionStorage).setItem(GH_TOKEN_KEY, tok); }catch(e){}
+}
+function ghErr(status, j){
+  const m = (j && j.message) || '';
+  let msg;
+  if(status === 401) msg = '🔑 Jeton refusé (invalide, expiré ou révoqué). Crée un nouveau jeton puis reconnecte-toi.';
+  else if(status === 403 && /rate limit/i.test(m)) msg = '⏳ Limite de GitHub atteinte : réessaie dans quelques minutes.';
+  else if(status === 403) msg = `🔒 Ce jeton n'a pas le droit d'écrire dans ${AUDIO_SRC.repo}. Sur GitHub, donne-lui « Contents : Read and write » pour ce dépôt.`;
+  else if(status === 404) msg = `🔍 Le jeton n'a pas accès au dépôt ${AUDIO_SRC.owner}/${AUDIO_SRC.repo} : choisis-le dans « Repository access ».`;
+  else if(status === 413 || status === 502 || status === 504) msg = "📦 GitHub n'a pas accepté ce fichier (trop lourd ou envoi trop long). Compresse-le (voix : MP3 mono 64 kbps) ou découpe-le, puis réessaie.";
+  else if(status === 0) msg = '📴 Envoi interrompu (connexion coupée ou fichier trop lourd). Réessaie ; si ça recommence, compresse le fichier.';
+  else msg = `GitHub a répondu ${status}${m ? ' : ' + m : ''}.`;
+  const e = new Error(msg); e.status = status; e.ghMessage = m;
+  return e;
+}
+async function ghReq(method, path, body){
+  let r;
+  try{
+    r = await fetch(GH_REPO_API + path, {
+      method, cache:'no-store',
+      headers:Object.assign({ 'Accept':'application/vnd.github+json', 'Authorization':'Bearer ' + audioAdmin.token }, body ? { 'Content-Type':'application/json' } : {}),
+      body:body ? JSON.stringify(body) : undefined,
+    });
+  }catch(e){ throw new Error('📴 Impossible de joindre GitHub : vérifie ta connexion.'); }
+  let j = null; try{ j = await r.json(); }catch(e){}
+  if(!r.ok) throw ghErr(r.status, j);
+  return j;
+}
+/* Lecture du fichier en morceaux → base64 sans créer une énorme chaîne d'un seul bloc (ménage la mémoire du téléphone). */
+async function ghFileToB64Parts(file){
+  const CH = 3 * 1024 * 1024; // multiple de 3 : chaque morceau s'encode sans « = » intermédiaire
+  const parts = [];
+  for(let o = 0; o < file.size; o += CH){
+    const buf = new Uint8Array(await file.slice(o, o + CH).arrayBuffer());
+    let s = '';
+    for(let i = 0; i < buf.length; i += 0x8000) s += String.fromCharCode.apply(null, buf.subarray(i, i + 0x8000));
+    parts.push(btoa(s));
+  }
+  return parts;
+}
+function ghUploadBlob(file, onPct){
+  return ghFileToB64Parts(file).then(parts => new Promise((resolve, reject) => {
+    const body = new Blob(['{"encoding":"base64","content":"'].concat(parts, ['"}']), { type:'application/json' });
+    const x = new XMLHttpRequest();
+    x.open('POST', GH_REPO_API + '/git/blobs');
+    x.setRequestHeader('Accept', 'application/vnd.github+json');
+    x.setRequestHeader('Authorization', 'Bearer ' + audioAdmin.token);
+    x.setRequestHeader('Content-Type', 'application/json');
+    x.upload.onprogress = (e) => { if(e.lengthComputable) onPct(Math.min(99, Math.round(e.loaded / e.total * 100))); };
+    x.onload = () => {
+      let j = null; try{ j = JSON.parse(x.responseText); }catch(e){}
+      if(x.status >= 200 && x.status < 300 && j && j.sha){ onPct(100); resolve(j.sha); }
+      else reject(ghErr(x.status, j));
+    };
+    x.onerror = () => reject(ghErr(0, null));
+    x.send(body);
+  }));
+}
+/* Un commit pour un lot de changements : [{path, sha}] (ajout/déplacement), [{path, sha:null}] (suppression),
+   [{path, content}] (petit fichier texte, ex. « .keep » pour garder un dossier vide). */
+async function ghCommitChanges(changes, message){
+  const pre = AUDIO_SRC.folder + '/';
+  changes.forEach(c => { if(!c.path.startsWith(pre) || c.path.split('/').some(s => s === '..' || s === '')) throw new Error('Chemin refusé : ' + c.path); });
+  if(!changes.length) return audioAdmin.treeSha;
+  for(let attempt = 0; ; attempt++){
+    const ref = await ghReq('GET', `/git/ref/heads/${AUDIO_SRC.branch}`);
+    const head = ref.object.sha;
+    const base = await ghReq('GET', `/git/commits/${head}`);
+    const tree = await ghReq('POST', '/git/trees', {
+      base_tree:base.tree.sha,
+      tree:changes.map(c => c.content !== undefined
+        ? { path:c.path, mode:'100644', type:'blob', content:c.content }
+        : { path:c.path, mode:'100644', type:'blob', sha:c.sha }),
+    });
+    const commit = await ghReq('POST', '/git/commits', { message, tree:tree.sha, parents:[head] });
+    try{
+      await ghReq('PATCH', `/git/refs/heads/${AUDIO_SRC.branch}`, { sha:commit.sha, force:false });
+      audioAdmin.dirty = true;
+      return tree.sha;
+    }catch(e){
+      if(e.status === 422 && attempt < 2) continue; // quelqu'un a modifié le dépôt entre-temps : on rejoue sur la version à jour
+      throw e;
+    }
+  }
+}
+async function audioAdminLoad(treeSha){
+  audioAdmin.loading = true;
+  try{
+    if(!treeSha){
+      const ref = await ghReq('GET', `/git/ref/heads/${AUDIO_SRC.branch}`);
+      const c = await ghReq('GET', `/git/commits/${ref.object.sha}`);
+      treeSha = c.tree.sha;
+    }
+    const t = await ghReq('GET', `/git/trees/${treeSha}?recursive=1`);
+    const pre = AUDIO_SRC.folder + '/';
+    audioAdmin.treeSha = treeSha;
+    audioAdmin.entries = (t.tree || []).filter(e => e.type === 'blob' && e.path.startsWith(pre));
+    audioAdmin.hasManifest = audioAdmin.entries.some(e => e.path === pre + 'playlist.json');
+  } finally { audioAdmin.loading = false; }
+}
+/* Met la liste de lecture à jour tout de suite (sans attendre le cache de 10 min), en gardant la piste en cours. */
+function audioLibApplyData(data, remap){
+  const cur = audioCurrent();
+  audioLib.data = data;
+  if(cur){
+    const f = (remap && remap[cur.t.file]) || cur.t.file;
+    audioLib.pl = data.playlists.findIndex(p => p.tracks.some(t => t.file === f));
+    audioLib.tr = audioLib.pl >= 0 ? data.playlists[audioLib.pl].tracks.findIndex(t => t.file === f) : -1;
+    if(audioLib.pl < 0){ audioLib.pl = -1; audioLib.tr = -1; }
+  }
+  audioUpdateUI(true);
+}
+async function audioAdminSyncLibrary(treeSha, remap){
+  try{ audioLibApplyData(await audioFetchLibrary(true, treeSha), remap); }catch(e){}
+}
+/* Renommer/déplacer ne doit pas faire perdre « où j'en étais » ni « déjà écouté ». */
+function audioAdminRemap(map){
+  const pos = audioLoadPos(); let ch = false;
+  Object.keys(map).forEach(a => { if(pos[a] && a !== map[a]){ pos[map[a]] = pos[a]; delete pos[a]; ch = true; } });
+  if(ch) audioSavePos(pos);
+  try{ const last = localStorage.getItem(AUDIO_LAST_KEY); if(last && map[last]) localStorage.setItem(AUDIO_LAST_KEY, map[last]); }catch(e){}
+}
+/* Nettoie un nom de fichier / dossier : pas de « .. », pas de caractères interdits, pas de nom commençant par
+   « . » ou « _ » (GitHub Pages ne publie pas ces fichiers-là). */
+function amCleanPath(rel){
+  return String(rel).replace(/\\/g, '/').split('/').map(s => s.normalize('NFC').replace(/[\u0000-\u001f:*?"<>|]/g, '-').replace(/\s+/g, ' ').trim().replace(/^[._#~\s]+/, '').replace(/[.\s]+$/, '')).filter(Boolean).join('/');
+}
+function amBaseName(p){ return p.split('/').pop(); }
+function amDirName(p){ return p.split('/').slice(0, -1).join('/'); }
+function amFmtSize(b){ return b >= 1048576 ? (b / 1048576).toFixed(b >= 10485760 ? 0 : 1).replace('.', ',') + ' Mo' : Math.max(1, Math.round(b / 1024)) + ' Ko'; }
+function amIsHidden(p){ return /(^|\/)\.[^/]*$/.test(p); }
+function amListDir(path){
+  const pre = path + '/';
+  const folders = {}, files = [];
+  (audioAdmin.entries || []).forEach(e => {
+    if(!e.path.startsWith(pre)) return;
+    const rest = e.path.slice(pre.length);
+    const i = rest.indexOf('/');
+    if(i < 0){ if(!amIsHidden(e.path)) files.push(e); return; }
+    const n = rest.slice(0, i);
+    const f = folders[n] = folders[n] || { name:n, path:pre + n, count:0, size:0 };
+    if(AUDIO_EXT.test(e.path)) f.count++;
+    f.size += e.size || 0;
+  });
+  const coll = new Intl.Collator('fr', { numeric:true, sensitivity:'base' });
+  return { folders:Object.values(folders).sort((a, b) => coll.compare(a.name, b.name)), files:files.sort((a, b) => coll.compare(a.path, b.path)) };
+}
+function amAllFolders(){
+  const set = new Set([AUDIO_SRC.folder]);
+  (audioAdmin.entries || []).forEach(e => { let d = amDirName(e.path); while(d && d.length > AUDIO_SRC.folder.length){ set.add(d); d = amDirName(d); } });
+  const coll = new Intl.Collator('fr', { numeric:true, sensitivity:'base' });
+  return [...set].sort(coll.compare);
+}
+function amFolderLabel(p){ return p === AUDIO_SRC.folder ? '🏠 Audiothèque (racine)' : '📁 ' + p.slice(AUDIO_SRC.folder.length + 1).split('/').join(' › '); }
+
+/* ---------- petite boîte de dialogue maison (texte, liste, choix) ---------- */
+function amDialog(o){
+  return new Promise(res => {
+    const ov = document.createElement('div');
+    ov.className = 'am-dlg-ov';
+    ov.innerHTML = `<div class="am-dlg" role="dialog" aria-modal="true">
+      <div class="am-dlg-t">${o.title}</div>
+      ${o.text ? `<div class="am-dlg-x">${o.text}</div>` : ''}
+      ${o.input ? `<input class="am-in" id="amDlgIn" autocomplete="off" value="${escapeHtml(o.input.value || '')}" placeholder="${escapeHtml(o.input.placeholder || '')}">` : ''}
+      ${o.select ? `<select class="am-in" id="amDlgSel">${o.select.options.map(x => `<option value="${escapeHtml(x.v)}" ${x.v === o.select.value ? 'selected' : ''}>${escapeHtml(x.l)}</option>`).join('')}</select>` : ''}
+      <div class="am-dlg-b ${o.stack ? 'stack' : ''}">${o.buttons.map(b => `<button class="am-dlg-btn ${b.cls || ''}" data-v="${b.id}">${b.label}</button>`).join('')}</div>
+    </div>`;
+    document.body.appendChild(ov);
+    requestAnimationFrame(() => ov.classList.add('show'));
+    const inp = ov.querySelector('#amDlgIn'), sel = ov.querySelector('#amDlgSel');
+    const close = (v) => { document.removeEventListener('keydown', onKey, true); ov.remove(); res(v); };
+    const pick = (id) => close(id === 'cancel' ? null : { action:id, value:inp ? inp.value : sel ? sel.value : '' });
+    const onKey = (e) => {
+      if(e.key === 'Escape'){ e.preventDefault(); close(null); }
+      else if(e.key === 'Enter' && inp && document.activeElement === inp){ e.preventDefault(); const first = o.buttons.find(b => b.id !== 'cancel'); if(first) pick(first.id); }
+    };
+    document.addEventListener('keydown', onKey, true);
+    ov.addEventListener('click', (e) => { if(e.target === ov) close(null); });
+    ov.querySelectorAll('[data-v]').forEach(b => b.addEventListener('click', () => pick(b.dataset.v)));
+    if(inp){ setTimeout(() => { inp.focus(); const v = inp.value, dot = v.lastIndexOf('.'); try{ inp.setSelectionRange(0, o.input.selectBase && dot > 0 ? dot : v.length); }catch(e){} }, 60); }
+  });
+}
+const AM_CANCEL = { id:'cancel', label:'Annuler', cls:'ghost' };
+
+/* ---------- Écran « Gérer l'Audiothèque » ---------- */
+function renderAudioManager(path){
+  if(typeof path === 'string') audioAdmin.path = path;
+  clearQuestionTimer();
+  document.body.classList.remove('quiz-active');
+  currentBlock = null;
+  isHomeScreen = false;
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="amBackBtn" style="cursor:pointer;">← Audiothèque</button>`;
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('footerNote').textContent = '';
+  document.getElementById('quizCard').innerHTML = `
+    <div class="cat-tag">🗂️ Gérer l'Audiothèque</div>
+    <div class="word-fr" style="font-size:clamp(22px,4.5vw,28px);">Ajoute et range tes audios</div>
+    <div id="amBody" style="margin-top:12px;"></div>`;
+  document.getElementById('amBackBtn').addEventListener('click', () => { const d = audioAdmin.dirty; audioAdmin.dirty = false; renderAudioLibrary(d); });
+  audioAdmin.token = ghTokenGet();
+  audioAdmin.error = '';
+  amRender();
+  if(audioAdmin.token && !audioAdmin.busy) amRun('⏳ Lecture de ton dépôt GitHub…', () => audioAdminLoad());
+}
+async function amRun(label, fn){
+  audioAdmin.busy = true; audioAdmin.busyLabel = label; audioAdmin.error = '';
+  amRender();
+  try{ await fn(); }
+  catch(e){
+    audioAdmin.error = e.message || String(e);
+    if(e.status === 401){ ghTokenSet(''); audioAdmin.token = ''; audioAdmin.entries = null; }
+  }
+  audioAdmin.busy = false; audioAdmin.busyLabel = '';
+  amRender();
+}
+function amConnectHtml(){
+  return `<div class="am-connect">
+    <div class="am-h">🔑 Relie l'appli à ton dépôt GitHub <small>(une seule fois par appareil)</small></div>
+    <ol>
+      <li>Ouvre <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">github.com › Settings › Fine-grained tokens › <b>Generate new token</b></a>.</li>
+      <li><b>Token name</b> : <i>VocabVISION Audiothèque</i> · <b>Expiration</b> : la durée de ton choix (ex. 1 an).</li>
+      <li><b>Repository access</b> → <i>Only select repositories</i> → <b>${AUDIO_SRC.owner}/${AUDIO_SRC.repo}</b>.</li>
+      <li><b>Permissions</b> → <i>Repository permissions</i> → <b>Contents</b> → <b>Read and write</b>.</li>
+      <li><b>Generate token</b>, copie le code <code>github_pat_…</code> et colle-le ici :</li>
+    </ol>
+    <input type="password" class="am-in" id="amTok" placeholder="github_pat_…" autocomplete="off" spellcheck="false">
+    <label class="am-remember"><input type="checkbox" id="amRemember" checked> Rester connecté sur cet appareil</label>
+    <button class="restart-btn" id="amConnectBtn" style="width:100%;margin-top:10px;">🔗 Se connecter</button>
+    <div class="am-safe">🔒 Le jeton reste <b>uniquement sur cet appareil</b> (il n'est jamais envoyé dans ta synchronisation cloud) et l'appli ne s'en sert que pour écrire dans le dossier <code>${AUDIO_SRC.folder}/</code>. Tu peux le supprimer à tout moment sur GitHub.</div>
+  </div>`;
+}
+function amRender(){
+  const body = document.getElementById('amBody');
+  if(!body) return;
+  const status = audioAdmin.busy ? `<div class="am-status busy"><span class="am-spin"></span>${escapeHtml(audioAdmin.busyLabel || 'Un instant…')}</div>`
+    : audioAdmin.error ? `<div class="am-status ko">${escapeHtml(audioAdmin.error)}</div>`
+    : audioAdmin.notice ? `<div class="am-status ${audioAdmin.notice.startsWith('✅') ? 'ok' : 'warn'}">${audioAdmin.notice}</div>` : '';
+  if(!audioAdmin.token){
+    body.innerHTML = status + amConnectHtml();
+    const tok = body.querySelector('#amTok');
+    const go = () => {
+      const v = tok.value.trim();
+      if(!v){ tok.focus(); return; }
+      const remember = body.querySelector('#amRemember').checked;
+      audioAdmin.token = v;
+      amRun('🔗 Connexion à GitHub…', async () => {
+        try{ await ghReq('GET', ''); }catch(e){ audioAdmin.token = ''; throw e; }
+        ghTokenSet(v, remember);
+        await audioAdminLoad();
+        audioAdmin.notice = '✅ Connecté ! Tu peux maintenant ajouter tes audios et créer des dossiers.';
+      });
+    };
+    body.querySelector('#amConnectBtn').addEventListener('click', go);
+    tok.addEventListener('keydown', (e) => { if(e.key === 'Enter') go(); });
+    return;
+  }
+  const desktop = window.matchMedia && matchMedia('(hover:hover) and (pointer:fine)').matches;
+  const p = audioAdmin.path;
+  const segs = p.split('/');
+  const crumbs = segs.map((s, i) => {
+    const full = segs.slice(0, i + 1).join('/');
+    const label = i === 0 ? '🏠 Audiothèque' : escapeHtml(s);
+    return i === segs.length - 1 ? `<b>${label}</b>` : `<button class="am-crumb" data-am-go="${escapeHtml(full)}">${label}</button>`;
+  }).join('<span class="am-sep">›</span>');
+  body.innerHTML = `
+    <div class="am-top"><span>🟢 Connecté à <b>${AUDIO_SRC.owner}/${AUDIO_SRC.repo}</b></span><button class="am-link" id="amLogout">Se déconnecter</button></div>
+    <div class="am-crumbs">${crumbs}</div>
+    <div class="am-actions">
+      <button class="am-act primary" id="amPickBtn">⬆️ Ajouter des audios</button>
+      <button class="am-act" id="amNewFolder">➕ Nouveau dossier</button>
+      ${desktop ? '<button class="am-act" id="amPickDirBtn">📂 Importer un dossier</button>' : ''}
+      <input type="file" id="amPick" class="am-file" multiple accept="audio/*,.mp3,.m4a,.aac,.ogg,.oga,.opus,.wav,.webm,.flac">
+      <input type="file" id="amPickDir" class="am-file" multiple webkitdirectory>
+    </div>
+    ${desktop ? `<div class="am-drop" id="amDrop">🎯 …ou glisse ici tes MP3 (ou des dossiers entiers) depuis ton ordinateur</div>` : ''}
+    <div id="amStatusBox">${status}</div>
+    <div id="amQueue"></div>
+    ${audioAdmin.hasManifest ? `<div class="am-status warn">📝 Un fichier <code>${AUDIO_SRC.folder}/playlist.json</code> existe : l'Audiothèque suit ce fichier. Pour voir les nouveaux audios, ajoute-les dedans ou supprime-le.</div>` : ''}
+    <div class="am-list" id="amList"></div>
+    <div id="amQuota"></div>`;
+  body.querySelector('#amLogout').addEventListener('click', async () => {
+    const r = await amDialog({ title:'Se déconnecter ?', text:"Le jeton sera effacé de cet appareil. Tes audios restent sur GitHub et dans l'Audiothèque.", buttons:[{ id:'ok', label:'Se déconnecter', cls:'danger' }, AM_CANCEL] });
+    if(!r) return;
+    ghTokenSet(''); audioAdmin.token = ''; audioAdmin.entries = null; audioAdmin.notice = ''; audioAdmin.error = '';
+    amRender();
+  });
+  body.querySelectorAll('[data-am-go]').forEach(b => b.addEventListener('click', () => { audioAdmin.path = b.dataset.amGo; audioAdmin.notice = ''; amRender(); }));
+  const pick = body.querySelector('#amPick'), pickDir = body.querySelector('#amPickDir');
+  body.querySelector('#amPickBtn').addEventListener('click', () => pick.click());
+  const pdb = body.querySelector('#amPickDirBtn'); if(pdb) pdb.addEventListener('click', () => pickDir.click());
+  pick.addEventListener('change', () => { amQueueAdd([...pick.files].map(f => ({ file:f, rel:f.name }))); pick.value = ''; });
+  pickDir.addEventListener('change', () => { amQueueAdd([...pickDir.files].map(f => ({ file:f, rel:f.webkitRelativePath || f.name }))); pickDir.value = ''; });
+  body.querySelector('#amNewFolder').addEventListener('click', amNewFolder);
+  const drop = body.querySelector('#amDrop');
+  if(drop){
+    drop.addEventListener('dragover', (e) => { e.preventDefault(); drop.classList.add('over'); });
+    drop.addEventListener('dragleave', () => drop.classList.remove('over'));
+    drop.addEventListener('drop', async (e) => {
+      e.preventDefault(); drop.classList.remove('over');
+      const items = [...(e.dataTransfer.items || [])].map(it => it.webkitGetAsEntry ? it.webkitGetAsEntry() : null).filter(Boolean);
+      if(items.length){ const out = []; for(const en of items) await amReadEntry(en, '', out); amQueueAdd(out); }
+      else amQueueAdd([...e.dataTransfer.files].map(f => ({ file:f, rel:f.name })));
+    });
+  }
+  amRenderList();
+  amRenderQueue();
+  amRenderQuota();
+}
+/* Dossiers glissés-déposés : on parcourt leur contenu en gardant l'arborescence. */
+async function amReadEntry(entry, prefix, out){
+  if(entry.isFile){ const f = await new Promise((ok, ko) => entry.file(ok, ko)).catch(() => null); if(f) out.push({ file:f, rel:prefix + f.name }); return; }
+  if(!entry.isDirectory) return;
+  const reader = entry.createReader();
+  for(;;){
+    const batch = await new Promise((ok) => reader.readEntries(ok, () => ok([])));
+    if(!batch.length) break;
+    for(const en of batch) await amReadEntry(en, prefix + entry.name + '/', out);
+  }
+}
+function amRenderList(){
+  const list = document.getElementById('amList');
+  if(!list) return;
+  if(!audioAdmin.entries){ list.innerHTML = audioAdmin.busy ? '' : `<div class="audio-empty">Liste indisponible. <button class="am-link" id="amRetry">Réessayer</button></div>`; const rt = list.querySelector('#amRetry'); if(rt) rt.addEventListener('click', () => amRun('⏳ Lecture de ton dépôt GitHub…', () => audioAdminLoad())); return; }
+  const { folders, files } = amListDir(audioAdmin.path);
+  if(!folders.length && !files.length){
+    list.innerHTML = `<div class="audio-empty">📭 Ce dossier est vide.<br>Touche <b>⬆️ Ajouter des audios</b>${audioAdmin.path === AUDIO_SRC.folder ? ' ou crée d\'abord un dossier (= une liste de lecture)' : ''}.</div>`;
+    return;
+  }
+  list.innerHTML = folders.map(f => `
+    <div class="am-row folder" data-am-open="${escapeHtml(f.path)}" role="button" tabindex="0">
+      <span class="am-ic">📁</span>
+      <span class="am-name">${escapeHtml(f.name)}<small>${f.count} audio${f.count > 1 ? 's' : ''}${f.size ? ' · ' + amFmtSize(f.size) : ''}</small></span>
+      <button class="am-more" data-am-menu="d" data-am-path="${escapeHtml(f.path)}" aria-label="Options du dossier">⋯</button>
+    </div>`).join('') + files.map(e => `
+    <div class="am-row file" data-am-file="${escapeHtml(e.path)}" role="button" tabindex="0">
+      <span class="am-ic">${AUDIO_EXT.test(e.path) ? '🎵' : '📄'}</span>
+      <span class="am-name">${escapeHtml(amBaseName(e.path))}<small>${amFmtSize(e.size || 0)}</small></span>
+      <button class="am-more" data-am-menu="f" data-am-path="${escapeHtml(e.path)}" aria-label="Options du fichier">⋯</button>
+    </div>`).join('');
+  list.querySelectorAll('[data-am-open]').forEach(r => r.addEventListener('click', (e) => { if(e.target.closest('.am-more')) return; audioAdmin.path = r.dataset.amOpen; audioAdmin.notice = ''; amRender(); }));
+  list.querySelectorAll('[data-am-file]').forEach(r => r.addEventListener('click', (e) => { if(e.target.closest('.am-more')) return; amFileMenu(r.dataset.amFile); }));
+  list.querySelectorAll('[data-am-menu]').forEach(b => b.addEventListener('click', (e) => { e.stopPropagation(); (b.dataset.amMenu === 'd' ? amFolderMenu : amFileMenu)(b.dataset.amPath); }));
+}
+function amRenderQuota(){
+  const q = document.getElementById('amQuota');
+  if(!q || !audioAdmin.entries) return;
+  const used = audioAdmin.entries.reduce((s, e) => s + (e.size || 0), 0);
+  const pct = Math.min(100, used / audioAdmin.pagesLimit * 100);
+  q.innerHTML = `<div class="am-quota ${pct > 80 ? 'hot' : ''}"><div>💾 <b>${amFmtSize(used)}</b> utilisés sur ~1 Go (limite d'un site GitHub Pages)</div><div class="am-qbar"><span style="width:${pct.toFixed(1)}%"></span></div></div>`;
+}
+
+/* ---------- File d'envoi ---------- */
+function amQueueAdd(items){
+  const base = audioAdmin.path;
+  let ignored = 0;
+  const coll = new Intl.Collator('fr', { numeric:true, sensitivity:'base' });
+  items.slice().sort((a, b) => coll.compare(a.rel, b.rel)).forEach(({ file, rel }) => {
+    if(!AUDIO_EXT.test(file.name)){ ignored++; return; }
+    const clean = amCleanPath(rel);
+    if(!clean){ ignored++; return; }
+    const path = base + '/' + clean;
+    if(audioAdmin.queue.some(q => q.path === path && q.state !== 'done')) return;
+    const tooBig = file.size > audioAdmin.maxBytes;
+    audioAdmin.queue.push({
+      file, path, size:file.size, pct:0, sha:'',
+      exists:(audioAdmin.entries || []).some(e => e.path === path),
+      state:tooBig ? 'toobig' : 'wait',
+      err:tooBig ? `Trop lourd (${amFmtSize(file.size)} > 95 Mo) : compresse-le (voix : MP3 mono 64 kbps) ou découpe-le.` : '',
+    });
+  });
+  audioAdmin.notice = ignored ? `ℹ️ ${ignored} fichier${ignored > 1 ? 's' : ''} ignoré${ignored > 1 ? 's' : ''} (pas un format audio).` : '';
+  audioAdmin.error = '';
+  amRender();
+}
+function amRenderQueue(){
+  const box = document.getElementById('amQueue');
+  if(!box) return;
+  const q = audioAdmin.queue.filter(x => x.state !== 'done');
+  if(!q.length){ box.innerHTML = ''; return; }
+  const sendable = q.filter(x => x.state === 'wait' || x.state === 'error');
+  const total = sendable.reduce((s, x) => s + x.size, 0);
+  const big = sendable.some(x => x.size > audioAdmin.warnBytes);
+  const loaded = q.reduce((s, x) => s + (x.state === 'up' || x.state === 'blob' ? x.size * x.pct / 100 : 0), 0);
+  const all = q.filter(x => x.state !== 'toobig').reduce((s, x) => s + x.size, 0) || 1;
+  const rel = (p) => p.slice(audioAdmin.path.length + 1);
+  box.innerHTML = `<div class="am-queue">
+    <div class="am-h">📤 À envoyer dans <b>${escapeHtml(amFolderLabel(audioAdmin.path).replace(/^\S+\s/, ''))}</b></div>
+    ${q.map((x, i) => `<div class="am-q ${x.state}">
+      <span class="am-q-ic">${{ wait:'🎵', up:'⬆️', blob:'✔️', error:'⚠️', toobig:'⛔' }[x.state] || '🎵'}</span>
+      <span class="am-q-t">${escapeHtml(rel(x.path))}<small>${amFmtSize(x.size)}${x.exists ? ' · remplacera le fichier existant' : ''}${x.err ? ' · ' + escapeHtml(x.err) : ''}</small>
+        ${x.state === 'up' || x.state === 'blob' ? `<span class="am-q-bar"><span style="width:${x.pct}%"></span></span>` : ''}</span>
+      ${audioAdmin.busy ? '' : `<button class="am-q-x" data-am-unq="${i}" aria-label="Retirer">✕</button>`}
+    </div>`).join('')}
+    ${audioAdmin.busy ? `<div class="am-q-total"><span style="width:${Math.round(loaded / all * 100)}%"></span></div>` : `
+      ${big ? '<div class="am-tip">💡 Les gros fichiers (plus de 40 Mo) peuvent être longs à envoyer depuis un téléphone : reste sur cet écran, en Wi-Fi si possible.</div>' : ''}
+      <div class="am-q-btns">
+        ${sendable.length ? `<button class="restart-btn" id="amSend">⬆️ Envoyer ${sendable.length} audio${sendable.length > 1 ? 's' : ''} · ${amFmtSize(total)}</button>` : ''}
+        <button class="mode-chip" id="amClearQ">Vider la liste</button>
+      </div>`}
+  </div>`;
+  box.querySelectorAll('[data-am-unq]').forEach(b => b.addEventListener('click', () => { const x = q[+b.dataset.amUnq]; audioAdmin.queue = audioAdmin.queue.filter(y => y !== x); amRenderQueue(); }));
+  const send = box.querySelector('#amSend'); if(send) send.addEventListener('click', amUploadAll);
+  const clr = box.querySelector('#amClearQ'); if(clr) clr.addEventListener('click', () => { audioAdmin.queue = []; amRenderQueue(); });
+}
+async function amUploadAll(){
+  if(audioAdmin.busy) return;
+  const todo = audioAdmin.queue.filter(q => q.state === 'wait' || q.state === 'error');
+  if(!todo.length) return;
+  audioAdmin.notice = '';
+  await amRun(`⬆️ Envoi de ${todo.length} audio${todo.length > 1 ? 's' : ''} vers GitHub…`, async () => {
+    let lastPaint = 0;
+    for(const q of todo){
+      if(q.sha && q.blobOk){ q.state = 'blob'; q.pct = 100; q.err = ''; continue; } // déjà sur GitHub, seul le commit avait échoué
+      q.state = 'up'; q.pct = 0; q.err = '';
+      amRenderQueue();
+      try{
+        q.sha = await ghUploadBlob(q.file, (p) => { q.pct = p; const now = Date.now(); if(now - lastPaint > 250 || p === 100){ lastPaint = now; amRenderQueue(); } });
+        q.state = 'blob'; q.blobOk = true;
+      }catch(e){
+        q.state = 'error'; q.err = e.message;
+        if(e.status === 401 || e.status === 403 || e.status === 404) throw e; // inutile d'insister avec ce jeton
+      }
+      amRenderQueue();
+    }
+    const ok = audioAdmin.queue.filter(q => q.state === 'blob');
+    if(!ok.length) throw new Error(todo.length > 1 ? "⚠️ Aucun fichier n'a pu être envoyé (voir le détail dans la liste)." : todo[0].err);
+    audioAdmin.busyLabel = '📝 Enregistrement dans ton dépôt…';
+    amRender();
+    let treeSha;
+    try{ treeSha = await ghCommitChanges(ok.map(q => ({ path:q.path, sha:q.sha })), `🎵 Audiothèque : ajout de ${ok.length} audio${ok.length > 1 ? 's' : ''}`); }
+    catch(e){ ok.forEach(q => { q.state = 'error'; q.err = e.message; }); throw e; }
+    ok.forEach(q => { q.state = 'done'; });
+    audioAdmin.queue = audioAdmin.queue.filter(q => q.state !== 'done');
+    const failed = audioAdmin.queue.filter(q => q.state === 'error').length;
+    audioAdmin.notice = `✅ ${ok.length} audio${ok.length > 1 ? 's' : ''} ajouté${ok.length > 1 ? 's' : ''} ! Tu peux ${ok.length > 1 ? 'les ' : "l'"}écouter tout de suite${failed ? ` · ⚠️ ${failed} en échec (réessaie ci-dessous)` : ''}.`;
+    await audioAdminLoad(treeSha);
+    await audioAdminSyncLibrary(treeSha);
+    try{ if(typeof fxFireworks === 'function') fxFireworks(2); }catch(e){}
+  });
+}
+
+/* ---------- Dossiers & fichiers : créer, renommer, déplacer, supprimer ---------- */
+function amKeepFor(dir){ return { path:dir + '/.keep', content:'Dossier de l\'Audiothèque VocabVISION\n' }; }
+/* Si on vide complètement un dossier, on y laisse un « .keep » pour qu'il ne disparaisse pas. */
+function amKeepEmptied(changes, dirs){
+  const removed = new Set(changes.filter(c => c.sha === null).map(c => c.path));
+  const added = changes.filter(c => c.sha !== null).map(c => c.path);
+  dirs.forEach(dir => {
+    if(!dir || dir === AUDIO_SRC.folder) return;
+    const left = (audioAdmin.entries || []).some(e => e.path.startsWith(dir + '/') && !removed.has(e.path)) || added.some(p => p.startsWith(dir + '/'));
+    if(!left) changes.push(amKeepFor(dir));
+  });
+  return changes;
+}
+async function amMovePaths(pairs, message, keepDirs){
+  const byPath = new Map((audioAdmin.entries || []).map(e => [e.path, e]));
+  const changes = [], map = {};
+  pairs.forEach(([a, b]) => { const e = byPath.get(a); if(!e || a === b) return; changes.push({ path:b, sha:e.sha }, { path:a, sha:null }); map[a] = b; });
+  if(!changes.length) return;
+  amKeepEmptied(changes, keepDirs || []);
+  const treeSha = await ghCommitChanges(changes, message);
+  audioAdminRemap(map);
+  await audioAdminLoad(treeSha);
+  await audioAdminSyncLibrary(treeSha, map);
+}
+async function amDeletePaths(paths, message, keepDirs){
+  const c = audioCurrent();
+  if(c && paths.includes(c.t.file)) audioStop();
+  const changes = paths.map(p => ({ path:p, sha:null }));
+  if(keepDirs) amKeepEmptied(changes, keepDirs);
+  const treeSha = await ghCommitChanges(changes, message);
+  await audioAdminLoad(treeSha);
+  await audioAdminSyncLibrary(treeSha);
+}
+async function amNewFolder(){
+  const r = await amDialog({ title:'➕ Nouveau dossier', text:'Chaque dossier devient une <b>liste de lecture</b> dans l\'Audiothèque.', input:{ placeholder:'Ex. : Leçons d\'arabe' }, buttons:[{ id:'ok', label:'Créer' }, AM_CANCEL] });
+  if(!r) return;
+  const name = amCleanPath(r.value);
+  if(!name){ audioAdmin.error = 'Nom de dossier vide ou invalide.'; amRender(); return; }
+  const path = audioAdmin.path + '/' + name;
+  if(amAllFolders().includes(path)){ audioAdmin.path = path; audioAdmin.notice = ''; amRender(); return; }
+  await amRun('📁 Création du dossier…', async () => {
+    const treeSha = await ghCommitChanges([amKeepFor(path)], `📁 Audiothèque : nouveau dossier « ${name} »`);
+    await audioAdminLoad(treeSha);
+    audioAdmin.path = path;
+    audioAdmin.notice = `✅ Dossier « ${escapeHtml(name)} » créé. Ajoute-y tes audios !`;
+  });
+}
+async function amFolderMenu(path){
+  const name = amBaseName(path);
+  const inside = (audioAdmin.entries || []).filter(e => e.path.startsWith(path + '/'));
+  const nAudio = inside.filter(e => AUDIO_EXT.test(e.path)).length;
+  const r = await amDialog({ title:'📁 ' + escapeHtml(name), stack:true, buttons:[
+    { id:'open', label:'📂 Ouvrir' }, { id:'rename', label:'✏️ Renommer' }, { id:'move', label:'↪️ Déplacer' },
+    { id:'del', label:`🗑️ Supprimer (${nAudio} audio${nAudio > 1 ? 's' : ''})`, cls:'danger' }, AM_CANCEL ] });
+  if(!r) return;
+  if(r.action === 'open'){ audioAdmin.path = path; audioAdmin.notice = ''; amRender(); return; }
+  if(r.action === 'rename' || r.action === 'move'){
+    let target;
+    if(r.action === 'rename'){
+      const r2 = await amDialog({ title:'✏️ Renommer le dossier', input:{ value:name }, buttons:[{ id:'ok', label:'Renommer' }, AM_CANCEL] });
+      if(!r2) return;
+      const clean = amCleanPath(r2.value);
+      if(!clean) return;
+      target = amDirName(path) + '/' + clean;
+    } else {
+      const opts = amAllFolders().filter(f => f !== amDirName(path) && f !== path && !f.startsWith(path + '/')).map(f => ({ v:f, l:amFolderLabel(f) }));
+      if(!opts.length){ audioAdmin.error = "Aucun autre dossier où le déplacer : crée-en un d'abord."; amRender(); return; }
+      const r2 = await amDialog({ title:`↪️ Déplacer « ${escapeHtml(name)} » dans…`, select:{ options:opts, value:opts[0].v }, buttons:[{ id:'ok', label:'Déplacer' }, AM_CANCEL] });
+      if(!r2) return;
+      target = r2.value + '/' + name;
+    }
+    if(target === path) return;
+    if(target.startsWith(path + '/')){ audioAdmin.error = 'Impossible de déplacer un dossier dans lui-même.'; amRender(); return; }
+    const pairs = inside.map(e => [e.path, target + e.path.slice(path.length)]);
+    const clash = pairs.filter(([, b]) => (audioAdmin.entries || []).some(e => e.path === b) && !amIsHidden(b)).length;
+    if(clash){
+      const c = await amDialog({ title:'Fusionner les dossiers ?', text:`« ${escapeHtml(amBaseName(target))} » existe déjà et ${clash} fichier${clash > 1 ? 's portent' : ' porte'} le même nom : ${clash > 1 ? 'ils seront remplacés' : 'il sera remplacé'}.`, buttons:[{ id:'ok', label:'Fusionner', cls:'danger' }, AM_CANCEL] });
+      if(!c) return;
+    }
+    await amRun(r.action === 'rename' ? '✏️ Renommage…' : '↪️ Déplacement…', async () => {
+      await amMovePaths(pairs, `✏️ Audiothèque : « ${name} » → « ${target.slice(AUDIO_SRC.folder.length + 1)} »`, [amDirName(path)]);
+      audioAdmin.notice = `✅ Dossier ${r.action === 'rename' ? 'renommé' : 'déplacé'}.`;
+    });
+    return;
+  }
+  if(r.action === 'del'){
+    const c = await amDialog({ title:`🗑️ Supprimer « ${escapeHtml(name)} » ?`, text:`Le dossier et ses <b>${inside.length} fichier${inside.length > 1 ? 's' : ''}</b> seront supprimés de GitHub (et de l'Audiothèque).`, buttons:[{ id:'ok', label:'Supprimer', cls:'danger' }, AM_CANCEL] });
+    if(!c) return;
+    await amRun('🗑️ Suppression…', async () => {
+      await amDeletePaths(inside.map(e => e.path), `🗑️ Audiothèque : suppression du dossier « ${name} »`, [amDirName(path)]);
+      audioAdmin.notice = `✅ Dossier « ${escapeHtml(name)} » supprimé.`;
+    });
+  }
+}
+async function amFileMenu(path){
+  const name = amBaseName(path);
+  const isAudio = AUDIO_EXT.test(path);
+  const r = await amDialog({ title:(isAudio ? '🎵 ' : '📄 ') + escapeHtml(name), stack:true, buttons:[
+    ...(isAudio ? [{ id:'play', label:'▶ Écouter' }] : []),
+    { id:'rename', label:'✏️ Renommer' }, { id:'move', label:'↪️ Déplacer vers un dossier' },
+    { id:'del', label:'🗑️ Supprimer', cls:'danger' }, AM_CANCEL ] });
+  if(!r) return;
+  if(r.action === 'play'){ amPlayFile(path); return; }
+  if(r.action === 'rename' || r.action === 'move'){
+    let target;
+    if(r.action === 'rename'){
+      const r2 = await amDialog({ title:'✏️ Renommer', text:'Astuce : commence par un numéro (01, 02…) pour choisir l\'ordre de lecture.', input:{ value:name, selectBase:true }, buttons:[{ id:'ok', label:'Renommer' }, AM_CANCEL] });
+      if(!r2) return;
+      let clean = amCleanPath(r2.value).replace(/\//g, '-');
+      if(!clean) return;
+      const ext = (name.match(/\.[^.]+$/) || [''])[0];
+      if(ext && !/\.[^.]+$/.test(clean)) clean += ext; // extension oubliée : on la remet
+      target = amDirName(path) + '/' + clean;
+    } else {
+      const opts = amAllFolders().filter(f => f !== amDirName(path)).map(f => ({ v:f, l:amFolderLabel(f) }));
+      if(!opts.length){ audioAdmin.error = "Aucun autre dossier : crée-en un d'abord avec « ➕ Nouveau dossier »."; amRender(); return; }
+      const r2 = await amDialog({ title:`↪️ Déplacer « ${escapeHtml(name)} » dans…`, select:{ options:opts, value:opts[0].v }, buttons:[{ id:'ok', label:'Déplacer' }, AM_CANCEL] });
+      if(!r2) return;
+      target = r2.value + '/' + name;
+    }
+    if(target === path) return;
+    if((audioAdmin.entries || []).some(e => e.path === target)){
+      const c = await amDialog({ title:'Remplacer ?', text:`« ${escapeHtml(amBaseName(target))} » existe déjà à cet endroit : il sera remplacé.`, buttons:[{ id:'ok', label:'Remplacer', cls:'danger' }, AM_CANCEL] });
+      if(!c) return;
+    }
+    await amRun(r.action === 'rename' ? '✏️ Renommage…' : '↪️ Déplacement…', async () => {
+      await amMovePaths([[path, target]], `✏️ Audiothèque : « ${name} » → « ${target.slice(AUDIO_SRC.folder.length + 1)} »`, [amDirName(path)]);
+      audioAdmin.notice = r.action === 'rename' ? '✅ Fichier renommé.' : `✅ Déplacé dans ${escapeHtml(amFolderLabel(amDirName(target)))}.`;
+    });
+    return;
+  }
+  if(r.action === 'del'){
+    const c = await amDialog({ title:`🗑️ Supprimer « ${escapeHtml(name)} » ?`, text:'Le fichier sera supprimé de GitHub et de l\'Audiothèque.', buttons:[{ id:'ok', label:'Supprimer', cls:'danger' }, AM_CANCEL] });
+    if(!c) return;
+    await amRun('🗑️ Suppression…', async () => {
+      await amDeletePaths([path], `🗑️ Audiothèque : suppression de « ${name} »`, [amDirName(path)]);
+      audioAdmin.notice = '✅ Fichier supprimé.';
+    });
+  }
+}
+async function amPlayFile(path){
+  const find = () => { const d = audioLib.data; if(!d) return null; for(let i = 0; i < d.playlists.length; i++){ const j = d.playlists[i].tracks.findIndex(t => t.file === path); if(j >= 0) return [i, j]; } return null; };
+  let at = find();
+  if(!at){ try{ audioLibApplyData(await audioFetchLibrary(true, audioAdmin.treeSha)); }catch(e){} at = find(); }
+  if(at) audioPlay(at[0], at[1]);
+  else { audioAdmin.error = "Ce fichier n'apparaît pas dans l'Audiothèque (playlist.json ?)."; amRender(); }
+}
+window.addEventListener('beforeunload', (e) => { if(audioAdmin.busy){ e.preventDefault(); e.returnValue = ''; } });
 
 /* ============ ▶ « Go » : ouvre directement le module qui fait avancer un défi du jour ============ */
 function startNextBlockInMode(mode){
