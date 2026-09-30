@@ -390,6 +390,7 @@
 
   .reveal{margin-top:26px;padding-top:24px;border-top:3px dashed #E4DEFC;display:none;}
   .reveal.show{display:block;animation:fadeUp .4s ease;}
+  .reveal:not(:empty){display:block;animation:fadeUp .4s ease;} /* toute correction affichée est visible (grammaire, orthographe, conjugaison…) */
   @keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
 
   .seal{display:flex;align-items:center;gap:18px;margin-bottom:16px;}
@@ -1948,6 +1949,71 @@
   .home-blocks{ padding:16px 12px 18px; }
   .home-blocks .mode-row{ margin-top:6px; }
   .lexicon-progress-card{ margin-top:6px; }
+
+  /* ================= 🎆 SPECTACLE : renard surgissant, gros textes, correction manuelle ================= */
+  #foxCameo{ position:fixed; z-index:9998; pointer-events:none; display:none; width:220px; height:220px; transition:transform .62s cubic-bezier(.2,1.45,.4,1); will-change:transform; }
+  #foxCameo .cameo-fox{ position:relative; width:220px; height:220px; }
+  #foxCameo .cameo-fox .fox3d-canvas{ width:220px !important; height:220px !important; transform:translate(-50%,-52%); }
+  #foxCameo .cameo-emoji{ position:absolute; left:50%; top:55%; transform:translate(-50%,-50%); font-size:118px; line-height:1; filter:drop-shadow(0 12px 14px rgba(0,0,0,0.25)); animation:cameoBob 1s ease-in-out infinite; }
+  #foxCameo.has3d .cameo-emoji{ display:none; }
+  @keyframes cameoBob{ 0%,100%{ transform:translate(-50%,-50%) rotate(-6deg); } 50%{ transform:translate(-50%,-58%) rotate(6deg); } }
+  #foxCameo .cameo-bubble{
+    position:absolute; width:max-content; max-width:210px; white-space:normal; background:#fff; color:#1E1747; font-family:'Nunito','Inter',sans-serif;
+    font-weight:900; font-size:14.5px; line-height:1.25; padding:10px 14px; border-radius:18px; border:2px solid #E8E3F7;
+    box-shadow:0 5px 0 #E4DBFF, 0 16px 30px -12px rgba(76,52,180,0.5); opacity:0; transform:scale(.5);
+    transition:opacity .3s ease .35s, transform .45s cubic-bezier(.3,1.7,.5,1) .35s;
+  }
+  #foxCameo.in .cameo-bubble{ opacity:1; transform:scale(1); }
+  #foxCameo.out .cameo-bubble{ opacity:0; transform:scale(.6); transition-delay:0s; }
+  /* bords d'apparition */
+  #foxCameo.cameo-left{ left:0; top:34vh; transform:translateX(-115%) rotate(-35deg); }
+  #foxCameo.cameo-left.in{ transform:translateX(-22%) rotate(16deg); }
+  #foxCameo.cameo-left .cameo-bubble{ left:165px; top:18px; }
+  #foxCameo.cameo-right{ right:0; top:28vh; transform:translateX(115%) rotate(35deg); }
+  #foxCameo.cameo-right.in{ transform:translateX(22%) rotate(-16deg); }
+  #foxCameo.cameo-right .cameo-bubble{ right:165px; top:18px; }
+  #foxCameo.cameo-bottom{ left:calc(50% - 110px); bottom:0; transform:translateY(120%); }
+  #foxCameo.cameo-bottom.in{ transform:translateY(16%); }
+  #foxCameo.cameo-bottom .cameo-bubble{ left:150px; top:0; }
+  #foxCameo.cameo-top{ left:14vw; top:0; transform:translateY(-120%); }
+  #foxCameo.cameo-top.in{ transform:translateY(-26%); }
+  #foxCameo.cameo-top .cameo-fox{ transform:rotate(180deg); }
+  #foxCameo.cameo-top .cameo-bubble{ left:150px; top:120px; }
+  #foxCameo.cameo-bl{ left:0; bottom:0; transform:translate(-115%,115%) rotate(-45deg); }
+  #foxCameo.cameo-bl.in{ transform:translate(-14%,14%) rotate(14deg); }
+  #foxCameo.cameo-bl .cameo-bubble{ left:170px; top:10px; }
+  #foxCameo.cameo-br{ right:0; bottom:0; transform:translate(115%,115%) rotate(45deg); }
+  #foxCameo.cameo-br.in{ transform:translate(14%,14%) rotate(-14deg); }
+  #foxCameo.cameo-br .cameo-bubble{ right:170px; top:10px; }
+  @media (max-width:420px){ #foxCameo .cameo-bubble{ max-width:150px; font-size:13px; } }
+  .fx-bigtext{
+    position:fixed; left:50%; top:38%; z-index:9999; pointer-events:none; white-space:nowrap;
+    font-family:'Nunito','Inter',sans-serif; font-weight:900; font-size:clamp(34px,10vw,76px); letter-spacing:-0.02em;
+    color:var(--fx-c,#FFD23F); -webkit-text-stroke:2px rgba(40,15,120,0.55);
+    text-shadow:0 5px 0 rgba(40,15,120,0.35), 0 0 30px rgba(255,255,255,0.6);
+    animation:fxBigText 1.9s cubic-bezier(.2,1.4,.4,1) forwards;
+  }
+  @keyframes fxBigText{
+    0%{ opacity:0; transform:translate(-50%,-50%) scale(.2) rotate(-12deg); }
+    18%{ opacity:1; transform:translate(-50%,-50%) scale(1.18) rotate(4deg); }
+    30%{ transform:translate(-50%,-50%) scale(1) rotate(-2deg); }
+    75%{ opacity:1; transform:translate(-50%,-56%) scale(1.03) rotate(0deg); }
+    100%{ opacity:0; transform:translate(-50%,-90%) scale(.9); }
+  }
+  .wrap.fx-shake{ animation:fxShake .45s cubic-bezier(.36,.07,.19,.97) both; }
+  @keyframes fxShake{ 10%,90%{ transform:translate3d(-2px,1px,0); } 20%,80%{ transform:translate3d(4px,-2px,0); } 30%,50%,70%{ transform:translate3d(-7px,2px,0) rotate(-.4deg); } 40%,60%{ transform:translate3d(7px,-1px,0) rotate(.4deg); } }
+  .fix-bar{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:14px; }
+  .fix-bar .next-btn{ margin-top:0; flex:1; min-width:180px; }
+  .fix-listen{
+    border:2px solid #BDE7FB; background:#E6F7FF; color:#0B79B8; font-family:'Nunito','Inter',sans-serif; font-weight:900; font-size:14px;
+    padding:12px 16px; border-radius:16px; cursor:pointer; box-shadow:0 4px 0 #BDE7FB; transition:transform .12s;
+  }
+  .fix-listen:active{ transform:translateY(3px); box-shadow:0 1px 0 #BDE7FB; }
+  [data-theme="dark"] .fix-listen{ background:rgba(92,200,255,0.12); border-color:rgba(92,200,255,0.35); color:#8FDBFF; box-shadow:none; }
+  .reveal > .fix-listen{ margin:14px 8px 0 0; }
+  .next-btn.fix-next{ background:linear-gradient(135deg,#FF8A1F,#FF4D5E) !important; box-shadow:0 5px 0 #C2410C !important; animation:fixPulse 1.6s ease-in-out infinite; }
+  @keyframes fixPulse{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.02); } }
+  body:has(.fix-next) #questPeekFab, body:has(.fix-next) #homeNavArrows{ opacity:0; pointer-events:none; transition:opacity .2s; } /* rien ne cache « Suivant » pendant une correction */
   @media (prefers-reduced-motion: reduce){ body::before, .tile, .home-stats .stat-box, .hh-deco, .hero-cta{ animation:none !important; } }
 </style>
 </head>
@@ -5374,6 +5440,25 @@ function attachAutoAdvance(btnId, onAdvance){
   clearAutoAdvance(); // ne jamais laisser tourner un ancien minuteur en arrière-plan
   const btn = document.getElementById(btnId);
   if(!btn) return;
+  // ❌ Juste après une ERREUR : pas d'avance automatique. On laisse le temps de lire la correction,
+  // de l'écouter, puis on passe quand on veut. L'avance automatique ne sert qu'après une réussite.
+  const af = window.__answerFx;
+  if(af && af.ok === false && Date.now() - af.t < 6000){
+    btn.textContent = "J'ai compris → Suivant";
+    btn.classList.add('fix-next');
+    btn.onclick = () => { clearAutoAdvance(); onAdvance(); };
+    const holder = btn.parentElement;
+    if(holder && !holder.querySelector('.fix-listen')){
+      const clone = holder.cloneNode(true);
+      clone.querySelectorAll('button').forEach(b => b.remove());
+      const txt = (typeof fxCleanSpeech === 'function') ? fxCleanSpeech(clone.textContent) : clone.textContent;
+      const lb = document.createElement('button');
+      lb.type = 'button'; lb.className = 'fix-listen'; lb.textContent = '🔊 Écouter la correction';
+      lb.addEventListener('click', () => speak(txt, 'fr-FR'));
+      holder.insertBefore(lb, btn);
+    }
+    return;
+  }
   if(autoAdvanceSeconds <= 0){ btn.textContent = 'Suivant →'; btn.onclick = onAdvance; return; }
   let remaining = autoAdvanceSeconds;
   let paused = false;
@@ -6112,8 +6197,20 @@ function renderSoundSettings(){
     <div class="question-line">Personnalise le son joué à chaque bonne ou mauvaise réponse. Tape ▶ pour écouter avant de choisir.</div>
     ${buildGroup('✅ Son de réussite', SOUND_PRESETS_OK, soundPrefs.ok, 'ok')}
     ${buildGroup("❌ Son d'échec", SOUND_PRESETS_KO, soundPrefs.ko, 'ko')}
+    <div style="font-weight:800;color:var(--purple);margin:18px 0 8px;">🎆 Animations spectaculaires</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="mode-chip ${fxOn ? 'active' : ''}" data-fx="1">✨ Activées (renard, orages, explosions…)</button>
+      <button class="mode-chip ${fxOn ? '' : 'active'}" data-fx="0">🙈 Désactivées</button>
+      <button class="mode-chip" id="fxDemoBtn">🎬 Voir la démo</button>
+    </div>
     <button class="restart-btn" id="goVoiceSettingsBtn" style="margin-top:20px;">🗣️ Choisir les voix de lecture →</button>
   `;
+  card.querySelectorAll('[data-fx]').forEach(b => b.addEventListener('click', () => { fxOn = b.dataset.fx === '1'; try{ localStorage.setItem(FX_PREF_KEY, fxOn ? '1' : '0'); }catch(e){} renderSoundSettings(); }));
+  document.getElementById('fxDemoBtn').addEventListener('click', () => {
+    if(!fxOn) return;
+    foxCameo('party', 'Regarde ce que je sais faire ! 🦊', { force:true, edge:'bottom' });
+    setTimeout(() => fxFireworks(3), 600); setTimeout(() => fxExplosion(null, null, true), 1900); setTimeout(() => fxStorm(true, 1800), 3000);
+  });
   document.getElementById('goVoiceSettingsBtn').addEventListener('click', () => renderVoiceSettings());
   document.getElementById('backFromSoundsBtn').addEventListener('click', renderBlockSelect);
 
@@ -8586,7 +8683,7 @@ function validateGrammarAnswer(){
     : `<div class="pass-banner ko">❌ ${fullSentenceHtml}${hintHtml}</div>`;
   input.style.borderColor = isCorrect ? 'var(--green)' : 'var(--red)';
 
-  setTimeout(() => { st.idx++; renderGrammarQuizCard(); }, isCorrect ? 900 : 2400);
+  advanceAfterAnswer(isCorrect, () => { st.idx++; renderGrammarQuizCard(); }, 900); // ❌ erreur : on attend « Suivant » (correction + écoute)
 }
 
 function endGrammarQuiz(){
@@ -8704,7 +8801,7 @@ function validateCodCoi(chosen, item){
     reveal.innerHTML = `<div class="pass-banner ko">❌ ${escapeHtml(item.rule)}</div>`;
     speak(item.rule, 'fr-FR');
   }
-  setTimeout(() => { st.idx++; renderCodCoiCard(); }, isCorrect ? 1300 : 3200);
+  advanceAfterAnswer(isCorrect, () => { st.idx++; renderCodCoiCard(); }, 1300); // ❌ erreur : on attend « Suivant » (correction + écoute)
 }
 function endCodCoiQuiz(){
   document.body.classList.remove('quiz-active');
@@ -8816,7 +8913,7 @@ function validateSentenceType(chosen, item){
     reveal.innerHTML = `<div class="pass-banner ko">❌ ${escapeHtml(item.rule)}</div>`;
     speak(item.rule, 'fr-FR');
   }
-  setTimeout(() => { st.idx++; renderSentenceTypeCard(); }, isCorrect ? 1300 : 3200);
+  advanceAfterAnswer(isCorrect, () => { st.idx++; renderSentenceTypeCard(); }, 1300); // ❌ erreur : on attend « Suivant » (correction + écoute)
 }
 function endSentenceTypeQuiz(){
   document.body.classList.remove('quiz-active');
@@ -9877,7 +9974,7 @@ function validateGenericReco(chosen, item){
     reveal.innerHTML = `<div class="pass-banner ko">❌ ${escapeHtml(item.rule)}</div>`;
     speak(item.rule, 'fr-FR');
   }
-  setTimeout(() => { st.idx++; renderGenericRecoCard(); }, isCorrect ? 1300 : 3400);
+  advanceAfterAnswer(isCorrect, () => { st.idx++; renderGenericRecoCard(); }, 1300); // ❌ erreur : on attend « Suivant » (correction + écoute)
 }
 function endGenericRecoQuiz(){
   document.body.classList.remove('quiz-active');
@@ -10192,10 +10289,10 @@ function validateMiniOrtho(correctAnswer, nextRenderFnName){
     ? `<div class="pass-banner ok">✅ ${escapeHtml(correctAnswer)}</div>`
     : `<div class="pass-banner ko">❌ La bonne réponse était : <b>${escapeHtml(correctAnswer)}</b></div>`;
   input.style.borderColor = isCorrect ? 'var(--green)' : 'var(--red)';
-  setTimeout(() => {
+  advanceAfterAnswer(isCorrect, () => {
     st.idx++;
     if(nextRenderFnName === 'renderPluralQuizCard'){ renderPluralQuizCard(); } else { renderAccordQuizCard(); }
-  }, isCorrect ? 900 : 1900);
+  }, 900);
 }
 
 function endMiniOrthoQuiz(st, backFnName){
@@ -10431,7 +10528,7 @@ function validateOrthoAnswer(){
     : `<div class="pass-banner ko">❌ ${fullSentenceHtml}${hintHtml}</div>`;
   input.style.borderColor = isCorrect ? 'var(--green)' : 'var(--red)';
 
-  setTimeout(() => { st.idx++; renderOrthoQuizCard(); }, isCorrect ? 900 : 2400);
+  advanceAfterAnswer(isCorrect, () => { st.idx++; renderOrthoQuizCard(); }, 900); // ❌ erreur : on attend « Suivant » (correction + écoute)
 }
 
 function endOrthoQuiz(){
@@ -10730,7 +10827,7 @@ function validateConjugationAnswer(){
     : `<div class="pass-banner ko">❌ La bonne réponse était : ${fullSentence}</div>`;
   input.style.borderColor = isCorrect ? 'var(--green)' : 'var(--red)';
 
-  setTimeout(() => { st.idx++; renderConjugationQuizCard(); }, isCorrect ? 900 : 1700);
+  advanceAfterAnswer(isCorrect, () => { st.idx++; renderConjugationQuizCard(); }, 900); // ❌ erreur : on attend « Suivant » (correction + écoute)
 }
 
 function endConjugationQuiz(){
@@ -10876,7 +10973,7 @@ function validateConjListenAnswer(correctText){
     ? `<div class="pass-banner ok">✅ ${escapeHtml(correctText)}</div>`
     : `<div class="pass-banner ko">❌ La bonne réponse était : <b>${escapeHtml(correctText)}</b></div>`;
   input.style.borderColor = isCorrect ? 'var(--green)' : 'var(--red)';
-  setTimeout(() => { st.idx++; renderConjListenCard(); }, isCorrect ? 900 : 2200);
+  advanceAfterAnswer(isCorrect, () => { st.idx++; renderConjListenCard(); }, 900); // ❌ erreur : on attend « Suivant » (correction + écoute)
 }
 
 function endConjListenQuiz(){
@@ -11065,7 +11162,7 @@ function validateTenseChoice(chosen, item){
     reveal.innerHTML = `<div class="pass-banner ko">❌ ${escapeHtml(item.rule)}</div>`;
     speak(item.rule, 'fr-FR');
   }
-  setTimeout(() => { st.idx++; renderTenseChoiceCard(); }, isCorrect ? 1300 : 3200);
+  advanceAfterAnswer(isCorrect, () => { st.idx++; renderTenseChoiceCard(); }, 1300); // ❌ erreur : on attend « Suivant » (correction + écoute)
 }
 function endTenseChoiceQuiz(){
   document.body.classList.remove('quiz-active');
@@ -14932,6 +15029,7 @@ function handleChronoAnswer(playerSaysTrue){
 
 function handleAnswer(i){
   if(answered) return;
+  if(!document.getElementById('revealWrap')) return; // écran quitté entre-temps (ex. minuteur resté armé)
   answered = true;
   clearQuestionTimer();
   const options = window.__currentOptions;
@@ -33480,6 +33578,363 @@ function initFox3D(){
 ['pointermove', 'pointerdown'].forEach(evt => window.addEventListener(evt, (e) => { fox3d.pointer.x = e.clientX; fox3d.pointer.y = e.clientY; fox3d.pointer.t = performance.now(); }, { passive:true }));
 window.addEventListener('touchmove', (e) => { const t = e.touches && e.touches[0]; if(t){ fox3d.pointer.x = t.clientX; fox3d.pointer.y = t.clientY; fox3d.pointer.t = performance.now(); } }, { passive:true });
 setTimeout(initFox3D, 900);
+
+/* ============ 🎆 SPECTACLE : effets plein écran + mascotte qui surgit de partout ============
+   - Bonne réponse : gerbe d'étincelles là où tu as tapé.
+   - Erreur : le renard surgit d'un bord de l'écran sous un petit nuage d'orage, t'encourage,
+     et l'exercice ATTEND que tu aies lu/écouté la correction (plus d'avance automatique).
+   - Séries (3, 5, 10, 15, 20, 30…) : feu, feux d'artifice, explosions, orage électrique doré.
+   - Fin de session réussie : feu d'artifice + renard en fête.
+   - De temps en temps, le renard passe la tête pour te motiver.
+   Actif dans TOUS les modules (vocabulaire, conjugaison, orthographe, grammaire, jeux…) car il
+   se branche sur les sons de réussite/erreur communs à toute l'appli. Désactivable (menu Sons). */
+const FX_PREF_KEY = 'lexiqueQuiz::fxOn';
+let fxOn = (() => { try{ return localStorage.getItem(FX_PREF_KEY) !== '0'; }catch(e){ return true; } })();
+const fxReduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+const fx = { cv:null, ctx:null, w:0, h:0, dpr:1, parts:[], rings:[], bolts:[], rain:[], dim:0, dimTarget:0, flash:0, flashRGB:'255,255,255', running:false, pointer:{ x:window.innerWidth/2, y:window.innerHeight/2 }, last:0 };
+window.__answerFx = { ok:null, t:0 };
+
+function fxEnsure(){
+  if(fx.cv) return true;
+  const cv = document.createElement('canvas');
+  cv.id = 'fxCanvas';
+  cv.style.cssText = 'position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:9997;';
+  document.body.appendChild(cv);
+  fx.cv = cv; fx.ctx = cv.getContext('2d');
+  const resize = () => { fx.dpr = Math.min(window.devicePixelRatio || 1, 2); fx.w = window.innerWidth; fx.h = window.innerHeight; cv.width = fx.w * fx.dpr; cv.height = fx.h * fx.dpr; fx.ctx.setTransform(fx.dpr, 0, 0, fx.dpr, 0, 0); };
+  resize(); window.addEventListener('resize', resize);
+  return true;
+}
+function fxStart(){ if(!fx.running){ fx.running = true; fx.last = performance.now(); requestAnimationFrame(fxLoop); } }
+const rnd = (a, b) => a + Math.random() * (b - a);
+const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+/* ---------- Particules ---------- */
+function fxBurst(x, y, o){
+  if(!fxOn || !fxEnsure()) return;
+  o = o || {};
+  const n = fxReduced ? Math.min(8, o.count || 24) : (o.count || 24);
+  const colors = o.colors || ['#FFD23F', '#FF5DA2', '#6D4AFF', '#1CB0F6', '#3DDC84', '#FF8A1F'];
+  for(let i = 0; i < n; i++){
+    const a = o.angle !== undefined ? o.angle + rnd(-o.spread, o.spread) : rnd(0, Math.PI * 2);
+    const sp = rnd(o.speedMin || 120, o.speed || 420);
+    fx.parts.push({ x, y, vx:Math.cos(a) * sp, vy:Math.sin(a) * sp, g:o.gravity ?? 520, drag:o.drag ?? 1.8, life:rnd(o.lifeMin || 0.5, o.life || 1.1), age:0,
+      size:rnd(o.sizeMin || 2.5, o.size || 6), color:pick(colors), shape:o.shape || pick(['star', 'circle', 'spark']), spin:rnd(-8, 8), rot:rnd(0, 6), glow:o.glow !== false, smoke:!!o.smoke });
+  }
+  fxStart();
+}
+function fxRing(x, y, color, maxR, width){ if(!fxOn || !fxEnsure()) return; fx.rings.push({ x, y, r:4, maxR:maxR || 180, age:0, life:0.6, color:color || '255,255,255', width:width || 6 }); fxStart(); }
+function fxFlash(rgb, strength){ fx.flashRGB = rgb || '255,255,255'; fx.flash = Math.max(fx.flash, strength || 0.6); fxStart(); }
+function fxShake(ms){
+  if(fxReduced) return;
+  const w = document.querySelector('.wrap'); if(!w) return;
+  w.classList.remove('fx-shake'); void w.offsetWidth; w.classList.add('fx-shake');
+  setTimeout(() => w.classList.remove('fx-shake'), ms || 500);
+}
+/* Éclair : ligne brisée par déplacement du point milieu, avec ramifications */
+function fxBolt(x1, y1, x2, y2, color, width){
+  const pts = [[x1, y1], [x2, y2]];
+  let disp = Math.hypot(x2 - x1, y2 - y1) / 4;
+  for(let k = 0; k < 6; k++){
+    const out = [];
+    for(let i = 0; i < pts.length - 1; i++){
+      const [ax, ay] = pts[i], [bx, by] = pts[i + 1];
+      out.push([ax, ay], [(ax + bx) / 2 + rnd(-disp, disp), (ay + by) / 2 + rnd(-disp * 0.3, disp * 0.3)]);
+    }
+    out.push(pts[pts.length - 1]);
+    pts.splice(0, pts.length, ...out);
+    disp /= 2;
+  }
+  fx.bolts.push({ pts, age:0, life:0.45, color:color || '200,220,255', width:width || 3 });
+  // ramification
+  if(Math.random() < 0.8){ const j = Math.floor(pts.length * rnd(0.3, 0.6)); const [bx, by] = pts[j]; if(width > 1.5) fxBolt(bx, by, bx + rnd(-140, 140), by + rnd(80, 220), color, width * 0.5); }
+  fxStart();
+}
+
+/* ---------- Grands effets ---------- */
+function fxSparkleAtPointer(){
+  const { x, y } = fx.pointer;
+  fxBurst(x, y, { count:22, speed:380, life:0.9, size:6 });
+  fxRing(x, y, '255,210,63', 70, 4);
+}
+function fxFireworks(n){
+  if(!fxOn || !fxEnsure()) return;
+  n = fxReduced ? 1 : (n || 3);
+  for(let i = 0; i < n; i++){
+    setTimeout(() => {
+      const x = rnd(fx.w * 0.15, fx.w * 0.85), y = rnd(fx.h * 0.15, fx.h * 0.45);
+      // fusée qui monte puis éclate
+      fx.parts.push({ x, y:fx.h + 10, vx:rnd(-40, 40), vy:-(fx.h - y) * 1.9, g:0, drag:1.9, life:0.55, age:0, size:3, color:'#FFF3C4', shape:'spark', rocket:true, targetY:y, glow:true, rot:0, spin:0 });
+      setTimeout(() => {
+        const palette = pick([['#FFD23F', '#FF8A1F', '#FFF3C4'], ['#FF5DA2', '#C06CFF', '#FFD6F0'], ['#3DDC84', '#1CB0F6', '#E0FFF4'], ['#6D4AFF', '#1CB0F6', '#FFFFFF']]);
+        fxBurst(x, y, { count:60, speed:360, speedMin:60, life:1.5, lifeMin:0.9, gravity:180, drag:1.2, colors:palette, shape:'circle', size:3.6, sizeMin:1.8 });
+        fxRing(x, y, '255,255,255', 120, 3);
+        fxFlash('255,240,210', 0.12);
+        fxSound('pop');
+      }, 520);
+    }, i * 330);
+  }
+  fxSound('whistle');
+}
+function fxExplosion(x, y, big){
+  if(!fxOn || !fxEnsure()) return;
+  x = x ?? fx.w / 2; y = y ?? fx.h * 0.42;
+  fxFlash('255,230,180', big ? 0.75 : 0.45);
+  fxRing(x, y, '255,200,120', big ? 420 : 260, big ? 14 : 9);
+  setTimeout(() => fxRing(x, y, '255,255,255', big ? 300 : 200, 4), 90);
+  fxBurst(x, y, { count:big ? 90 : 55, speed:big ? 900 : 650, speedMin:200, life:1.3, gravity:700, drag:1.4, colors:['#FFF3C4', '#FFD23F', '#FF8A1F', '#FF4D5E', '#FFFFFF'], shape:'spark', size:7 });
+  fxBurst(x, y, { count:big ? 26 : 16, speed:160, speedMin:30, life:1.8, gravity:-40, drag:1.1, colors:['#9C8FB0', '#6B6391', '#C9C2DD'], shape:'circle', size:26, sizeMin:12, glow:false, smoke:true });
+  fxShake(big ? 650 : 450);
+  fxSound('boom');
+}
+function fxStorm(golden, duration){
+  if(!fxOn || !fxEnsure()) return;
+  duration = fxReduced ? 900 : (duration || 2200);
+  fx.dimTarget = golden ? 0.42 : 0.5;
+  const color = golden ? '255,220,120' : '190,210,255';
+  const end = performance.now() + duration;
+  const rainTimer = setInterval(() => {
+    if(performance.now() > end){ clearInterval(rainTimer); fx.dimTarget = 0; return; }
+    for(let i = 0; i < 14; i++){ fx.rain.push({ x:rnd(-40, fx.w + 40), y:rnd(-60, -10), vy:rnd(900, 1300), vx:-120, len:rnd(12, 22), age:0 }); }
+  }, 50);
+  const strike = (k) => {
+    if(performance.now() > end) return;
+    const x = rnd(fx.w * 0.1, fx.w * 0.9);
+    fxBolt(x, -10, x + rnd(-120, 120), rnd(fx.h * 0.45, fx.h * 0.85), color, golden ? 4 : 3.2);
+    fxFlash(golden ? '255,236,170' : '220,230,255', 0.55);
+    if(k === 0 || Math.random() < 0.6) fxSound('thunder');
+    setTimeout(() => strike(k + 1), rnd(380, 800));
+  };
+  strike(0);
+  fxStart();
+}
+/* Petit orage personnel au-dessus du renard (erreur) : nuage + pluie + mini-éclair */
+function fxRainCloud(x, y, w){
+  if(!fxOn || !fxEnsure()) return;
+  const until = performance.now() + 1600;
+  const t = setInterval(() => {
+    if(performance.now() > until){ clearInterval(t); return; }
+    for(let i = 0; i < 4; i++) fx.rain.push({ x:rnd(x - w / 2, x + w / 2), y, vy:rnd(420, 620), vx:-30, len:rnd(8, 14), age:0, maxY:y + 190 });
+  }, 40);
+  setTimeout(() => { fxBolt(x + rnd(-20, 20), y + 4, x + rnd(-50, 50), y + 150, '200,220,255', 2.2); fxFlash('220,230,255', 0.18); fxSound('thunderSmall'); }, 380);
+  fxStart();
+}
+
+/* ---------- Boucle de rendu ---------- */
+function fxDrawStar(c, r){ c.beginPath(); for(let i = 0; i < 10; i++){ const rr = i % 2 ? r * 0.45 : r; const a = i * Math.PI / 5 - Math.PI / 2; c.lineTo(Math.cos(a) * rr, Math.sin(a) * rr); } c.closePath(); c.fill(); }
+function fxLoop(now){
+  const c = fx.ctx;
+  const dt = Math.min(0.05, (now - fx.last) / 1000); fx.last = now;
+  c.clearRect(0, 0, fx.w, fx.h);
+  // voile sombre (orage)
+  fx.dim += (fx.dimTarget - fx.dim) * Math.min(1, dt * 5);
+  if(fx.dim > 0.01){
+    const g = c.createRadialGradient(fx.w / 2, fx.h * 0.4, fx.h * 0.1, fx.w / 2, fx.h * 0.4, Math.max(fx.w, fx.h));
+    g.addColorStop(0, `rgba(25,15,70,${fx.dim * 0.6})`); g.addColorStop(1, `rgba(8,4,30,${fx.dim})`);
+    c.fillStyle = g; c.fillRect(0, 0, fx.w, fx.h);
+  }
+  // pluie
+  c.strokeStyle = 'rgba(190,210,255,0.55)'; c.lineWidth = 1.4; c.beginPath();
+  fx.rain = fx.rain.filter(d => {
+    d.age += dt; d.x += d.vx * dt; d.y += d.vy * dt;
+    c.moveTo(d.x, d.y); c.lineTo(d.x + d.vx * 0.02, d.y - d.len);
+    return d.y < (d.maxY || fx.h + 30);
+  });
+  c.stroke();
+  c.globalCompositeOperation = 'lighter';
+  // anneaux d'onde de choc
+  fx.rings = fx.rings.filter(r => {
+    r.age += dt; const p = r.age / r.life; if(p >= 1) return false;
+    const rad = 4 + (r.maxR - 4) * (1 - Math.pow(1 - p, 3));
+    c.strokeStyle = `rgba(${r.color},${(1 - p) * 0.9})`; c.lineWidth = r.width * (1 - p) + 1;
+    c.beginPath(); c.arc(r.x, r.y, rad, 0, Math.PI * 2); c.stroke();
+    return true;
+  });
+  // éclairs
+  fx.bolts = fx.bolts.filter(b => {
+    b.age += dt; const p = b.age / b.life; if(p >= 1) return false;
+    const a = p < 0.15 ? 1 : (1 - p) * (0.6 + Math.random() * 0.4);
+    [[b.width * 5, 0.12], [b.width * 2.2, 0.35], [b.width, 1]].forEach(([w, al]) => {
+      c.strokeStyle = `rgba(${b.color},${a * al})`; c.lineWidth = w; c.lineJoin = 'round'; c.beginPath();
+      b.pts.forEach(([x, y], i) => i ? c.lineTo(x, y) : c.moveTo(x, y)); c.stroke();
+    });
+    return true;
+  });
+  // particules
+  fx.parts = fx.parts.filter(p => {
+    p.age += dt; if(p.age >= p.life) return false;
+    if(p.rocket && p.y <= p.targetY) return false;
+    p.vx -= p.vx * p.drag * dt; p.vy -= p.vy * p.drag * dt; p.vy += p.g * dt;
+    p.x += p.vx * dt; p.y += p.vy * dt; p.rot += p.spin * dt;
+    const k = 1 - p.age / p.life;
+    c.save();
+    if(p.smoke){ c.globalCompositeOperation = 'source-over'; c.globalAlpha = k * 0.35; }
+    else c.globalAlpha = Math.min(1, k * 1.4);
+    c.translate(p.x, p.y); c.rotate(p.rot); c.fillStyle = p.color;
+    const s = p.smoke ? p.size * (1.6 - k * 0.6) : p.size * (0.4 + k * 0.6);
+    if(p.shape === 'star') fxDrawStar(c, s);
+    else if(p.shape === 'spark'){ c.fillRect(-s * 1.6, -s * 0.25, s * 3.2, s * 0.5); }
+    else { c.beginPath(); c.arc(0, 0, s, 0, Math.PI * 2); c.fill(); }
+    c.restore();
+    return true;
+  });
+  c.globalCompositeOperation = 'source-over';
+  // flash
+  if(fx.flash > 0.01){ c.fillStyle = `rgba(${fx.flashRGB},${fx.flash})`; c.fillRect(0, 0, fx.w, fx.h); fx.flash *= Math.pow(0.02, dt); }
+  const busy = fx.parts.length || fx.rings.length || fx.bolts.length || fx.rain.length || fx.flash > 0.01 || fx.dim > 0.01 || fx.dimTarget > 0;
+  if(busy) requestAnimationFrame(fxLoop); else { c.clearRect(0, 0, fx.w, fx.h); fx.running = false; }
+}
+
+/* ---------- Sons (synthèse, aucun fichier) ---------- */
+function fxSound(kind){
+  if(!fxOn) return;
+  const ctx = (typeof getAudioCtx === 'function') ? getAudioCtx() : null;
+  if(!ctx) return;
+  try{
+    const t = ctx.currentTime;
+    const noise = (dur) => { const b = ctx.createBuffer(1, Math.floor(ctx.sampleRate * dur), ctx.sampleRate); const d = b.getChannelData(0); for(let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; const s = ctx.createBufferSource(); s.buffer = b; return s; };
+    const out = ctx.createGain(); out.connect(ctx.destination);
+    if(kind === 'boom'){
+      const n = noise(1.2), f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.setValueAtTime(900, t); f.frequency.exponentialRampToValueAtTime(80, t + 1);
+      out.gain.setValueAtTime(0.55, t); out.gain.exponentialRampToValueAtTime(0.001, t + 1.2);
+      n.connect(f); f.connect(out); n.start(t); n.stop(t + 1.2);
+      const o = ctx.createOscillator(), og = ctx.createGain(); o.frequency.setValueAtTime(90, t); o.frequency.exponentialRampToValueAtTime(35, t + 0.6);
+      og.gain.setValueAtTime(0.5, t); og.gain.exponentialRampToValueAtTime(0.001, t + 0.7); o.connect(og); og.connect(ctx.destination); o.start(t); o.stop(t + 0.7);
+    } else if(kind === 'thunder' || kind === 'thunderSmall'){
+      const dur = kind === 'thunder' ? 2.2 : 1.1;
+      const n = noise(dur), f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.setValueAtTime(1600, t); f.frequency.exponentialRampToValueAtTime(120, t + dur * 0.8);
+      out.gain.setValueAtTime(0.001, t); out.gain.exponentialRampToValueAtTime(kind === 'thunder' ? 0.45 : 0.18, t + 0.04);
+      out.gain.exponentialRampToValueAtTime(0.001, t + dur);
+      n.connect(f); f.connect(out); n.start(t); n.stop(t + dur);
+    } else if(kind === 'pop'){
+      const n = noise(0.25), f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = rnd(900, 2200); f.Q.value = 0.8;
+      out.gain.setValueAtTime(0.35, t); out.gain.exponentialRampToValueAtTime(0.001, t + 0.25); n.connect(f); f.connect(out); n.start(t); n.stop(t + 0.25);
+    } else if(kind === 'whistle'){
+      const o = ctx.createOscillator(); o.type = 'sine'; o.frequency.setValueAtTime(700, t); o.frequency.exponentialRampToValueAtTime(2400, t + 0.5);
+      out.gain.setValueAtTime(0.05, t); out.gain.exponentialRampToValueAtTime(0.001, t + 0.55); o.connect(out); o.start(t); o.stop(t + 0.55);
+    } else if(kind === 'whoosh'){
+      const n = noise(0.5), f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.frequency.setValueAtTime(400, t); f.frequency.exponentialRampToValueAtTime(2600, t + 0.35); f.Q.value = 1.4;
+      out.gain.setValueAtTime(0.001, t); out.gain.exponentialRampToValueAtTime(0.16, t + 0.12); out.gain.exponentialRampToValueAtTime(0.001, t + 0.45);
+      n.connect(f); f.connect(out); n.start(t); n.stop(t + 0.5);
+    }
+  }catch(e){}
+}
+
+/* ---------- Big texte « INCROYABLE ! » ---------- */
+function fxBigText(text, color){
+  if(!fxOn) return;
+  const el = document.createElement('div');
+  el.className = 'fx-bigtext';
+  el.textContent = text;
+  if(color) el.style.setProperty('--fx-c', color);
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1900);
+}
+
+/* ---------- 🦊 Le renard qui surgit des bords de l'écran ---------- */
+const CAMEO_CHEER = ['Tu gères ! 💪', 'Continue comme ça ! 🚀', 'Impressionnant ! 🤩', 'Quelle série ! 🔥', 'Bravo champion·ne ! 🏆', 'Tu progresses à vue d\'œil ! 📈'];
+const CAMEO_OOPS = ['Pas grave ! Lis la correction 👇', 'On apprend de ses erreurs 🌱', 'Écoute bien la bonne réponse 🔊', 'Respire… tu vas l\'avoir ! 💫', 'Presque ! Regarde la correction 👀'];
+const CAMEO_MOTIV = ['Encore quelques mots et tu bats ton record ! ⭐', 'Chaque minute compte, tu es sur la bonne voie 🛤️', 'Je suis fier de toi ! 🦊❤️', 'Allez, on lâche rien ! 💥', 'Ton cerveau adore ça 🧠✨', 'Petit rappel : bois un verre d\'eau 💧 et on continue !'];
+const CAMEO_HOME = ['Salut ! On fait un bloc ensemble ? 🦊', 'Prêt·e pour ta dose de français ? 🇫🇷', 'Tes défis du jour t\'attendent 🎯'];
+let cameoBusy = false, cameoLast = 0;
+function foxCameo(kind, msg, opts){
+  opts = opts || {};
+  if(!fxOn || cameoBusy) return false;
+  const now = Date.now();
+  if(!opts.force && now - cameoLast < (opts.minGap || 5000)) return false;
+  cameoBusy = true; cameoLast = now;
+  let stage = document.getElementById('foxCameo');
+  if(!stage){
+    stage = document.createElement('div');
+    stage.id = 'foxCameo';
+    stage.innerHTML = `<div class="cameo-fox"><span class="cameo-emoji">🦊</span></div><div class="cameo-bubble"></div>`;
+    document.body.appendChild(stage);
+  }
+  const foxBox = stage.querySelector('.cameo-fox');
+  const use3d = typeof fox3d !== 'undefined' && fox3d.ready;
+  if(use3d){
+    if(!fox3d.cameo){ try{ fox3d.cameo = fox3dCreate(THREE, 220); }catch(e){ fox3d.cameo = null; } }
+    if(fox3d.cameo && fox3d.cameo.canvas.parentNode !== foxBox){ foxBox.appendChild(fox3d.cameo.canvas); }
+  }
+  stage.classList.toggle('has3d', !!(use3d && fox3d.cameo));
+  const edges = opts.edge ? [opts.edge] : ['left', 'right', 'bottom', 'top', 'bl', 'br'];
+  const edge = pick(edges);
+  stage.className = 'cameo-' + edge + ((use3d && fox3d.cameo) ? ' has3d' : '');
+  stage.querySelector('.cameo-bubble').textContent = msg || '';
+  stage.style.display = 'block';
+  void stage.offsetWidth;
+  stage.classList.add('in');
+  fxSound('whoosh');
+  setTimeout(() => {
+    if(use3d && fox3d.cameo){ fox3d.cameo.pop(); fox3d.cameo.react(kind === 'oops' ? 'ko' : (kind === 'party' ? 'party' : 'hop')); }
+    const r = foxBox.getBoundingClientRect();
+    if(kind === 'oops') fxRainCloud(r.left + r.width / 2, r.top - 6, r.width * 0.8);
+    if(kind === 'party' || kind === 'cheer') fxBurst(r.left + r.width / 2, r.top + r.height / 2, { count:30, speed:520 });
+  }, 380);
+  const hold = opts.hold || (kind === 'oops' ? 2300 : 2500);
+  setTimeout(() => { stage.classList.remove('in'); stage.classList.add('out'); }, hold);
+  setTimeout(() => { stage.classList.remove('out'); stage.style.display = 'none'; cameoBusy = false; }, hold + 650);
+  return true;
+}
+
+/* ---------- Branchements globaux ---------- */
+['pointerdown', 'touchstart'].forEach(evt => window.addEventListener(evt, (e) => {
+  const t = e.touches ? e.touches[0] : e; if(t){ fx.pointer.x = t.clientX; fx.pointer.y = t.clientY; }
+}, { passive:true, capture:true }));
+(function hookAnswerSounds(){
+  const okFn = playCorrectSound, koFn = playWrongSound;
+  playCorrectSound = function(){ okFn.apply(this, arguments); window.__answerFx = { ok:true, t:Date.now() }; if(fxOn) fxSparkleAtPointer(); };
+  playWrongSound = function(){
+    koFn.apply(this, arguments); window.__answerFx = { ok:false, t:Date.now() };
+    if(fxOn){ fxShake(380); foxCameo('oops', pick(CAMEO_OOPS), { minGap:7000 }); }
+  };
+  const msFn = mascotMilestone;
+  mascotMilestone = function(n){
+    msFn.apply(this, arguments);
+    if(!fxOn) return;
+    if(n >= 15 && n % 5 === 0){ fxStorm(true, 2400); setTimeout(() => fxExplosion(null, null, true), 500); setTimeout(() => fxFireworks(4), 1100); fxBigText(n >= 30 ? '👑 LÉGENDAIRE !' : `🚀 ${n} D'AFFILÉE !`, '#FFD23F'); foxCameo('party', `${n} sans faute ! Tu es une légende 👑`, { force:true, edge:'top' }); }
+    else if(n === 10){ fxStorm(true, 2000); setTimeout(() => fxExplosion(null, null, true), 450); fxBigText('⚡ ÉLECTRIQUE !', '#FFD23F'); foxCameo('party', '10 d\'affilée ! Tu es électrique ⚡', { force:true }); }
+    else if(n === 5){ fxFireworks(3); fxBigText('🎆 x5 COMBO !', '#FF5DA2'); foxCameo('party', pick(CAMEO_CHEER), { force:true }); }
+    else if(n === 3){ fxBurst(fx.w / 2, fx.h, { count:50, angle:-Math.PI / 2, spread:0.6, speed:1100, speedMin:500, gravity:900, colors:['#FFD23F', '#FF8A1F', '#FF4D5E'], shape:'spark', size:6 }); fxBigText('🔥 EN FEU !', '#FF8A1F'); foxCameo('cheer', pick(CAMEO_CHEER), { force:true, edge:pick(['left', 'right', 'bl', 'br']) }); }
+  };
+  const gcFn = launchGravityConfetti;
+  launchGravityConfetti = function(){ gcFn.apply(this, arguments); if(fxOn){ fxFireworks(5); setTimeout(() => foxCameo('party', 'Session réussie ! 🎉 Je suis fier de toi', { force:true, edge:'bottom' }), 400); } };
+})();
+// De temps en temps, le renard passe la tête pour motiver (jamais pendant une correction)
+setInterval(() => {
+  if(!fxOn || document.hidden || cameoBusy) return;
+  const since = Date.now() - cameoLast;
+  const inQuiz = document.body.classList.contains('quiz-active');
+  const recentAnswer = Date.now() - (window.__answerFx.t || 0) < 3000;
+  if(inQuiz && !recentAnswer && since > rnd(70000, 130000)) foxCameo('wave', pick(CAMEO_MOTIV));
+  else if(isHomeScreen && since > 180000) foxCameo('wave', pick(CAMEO_HOME), { edge:pick(['left', 'right', 'bl', 'br']) });
+}, 12000);
+setTimeout(() => { if(fxOn && isHomeScreen) foxCameo('wave', pick(CAMEO_HOME), { edge:pick(['bl', 'br', 'right']) }); }, 6500);
+
+/* ---------- ✅ Correction : ne jamais passer tout seul après une erreur ---------- */
+function fxCleanSpeech(text){
+  try{ return String(text || '').replace(/\p{Extended_Pictographic}/gu, ' ').replace(/[✓✔✗✘❌✅⏸️➡️→]/g, ' ').replace(/\s+/g, ' ').trim(); }
+  catch(e){ return String(text || '').trim(); }
+}
+/* Ajoute « 🔊 Écouter la correction » + « Suivant → » (manuel) dans la zone de correction. */
+function fixPanelManualNext(container, onNext){
+  if(!container) return;
+  const correctionText = fxCleanSpeech(container.innerText || container.textContent);
+  const bar = document.createElement('div');
+  bar.className = 'fix-bar';
+  bar.innerHTML = `<button class="fix-listen" type="button">🔊 Écouter la correction</button><button class="next-btn fix-next" id="nextBtn" type="button">J'ai compris → Suivant</button>`;
+  container.appendChild(bar);
+  bar.querySelector('.fix-listen').addEventListener('click', () => speak(correctionText, 'fr-FR'));
+  bar.querySelector('.fix-next').addEventListener('click', () => { bar.remove(); onNext(); });
+  try{ bar.scrollIntoView({ behavior:'smooth', block:'nearest' }); }catch(e){}
+}
+function advanceAfterAnswer(isCorrect, onNext, delayOk){
+  if(isCorrect){ setTimeout(onNext, delayOk || 900); return; }
+  const card = document.getElementById('quizCard');
+  const reveal = card && ([...card.querySelectorAll('[id$="Reveal"], .reveal')].filter(el => el.innerHTML.trim()).pop() || card);
+  if(reveal && reveal.classList) reveal.classList.add('show');
+  fixPanelManualNext(reveal, onNext);
+}
 
 /* ============ ▶ « Go » : ouvre directement le module qui fait avancer un défi du jour ============ */
 function startNextBlockInMode(mode){
