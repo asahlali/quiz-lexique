@@ -2,7 +2,7 @@
    Met l'application en cache pour un fonctionnement hors-ligne
    et permet l'installation depuis le navigateur (PWA). */
 
-const CACHE = 'vocabvision-v1';
+const CACHE = 'vocabvision-v2'; // v2 : nouvelles icônes + splash
 const ASSETS = [
   './',
   './index.html',
@@ -10,7 +10,10 @@ const ASSETS = [
   './icon-192.png',
   './icon-512.png',
   './icon-512-maskable.png',
-  './apple-touch-icon.png'
+  './icon-192-maskable.png',
+  './apple-touch-icon.png',
+  './favicon-32.png',
+  './favicon.svg'
 ];
 
 // Installation : on pré-charge la coquille de l'app
