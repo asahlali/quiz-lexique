@@ -2293,6 +2293,15 @@
   .sp2.leaving .sp-main > :not(.sp-stage), .sp2.leaving .sp-foot, .sp2.leaving .sp-portal, .sp2.leaving .sp-beam{ opacity:0 !important; transition:opacity .28s ease; }
   .sp2.leaving .sp-bubble{ transform:scale(.9); }
   .sp2.fade-out{ opacity:0; transition:opacity .5s ease; }
+  .sp-sound{ position:absolute; z-index:3; top:calc(env(safe-area-inset-top, 0px) + 14px); right:14px; height:42px; min-width:42px; padding:0 11px; display:flex; align-items:center; justify-content:center; gap:7px;
+    border-radius:999px; border:1px solid rgba(255,255,255,.35); background:rgba(255,255,255,.14); color:#fff; font:800 13px 'Nunito','Inter',sans-serif; cursor:pointer;
+    -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); opacity:0; animation:spUp .5s ease .5s forwards; -webkit-tap-highlight-color:transparent; }
+  .sp-sound .ic{ font-size:18px; line-height:1; }
+  .sp-sound .lbl{ display:none; }
+  .sp-sound.blocked{ background:linear-gradient(135deg,#F97316,#EC4899); border-color:rgba(255,255,255,.6); animation:spUp .5s ease .5s forwards, spPulse 1.4s ease-in-out 1s infinite; }
+  .sp-sound.blocked .lbl{ display:inline; }
+  @keyframes spPulse{ 0%,100%{ box-shadow:0 0 0 0 rgba(253,186,116,.65); } 50%{ box-shadow:0 0 0 12px rgba(253,186,116,0); } }
+  .sp2.leaving .sp-sound{ opacity:0 !important; transition:opacity .25s ease; }
   @media (max-height:560px){ .sp-tag{ display:none; } .sp-bubble{ min-height:0; padding:10px 14px; } .sp-stage{ margin-top:0; } }
   @media (prefers-reduced-motion: reduce){
     .sp-aurora, .sp-rays, .sp-bg::before, .sp-portal i{ animation:none !important; }
@@ -2351,6 +2360,7 @@
     </div>
     <div class="sp-bubble" id="spBubble" aria-live="polite"><span class="sp-hello" id="spHello"></span><span class="sp-ar" id="spAr" dir="rtl"></span><span class="sp-msg" id="spMsg"></span></div>
   </div>
+  <button class="sp-sound" id="spSound" type="button" aria-label="Activer le son"><span class="ic">🔊</span><span class="lbl">Activer le son</span></button>
   <div class="sp-foot"><div class="sp-hint">Touche l'écran pour commencer ✨</div><div class="sp-bar"><i id="spBar"></i></div></div>
 </div>
 <script>
@@ -35692,6 +35702,141 @@ function splashMessages(prevOpen){
   }catch(e){}
   return { hello, ar, lines:[first, ctx || pk(SPLASH_ENCOURAGE)] };
 }
+/* 🔊 Bande-son du splash, synthétisée en direct (aucun fichier à télécharger) :
+   souffle magique qui monte pendant que le portail se charge, impact grave + clochettes + accord
+   « ta-da » quand le renard jaillit, petits « yip-yip » quand il te parle, envolée finale.
+   Appli installée sur Android / ordinateur : le son démarre tout seul. Navigateur ou iPhone : le
+   navigateur exige un geste, d'où le bouton « 🔈 Activer le son » (le choix est mémorisé). */
+const SPLASH_SOUND_KEY = 'vocabVision.splashSound';
+function splashSoundEngine(){
+  let ctx = null, master = null, echo = null, charge = null, tickBuf = null, ticks = 0;
+  let pref = null;
+  try{ pref = localStorage.getItem(SPLASH_SOUND_KEY); }catch(e){}
+  let muted = pref === 'off' || (pref === null && typeof fxOn !== 'undefined' && !fxOn);
+  const init = () => {
+    if(ctx) return ctx;
+    ctx = (typeof getAudioCtx === 'function') ? getAudioCtx() : null;
+    if(!ctx) return null;
+    try{
+      master = ctx.createGain(); master.gain.value = muted ? 0 : 0.9;
+      const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -14; comp.ratio.value = 4;
+      master.connect(comp); comp.connect(ctx.destination);
+      echo = ctx.createDelay(1); echo.delayTime.value = 0.19;           // écho scintillant des clochettes
+      const fb = ctx.createGain(); fb.gain.value = 0.32;
+      const wet = ctx.createGain(); wet.gain.value = 0.35;
+      echo.connect(fb); fb.connect(echo); echo.connect(wet); wet.connect(master);
+    }catch(e){ ctx = null; }
+    return ctx;
+  };
+  const live = () => !!ctx && !!master && ctx.state === 'running' && !muted;
+  const noiseBuf = (dur) => {
+    const b = ctx.createBuffer(1, Math.max(1, Math.floor(ctx.sampleRate * dur)), ctx.sampleRate);
+    const d = b.getChannelData(0); for(let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    return b;
+  };
+  const tone = (freq, t, dur, o) => {
+    o = o || {};
+    const osc = ctx.createOscillator(), g = ctx.createGain();
+    osc.type = o.type || 'sine';
+    osc.frequency.setValueAtTime(freq, t);
+    if(o.to) osc.frequency.exponentialRampToValueAtTime(o.to, t + (o.glide || dur));
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(o.vol || 0.2, t + (o.att || 0.01));
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    osc.connect(g); g.connect(master); if(o.echo) g.connect(echo);
+    osc.start(t); osc.stop(t + dur + 0.05);
+  };
+  const whoosh = (t, dur, f0, f1, vol) => {
+    const n = ctx.createBufferSource(); n.buffer = noiseBuf(dur);
+    const f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.Q.value = 1.3;
+    f.frequency.setValueAtTime(f0, t); f.frequency.exponentialRampToValueAtTime(f1, t + dur);
+    const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + dur * 0.45); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    n.connect(f); f.connect(g); g.connect(master); n.start(t); n.stop(t + dur);
+  };
+  const safe = (fn) => function(){ try{ return fn.apply(this, arguments); }catch(e){} };
+  const api = {
+    get muted(){ return muted; },
+    blocked(){ init(); return !ctx || ctx.state !== 'running'; },
+    unlock(){ init(); try{ if(ctx && ctx.state !== 'running') return ctx.resume(); }catch(e){} return Promise.resolve(); },
+    setMuted(m){
+      muted = !!m;
+      try{ localStorage.setItem(SPLASH_SOUND_KEY, muted ? 'off' : 'on'); }catch(e){}
+      if(master) master.gain.setTargetAtTime(muted ? 0 : 0.9, ctx.currentTime, 0.04);
+      if(muted) api.stopCharge();
+    },
+    // portail qui se charge : souffle filtré qui monte + nappe douce
+    charge:safe(() => {
+      if(!live() || charge) return;
+      const t = ctx.currentTime;
+      const n = ctx.createBufferSource(); n.buffer = noiseBuf(2); n.loop = true;
+      const f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.Q.value = 2.5;
+      f.frequency.setValueAtTime(220, t); f.frequency.exponentialRampToValueAtTime(1700, t + 1.5);
+      const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.13, t + 1.1);
+      n.connect(f); f.connect(g); g.connect(master); n.start(t);
+      const pg = ctx.createGain(); pg.gain.setValueAtTime(0.0001, t); pg.gain.exponentialRampToValueAtTime(0.05, t + 0.9);
+      const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.setValueAtTime(500, t); lp.frequency.exponentialRampToValueAtTime(2400, t + 1.5);
+      pg.connect(lp); lp.connect(master);
+      const oscs = [220, 329.63, 440].map((fr, i) => {
+        const o = ctx.createOscillator(); o.type = i === 1 ? 'triangle' : 'sawtooth';
+        o.frequency.setValueAtTime(fr * 0.97, t); o.frequency.exponentialRampToValueAtTime(fr * 1.06, t + 1.5);
+        o.detune.value = (i - 1) * 7; o.connect(pg); o.start(t); return o;
+      });
+      charge = { srcs:[n].concat(oscs), gains:[g, pg] };
+    }),
+    stopCharge:safe(() => {
+      if(!charge || !ctx) return;
+      const t = ctx.currentTime;
+      charge.gains.forEach(g => { g.gain.cancelScheduledValues(t); g.gain.setTargetAtTime(0.0001, t, 0.05); });
+      charge.srcs.forEach(s => { try{ s.stop(t + 0.3); }catch(e){} });
+      charge = null;
+    }),
+    // le renard jaillit : impact grave, souffle, arpège de clochettes, accord « ta-da », scintillements
+    emerge:safe(() => {
+      api.stopCharge();
+      if(!live()) return;
+      const t = ctx.currentTime + 0.01;
+      tone(118, t, 0.6, { to:38, glide:0.42, vol:0.55, att:0.005 });
+      whoosh(t, 0.75, 2800, 160, 0.2);
+      [1046.5, 1318.5, 1568, 2093, 2637].forEach((f, i) => tone(f, t + 0.06 + i * 0.065, 0.6, { type:'triangle', vol:0.11, echo:true }));
+      [523.25, 659.25, 783.99, 1046.5].forEach((f) => tone(f, t + 0.34, 1.4, { vol:0.055, att:0.14 }));
+      for(let i = 0; i < 10; i++) tone(2400 + Math.random() * 2600, t + 0.25 + Math.random() * 0.95, 0.09, { vol:0.03, echo:true });
+    }),
+    // il te parle : deux petits « yip » joyeux + pop de la bulle
+    hello:safe(() => {
+      if(!live()) return;
+      const t = ctx.currentTime + 0.01;
+      const yip = (t0, f0, f1) => {
+        const o = ctx.createOscillator(), g = ctx.createGain(), v = ctx.createOscillator(), vg = ctx.createGain();
+        o.type = 'triangle';
+        o.frequency.setValueAtTime(f0, t0); o.frequency.exponentialRampToValueAtTime(f1, t0 + 0.07); o.frequency.exponentialRampToValueAtTime(f0 * 0.92, t0 + 0.16);
+        v.frequency.value = 32; vg.gain.value = 22; v.connect(vg); vg.connect(o.frequency);   // petit vibrato
+        g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(0.12, t0 + 0.015); g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.17);
+        o.connect(g); g.connect(master); o.start(t0); v.start(t0); o.stop(t0 + 0.2); v.stop(t0 + 0.2);
+      };
+      tone(520, t, 0.12, { to:880, glide:0.07, vol:0.07 });
+      yip(t + 0.05, 760, 1220); yip(t + 0.24, 880, 1480);
+    }),
+    // tic-tac discret de la machine à écrire
+    tick:safe(() => {
+      if(!live() || (ticks++ % 2)) return;
+      if(!tickBuf) tickBuf = noiseBuf(0.012);
+      const t = ctx.currentTime, n = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+      n.buffer = tickBuf; f.type = 'highpass'; f.frequency.value = 3500; g.gain.value = 0.035;
+      n.connect(f); f.connect(g); g.connect(master); n.start(t);
+    }),
+    swap:safe(() => { if(live()) tone(880, ctx.currentTime + 0.01, 0.12, { to:1320, glide:0.08, vol:0.06 }); }),
+    // envolée vers l'accueil
+    leave:safe(() => {
+      api.stopCharge();
+      if(!live()) return;
+      const t = ctx.currentTime + 0.01;
+      whoosh(t, 0.8, 300, 3400, 0.18);
+      tone(392, t, 0.75, { to:1568, glide:0.65, vol:0.05 });
+      [1568, 2093, 2637].forEach((f, i) => tone(f, t + 0.55 + i * 0.08, 0.7, { type:'triangle', vol:0.09, echo:true }));
+    }),
+  };
+  return api;
+}
 /* Ciel animé : étoiles, étoiles filantes, lettres FR/AR qui montent, énergie qui converge vers le portail, explosion. */
 function splashParticles(stage){
   const cv = document.getElementById('spCanvas');
@@ -35806,6 +35951,27 @@ function fox3dBindHeroClick(box){
   const placeCenter = () => { const r = stage.getBoundingClientRect(); sp.style.setProperty('--sp-cy', Math.round(r.top + r.height * 0.6) + 'px'); };
   placeCenter(); window.addEventListener('resize', placeCenter);
   const P = splashParticles(stage);
+  // 🔊 son : démarre tout seul quand le navigateur l'autorise (appli installée), sinon bouton « Activer le son »
+  const SFX = splashSoundEngine();
+  const sb = $('spSound');
+  const syncSound = () => {
+    if(!sb) return;
+    const blocked = !SFX.muted && SFX.blocked();
+    sb.classList.toggle('blocked', blocked);
+    sb.querySelector('.ic').textContent = SFX.muted ? '🔇' : (blocked ? '🔈' : '🔊');
+    sb.setAttribute('aria-label', (SFX.muted || blocked) ? 'Activer le son' : 'Couper le son');
+  };
+  if(!SFX.muted) SFX.unlock();
+  syncSound();
+  setTimeout(() => { if(done) return; if(state === 'charging') SFX.charge(); syncSound(); }, 150);
+  if(sb) sb.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if(SFX.muted || SFX.blocked()){
+      SFX.setMuted(false);
+      SFX.unlock().then(() => { syncSound(); if(state === 'charging') SFX.charge(); else if(state === 'out') SFX.emerge(); });
+    } else SFX.setMuted(true);
+    syncSound();
+  });
 
   const EMERGE_AT = quick ? 300 : 650;   // ms depuis l'ouverture de l'appli
   const WAIT_3D = quick ? 800 : 1500;    // attente max du moteur 3D (le portail « se charge » pendant ce temps)
@@ -35835,6 +36001,7 @@ function fox3dBindHeroClick(box){
       if(done || !el.isConnected) return;
       i = Math.min(chars.length, i + 1 + (Math.random() < 0.35 ? 1 : 0));
       span.textContent = chars.slice(0, i).join('');
+      SFX.tick();
       if(i < chars.length) setTimeout(step, 24);
       else if(el.lastChild && el.lastChild.classList) el.lastChild.remove();
     };
@@ -35845,12 +36012,14 @@ function fox3dBindHeroClick(box){
     $('spHello').textContent = msgs.hello;
     $('spAr').textContent = msgs.ar;
     sp.classList.add('talk');
+    SFX.hello();
     const lines = quick ? [msgs.lines[1]] : msgs.lines;
     typeInto($('spMsg'), lines[0]);
     if(lines[1]){
       setTimeout(() => {
         if(done || state === 'leaving') return;
         const m = $('spMsg'); m.classList.add('swap');
+        SFX.swap();
         setTimeout(() => { m.classList.remove('swap'); typeInto(m, lines[1]); if(foxInst) foxInst.react('hop'); }, 260);
       }, 1500);
     }
@@ -35862,6 +36031,7 @@ function fox3dBindHeroClick(box){
     state = 'out';
     make3d();
     sp.classList.add('fox-in');
+    SFX.emerge();
     if(foxInst){ foxInst.pop(); setTimeout(() => { if(foxInst) foxInst.react('party'); }, 380); }
     P.burst(reduced ? 20 : 90);
     setTimeout(talk, TALK_AFTER);
@@ -35915,6 +36085,7 @@ function fox3dBindHeroClick(box){
     done = true;
     clearTimeout(exitTimer);
     P.stop();
+    SFX.stopCharge();
     window.removeEventListener('resize', placeCenter);
     fox3d.splashHold = false;
     if(foxInst){
@@ -35935,6 +36106,7 @@ function fox3dBindHeroClick(box){
     const wasOut = state === 'out';
     state = 'leaving';
     sp.classList.add('leaving');
+    SFX.leave();
     const fr = foxBox.getBoundingClientRect();
     const cx = fr.left + fr.width / 2, cy = fr.top + fr.height * 0.55;
     if(!wasOut){ sp.classList.add('fade-out'); setTimeout(finish, 520); return; }
@@ -35960,7 +36132,12 @@ function fox3dBindHeroClick(box){
     irisOpen(cx, cy, reduced ? 1 : 820);
     setTimeout(finish, reduced ? 450 : 900);
   };
-  sp.addEventListener('click', () => { if(state === 'out'){ leave(); } else if(state === 'charging'){ emerge(); setTimeout(leave, 450); } });
+  sp.addEventListener('click', (e) => {
+    if(e.target.closest && e.target.closest('#spSound')) return;
+    // ce toucher est aussi l'occasion de débloquer le son (l'envolée sera sonorisée)
+    if(!SFX.muted && SFX.blocked()) SFX.unlock().then(() => { if(state === 'leaving') SFX.leave(); });
+    if(state === 'out'){ leave(); } else if(state === 'charging'){ emerge(); setTimeout(leave, 450); }
+  });
   setTimeout(() => { if(!done) finish(); }, 14000); // filet de sécurité
 })();
 
