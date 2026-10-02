@@ -2,7 +2,7 @@
    Met l'application en cache pour un fonctionnement hors-ligne
    et permet l'installation depuis le navigateur (PWA). */
 
-const CACHE = 'vocabvision-v3'; // v3 : design pro, renard réaliste, navigation précédent/suivant
+const CACHE = 'vocabvision-v6'; // v6 : renards Abdel & Souky (yeux)
 const ASSETS = [
   './',
   './index.html',
@@ -41,8 +41,9 @@ self.addEventListener('fetch', (event) => {
   if (req.method !== 'GET') return;
 
   const url = new URL(req.url);
-  // Les appels vers Google (synchro) passent toujours par le réseau
-  if (url.hostname.includes('script.google') || url.hostname.includes('googleusercontent')) {
+  // Tout ce qui vient d'un autre site (synchro Google, Cloudflare R2, polices, GitHub…) passe directement
+  // par le réseau, sans le service worker : le streaming audio (requêtes « Range ») reste ainsi intact.
+  if (url.origin !== self.location.origin) {
     return;
   }
 
