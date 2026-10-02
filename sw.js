@@ -2,7 +2,7 @@
    Met l'application en cache pour un fonctionnement hors-ligne
    et permet l'installation depuis le navigateur (PWA). */
 
-const CACHE = 'vocabvision-v6'; // v6 : renards Abdel & Souky (yeux)
+const CACHE = 'vocabvision-v7'; // v7 : retour des renards dessin animé à lunettes
 const ASSETS = [
   './',
   './index.html',
