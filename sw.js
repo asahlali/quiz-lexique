@@ -2,7 +2,7 @@
    Met l'application en cache pour un fonctionnement hors-ligne
    et permet l'installation depuis le navigateur (PWA). */
 
-const CACHE = 'vocabvision-v2'; // v2 : nouvelles icônes + splash
+const CACHE = 'vocabvision-v3'; // v3 : design pro, renard réaliste, navigation précédent/suivant
 const ASSETS = [
   './',
   './index.html',
