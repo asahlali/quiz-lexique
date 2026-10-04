@@ -1988,6 +1988,26 @@
   #foxCameo.cameo-br.in{ transform:translate(14%,14%) rotate(-14deg); }
   #foxCameo.cameo-br .cameo-bubble{ right:170px; top:10px; }
   @media (max-width:420px){ #foxCameo .cameo-bubble{ max-width:150px; font-size:13px; } }
+  /* 🎉 Fête à chaque bonne réponse : scène 3D plein écran + « Bravo ! » en relief */
+  #foxParty{ position:fixed; inset:0; z-index:9998; pointer-events:none; display:none; overflow:hidden; }
+  #foxParty .fox3d-party{ position:absolute; left:0; top:0; pointer-events:none; }
+  .celeb-praise{ position:fixed; z-index:9999; pointer-events:none; left:50%; top:30%; transform:translate(-50%,-50%); perspective:700px; text-align:center; white-space:nowrap; }
+  .celeb-in{ display:flex; flex-direction:column; align-items:center; gap:6px; transform-style:preserve-3d; animation:celebFlip 1.45s cubic-bezier(.2,.9,.3,1) both; }
+  .celeb-zoom .celeb-in{ animation-name:celebZoom; }
+  .celeb-swing .celeb-in{ animation-name:celebSwing; }
+  .celeb-spin .celeb-in{ animation-name:celebSpin; }
+  .celeb-word{ position:relative; display:inline-block; font:900 clamp(34px,9.5vw,60px)/1.08 'Nunito','Inter',system-ui,sans-serif; letter-spacing:.01em; padding:0 .08em; }
+  .celeb-word::before{ content:attr(data-t); position:absolute; inset:0; padding:0 .08em; color:#9A3412; -webkit-text-stroke:8px #fff; paint-order:stroke fill;
+    text-shadow:0 2px 0 #C2410C, 0 4px 0 #9A3412, 0 6px 0 #7C2D12, 0 8px 0 #6B2410, 0 14px 22px rgba(30,10,0,.38); }
+  .celeb-word > span{ position:relative; background:linear-gradient(180deg,#FFF7C2 0%,#FFD23F 40%,#FF9F1C 70%,#F2551C 100%); -webkit-background-clip:text; background-clip:text; color:transparent; -webkit-text-fill-color:transparent; }
+  .celeb-combo{ font:900 15px/1 'Nunito','Inter',sans-serif; color:#fff; background:linear-gradient(135deg,#F97316,#EA580C); padding:6px 12px; border-radius:999px; box-shadow:0 6px 16px rgba(234,88,12,.4); border:2px solid rgba(255,255,255,.85); }
+  @keyframes celebFlip{ 0%{ transform:rotateX(90deg) scale(.4); opacity:0 } 18%{ transform:rotateX(-18deg) scale(1.18); opacity:1 } 30%{ transform:rotateX(10deg) scale(.95) } 42%{ transform:rotateX(0) scale(1.03) } 78%{ transform:translateY(0) scale(1); opacity:1 } 100%{ transform:translateY(-34px) scale(.9); opacity:0 } }
+  @keyframes celebZoom{ 0%{ transform:translateZ(-600px) scale(.2) rotate(-12deg); opacity:0 } 20%{ transform:translateZ(80px) scale(1.25) rotate(4deg); opacity:1 } 34%{ transform:translateZ(0) scale(.96) rotate(-2deg) } 46%{ transform:scale(1.02) rotate(0) } 78%{ transform:scale(1); opacity:1 } 100%{ transform:scale(1.3); opacity:0 } }
+  @keyframes celebSwing{ 0%{ transform:rotateY(-100deg) translateX(-60px); opacity:0 } 22%{ transform:rotateY(20deg) translateX(6px); opacity:1 } 36%{ transform:rotateY(-8deg) } 48%{ transform:rotateY(0) } 78%{ transform:rotateY(0); opacity:1 } 100%{ transform:rotateY(70deg); opacity:0 } }
+  @keyframes celebSpin{ 0%{ transform:rotateY(540deg) scale(.3); opacity:0 } 30%{ transform:rotateY(-10deg) scale(1.15); opacity:1 } 42%{ transform:rotateY(0) scale(1) } 78%{ transform:scale(1); opacity:1 } 100%{ transform:translateY(-28px) rotateX(60deg); opacity:0 } }
+  @keyframes celebFade{ 0%{ opacity:0 } 15%{ opacity:1 } 80%{ opacity:1 } 100%{ opacity:0 } }
+  @media (prefers-reduced-motion: reduce){ .celeb-in{ animation:celebFade 1.3s ease both !important; } }
+  body.kb-open #foxParty, body.kb-open .celeb-praise{ display:none !important; }
   .fx-bigtext{
     position:fixed; left:50%; top:38%; z-index:9999; pointer-events:none; white-space:nowrap;
     font-family:'Nunito','Inter',sans-serif; font-weight:900; font-size:clamp(34px,10vw,76px); letter-spacing:-0.02em;
@@ -7472,6 +7492,13 @@ function renderSoundSettings(){
       <button class="mode-chip ${fxOn ? '' : 'active'}" data-fx="0">🙈 Désactivées</button>
       <button class="mode-chip" id="fxDemoBtn">🎬 Voir la démo</button>
     </div>
+    <div style="font-weight:800;color:var(--purple);margin:18px 0 8px;">🎉 Fête du renard à chaque bonne réponse</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="mode-chip ${celebFreq === 'all' ? 'active' : ''}" data-celeb="all">À chaque bonne réponse</button>
+      <button class="mode-chip ${celebFreq === 'half' ? 'active' : ''}" data-celeb="half">Une sur deux</button>
+      <button class="mode-chip ${celebFreq === 'off' ? 'active' : ''}" data-celeb="off">Seulement les séries</button>
+      <button class="mode-chip" id="celebDemoBtn">🦊 Voir une fête</button>
+    </div>
     <button class="restart-btn" id="goVoiceSettingsBtn" style="margin-top:20px;">🗣️ Choisir les voix de lecture →</button>
   `;
   card.querySelectorAll('[data-fx]').forEach(b => b.addEventListener('click', () => { fxOn = b.dataset.fx === '1'; try{ localStorage.setItem(FX_PREF_KEY, fxOn ? '1' : '0'); }catch(e){} renderSoundSettings(); }));
@@ -7482,6 +7509,8 @@ function renderSoundSettings(){
     foxCameo('party', 'Regarde ce que je sais faire ! 🦊', { force:true, edge:'bottom' });
     setTimeout(() => fxFireworks(3), 600); setTimeout(() => fxExplosion(null, null, true), 1900); setTimeout(() => fxStorm(true, 1800), 3000);
   });
+  card.querySelectorAll('[data-celeb]').forEach(b => b.addEventListener('click', () => { celebFreq = b.dataset.celeb; try{ localStorage.setItem(CELEB_FREQ_KEY, celebFreq); }catch(e){} renderSoundSettings(); }));
+  document.getElementById('celebDemoBtn').addEventListener('click', () => { if(fxOn) foxCelebrate({ force:true }); });
   document.getElementById('goVoiceSettingsBtn').addEventListener('click', () => renderVoiceSettings());
   document.getElementById('backFromSoundsBtn').addEventListener('click', renderBlockSelect);
 
@@ -17608,10 +17637,11 @@ const COLOR_PRESETS = {
 /* ============ 🆕 NOUVEAUTÉS — pour que tout ce qui a été ajouté reste découvrable ============ */
 const WHATS_NEW_SECTIONS = [
   { icon:'🆕', title:'Nouveautés', items:[
+    { name:'🎉 Fête à chaque bonne réponse', desc:"Abdel ou Souky surgit de partout — salto, fusée, saut à l'élastique, toupie, danse, roue, zoom, jackpot, super-héros… — avec confettis, étoiles et pièces d'or en 3D, cœurs, notes et un « Bravo ! » en relief. Jamais deux fois la même à la suite. Réglable dans 🔊 Sons." },
     { name:'🦊 Abdel & Souky', desc:"Les renards à lunettes (Souky avec son nœud et ses cils) sautent, tournent, creusent, plongent dans leur terrier et en surgissent, font des clins d'œil et des regards malins — touche le renard de l'accueil pour le voir faire." },
     { name:'☁️ Audiothèque + Cloudflare R2', desc:"Les gros fichiers (1 Go et plus) vont sur Cloudflare R2 (10 Go gratuits), les petits restent sur GitHub : tout s'affiche dans une seule Audiothèque, et un envoi coupé reprend où il s'était arrêté." },
     { name:'‹ › Précédent / Suivant', desc:"Navigation comme dans un navigateur : bouton retour du téléphone, flèches en haut à gauche, et au rechargement tu restes sur l'écran où tu étais." },
-    { name:'🦊 Nouveau design', desc:'Interface professionnelle en clair et en sombre, renard 3D réaliste, voix Homme / Enfant et vibrations variées.' },
+    { name:'🦊 Nouveau design', desc:'Interface professionnelle en clair et en sombre, renard 3D façon dessin animé, voix Homme / Enfant et vibrations variées.' },
   ]},
   { icon:'📚', title:'Apprentissage', items:[
     { name:'📖 Conjugaison', desc:'332 verbes vérifiés, 4 temps (présent, futur, imparfait, passé composé), 3 niveaux, phrases en contexte tirées de ton vocabulaire.' },
@@ -34667,6 +34697,16 @@ function fox3dBuild(T){
   mesh(S(0.42), M.cream, [0, -1.16, 0.36], [1, 0.95, 0.6], bodyG);
   const feet = [mesh(S(0.17, 24, 16), M.furDark, [-0.3, -1.72, 0.28], [1, 0.65, 1.25], bodyG),
                 mesh(S(0.17, 24, 16), M.furDark, [0.3, -1.72, 0.28], [1, 0.65, 1.25], bodyG)];
+  // ---- Petits bras (pivot = épaule) : le long du corps au repos ; levés, qui applaudissent ou saluent pendant les fêtes
+  const arms = [];
+  [-1, 1].forEach(sx => {
+    const p = new T.Group(); p.position.set(sx * 0.47, -0.95, 0.2); bodyG.add(p);
+    mesh(S(0.12, 24, 16), M.fur, [0, 0, 0], null, p);
+    mesh(new T.CylinderGeometry(0.112, 0.098, 0.46, 18), M.fur, [0, -0.23, 0], null, p);
+    mesh(S(0.135, 24, 16), M.furDark, [0, -0.49, 0.012], [1, 0.92, 1.08], p);
+    p.userData.sx = sx;
+    arms.push(p);
+  });
   // ---- Queue (chaîne de sphères, remuée avec inertie) ----
   const tail = new T.Group(); tail.position.set(0.42, -1.45, -0.38); bodyG.add(tail);
   [[0.12, 0.05, -0.08, 0.2, M.fur], [0.33, 0.2, -0.14, 0.26, M.fur], [0.48, 0.45, -0.15, 0.28, M.fur], [0.53, 0.72, -0.1, 0.24, M.cream], [0.49, 0.9, -0.05, 0.15, M.cream]]
@@ -34736,7 +34776,7 @@ function fox3dBuild(T){
     });
   });
   bow.visible = false; lashes.visible = false;
-  return { root, bodyG, headG, tail, eyes, irises, ears, smile, bow, lashes, feet };
+  return { root, bodyG, headG, tail, eyes, irises, ears, smile, bow, lashes, feet, arms };
 }
 
 function fox3dCreate(T, sizePx, opts){
@@ -34818,11 +34858,14 @@ function foxDirt(T, ground, size){
    disparaît dans son terrier, l'autre en sort. */
 function fox3dCreateToon(T, sizePx, opts){
   opts = opts || {};
+  // party : scène plein écran (célébrations) où le renard voyage partout, avec effets 3D
+  const party = !!opts.party;
   const canvas = document.createElement('canvas');
-  canvas.className = 'fox3d-canvas';
-  const renderer = new T.WebGLRenderer({ canvas, alpha:true, antialias:true, powerPreference:'low-power', premultipliedAlpha:true });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-  renderer.setSize(sizePx, sizePx);
+  canvas.className = party ? 'fox3d-party' : 'fox3d-canvas';
+  const renderer = new T.WebGLRenderer({ canvas, alpha:true, antialias:true, powerPreference:party ? 'default' : 'low-power', premultipliedAlpha:true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, party ? 1.5 : 2));
+  if(party) renderer.setSize(window.innerWidth, window.innerHeight);
+  else renderer.setSize(sizePx, sizePx);
   renderer.setClearColor(0x000000, 0);
   renderer.outputEncoding = T.sRGBEncoding;
   renderer.toneMapping = T.ACESFilmicToneMapping;
@@ -34830,25 +34873,36 @@ function fox3dCreateToon(T, sizePx, opts){
   renderer.localClippingEnabled = true;
   const scene = new T.Scene();
   scene.environment = fox3dEnvironment(T, renderer);
-  const camera = new T.PerspectiveCamera(30, 1, 0.1, 60);
-  camera.position.set(0, 0.35, 9.2); camera.lookAt(0, 0.05, 0);
+  const CAMZ = 14;
+  const camera = party ? new T.PerspectiveCamera(32, window.innerWidth / window.innerHeight, 0.5, 140) : new T.PerspectiveCamera(30, 1, 0.1, 60);
+  if(party){ camera.position.set(0, 0, CAMZ); camera.lookAt(0, 0, 0); }
+  else { camera.position.set(0, 0.35, 9.2); camera.lookAt(0, 0.05, 0); }
   scene.add(new T.HemisphereLight(0xfff1e0, 0x5b3a22, 0.35));
   const key = new T.DirectionalLight(0xfff5ea, 1.5); key.position.set(-3.5, 4.5, 5); scene.add(key);
   const rim = new T.DirectionalLight(0x9fcbff, 1.2); rim.position.set(3.5, 2.5, -4); scene.add(rim);
   const fill = new T.PointLight(0xffc98f, 0.35); fill.position.set(3, -1, 4); scene.add(fill);
 
   const GROUND = -1.86;
-  const clips = [new T.Plane(new T.Vector3(0, 1, 0), -GROUND)]; // rien ne dépasse sous le sol : terrier, plongeon
+  const clips = [new T.Plane(new T.Vector3(0, 1, 0), party ? 1e6 : -GROUND)]; // rien ne dépasse sous le sol : terrier, plongeon
   const f = fox3dBuild(T);
   f.root.traverse(o => { if(o.isMesh && o.material) o.material.clippingPlanes = clips; });
   const PIV = -1.05;                                   // pivot au milieu du corps (pour plonger, se pencher)
-  const pivot = new T.Group(); pivot.position.y = PIV; scene.add(pivot); pivot.add(f.root);
+  const mover = new T.Group(); scene.add(mover);       // déplacement d'ensemble (scène plein écran)
+  const pivot = new T.Group(); pivot.position.y = PIV; mover.add(pivot); pivot.add(f.root);
   const shadow = new T.Mesh(new T.PlaneGeometry(2.8, 2.8), new T.MeshBasicMaterial({ map:fox3dShadowTexture(T), transparent:true, depthWrite:false }));
-  shadow.rotation.x = -Math.PI / 2; shadow.position.y = GROUND; scene.add(shadow);
+  shadow.rotation.x = -Math.PI / 2; shadow.position.y = GROUND; mover.add(shadow);
   const hole = new T.Mesh(new T.PlaneGeometry(2.3, 1.15), new T.MeshBasicMaterial({ map:fox3dHoleTexture(T), transparent:true, depthWrite:false, opacity:0 }));
-  hole.rotation.x = -Math.PI / 2; hole.position.set(0, GROUND + 0.012, 0.35); hole.scale.setScalar(0.001); scene.add(hole);
+  hole.rotation.x = -Math.PI / 2; hole.position.set(0, GROUND + 0.012, 0.35); hole.scale.setScalar(0.001); mover.add(hole);
+  if(party){ shadow.visible = false; hole.visible = false; }
   const dirt = foxDirt(T, GROUND, 0.16); scene.add(dirt.points);
   const feetBase = f.feet.map(m => m.position.clone());
+  // bras : direction actuelle (lissée) et cible de la pose
+  const ARM_DOWN = new T.Vector3(0, -1, 0);
+  const armRest = (i, v) => v.set(f.arms[i].userData.sx * 0.26, -0.95, 0.17).normalize();
+  const armDir = f.arms.map((a, i) => armRest(i, new T.Vector3()));
+  const armTgt = [new T.Vector3(), new T.Vector3()];
+  const _a = new T.Vector3();
+  const armSet = (i, x, y, z, k) => { _a.set(x, y, z).normalize(); armTgt[i].lerp(_a, k === undefined ? 1 : k); };
 
   const st = {
     t:0, lookX:0, lookY:0, bodyX:0, prevHeadY:0,
@@ -34856,10 +34910,11 @@ function fox3dCreateToon(T, sizePx, opts){
     nextBlink:1.5 + Math.random() * 2, blinkT:-1, nextTwitch:3 + Math.random() * 4, twitchT:-1, twitchEar:0,
     ears:[{ a:0, v:0 }, { a:0, v:0 }], tail:{ a:0, v:0 }, female:!!opts.female, curious:0, nextCurious:5 + Math.random() * 5,
     auto:opts.auto || 0, act:null, queue:[], hole:0, holeTarget:0, hidden:false, swapping:false, pendingReact:null,
-    nextIdle:5 + Math.random() * 4,
+    nextIdle:5 + Math.random() * 4, emit:{ flame:0, trail:0 }, emitAcc:{ flame:0, trail:0 },
   };
   f.bow.visible = f.lashes.visible = st.female;
-  const DUR = { dig:2.0, digShort:1.6, dive:0.95, emerge:1.5, pounce:2.6, sniff:1.8, wink:1.0, sly:2.2 };
+  const DUR = { dig:2.0, digShort:1.6, dive:0.95, emerge:1.5, pounce:2.6, sniff:1.8, wink:1.0, sly:2.2,
+    cheer:1.4, wave:1.5, clap:1.4, dance:1.8, flip:1.25, cartwheel:1.3, spinTop:1.4, rocket:1.6, fly:1.6, bungee:1.8 };
   const _v = new T.Vector3(), _d = new T.Vector3();
   const play = (name) => { st.queue.push(name); };
   const busyGround = () => st.swapping || (st.act && /dive|emerge/.test(st.act.name)) || st.queue.some(n => n === 'emerge' || n === 'dive');
@@ -34873,8 +34928,14 @@ function fox3dCreateToon(T, sizePx, opts){
     }
     return null;
   }
+  function spinJump(){ st.jumpT = 0; st.spinT = 0; st.spinTurns = 1; st.spinDur = 0.8; st.happyT = 0; }
   function doReact(kind){
-    if(kind === 'ok'){ st.jumpT = 0; st.spinT = 0; st.spinTurns = 1; st.spinDur = 0.8; st.happyT = 0; }
+    if(kind === 'ok'){
+      // bonne réponse : une réaction différente à chaque fois (bond + vrille, bras levés, bravo, danse, salut)
+      const r = Math.random();
+      if(r < 0.3 || fox3d.reduced) spinJump();
+      else play(r < 0.5 ? 'cheer' : (r < 0.68 ? 'clap' : (r < 0.85 ? 'dance' : 'wave')));
+    }
     else if(kind === 'ko'){ st.shakeT = 0; st.sadT = 0; }
     else if(kind === 'party'){
       if(Math.random() < 0.5 && !fox3d.reduced){ st.queue.length = 0; st.act = null; play('pounce'); }
@@ -34892,7 +34953,7 @@ function fox3dCreateToon(T, sizePx, opts){
     },
     act(name){
       if(busyGround()) return;
-      if(name === 'hop' || name === 'spin' || name === 'ok' || name === 'party'){ st.act = null; st.queue.length = 0; doReact(name === 'spin' ? 'ok' : (name === 'hop' ? 'hop' : name)); return; }
+      if(name === 'hop' || name === 'spin' || name === 'ok' || name === 'party'){ st.act = null; st.queue.length = 0; if(name === 'spin') spinJump(); else doReact(name); return; }
       st.act = null; st.queue.length = 0; play(name);
     },
     setFemale(on, animated){
@@ -34915,7 +34976,195 @@ function fox3dCreateToon(T, sizePx, opts){
       st.intro = 1; st.act = null; st.queue.length = 0; play('emerge');
     },
     tick(dt, n){ for(let i = 0; i < (n || 1); i++) update(dt); renderer.render(scene, camera); },
+    // ---- scène plein écran (célébrations) ----
+    mover, party, onFrame:null,
+    play(name, o){ o = o || {}; st.queue.length = 0; st.jumpT = st.spinT = st.shakeT = -1; st.pendingReact = null; st.hidden = false; st.act = { name, t:0, dur:o.dur || DUR[name] || 1, fired:{}, side:o.side || (Math.random() < 0.5 ? 1 : -1), o }; },
+    still(){ st.act = null; st.queue.length = 0; st.jumpT = st.spinT = st.shakeT = st.happyT = st.sadT = -1; st.pendingReact = null; },
+    view(z){ const h = Math.tan(camera.fov * Math.PI / 360) * (CAMZ - (z || 0)); return { h, w:h * camera.aspect }; },
+    fx(kind, pos, o){ try{ fxSpawn(kind, pos, o); }catch(e){ console.warn('fox fx', e); } },
+    emit(name, on){ st.emit[name] = on ? 1 : 0; },
+    rope(top){ ropeTop = top ? (ropeTop || new T.Vector3()).copy(top) : null; },
+    clearFx(){ parts.splice(0).forEach(fxDrop); st.emit.flame = st.emit.trail = 0; ropeTop = null; if(ropeMesh) ropeMesh.visible = false; },
+    fxCount(){ return parts.length; },
+    warm(){   // compile d'avance les matériaux des effets (pas d'à-coup à la première fête)
+      const K = fxKit();
+      const tmp = [new T.Mesh(K.starG, K.gold), new T.Mesh(K.heartG, K.heart[0]), new T.Mesh(K.confG, K.conf[0]), new T.Sprite(K.flame[0]), new T.Mesh(K.ringG, new T.MeshBasicMaterial({ transparent:true, depthWrite:false }))];
+      tmp.forEach(o => scene.add(o)); renderer.compile(scene, camera); tmp.forEach(o => scene.remove(o));
+    },
+    anchor(name, out){
+      out = out || new T.Vector3();
+      if(name === 'head') return f.headG.getWorldPosition(out);
+      if(name === 'feet'){ f.feet[0].getWorldPosition(out); f.feet[1].getWorldPosition(_q); return out.add(_q).multiplyScalar(0.5); }
+      if(name === 'top'){ f.headG.getWorldPosition(out); _u.set(0, 1.3, 0.2).multiplyScalar(mover.scale.x).applyQuaternion(pivot.getWorldQuaternion(_qq)); return out.add(_u); }
+      return pivot.getWorldPosition(out);
+    },
+    screen(v){ _s.copy(v).project(camera); return { x:(_s.x + 1) / 2 * window.innerWidth, y:(1 - _s.y) / 2 * window.innerHeight }; },
+    resize(){ if(!party) return; renderer.setSize(window.innerWidth, window.innerHeight); camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); },
   };
+  if(party) window.addEventListener('resize', () => api.resize());
+
+  /* ---------- ✨ Effets 3D des fêtes : confettis, étoiles et pièces d'or, cœurs, notes, onde de choc, flammes, paillettes ---------- */
+  let FXK = null, ropeTop = null, ropeMesh = null;
+  const parts = [];
+  const _p = new T.Vector3(), _q = new T.Vector3(), _u = new T.Vector3(), _s = new T.Vector3(), _qq = new T.Quaternion(), YUP = new T.Vector3(0, 1, 0);
+  function fxKit(){
+    if(FXK) return FXK;
+    const col = (h) => new T.Color(h).convertSRGBToLinear();
+    const star = new T.Shape();
+    for(let i = 0; i < 10; i++){ const r = i % 2 ? 0.105 : 0.25, an = i * Math.PI / 5 + Math.PI / 2; if(i) star.lineTo(Math.cos(an) * r, Math.sin(an) * r); else star.moveTo(Math.cos(an) * r, Math.sin(an) * r); }
+    const starG = new T.ExtrudeGeometry(star, { depth:0.06, bevelEnabled:true, bevelThickness:0.04, bevelSize:0.028, bevelSegments:2 }); starG.center();
+    const hs = new T.Shape();
+    hs.moveTo(25, 25); hs.bezierCurveTo(25, 25, 20, 0, 0, 0); hs.bezierCurveTo(-30, 0, -30, 35, -30, 35); hs.bezierCurveTo(-30, 55, -10, 77, 25, 95);
+    hs.bezierCurveTo(60, 77, 80, 55, 80, 35); hs.bezierCurveTo(80, 35, 80, 0, 50, 0); hs.bezierCurveTo(35, 0, 25, 25, 25, 25);
+    const heartG = new T.ExtrudeGeometry(hs, { depth:14, bevelEnabled:true, bevelThickness:9, bevelSize:7, bevelSegments:3, curveSegments:14 });
+    heartG.center(); heartG.rotateZ(Math.PI); heartG.scale(0.0042, 0.0042, 0.0042);
+    const coinG = new T.CylinderGeometry(0.17, 0.17, 0.045, 32); coinG.rotateX(Math.PI / 2);
+    const tex = (draw) => { const c = document.createElement('canvas'); c.width = c.height = 64; draw(c.getContext('2d')); return new T.CanvasTexture(c); };
+    const glowT = tex(g => { const gr = g.createRadialGradient(32, 32, 0, 32, 32, 32); gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.4, 'rgba(255,255,255,0.8)'); gr.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = gr; g.fillRect(0, 0, 64, 64); });
+    const sparkT = tex(g => { g.fillStyle = '#fff'; g.beginPath(); for(let i = 0; i < 8; i++){ const r = i % 2 ? 7 : 31, an = i * Math.PI / 4; g.lineTo(32 + Math.cos(an) * r, 32 + Math.sin(an) * r); } g.closePath(); g.fill(); });
+    const spr = (map, c) => new T.SpriteMaterial({ map, color:col(c), transparent:true, depthWrite:false });
+    FXK = {
+      starG, heartG, coinG,
+      confG:new T.PlaneGeometry(0.2, 0.11), ringG:new T.TorusGeometry(1, 0.05, 10, 80),
+      noteHead:new T.SphereGeometry(0.1, 20, 14), noteStem:new T.CylinderGeometry(0.019, 0.019, 0.42, 8), noteFlag:new T.BoxGeometry(0.18, 0.055, 0.04),
+      gold:new T.MeshStandardMaterial({ color:col(0xFFC23A), metalness:1, roughness:0.2, envMapIntensity:1.7, emissive:col(0x6a3d00) }),
+      heart:[0xFF3D7F, 0xFF5DA2, 0xE11D48].map(c => new T.MeshPhysicalMaterial({ color:col(c), roughness:0.22, clearcoat:1, clearcoatRoughness:0.08, emissive:col(c).multiplyScalar(0.2) })),
+      note:[0x7C3AED, 0x2563EB, 0xDB2777, 0x059669].map(c => new T.MeshPhysicalMaterial({ color:col(c), roughness:0.25, clearcoat:1, emissive:col(c).multiplyScalar(0.22) })),
+      conf:[0xFF5DA2, 0xFFD23F, 0x22C55E, 0x3DD6F5, 0xFF8A3D, 0xA855F7, 0xFFFFFF].map(c => new T.MeshStandardMaterial({ color:col(c), roughness:0.4, metalness:0.3, side:T.DoubleSide, emissive:col(c).multiplyScalar(0.25), envMapIntensity:1.2 })),
+      flame:[spr(glowT, 0xFFD84A), spr(glowT, 0xFF9A1F), spr(glowT, 0xFF4B1F), spr(glowT, 0xB9B2C4)],
+      spark:[spr(sparkT, 0xFFE27A), spr(sparkT, 0xFFFFFF), spr(sparkT, 0xFFB8E0), spr(sparkT, 0x9EE7FF)],
+    };
+    return FXK;
+  }
+  function fxDrop(p){ scene.remove(p.o); if(p.kind === 'ring') p.o.material.dispose(); }
+  function fxAdd(o, at, vx, vy, vz, life, opt){
+    o.position.copy(at);
+    scene.add(o);
+    const p = Object.assign({ o, v:new T.Vector3(vx, vy, vz), g:0, drag:0.6, life, age:0, s0:o.scale.x, spin:null, flutter:0, sway:0, ph:Math.random() * 6.28, kind:'' }, opt);
+    parts.push(p);
+    if(parts.length > 240) fxDrop(parts.shift());
+    return p;
+  }
+  function fxSpawn(kind, pos, o){
+    o = o || {};
+    const K = fxKit(), u = mover.scale.x, R = Math.random, vw = api.view(0);
+    const at = new T.Vector3(); if(pos) at.copy(pos); else api.anchor('body', at);
+    const n = o.count || 0;
+    const rnd3 = (a) => new T.Vector3((R() - 0.5) * a, (R() - 0.5) * a, (R() - 0.5) * a);
+    const conf = (u2) => { const m = new T.Mesh(K.confG, K.conf[(R() * K.conf.length) | 0]); m.scale.setScalar(u2 * (1.1 + R() * 0.8)); m.rotation.set(R() * 6, R() * 6, R() * 6); return m; };
+    if(kind === 'confetti'){                    // gerbe de confettis autour du renard
+      for(let i = 0; i < (n || 46); i++){
+        const an = R() * Math.PI * 2, sp = (3 + R() * 6) * u;
+        fxAdd(conf(u), at, Math.cos(an) * sp, Math.sin(an) * sp * 0.85 + (o.up === false ? 0 : 3.5 * u), (R() - 0.3) * 4 * u, 1.5 + R() * 0.8, { g:6 * u, drag:1.7, spin:rnd3(16), flutter:0.7 * u, kind });
+      }
+    } else if(kind === 'cannon'){               // deux canons à confettis depuis les coins du bas de l'écran
+      const uu = Math.max(u, vw.h * 0.1);
+      [-1, 1].forEach(sd => {
+        for(let i = 0; i < (n || 30); i++){
+          const an = Math.PI / 2 - sd * (0.42 + (R() - 0.5) * 0.5), sp = vw.h * (1.3 + R() * 1.1);
+          fxAdd(conf(uu), _q.set(sd * vw.w * 1.02, -vw.h * 1.02, 0), Math.cos(an) * sp, Math.sin(an) * sp, (R() - 0.2) * vw.h * 0.4, 1.8 + R() * 0.8, { g:vw.h * 0.55, drag:1.45, spin:rnd3(16), flutter:0.25 * vw.h, kind:'confetti' });
+        }
+      });
+    } else if(kind === 'rain'){                 // pluie de confettis sur tout l'écran
+      const uu = Math.max(u, vw.h * 0.1);
+      for(let i = 0; i < (n || 60); i++){
+        fxAdd(conf(uu), _q.set((R() * 2 - 1) * vw.w, vw.h * (1.05 + R() * 0.7), (R() - 0.5) * 2), (R() - 0.5) * 0.3 * vw.h, -vw.h * (0.3 + R() * 0.4), 0, 2 + R() * 0.8, { g:vw.h * 0.25, drag:0.8, spin:rnd3(14), flutter:0.3 * vw.h, kind:'confetti' });
+      }
+    } else if(kind === 'stars' || kind === 'coins'){
+      for(let i = 0; i < (n || (kind === 'stars' ? 10 : 12)); i++){
+        const m = new T.Mesh(kind === 'stars' ? K.starG : K.coinG, K.gold);
+        m.scale.setScalar(u * (kind === 'stars' ? 0.9 + R() * 0.8 : 1.05 + R() * 0.35)); m.rotation.set(R() * 0.6, R() * 6, R() * 0.6);
+        const an = o.dir !== undefined ? o.dir + (R() - 0.5) * (o.spread || 1.2) : R() * Math.PI * 2;
+        const sp = (o.speed || 5.5) * (0.55 + R() * 0.6) * u;
+        fxAdd(m, at, Math.cos(an) * sp, Math.sin(an) * sp, (0.2 + R() * 0.8) * 3 * u, (o.life || 1.3) + R() * 0.6,
+          { g:(o.g !== undefined ? o.g : 6) * u, drag:o.drag !== undefined ? o.drag : 0.9, spin:kind === 'coins' ? new T.Vector3(6 + R() * 8, (R() - 0.5) * 4, 0) : rnd3(10), kind });
+      }
+    } else if(kind === 'hearts' || kind === 'notes'){
+      for(let i = 0; i < (n || 6); i++){
+        let m;
+        if(kind === 'hearts') m = new T.Mesh(K.heartG, K.heart[(R() * K.heart.length) | 0]);
+        else {
+          m = new T.Group(); const mat = K.note[(R() * K.note.length) | 0];
+          const hd = new T.Mesh(K.noteHead, mat); hd.scale.set(1.3, 0.95, 0.75); hd.rotation.z = 0.45; m.add(hd);
+          const st2 = new T.Mesh(K.noteStem, mat); st2.position.set(0.115, 0.2, 0); m.add(st2);
+          const fl = new T.Mesh(K.noteFlag, mat); fl.position.set(0.18, 0.36, 0); fl.rotation.z = -0.65; m.add(fl);
+          if(R() < 0.45){ const h2 = hd.clone(); h2.position.x = 0.32; m.add(h2); const s2 = st2.clone(); s2.position.x = 0.435; m.add(s2); const bm = fl.clone(); bm.scale.set(1.8, 1, 1); bm.position.set(0.275, 0.4, 0); bm.rotation.z = 0; m.add(bm); fl.visible = false; }
+        }
+        m.scale.setScalar(u * (1.2 + R() * 0.6));
+        _q.set(at.x + (R() - 0.5) * 1.8 * u, at.y + (R() - 0.1) * 1.2 * u, at.z + R() * u);
+        fxAdd(m, _q, (R() - 0.5) * 1.6 * u, (2.2 + R() * 1.8) * u, R() * u, 1.3 + R() * 0.6, { g:-0.5 * u, drag:0.5, spin:new T.Vector3(0, (R() - 0.5) * 5, (R() - 0.5) * 1.5), sway:1.4 * u, kind });
+      }
+    } else if(kind === 'ring'){                 // onde de choc dorée
+      const m = new T.Mesh(K.ringG, new T.MeshBasicMaterial({ color:new T.Color(o.color || 0xFFD23F).convertSRGBToLinear(), transparent:true, depthWrite:false }));
+      if(o.flat) m.rotation.x = 1.2;
+      m.scale.setScalar(0.2 * u);
+      fxAdd(m, at, 0, 0, 0, o.life || 0.6, { kind, grow:(o.size || 3.2) * u, drag:0 });
+    } else if(kind === 'sparkles'){
+      for(let i = 0; i < (n || 14); i++){
+        const m = new T.Sprite(K.spark[(R() * K.spark.length) | 0]); m.scale.setScalar(u * (0.3 + R() * 0.35));
+        const an = R() * Math.PI * 2, rr = (0.5 + R() * 1.5) * u;
+        _q.set(at.x + Math.cos(an) * rr, at.y + Math.sin(an) * rr, at.z + 0.6 * u);
+        fxAdd(m, _q, Math.cos(an) * 1.4 * u, Math.sin(an) * 1.4 * u, 0, 0.45 + R() * 0.5, { kind, twinkle:1, drag:1 });
+      }
+    }
+  }
+  function fxEmit(dt){
+    const u = mover.scale.x, R = Math.random;
+    if(st.emit.flame){
+      st.emitAcc.flame += dt;
+      _u.set(0, -1, 0).applyQuaternion(pivot.getWorldQuaternion(_qq));
+      while(st.emitAcc.flame > 0.016){
+        st.emitAcc.flame -= 0.016;
+        f.feet[R() < 0.5 ? 0 : 1].getWorldPosition(_p);
+        const m = new T.Sprite(fxKit().flame[0]); m.scale.setScalar(u * (0.7 + R() * 0.4));
+        const sp = (6 + R() * 3) * u;
+        fxAdd(m, _p, _u.x * sp + (R() - 0.5) * 1.2 * u, _u.y * sp + (R() - 0.5) * 1.2 * u, _u.z * sp, 0.3 + R() * 0.2, { kind:'flame', drag:2.2 });
+      }
+    }
+    if(st.emit.trail){
+      st.emitAcc.trail += dt;
+      while(st.emitAcc.trail > 0.035){
+        st.emitAcc.trail -= 0.035;
+        pivot.getWorldPosition(_p); _p.x += (R() - 0.5) * 1.4 * u; _p.y += (R() - 0.5) * 1.4 * u;
+        const m = new T.Sprite(fxKit().spark[(R() * 4) | 0]); m.scale.setScalar(u * (0.25 + R() * 0.3));
+        fxAdd(m, _p, (R() - 0.5) * u, (R() - 0.5) * u, 0, 0.5 + R() * 0.35, { kind:'sparkles', twinkle:1, drag:1 });
+      }
+    }
+  }
+  function fxUpdate(dt){
+    const u = mover.scale.x;
+    for(let i = parts.length - 1; i >= 0; i--){
+      const p = parts[i];
+      p.age += dt;
+      if(p.age >= p.life){ fxDrop(p); parts.splice(i, 1); continue; }
+      const k = p.age / p.life;
+      p.v.y -= p.g * dt;
+      if(p.drag) p.v.multiplyScalar(Math.max(0, 1 - p.drag * dt));
+      p.o.position.addScaledVector(p.v, dt);
+      if(p.sway) p.o.position.x += Math.sin(p.age * 4 + p.ph) * p.sway * dt;
+      if(p.flutter){ p.o.position.x += Math.sin(p.age * 7 + p.ph) * p.flutter * dt; p.o.position.z += Math.cos(p.age * 5 + p.ph) * p.flutter * 0.5 * dt; }
+      if(p.spin){ p.o.rotation.x += p.spin.x * dt; p.o.rotation.y += p.spin.y * dt; p.o.rotation.z += p.spin.z * dt; }
+      if(p.kind === 'ring'){ p.o.scale.setScalar(0.2 * u + p.grow * (1 - Math.pow(1 - k, 3))); p.o.material.opacity = (1 - k) * 0.95; continue; }
+      if(p.kind === 'flame'){
+        p.o.material = fxKit().flame[k < 0.22 ? 0 : (k < 0.5 ? 1 : (k < 0.78 ? 2 : 3))];
+        p.o.scale.setScalar(Math.max(1e-4, p.s0 * (0.75 + k * 1.1) * (k > 0.7 ? (1 - k) / 0.3 : 1)));
+        continue;
+      }
+      let sc = p.s0 * easeOut(Math.min(1, p.age / 0.12)) * Math.min(1, (p.life - p.age) / 0.3);
+      if(p.twinkle) sc *= 0.55 + 0.45 * Math.sin(p.age * 28 + p.ph);
+      p.o.scale.setScalar(Math.max(1e-4, sc));
+    }
+    // élastique du saut à l'élastique : des pieds jusqu'au point d'accroche
+    if(ropeTop){
+      if(!ropeMesh){ ropeMesh = new T.Mesh(new T.CylinderGeometry(1, 1, 1, 10), new T.MeshStandardMaterial({ color:new T.Color(0xEC4899).convertSRGBToLinear(), roughness:0.45 })); scene.add(ropeMesh); }
+      ropeMesh.visible = true;
+      api.anchor('feet', _p);
+      _q.copy(ropeTop).sub(_p); const len = Math.max(1e-3, _q.length());
+      ropeMesh.position.copy(_p).addScaledVector(_q, 0.5);
+      ropeMesh.scale.set(0.045 * u, len, 0.045 * u);
+      ropeMesh.quaternion.setFromUnitVectors(YUP, _q.normalize());
+    } else if(ropeMesh) ropeMesh.visible = false;
+  }
 
   const ease = (x) => x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
   const easeOut = (x) => 1 - Math.pow(1 - x, 3);
@@ -34931,12 +35180,14 @@ function fox3dCreateToon(T, sizePx, opts){
   let last = performance.now();
   function update(dt){
     st.t += dt;
+    if(api.onFrame){ try{ api.onFrame(dt); }catch(e){ console.warn('fox route', e); api.onFrame = null; } }
     const R = fox3d.reduced ? 0.25 : 1;
     // --- cible du regard : doigt / souris, sinon flânerie curieuse
-    const rect = canvas.getBoundingClientRect();
     let tx, ty;
     const p = fox3d.pointer;
-    if(p.x !== null && performance.now() - p.t < 3500){
+    if(party){ tx = Math.sin(st.t * 0.8) * 0.16; ty = -0.05; }   // il te regarde (toi, derrière l'écran)
+    else if(p.x !== null && performance.now() - p.t < 3500){
+      const rect = canvas.getBoundingClientRect();
       tx = Math.max(-1, Math.min(1, (p.x - (rect.left + rect.width / 2)) / (window.innerWidth * 0.42)));
       ty = Math.max(-1, Math.min(1, (p.y - (rect.top + rect.height / 2)) / (window.innerHeight * 0.42)));
     } else {
@@ -34950,9 +35201,9 @@ function fox3dCreateToon(T, sizePx, opts){
     if(st.curiousEnd && st.t > st.curiousEnd){ st.curious = 0; st.curiousEnd = 0; }
     // --- petits gestes spontanés (accueil, quiz)
     if(!st.act && !st.queue.length && st.auto > 0 && st.t > st.nextIdle && !st.hidden && st.jumpT < 0 && st.spinT < 0){
-      const pool = st.auto >= 2 ? ['sniff', 'sly', 'wink', 'digShort', 'pounce', 'sly', 'wink', 'hop', 'spin'] : ['wink', 'sly'];
+      const pool = st.auto >= 2 ? ['sniff', 'sly', 'wink', 'digShort', 'pounce', 'sly', 'wink', 'hop', 'spin', 'wave', 'clap', 'dance'] : ['wink', 'sly'];
       const g = pool[(Math.random() * pool.length) | 0];
-      if(g === 'hop') doReact('hop'); else if(g === 'spin') doReact('ok'); else play(g);
+      if(g === 'hop') doReact('hop'); else if(g === 'spin') spinJump(); else play(g);
       st.nextIdle = st.t + (st.auto >= 2 ? 7 + Math.random() * 6 : 11 + Math.random() * 8);
     }
     if(!st.act) st.act = nextAct();
@@ -34987,7 +35238,13 @@ function fox3dCreateToon(T, sizePx, opts){
 
     // --- gestes (couche ajoutée par-dessus)
     let aY = 0, pitch = 0, roll = 0, aSq = 0, headP = 0, headR = 0, headY = 0, lookK = 1;
-    let eyeMul = [1, 1], irisX = null, earsDown = 0, wagFast = 0, smileK = 0, digK = 0;
+    let eyeMul = [1, 1], irisX = null, earsDown = 0, wagFast = 0, smileK = 0, digK = 0, lift = 0, yawA = 0;
+    // bras : au repos le long du corps (léger balancement), levés quand il saute
+    armRest(0, armTgt[0]); armRest(1, armTgt[1]);
+    const swingA = Math.sin(st.t * 2.2) * 0.03 * R;
+    armTgt[0].x -= swingA; armTgt[1].x += swingA;
+    if(jumpY > 0.02 || st.happyT >= 0){ const up = Math.min(1, jumpY / 0.45 + (st.happyT >= 0 ? 0.35 : 0)); [0, 1].forEach(i => armSet(i, (i ? 1 : -1) * 0.82, 0.5, 0.28, up)); }
+    const arms2 = (x, y, z, w, wob) => { [0, 1].forEach(i => { const sx = i ? 1 : -1; armSet(i, sx * x + (wob ? Math.sin(st.t * wob + i * 2.1) * 0.08 : 0), y, z, w); }); };
     if(a){
       a.t += dt;
       const k = Math.min(1, a.t / a.dur);
@@ -34996,6 +35253,7 @@ function fox3dCreateToon(T, sizePx, opts){
           const on = seg(k, 0.08, 0.2) * (1 - seg(k, 0.86, 1));
           pitch = 0.5 * on; aY = -0.08 * on; headP = 0.25 * on; lookK = 1 - on * 0.8;
           eyeMul = [1 - 0.45 * on, 1 - 0.45 * on]; digK = on; wagFast = on;
+          [0, 1].forEach(i => armSet(i, (i ? 1 : -1) * 0.18, -0.55 + Math.sin(st.t * 15 + i * Math.PI) * 0.35, 0.8, on));
           st.holeTarget = (a.name === 'dig' || st.swapping) ? Math.max(st.holeTarget, seg(k, 0.15, 0.7)) : 0.8 * on;
           if(on > 0.5){
             a.acc = (a.acc || 0) + dt;
@@ -35024,6 +35282,7 @@ function fox3dCreateToon(T, sizePx, opts){
           st.holeTarget = k < 0.74 ? 1 : 0;
           const rise = seg(k, 0.12, 0.5), hopk = seg(k, 0.48, 0.62), shk = seg(k, 0.62, 1);
           aY = k < 0.12 ? -4 : lerp(-3.6, 0, easeOut(rise)) + Math.sin(Math.PI * hopk) * 0.35 * R;
+          arms2(0.75, 0.6, 0.3, bump(seg(k, 0.14, 0.7)));
           roll = k > 0.62 ? Math.sin(shk * 34) * 0.2 * (1 - shk) * R : 0;
           headR = roll * 1.3;
           eyeMul = k < 0.6 ? [1.12, 1.12] : [1, 1];
@@ -35041,6 +35300,7 @@ function fox3dCreateToon(T, sizePx, opts){
           } else if(k < 0.58){
             aY = Math.sin(Math.PI * air * 0.82) * 1.05 * R - (air > 0.82 ? (air - 0.82) / 0.18 * 1.1 : 0);
             pitch = lerp(-0.35, 1.35, ease(air)); lookK = 0; eyeMul = [1.15, 1.15];
+            arms2(0.3, 0.9, 0.3, seg(air, 0.2, 0.5));
           } else if(k < 0.76){
             aY = -1.15; pitch = 1.35; wagFast = 1; lookK = 0;
             once(a, 'burst', () => dirt.spawn(_v.set(0, GROUND + 0.05, 0.75), 30, _d.set(0, 1, 0.25), 3.4, 2.4));
@@ -35077,6 +35337,97 @@ function fox3dCreateToon(T, sizePx, opts){
           smileK = 0.25 * on; lookK = 1 - on;
           break;
         }
+        /* ---- gestes de fête ---- */
+        case 'cheer': {                                        // bras en l'air, deux petits bonds
+          const on = seg(k, 0, 0.12) * (1 - seg(k, 0.88, 1));
+          lift = (bump(seg(k, 0.06, 0.46)) + bump(seg(k, 0.5, 0.9))) * 0.5 * R;
+          aSq = -0.12 * (bump(seg(k, 0, 0.07)) + bump(seg(k, 0.45, 0.51)) + bump(seg(k, 0.89, 0.96)));
+          arms2(0.8, 0.55, 0.28, on, 22);
+          eyeMul = [1 - 0.55 * on, 1 - 0.55 * on]; smileK = 0.5 * on; wagFast = on; headP = -0.12 * on;
+          break;
+        }
+        case 'wave': {                                         // coucou de la patte + clin d'œil
+          const on = seg(k, 0, 0.15) * (1 - seg(k, 0.85, 1));
+          const i = a.side > 0 ? 1 : 0, sx = a.side > 0 ? 1 : -1;
+          armSet(i, sx * (0.6 + Math.sin(a.t * 15) * 0.34), 0.78, 0.3, on);
+          const w = bump(seg(k, 0.25, 0.65));
+          eyeMul[i] = lerp(1, 0.08, w); eyeMul[1 - i] = lerp(1, 0.8, w);
+          headR = 0.18 * on * sx; smileK = 0.45 * on; wagFast = 0.8 * on;
+          lift = Math.abs(Math.sin(a.t * 7.5)) * 0.08 * on * R;
+          break;
+        }
+        case 'clap': {                                         // bravo ! il applaudit
+          const on = seg(k, 0, 0.12) * (1 - seg(k, 0.88, 1));
+          const c = 0.5 + 0.5 * Math.sin(a.t * 24);
+          [0, 1].forEach(i => { const sx = i ? 1 : -1; armSet(i, -sx * lerp(0.62, 0.08, c), -0.02, 0.8, on); });
+          lift = Math.abs(Math.sin(a.t * 6.5)) * 0.1 * on * R;
+          eyeMul = [1 - 0.55 * on, 1 - 0.55 * on]; smileK = 0.5 * on; wagFast = on;
+          break;
+        }
+        case 'dance': {                                        // petite danse : hanches, bras, tête
+          const on = seg(k, 0, 0.1) * (1 - seg(k, 0.9, 1));
+          const b = a.t * 9.5, sb = Math.sin(b), u0 = (sb + 1) / 2;
+          lift = Math.abs(Math.sin(b)) * 0.18 * on * R;
+          roll = sb * 0.14 * on * R; yawA = Math.sin(b * 0.5) * 0.5 * on * R;
+          armSet(0, -lerp(0.4, 0.82, u0), lerp(-0.85, 0.6, u0), 0.3, on);
+          armSet(1, lerp(0.4, 0.82, 1 - u0), lerp(-0.85, 0.6, 1 - u0), 0.3, on);
+          headR = -sb * 0.16 * on; eyeMul = [1 - 0.5 * on, 1 - 0.5 * on]; smileK = 0.5 * on; wagFast = on;
+          break;
+        }
+        case 'flip': {                                         // salto arrière
+          const crouch = seg(k, 0, 0.16), air = seg(k, 0.16, 0.8), land = seg(k, 0.8, 0.94);
+          lift = bump(air) * ((a.o && a.o.h) || 1.5) * R;
+          pitch = -ease(seg(k, 0.2, 0.76)) * Math.PI * 2 * (fox3d.reduced ? 0 : 1);
+          aSq = -0.16 * bump(crouch) - 0.16 * bump(land) + 0.1 * bump(seg(k, 0.16, 0.3));
+          const tuck = bump(seg(k, 0.2, 0.76));
+          if(k < 0.8) arms2(0.3, -0.2, 0.92, tuck);
+          else arms2(0.82, 0.55, 0.28, seg(k, 0.8, 0.88) * (1 - seg(k, 0.95, 1)));
+          eyeMul = k < 0.8 ? [1 - 0.75 * tuck, 1 - 0.75 * tuck] : [0.45, 0.45];
+          smileK = 0.4; wagFast = 1; lookK = 1 - tuck;
+          break;
+        }
+        case 'cartwheel': {                                    // roue
+          const turns = (a.o && a.o.turns) || 1, on = seg(k, 0, 0.1) * (1 - seg(k, 0.9, 1));
+          const pr = ease(seg(k, 0.05, 0.95));
+          roll = -a.side * pr * Math.PI * 2 * turns * (fox3d.reduced ? 0 : 1);
+          lift = (Math.abs(Math.sin(pr * Math.PI * turns)) * 0.5 + bump(seg(k, 0.05, 0.95)) * 0.25) * R;
+          arms2(1, 0.25, 0.12, on);
+          eyeMul = [0.45, 0.45]; smileK = 0.45; wagFast = 1; lookK = 0.4;
+          break;
+        }
+        case 'spinTop': {                                      // toupie, puis tout étourdi
+          const sk = seg(k, 0.05, 0.72), dz = seg(k, 0.72, 1);
+          yawA = ease(sk) * Math.PI * 2 * 4 * (fox3d.reduced ? 0 : 1);
+          lift = bump(sk) * 0.3 * R;
+          arms2(1, 0.15, 0.1, seg(k, 0, 0.1) * (1 - seg(k, 0.72, 0.85)));
+          if(k > 0.72){ headR = Math.sin(a.t * 11) * 0.24 * (1 - dz); roll = Math.sin(a.t * 11 + 1) * 0.09 * (1 - dz) * R; irisX = Math.cos(a.t * 13) * 0.05; }
+          eyeMul = k > 0.72 ? [1.1, 1.1] : [0.5, 0.5]; smileK = 0.3; wagFast = 1; lookK = k > 0.72 ? 0 : 0.3;
+          break;
+        }
+        case 'rocket': {                                       // pose « fusée » (le vol est fait par la scène)
+          const on = seg(k, 0, 0.08) * (1 - seg(k, 0.94, 1));
+          aSq = 0.12 * on;
+          arms2(0.85, 0.5, 0.25, on, 30);
+          eyeMul = [1.15, 1.15]; smileK = 0.55 * on; wagFast = 1; earsDown = -0.3 * on; lookK = 0.3;
+          headR = Math.sin(a.t * 40) * 0.02;
+          break;
+        }
+        case 'fly': {                                          // super-héros : un bras tendu, tonneau en plein vol
+          const on = seg(k, 0, 0.08) * (1 - seg(k, 0.94, 1));
+          const lead = a.side > 0 ? 1 : 0;
+          armSet(lead, (lead ? 1 : -1) * 0.22, 0.96, 0.2, on);
+          armSet(1 - lead, (lead ? -1 : 1) * 0.22, -0.95, -0.1, on);
+          yawA = ease(seg(k, 0.35, 0.68)) * Math.PI * 2 * (fox3d.reduced ? 0 : 1);
+          eyeMul = [0.85, 0.85]; smileK = 0.5 * on; wagFast = 1; lookK = 0.2; earsDown = -0.35 * on;
+          break;
+        }
+        case 'bungee': {                                       // la tête en bas au bout de l'élastique
+          const on = seg(k, 0, 0.1) * (1 - seg(k, 0.92, 1));
+          [0, 1].forEach(i => { const sx = i ? 1 : -1; armSet(i, sx * (0.55 + Math.sin(a.t * 9 + i * 3) * 0.25), 0.8, 0.25, on); });
+          eyeMul = [0.45, 0.45]; smileK = 0.55 * on; wagFast = 1; lookK = 0.3;
+          headR = Math.sin(a.t * 4) * 0.15 * on;
+          break;
+        }
       }
       if(a.t >= a.dur) st.act = null;
     }
@@ -35095,7 +35446,10 @@ function fox3dCreateToon(T, sizePx, opts){
     f.root.position.y = -PIV + floatY + jumpY + aY;
     const S2 = sq + aSq;
     f.root.scale.set(introS * (1 - S2 * 0.6 - breath * 0.5), introS * (1 + S2 + breath), introS * (1 - S2 * 0.6 - breath * 0.5));
-    f.root.rotation.y = spin + st.bodyX * 0.25 * lookK;
+    f.root.rotation.y = spin + yawA + st.bodyX * 0.25 * lookK;
+    pivot.position.y = PIV + lift;
+    const armK = Math.min(1, dt * 26);
+    f.arms.forEach((arm, i) => { armDir[i].lerp(armTgt[i], armK).normalize(); arm.quaternion.setFromUnitVectors(ARM_DOWN, armDir[i]); });
     f.headG.rotation.y = st.lookX * 0.5 * lookK + shake + headY;
     f.headG.rotation.x = st.lookY * 0.32 * lookK + (st.sadT >= 0 ? 0.18 : 0) + headP;
     f.headG.rotation.z = -st.lookX * 0.1 * lookK + st.curious * R + Math.sin(st.t * 0.9) * 0.03 * R + headR;
@@ -35119,7 +35473,7 @@ function fox3dCreateToon(T, sizePx, opts){
     if(st.twitchT >= 0){ st.twitchT += dt; if(st.twitchT > 0.35) st.twitchT = -1; }
     f.ears.forEach((ear, i) => {
       const sx = i === 0 ? -1 : 1;
-      let target = -headVel * 0.03 - sx * (jumpY + Math.max(0, aY)) * 0.22;
+      let target = -headVel * 0.03 - sx * (jumpY + Math.min(0.8, lift) + Math.max(0, aY)) * 0.22;
       if(st.sadT >= 0) target += -sx * 0.45;
       target += sx * earsDown;
       if(st.twitchT >= 0 && st.twitchEar === i) target += Math.sin(st.twitchT * 40) * 0.25;
@@ -35133,10 +35487,12 @@ function fox3dCreateToon(T, sizePx, opts){
     f.tail.rotation.z = st.tail.a;
     f.tail.rotation.y = st.tail.a * 0.6;
     // --- ombre au sol
-    const h = jumpY + Math.max(0, aY) + floatY;
+    const h = jumpY + lift + Math.max(0, aY) + floatY;
     const sh = st.hidden ? 0 : (1 - Math.min(0.55, h * 0.6)) * (aY < -0.6 ? 0.25 : 1);
     shadow.scale.set(Math.max(0.001, sh * introS), Math.max(0.001, sh * introS), 1);
     shadow.material.opacity = sh;
+    if(st.emit.flame || st.emit.trail) fxEmit(dt);
+    if(parts.length || ropeTop || ropeMesh) fxUpdate(dt);
   }
   function frame(now){
     requestAnimationFrame(frame);
@@ -35176,6 +35532,7 @@ function initFox3D(){
     fox3d.ready = true;
     fox3dMountQuiz();
     fox3dMountHero();
+    setTimeout(celebWarm, 5000);
     // l'accueil est reconstruit à chaque retour : on y replace le même renard (un seul contexte WebGL)
     const card = document.getElementById('quizCard');
     if(card){ new MutationObserver(() => fox3dMountHero()).observe(card, { childList:true }); }
@@ -35429,6 +35786,20 @@ function fxSound(kind){
       const n = noise(0.5), f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.frequency.setValueAtTime(400, t); f.frequency.exponentialRampToValueAtTime(2600, t + 0.35); f.Q.value = 1.4;
       out.gain.setValueAtTime(0.001, t); out.gain.exponentialRampToValueAtTime(0.16, t + 0.12); out.gain.exponentialRampToValueAtTime(0.001, t + 0.45);
       n.connect(f); f.connect(out); n.start(t); n.stop(t + 0.5);
+    } else if(kind === 'boing'){
+      const o = ctx.createOscillator(); o.type = 'sine'; o.frequency.setValueAtTime(170, t); o.frequency.exponentialRampToValueAtTime(520, t + 0.12); o.frequency.exponentialRampToValueAtTime(240, t + 0.38);
+      const lfo = ctx.createOscillator(), lg = ctx.createGain(); lfo.frequency.value = 22; lg.gain.value = 38; lfo.connect(lg); lg.connect(o.frequency);
+      out.gain.setValueAtTime(0.001, t); out.gain.exponentialRampToValueAtTime(0.12, t + 0.03); out.gain.exponentialRampToValueAtTime(0.001, t + 0.42);
+      o.connect(out); o.start(t); o.stop(t + 0.45); lfo.start(t); lfo.stop(t + 0.45);
+    } else if(kind === 'coin'){
+      const o = ctx.createOscillator(), f = ctx.createBiquadFilter(); o.type = 'square'; o.frequency.setValueAtTime(988, t); o.frequency.setValueAtTime(1319, t + 0.07);
+      f.type = 'lowpass'; f.frequency.value = 3600;
+      out.gain.setValueAtTime(0.045, t); out.gain.setValueAtTime(0.045, t + 0.07); out.gain.exponentialRampToValueAtTime(0.001, t + 0.36);
+      o.connect(f); f.connect(out); o.start(t); o.stop(t + 0.37);
+    } else if(kind === 'jet'){
+      const n = noise(1.0), f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.frequency.setValueAtTime(280, t); f.frequency.exponentialRampToValueAtTime(1900, t + 0.8); f.Q.value = 0.9;
+      out.gain.setValueAtTime(0.001, t); out.gain.exponentialRampToValueAtTime(0.13, t + 0.15); out.gain.exponentialRampToValueAtTime(0.001, t + 1.0);
+      n.connect(f); f.connect(out); n.start(t); n.stop(t + 1.0);
     }
   }catch(e){}
 }
@@ -35552,7 +35923,10 @@ function kbUpdate(){
   const focused = fxIsTextField(document.activeElement);
   if(!focused || v.h > kbBaseH) kbBaseH = v.h; // hauteur « sans clavier » (mise à jour hors saisie)
   const open = focused && kbBaseH - v.h > 140;
-  if(open !== document.body.classList.contains('kb-open')) document.body.classList.toggle('kb-open', open);
+  if(open !== document.body.classList.contains('kb-open')){
+    document.body.classList.toggle('kb-open', open);
+    if(open){ try{ if(celeb.busy || celeb.draining) celebStop(); }catch(e){} }   // tu tapes : la fête s'efface
+  }
   kbFixOverlay(open);
   clearTimeout(kbEnsureT);
   if(open) kbEnsureT = setTimeout(kbEnsureVisible, 90);
@@ -35577,6 +35951,7 @@ function foxCameo(kind, msg, opts){
     return true;
   }
   cameoBusy = true; cameoLast = now;
+  if(celeb.busy || celeb.draining) celebStop();
   let stage = document.getElementById('foxCameo');
   if(!stage){
     stage = document.createElement('div');
@@ -35613,13 +35988,298 @@ function foxCameo(kind, msg, opts){
   return true;
 }
 
+/* ---------- 🎉 Bonne réponse : Abdel ou Souky surgit de partout pour fêter ça ----------
+   Une scène 3D plein écran, transparente, qui ne bloque aucun clic. À chaque bonne réponse, une fête
+   différente et jamais deux fois la même à la suite : salto depuis le bas, coucou depuis un bord,
+   fusée, saut à l'élastique, toupie, danse, roue, zoom vers toi, jackpot de pièces, vol de
+   super-héros, bravo depuis un coin… avec confettis, étoiles et pièces d'or en 3D, cœurs, notes de
+   musique, onde de choc, flammes et paillettes, plus un « Bravo ! » en relief.
+   Réglable dans 🔊 Sons : à chaque bonne réponse, une sur deux, ou seulement pour les séries. */
+const CELEB_FREQ_KEY = 'lexiqueQuiz::celebFreq';
+let celebFreq = (() => { try{ return localStorage.getItem(CELEB_FREQ_KEY) || 'all'; }catch(e){ return 'all'; } })();
+const CELEB_PRAISE = ['Bravo !', 'Super !', 'Excellent !', 'Génial !', 'Top !', 'Parfait !', 'Bien joué !', 'Trop fort !', 'Waouh !', 'Champion·ne !', 'Impeccable !', 'Magnifique !', 'Tu assures !', 'Incroyable !', 'Yes !', 'Bingo !'];
+const celeb = { busy:false, draining:false, last:0, n:0, bag:[], lastRoute:'', skip:false, manual:false, safety:0, route:'' };
+const celCl = (x) => Math.max(0, Math.min(1, x));
+const celSeg = (t, a, b) => celCl((t - a) / (b - a));
+const celOut = (x) => 1 - Math.pow(1 - x, 3);
+const celIn = (x) => x * x * x;
+const celInOut = (x) => x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const celBack = (x) => { const c1 = 1.9, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
+const celLerp = (a, b, k) => a + (b - a) * k;
+
+/* Chaque parcours reçoit le contexte (taille de l'écran en unités 3D, taille du renard…) et renvoie
+   sa durée, sa trajectoire image par image et ses événements (gestes, effets, sons, « Bravo »). */
+const CELEB_ROUTES = {
+  // Salto arrière depuis le bas de l'écran, explosion de confettis au sommet
+  salto(c){
+    const { P, u, vw } = c;
+    const x = c.clampX(c.rnd(-0.45, 0.45) * vw.w), yIn = -vw.h - 2 * u, yUp = -vw.h + 2.35 * u;
+    return { dur:1.85,
+      frame(t){ P.mover.position.set(x, t < 0.3 ? celLerp(yIn, yUp, celBack(t / 0.3)) : (t < 1.45 ? yUp : celLerp(yUp, yIn, celIn(celSeg(t, 1.45, 1.85)))), 0); },
+      events:[[0, () => { P.play('cheer', { dur:0.3 }); c.sound('whoosh'); }], [0.28, () => P.play('flip', { dur:1.15, h:1.9 })],
+        [0.72, () => { P.fx('confetti'); P.fx('ring', null, { flat:true, size:3.6 }); c.sound('pop'); c.praise(); }], [1.05, () => P.fx('sparkles')]] };
+  },
+  // Coucou depuis un bord de l'écran, penché, avec des cœurs
+  coucou(c){
+    const { P, u, vw, s } = c;
+    const y = c.rnd(-0.3, 0.32) * vw.h, xOut = s * (vw.w + 1.6 * u), xIn = s * (vw.w - 0.9 * u);
+    return { dur:1.9,
+      frame(t){
+        const k = t < 0.34 ? celBack(t / 0.34) : (t < 1.5 ? 1 : 1 - celIn(celSeg(t, 1.5, 1.9)));
+        P.mover.position.set(celLerp(xOut, xIn, k), y + Math.sin(t * 6) * 0.05 * u, 0);
+        P.mover.rotation.z = s * celLerp(0.9, 0.42, Math.min(1, k));
+      },
+      events:[[0, () => { P.play('wave', { side:-s, dur:1.6 }); c.sound('whoosh'); }], [0.42, () => { P.fx('hearts', P.anchor('head'), { count:5 }); c.praise({ side:true }); }], [0.95, () => P.fx('hearts', P.anchor('head'), { count:3 })]] };
+  },
+  // Fusée : traverse l'écran en diagonale, flammes sous les pattes, étoiles d'or
+  fusee(c){
+    const { P, u, vw, s } = c;
+    const p0 = c.v(-s * vw.w * 0.75, -vw.h - 2.6 * u), p1 = c.v(-s * vw.w * 0.05, -vw.h * 0.15), p2 = c.v(s * (vw.w + 2.8 * u), vw.h + 2.8 * u);
+    const bez = (k, o) => { const m = 1 - k; o.set(m * m * p0.x + 2 * m * k * p1.x + k * k * p2.x, m * m * p0.y + 2 * m * k * p1.y + k * k * p2.y, 0); return o; };
+    const a = c.v(0, 0), b = c.v(0, 0);
+    return { dur:1.6,
+      frame(t){
+        const k = celInOut(celSeg(t, 0, 1.6)) * 0.92 + celSeg(t, 0, 1.6) * 0.08;
+        bez(k, a); bez(Math.min(1, k + 0.02), b);
+        P.mover.position.copy(a);
+        P.mover.rotation.z = Math.atan2(-(b.x - a.x), b.y - a.y);
+        P.mover.rotation.y = t * 7;
+      },
+      events:[[0, () => { P.play('rocket', { dur:1.6 }); P.emit('flame', true); c.sound('jet'); }], [0.62, () => { P.fx('stars', null, { count:9, speed:6 }); c.praise({ pt:{ x:window.innerWidth * (0.5 - s * 0.2), y:window.innerHeight * 0.2 } }); }], [0.95, () => P.fx('sparkles')], [1.5, () => P.emit('flame', false)]] };
+  },
+  // Saut à l'élastique : tombe du haut de l'écran, la tête en bas, rebondit, des pièces tombent des poches
+  elastique(c){
+    const { P, u, vw } = c;
+    const x = c.clampX(c.rnd(-0.5, 0.5) * vw.w), yHi = vw.h + 2.2 * u, yLow = vw.h - 3.0 * u;
+    let yEnd = yLow;
+    return { dur:2.0,
+      frame(t){
+        let y;
+        if(t < 0.36) y = celLerp(yHi, yLow - 0.7 * u, celIn(t / 0.36));
+        else if(t < 1.5){ const tt = t - 0.36; y = yLow - 0.7 * u * Math.exp(-3.4 * tt) * Math.cos(10.5 * tt); yEnd = y; }
+        else y = celLerp(yEnd, yHi + 1.2 * u, celIn(celSeg(t, 1.5, 2.0)));
+        P.mover.position.set(x, y, 0);
+        P.mover.rotation.z = Math.PI + Math.sin(t * 5) * 0.16 * Math.exp(-Math.max(0, t - 0.4));
+      },
+      events:[[0, () => { P.play('bungee', { dur:2.0 }); P.rope(c.v(x, vw.h + 0.4 * u)); c.sound('whoosh'); }],
+        [0.38, () => { c.sound('boing'); P.fx('coins', P.anchor('body'), { count:10, dir:-Math.PI / 2, spread:2.4, speed:2.5, g:9, life:1.4 }); c.praise({ below:true }); }],
+        [0.95, () => P.fx('sparkles', P.anchor('head'))]] };
+  },
+  // Toupie dans un coin du bas, onde de choc, puis tout étourdi
+  toupie(c){
+    const { P, u, vw, s } = c;
+    const x = c.clampX(s * (vw.w - 1.6 * u)), yIn = -vw.h - 2 * u, yUp = -vw.h + 2.05 * u;
+    return { dur:1.8,
+      frame(t){ P.mover.position.set(x, t < 0.3 ? celLerp(yIn, yUp, celBack(t / 0.3)) : (t < 1.45 ? yUp : celLerp(yUp, yIn, celIn(celSeg(t, 1.45, 1.8)))), 0); },
+      events:[[0.25, () => { P.play('spinTop', { dur:1.15 }); c.sound('whoosh'); }], [0.55, () => { P.fx('ring', P.anchor('feet'), { flat:true, size:3.4 }); P.fx('sparkles'); }],
+        [0.7, () => c.praise()], [1.0, () => P.fx('stars', null, { count:6, dir:Math.PI / 2, spread:2.2, speed:6 })]] };
+  },
+  // Petite danse dans un coin, notes de musique
+  danse(c){
+    const { P, u, vw, s } = c;
+    const xIn = c.clampX(s * (vw.w - 1.6 * u)), xOut = s * (vw.w + 1.7 * u), y0 = -vw.h + 2.05 * u;
+    return { dur:2.0,
+      frame(t){
+        const k = t < 0.36 ? celOut(t / 0.36) : (t < 1.66 ? 1 : 1 - celIn(celSeg(t, 1.66, 2.0)));
+        const hop = (t < 0.36 || t > 1.66) ? Math.abs(Math.sin(t * 17)) * 0.35 * u : 0;
+        P.mover.position.set(celLerp(xOut, xIn, k), y0 + hop, 0);
+        P.mover.rotation.z = (t < 0.36 || t > 1.66) ? s * 0.18 : 0;
+      },
+      events:[[0, () => c.sound('whoosh')], [0.3, () => P.play('dance', { dur:1.42 })], [0.42, () => { P.fx('notes', P.anchor('head'), { count:3 }); c.praise(); }],
+        [0.8, () => P.fx('notes', P.anchor('head'), { count:2 })], [1.15, () => P.fx('notes', P.anchor('head'), { count:3 })], [1.45, () => P.fx('notes', P.anchor('head'), { count:2 })]] };
+  },
+  // La roue : traverse tout le bas de l'écran en faisant la roue, traînée de paillettes
+  roue(c){
+    const { P, u, vw, s } = c;
+    const x0 = -s * (vw.w + 1.8 * u), x1 = s * (vw.w + 1.8 * u), y0 = -vw.h + 2.9 * u;
+    return { dur:1.8,
+      frame(t){ P.mover.position.set(celLerp(x0, x1, celSeg(t, 0, 1.8)), y0, 0); },
+      events:[[0, () => { P.play('cartwheel', { dur:1.8, turns:2, side:s }); P.emit('trail', true); c.sound('whoosh'); }],
+        [0.8, () => { c.praise({ pt:{ x:window.innerWidth / 2, y:P.screen(c.v(0, y0)).y - c.foxPx * 1.15 } }); P.fx('stars', null, { count:6, dir:Math.PI / 2, spread:2, speed:6 }); }], [1.65, () => P.emit('trail', false)]] };
+  },
+  // Zoom : arrive du fond de l'écran en tournoyant jusqu'à toi, puis bras en l'air et confettis
+  zoom(c){
+    const { P, u, s } = c;
+    const zF = -30, zN = 3.2;
+    const vF = P.view(zF), vN = P.view(zN);
+    const pF = c.v(c.rnd(-0.3, 0.3) * vF.w, 0.3 * vF.h, zF);
+    const pN = c.v(c.clampX(s * (vN.w - 1.6 * u)), -vN.h + 2.15 * u, zN);
+    const pOut = c.v(pN.x, -vN.h - 2.4 * u, zN);
+    return { dur:1.9,
+      frame(t){
+        if(t < 0.8){ const k = celOut(t / 0.8); P.mover.position.lerpVectors(pF, pN, k); P.mover.rotation.y = (1 - k) * Math.PI * 2; }
+        else if(t < 1.5){ P.mover.position.copy(pN); P.mover.rotation.y = 0; }
+        else P.mover.position.lerpVectors(pN, pOut, celIn(celSeg(t, 1.5, 1.9)));
+      },
+      events:[[0, () => { P.play('cartwheel', { dur:0.8, turns:1, side:s }); c.sound('whoosh'); }], [0.8, () => { P.play('cheer', { dur:0.75 }); P.fx('confetti', null, { count:40 }); P.fx('ring', null, { size:3.2 }); c.sound('pop'); c.praise({ k:1.4 }); }]] };
+  },
+  // Jackpot : surgit du bas, bras en l'air, fontaine de pièces d'or
+  jackpot(c){
+    const { P, u, vw } = c;
+    const x = c.clampX(c.rnd(-0.4, 0.4) * vw.w), yIn = -vw.h - 2 * u, yUp = -vw.h + 2.1 * u;
+    return { dur:1.95,
+      frame(t){ P.mover.position.set(x, t < 0.3 ? celLerp(yIn, yUp, celBack(t / 0.3)) : (t < 1.58 ? yUp : celLerp(yUp, yIn, celIn(celSeg(t, 1.58, 1.95)))), 0); },
+      events:[[0.2, () => P.play('cheer', { dur:1.35 })], [0.42, () => { P.fx('coins', P.anchor('top'), { count:16, dir:Math.PI / 2, spread:1.2, speed:11, g:13, life:1.4 }); c.sound('coin'); c.praise(); }],
+        [0.8, () => { P.fx('coins', P.anchor('top'), { count:9, dir:Math.PI / 2, spread:1.4, speed:10, g:13, life:1.2 }); c.sound('coin'); }], [1.1, () => P.fx('sparkles', P.anchor('top'))]] };
+  },
+  // Super-héros : traverse l'écran à l'horizontale, un bras tendu, tonneau en plein vol
+  heros(c){
+    const { P, u, vw, s } = c;
+    const y = c.rnd(-0.15, 0.5) * vw.h, x0 = -s * (vw.w + 2.6 * u), x1 = s * (vw.w + 2.6 * u);
+    return { dur:1.6,
+      frame(t){
+        const k = celSeg(t, 0, 1.6);
+        P.mover.position.set(celLerp(x0, x1, k * 0.85 + celInOut(k) * 0.15), y + Math.sin(t * 5) * 0.25 * u, 0);
+        P.mover.rotation.z = -s * Math.PI / 2 + Math.sin(t * 5) * 0.08;
+      },
+      events:[[0, () => { P.play('fly', { dur:1.6, side:s }); P.emit('trail', true); c.sound('whoosh'); }], [0.6, () => { const ys = P.screen(c.v(0, y)).y; c.praise({ pt:{ x:window.innerWidth / 2, y:ys - c.foxPx * 0.85 < 70 ? ys + c.foxPx * 0.85 : ys - c.foxPx * 0.85 } }); P.fx('stars', null, { count:6, speed:5 }); }], [1.45, () => P.emit('trail', false)]] };
+  },
+  // Bravo depuis un coin du bas : il applaudit, paillettes
+  bravo(c){
+    const { P, u, vw, s } = c;
+    const x = s * (vw.w - 1.05 * u), yIn = -vw.h - 2 * u, yUp = -vw.h + 1.55 * u;
+    return { dur:1.75,
+      frame(t){
+        const k = t < 0.3 ? celBack(t / 0.3) : (t < 1.4 ? 1 : 1 - celIn(celSeg(t, 1.4, 1.75)));
+        P.mover.position.set(x, celLerp(yIn, yUp, k), 0);
+        P.mover.rotation.z = s * 0.3;
+      },
+      events:[[0.12, () => { P.play('clap', { dur:1.3 }); c.sound('whoosh'); }], [0.42, () => { P.fx('sparkles', P.anchor('head')); c.praise({ side:true }); }], [0.85, () => P.fx('sparkles', P.anchor('head'), { count:10 })]] };
+  },
+};
+
+function celebCtx(P){
+  const vw = P.view(0), H = window.innerHeight, W = window.innerWidth;
+  const foxPx = Math.max(140, Math.min(230, H * 0.25, W * 0.55));
+  const u = foxPx * 2 * vw.h / H / 3.5;
+  const c = {
+    P, vw, u, foxPx, s:Math.random() < 0.5 ? 1 : -1,
+    rnd:(a, b) => a + Math.random() * (b - a),
+    clampX:(x) => Math.max(-vw.w + 1.4 * u, Math.min(vw.w - 1.4 * u, x)),
+    v:(x, y, z) => new THREE.Vector3(x, y, z || 0),
+    sound:(k) => fxSound(k),
+    praise:(o) => celebPraise(P, c, o),
+  };
+  return c;
+}
+
+/* « Bravo ! » en relief, au-dessus du renard (ou à côté / en dessous selon sa position) */
+function celebPraise(P, c, o){
+  if(!fxOn) return;
+  o = o || {};
+  const word = o.text || pick(CELEB_PRAISE);
+  const streak = (typeof comboStreak === 'number' && comboStreak >= 2) ? comboStreak : 0;
+  const el = document.createElement('div');
+  el.className = 'celeb-praise celeb-' + pick(['flip', 'zoom', 'swing', 'spin']);
+  el.innerHTML = `<div class="celeb-in"><span class="celeb-word" data-t="${word}"><span>${word}</span></span>${streak ? `<span class="celeb-combo">🔥 ${streak} d'affilée</span>` : ''}</div>`;
+  document.body.appendChild(el);
+  const W = window.innerWidth, H = window.innerHeight;
+  let x = W / 2, y = H * 0.32;
+  if(P && c){
+    const h = P.screen(P.anchor('head'));
+    const px = c.foxPx * (o.k || 1);
+    if(o.pt){ x = o.pt.x; y = o.pt.y; }
+    else if(o.at === 'mid'){ x = h.x; y = h.y - px * 0.8; }
+    else if(o.below){ x = h.x; y = h.y + px * 0.62; }
+    else if(o.side){ x = h.x < W / 2 ? h.x + px * 0.95 : h.x - px * 0.95; y = h.y - px * 0.35; }
+    else { x = h.x; y = h.y - px * 0.78; }
+    if(y < 64 && !o.pt) y = h.y + px * 0.75;
+  }
+  const ew = el.offsetWidth * 1.08, eh = el.offsetHeight;   // taille réelle (sans le zoom de l'animation)
+  x = Math.max(ew / 2 + 8, Math.min(W - ew / 2 - 8, x));
+  y = Math.max(eh / 2 + 12, Math.min(H - eh / 2 - 12, y));
+  el.style.left = x + 'px'; el.style.top = y + 'px';
+  fxBurst(x, y, { count:16, speed:340, life:0.8, size:5, colors:['#FFD23F', '#FF8A1F', '#FFF3C4', '#FF5DA2', '#3DD6F5'] });
+  setTimeout(() => el.remove(), 1500);
+}
+
+function celebWarm(){
+  if(fox3d.party || !fox3d.ready || fox3d.reduced || !fxOn || celebFreq === 'off') return;
+  try{ fox3d.party = fox3dCreate(THREE, 0, { party:true }); fox3d.party.warm(); }catch(e){ console.warn('fox party', e); fox3d.party = null; }
+}
+function celebStop(){
+  clearTimeout(celeb.safety);
+  const P = typeof fox3d !== 'undefined' ? fox3d.party : null;
+  if(P){ P.onFrame = null; P.clearFx(); P.still(); P.mover.position.set(0, -500, 0); }
+  const stage = document.getElementById('foxParty');
+  if(stage) stage.style.display = 'none';
+  celeb.busy = false; celeb.draining = false;
+}
+/* Fin du parcours : le renard est reparti, on laisse retomber les confettis puis on range la scène */
+function celebFinish(P){
+  celeb.busy = false; celeb.draining = true;
+  P.emit('flame', false); P.emit('trail', false); P.rope(null);
+  let wait = 0;
+  P.onFrame = (dt) => { wait += dt; if(!P.fxCount() || wait > 1.4) celebStop(); };
+}
+
+function foxCelebrate(opts){
+  opts = opts || {};
+  if(!fxOn || document.hidden) return false;
+  if(!opts.force){
+    if(celebFreq === 'off') return false;
+    if(celebFreq === 'half' && (celeb.n++ % 2)) return false;
+  }
+  if(celeb.busy || cameoBusy) return false;
+  const now = Date.now();
+  if(!opts.force && now - celeb.last < 900) return false;
+  // le clavier du téléphone est en train de se ranger : la fête commence dès qu'il est rentré
+  if(!opts._kbDone && fxTouch && (fxHideKeyboard() || now - kbClosedAt < 350)){
+    celeb.busy = true; celeb.last = now; kbHoldUntil = Math.max(kbHoldUntil, now + 800);
+    setTimeout(() => { celeb.busy = false; foxCelebrate(Object.assign({}, opts, { force:true, _kbDone:true })); }, 330);
+    return true;
+  }
+  celeb.last = now;
+  const use3d = typeof fox3d !== 'undefined' && fox3d.ready && !fox3d.reduced && typeof THREE !== 'undefined';
+  if(use3d && !fox3d.party){ try{ fox3d.party = fox3dCreate(THREE, 0, { party:true }); }catch(e){ console.warn('fox party', e); fox3d.party = null; } }
+  const P = use3d ? fox3d.party : null;
+  if(!P){ celebPraise(null, null); return true; }   // sans 3D (ou mouvements réduits) : juste le « Bravo » en relief
+  let stage = document.getElementById('foxParty');
+  if(!stage){ stage = document.createElement('div'); stage.id = 'foxParty'; document.body.appendChild(stage); }
+  if(P.canvas.parentNode !== stage) stage.appendChild(P.canvas);
+  stage.style.display = 'block';
+  P.resize();
+  // parcours tiré d'un « sac » mélangé : tous y passent avant qu'un revienne, jamais deux fois de suite
+  const names = Object.keys(CELEB_ROUTES);
+  let name = opts.route && CELEB_ROUTES[opts.route] ? opts.route : '';
+  if(!name){
+    if(!celeb.bag.length){ celeb.bag = names.slice().sort(() => Math.random() - 0.5); if(celeb.bag[0] === celeb.lastRoute) celeb.bag.push(celeb.bag.shift()); }
+    name = celeb.bag.shift();
+  }
+  celeb.lastRoute = celeb.route = name;
+  if(!celeb.draining) P.clearFx(); else { P.emit('flame', false); P.emit('trail', false); P.rope(null); }
+  P.still(); P.st.intro = 1; P.st.hidden = false;
+  P.setFemale(Math.random() < 0.5);
+  P.mover.rotation.order = 'ZYX'; P.mover.rotation.set(0, 0, 0); P.mover.position.set(0, -500, 0);
+  const c = celebCtx(P);
+  P.mover.scale.setScalar(c.u);
+  const route = CELEB_ROUTES[name](c);
+  const evs = (route.events || []).slice().sort((a, b) => a[0] - b[0]);
+  let t = 0;
+  celeb.busy = true; celeb.draining = false;
+  route.frame(0);
+  P.onFrame = (dt) => {
+    t += dt;
+    route.frame(Math.min(t, route.dur));
+    while(evs.length && evs[0][0] <= t){ const e = evs.shift(); try{ e[1](); }catch(err){ console.warn('fête', err); } }
+    if(t >= route.dur) celebFinish(P);
+  };
+  if(fxTouch) kbHoldUntil = Math.max(kbHoldUntil, Date.now() + route.dur * 600);
+  clearTimeout(celeb.safety);
+  if(!celeb.manual) celeb.safety = setTimeout(celebStop, route.dur * 1000 + 3000);   // filet de sécurité
+  return true;
+}
+
 /* ---------- Branchements globaux ---------- */
 ['pointerdown', 'touchstart'].forEach(evt => window.addEventListener(evt, (e) => {
   const t = e.touches ? e.touches[0] : e; if(t){ fx.pointer.x = t.clientX; fx.pointer.y = t.clientY; }
 }, { passive:true, capture:true }));
 (function hookAnswerSounds(){
   const okFn = playCorrectSound, koFn = playWrongSound;
-  playCorrectSound = function(){ okFn.apply(this, arguments); window.__answerFx = { ok:true, t:Date.now() }; fxHideKeyboard(); if(fxOn) fxSparkleAtPointer(); };
+  playCorrectSound = function(){
+    okFn.apply(this, arguments); window.__answerFx = { ok:true, t:Date.now() }; fxHideKeyboard();
+    if(fxOn){ fxSparkleAtPointer(); if(!celeb.skip) setTimeout(() => foxCelebrate(), 90); }   // la série (3, 5, 10…) garde sa grande fête
+  };
   playWrongSound = function(){
     koFn.apply(this, arguments); window.__answerFx = { ok:false, t:Date.now() }; fxHideKeyboard();
     if(fxOn){ fxShake(380); foxCameo('oops', pick(CAMEO_OOPS), { minGap:7000 }); }
@@ -37790,9 +38450,9 @@ function fox3dBindHeroClick(box){
   box.style.cursor = 'pointer';
   box.addEventListener('click', () => {
     const h = fox3d.hero; if(!h) return;
-    if(h.act){ const g = ['hop', 'spin', 'pounce', 'wink', 'digShort', 'sly', 'sniff']; h.act(g[(Math.random() * g.length) | 0]); }
+    if(h.act){ const g = ['hop', 'spin', 'pounce', 'wink', 'digShort', 'sly', 'sniff', 'cheer', 'wave', 'clap', 'dance']; h.act(g[(Math.random() * g.length) | 0]); }
     else h.react(Math.random() < 0.5 ? 'ok' : 'party');
-    try{ playCorrectSound(); }catch(e){}
+    celeb.skip = true; try{ playCorrectSound(); }catch(e){} celeb.skip = false;
   });
 }
 (function runSplash(){
