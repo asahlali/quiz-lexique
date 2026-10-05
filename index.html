@@ -2747,6 +2747,18 @@
   .am-copy:hover{ border-color:var(--accent-line, rgba(79,70,229,.35)); }
   .am-or{ text-align:center; margin:14px 0; color:var(--text-dim); font-weight:600; font-size:13px; }
   html body .am-connect{ border-width:1px !important; }
+  /* 🎯 Entraînement de conjugaison sur mesure */
+  .cs-title{ font-family:'Nunito','Inter',sans-serif; font-weight:800; color:var(--purple); margin:18px 0 8px; font-size:12.5px; text-transform:uppercase; letter-spacing:.04em; }
+  .cs-title span{ text-transform:none; letter-spacing:0; font-weight:700; color:var(--text-dim); }
+  .cs-row{ display:flex; flex-wrap:wrap; gap:8px; }
+  .cs-row .mode-chip.cs-all{ font-weight:800; }
+  .cs-summary{ margin-top:18px; padding:12px 14px; border-radius:14px; background:var(--surface-sunken); border:1px solid var(--border); font-size:14px; line-height:1.5; color:var(--text); text-align:center; }
+  .cs-example{ margin-top:8px; font-size:13.5px; color:var(--text-dim); }
+  .cs-example b{ color:var(--text); }
+  .cs-example span{ white-space:nowrap; }
+  .conj-answer{ display:flex; align-items:center; justify-content:center; gap:10px; }
+  .conj-answer > span{ flex:1 1 auto; min-width:0; }
+  .conj-answer .speak-btn{ flex:none; }
 
   /* ============ 🦊 Logo & images : le VRAI renard 3D (Abdel & Souky), rendu en image ============ */
   :root{
@@ -2767,71 +2779,29 @@
   html body.no-fox3d .home-hero #heroMascotContainer{ display:block !important; }
   html body.no-fox3d.quiz-active:not(.kb-open) .mascot-zone{ display:flex !important; }
   html body.no-fox3d .sp-orb{ background:var(--vv-fox-wave) center/contain no-repeat !important; box-shadow:none !important; border-radius:0 !important; width:62% !important; }
+  /* ============ 📱 Téléphone à l'horizontale (paysage) : mise en page compacte, la question tient à l'écran ============ */
+  @media (orientation: landscape) and (max-height: 520px){
+    html body{ padding-top:8px; padding-bottom:64px; }
+    html body .navbar{ padding:5px 12px; margin-bottom:8px; top:0; border-radius:16px; }
+    html body.quiz-active .navbar{ position:relative; }   /* en exercice, la barre ne cache pas le haut de la carte */
+    html body .brand-word{ font-size:19px; }
+    html body.quiz-active .mascot-zone, html body.no-fox3d.quiz-active:not(.kb-open) .mascot-zone{ display:none !important; }
+    html body.quiz-active .mascot-bubble{ display:none !important; }
+    html body.quiz-active .scoreboard{ margin:2px 0 4px; gap:8px; }
+    html body.quiz-active .progress-label{ margin:0 2px 2px; }
+    html body.quiz-active .progress-track{ margin:4px 0 8px; }
+    html body.quiz-active .card{ padding:14px 22px 16px; margin-top:0; max-height:calc(100dvh - 14px); }
+    html body.quiz-active .card .question-line{ margin:2px 0 10px; }
+    html body.quiz-active .card .cat-tag{ margin-bottom:6px; }
+    html body.quiz-active .card .word-fr{ font-size:clamp(24px, 8vh, 36px); margin:2px 0 6px; }
+    html body.quiz-active .card .options{ grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px; }
+    html body.quiz-active .card .opt{ padding-top:10px; padding-bottom:10px; }
+    html body .cs-title{ margin:12px 0 6px; }
+  }
 
-  /* ============ 📱 Mode portrait : si le téléphone est tourné, on invite à le remettre droit ============ */
-  .vv-rotate{ display:none; position:fixed; inset:0; z-index:2147483600; align-items:center; justify-content:center; text-align:center; padding:20px 28px;
-    background:radial-gradient(120% 100% at 50% 15%, #4527C9 0%, #1C0A45 58%, #0E1120 100%); color:#F8FAFC; font-family:'Nunito','Inter',system-ui,sans-serif; touch-action:none; }
-  html.vv-landscape .vv-rotate{ display:flex; }
-  html.vv-landscape, html.vv-landscape body{ overflow:hidden !important; }
-  .vv-rotate-box{ display:flex; align-items:center; gap:30px; max-width:680px; text-align:left; }
-  .vv-rotate-art{ position:relative; width:170px; height:170px; flex:none; }
-  .vv-rotate-art::before{ content:''; position:absolute; inset:6%; border-radius:50%; background:radial-gradient(circle, rgba(167,139,250,.45), rgba(167,139,250,0) 68%); }
-  .vv-rotate-phone{ position:absolute; left:50%; top:50%; width:74px; height:132px; margin:-66px 0 0 -37px; border:4px solid #E0E7FF; border-radius:16px;
-    background:linear-gradient(160deg, rgba(255,255,255,.14), rgba(255,255,255,.03)); box-shadow:0 12px 30px rgba(0,0,0,.45); animation:vvTurn 2.6s cubic-bezier(.65,0,.3,1) infinite; }
-  .vv-rotate-phone::before{ content:''; position:absolute; left:50%; top:5px; width:20px; height:4px; margin-left:-10px; border-radius:3px; background:#E0E7FF; opacity:.75; }
-  .vv-rotate-fox{ position:absolute; inset:10px 0 4px; background:var(--vv-fox-wave) center/122% no-repeat; }
-  .vv-rotate-arrow{ position:absolute; right:-4px; top:2px; font-size:34px; line-height:1; color:#FDE68A; animation:vvArrow 2.6s ease-in-out infinite; }
-  .vv-rotate-title{ font-weight:900; font-size:26px; line-height:1.15; margin:0 0 8px; }
-  .vv-rotate-title b{ background:linear-gradient(90deg,#FDE68A,#FDBA74); -webkit-background-clip:text; background-clip:text; color:transparent; }
-  .vv-rotate-text{ font-size:15px; line-height:1.45; color:#C7D2FE; }
-  @keyframes vvTurn{ 0%,18%{ transform:rotate(-90deg); } 52%,100%{ transform:rotate(0deg); } }
-  @keyframes vvArrow{ 0%,18%{ opacity:0; transform:rotate(-40deg) scale(.7); } 35%{ opacity:1; transform:rotate(0) scale(1); } 60%,100%{ opacity:0; transform:rotate(30deg) scale(.9); } }
-  @media (prefers-reduced-motion: reduce){ .vv-rotate-phone, .vv-rotate-arrow{ animation:none; } }
-  @media (max-height:330px){ .vv-rotate-art{ width:130px; height:130px; } .vv-rotate-phone{ transform:scale(.8); } .vv-rotate-title{ font-size:22px; } }
 </style>
 </head>
 <body>
-<div class="vv-rotate" id="vvRotate" role="alert" aria-live="assertive">
-  <div class="vv-rotate-box">
-    <div class="vv-rotate-art" aria-hidden="true"><div class="vv-rotate-phone"><i class="vv-rotate-fox"></i></div><span class="vv-rotate-arrow">↻</span></div>
-    <div>
-      <div class="vv-rotate-title">Tourne ton téléphone <b>en portrait</b> 📱</div>
-      <div class="vv-rotate-text">VocabVISION s'utilise en mode portrait.<br>Remets ton téléphone droit et on continue !</div>
-    </div>
-  </div>
-</div>
-<script>
-/* 📱 Mode portrait : sur téléphone, l'appli reste en portrait. L'écran est verrouillé quand le système le
-   permet (appli installée) ; sinon, si tu tournes le téléphone, un écran t'invite à le remettre droit.
-   On se fie à l'orientation réelle de l'écran (pas à la taille de la fenêtre), pour ne jamais confondre
-   avec le clavier ouvert. Les tablettes et les ordinateurs ne sont pas concernés. */
-(function(){
-  var root = document.documentElement;
-  function phone(){ try{ return matchMedia('(pointer:coarse)').matches && Math.min(screen.width, screen.height) < 600; }catch(e){ return false; } }
-  function landscape(){
-    try{
-      var o = screen.orientation && screen.orientation.type;
-      if(o) return o.indexOf('landscape') === 0;
-      if(typeof window.orientation === 'number') return Math.abs(window.orientation) === 90;
-    }catch(e){}
-    var a = document.activeElement, typing = a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA' || a.isContentEditable);
-    return !typing && window.innerWidth > window.innerHeight;
-  }
-  function lock(){ try{ var so = screen.orientation; if(so && so.lock){ var p = so.lock('portrait'); if(p && p.catch) p.catch(function(){}); } }catch(e){} }
-  function update(){
-    var on = phone() && landscape();
-    if(on === root.classList.contains('vv-landscape')) return;
-    root.classList.toggle('vv-landscape', on);
-    if(on){ var a = document.activeElement; if(a && a !== document.body && a.blur){ try{ a.blur(); }catch(e){} } }
-  }
-  update(); lock();
-  try{ if(screen.orientation && screen.orientation.addEventListener) screen.orientation.addEventListener('change', function(){ update(); setTimeout(update, 150); }); }catch(e){}
-  window.addEventListener('orientationchange', function(){ setTimeout(update, 150); });
-  window.addEventListener('resize', update);
-  document.addEventListener('pointerdown', function first(){ lock(); document.removeEventListener('pointerdown', first, true); }, true);
-  window.vvOrientationUpdate = update;
-})();
-</script>
 <div class="splash-screen sp2" id="splashScreen" role="img" aria-label="VocabVISION démarre">
   <div class="sp-bg" id="spBg">
     <div class="sp-aurora a1"></div><div class="sp-aurora a2"></div><div class="sp-aurora a3"></div>
@@ -3135,7 +3105,7 @@ const NAV_TITLES = {
   renderDailyChallenge:'Défi du jour', renderBadgesScreen:'Badges', renderAssociationIntro:'Association', renderGrammarHome:'Grammaire',
   renderCodCoiIntro:'COD / COI', renderSentenceTypeIntro:'Types de phrases', renderGenericRecoIntro:'Exercice', renderPluralPractice:'Pluriels',
   renderAccordPractice:'Accords', renderOrthoHome:'Orthographe', renderOrthoLesson:'Leçon d’orthographe', renderConjugationHome:'Conjugaison',
-  renderVerbTable:'Tableau du verbe', renderConjListenSetup:'Écoute des verbes', renderConjTraps:'Pièges de conjugaison', renderTenseChoiceIntro:'Choix du temps',
+  renderVerbTable:'Tableau du verbe', renderConjPracticeSetup:'Entraînement de conjugaison', renderConjListenSetup:'Écoute des verbes', renderConjTraps:'Pièges de conjugaison', renderTenseChoiceIntro:'Choix du temps',
   renderAddVerbScreen:'Ajouter un verbe', renderTrainingCenter:'Centre d’entraînement', renderTrainingChunkPicker:'Entraînement',
   renderCustomBlockManage:'Bloc perso', renderCustomBlockBuilder:'Créer un bloc', renderWordListView:'Liste de mots', renderDictionaryView:'Dictionnaire',
   renderProfileView:'Profil', renderHistoryView:'Historique', renderLeaderboard:'Classement', renderSyncView:'Synchronisation',
@@ -3162,8 +3132,8 @@ const NAV_CFG = (() => {
     res: (a) => { const all = getAllVerbs(); const v = all.find(x => x.inf === a[0]); if(!v) return false; renderVerbTable(v, all, a[1] || 'present'); return true; } };
   c.renderConjListenSetup.ser = () => null; c.renderConjListenSetup.fb = 'renderConjugationHome';
   c.startConjugationQuiz = { fb:'renderConjugationHome',
-    ser: (a) => Array.isArray(a[0]) ? [a[0].map(v => v && v.inf).filter(Boolean), a[1] || 'present', !!a[2]] : null,
-    res: (a) => { const all = getAllVerbs(); const vs = (a[0] || []).map(i => all.find(v => v.inf === i)).filter(Boolean); if(!vs.length) return false; startConjugationQuiz(vs, a[1], a[2]); return true; } };
+    ser: (a) => Array.isArray(a[0]) ? [a[0].map(v => v && v.inf).filter(Boolean), a[1] || 'present', a[2] === 'mix' ? 'mix' : !!a[2], a[3] || null] : null,
+    res: (a) => { const all = getAllVerbs(); const vs = (a[0] || []).map(i => all.find(v => v.inf === i)).filter(Boolean); if(!vs.length) return false; startConjugationQuiz(vs, a[1], a[2], a[3] || undefined); return true; } };
   c.startShadowGame = { ser: () => null, fb:'renderDailyLesson' };
   c.startVocabMatchGame = { ser: () => null, fb:'renderDailyLesson' };
   c.startEntMission = { fb:'renderEntrepriseHub', ser: (a) => (!a[0] || a[0] instanceof Event || (typeof ENT_MISSION_CFG !== 'undefined' && a[0] === ENT_MISSION_CFG)) ? [] : null };
@@ -5072,12 +5042,12 @@ const DEFAULT_VERBS = [
     imparfait:['absorbais','absorbais','absorbait','absorbions','absorbiez','absorbaient'],
     conditionnel:['absorberais','absorberais','absorberait','absorberions','absorberiez','absorberaient'],
     imperatif:['absorbe','absorbons','absorbez'],passeCompose:['ai absorbé','as absorbé','a absorbé','avons absorbé','avez absorbé','ont absorbé'] } },
-  { inf:'abstenir', ar:'يمتنع', groupe:'irrégulier (comme tenir)', level:'debutant', tenses:{
-    present:['abstiens','abstiens','abstient','abstenons','abstenez','abstiennent'],
-    futur:['abstiendrai','abstiendras','abstiendra','abstiendrons','abstiendrez','abstiendront'],
-    imparfait:['abstenais','abstenais','abstenait','abstenions','absteniez','abstenaient'],
-    conditionnel:['abstiendrais','abstiendrais','abstiendrait','abstiendrions','abstiendriez','abstiendraient'],
-    imperatif:['abstiens','abstenons','abstenez'],passeCompose:['ai abstenu','as abstenu','a abstenu','avons abstenu','avez abstenu','ont abstenu'] } },
+  { inf:"s'abstenir", ar:'يمتنع', groupe:'irrégulier (comme tenir) · pronominal', level:'debutant', tenses:{
+    present:["m'abstiens","t'abstiens","s'abstient",'nous abstenons','vous abstenez',"s'abstiennent"],
+    futur:["m'abstiendrai","t'abstiendras","s'abstiendra",'nous abstiendrons','vous abstiendrez',"s'abstiendront"],
+    imparfait:["m'abstenais","t'abstenais","s'abstenait",'nous abstenions','vous absteniez',"s'abstenaient"],
+    conditionnel:["m'abstiendrais","t'abstiendrais","s'abstiendrait",'nous abstiendrions','vous abstiendriez',"s'abstiendraient"],
+    imperatif:['abstiens-toi','abstenons-nous','abstenez-vous'],passeCompose:['me suis abstenu',"t'es abstenu","s'est abstenu",'nous sommes abstenus','vous êtes abstenu','se sont abstenus'] } },
   { inf:'accabler', ar:'يرهق', groupe:'1er groupe (-er)', level:'debutant', tenses:{
     present:['accable','accables','accable','accablons','accablez','accablent'],
     futur:['accablerai','accableras','accablera','accablerons','accablerez','accableront'],
@@ -11980,7 +11950,7 @@ function renderConjugationHome(level){
   card.innerHTML = `
     <div class="cat-tag">📖 Conjugaison</div>
     <div class="word-fr" style="font-size:clamp(24px,4.5vw,32px);">Verbes essentiels</div>
-    <div class="question-line">${verbs.length} verbe${verbs.length>1?'s':''} · présent, futur, imparfait, passé composé, conditionnel · je / tu / il / nous / vous / ils (+ impératif tu/nous/vous, en lecture)</div>
+    <div class="question-line">${verbs.length} verbe${verbs.length>1?'s':''} · présent, futur, imparfait, passé composé, conditionnel · je / tu / il / nous / vous / ils (+ impératif tu/nous/vous, en lecture) · 🔊 chaque réponse est lue à voix haute</div>
     ${dueVerbCount > 0 ? `<div class="srs-card"><div class="srs-card-inner"><div class="srs-card-icon">${proIcon('repeat', 22)}</div><div class="srs-card-text"><div class="srs-card-title">${dueVerbCount} verbe${dueVerbCount>1?'s':''} à réviser aujourd'hui</div><div class="srs-card-sub">Répétition espacée — pour retenir les verbes sur le long terme</div></div><button class="restart-btn" id="startVerbSRSBtn" style="margin:0;flex:none;">Réviser</button></div></div>` : ''}
 
     <div class="mode-row" style="justify-content:center;margin:14px 0 4px;">
@@ -11988,8 +11958,9 @@ function renderConjugationHome(level){
     </div>
 
     <div style="display:flex;gap:10px;justify-content:center;margin:16px 0;flex-wrap:wrap;">
-      <button class="restart-btn" id="conjPracticeAllBtn" style="margin:0;">🎲 Pratique aléatoire (présent)</button>
-      <button class="restart-btn" id="conjContextAllBtn" style="margin:0;background:var(--surface-sunken);border:1px solid var(--border);color:var(--purple);box-shadow:none;">📝 Phrases en contexte</button>
+      <button class="restart-btn" id="conjSetupBtn" style="margin:0;background:linear-gradient(135deg,#8B5CF6,#EC4899);border-color:#9D174D;">🎯 Tous les verbes · tous les temps</button>
+      <button class="restart-btn" id="conjPracticeAllBtn" style="margin:0;">🎲 Pratique rapide</button>
+      <button class="restart-btn" id="conjContextAllBtn" style="margin:0;background:var(--surface-sunken);border:1px solid var(--border);color:var(--purple);box-shadow:none;">📝 Phrases · tous les temps</button>
       <button class="restart-btn" id="conjListenAllBtn" style="margin:0;background:linear-gradient(135deg,#6366F1,#4F46E5);border-color:#3730A3;">🎧 Dictée de verbes</button>
       <button class="restart-btn" id="conjTrapsBtn" style="margin:0;background:var(--surface-sunken);border:1px solid var(--border);color:var(--red);box-shadow:none;">⚠️ Pièges à éviter</button>
       <button class="restart-btn" id="conjTenseChoiceBtn" style="margin:0;background:linear-gradient(135deg,#6366F1,#4F46E5);border-color:#3730A3;">🎯 Quel temps utiliser ?</button>
@@ -11999,10 +11970,11 @@ function renderConjugationHome(level){
     <div class="options" id="conjVerbGrid" style="grid-template-columns:repeat(auto-fill,minmax(140px,1fr));margin-top:10px;"></div>
   `;
   document.getElementById('backFromConjBtn').addEventListener('click', renderBlockSelect);
-  document.getElementById('conjPracticeAllBtn').addEventListener('click', () => startConjugationQuiz(verbs, 'present'));
+  document.getElementById('conjSetupBtn').addEventListener('click', () => renderConjPracticeSetup());
+  document.getElementById('conjPracticeAllBtn').addEventListener('click', () => conjStartFromSetup());
   const startVerbSRSBtn = document.getElementById('startVerbSRSBtn');
   if(startVerbSRSBtn){ startVerbSRSBtn.addEventListener('click', () => startConjugationQuiz(getSRSDueVerbs(), 'present')); }
-  document.getElementById('conjContextAllBtn').addEventListener('click', () => startConjugationQuiz(verbs, 'present', true));
+  document.getElementById('conjContextAllBtn').addEventListener('click', () => startConjugationQuiz(verbs, CONJ_TENSES.slice(), true, { count:30 }));
   document.getElementById('conjListenAllBtn').addEventListener('click', () => renderConjListenSetup(verbs));
   document.getElementById('conjTrapsBtn').addEventListener('click', () => renderConjTraps());
   document.getElementById('conjTenseChoiceBtn').addEventListener('click', () => renderTenseChoiceIntro());
@@ -12034,7 +12006,7 @@ function readVerbTableAloud(verb, tense){
   let i = 0;
   const playNext = () => {
     if(myToken !== verbReadAllToken || i >= forms.length) return;
-    const text = (labels[i] ? labels[i] + ' ' : '') + forms[i];
+    const text = tense === 'imperatif' ? forms[i] : conjWithPronoun(i, forms[i], verb.inf);
     highlightVerbRow(i);
     speak(text, 'fr-FR', () => {
       if(myToken !== verbReadAllToken) return;
@@ -12062,7 +12034,7 @@ function renderVerbTable(verb, pool, tense){
   tense = availableTenses.includes(tense) ? tense : availableTenses[0];
   const forms = verb.tenses[tense];
   const isImperatif = tense === 'imperatif';
-  const rowLabels = isImperatif ? ['(tu)', '(nous)', '(vous)'] : PRONOUNS;
+  const rowLabels = isImperatif ? ['(tu)', '(nous)', '(vous)'] : PRONOUNS.map((p, i) => conjPronounLabel(i, forms[i], verb.inf));
 
   const card = document.getElementById('quizCard');
   card.innerHTML = `
@@ -12078,13 +12050,14 @@ function renderVerbTable(verb, pool, tense){
         <div class="result-card" style="display:flex;align-items:center;justify-content:space-between;padding:12px 18px;">
           <span style="font-weight:700;color:var(--text-dim);">${p}</span>
           <span style="font-weight:800;font-size:17px;color:var(--text);">${escapeHtml(forms[i])}</span>
-          <button class="speak-btn small" data-speak-fr="${escapeHtml(forms[i])}" title="Écouter">${SPEAK_SVG_SMALL}</button>
+          <button class="speak-btn small" data-speak-fr="${escapeHtml(isImperatif ? forms[i] : conjWithPronoun(i, forms[i], verb.inf))}" title="Écouter">${SPEAK_SVG_SMALL}</button>
         </div>
       `).join('')}
     </div>
     ${isImperatif ? `<div class="question-line" style="margin-top:10px;">L'impératif n'a que 3 formes (tu/nous/vous, sans pronom) — pas d'exercice dédié pour l'instant, ce tableau est pour la lecture/écoute.</div>` : `
     <button class="restart-btn" id="conjPracticeThisBtn" style="margin-top:18px;">🎯 M'entraîner sur ce verbe (${TENSE_LABELS[tense]})</button>
     ${resolveVerbContext(verb) ? `<button class="restart-btn" id="conjContextThisBtn" style="margin-top:10px;background:var(--surface-sunken);border:1px solid var(--border);color:var(--purple);box-shadow:none;">📝 En phrase (${TENSE_LABELS[tense]})</button>` : ''}
+    <button class="restart-btn" id="conjAllTensesThisBtn" style="margin-top:10px;background:linear-gradient(135deg,#8B5CF6,#EC4899);border-color:#9D174D;">🌈 Ce verbe à tous les temps</button>
     `}
   `;
   document.getElementById('backFromVerbBtn').addEventListener('click', () => { stopVerbReadAll(); renderConjugationHome(); });
@@ -12092,6 +12065,8 @@ function renderVerbTable(verb, pool, tense){
   if(conjPracticeThisBtn){ conjPracticeThisBtn.addEventListener('click', () => startConjugationQuiz([verb], tense)); }
   const conjContextThisBtn = document.getElementById('conjContextThisBtn');
   if(conjContextThisBtn){ conjContextThisBtn.addEventListener('click', () => startConjugationQuiz([verb], tense, true)); }
+  const conjAllTensesThisBtn = document.getElementById('conjAllTensesThisBtn');
+  if(conjAllTensesThisBtn){ conjAllTensesThisBtn.addEventListener('click', () => startConjugationQuiz([verb], CONJ_TENSES.slice(), 'mix', { count:30 })); }
   document.getElementById('readAllVerbBtn').addEventListener('click', () => readVerbTableAloud(verb, tense));
   card.querySelectorAll('[data-speak-fr]').forEach(btn => {
     btn.addEventListener('click', (e) => { e.stopPropagation(); speak(btn.dataset.speakFr, 'fr-FR'); });
@@ -12101,35 +12076,201 @@ function renderVerbTable(verb, pool, tense){
   });
 }
 
-let conjQuizState = null; // { queue, idx, score, tense }
-const TENSE_TIME_MARKERS = { present:"D'habitude,", futur:'Demain,', imparfait:'Avant,', passeCompose:'Hier,' };
+let conjQuizState = null; // { queue:[{ verb, tense, pronounIdx, sentence, ctx, marker }], idx, score, tenses, mode }
+const TENSE_TIME_MARKERS = { present:"D'habitude,", futur:'Demain,', imparfait:'Avant,', passeCompose:'Hier,', conditionnel:"Dans l'idéal," };
+/* 🕰️ Le petit mot en tête de phrase annonce le temps (tiré au hasard à chaque question) */
+const CONJ_MARKERS = {
+  present:["D'habitude,", 'En ce moment,', "Aujourd'hui,", 'Souvent,', 'Chaque jour,'],
+  futur:['Demain,', 'La semaine prochaine,', 'Bientôt,', "L'année prochaine,", 'Dans deux jours,'],
+  imparfait:['Avant,', 'Autrefois,', "À l'époque,", 'Chaque été,', 'Quand il pleuvait,'],
+  passeCompose:['Hier,', 'La semaine dernière,', 'Ce matin,', "L'an dernier,", 'Hier soir,'],
+  conditionnel:["Dans l'idéal,", 'Avec plus de temps,', "Si c'était possible,", 'Sans ce problème,', 'Avec un peu de chance,'],
+};
+const CONJ_TENSES = ['present', 'futur', 'imparfait', 'passeCompose', 'conditionnel'];
+const TENSE_AU = { present:'au présent', futur:'au futur simple', imparfait:"à l'imparfait", passeCompose:'au passé composé', conditionnel:'au conditionnel', imperatif:"à l'impératif" };
+/* 📝 Une phrase pour CHAQUE verbe : « Demain, nous ___ le bus. » — compléments écrits pour marcher avec
+   toutes les personnes et tous les temps. */
+const CONJ_PHRASES = { "être": "en retard", "avoir": "un chat", "aller": "à l'école", "faire": "les courses", "dire": "la vérité", "pouvoir": "venir à la fête", "vouloir": "partir en vacances", "devoir": "travailler dur", "prendre": "le bus", "venir": "à la fête", "savoir": "la réponse", "voir": "un film", "mettre": "la table", "croire": "cette histoire", "partir": "en voyage", "sortir": "avec des amis", "connaître": "cette ville", "boire": "de l'eau", "écrire": "une lettre", "lire": "un roman", "parler": "français", "aimer": "le chocolat", "manger": "une pomme", "donner": "un cadeau à Sara", "finir": "le travail", "choisir": "une couleur", "vendre": "la voiture", "attendre": "le bus", "courir": "dans le parc", "comprendre": "la leçon", "ouvrir": "la porte", "tenir": "la porte", "vivre": "à Paris", "entendre": "un bruit", "rire": "aux éclats", "suivre": "les conseils du médecin", "mourir": "de rire", "naître": "en France", "offrir": "des fleurs", "souffrir": "en silence", "plaire": "à tout le monde", "apprendre": "le français", "chercher": "une solution", "trouver": "les clés", "demander": "de l'aide", "penser": "à l'avenir", "travailler": "beaucoup", "habiter": "à Casablanca", "arriver": "à l'heure", "rester": "à la maison", "tomber": "dans l'escalier", "acheter": "du pain", "appeler": "le médecin", "commencer": "le cours", "devenir": "architecte", "aider": "les voisins", "jouer": "au foot", "regarder": "la télévision", "écouter": "de la musique", "oublier": "le code", "recevoir": "un colis", "descendre": "à la cave", "monter": "au grenier", "envoyer": "un message", "résoudre": "ce problème", "considérer": "la question", "permettre": "cette sortie", "réussir": "l'examen", "refuser": "l'offre", "accepter": "l'offre", "proposer": "une solution", "expliquer": "la situation", "exister": "sans internet", "continuer": "les études", "décider": "de partir", "développer": "une application", "exiger": "des excuses", "montrer": "le chemin", "paraître": "fatigué", "ajouter": "du sel", "remarquer": "un détail", "éviter": "les erreurs", "garder": "un secret", "quitter": "la maison", "changer": "de travail", "préparer": "le dîner", "indiquer": "la direction", "raconter": "une histoire", "décrire": "la situation", "abonder": "dans ce sens", "aborder": "un sujet délicat", "aboutir": "à un accord", "abréger": "le discours", "absorber": "beaucoup d'eau", "s'abstenir": "de commenter", "accabler": "l'équipe de reproches", "acclamer": "le champion", "accommoder": "les restes", "accompagner": "les enfants à la gare", "accomplir": "une mission difficile", "accorder": "un délai", "accroître": "les revenus", "accueillir": "les nouveaux employés", "accumuler": "de l'expérience", "accuser": "le voisin", "accéder": "au poste de directeur", "accélérer": "le processus", "acheminer": "le courrier", "acquitter": "la facture", "acquérir": "de nouvelles compétences", "activer": "le compte", "actualiser": "le document", "adapter": "la stratégie", "adhérer": "à cette association", "admettre": "l'erreur", "administrer": "une entreprise", "adopter": "une nouvelle méthode", "adorer": "jouer dehors", "adresser": "une demande au service", "affaiblir": "l'adversaire", "affecter": "toute l'équipe", "affirmer": "le contraire", "affronter": "la difficulté", "agir": "rapidement", "agrandir": "la maison", "ajourner": "la réunion", "ajuster": "les paramètres", "aligner": "les chaises", "alimenter": "la discussion", "allonger": "les pauses", "allouer": "un budget au projet", "alléger": "les démarches", "altérer": "le goût", "amorcer": "le dialogue", "amplifier": "le son", "améliorer": "la qualité", "aménager": "les bureaux", "analyser": "les résultats", "anticiper": "les risques", "apaiser": "les tensions", "apercevoir": "un ami dans la foule", "appliquer": "cette procédure", "apporter": "les documents", "approcher": "de la ville", "approuver": "la proposition", "apprécier": "ce geste", "argumenter": "avec calme", "arranger": "les fleurs", "articuler": "chaque mot", "aspirer": "à une vie calme", "assigner": "une tâche", "associer": "les deux idées", "assumer": "les décisions", "assurer": "la voiture", "atteindre": "les objectifs", "attester": "les faits", "attribuer": "un prix", "atténuer": "les conséquences", "augmenter": "les prix", "authentifier": "le document", "autoriser": "cette dépense", "avancer": "vite", "avertir": "les voisins", "avouer": "la vérité", "bafouer": "les règles", "bannir": "le sucre", "berner": "les collègues", "bloquer": "le passage", "blâmer": "les autres", "bouleverser": "les habitudes", "braver": "le froid", "breveter": "cette invention", "briller": "en mathématiques", "brosser": "les chaussures", "brusquer": "les enfants", "bâtir": "une maison", "bénéficier": "d'une réduction", "cacher": "la vérité", "cadencer": "le travail", "calculer": "le coût total", "canaliser": "cette énergie", "captiver": "le public", "caractériser": "la situation", "causer": "un retard", "cerner": "le problème", "certifier": "l'exactitude des faits", "cesser": "de fumer", "challenger": "l'équipe", "charger": "la voiture", "chasser": "les mouches", "circonscrire": "l'incendie", "circuler": "à vélo", "clarifier": "la demande", "classer": "les dossiers", "clôturer": "le projet", "coexister": "en paix", "collaborer": "avec d'autres équipes", "collecter": "les informations", "combattre": "la fraude", "combiner": "ces méthodes", "commander": "une pizza", "commenter": "le match", "commercialiser": "ce produit", "communiquer": "par e-mail", "commémorer": "cet événement", "comparer": "les prix", "compenser": "les pertes", "compiler": "les données", "compliquer": "les choses", "compléter": "le formulaire", "composer": "un numéro", "compromettre": "le projet", "concentrer": "les efforts sur l'essentiel", "concevoir": "une application", "conclure": "un accord", "concrétiser": "cette idée", "condamner": "la violence", "conduire": "prudemment", "confier": "un secret à Sara", "confirmer": "le rendez-vous", "confondre": "les deux jumeaux", "confronter": "les opinions", "conférer": "de nouveaux droits", "congeler": "les aliments", "conquérir": "de nouveaux marchés", "consacrer": "du temps à la famille", "conserver": "les preuves", "consigner": "cet incident", "consommer": "peu d'énergie", "constater": "une amélioration", "constituer": "une équipe", "construire": "un nouvel hôpital", "consulter": "un spécialiste", "contaminer": "l'eau", "contempler": "le paysage", "contester": "cette décision", "contracter": "un prêt", "contredire": "le professeur", "contribuer": "au projet", "convaincre": "le client", "convenir": "d'un rendez-vous", "convertir": "le fichier en PDF", "coopérer": "avec la police", "coordonner": "les équipes", "corriger": "les copies", "corroborer": "cette version", "corrompre": "un fonctionnaire", "couvrir": "les livres", "craindre": "l'orage", "critiquer": "le film", "croiser": "un voisin", "croître": "rapidement", "créer": "une entreprise", "cueillir": "des pommes", "culminer": "en tête du classement", "cultiver": "des légumes", "cumuler": "plusieurs fonctions", "céder": "la place", "célébrer": "la victoire", "côtoyer": "des chercheurs", "demeurer": "à la campagne", "desservir": "la table", "destiner": "ce cadeau à Sara", "devancer": "la concurrence", "diagnostiquer": "la panne", "dialoguer": "avec les voisins", "dicter": "une lettre", "diffuser": "l'information", "différencier": "les deux concepts", "digérer": "la nouvelle", "diluer": "le sirop", "diminuer": "les dépenses", "diriger": "une équipe", "discerner": "la vérité", "discuter": "calmement", "disperser": "la foule", "disposer": "de peu de temps", "dissimuler": "la colère", "distinguer": "les deux modèles", "distraire": "les enfants", "distribuer": "les documents", "diversifier": "les activités", "divulguer": "ces informations", "dominer": "le match", "doter": "l'école d'ordinateurs", "doubler": "le chiffre d'affaires", "dresser": "un bilan", "durcir": "les contrôles", "débattre": "de cette proposition", "débloquer": "la situation", "déborder": "d'énergie", "déceler": "une anomalie", "décentraliser": "certains services", "décevoir": "les clients", "déchiffrer": "le message", "déclencher": "une alerte", "décliner": "l'invitation", "décomposer": "le problème", "découvrir": "une nouvelle méthode", "décrypter": "le rapport", "déduire": "les frais", "défendre": "cette idée", "défier": "les concurrents", "définir": "les objectifs", "déformer": "les propos", "dégager": "la route", "dégrader": "le matériel", "délaisser": "le jardin", "délibérer": "longuement", "délivrer": "un certificat", "déléguer": "cette tâche", "démentir": "la rumeur", "démontrer": "le théorème", "dénoncer": "une fraude", "dépendre": "du budget", "dépenser": "trop d'argent", "déplacer": "la réunion", "déployer": "une nouvelle solution", "déposer": "une plainte", "déprécier": "le travail des autres", "déranger": "les voisins", "dériver": "vers le large", "désamorcer": "le conflit", "désapprouver": "cette décision", "désigner": "un responsable", "désirer": "un café", "désobéir": "aux règles", "désorienter": "les visiteurs", "détailler": "la proposition", "détecter": "une anomalie", "détenir": "plusieurs brevets", "déterminer": "les priorités" };
 
-/* 📚 Si ce verbe existe déjà dans le lexique de vocabulaire avec une phrase d'exemple, on l'utilise
-   en priorité pour construire la phrase de l'exercice — sinon on retombe sur le complément fourni
-   avec le verbe. Le "~" de la phrase d'exemple marque où le verbe conjugué doit s'insérer ; on
-   récupère ce qui suit comme complément à coller après "pronom ___". */
+/* 🔤 Pronom + verbe avec l'élision : j'aime, j'ai mangé, j'habite (mais je hurle : h aspiré) */
+const CONJ_H_ASPIRE = ['haïr', 'hurler', 'hâter', 'heurter', 'hanter', 'harceler', 'hisser', 'huer', 'hacher', 'hausser', 'héler', 'hennir', 'hérisser', 'hocher', 'honnir', 'hululer', 'hasarder', 'handicaper', 'harponner', 'haleter', 'hâler', 'harasser', 'hiérarchiser', 'hoqueter', 'houspiller'];
+function conjElides(form, inf){
+  const f = String(form || '').trim();
+  if(/^[aeiouyàâäéèêëîïôöùûüœæ]/i.test(f)) return true;
+  if(/^h/i.test(f)) return !CONJ_H_ASPIRE.includes(String(inf || '').replace(/^(se |s')/i, '').toLowerCase());
+  return false;
+}
+function conjPronounLabel(pi, form, inf){ return pi === 0 && conjElides(form, inf) ? "j'" : PRONOUNS[pi]; }
+function conjWithPronoun(pi, form, inf){ const p = conjPronounLabel(pi, form, inf); return p.endsWith("'") ? p + form : p + ' ' + form; }
+/* Comparaison tolérante : accents, apostrophes typographiques, espaces, et pronom tapé ou non (« nous mangeons » = « mangeons ») */
+function conjNormText(s){ return normalizeForSearch(String(s || '')).replace(/[’`´ʼ]/g, "'").replace(/\s*'\s*/g, "'").replace(/\s+/g, ' ').trim(); }
+function conjAnswerMatches(typed, form){
+  const t = conjNormText(typed), f = conjNormText(form);
+  if(!t) return false;
+  if(t === f) return true;
+  const stripped = t.replace(/^(j'|je |tu |il |elle |on |nous |vous |ils |elles )/, '');
+  return stripped === f;
+}
+
+/* Complément de phrase d'un verbe : notre liste, puis celui donné avec le verbe (verbes ajoutés), puis
+   l'exemple du lexique de vocabulaire (le « ~ » marque la place du verbe), nettoyé. */
 function resolveVerbContext(verb){
+  if(!verb) return null;
+  if(CONJ_PHRASES[verb.inf]) return CONJ_PHRASES[verb.inf];
+  if(verb.ctx) return String(verb.ctx).trim().replace(/\s*[.!?…]+$/, '') || null;
   const normInf = normalizeForSearch(verb.inf);
   const match = WORDS.find(w => w.fr && normalizeForSearch(w.fr) === normInf && w.ex && w.ex.includes('~'));
   if(match){
-    const after = match.ex.split('~').slice(1).join('~').trim().replace(/^[,;.\s]+/, '');
-    if(after) return after;
+    const after = match.ex.split('~').slice(1).join('~').trim().replace(/^[,;.\s]+/, '').replace(/\s*[.!?…]+$/, '');
+    if(after && !/^(pas|plus|jamais|rien|point)\b/i.test(after) && !/[~?]/.test(after)) return after;
   }
-  return verb.ctx || null;
+  return null;
 }
 
-function startConjugationQuiz(pool, tense, contextMode){
-  tense = tense || 'present';
-  if(tense === 'imperatif'){ renderConjugationHome(); return; } // pas d'exercice 6-pronoms pour l'impératif (seulement tu/nous/vous)
-  // ne garde que les verbes qui possèdent bien ce temps (les verbes perso n'ont souvent que le présent)
-  // et, en mode "phrase en contexte", uniquement ceux qui ont un complément de phrase (le tien si
-  // trouvé dans ton lexique, sinon celui fourni avec le verbe)
-  let usable = pool.filter(v => v.tenses[tense]);
-  if(contextMode){ usable = usable.filter(v => resolveVerbContext(v)); }
-  if(!usable || usable.length === 0){ renderConjugationHome(); return; }
-  const challenges = [];
-  usable.forEach(v => PRONOUNS.forEach((p, pi) => challenges.push({ verb: v, pronounIdx: pi })));
-  conjQuizState = { queue: shuffle(challenges).slice(0, 30), idx: 0, score: { correct:0, total:0 }, startTime: Date.now(), tense, contextMode: !!contextMode };
+/* ⚙️ Réglage de l'entraînement (mémorisé) */
+const CONJ_SETUP_KEY = 'lexiqueQuiz::conjSetup';
+function conjSetupDefault(){ return { scope:'tous', tenses:CONJ_TENSES.slice(), format:'phrase', count:30, speak:true }; }
+function conjSetupLoad(){
+  try{
+    const c = JSON.parse(localStorage.getItem(nsKey(CONJ_SETUP_KEY)) || 'null');
+    if(c && typeof c === 'object'){
+      const out = Object.assign(conjSetupDefault(), c);
+      out.tenses = (Array.isArray(out.tenses) ? out.tenses : []).filter(t => CONJ_TENSES.includes(t));
+      if(!out.tenses.length) out.tenses = CONJ_TENSES.slice();
+      return out;
+    }
+  }catch(e){}
+  return conjSetupDefault();
+}
+function conjSetupSave(c){ try{ localStorage.setItem(nsKey(CONJ_SETUP_KEY), JSON.stringify(c)); }catch(e){} }
+function conjScopeVerbs(scope){
+  const all = getAllVerbs();
+  if(scope === 'revoir') return getSRSDueVerbs();
+  if(scope === 'perso') return customVerbs.slice();
+  if(scope === 'debutant' || scope === 'intermediaire' || scope === 'avance') return all.filter(v => (v.level || 'debutant') === scope);
+  return all;
+}
+function conjStartFromSetup(c){
+  c = c || conjSetupLoad();
+  startConjugationQuiz(conjScopeVerbs(c.scope), c.tenses, c.format === 'mix' ? 'mix' : c.format === 'phrase', { count:c.count, speak:c.speak });
+}
+
+/* 🎯 Entraînement sur mesure : quels verbes, quels temps, en phrases ou non, combien de questions */
+function renderConjPracticeSetup(){
+  clearQuestionTimer();
+  document.body.classList.remove('quiz-active');
+  currentBlock = null;
+  isHomeScreen = false;
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="csBackBtn" style="cursor:pointer;">← Conjugaison</button>`;
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('footerNote').textContent = '';
+  const c = conjSetupLoad();
+  const all = getAllVerbs();
+  const lv = (l) => all.filter(v => (v.level || 'debutant') === l).length;
+  const due = getSRSDueVerbCount();
+  const scopes = [['tous', `📚 Tous les verbes · ${all.length}`], ['debutant', `🌱 Débutant · ${lv('debutant')}`], ['intermediaire', `🌿 Intermédiaire · ${lv('intermediaire')}`], ['avance', `🎓 Avancé · ${lv('avance')}`]];
+  if(due > 0) scopes.push(['revoir', `🔁 À réviser · ${due}`]);
+  if(customVerbs.length) scopes.push(['perso', `✍️ Mes verbes · ${customVerbs.length}`]);
+  if(!scopes.some(s => s[0] === c.scope)) c.scope = 'tous';
+  const allT = CONJ_TENSES.every(t => c.tenses.includes(t));
+  const verbs = conjScopeVerbs(c.scope);
+  // exemple de phrase avec le réglage choisi
+  const exV = verbs.filter(v => resolveVerbContext(v) && c.tenses.some(t => v.tenses[t]));
+  let example = '';
+  if(exV.length && c.format !== 'pronom'){
+    const v = exV[Math.floor(Math.random() * exV.length)];
+    const ts = c.tenses.filter(t => v.tenses[t]);
+    const t = ts[Math.floor(Math.random() * ts.length)];
+    const pi = Math.floor(Math.random() * 6);
+    const m = CONJ_MARKERS[t][Math.floor(Math.random() * CONJ_MARKERS[t].length)];
+    const pl = conjPronounLabel(pi, v.tenses[t][pi], v.inf);
+    example = `<div class="cs-example">Exemple : <b>${escapeHtml(m)} ${escapeHtml(pl)}${pl.endsWith("'") ? '' : ' '}___ ${escapeHtml(resolveVerbContext(v))}.</b> <span>(${escapeHtml(v.inf)} · ${TENSE_LABELS[t]})</span></div>`;
+  }
+  const fmtLabel = { phrase:'en phrases', pronom:'pronom + verbe', mix:'phrases et pronoms mélangés' }[c.format] || 'en phrases';
+  const chip = (attr, val, on, label) => `<button class="mode-chip ${on ? 'active' : ''}" ${attr}="${val}">${label}</button>`;
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="cat-tag">🎯 Entraînement sur mesure</div>
+    <div class="word-fr" style="font-size:clamp(22px,4.5vw,30px);">Tes verbes, tes temps</div>
+    <div class="question-line">Après chaque réponse, juste ou fausse, tu entends le verbe conjugué.</div>
+    <div class="cs-title">Verbes</div>
+    <div class="cs-row">${scopes.map(s => chip('data-cs-scope', s[0], c.scope === s[0], s[1])).join('')}</div>
+    <div class="cs-title">Temps <span>— un ou plusieurs</span></div>
+    <div class="cs-row">
+      <button class="mode-chip cs-all ${allT ? 'active' : ''}" data-cs-all="1">✨ Tous les temps</button>
+      ${CONJ_TENSES.map(t => chip('data-cs-tense', t, c.tenses.includes(t), `${TENSE_STYLE[t].emoji} ${TENSE_LABELS[t]}`)).join('')}
+    </div>
+    <div class="cs-title">Exercice</div>
+    <div class="cs-row">${[['phrase', '📝 En phrases'], ['pronom', '👤 Pronom + verbe'], ['mix', '🔀 Les deux']].map(f => chip('data-cs-format', f[0], c.format === f[0], f[1])).join('')}</div>
+    <div class="cs-title">Questions</div>
+    <div class="cs-row">${[10, 20, 30, 50, 100].map(n => chip('data-cs-count', n, c.count === n, n)).join('')}</div>
+    <div class="cs-title">Entendre le verbe</div>
+    <div class="cs-row">${chip('data-cs-speak', '1', c.speak !== false, '🔊 Oui, après chaque réponse')}${chip('data-cs-speak', '0', c.speak === false, '🔇 Non')}</div>
+    <div class="cs-summary"><b>${verbs.length}</b> verbe${verbs.length > 1 ? 's' : ''} × <b>${c.tenses.length}</b> temps · ${fmtLabel} · <b>${c.count}</b> questions${example}</div>
+    <button class="restart-btn" id="csStartBtn" style="margin-top:14px;" ${verbs.length ? '' : 'disabled'}>▶ C'est parti !</button>
+  `;
+  const save = () => { conjSetupSave(c); renderConjPracticeSetup(); };
+  document.getElementById('csBackBtn').addEventListener('click', () => renderConjugationHome());
+  card.querySelectorAll('[data-cs-scope]').forEach(b => b.addEventListener('click', () => { c.scope = b.dataset.csScope; save(); }));
+  card.querySelector('[data-cs-all]').addEventListener('click', () => { c.tenses = CONJ_TENSES.slice(); save(); });
+  card.querySelectorAll('[data-cs-tense]').forEach(b => b.addEventListener('click', () => {
+    const t = b.dataset.csTense;
+    if(c.tenses.includes(t)){ if(c.tenses.length > 1) c.tenses = c.tenses.filter(x => x !== t); }
+    else c.tenses = CONJ_TENSES.filter(x => x === t || c.tenses.includes(x));
+    save();
+  }));
+  card.querySelectorAll('[data-cs-format]').forEach(b => b.addEventListener('click', () => { c.format = b.dataset.csFormat; save(); }));
+  card.querySelectorAll('[data-cs-count]').forEach(b => b.addEventListener('click', () => { c.count = parseInt(b.dataset.csCount, 10) || 30; save(); }));
+  card.querySelectorAll('[data-cs-speak]').forEach(b => b.addEventListener('click', () => { c.speak = b.dataset.csSpeak === '1'; save(); if(c.speak) speak('Tu entendras le verbe après chaque réponse.', 'fr-FR'); }));
+  document.getElementById('csStartBtn').addEventListener('click', () => conjStartFromSetup(c));
+}
+
+/* ▶ Lance un entraînement.
+   tense : un temps ('present') ou une liste (['present', 'futur', …]).
+   contextMode : true = en phrases, false = pronom + verbe, 'mix' = les deux.
+   opts : { count, speak } */
+function startConjugationQuiz(pool, tense, contextMode, opts){
+  opts = opts || {};
+  const tenses = (Array.isArray(tense) ? tense : [tense || 'present']).filter(t => t !== 'imperatif' && TENSE_LABELS[t]);
+  if(!tenses.length){ renderConjugationHome(); return; } // pas d'exercice 6 personnes pour l'impératif (seulement tu/nous/vous)
+  const has = (v, t) => v && v.tenses && Array.isArray(v.tenses[t]) && v.tenses[t].length >= 6;
+  const usable = (pool || []).filter(v => tenses.some(t => has(v, t)));
+  if(!usable.length){ renderConjugationHome(); return; }
+  const mode = contextMode === 'mix' ? 'mix' : (contextMode ? 'phrase' : 'pronom');
+  const count = Math.max(1, opts.count || 30);
+  const pickMarker = (t) => { const l = CONJ_MARKERS[t] || [TENSE_TIME_MARKERS[t] || '']; return l[Math.floor(Math.random() * l.length)]; };
+  const make = (v, t, pi) => {
+    const ctx = mode === 'pronom' ? null : resolveVerbContext(v);
+    const sentence = !!ctx && (mode === 'phrase' || Math.random() < 0.5);
+    return { verb:v, tense:t, pronounIdx:pi, sentence, ctx:sentence ? ctx : null, marker:sentence ? pickMarker(t) : '' };
+  };
+  let total = 0;
+  usable.forEach(v => tenses.forEach(t => { if(has(v, t)) total += 6; }));
+  let queue = [];
+  if(total <= count){
+    // peu de choix (un seul verbe…) : toutes les personnes de tous les temps, mélangées
+    const combos = [];
+    usable.forEach(v => tenses.forEach(t => { if(has(v, t)) for(let pi = 0; pi < 6; pi++) combos.push([v, t, pi]); }));
+    queue = shuffle(combos).map(x => make(x[0], x[1], x[2]));
+  } else {
+    // beaucoup de choix : un verbe différent à chaque question, les temps passent chacun leur tour
+    const seen = new Set();
+    let verbs = shuffle(usable.slice()), vi = 0, order = shuffle(tenses.slice()), ti = 0, guard = 0;
+    while(queue.length < count && guard++ < count * 30){
+      if(vi >= verbs.length){ verbs = shuffle(usable.slice()); vi = 0; }
+      const v = verbs[vi++];
+      if(ti >= order.length){ order = shuffle(tenses.slice()); ti = 0; }
+      let t = order[ti++];
+      if(!has(v, t)){ const ok = tenses.filter(x => has(v, x)); t = ok[Math.floor(Math.random() * ok.length)]; }
+      const pi = Math.floor(Math.random() * 6);
+      const key = v.inf + '|' + t + '|' + pi;
+      if(seen.has(key)) continue;
+      seen.add(key);
+      queue.push(make(v, t, pi));
+    }
+  }
+  conjQuizState = { queue, idx:0, score:{ correct:0, total:0 }, startTime:Date.now(), tense:tenses.length === 1 ? tenses[0] : 'mix', tenses, contextMode, mode, pool, opts,
+    speak:opts.speak !== undefined ? opts.speak !== false : conjSetupLoad().speak !== false };
   totalHiddenMs = 0; hiddenSince = document.hidden ? Date.now() : null; totalIdleMs = 0; lastInteractionAt = Date.now();
   renderConjugationQuizCard();
 }
@@ -12148,30 +12289,31 @@ function renderConjugationQuizCard(){
   if(!st || st.idx >= st.queue.length){ endConjugationQuiz(); return; }
   document.body.classList.add('quiz-active');
   const ch = st.queue[st.idx];
-  const pronoun = PRONOUNS[ch.pronounIdx];
-  const tStyle = TENSE_STYLE[st.tense] || TENSE_STYLE.present;
+  const form = ch.verb.tenses[ch.tense][ch.pronounIdx];
+  const pl = conjPronounLabel(ch.pronounIdx, form, ch.verb.inf);
+  const gap = pl.endsWith("'") ? pl + '___' : pl + ' ___';
+  const tStyle = TENSE_STYLE[ch.tense] || TENSE_STYLE.present;
 
   document.getElementById('scoreboard').innerHTML = `
     <div class="chip">✅ <b>${st.score.correct}</b>/${st.score.total}</div>
     ${comboStreak >= 2 ? `<div class="chip" style="background:linear-gradient(135deg,#F97316,#EA580C);color:#fff;border:none;">🔥 <b>${comboStreak}</b> d'affilée</div>` : ''}
     <button class="chip" id="conjExitBtn" style="cursor:pointer;">← Quitter</button>
   `;
-  document.getElementById('conjExitBtn').addEventListener('click', () => renderConjugationHome());
+  document.getElementById('conjExitBtn').addEventListener('click', () => { conjQuizState = null; renderConjugationHome(); });
   document.getElementById('progressFill').style.width = Math.round((st.idx / st.queue.length) * 100) + '%';
   document.getElementById('footerNote').textContent = `${st.idx+1} / ${st.queue.length}`;
 
   const card = document.getElementById('quizCard');
-  const resolvedCtx = st.contextMode ? resolveVerbContext(ch.verb) : null;
-  ch.resolvedCtx = resolvedCtx;
-  const sentenceHtml = st.contextMode
-    ? `<div class="word-fr" style="font-size:clamp(20px,4.2vw,27px);line-height:1.5;">${TENSE_TIME_MARKERS[st.tense]} ${pronoun} ___ ${escapeHtml(resolvedCtx)}.</div>
-       <div class="question-line" style="margin-top:6px;">verbe : <b style="color:var(--purple);">${escapeHtml(ch.verb.inf)}</b> (${escapeHtml(ch.verb.ar)}) · ${TENSE_LABELS[st.tense]}</div>`
-    : `<div class="question-line">Conjugue <b style="color:var(--purple);">${escapeHtml(ch.verb.inf)}</b> (${escapeHtml(ch.verb.ar)}) à la bonne personne :</div>
-       <div class="word-fr" style="font-size:clamp(26px,5.5vw,36px);">${pronoun} ___</div>`;
+  const verbLine = `<b style="color:var(--purple);">${escapeHtml(ch.verb.inf)}</b> (${escapeHtml(ch.verb.ar || '')})`;
+  const sentenceHtml = ch.sentence
+    ? `<div class="word-fr" style="font-size:clamp(20px,4.2vw,27px);line-height:1.5;">${escapeHtml(ch.marker)} ${escapeHtml(gap)} ${escapeHtml(ch.ctx)}.</div>
+       <div class="question-line" style="margin-top:6px;">verbe : ${verbLine} · <b>${TENSE_LABELS[ch.tense]}</b></div>`
+    : `<div class="question-line">Conjugue ${verbLine} <b>${TENSE_AU[ch.tense] || ''}</b> :</div>
+       <div class="word-fr" style="font-size:clamp(26px,5.5vw,36px);">${escapeHtml(gap)}</div>`;
   card.innerHTML = `
-    <div class="cat-tag" style="background:${tStyle.grad};color:#fff;border:none;">${tStyle.emoji} ${TENSE_LABELS[st.tense]}${st.contextMode ? ' · en contexte' : ''}</div>
+    <div class="cat-tag" style="background:${tStyle.grad};color:#fff;border:none;">${tStyle.emoji} ${TENSE_LABELS[ch.tense]}${ch.sentence ? ' · en phrase' : ''}</div>
     ${sentenceHtml}
-    <input type="text" id="conjAnswerInput" class="search-input" placeholder="Écris la forme conjuguée..." style="max-width:320px;margin:16px auto 0;text-align:center;font-size:18px;" autocomplete="off" autocapitalize="off" autocorrect="off">
+    <input type="text" id="conjAnswerInput" class="search-input" placeholder="Écris le verbe conjugué..." style="max-width:320px;margin:16px auto 0;text-align:center;font-size:18px;" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
     <button class="restart-btn" id="conjValidateBtn" style="margin-top:14px;">✓ Valider</button>
     <div class="reveal" id="conjReveal"></div>
   `;
@@ -12186,10 +12328,11 @@ function validateConjugationAnswer(){
   if(!st) return;
   const input = document.getElementById('conjAnswerInput');
   const btn = document.getElementById('conjValidateBtn');
-  if(input.disabled) return;
+  if(!input || input.disabled) return;
+  if(!input.value.trim()){ input.focus(); return; }
   const ch = st.queue[st.idx];
-  const correctForm = ch.verb.tenses[st.tense][ch.pronounIdx];
-  const isCorrect = normalizeForSearch(input.value.trim()) === normalizeForSearch(correctForm);
+  const correctForm = ch.verb.tenses[ch.tense][ch.pronounIdx];
+  const isCorrect = conjAnswerMatches(input.value, correctForm);
 
   input.disabled = true; btn.disabled = true;
   st.score.total++;
@@ -12205,42 +12348,63 @@ function validateConjugationAnswer(){
   }
   else { playWrongSound(); reactMascot('ko'); vibrate([40,40,40]); }
 
+  // ce qu'on affiche et ce qu'on entend : « j'ai mangé », ou la phrase entière
+  const pl = conjPronounLabel(ch.pronounIdx, correctForm, ch.verb.inf);
+  const withPron = conjWithPronoun(ch.pronounIdx, correctForm, ch.verb.inf);
+  const spoken = ch.sentence ? `${ch.marker} ${withPron} ${ch.ctx}.` : withPron;
+  const shown = `${escapeHtml(pl)}${pl.endsWith("'") ? '' : ' '}<b>${escapeHtml(correctForm)}</b>`;
+  const fullSentence = ch.sentence ? `${escapeHtml(ch.marker)} ${shown} ${escapeHtml(ch.ctx)}.` : shown;
   const reveal = document.getElementById('conjReveal');
-  const fullSentence = st.contextMode
-    ? `${TENSE_TIME_MARKERS[st.tense]} ${PRONOUNS[ch.pronounIdx]} <b>${escapeHtml(correctForm)}</b> ${escapeHtml(ch.resolvedCtx || ch.verb.ctx)}.`
-    : `${PRONOUNS[ch.pronounIdx]} <b>${escapeHtml(correctForm)}</b>`;
+  const sayBtn = `<button class="speak-btn small conj-say" type="button" title="Réécouter" aria-label="Réécouter">${SPEAK_SVG_SMALL}</button>`;
   reveal.innerHTML = isCorrect
-    ? `<div class="pass-banner ok">✅ ${fullSentence}</div>`
-    : `<div class="pass-banner ko">❌ La bonne réponse était : ${fullSentence}</div>`;
+    ? `<div class="pass-banner ok conj-answer"><span>✅ ${fullSentence}</span>${sayBtn}</div>`
+    : `<div class="pass-banner ko conj-answer"><span>❌ La bonne réponse était : ${fullSentence}</span>${sayBtn}</div>`;
+  reveal.querySelector('.conj-say').addEventListener('click', (e) => { e.stopPropagation(); speak(spoken, 'fr-FR'); });
   input.style.borderColor = isCorrect ? 'var(--green)' : 'var(--red)';
 
-  advanceAfterAnswer(isCorrect, () => { st.idx++; renderConjugationQuizCard(); }, 900); // ❌ erreur : on attend « Suivant » (correction + écoute)
+  const myIdx = st.idx;
+  const go = () => { if(conjQuizState !== st || st.idx !== myIdx) return; st.idx++; renderConjugationQuizCard(); };
+  if(isCorrect){
+    // 🔊 juste : on entend le verbe, puis question suivante dès la fin de la lecture
+    if(st.speak){
+      const t0 = Date.now();
+      setTimeout(() => {
+        if(conjQuizState !== st || st.idx !== myIdx) return;
+        speak(spoken, 'fr-FR', () => setTimeout(go, Math.max(300, 1000 - (Date.now() - t0))));
+      }, 380);
+    } else setTimeout(go, 900);
+  } else {
+    // ❌ faux : on entend la bonne réponse, et on attend « Suivant » (correction + écoute)
+    if(st.speak) setTimeout(() => { if(conjQuizState === st && st.idx === myIdx) speak(spoken, 'fr-FR'); }, 450);
+    advanceAfterAnswer(false, go);
+  }
 }
 
 function endConjugationQuiz(){
   document.body.classList.remove('quiz-active');
   const st = conjQuizState;
+  if(!st){ renderConjugationHome(); return; }
   const pct = st.score.total ? Math.round((st.score.correct/st.score.total)*100) : 0;
   const durationSec = computeActiveDurationSec(st.startTime);
   recordDailyActivity();
   recordDailyStats(durationSec, pct >= PASS_THRESHOLD, st.score.correct * 5, 'conjugaison');
-  bumpSubjectLifetime('conjugaison', st.score.correct);
-  bumpSubjectLifetime('conjugaison', st.score.correct);
   bumpSubjectLifetime('conjugaison', st.score.correct);
   cloudAutoPush();
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="conjEndBackBtn" style="cursor:pointer;">← Retour aux verbes</button>`;
   document.getElementById('progressFill').style.width = '100%';
   document.getElementById('footerNote').textContent = 'Terminé';
 
+  const label = st.tense === 'mix' ? `${st.tenses.length} temps mélangés` : TENSE_LABELS[st.tense];
   const fun = pct === 100 ? '🏆 Sans faute, imbattable !' : pct >= 90 ? '🌟 Excellent !' : pct >= 70 ? '👍 Bien joué !' : pct >= 50 ? '💪 Continue comme ça !' : '🌱 Ça vient, entraîne-toi encore !';
   const card = document.getElementById('quizCard');
   card.innerHTML = `
     <div class="end-screen">
-      <div class="cat-tag">📖 ${TENSE_LABELS[st.tense]} terminé</div>
+      <div class="cat-tag">📖 ${escapeHtml(label)} · terminé</div>
       <div class="big">${st.score.correct} / ${st.score.total}</div>
       <div class="sub">${pct}% de bonnes réponses · ${fun}</div>
       <div style="display:flex;gap:12px;justify-content:center;margin-top:20px;flex-wrap:wrap;">
         <button class="restart-btn" id="conjAgainBtn">🔁 Recommencer</button>
+        <button class="restart-btn" id="conjSetupAgainBtn" style="background:var(--surface-sunken);border:1px solid var(--border);color:var(--purple);box-shadow:none;">⚙️ Changer le réglage</button>
         <button class="restart-btn" id="conjBackBtn" style="background:var(--surface-sunken);border:1px solid var(--border);color:var(--purple);box-shadow:none;">← Retour aux verbes</button>
       </div>
     </div>
@@ -12248,9 +12412,10 @@ function endConjugationQuiz(){
   if(pct === 100){ celebrate(); setTimeout(launchConfetti, 250); }
   else if(pct >= 90){ launchConfetti(); }
   else if(pct >= 70){ burstStars(window.innerWidth/2, window.innerHeight*0.35); }
-  document.getElementById('conjEndBackBtn').addEventListener('click', renderConjugationHome);
-  document.getElementById('conjBackBtn').addEventListener('click', renderConjugationHome);
-  document.getElementById('conjAgainBtn').addEventListener('click', () => startConjugationQuiz(getAllVerbs(), st.tense, st.contextMode));
+  document.getElementById('conjEndBackBtn').addEventListener('click', () => renderConjugationHome());
+  document.getElementById('conjBackBtn').addEventListener('click', () => renderConjugationHome());
+  document.getElementById('conjSetupAgainBtn').addEventListener('click', () => renderConjPracticeSetup());
+  document.getElementById('conjAgainBtn').addEventListener('click', () => startConjugationQuiz(st.pool || getAllVerbs(), st.tenses || st.tense, st.contextMode, Object.assign({}, st.opts, { speak:st.speak })));
 }
 
 /* ============ 🎧 DICTÉE DE VERBES — écoute la forme conjuguée, écris-la ============ */
@@ -12305,8 +12470,7 @@ function renderConjListenCard(){
   document.body.classList.add('quiz-active');
   const ch = st.queue[st.idx];
   const form = ch.verb.tenses[ch.tense][ch.pronounIdx];
-  const pronoun = PRONOUNS[ch.pronounIdx];
-  const fullText = pronoun + ' ' + form;
+  const fullText = conjWithPronoun(ch.pronounIdx, form, ch.verb.inf);
 
   document.getElementById('scoreboard').innerHTML = `
     <div class="chip">✅ <b>${st.score.correct}</b>/${st.score.total}</div>
@@ -12341,7 +12505,7 @@ function validateConjListenAnswer(correctText){
   const input = document.getElementById('conjListenInput');
   const btn = document.getElementById('conjListenValidateBtn');
   if(input.disabled) return;
-  const isCorrect = normalizeForSearch(input.value.trim()) === normalizeForSearch(correctText);
+  const isCorrect = conjNormText(input.value) === conjNormText(correctText);
   input.disabled = true; btn.disabled = true;
   st.score.total++;
   if(isCorrect){ st.score.correct++; }
@@ -17692,7 +17856,8 @@ const COLOR_PRESETS = {
 const WHATS_NEW_SECTIONS = [
   { icon:'🆕', title:'Nouveautés', items:[
     { name:'🦊 Nouvelles icônes', desc:"L'icône de l'appli, celle de l'onglet, le logo en haut de l'écran et l'écran de résultats montrent maintenant le vrai renard 3D à lunettes (Abdel, et Souky pour fêter tes résultats)." },
-    { name:'📱 Toujours en portrait', desc:"Sur téléphone, l'appli reste en mode portrait : l'écran est verrouillé quand c'est possible (appli installée), sinon un écran t'invite à remettre ton téléphone droit." },
+    { name:'📱 Portrait et paysage', desc:"Tourne ton téléphone : l'appli passe en paysage (horizontal) et revient en portrait (vertical), sans rien perdre." },
+    { name:'📖 Conjugaison : tous les verbes, tous les temps', desc:"Choisis tes verbes (tous, par niveau, à réviser), un ou plusieurs temps, en phrases ou pronom + verbe. Après chaque réponse, juste ou fausse, tu entends le verbe conjugué." },
     { name:'🎉 Fête à chaque bonne réponse', desc:"Abdel ou Souky surgit de partout — salto, fusée, saut à l'élastique, toupie, danse, roue, zoom, jackpot, super-héros… — avec confettis, étoiles et pièces d'or en 3D, cœurs, notes et un « Bravo ! » en relief. Jamais deux fois la même à la suite. Réglable dans 🔊 Sons." },
     { name:'🦊 Abdel & Souky', desc:"Les renards à lunettes (Souky avec son nœud et ses cils) sautent, tournent, creusent, plongent dans leur terrier et en surgissent, font des clins d'œil et des regards malins — touche le renard de l'accueil pour le voir faire." },
     { name:'☁️ Audiothèque + Cloudflare R2', desc:"Les gros fichiers (1 Go et plus) vont sur Cloudflare R2 (10 Go gratuits), les petits restent sur GitHub : tout s'affiche dans une seule Audiothèque, et un envoi coupé reprend où il s'était arrêté." },
@@ -31589,11 +31754,14 @@ function renderConjugueCard(){
   document.getElementById('backFromCGBtn').addEventListener('click', renderJeuxMotsHome);
   const input = document.getElementById('cgInput');
   const check = () => {
-    const ok = normalizeForSearch(input.value) === normalizeForSearch(item.answer);
+    if(!input || !input.value.trim()) return;
+    const ok = conjAnswerMatches(input.value, item.answer);
     st.answered = true;
     st.wasCorrect = ok;
     if(ok) st.score++;
     renderConjugueCard();
+    const full = (item.person === 'je' && conjElides(item.answer, item.verb)) ? "j'" + item.answer : item.person + ' ' + item.answer;
+    setTimeout(() => speak(full, 'fr-FR'), 250);   // 🔊 on entend le verbe, juste ou faux
   };
   const checkBtn = document.getElementById('cgCheckBtn');
   if(checkBtn) checkBtn.addEventListener('click', check);
@@ -36326,6 +36494,24 @@ function foxCelebrate(opts){
   if(!celeb.manual) celeb.safety = setTimeout(celebStop, route.dur * 1000 + 3000);   // filet de sécurité
   return true;
 }
+
+/* 📱 Paysage (téléphone à l'horizontale) : à chaque nouvelle question, la carte se cale en haut de l'écran
+   pour que la question et les réponses soient visibles sans faire défiler. */
+(function landscapeQuizFit(){
+  let mq = null;
+  try{ mq = matchMedia('(orientation: landscape) and (max-height: 520px)'); }catch(e){ return; }
+  const card = document.getElementById('quizCard');
+  if(!card || !mq) return;
+  const fit = () => {
+    if(!mq.matches || !document.body.classList.contains('quiz-active') || document.body.classList.contains('kb-open')) return;
+    const r = card.getBoundingClientRect();
+    if(r.top >= 0 && r.bottom <= window.innerHeight) return;   // déjà entièrement visible
+    window.scrollTo({ top:Math.max(0, window.scrollY + r.top - 6), behavior:'auto' });
+  };
+  new MutationObserver(() => requestAnimationFrame(fit)).observe(card, { childList:true });
+  const later = () => setTimeout(fit, 250);
+  if(mq.addEventListener) mq.addEventListener('change', later); else if(mq.addListener) mq.addListener(later);
+})();
 
 /* ---------- Branchements globaux ---------- */
 ['pointerdown', 'touchstart'].forEach(evt => window.addEventListener(evt, (e) => {
