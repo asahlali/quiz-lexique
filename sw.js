@@ -2,7 +2,9 @@
    Met l'application en cache pour un fonctionnement hors-ligne
    et permet l'installation depuis le navigateur (PWA). */
 
-const CACHE = 'vocabvision-v12'; // v12 : parle avec Abdel & Souky (assistant vocal) + bonjour par le prénom
+// 🏷️ Version publiée : mise à jour automatiquement par publier-site.cmd (même numéro que dans index.html)
+const VERSION = '1.0.1';
+const CACHE = 'vocabvision-' + VERSION;
 const ASSETS = [
   './',
   './index.html',
@@ -47,8 +49,14 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // version.json (« y a-t-il une nouvelle version ? ») : toujours le réseau, jamais le cache
+  if (url.pathname.endsWith('version.json')) return;
+
+  // La page elle-même : on demande toujours au serveur s'il y a plus récent
+  // (sinon le navigateur peut garder l'ancienne version jusqu'à 10 minutes après une publication).
+  const fresh = req.mode === 'navigate' || url.pathname.endsWith('/') || url.pathname.endsWith('.html');
   event.respondWith(
-    fetch(req)
+    (fresh ? fetch(req, { cache: 'no-cache' }) : fetch(req))
       .then((res) => {
         // met à jour le cache des ressources de l'app
         if (res && res.status === 200 && url.origin === self.location.origin) {

@@ -2,6 +2,8 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
+<!-- 🏷️ Version de l'appli : augmentée automatiquement par publier-site.cmd à chaque publication -->
+<meta name="app-version" content="1.0.1" data-date="2026-10-06">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <title>VocabVISION — Vocabulaire Français ↔ Arabe</title>
 <script>
@@ -2766,6 +2768,29 @@
   .cs-example span{ white-space:nowrap; }
   .conj-answer{ display:flex; align-items:center; justify-content:center; gap:10px; }
   .conj-answer > span{ flex:1 1 auto; min-width:0; }
+  /* 🏷️ Version : écran de démarrage, menu, bandeau « Nouvelle version » */
+  .sp-ver{ font:800 11.5px/1 'Nunito','Inter',sans-serif; letter-spacing:.05em; color:rgba(255,255,255,.66); padding:5px 11px; border-radius:999px; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.14); }
+  .sp-ver:empty{ display:none; }
+  html[data-theme="light"] body .sp-ver{ color:#475569; background:rgba(17,24,39,.05); border-color:rgba(17,24,39,.1); }
+  .menu-ver-badge{ font:800 11px/1 'Nunito','Inter',sans-serif; color:var(--purple); background:color-mix(in srgb, var(--purple) 12%, transparent); padding:4px 7px; border-radius:999px; }
+  .menu-ver-badge:empty{ display:none; }
+  .menu-ver{ margin:10px 16px 0; padding:12px; border-radius:14px; background:var(--surface-sunken); border:1px solid var(--border); display:flex; flex-direction:column; align-items:center; gap:8px; text-align:center; font:600 13px/1.35 'Nunito','Inter',sans-serif; color:var(--text-dim); }
+  .menu-ver b{ color:var(--text); }
+  .menu-ver-btn{ width:100%; min-height:44px; border-radius:12px; border:1px solid var(--border); background:var(--surface); color:var(--text); font:800 14px 'Nunito','Inter',sans-serif; cursor:pointer; }
+  .menu-ver-btn:hover{ border-color:var(--purple); color:var(--purple); }
+  .menu-ver-state{ font-weight:800; font-size:13px; }
+  .menu-ver-state:empty{ display:none; }
+  .menu-ver-state.ok{ color:var(--green, #059669); }
+  .menu-ver-state.new{ color:var(--purple); }
+  .vv-update{ position:fixed; left:50%; top:calc(env(safe-area-inset-top, 0px) + 10px); z-index:10035; width:min(520px, calc(100% - 20px)); transform:translate(-50%, -140%); transition:transform .35s cubic-bezier(.2,.9,.3,1); display:flex; align-items:center; gap:10px; padding:10px 10px 10px 14px; border-radius:18px; background:linear-gradient(135deg,#4C1D95,#7C3AED); color:#fff; box-shadow:0 14px 34px rgba(76,29,149,.45); font-family:'Nunito','Inter',sans-serif; }
+  .vv-update.in{ transform:translate(-50%, 0); }
+  .vv-up-ic{ font-size:24px; flex:none; }
+  .vv-up-txt{ flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
+  .vv-up-txt b{ font-weight:900; font-size:15px; }
+  .vv-up-txt small{ font-weight:700; font-size:12px; opacity:.82; }
+  .vv-up-go{ flex:none; min-height:44px; padding:0 14px; border:none; border-radius:12px; background:#fff; color:#4C1D95; font:900 14.5px 'Nunito','Inter',sans-serif; cursor:pointer; }
+  .vv-up-go:disabled{ opacity:.7; }
+  .vv-up-x{ flex:none; width:36px; height:36px; border:none; border-radius:50%; background:rgba(255,255,255,.16); color:#fff; font-size:15px; cursor:pointer; }
   /* 🦊 Parle avec Abdel & Souky — grande fenêtre simple : le renard, sa bulle, un gros micro, de gros boutons */
   .va-overlay{ position:fixed; inset:0; z-index:10040; background:rgba(15,8,45,.55); -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px); display:flex; align-items:flex-end; justify-content:center; opacity:0; transition:opacity .25s ease; }
   .va-overlay.in{ opacity:1; }
@@ -2799,7 +2824,9 @@
   .va-mic.on .va-mic-ring{ animation:vaRing 1.2s ease-out infinite; }
   .va-mic.on .va-mic-ic{ background:linear-gradient(135deg,#EF4444,#B91C1C); box-shadow:0 12px 26px rgba(239,68,68,.45); }
   .va-mic-lbl{ font:800 17px/1 'Nunito','Inter',sans-serif; }
-  .va-mic.off{ display:none; }
+  .va-type.dictate input{ border-color:var(--purple); box-shadow:0 0 0 4px color-mix(in srgb, var(--purple) 20%, transparent); }
+  .va-type.dictate button{ animation:vaSend 1.6s ease-in-out infinite; }
+  @keyframes vaSend{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.08); } }
   .va-type{ display:flex; gap:8px; margin:12px 16px 0; }
   .va-type input{ flex:1; min-width:0; height:52px; border-radius:16px; border:2px solid var(--border); background:var(--surface-sunken); color:var(--text); font:600 17px 'Nunito','Inter',sans-serif; padding:0 14px; }
   .va-type input:focus{ outline:none; border-color:var(--purple); }
@@ -2929,8 +2956,9 @@
     <div class="sp-bubble" id="spBubble" aria-live="polite"><span class="sp-hello" id="spHello"></span><span class="sp-msg" id="spMsg"></span></div>
   </div>
   <button class="sp-sound" id="spSound" type="button" aria-label="Activer le son"><span class="ic"></span><span class="lbl">Activer le son</span></button>
-  <div class="sp-foot"><div class="sp-hint">Touche l'écran pour commencer</div><div class="sp-bar"><i id="spBar"></i></div></div>
+  <div class="sp-foot"><div class="sp-hint">Touche l'écran pour commencer</div><div class="sp-bar"><i id="spBar"></i></div><div class="sp-ver" id="spVer"></div></div>
 </div>
+<script>(function(){ try{ var m = document.querySelector('meta[name="app-version"]'), el = document.getElementById('spVer'); if(m && el) el.textContent = 'Version ' + m.content; }catch(e){} })();</script>
 <script>
 /* 🦊 Le moteur 3D du renard commence à se télécharger tout de suite, pendant que l'appli se charge. */
 (function(){ try{
@@ -3062,7 +3090,7 @@
   <div class="menu-head">
     <div class="menu-head-brand">
       <span class="brand-logo" aria-hidden="true"><i class="vv-logo" style="--s:30px"></i></span>
-      <span class="menu-head-title">VocabVISION</span>
+      <span class="menu-head-title">VocabVISION</span><span class="menu-ver-badge" id="menuVerBadge"></span>
     </div>
     <button class="menu-close" id="menuClose" aria-label="Fermer">✕</button>
   </div>
@@ -3096,10 +3124,103 @@
     <button class="menu-item" id="autoSpeakBtn"><span class="mi-ic">🔊</span> Voix : ON</button>
     <button class="menu-item" id="installBtn" style="display:none;"><span class="mi-ic">📲</span> Installer l'application</button>
   </div>
+  <div class="menu-ver">
+    <div class="menu-ver-line">🏷️ Version <b id="menuVerNum"></b></div>
+    <button type="button" class="menu-ver-btn" id="checkUpdateBtn">🔄 Vérifier les mises à jour</button>
+    <div class="menu-ver-state" id="menuVerState" aria-live="polite"></div>
+  </div>
   <input type="file" id="csvFileInput" accept=".csv,text/csv" style="display:none;">
 </nav>
 
 <script>
+
+/* ============ 🏷️ VERSION DE L'APPLI + MISES À JOUR ============
+   Le numéro vient de la balise meta « app-version » (en haut du fichier). publier-site.cmd l'augmente
+   tout seul à chaque publication (1.0.1 → 1.0.2 → …) et écrit version.json à côté du site.
+   On l'affiche sur l'écran de démarrage et dans le menu ; l'appli compare avec version.json en ligne
+   et propose « Mettre à jour » dès qu'une version plus récente a été publiée. */
+const APP_VERSION_META = document.querySelector('meta[name="app-version"]');
+const APP_VERSION = (APP_VERSION_META && APP_VERSION_META.content) || '0.0.0';
+const APP_RELEASE_DATE = (APP_VERSION_META && APP_VERSION_META.dataset.date) || '';
+const vvUpdate = { checkedAt:0, remote:null, busy:false };
+function vvVerCmp(a, b){
+  const pa = String(a).split('.').map(n => parseInt(n, 10) || 0), pb = String(b).split('.').map(n => parseInt(n, 10) || 0);
+  for(let i = 0; i < Math.max(pa.length, pb.length); i++){ const d = (pa[i] || 0) - (pb[i] || 0); if(d) return d > 0 ? 1 : -1; }
+  return 0;
+}
+function vvDateFr(d){
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(d || ''); if(!m) return '';
+  try{ return new Date(+m[1], +m[2] - 1, +m[3]).toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric' }); }catch(e){ return d; }
+}
+async function vvFetchRemoteVersion(){
+  if(location.protocol === 'file:' || !navigator.onLine) return null;
+  const r = await fetch('version.json?t=' + Date.now(), { cache:'no-store' });
+  if(!r.ok) return null;
+  const j = await r.json();
+  return (j && j.version) ? j : null;
+}
+/* manual : depuis le menu (« Vérifier les mises à jour ») → on affiche aussi « tu es à jour » */
+async function vvCheckUpdate(manual){
+  if(vvUpdate.busy) return;
+  vvUpdate.busy = true; vvUpdate.checkedAt = Date.now();
+  const st = document.getElementById('menuVerState');
+  if(manual && st){ st.className = 'menu-ver-state'; st.textContent = 'Vérification…'; }
+  let remote = null, failed = false;
+  try{ remote = await vvFetchRemoteVersion(); }catch(e){ failed = true; }
+  vvUpdate.busy = false;
+  if(remote && vvVerCmp(remote.version, APP_VERSION) > 0){
+    vvUpdate.remote = remote; vvShowUpdateBar(remote);
+    if(st){ st.className = 'menu-ver-state new'; st.textContent = `🆕 Version ${remote.version} disponible`; }
+    return 'new';
+  }
+  if(manual && st){
+    if(remote){ st.className = 'menu-ver-state ok'; st.textContent = '✅ Tu as la dernière version'; }
+    else { st.className = 'menu-ver-state'; st.textContent = (failed || !navigator.onLine) ? 'Pas de connexion : vérifie plus tard' : 'Vérification impossible ici'; }
+  }
+  return remote ? 'ok' : 'unknown';
+}
+function vvShowUpdateBar(remote){
+  let bar = document.getElementById('vvUpdateBar');
+  const date = vvDateFr(remote.date);
+  const html = `<span class="vv-up-ic" aria-hidden="true">🆕</span>
+    <span class="vv-up-txt"><b>Nouvelle version ${escapeHtml(remote.version)}</b><small>Tu as la ${escapeHtml(APP_VERSION)}${date ? ' · publiée le ' + escapeHtml(date) : ''}</small></span>
+    <button type="button" class="vv-up-go">Mettre à jour</button>
+    <button type="button" class="vv-up-x" aria-label="Plus tard">✕</button>`;
+  if(!bar){
+    bar = document.createElement('div'); bar.id = 'vvUpdateBar'; bar.className = 'vv-update'; bar.setAttribute('role', 'status');
+    document.body.appendChild(bar);
+    requestAnimationFrame(() => bar.classList.add('in'));
+  }
+  bar.innerHTML = html;
+  bar.querySelector('.vv-up-go').addEventListener('click', vvApplyUpdate);
+  bar.querySelector('.vv-up-x').addEventListener('click', () => { bar.classList.remove('in'); setTimeout(() => bar.remove(), 300); });
+}
+async function vvApplyUpdate(){
+  const bar = document.getElementById('vvUpdateBar');
+  if(bar){ const b = bar.querySelector('.vv-up-go'); if(b){ b.disabled = true; b.textContent = 'Un instant…'; } }
+  try{ sessionStorage.setItem('vocabVision.updatedFrom', APP_VERSION); }catch(e){}
+  try{
+    const reg = navigator.serviceWorker && await navigator.serviceWorker.getRegistration();
+    if(reg) await Promise.race([reg.update(), new Promise(r => setTimeout(r, 2500))]);
+  }catch(e){}
+  location.reload();
+}
+function vvVersionInit(){
+  const label = APP_VERSION + (APP_RELEASE_DATE ? ' · ' + vvDateFr(APP_RELEASE_DATE) : '');
+  const n = document.getElementById('menuVerNum'); if(n) n.textContent = label;
+  const badge = document.getElementById('menuVerBadge'); if(badge) badge.textContent = 'v' + APP_VERSION;
+  const btn = document.getElementById('checkUpdateBtn'); if(btn) btn.addEventListener('click', () => vvCheckUpdate(true));
+  // après « Mettre à jour » : on confirme que la nouvelle version est bien là
+  let from = null; try{ from = sessionStorage.getItem('vocabVision.updatedFrom'); sessionStorage.removeItem('vocabVision.updatedFrom'); }catch(e){}
+  if(from && vvVerCmp(APP_VERSION, from) > 0){
+    setTimeout(() => { try{ showGoalToast('Appli mise à jour !', `Tu as maintenant la version ${APP_VERSION} 🎉`, '✅'); }catch(e){} }, 3500);
+  }
+  // vérification discrète : au démarrage, au retour sur l'appli (toutes les 20 min max) et au retour du réseau
+  setTimeout(() => vvCheckUpdate(false), 6000);
+  document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible' && Date.now() - vvUpdate.checkedAt > 20 * 60000) vvCheckUpdate(false); });
+  window.addEventListener('online', () => setTimeout(() => vvCheckUpdate(false), 1500));
+}
+vvVersionInit();
 
 /* ============ 💼 Icônes au trait (style pro) — remplacent les émojis dans la navigation ============ */
 const PRO_ICON_PATHS = {
@@ -18254,6 +18375,7 @@ const COLOR_PRESETS = {
 /* ============ 🆕 NOUVEAUTÉS — pour que tout ce qui a été ajouté reste découvrable ============ */
 const WHATS_NEW_SECTIONS = [
   { icon:'🆕', title:'Nouveautés', items:[
+    { name:'🏷️ Numéro de version', desc:"Le numéro de version s'affiche sur l'écran de démarrage et en bas du menu (ex. « Version 1.0.1 »). Il augmente à chaque publication, et l'appli te propose « Mettre à jour » dès qu'une nouvelle version est en ligne." },
     { name:'🦊 Parle avec Abdel & Souky', desc:"Touche le renard de l'accueil (ou le micro 🎤 en haut) et dis ce que tu veux : « la conjugaison », « des exercices de conjugaison au futur », « je veux lire », « la grammaire », « l'art oratoire »… Il te répond et t'y emmène. Gros boutons et clavier aussi, en français ou en arabe." },
     { name:'👋 Bonjour par ton prénom', desc:"À l'ouverture et à la connexion, le renard te salue par ton prénom : « Bonjour Abdellatif ! Ravi de te revoir »." },
     { name:'🦊 Nouvelles icônes', desc:"L'icône de l'appli, celle de l'onglet, le logo en haut de l'écran et l'écran de résultats montrent maintenant le vrai renard 3D à lunettes (Abdel, et Souky pour fêter tes résultats)." },
@@ -33814,7 +33936,7 @@ function renderWhatsNew(){
   card.innerHTML = `
     <div class="cat-tag">🆕 Nouveautés</div>
     <div class="word-fr" style="font-size:clamp(24px,4.5vw,32px);">Tout ce que l'app sait faire</div>
-    <div class="question-line">L'app a beaucoup grandi — voici un aperçu pour ne rien manquer.</div>
+    <div class="question-line">L'app a beaucoup grandi — voici un aperçu pour ne rien manquer. <b style="white-space:nowrap;">Version ${escapeHtml(APP_VERSION)}</b></div>
     <div style="text-align:left;margin-top:16px;">
       ${WHATS_NEW_SECTIONS.map(sec => `
         <div style="margin-bottom:20px;">
@@ -37139,17 +37261,37 @@ function vaReply(o){
   }
 }
 function vaFox(){ return (typeof fox3d !== 'undefined' && fox3d.ready && fox3d.cameo && fox3d.cameo.canvas.parentNode && fox3d.cameo.canvas.parentNode.id === 'vaFox') ? fox3d.cameo : null; }
-function vaCanListen(){ return !!(window.SpeechRecognition || window.webkitSpeechRecognition); }
+function vaCanListen(){ return !VA.noRec && !!(window.SpeechRecognition || window.webkitSpeechRecognition); }
+/* 🎤 Pas de reconnaissance vocale ici (Firefox, appli iPhone installée, micro bloqué…) : le gros micro reste là
+   et passe par la dictée du clavier — le 🎤 du clavier du téléphone, ou Windows + H sur un PC. */
+function vaDictate(reason){
+  if(!VA.open) return;
+  if(reason && reason !== 'nosr') VA.noRec = reason;
+  VA.autoListen = false; vaStopListen();
+  const coarse = !!(window.matchMedia && matchMedia('(pointer: coarse)').matches);
+  const ua = navigator.userAgent || '';
+  const how = coarse ? 'touche le 🎤 de ton clavier et parle' : (/Windows/.test(ua) ? 'appuie sur les touches Windows + H et parle' : (/Mac/.test(ua) ? 'appuie deux fois sur la touche Fn et parle' : 'utilise la dictée de ton clavier'));
+  const cap = how.charAt(0).toUpperCase() + how.slice(1);
+  let fr;
+  if(reason === 'denied') fr = `Le micro est bloqué pour VocabVISION. Pour l'autoriser : touche 🔒 à côté de l'adresse → Micro → Autoriser. En attendant, ${how}, puis touche ➤.`;
+  else if(reason === 'nomic') fr = `Je ne trouve pas de micro… ${cap}, ou touche simplement un bouton 👇`;
+  else fr = `Ici, tu me parles par le clavier : ${how}, puis touche ➤. 😊`;
+  const ar = coarse ? 'اضغط على 🎤 في لوحة المفاتيح وتكلم، ثم اضغط ➤' : 'استعمل الإملاء الصوتي في لوحة المفاتيح، ثم اضغط ➤';
+  const f = document.getElementById('vaForm'); if(f) f.classList.add('dictate');
+  const i = document.getElementById('vaInput');
+  if(i){ if(coarse) i.placeholder = 'Touche 🎤 sur le clavier et parle…'; try{ i.focus({ preventScroll:true }); }catch(e){ try{ i.focus(); }catch(er){} } }
+  vaReply({ fr, ar });
+}
 /* 🎤 Écouter (reconnaissance vocale du navigateur, en français ou en arabe) */
 function vaListen(auto){
   if(!VA.open) return;
-  if(!vaCanListen()){ if(!auto) vaReply({ fr:"Sur cet appareil je ne peux pas t'entendre… Touche un bouton ou écris-moi, je comprends aussi ! 😊", ar:'لا أستطيع سماعك على هذا الجهاز… اضغط على زر أو اكتب لي.' }); return; }
+  if(!vaCanListen()){ if(!auto) vaDictate(VA.noRec || 'nosr'); return; }
   vaStopListen();
   try{ stopRecognition(); }catch(e){}
   try{ window.speechSynthesis.cancel(); }catch(e){}
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   let rec;
-  try{ rec = new SR(); }catch(e){ return; }
+  try{ rec = new SR(); }catch(e){ if(!auto) vaDictate('blocked'); return; }
   rec.lang = VA.lang; rec.interimResults = true; rec.maxAlternatives = 3; rec.continuous = false;
   VA.rec = rec; VA.listening = true; vaUi();
   const F = vaFox(); if(F) F.play('listen', { dur:12, side:1 });
@@ -37166,7 +37308,9 @@ function vaListen(auto){
   };
   rec.onerror = (e) => {
     VA.listening = false; vaUi();
-    if(e.error === 'not-allowed' || e.error === 'service-not-allowed'){ VA.autoListen = false; if(!auto) vaReply({ fr:"Je n'ai pas accès au micro. Autorise le micro pour VocabVISION, ou touche un bouton 👇", ar:'لا يمكنني الوصول إلى الميكروفون. اضغط على زر 👇' }); }
+    if(e.error === 'not-allowed'){ VA.autoListen = false; if(!auto) vaDictate('denied'); }
+    else if(e.error === 'service-not-allowed' || e.error === 'network' || e.error === 'language-not-supported'){ if(!auto) vaDictate('blocked'); else { VA.noRec = 'blocked'; VA.autoListen = false; } }
+    else if(e.error === 'audio-capture'){ if(!auto) vaDictate('nomic'); else { VA.noRec = 'nomic'; VA.autoListen = false; } }
     else if(e.error === 'no-speech'){ VA.quiet++; vaShowHeard(VA.quiet >= 2 ? 'Touche le micro quand tu veux me parler 🎤' : "Je n'ai rien entendu… parle-moi !", true); }
   };
   rec.onend = () => {
@@ -37175,7 +37319,7 @@ function vaListen(auto){
     if(finalText.trim()){ VA.quiet = 0; vaHandle(finalText.trim(), alts); }
     else if(!heard && !auto) vaShowHeard("Je n'ai rien entendu… touche le micro et parle-moi 🎤", true);
   };
-  try{ rec.start(); }catch(e){ VA.listening = false; vaUi(); }
+  try{ rec.start(); }catch(e){ VA.listening = false; VA.rec = null; vaUi(); if(!auto) vaDictate('blocked'); }
 }
 function vaStopListen(){ if(VA.rec){ const r = VA.rec; VA.rec = null; try{ r.onend = null; r.onresult = null; r.abort(); }catch(e){} } VA.listening = false; vaUi(); }
 function vaShowHeard(text, interim){ const el = document.getElementById('vaHeard'); if(!el) return; el.dir = /[؀-ۿ]/.test(text) ? 'rtl' : 'ltr'; el.textContent = text ? (interim ? text : `🗣️ « ${text} »`) : ''; el.classList.toggle('interim', !!interim); }
@@ -37204,7 +37348,7 @@ function vaRenderChips(chips){
   const list = chips || VA_CHIPS;
   box.innerHTML = list.map(([k, label]) => {
     const id = k.replace(/^ex:/, ''), d = VA_DEST.find(x => x.id === id);
-    const icon = k === 'help' ? '💡' : (d ? d.icon : (k.startsWith('ex:') ? '✍️' : '•'));
+    const icon = k === 'help' ? '💡' : (k.startsWith('ex:') ? ((chips && d) ? d.icon : '✍️') : (d ? d.icon : '•'));   // « exercices dans quoi ? » : l'icône du sujet
     return `<button type="button" class="va-chip${chips ? ' ctx' : ''}" data-va-chip="${k}"><span class="va-chip-ic">${icon}</span><span>${escapeHtml(label)}</span></button>`;
   }).join('') + (chips ? `<button type="button" class="va-chip more" data-va-chip="__all"><span class="va-chip-ic">☰</span><span>Tout voir</span></button>` : '');
   box.querySelectorAll('[data-va-chip]').forEach(b => b.addEventListener('click', () => { const k = b.dataset.vaChip; if(k === '__all') vaRenderChips(); else vaChip(k); }));
@@ -37219,6 +37363,7 @@ function vaUi(){
 function vaOpen(){
   if(VA.open) return;
   VA.open = true; VA.pending = null; VA.misses = 0; VA.quiet = 0; VA.autoListen = true; VA.yes = null;
+  if(VA.noRec === 'denied' || VA.noRec === 'nomic') VA.noRec = null;   // micro peut-être autorisé / branché entre-temps : on réessaie
   try{ if(typeof celebStop === 'function') celebStop(); }catch(e){}
   const name = vaUserFirstName();
   const ov = document.createElement('div');
@@ -37253,7 +37398,6 @@ function vaOpen(){
     box.appendChild(fox3d.cameo.canvas); box.classList.add('has3d');
     const F = fox3d.cameo; F.setFemale(Math.random() < 0.35); F.st.intro = 0; F.pop(); setTimeout(() => { if(VA.open) F.play('wave', { side:1, dur:1.4 }); }, 900);
   }
-  if(!vaCanListen()){ ov.querySelector('#vaMic').classList.add('off'); }
   vaRenderChips();
   vaUi();
   ov.querySelector('.va-close').addEventListener('click', () => vaClose());
