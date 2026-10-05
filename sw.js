@@ -2,7 +2,7 @@
    Met l'application en cache pour un fonctionnement hors-ligne
    et permet l'installation depuis le navigateur (PWA). */
 
-const CACHE = 'vocabvision-v8'; // v8 : fête 3D du renard à chaque bonne réponse
+const CACHE = 'vocabvision-v9'; // v9 : icônes du vrai renard 3D + mode portrait
 const ASSETS = [
   './',
   './index.html',
