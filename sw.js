@@ -2,7 +2,7 @@
    Met l'application en cache pour un fonctionnement hors-ligne
    et permet l'installation depuis le navigateur (PWA). */
 
-const CACHE = 'vocabvision-v10'; // v10 : paysage + conjugaison tous les temps en phrases, verbe lu à chaque réponse
+const CACHE = 'vocabvision-v12'; // v12 : parle avec Abdel & Souky (assistant vocal) + bonjour par le prénom
 const ASSETS = [
   './',
   './index.html',
