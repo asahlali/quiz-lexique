@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- 🏷️ Version de l'appli : augmentée automatiquement par publier-site.cmd à chaque publication -->
-<meta name="app-version" content="1.0.1" data-date="2026-10-06">
+<meta name="app-version" content="1.0.2" data-date="2026-10-06">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <title>VocabVISION — Vocabulaire Français ↔ Arabe</title>
 <script>
@@ -2791,6 +2791,72 @@
   .vv-up-go{ flex:none; min-height:44px; padding:0 14px; border:none; border-radius:12px; background:#fff; color:#4C1D95; font:900 14.5px 'Nunito','Inter',sans-serif; cursor:pointer; }
   .vv-up-go:disabled{ opacity:.7; }
   .vv-up-x{ flex:none; width:36px; height:36px; border:none; border-radius:50%; background:rgba(255,255,255,.16); color:#fff; font-size:15px; cursor:pointer; }
+  /* 🧓 Simple pour tous : aide vocale par profil, lecture accompagnée, bouton « Aide » */
+  .vh-sw{ position:relative; flex:none; width:44px; height:26px; border-radius:999px; background:var(--border); transition:background .2s; }
+  .vh-sw::after{ content:''; position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.3); transition:transform .2s; }
+  .vh-sw.on{ background:#22C55E; }
+  .vh-sw.on::after{ transform:translateX(18px); }
+  body.vh-off #vaNavBtn, body.vh-off .va-hero-pill, body.vh-off #vaFab, body.vh-off .cq-say, body.vh-off .dict-say{ display:none !important; }
+  .va-fab{ position:fixed; left:12px; bottom:calc(env(safe-area-inset-bottom, 0px) + 150px); z-index:42; display:flex; align-items:center; gap:6px; padding:5px 15px 5px 5px; border-radius:999px; border:2px solid #fff; background:linear-gradient(135deg,#F97316,#EC4899); color:#fff; font:900 16px/1 'Nunito','Inter',sans-serif; box-shadow:0 10px 24px rgba(236,72,153,.42); cursor:pointer; }
+  .va-fab .vv-logo{ border-radius:50%; background-color:#fff; }
+  .va-fab span{ max-width:60px; overflow:hidden; white-space:nowrap; transition:max-width .3s ease, opacity .3s ease; }
+  .va-fab.mini{ padding:4px; gap:0; opacity:.92; }
+  .va-fab.mini span{ max-width:0; opacity:0; }
+  .va-fab:active{ transform:scale(.95); }
+  body.quiz-active .va-fab, body.kb-open .va-fab, body.va-open .va-fab, body.menu-open .va-fab{ display:none; }
+  .va-fox{ cursor:pointer; }
+  .va-ear{ position:absolute; right:10px; top:14px; z-index:3; font-size:30px; opacity:0; transform:scale(.6); transition:opacity .2s, transform .2s; pointer-events:none; }
+  .va-fox:not(.has3d).listening .va-ear{ opacity:1; transform:scale(1); animation:vaEar 1s ease-in-out infinite; }
+  @keyframes vaEar{ 0%,100%{ transform:scale(1) rotate(-6deg); } 50%{ transform:scale(1.15) rotate(6deg); } }
+  /* 📖 lecture accompagnée */
+  .bq-resume-btn{ display:flex; align-items:center; gap:12px; width:100%; max-width:460px; margin:14px auto 0; padding:14px 16px; border:none; border-radius:18px; background:linear-gradient(135deg,#F97316,#EC4899); color:#fff; text-align:left; cursor:pointer; box-shadow:0 10px 24px rgba(236,72,153,.35); }
+  .bq-resume-btn .bq-rb-ic{ font-size:32px; flex:none; }
+  .bq-resume-btn b{ display:block; font:900 18px/1.2 'Nunito','Inter',sans-serif; }
+  .bq-resume-btn small{ display:block; margin-top:3px; font:700 13.5px/1.3 'Nunito','Inter',sans-serif; opacity:.92; }
+  .bq-coach{ display:grid; grid-template-columns:96px 1fr; align-items:center; column-gap:8px; margin:14px 0 4px; padding:8px 12px 12px 4px; border-radius:20px; background:linear-gradient(135deg, color-mix(in srgb, var(--purple) 12%, var(--surface)), color-mix(in srgb, #EC4899 10%, var(--surface))); border:1.5px solid color-mix(in srgb, var(--purple) 30%, transparent); text-align:left; }
+  .bq-fox{ position:relative; width:96px; height:104px; cursor:pointer; }
+  .bq-fox .fox3d-canvas{ position:absolute; width:150px !important; height:150px !important; left:50%; top:54%; transform:translate(-50%,-50%); }
+  .bq-fox-img{ position:absolute; inset:4px; background:var(--vv-fox-wave) center/contain no-repeat; }
+  .bq-fox.has3d .bq-fox-img{ display:none; }
+  .bq-fox.talking .bq-fox-img{ animation:vaTalk .5s ease-in-out infinite; }
+  .bq-fox.listening::after{ content:'👂'; position:absolute; right:-2px; top:0; font-size:22px; animation:vaEar 1s ease-in-out infinite; }
+  .bq-coach-main{ flex:1; min-width:0; }
+  .bq-say{ font:800 clamp(16px,4.2vw,18px)/1.38 'Nunito','Inter',sans-serif; color:var(--text); }
+  .bq-heard{ min-height:0; margin-top:4px; font:700 14px/1.3 'Nunito','Inter',sans-serif; color:var(--text-dim); }
+  .bq-heard.on{ color:var(--purple); }
+  .bq-heard:empty{ display:none; }
+  .bq-btns{ grid-column:1 / -1; display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; padding-left:8px; }
+  .bq-btn{ flex:1 1 auto; min-height:52px; padding:0 14px; border-radius:14px; border:2px solid var(--border); background:var(--surface); color:var(--text); font:900 16px 'Nunito','Inter',sans-serif; cursor:pointer; }
+  .bq-btn.main{ border-color:transparent; background:linear-gradient(135deg,#7C3AED,#5B21B6); color:#fff; box-shadow:0 8px 18px rgba(91,33,182,.3); }
+  .bq-btn:active{ transform:scale(.97); }
+  .bq-text .bq-p{ margin:0 0 .7em; }
+  .bq-sent{ cursor:pointer; border-radius:6px; padding:1px 2px; transition:background .2s, box-shadow .2s; }
+  .bq-sent:hover{ background:color-mix(in srgb, var(--purple) 8%, transparent); }
+  .bq-sent.on{ background:#FDE68A; color:#1E1B4B; box-shadow:0 0 0 3px #FDE68A; }
+  .bq-sent.here{ box-shadow:inset 0 -3px 0 #F59E0B; }
+  .bq-here-pin{ display:inline-block; margin:0 4px 0 0; padding:2px 8px; border-radius:999px; background:#F59E0B; color:#fff; font:800 12px/1.6 'Nunito','Inter',sans-serif; vertical-align:middle; }
+  .bq-quote{ margin-top:14px; font-style:italic; color:var(--purple); font-weight:700; font-size:calc(14.5px * var(--reading-scale,1)); }
+  .bq-player{ position:fixed; left:50%; bottom:calc(env(safe-area-inset-bottom, 0px) + 12px); z-index:60; transform:translate(-50%, 140%); transition:transform .3s cubic-bezier(.2,.9,.3,1); display:flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; background:#1E1B4B; color:#fff; box-shadow:0 14px 34px rgba(0,0,0,.35); }
+  .bq-player.in{ transform:translate(-50%, 0); }
+  .bq-player button{ width:48px; height:48px; border-radius:50%; border:none; background:rgba(255,255,255,.12); color:#fff; font-size:20px; cursor:pointer; }
+  .bq-player button.main{ width:58px; height:58px; background:linear-gradient(135deg,#F97316,#EC4899); font-size:24px; }
+  .bq-prog{ min-width:44px; text-align:center; font:800 13px 'Nunito','Inter',sans-serif; opacity:.85; }
+  body:has(#bqCoach) .va-fab, body:has(#bqPlayer) .va-fab{ display:none; }   /* en lecture, le renard est déjà là */
+  /* 🗣️ réponse orale (conjugaison) et recherche à la voix */
+  .cq-say.on{ background:#EF4444 !important; color:#fff !important; border-color:#EF4444 !important; animation:vaPill 1.2s ease-in-out infinite; }
+  .conj-oral{ margin-top:8px; padding:8px 12px; border-radius:12px; background:color-mix(in srgb, #22C55E 12%, var(--surface)); font:700 14px/1.4 'Nunito','Inter',sans-serif; color:var(--text); }
+  .search-box-wrap.has-mic .search-input{ padding-right:58px; }
+  .search-box-wrap.has-mic .search-icon{ display:none; }
+  .dict-say{ position:absolute; right:7px; top:50%; transform:translateY(-50%); width:44px; height:44px; border-radius:12px; border:none; background:var(--purple); color:#fff; font-size:21px; cursor:pointer; }
+  .dict-say.on{ background:#EF4444; }
+  /* réglages : le conteur et l'aide vocale */
+  .vs-narr{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .vs-narr-btn{ display:flex; flex-direction:column; align-items:center; gap:4px; padding:14px 8px; border-radius:16px; border:2px solid var(--border); background:var(--surface-sunken); color:var(--text); cursor:pointer; }
+  .vs-narr-btn span{ font-size:40px; line-height:1; }
+  .vs-narr-btn b{ font:900 16px 'Nunito','Inter',sans-serif; }
+  .vs-narr-btn small{ font:700 12px 'Nunito','Inter',sans-serif; color:var(--text-dim); }
+  .vs-narr-btn.on{ border-color:var(--purple); background:color-mix(in srgb, var(--purple) 12%, var(--surface)); }
+  .vs-help{ display:flex; align-items:center; justify-content:space-between; gap:12px; width:100%; padding:14px 16px; border-radius:16px; border:2px solid var(--border); background:var(--surface-sunken); color:var(--text); font:900 16px 'Nunito','Inter',sans-serif; cursor:pointer; text-align:left; }
   /* 🦊 Parle avec Abdel & Souky — grande fenêtre simple : le renard, sa bulle, un gros micro, de gros boutons */
   .va-overlay{ position:fixed; inset:0; z-index:10040; background:rgba(15,8,45,.55); -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px); display:flex; align-items:flex-end; justify-content:center; opacity:0; transition:opacity .25s ease; }
   .va-overlay.in{ opacity:1; }
@@ -2989,7 +3055,7 @@
     </div>
     <button id="userChipBtn" style="margin-left:8px;border:1px solid var(--border);background:var(--surface-sunken);color:var(--text);padding:5px 12px;border-radius:999px;font-weight:700;font-size:12px;cursor:pointer;white-space:nowrap;">👤</button>
     <span id="syncIndicator" class="sync-indicator" title="Synchronisation en cours..." aria-hidden="true">☁️</span>
-    <button class="theme-toggle va-nav-btn" id="vaNavBtn" type="button" aria-label="Parler au renard" title="Parle au renard 🦊">🎤</button>
+    <button class="theme-toggle va-nav-btn" id="vaNavBtn" type="button" aria-label="Parler au renard" title="Parle au renard 🦊">💬</button>
     <button class="theme-toggle" id="themeToggle" aria-label="Changer de thème" title="Thème clair / sombre">🌙</button>
     <button class="menu-toggle" id="menuToggle" aria-label="Ouvrir le menu" aria-expanded="false">
       <span></span><span></span><span></span>
@@ -3121,6 +3187,7 @@
   </div>
   <div class="menu-group">
     <div class="menu-label">Réglages</div>
+    <button class="menu-item" id="voiceHelpBtn"><span class="mi-ic">💬</span> <span id="voiceHelpLbl" style="flex:1;">Aide vocale : activée</span><span class="vh-sw on" id="voiceHelpSw" aria-hidden="true"></span></button>
     <button class="menu-item" id="autoSpeakBtn"><span class="mi-ic">🔊</span> Voix : ON</button>
     <button class="menu-item" id="installBtn" style="display:none;"><span class="mi-ic">📲</span> Installer l'application</button>
   </div>
@@ -3304,7 +3371,7 @@ const PRO_MENU_ICONS = {
   switchAppBtn:'shuffle', audioLibMenuBtn:'headphones', colorSettingsBtn:'palette', soundSettingsBtn:'volume', voiceSettingsBtn:'mic',
   authAccountBtn:'lock', whatsNewBtn:'sparkles', soundTestBtn:'volume', leaderboardBtn:'trophy', timeBreakdownBtn:'pie', homeBtn:'home',
   dictBtn:'search', historyBtn:'history', profileBtn:'user', addWordsBtn:'plus', importBtn:'upload', exportBtn:'download', syncBtn:'cloud',
-  resetBtn:'rotate', autoSpeakBtn:'volume', installBtn:'phone',
+  resetBtn:'rotate', autoSpeakBtn:'volume', installBtn:'phone', voiceHelpBtn:'message',
 };
 function proApplyChromeIcons(){
   try{
@@ -3357,6 +3424,7 @@ const NAV_CFG = (() => {
    'renderAudioManager','renderSheetsHomeBySection','renderGenericRecoIntro','renderQcmSetManage','startSheetQuiz','startGenericRecoQuiz','startQcmPractice']
     .forEach(n => { c[n].push = true; });
   c.renderAudioLibrary.ser = () => [];
+  c.renderBouquinageDetail.ser = (a) => [a[0]];   // on ne rejoue pas « lis-moi » en revenant en arrière
   c.renderVerbTable = { ser: (a) => (a[0] && a[0].inf) ? [a[0].inf, a[2] || null] : null, fb:'renderConjugationHome',
     res: (a) => { const all = getAllVerbs(); const v = all.find(x => x.inf === a[0]); if(!v) return false; renderVerbTable(v, all, a[1] || 'present'); return true; } };
   c.renderConjListenSetup.ser = () => null; c.renderConjListenSetup.fb = 'renderConjugationHome';
@@ -3765,6 +3833,9 @@ function reloadAllUserState(){
   if(typeof applyCustomColors === 'function'){ applyCustomColors(); }
   qcmSets = loadQcmSets();
   try{ const dv = localStorage.getItem(nsKey('lexiqueQuiz::dictView')); dictView = (dv==='list'||dv==='cards') ? dv : 'cards'; }catch(e){ dictView='cards'; }
+  // 👵 réglages de lecture et 💬 aide vocale : ils suivent le profil
+  try{ readingVoiceGender = loadReadingVoice(); readingRate = loadReadingRate(); readingScale = loadReadingScale(); applyReadingScale(); }catch(e){}
+  try{ applyVoiceHelp(); }catch(e){}
   const custom = loadCustomWords();
   WORDS = custom ? custom : DEFAULT_WORDS.slice();
   activeFilterCat = null; currentBlock = null;
@@ -7179,13 +7250,19 @@ function hasVoiceFor(langPrefix){ return getVoicesFor(langPrefix).length > 0; }
    à l'autre), donc volontairement hors de la synchro cloud (clé sans préfixe lexiqueQuiz::). */
 const VOICE_PREFS_KEY = 'vocabVision.voicePrefs.device';
 function loadVoicePrefs(){
-  try{ const p = JSON.parse(localStorage.getItem(VOICE_PREFS_KEY) || '{}'); return { mode: p.mode || 'vary', rate: p.rate || 0.96, fr: p.fr || [], ar: p.ar || [], cast: Array.isArray(p.cast) && p.cast.length ? p.cast : ['f', 'm', 'c'] }; }
-  catch(e){ return { mode:'vary', rate:0.96, fr:[], ar:[], cast:['f', 'm', 'c'] }; }
+  try{
+    const p = JSON.parse(localStorage.getItem(VOICE_PREFS_KEY) || '{}');
+    // v2 : les voix posées (dame / monsieur) remplacent l'ancienne distribution femme / homme / enfant
+    const cast = (p.v2 && Array.isArray(p.cast) && p.cast.length) ? p.cast : ['g', 'p'];
+    return { mode: p.mode || 'vary', rate: p.rate || 0.96, fr: p.fr || [], ar: p.ar || [], cast, v2:true };
+  }
+  catch(e){ return { mode:'vary', rate:0.96, fr:[], ar:[], cast:['g', 'p'], v2:true }; }
 }
 function saveVoicePrefs(){ try{ localStorage.setItem(VOICE_PREFS_KEY, JSON.stringify(voicePrefs)); }catch(e){} }
 let voicePrefs = loadVoicePrefs();
 const lastVoiceByLang = {};
 let ttsNextSlot = null; // 🎭 dialogues : n° d'interlocuteur pour la prochaine phrase (voix fixe par personnage)
+let ttsForcePersona = null; // 👵👴 voix imposée pour la prochaine phrase (le renard, le conteur du Bouquinage)
 
 /* 👥 Distribution des voix : une femme, un homme et un enfant se relaient pour lire.
    - Homme : vraie voix d'homme si l'appareil en a une, sinon voix rendue plus grave (hauteur baissée).
@@ -7193,15 +7270,18 @@ let ttsNextSlot = null; // 🎭 dialogues : n° d'interlocuteur pour la prochain
    Mode « plusieurs voix » : on alterne entre les personnages cochés (jamais deux fois le même d'affilée) ;
    dialogues : chaque interlocuteur garde son personnage (1er = femme, 2e = homme, 3e = enfant). */
 const VOICE_CAST = {
+  g: { label:'Une dame', icon:'👵', demo:"Bonjour ! Installe-toi confortablement, je vais te lire une belle histoire." },
+  p: { label:'Un monsieur', icon:'👴', demo:"Bonjour ! Prenons le temps, et lisons ensemble tranquillement." },
   f: { label:'Femme', icon:'👩', demo:"Bonjour ! Je vais t'aider à progresser en français." },
   m: { label:'Homme', icon:'👨', demo:'Bonjour ! On révise ensemble le vocabulaire du jour ?' },
   c: { label:'Enfant', icon:'🧒', demo:"Coucou ! Moi aussi j'apprends des nouveaux mots !" },
 };
-const VOICE_CAST_ORDER = ['f', 'm', 'c'];
+const VOICE_CAST_ORDER = ['g', 'p', 'f', 'm', 'c'];
+const VOICE_CAST_DEFAULT = ['g', 'p'];   // 👵👴 voix posées par défaut : plus de voix d'enfant
 const lastPersonaByLang = {};
 function castList(){
-  const c = VOICE_CAST_ORDER.filter(k => (voicePrefs.cast || VOICE_CAST_ORDER).includes(k));
-  return c.length ? c : ['f'];
+  const c = VOICE_CAST_ORDER.filter(k => (voicePrefs.cast || VOICE_CAST_DEFAULT).includes(k));
+  return c.length ? c : ['g'];
 }
 function nextPersona(langPrefix){
   const cast = castList();
@@ -7226,6 +7306,13 @@ function personaVoice(langPrefix, persona){
     return v;
   };
   const top = (arr) => arr.slice(0, 3);
+  // 👵👴 voix posées : toujours la même belle voix (c'est « le conteur »), un peu plus grave et plus lente
+  if(persona === 'g' || persona === 'p'){
+    const same = byG(persona === 'g' ? 'f' : 'm');
+    if(same.length) return { voice:same[0], pitch:persona === 'g' ? 0.9 : 0.86, rate:0.9, simulated:false };
+    if(persona === 'p') return { voice:list[0] || null, pitch:0.62, rate:0.88, simulated:true };
+    return { voice:list[0] || null, pitch:0.92, rate:0.9, simulated:!list.length };
+  }
   if(persona === 'm'){
     const m = byG('m');
     if(m.length) return { voice:vary(top(m)), pitch:1, rate:0.98, simulated:false };
@@ -7244,6 +7331,7 @@ function personaVoice(langPrefix, persona){
 function castStatus(persona, langPrefix){
   const pv = personaVoice(langPrefix || 'fr', persona);
   if(!pv.voice) return 'voix par défaut de l\'appareil';
+  if(persona === 'g' || persona === 'p') return (pv.simulated ? (persona === 'p' ? 'voix grave (simulée)' : pv.voice.name) : pv.voice.name) + ' · posée, plus lente';
   return pv.simulated ? (persona === 'm' ? 'voix grave (simulée)' : persona === 'c' ? 'voix aiguë (simulée)' : pv.voice.name) : pv.voice.name;
 }
 function speakAsPersona(text, lang, persona, onEnd){
@@ -7336,6 +7424,7 @@ function updateMicButtonUI(){
 
 function speak(text, lang, onEnd, rateOverride){
   const slot = ttsNextSlot; ttsNextSlot = null; // capturé tout de suite (le vrai départ est différé)
+  const forced = ttsForcePersona; ttsForcePersona = null;
   if(!speechAvailable || !text){ if(onEnd) onEnd(); return; }
   try{
     stopRecognition(); // le micro ne doit JAMAIS écouter pendant que l'app parle (sinon il s'entend lui-même)
@@ -7352,7 +7441,7 @@ function speak(text, lang, onEnd, rateOverride){
         u.lang = langCode;
         const prefix = langCode.slice(0,2).toLowerCase();
         // 👥 personnage (femme / homme / enfant) : alterné, ou fixe par interlocuteur en dialogue
-        const persona = (slot !== null && slot !== undefined) ? personaForSlot(slot) : nextPersona(prefix);
+        const persona = forced || ((slot !== null && slot !== undefined) ? personaForSlot(slot) : nextPersona(prefix));
         const pv = personaVoice(prefix, persona);
         if(pv.voice){ u.voice = pv.voice; u.lang = pv.voice.lang; }
         u.rate = (rateOverride || voicePrefs.rate || 0.96) * pv.rate;
@@ -7361,10 +7450,12 @@ function speak(text, lang, onEnd, rateOverride){
         const finish = () => { if(finished) return; finished = true; ttsSpeaking = false; updateMicButtonUI(); if(onEnd) onEnd(); };
         u.onend = finish;
         u.onerror = finish;
+        u.onstart = () => fox3dLip('start');                        // 👄 le renard articule en même temps que la voix
+        u.onboundary = (ev) => { if(ev.charIndex != null) fox3dLip('word', ev.charIndex); };
         window.speechSynthesis.speak(u);
         // Filet de sécurité : si le navigateur ne déclenche jamais onend/onerror (arrive parfois),
-        // on ne reste pas bloqué indéfiniment — estimation large de la durée + marge.
-        const estMs = Math.max(1500, text.length * 90);
+        // on ne reste pas bloqué indéfiniment — estimation large de la durée + marge (plus longue si on lit lentement).
+        const estMs = Math.max(1500, text.length * 90 / Math.min(1, u.rate || 1));
         setTimeout(finish, estMs);
       }catch(e){ ttsSpeaking = false; updateMicButtonUI(); if(onEnd) onEnd(); }
     }, 60);
@@ -7516,12 +7607,13 @@ function loadReadingRate(){
 }
 function saveReadingRate(v){ try{ localStorage.setItem(nsKey(READING_RATE_KEY), String(v)); }catch(e){} }
 function loadReadingVoice(){
-  try{ const v = localStorage.getItem(nsKey(READING_VOICE_KEY)); return (v === 'f' || v === 'm' || v === 'c') ? v : null; }catch(e){ return null; }
+  // défaut : 👵 la dame (voix posée). '' = 🎲 au hasard (choisi exprès). L'ancienne voix d'enfant devient la dame.
+  try{ const v = localStorage.getItem(nsKey(READING_VOICE_KEY)); if(v === null || v === 'c') return 'g'; return ['g', 'p', 'f', 'm'].includes(v) ? v : null; }catch(e){ return 'g'; }
 }
 function saveReadingVoice(v){ try{ localStorage.setItem(nsKey(READING_VOICE_KEY), v || ''); }catch(e){} }
 let readingScale = loadReadingScale();
 let readingRate = loadReadingRate();
-let readingVoiceGender = loadReadingVoice(); // null = aléatoire, 'f' = femme imposée, 'm' = homme imposé
+let readingVoiceGender = loadReadingVoice(); // 'g' = 👵 dame (défaut), 'p' = 👴 monsieur, 'f' / 'm' = femme / homme, null = au hasard
 
 function applyReadingScale(){
   document.documentElement.style.setProperty('--reading-scale', readingScale);
@@ -7544,10 +7636,11 @@ function buildReadingToolbarHtml(idPrefix){
         <button class="mode-chip" id="${p}readingSpeedUpBtn" style="padding:6px 12px;margin:0;" title="Accélérer la lecture">🐇</button>
       </div>
       <div style="display:flex;align-items:center;gap:2px;background:var(--surface-sunken);border:1px solid var(--border);border-radius:999px;padding:4px;">
-        <button class="mode-chip ${readingVoiceGender === null ? 'active' : ''}" id="${p}readingVoiceRandomBtn" style="padding:6px 10px;margin:0;" title="Voix aléatoire">🎲</button>
+        <button class="mode-chip ${readingVoiceGender === 'g' ? 'active' : ''}" id="${p}readingVoiceGBtn" style="padding:6px 10px;margin:0;" title="Une dame (voix posée)">👵</button>
+        <button class="mode-chip ${readingVoiceGender === 'p' ? 'active' : ''}" id="${p}readingVoicePBtn" style="padding:6px 10px;margin:0;" title="Un monsieur (voix posée)">👴</button>
         <button class="mode-chip ${readingVoiceGender === 'f' ? 'active' : ''}" id="${p}readingVoiceFBtn" style="padding:6px 10px;margin:0;" title="Voix féminine">👩</button>
         <button class="mode-chip ${readingVoiceGender === 'm' ? 'active' : ''}" id="${p}readingVoiceMBtn" style="padding:6px 10px;margin:0;" title="Voix masculine">👨</button>
-        <button class="mode-chip ${readingVoiceGender === 'c' ? 'active' : ''}" id="${p}readingVoiceCBtn" style="padding:6px 10px;margin:0;" title="Voix d'enfant">🧒</button>
+        <button class="mode-chip ${readingVoiceGender === null ? 'active' : ''}" id="${p}readingVoiceRandomBtn" style="padding:6px 10px;margin:0;" title="Voix au hasard">🎲</button>
       </div>
       ${!p ? `<button class="mode-chip" id="readingFullscreenBtn" style="padding:8px 14px;margin:0;" title="Mode plein écran">⛶ Plein écran</button>` : ''}
     </div>
@@ -7556,10 +7649,7 @@ function buildReadingToolbarHtml(idPrefix){
 function wireReadingToolbar(onChange, idPrefix){
   const p = idPrefix || '';
   const refreshVoiceButtons = () => {
-    document.getElementById(p+'readingVoiceRandomBtn').classList.toggle('active', readingVoiceGender === null);
-    document.getElementById(p+'readingVoiceFBtn').classList.toggle('active', readingVoiceGender === 'f');
-    document.getElementById(p+'readingVoiceMBtn').classList.toggle('active', readingVoiceGender === 'm');
-    const cb = document.getElementById(p+'readingVoiceCBtn'); if(cb) cb.classList.toggle('active', readingVoiceGender === 'c');
+    [['RandomBtn', null], ['GBtn', 'g'], ['PBtn', 'p'], ['FBtn', 'f'], ['MBtn', 'm']].forEach(([id, v]) => { const b = document.getElementById(p + 'readingVoice' + id); if(b) b.classList.toggle('active', readingVoiceGender === v); });
   };
   document.getElementById(p+'readingScaleDownBtn').addEventListener('click', () => {
     const i = Math.max(0, READING_SCALES.indexOf(readingScale) - 1);
@@ -7579,11 +7669,10 @@ function wireReadingToolbar(onChange, idPrefix){
     readingRate = READING_RATES[i]; saveReadingRate(readingRate);
     document.getElementById(p+'readingSpeedLabel').textContent = readingRate.toFixed(2) + '×';
   });
-  document.getElementById(p+'readingVoiceRandomBtn').addEventListener('click', () => { readingVoiceGender = null; saveReadingVoice(null); refreshVoiceButtons(); });
-  document.getElementById(p+'readingVoiceFBtn').addEventListener('click', () => { readingVoiceGender = 'f'; saveReadingVoice('f'); refreshVoiceButtons(); });
-  document.getElementById(p+'readingVoiceMBtn').addEventListener('click', () => { readingVoiceGender = 'm'; saveReadingVoice('m'); refreshVoiceButtons(); });
-  const childBtn = document.getElementById(p+'readingVoiceCBtn');
-  if(childBtn) childBtn.addEventListener('click', () => { readingVoiceGender = 'c'; saveReadingVoice('c'); refreshVoiceButtons(); });
+  [['RandomBtn', null], ['GBtn', 'g'], ['PBtn', 'p'], ['FBtn', 'f'], ['MBtn', 'm']].forEach(([id, v]) => {
+    const b = document.getElementById(p + 'readingVoice' + id);
+    if(b) b.addEventListener('click', () => { readingVoiceGender = v; saveReadingVoice(v); refreshVoiceButtons(); if(v) speakAsPersona(v === 'g' || v === 'p' ? VOICE_CAST[v].demo : "D'accord, je lis avec cette voix.", 'fr-FR', v); });
+  });
   if(!p){
     const fsBtn = document.getElementById('readingFullscreenBtn');
     if(fsBtn){ fsBtn.addEventListener('click', () => { if(onChange) onChange(); }); }
@@ -8363,6 +8452,7 @@ function updateAutoSpeakBtn(){
   const btn = document.getElementById('autoSpeakBtn');
   if(btn){ btn.innerHTML = `<span class="mi-ic">${proIcon(autoSpeak ? 'volume' : 'mute', 18)}</span> Voix : ${autoSpeak ? 'ON' : 'OFF'}`; }
 }
+document.getElementById('voiceHelpBtn').addEventListener('click', () => setVoiceHelp(!voiceHelpOn()));   // 💬 aide vocale : pour CE profil
 document.getElementById('autoSpeakBtn').addEventListener('click', () => {
   autoSpeak = !autoSpeak;
   saveAutoSpeak(autoSpeak);
@@ -12790,6 +12880,7 @@ function renderConjugationQuizCard(){
       <button class="restart-btn" id="conjValidateBtn">✓ Valider</button>
       <button type="button" class="mode-chip cq-help" id="conjHintBtn">💡 Indice</button>
       <button type="button" class="mode-chip cq-help" id="conjRuleBtn">📘 Règle</button>
+      ${vvCanHear() ? '<button type="button" class="mode-chip cq-help cq-say" id="conjSayBtn">🗣️ Dire</button>' : ''}
     </div>
     <div class="reveal" id="conjReveal"></div>
   `;
@@ -12812,6 +12903,7 @@ function renderConjugationQuizCard(){
     if(!fxTouch){ try{ input.focus({ preventScroll:true }); }catch(e){} }
   });
   document.getElementById('conjRuleBtn').addEventListener('click', () => { const ids = conjSheetIds(ch); if(ids.length) conjSheetPeek(ids[0]); });
+  const sayBtn = document.getElementById('conjSayBtn'); if(sayBtn) sayBtn.addEventListener('click', () => conjOralAnswer(ch));   // 🗣️ répondre à voix haute
   input.focus();
   input.addEventListener('keydown', (e) => { if(e.key === 'Enter'){ e.preventDefault(); validateConjugationAnswer(); } });
   document.getElementById('conjValidateBtn').addEventListener('click', validateConjugationAnswer);
@@ -13956,11 +14048,15 @@ function buildWordRowHtml(w){
 function getDictMatches(){
   const q = dictQuery.trim();
   const qNorm = normalizeForSearch(q);
-  return WORDS.filter(w => {
+  const qAr = /[\u0600-\u06FF]/.test(q) ? arStripMarks(q) : '';
+  const list = WORDS.filter(w => {
     if(dictCat && w.cat !== dictCat) return false;
     if(!q) return true;
-    return normalizeForSearch(w.fr).includes(qNorm) || w.ar.includes(q) || normalizeForSearch(w.def).includes(qNorm);
+    return normalizeForSearch(w.fr).includes(qNorm) || w.ar.includes(q) || (qAr && arStripMarks(w.ar).includes(qAr)) || normalizeForSearch(w.def).includes(qNorm);
   });
+  if(!q) return list;
+  // le mot exact d'abord, puis ceux qui commencent pareil, puis le reste (définitions en dernier)
+  return list.map((w, i) => ({ w, i, r:dictRank(w, qAr ? '' : qNorm, qAr) })).sort((a, b) => (a.r - b.r) || (a.i - b.i)).map(x => x.w);
 }
 
 function renderDictResults(){
@@ -14256,9 +14352,10 @@ function renderDictionaryView(){
     <div class="cat-tag">📖 Dictionnaire · ${WORDS.length} mots</div>
     <div class="word-fr" style="font-size:clamp(24px,4.5vw,32px);">Mots & recherche</div>
     <div class="question-line">Tape en français, en arabe, ou un mot de la définition — ou explore par catégorie.</div>
-    <div class="search-box-wrap">
+    <div class="search-box-wrap${vvCanHear() ? ' has-mic' : ''}">
       <input type="text" id="dictInput" class="search-input" placeholder="ex : opportunité, فرصة, décider..." autocomplete="off" value="${escapeHtml(dictQuery)}">
       <span class="search-icon">🔎</span>
+      ${vvCanHear() ? '<button type="button" class="dict-say" id="dictSayBtn" aria-label="Chercher en disant le mot">🗣️</button>' : ''}
     </div>
     <div class="filter-row" id="dictCatRow" style="justify-content:flex-start;margin:0 0 12px;"></div>
     <div class="dict-toolbar">
@@ -14289,6 +14386,25 @@ function renderDictionaryView(){
 
   const input = document.getElementById('dictInput');
   input.addEventListener('input', () => { dictQuery = input.value; renderDictResults(); });
+  // 🗣️ chercher en disant le mot : « maison », « que veut dire opportunité »… puis on t'en lit la traduction
+  const dSay = document.getElementById('dictSayBtn');
+  if(dSay) dSay.addEventListener('click', () => {
+    if(dSay.classList.contains('on')){ vvHearStop(); return; }
+    const ph = input.placeholder;
+    dSay.classList.add('on'); dSay.textContent = '👂'; input.placeholder = "Je t'écoute… dis un mot";
+    const lang = (typeof VA !== 'undefined' && VA.lang) || 'fr-FR';
+    vvHear({ lang, onInterim:(t) => { input.value = t; },
+      onText:(text) => {
+        const t = vaNorm(text);
+        const q = vaSearchQuery(t) || (lang.startsWith('ar') ? text.trim() : t.replace(/^(le mot |le |la |les |l |un |une |des )/, '').trim());
+        input.value = q; dictQuery = q; renderDictResults();
+        const w = vaDictFind(q)[0];
+        if(w){ ttsForcePersona = narratorPersona(); speak(w.fr, 'fr-FR', () => { ttsForcePersona = narratorPersona(); speak(w.ar, 'ar-SA'); }); }
+        else { ttsForcePersona = narratorPersona(); speak(`Je n'ai pas trouvé ${q}.`, 'fr-FR'); }
+      },
+      onFail:(r) => { if(r !== 'silence'){ dSay.style.display = 'none'; dSay.parentNode.classList.remove('has-mic'); } },
+      onEnd:() => { dSay.classList.remove('on'); dSay.textContent = '🗣️'; input.placeholder = ph; } });
+  });
 
   function setView(v){
     dictView = v;
@@ -14712,7 +14828,7 @@ function renderBlockSelect(){
     <section class="home-hero">
       <span class="hh-deco hh-d1"></span><span class="hh-deco hh-d2"></span><span class="hh-deco hh-d3">✦</span><span class="hh-deco hh-d4">✧</span><span class="hh-deco hh-d5">●</span>
       <div class="hero-mascot" id="heroMascotContainer" title="Touche-moi pour me parler" style="position:relative;width:96px;height:96px;margin:0 auto;">
-        <button type="button" class="va-hero-pill" aria-label="Parler avec le renard">🎤 Parle-moi</button>
+        <button type="button" class="va-hero-pill" aria-label="Parler avec le renard">💬 Parle-moi</button>
         <div class="hero-mascot-glow"></div>
         <div class="mascot-3d-wrap" id="heroMascot3d">
         <svg id="mascotMale" viewBox="0 0 120 120" width="96" height="96" style="position:absolute;top:0;left:0;transition:opacity .6s ease, transform .6s ease;">
@@ -18330,7 +18446,7 @@ function applyTheme(theme){
 }
 let currentTheme = loadTheme();
 applyTheme(currentTheme);
-try{ const vb = document.getElementById('vaNavBtn'); if(vb) vb.innerHTML = proIcon('mic', 18); }catch(e){}
+try{ const vb = document.getElementById('vaNavBtn'); if(vb) vb.innerHTML = proIcon('message', 18); }catch(e){}
 proApplyChromeIcons();
 document.getElementById('menuToggle').addEventListener('click', proApplyChromeIcons);
 
@@ -18375,6 +18491,12 @@ const COLOR_PRESETS = {
 /* ============ 🆕 NOUVEAUTÉS — pour que tout ce qui a été ajouté reste découvrable ============ */
 const WHATS_NEW_SECTIONS = [
   { icon:'🆕', title:'Nouveautés', items:[
+    { name:'📖 « Je veux lire »', desc:"Dis-le au renard (ou touche « Reprendre ma lecture ») : le Bouquinage s'ouvre là où tu t'étais arrêté et il te demande « Je te le lis, ou tu lis toi-même ? ». Il lit phrase par phrase (pause, phrase précédente/suivante), et en lisant seul tu peux toucher une phrase pour l'entendre." },
+    { name:'🎧 « Je veux écouter »', desc:"L'Audiothèque reprend tout de suite ton audio là où tu t'étais arrêté." },
+    { name:'🔍 Chercher un mot à la voix', desc:"« Cherche le mot maison », « Que veut dire opportunité ? », « Comment on dit merci en arabe ? » — ou le bouton 🗣️ dans « Mots & recherche ». Le renard te dit la traduction." },
+    { name:'👵👴 Voix posées', desc:"Le renard et la lecture parlent avec une voix calme de dame ou de monsieur (plus de voix d'enfant). Choix dans 🗣️ Voix de lecture." },
+    { name:'🦊 Il articule et il écoute', desc:"Quand il parle, le renard bouge la bouche à chaque syllabe et fait des mimiques ; quand il écoute, il met la patte derrière l'oreille." },
+    { name:'💬 Aide vocale par profil', desc:"Activée par défaut ; tu peux la couper pour un profil dans le menu ☰ « Aide vocale ». Elle permet aussi de répondre à voix haute en conjugaison (bouton 🗣️ Dire) et d'avoir le bouton « Aide » en bas de l'écran." },
     { name:'🏷️ Numéro de version', desc:"Le numéro de version s'affiche sur l'écran de démarrage et en bas du menu (ex. « Version 1.0.1 »). Il augmente à chaque publication, et l'appli te propose « Mettre à jour » dès qu'une nouvelle version est en ligne." },
     { name:'🦊 Parle avec Abdel & Souky', desc:"Touche le renard de l'accueil (ou le micro 🎤 en haut) et dis ce que tu veux : « la conjugaison », « des exercices de conjugaison au futur », « je veux lire », « la grammaire », « l'art oratoire »… Il te répond et t'y emmène. Gros boutons et clavier aussi, en français ou en arabe." },
     { name:'👋 Bonjour par ton prénom', desc:"À l'ouverture et à la connexion, le renard te salue par ton prénom : « Bonjour Abdellatif ! Ravi de te revoir »." },
@@ -32990,8 +33112,11 @@ function renderBouquinageHome(){
   document.getElementById('footerNote').textContent = '';
   const card = document.getElementById('quizCard');
   const readCount = BOUQUINAGE_TEXTS.filter((t, i) => isBouquinageRead(i)).length;
+  const bqR = bqLoadResume(), bqT = bqResumeTarget();
+  const bqResumeLbl = (bqR && !bqR.done) ? '▶ Reprendre ma lecture' : (readCount ? '▶ Lire le texte suivant' : '▶ Commencer à lire');
   card.innerHTML = `
     <div class="cat-tag">📖 Bouquinage</div>
+    <button class="bq-resume-btn" id="bqResumeBtn" type="button"><span class="bq-rb-ic">📖</span><span><b>${bqResumeLbl}</b><small>« ${escapeHtml(BOUQUINAGE_TEXTS[bqT.idx].title)} »</small></span></button>
     <div class="word-fr" style="font-size:clamp(22px,4.5vw,28px);">Textes de motivation</div>
     <div class="word-def" style="margin-top:4px;">${BOUQUINAGE_TEXTS.length} textes à lire et à écouter · ✅ ${readCount}/${BOUQUINAGE_TEXTS.length} lus</div>
     <button class="restart-btn" id="bouquinageRandomBtn" style="margin:16px auto;background:linear-gradient(135deg,#7C3AED,#5B21B6);border-color:#4C1D95;">🎲 Lire un texte au hasard</button>
@@ -33008,6 +33133,7 @@ function renderBouquinageHome(){
     </div>
   `;
   document.getElementById('backFromBouquinageBtn').addEventListener('click', renderBlockSelect);
+  document.getElementById('bqResumeBtn').addEventListener('click', () => bqOpenResume());
   document.getElementById('bouquinageRandomBtn').addEventListener('click', () => renderBouquinageDetail(Math.floor(Math.random() * BOUQUINAGE_TEXTS.length)));
   card.querySelectorAll('[data-bouq]').forEach(btn => {
     btn.addEventListener('click', () => renderBouquinageDetail(parseInt(btn.dataset.bouq, 10)));
@@ -33015,12 +33141,13 @@ function renderBouquinageHome(){
   setQuickNavTarget(() => [...card.querySelectorAll('[data-bouq]')].find(b => !isBouquinageRead(parseInt(b.dataset.bouq, 10))) || null);
   startSectionReading('bouquinage');
 }
-function renderBouquinageDetail(idx){
+function renderBouquinageDetail(idx, opts){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
   isHomeScreen = false;
   bouquinageIdx = idx;
   const t = BOUQUINAGE_TEXTS[idx];
+  const bqParts = bqTextParts(t);   // le texte découpé en phrases (on peut toucher une phrase pour l'entendre)
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromBouquinageDetailBtn" style="cursor:pointer;">← Tous les textes</button>`;
   document.getElementById('progressFill').style.width = Math.round(((idx+1)/BOUQUINAGE_TEXTS.length)*100) + '%';
   document.getElementById('footerNote').textContent = `${idx+1} / ${BOUQUINAGE_TEXTS.length}`;
@@ -33029,12 +33156,10 @@ function renderBouquinageDetail(idx){
   card.innerHTML = `
     <div class="cat-tag">📖 Bouquinage${read ? ' · ✅ Lu' : ''}</div>
     <div class="word-fr" style="font-size:clamp(19px,4vw,24px);">${escapeHtml(t.title)}</div>
+    ${bqCoachHtml(idx)}
     ${buildReadingToolbarHtml()}
-    <button class="mode-chip" id="listenBouquinageBtn" style="margin-top:10px;">🔊 Écouter ce texte</button>
-    <div class="reading-text" style="text-align:left;margin-top:12px;">
-      <span id="bouquinageReadingTarget">${escapeHtml(t.body)}</span>
-    </div>
-    ${t.quote ? `<div style="margin-top:14px;font-style:italic;color:var(--purple);font-weight:700;font-size:13.5px;">« ${escapeHtml(t.quote)} »</div>` : ''}
+    <div class="reading-text bq-text" id="bouquinageReadingTarget" style="text-align:left;margin-top:12px;">${bqParts.body}</div>
+    ${bqParts.quote}
     <button class="restart-btn" id="markReadBtn" style="margin:16px auto 0;${read ? 'background:var(--surface-sunken);border:1px solid rgba(34,197,94,0.5);color:#16A34A;box-shadow:none;' : 'background:linear-gradient(135deg,#22C55E,#16A34A);border-color:#15803D;'}">
       ${read ? '✅ Marqué comme lu (cliquer pour annuler)' : '☐ Marquer comme lu'}
     </button>
@@ -33045,10 +33170,9 @@ function renderBouquinageDetail(idx){
     </div>
   `;
   document.getElementById('backFromBouquinageDetailBtn').addEventListener('click', renderBouquinageHome);
-  document.getElementById('listenBouquinageBtn').addEventListener('click', () => speakHighlighted(t.body + (t.quote ? '. ' + t.quote : ''), 'fr-FR', 'bouquinageReadingTarget', null, 'listenBouquinageBtn'));
   wireReadingToolbar(() => openReadingFullscreen(t.title, t.body + (t.quote ? '\n\n« ' + t.quote + ' »' : ''), 'fr-FR'));
   document.getElementById('markReadBtn').addEventListener('click', () => {
-    if(isBouquinageRead(idx)){ unmarkBouquinageRead(idx); } else { markBouquinageRead(idx); playCorrectSound(); }
+    if(isBouquinageRead(idx)){ unmarkBouquinageRead(idx); } else { markBouquinageRead(idx); playCorrectSound(); bqSaveResume(idx, 0, true); }
     renderBouquinageDetail(idx);
   });
   if(idx > 0){ document.getElementById('bouquinagePrevBtn').addEventListener('click', () => renderBouquinageDetail(idx - 1)); }
@@ -33056,6 +33180,7 @@ function renderBouquinageDetail(idx){
   document.getElementById('bouquinageRandomDetailBtn').addEventListener('click', () => renderBouquinageDetail(Math.floor(Math.random() * BOUQUINAGE_TEXTS.length)));
   setQuickNavTarget(() => document.getElementById(isBouquinageRead(idx) && idx < BOUQUINAGE_TEXTS.length - 1 ? 'bouquinageNextBtn' : 'markReadBtn'));
   startSectionReading('bouquinage');
+  bqWire(idx, opts);   // 🦊 « Je te lis, ou tu lis toi-même ? » + reprise là où on s'était arrêté
 }
 
 function renderLessonList(){
@@ -34798,6 +34923,14 @@ function renderVoiceSettings(){
     <div class="question-line">Coche les voix que tu aimes (▶ pour écouter). L'appli alternera entre elles, et dans les dialogues chaque personnage gardera sa propre voix.</div>
     <div class="def-text" style="text-align:left;background:rgba(80,70,229,0.06);border:1px solid rgba(80,70,229,0.18);border-radius:12px;padding:12px 14px;font-size:13px;">${voiceDeviceTip()}</div>
 
+    <div style="font-weight:800;color:var(--purple);margin:18px 0 8px;">🦊 Le conteur <span style="font-weight:600;color:var(--text-dim);font-size:12px;">(la voix du renard et de la lecture, pour ce profil)</span></div>
+    <div class="vs-narr">
+      <button type="button" class="vs-narr-btn ${narratorPersona() === 'g' ? 'on' : ''}" data-narr="g"><span>👵</span><b>Une dame</b><small>voix posée</small></button>
+      <button type="button" class="vs-narr-btn ${narratorPersona() === 'p' ? 'on' : ''}" data-narr="p"><span>👴</span><b>Un monsieur</b><small>voix posée</small></button>
+    </div>
+    <div style="font-weight:800;color:var(--purple);margin:18px 0 8px;">💬 Aide vocale <span style="font-weight:600;color:var(--text-dim);font-size:12px;">(parler au renard, répondre à voix haute — pour ce profil)</span></div>
+    <button type="button" class="vs-help" id="vsHelpBtn"><span>${voiceHelpOn() ? 'Activée' : 'Désactivée'}</span><i class="vh-sw ${voiceHelpOn() ? 'on' : ''}"></i></button>
+
     <div style="font-weight:800;color:var(--purple);margin:18px 0 8px;">🎭 Façon de lire</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;">
       <button class="mode-chip ${voicePrefs.mode === 'vary' ? 'active' : ''}" data-voice-mode="vary">🎭 Plusieurs voix (alternance)</button>
@@ -34806,7 +34939,7 @@ function renderVoiceSettings(){
 
     <div style="font-weight:800;color:var(--purple);margin:18px 0 8px;">👥 Qui lit ? <span style="font-weight:600;color:var(--text-dim);font-size:12px;">(coche les voix à faire alterner)</span></div>
     <div class="voice-cast">
-      ${VOICE_CAST_ORDER.map(k => { const on = castList().includes(k) && (voicePrefs.cast || VOICE_CAST_ORDER).includes(k); return `
+      ${VOICE_CAST_ORDER.map(k => { const on = castList().includes(k) && (voicePrefs.cast || VOICE_CAST_DEFAULT).includes(k); return `
       <div class="voice-cast-card ${on ? 'on' : ''}">
         <button class="voice-cast-main" data-cast-toggle="${k}" aria-pressed="${on}">
           <span class="vc-ic">${VOICE_CAST[k].icon}</span>
@@ -34820,16 +34953,18 @@ function renderVoiceSettings(){
     <div style="font-weight:800;color:var(--purple);margin:18px 0 6px;">🐢 Vitesse : <span id="voiceRateLbl">${Math.round((voicePrefs.rate || 0.96) * 100)} %</span></div>
     <input type="range" id="voiceRate" min="0.7" max="1.2" step="0.02" value="${voicePrefs.rate || 0.96}" style="width:100%;">
 
-    <button class="restart-btn" id="voiceDemoBtn" style="margin:16px auto 0;display:flex;align-items:center;gap:8px;">🎧 Tester : petit dialogue femme, homme et enfant</button>
+    <button class="restart-btn" id="voiceDemoBtn" style="margin:16px auto 0;display:flex;align-items:center;gap:8px;">🎧 Tester : petit dialogue à plusieurs voix</button>
 
     ${langBlock('fr', '🇫🇷 Voix françaises')}
     ${langBlock('ar', '🇸🇦 Voix arabes')}
   `;
   document.getElementById('backFromVoicesBtn').addEventListener('click', renderBlockSelect);
+  card.querySelectorAll('[data-narr]').forEach(b => b.addEventListener('click', () => { const v = b.dataset.narr; readingVoiceGender = v; saveReadingVoice(v); speakAsPersona(VOICE_CAST[v].demo, 'fr-FR', v); const y = window.scrollY; renderVoiceSettings(); window.scrollTo(0, y); }));
+  document.getElementById('vsHelpBtn').addEventListener('click', () => { setVoiceHelp(!voiceHelpOn()); const y = window.scrollY; renderVoiceSettings(); window.scrollTo(0, y); });
   card.querySelectorAll('[data-voice-mode]').forEach(b => b.addEventListener('click', () => { voicePrefs.mode = b.dataset.voiceMode; saveVoicePrefs(); renderVoiceSettings(); }));
   card.querySelectorAll('[data-cast-toggle]').forEach(b => b.addEventListener('click', () => {
     const k = b.dataset.castToggle;
-    let cast = (voicePrefs.cast || VOICE_CAST_ORDER).slice();
+    let cast = (voicePrefs.cast || VOICE_CAST_DEFAULT).slice();
     if(cast.includes(k)){ if(cast.length > 1) cast = cast.filter(x => x !== k); }   // au moins une voix reste active
     else { cast.push(k); speakAsPersona(VOICE_CAST[k].demo, 'fr-FR', k); }
     voicePrefs.cast = VOICE_CAST_ORDER.filter(x => cast.includes(x));
@@ -34860,7 +34995,7 @@ function renderVoiceSettings(){
     const lines = [
       ['fr', 0, 'Bonjour ! Vous avez fait bon voyage ?'],
       ['fr', 1, "Très bon, merci. Le train est arrivé à l'heure."],
-      ['fr', 2, 'Papa, on pourra aller voir la mer après ?'],
+      ['fr', 2, 'Et ensuite, on pourra aller voir la mer ?'],
       ['fr', 0, 'Bien sûr ! Juste après la réunion.'],
       ['ar', 1, 'تشرفنا بلقائكم.'],
     ];
@@ -35431,6 +35566,8 @@ function fox3dBuild(T){
     lens: new T.MeshPhysicalMaterial({ color:0xffffff, roughness:0, metalness:0, transparent:true, opacity:0.14, envMapIntensity:2.2, depthWrite:false, clearcoat:1 }),
     blush: new T.MeshStandardMaterial({ color:col(0xFF7A95), roughness:0.8, transparent:true, opacity:0.55, depthWrite:false }),
     mouth: new T.MeshStandardMaterial({ color:col(0x3B1507), roughness:0.5 }),
+    tongue: new T.MeshStandardMaterial({ color:col(0xF0607E), roughness:0.55 }),
+    mouthIn: new T.MeshStandardMaterial({ color:col(0x5A1A10), roughness:0.6 }),
     bow: new T.MeshPhysicalMaterial({ color:col(0xEC4899), roughness:0.4, clearcoat:0.6, clearcoatRoughness:0.2 }),
   };
   const S = (r, ws = 40, hs = 28) => new T.SphereGeometry(r, ws, hs);
@@ -35472,6 +35609,18 @@ function fox3dBuild(T){
   mesh(S(0.1, 20, 14), M.blush, [0.62, -0.28, 0.86], [1.2, 0.8, 0.35], headG);
   const smile = mesh(new T.TorusGeometry(0.13, 0.022, 10, 30, Math.PI), M.mouth, [0, -0.46, 1.08], null, headG);
   smile.rotation.set(0.35, 0, Math.PI);
+  // 👄 bouche qui s'ouvre quand il parle (avec la langue) — fermée (invisible) au repos
+  const mouthG = new T.Group(); mouthG.position.set(0, -0.545, 1.05); mouthG.rotation.x = 0.3; headG.add(mouthG);
+  mesh(S(0.135, 28, 18), M.mouthIn, [0, 0, 0], [1, 1, 0.45], mouthG);
+  mesh(S(0.085, 20, 14), M.tongue, [0, -0.06, 0.03], [1.2, 0.55, 0.5], mouthG);
+  mouthG.scale.set(1, 0.001, 1); mouthG.visible = false;
+  // 🤨 sourcils : pour les mimiques (surpris, curieux, attendri…)
+  const brows = [];
+  [-1, 1].forEach(sx => {
+    const b = new T.Group(); b.position.set(sx * 0.37, 0.52, 0.8); b.rotation.z = sx * 0.1; headG.add(b);
+    mesh(S(0.13, 24, 12), M.tip, [0, 0, 0], [1, 0.27, 0.34], b);
+    brows.push(b);
+  });
   // houppette sur le crâne
   const tuft = mesh(new T.ConeGeometry(0.13, 0.32, 20), M.fur, [0.05, 0.98, 0.25], null, headG); tuft.rotation.set(0.5, 0, -0.3);
 
@@ -35524,8 +35673,61 @@ function fox3dBuild(T){
     });
   });
   bow.visible = false; lashes.visible = false;
-  return { root, bodyG, headG, tail, eyes, irises, ears, smile, bow, lashes, feet, arms };
+  return { root, bodyG, headG, tail, eyes, irises, ears, smile, mouthG, brows, bow, lashes, feet, arms };
 }
+
+/* 👄 Plan d'articulation : on découpe la phrase en syllables (groupes de voyelles) avec, pour chacune,
+   l'ouverture de la bouche et sa forme — « a » grand ouvert, « o / ou / u » arrondi, « é / i » étiré —,
+   de petites pauses aux virgules et aux points (avec un hochement de tête), et le ton de la phrase
+   (question → sourcils levés, exclamation → grand sourire). Sert au renard qui parle. */
+function foxLipPlan(text, rate){
+  const r = Math.max(0.5, Math.min(1.6, rate || 1));
+  const SYL = 0.185 / r, GAP = 0.035 / r;
+  const syl = [];
+  let t = 0;
+  const src = String(text || '').replace(/\s+/g, ' ');
+  const sentences = src.match(/[^.!?…]+[.!?…]*/g) || [];
+  let ci = 0;
+  sentences.forEach(sent => {
+    const start = src.indexOf(sent, ci); const base = start >= 0 ? start : ci; ci = base + sent.length;
+    const end = (sent.trim().match(/[.!?…]+$/) || [''])[0];
+    const q = end.includes('?') ? 1 : end.includes('!') ? 2 : 0;
+    const from = syl.length;
+    const re = /[\p{L}']+|[,;:]/gu; let m;
+    while((m = re.exec(sent))){
+      const w = m[0];
+      if(/^[,;:]$/.test(w)){ t += 0.2 / r; continue; }
+      let groups = w.toLowerCase().replace(/([qg])u(?=[aeiyéèêîo])/g, '$1').match(/[aeiouyàâäéèêëîïôöùûüœæ]+/g);   // « qu », « gu » : le u ne se prononce pas
+      if(!groups){ const n = Math.max(1, Math.round(w.replace(/'/g, '').length / 2.4)); groups = Array.from({ length:n }, (_, k) => 'aeo'[(w.charCodeAt(0) + k) % 3]); }   // arabe…
+      else if(groups.length > 1 && /e(s|nt)?$/i.test(w) && /e$/.test(groups[groups.length - 1])) groups = groups.slice(0, -1);   // « e » muet final
+      groups.forEach(g => {
+        let open, wd;
+        if(/ou|au|eau|[oôöuûüù]/.test(g) && !/ai|ei/.test(g)){ open = 0.62; wd = 0.72; }
+        else if(/[aàâä]/.test(g) && !/ai|au/.test(g)){ open = 1; wd = 1.02; }
+        else { open = 0.48; wd = 1.2; }
+        syl.push({ t0:t, t1:t + SYL * 0.78, open:open * (0.85 + Math.random() * 0.15), w:wd, q:0, nod:false, c:base + m.index });
+        t += SYL;
+      });
+      t += GAP;
+    }
+    if(syl.length > from){
+      if(q) for(let k = Math.max(from, syl.length - 4); k < syl.length; k++) syl[k].q = q;
+      if(end){ syl[syl.length - 1].nod = true; t += (end.includes('.') || end.includes('…') ? 0.42 : 0.3) / r; }
+    }
+  });
+  return { syl, total:t };
+}
+function foxLipAt(plan, L){
+  if(!plan || L < 0) return null;
+  const s = plan.syl;
+  let lo = 0, hi = s.length - 1, f = -1;
+  while(lo <= hi){ const mid = (lo + hi) >> 1; if(s[mid].t0 <= L){ f = mid; lo = mid + 1; } else hi = mid - 1; }
+  if(f < 0) return null;
+  const y = s[f];
+  if(L > y.t1) return { open:0, w:1, q:y.q, nod:y.nod && L - y.t1 < 0.3 };
+  return { open:y.open * Math.sin(Math.PI * (L - y.t0) / (y.t1 - y.t0)), w:y.w, q:y.q, nod:false };
+}
+function fox3dLip(kind, ci){ try{ const F = (typeof fox3d !== 'undefined') ? fox3d.lipFox : null; if(F && F.lip) F.lip(kind, ci); }catch(e){} }
 
 function fox3dCreate(T, sizePx, opts){
   return fox3dCreateToon(T, sizePx, opts);
@@ -35659,6 +35861,7 @@ function fox3dCreateToon(T, sizePx, opts){
     ears:[{ a:0, v:0 }, { a:0, v:0 }], tail:{ a:0, v:0 }, female:!!opts.female, curious:0, nextCurious:5 + Math.random() * 5,
     auto:opts.auto || 0, act:null, queue:[], hole:0, holeTarget:0, hidden:false, swapping:false, pendingReact:null,
     nextIdle:5 + Math.random() * 4, emit:{ flame:0, trail:0 }, emitAcc:{ flame:0, trail:0 },
+    mouth:0, mouthW:1, brow:0, tilt:0, one:0,
   };
   f.bow.visible = f.lashes.visible = st.female;
   const DUR = { dig:2.0, digShort:1.6, dive:0.95, emerge:1.5, pounce:2.6, sniff:1.8, wink:1.0, sly:2.2,
@@ -35728,6 +35931,12 @@ function fox3dCreateToon(T, sizePx, opts){
     mover, party, onFrame:null,
     play(name, o){ o = o || {}; st.queue.length = 0; st.jumpT = st.spinT = st.shakeT = -1; st.pendingReact = null; st.hidden = false; st.act = { name, t:0, dur:o.dur || DUR[name] || 1, fired:{}, side:o.side || (Math.random() < 0.5 ? 1 : -1), o }; },
     still(){ st.act = null; st.queue.length = 0; st.jumpT = st.spinT = st.shakeT = st.happyT = st.sadT = -1; st.pendingReact = null; },
+    // 👄 synchronisation des lèvres avec la voix : « start » (la voix démarre) et « word » (le navigateur annonce le mot lu)
+    lip(kind, ci){
+      const a = st.act; if(!a || a.name !== 'talk' || !a.lip) return;
+      if(kind === 'start'){ a.lipGo = true; return; }
+      if(kind === 'word' && ci != null){ const sy = a.lip.syl.find(x => x.c >= ci); if(sy){ if(a.start < 0) a.lipGo = true; a.start = a.t - sy.t0; } }
+    },
     view(z){ const h = Math.tan(camera.fov * Math.PI / 360) * (CAMZ - (z || 0)); return { h, w:h * camera.aspect }; },
     fx(kind, pos, o){ try{ fxSpawn(kind, pos, o); }catch(e){ console.warn('fox fx', e); } },
     emit(name, on){ st.emit[name] = on ? 1 : 0; },
@@ -35987,6 +36196,7 @@ function fox3dCreateToon(T, sizePx, opts){
     // --- gestes (couche ajoutée par-dessus)
     let aY = 0, pitch = 0, roll = 0, aSq = 0, headP = 0, headR = 0, headY = 0, lookK = 1;
     let eyeMul = [1, 1], irisX = null, earsDown = 0, wagFast = 0, smileK = 0, digK = 0, lift = 0, yawA = 0;
+    let mouthO = 0, mouthWt = 1, browT = 0, browTilt = 0, browOne = 0, browSide = 1;   // bouche / sourcils (mimiques)
     // bras : au repos le long du corps (léger balancement), levés quand il saute
     armRest(0, armTgt[0]); armRest(1, armTgt[1]);
     const swingA = Math.sin(st.t * 2.2) * 0.03 * R;
@@ -36169,13 +36379,31 @@ function fox3dCreateToon(T, sizePx, opts){
           eyeMul = [0.85, 0.85]; smileK = 0.5 * on; wagFast = 1; lookK = 0.2; earsDown = -0.35 * on;
           break;
         }
-        case 'talk': {                                         // il te parle : la bouche bouge, la tête hoche, une patte accompagne
-          const on = seg(k, 0, 0.06) * (1 - seg(k, 0.94, 1));
-          const syl = Math.abs(Math.sin(a.t * 13)) * (0.6 + 0.4 * Math.sin(a.t * 3.1));
-          smileK = (0.15 + 0.45 * syl) * on; headP = Math.sin(a.t * 6.5) * 0.045 * on; headR = Math.sin(a.t * 2.3) * 0.09 * on;
+        case 'talk': {                                         // il te parle : il articule chaque syllabe, hoche la tête, fait des mimiques
+          const o = a.o || {};
+          if(!a.lip){ a.lip = foxLipPlan(o.text || '', o.rate || 1); a.start = -1; a.wait = 0; a.quiet = 0; a.ending = false; if(typeof fox3d !== 'undefined') fox3d.lipFox = api; }
+          // la voix démarre (onstart du navigateur), sinon on part au bout de 0,45 s
+          if(a.start < 0){ a.wait += dt; if(a.lipGo || a.wait > 0.45 || o.silent) a.start = a.t; }
+          const speaking = typeof ttsSpeaking !== 'undefined' && ttsSpeaking;
+          if(!a.ending){
+            if(o.silent){ if(a.t - a.start > a.lip.total + 0.1){ a.ending = true; a.dur = a.t + 0.35; } else if(a.t > a.dur - 0.4) a.dur = a.t + 0.5; }
+            else if(a.start >= 0 && a.t - a.start > 0.6 && !speaking){ a.quiet += dt; if(a.quiet > 0.2){ a.ending = true; a.dur = a.t + 0.35; } }
+            else { a.quiet = 0; if(a.t > a.dur - 0.4) a.dur = a.t + 0.5; }   // tant que la voix parle, il continue
+            if(a.t > 45){ a.ending = true; a.dur = a.t + 0.35; }
+          }
+          const on = clamp01(a.t / 0.2) * (a.ending ? clamp01((a.dur - a.t) / 0.35) : 1);
+          let sy = null;
+          if(a.start >= 0 && !a.ending) sy = foxLipAt(a.lip, a.t - a.start);
+          const open = sy ? sy.open : 0;
+          mouthO = open * on; mouthWt = 1 + ((sy ? sy.w : 1) - 1) * on;
+          const q = sy ? sy.q : 0;                               // 1 = question (sourcils levés), 2 = exclamation (grand sourire)
+          smileK = (0.2 + (q === 2 ? 0.3 : 0)) * on;
+          browT = (q === 1 ? 0.85 : q === 2 ? 0.5 : 0.12 + 0.22 * Math.max(0, Math.sin(a.t * 1.4))) * on;
+          browTilt = (q === 1 ? 0.15 : 0) * on;
+          headP = (Math.sin(a.t * 6.5) * 0.025 + (sy && sy.nod ? 0.14 : 0) + open * 0.03) * on; headR = (Math.sin(a.t * 2.3) * 0.08 + (q === 1 ? 0.12 * a.side : 0)) * on;
           const i = a.side > 0 ? 1 : 0, sx = i ? 1 : -1, w = Math.max(0, Math.sin(a.t * 1.6)) * on;
-          armSet(i, sx * (0.75 + Math.sin(a.t * 5) * 0.08), 0.15 + Math.sin(a.t * 2.4) * 0.25, 0.5, w);
-          eyeMul = [1 - 0.12 * syl * on, 1 - 0.12 * syl * on]; wagFast = 0.4 * on;
+          armSet(i, sx * (0.75 + Math.sin(a.t * 5) * 0.08), 0.15 + Math.sin(a.t * 2.4) * 0.25 + (q === 2 ? 0.35 : 0), 0.5, w);
+          eyeMul = [1 - 0.1 * open * on + (q === 1 ? 0.1 : 0), 1 - 0.1 * open * on + (q === 1 ? 0.1 : 0)]; wagFast = 0.4 * on;
           break;
         }
         case 'listen': {                                       // il t'écoute : tête penchée, oreilles dressées, une patte derrière l'oreille
@@ -36183,6 +36411,7 @@ function fox3dCreateToon(T, sizePx, opts){
           const i = a.side > 0 ? 1 : 0, sx = i ? 1 : -1;
           headR = -0.24 * sx * on; headY = 0.12 * sx * on; earsDown = 0.22 * on; eyeMul = [1.12, 1.12]; lookK = 1 - 0.4 * on;
           armSet(i, sx * 0.62, 0.78, 0.38, on);
+          browT = 0.25 * on; browOne = 0.6 * on; browSide = i; smileK = 0.12 * on;   // un sourcil levé : « je t'écoute… »
           if(Math.sin(a.t * 4.2) > 0.96) earsDown += 0.15;
           break;
         }
@@ -36232,6 +36461,21 @@ function fox3dCreateToon(T, sizePx, opts){
     if(st.happyT >= 0) eyeS = Math.min(eyeS, 0.45);
     f.eyes.forEach((eg, i) => { const target = Math.min(eyeS, 1) * eyeMul[i]; eg.scale.y += (target - eg.scale.y) * Math.min(1, dt * 30); });
     f.smile.scale.setScalar(1 + (st.happyT >= 0 ? 0.35 : 0) + smileK - (st.sadT >= 0 ? 0.25 : 0));
+    // --- bouche qui articule + sourcils (content : bouche ouverte et sourcils hauts ; raté : sourcils inquiets)
+    if(st.happyT >= 0){ const hb = bump(st.happyT / 1.3); mouthO = Math.max(mouthO, 0.5 * hb); mouthWt = Math.max(mouthWt, 1.15); browT = Math.max(browT, 0.6 * hb); }
+    if(st.sadT >= 0){ const sb = bump(st.sadT / 1.6); browTilt = Math.max(browTilt, 0.9 * sb); browT = Math.max(browT, 0.25 * sb); }
+    st.mouth += (mouthO - st.mouth) * Math.min(1, dt * 26);
+    st.mouthW += (mouthWt - st.mouthW) * Math.min(1, dt * 18);
+    f.mouthG.visible = st.mouth > 0.03;
+    f.mouthG.scale.set(st.mouthW, Math.max(0.001, st.mouth), 1);
+    st.brow += (browT - st.brow) * Math.min(1, dt * 12);
+    st.tilt += (browTilt - st.tilt) * Math.min(1, dt * 10);
+    st.one += (browOne - st.one) * Math.min(1, dt * 10);
+    f.brows.forEach((b, i) => {
+      const sx = i ? 1 : -1;
+      b.position.y = 0.52 + st.brow * 0.075 + (i === browSide ? st.one * 0.06 : 0);
+      b.rotation.z = sx * 0.1 - sx * st.tilt * 0.42 + (i === browSide ? sx * st.one * 0.12 : 0);
+    });
     // --- oreilles : inertie + frétillement + oreilles basses quand c'est raté
     const headVel = (f.headG.rotation.y - st.prevHeadY) / Math.max(dt, 0.001); st.prevHeadY = f.headG.rotation.y;
     if(st.t > st.nextTwitch && st.twitchT < 0){ st.twitchT = 0; st.twitchEar = Math.random() < 0.5 ? 0 : 1; st.nextTwitch = st.t + 3 + Math.random() * 5; }
@@ -37096,7 +37340,7 @@ const VA_DEST = [
   { id:'oratoire', icon:'🎤', label:'Art oratoire', ar:'فن الخطابة', words:['art oratoire', 'oratoire', 'diction', 'discours', 'prise de parole', 'parler en public', 'eloquence', 'articulation', 'theatre', 'respiration', 'الخطابه', 'خطابه'],
     go:() => renderArtOratoireHome(), say:"Bienvenue à l'art oratoire : diction, voix et prise de parole ! 🎤" },
   { id:'bouquinage', icon:'📚', label:'Bouquinage', ar:'القراءة', words:['bouquinage', 'bouquin', 'livre', 'livres', 'lire', 'lecture', 'lectures', 'histoire', 'histoires', 'roman', 'romans', 'textes', 'texte', 'قراءه', 'القراءه', 'اقرا', 'كتاب', 'قصه'],
-    go:() => renderBouquinageHome(), say:"Installe-toi bien, on va lire ! 📚" },
+    go:() => bqOpenResume({ ask:true }), say:"Installe-toi bien ! J'ouvre ta lecture, là où tu t'étais arrêté. 📚" },
   { id:'lecturejour', icon:'📰', label:'Lecture du jour', ar:'قراءة اليوم', words:['lecture du jour', 'texte du jour', 'article du jour'], go:() => renderDailyReading(), say:"Voici la lecture du jour ! 📰" },
   { id:'arabe', icon:'☀️', label:"Leçon d'arabe", ar:'درس اليوم', words:['lecon du jour', 'lecon d arabe', 'arabe', 'apprendre l arabe', 'dialogue', 'dialogues', 'العربيه', 'درس اليوم', 'درس'],
     go:() => renderLessonList(), say:"Voici les leçons d'arabe, avec les dialogues ! ☀️" },
@@ -37126,10 +37370,11 @@ const VA_EX = ['exercice', 'exercices', 'exo', 'exos', 'entrainer', 'entraine', 
 const VA_RULES = ['regle', 'regles', 'indice', 'indices', 'cours', 'explication', 'expliquer', 'explique', 'comprendre', 'قاعده', 'شرح'];
 const VA_TENSE_WORDS = [['passe compose', 'passeCompose'], ['present', 'present'], ['futur', 'futur'], ['imparfait', 'imparfait'], ['conditionnel', 'conditionnel'], ['passe', 'passeCompose']];
 const VA_CHIPS = [
-  ['conjugaison', 'Conjugaison'], ['ex:conjugaison', 'Exercices de conjugaison'], ['grammaire', 'Grammaire'], ['orthographe', 'Orthographe'],
-  ['ex:vocabulaire', 'Quiz de vocabulaire'], ['oral', 'Expression orale'], ['oratoire', 'Art oratoire'], ['bouquinage', 'Bouquinage'],
-  ['arabe', "Leçon d'arabe"], ['jeux', 'Jeux'], ['audio', 'Audiothèque'], ['accueil', 'Accueil'],
+  ['bouquinage', "Lire (là où j'en étais)"], ['do:stream', 'Écouter mes audios'], ['do:search', 'Chercher un mot'], ['conjugaison', 'Conjugaison'],
+  ['ex:conjugaison', 'Exercices de conjugaison'], ['grammaire', 'Grammaire'], ['orthographe', 'Orthographe'], ['ex:vocabulaire', 'Quiz de vocabulaire'],
+  ['oral', 'Expression orale'], ['oratoire', 'Art oratoire'], ['arabe', "Leçon d'arabe"], ['jeux', 'Jeux'], ['accueil', 'Accueil'],
 ];
+const VA_DO_ICONS = { 'do:stream':'🎧', 'do:search':'🔍' };
 const VA_JOKES = ["Pourquoi Abdel porte des lunettes ? Pour mieux lire les règles de conjugaison ! 🤓", "Quel est le temps préféré des renards ? Le futur… parce qu'ils ont toujours un coup d'avance ! 🦊", "Que dit un verbe à l'imparfait ? « Avant, j'étais tranquille… » 😄"];
 const vaArStrip = (w) => w.replace(/^(وال|بال|كال|فال|لل|ال)/, '');   // l'article arabe « ال » (التصريف = تصريف)
 function vaHasWord(t, toks, key){
@@ -37160,6 +37405,10 @@ function vaUnderstand(raw){
   if(/\b(moins vite|plus lentement|lentement|doucement|trop vite)\b/.test(t) && /\b(parle|parles|lis|lire|voix|lecture)\b/.test(t)) return Object.assign(out, { kind:'rate', value:-0.15 });
   if(/\b(plus vite|plus rapidement)\b/.test(t) && /\b(parle|parles|lis|lire|voix|lecture)\b/.test(t)) return Object.assign(out, { kind:'rate', value:0.15 });
   if(/^(au revoir|bye|ciao|a plus|ferme|fermer|stop|c est tout|rien|مع السلامه|وداعا)\b/.test(t) || /\b(au revoir|ferme la fenetre)\b/.test(t)) return Object.assign(out, { kind:'bye' });
+  // 🔍 chercher un mot : « cherche le mot maison », « que veut dire… », « comment on dit … en arabe »
+  const sq = vaSearchQuery(t); if(sq) return Object.assign(out, { kind:'search', q:sq });
+  // 📖 « lis-moi », « raconte-moi une histoire » : on ouvre la lecture en cours et le renard lit tout de suite
+  if(/\b(lis moi|lis nous|lis le moi|lire pour moi|raconte moi|tu me lis|me lire|tu peux me lire|اقرا لي)\b/.test(t) || (/\b(ecouter|ecoute)\b/.test(t) && /\b(texte|histoire|lecture|livre|bouquin)/.test(t))) return Object.assign(out, { kind:'readme' });
   // verbe précis : « conjugue le verbe aller », « le verbe prendre au futur »
   let verb = null;
   const vm = t.match(/\b(?:verbe|conjugue[rsz]?|conjugaison du verbe|conjugaison de)\s+(?:le verbe\s+|du verbe\s+|de\s+|d\s+|le\s+)?([a-zà-ÿ]+)/);
@@ -37168,6 +37417,8 @@ function vaUnderstand(raw){
   for(const [w, id] of VA_TENSE_WORDS){ if((' ' + t + ' ').includes(' ' + w + ' ')){ tense = id; break; } }
   let dest = vaFindDest(t, toks);
   if(!dest && (verb || tense)) dest = VA_DEST[0];
+  // 🎧 « je veux écouter », « le stream », « reprends mon podcast » : l'Audiothèque reprend là où on s'était arrêté
+  if(!verb && !tense && (/\b(stream|streaming|podcast|podcasts|mp3|mes audios|ma musique|musique|reprendre l ecoute|reprends l ecoute|reprendre mon ecoute|استماع)\b/.test(t) || (/\b(ecouter|ecoute|j ecoute|اسمع)\b/.test(t) && (!dest || dest.id === 'audio')))) return Object.assign(out, { kind:'stream' });
   const ex = has(VA_EX), rules = has(VA_RULES);
   if(dest) return Object.assign(out, { kind:'go', dest, ex, rules, tense, verb });
   if(ex) return Object.assign(out, { kind:'askex' });
@@ -37207,11 +37458,14 @@ function vaAct(intent){
       if(intent.ex && d.sayEx) return go(d.go, d.sayEx, arGo);
       return go(d.go, d.say, arGo);
     }
+    case 'readme': return go(() => bqOpenResume({ autoRead:true }), "Avec plaisir ! J'ouvre ta lecture et je te la lis. 📖", 'بكل سرور! سأقرأ لك النص. 📖');
+    case 'stream': vaStream(); return;
+    case 'search': return vaSearch(intent.q);
     case 'askex':
       VA.pending = { ex:true };
       return vaReply({ fr:"Avec plaisir ! Des exercices dans quoi ? La conjugaison, la grammaire, l'orthographe ou le vocabulaire ?", ar:'بكل سرور! تمارين في ماذا؟ التصريف، القواعد، الإملاء أم المفردات؟', chips:[['ex:conjugaison', 'Conjugaison'], ['ex:grammaire', 'Grammaire'], ['ex:orthographe', 'Orthographe'], ['ex:vocabulaire', 'Vocabulaire']], listen:true });
     case 'help':
-      return vaReply({ fr:"Dis-moi simplement où tu veux aller ! Par exemple : « la conjugaison », « des exercices de conjugaison au futur », « la grammaire », « je veux lire », « l'art oratoire », « retour à l'accueil ». Tu peux aussi toucher un bouton. 👇", ar:'قل لي فقط إلى أين تريد الذهاب! مثلًا: التصريف، القواعد، القراءة، أو اضغط على زر.', listen:true });
+      return vaReply({ fr:"Dis-moi simplement ce que tu veux ! Par exemple : « je veux lire », « lis-moi un texte », « je veux écouter », « cherche le mot maison », « la conjugaison », « des exercices de conjugaison », « retour à l'accueil ». Tu peux aussi toucher un gros bouton. 👇", ar:'قل لي فقط إلى أين تريد الذهاب! مثلًا: التصريف، القواعد، القراءة، أو اضغط على زر.', listen:true });
     case 'suggest': {
       const opts = [['ex:vocabulaire', "un petit quiz de vocabulaire"], ['ex:conjugaison', 'des exercices de conjugaison'], ['bouquinage', 'une belle lecture'], ['arabe', "la leçon d'arabe du jour"]];
       const pickd = opts[Math.floor(Math.random() * opts.length)];
@@ -37240,20 +37494,29 @@ function vaReply(o){
   vaStopListen();
   const ar = vaIsAr() && o.ar;
   const text = ar ? o.ar : o.fr;
+  const spoken = fxCleanSpeech(ar ? (o.sayAr || o.ar) : (o.say || o.fr));   // ce qu'il dit (peut différer de la bulle)
+  const lang = ar ? 'ar-SA' : 'fr-FR';
+  const tail = ar ? (o.tailAr || null) : (o.tail || null);                // ex. le mot arabe, dit avec une voix arabe
   const sayEl = document.getElementById('vaSay');
-  VA.last = { text:fxCleanSpeech(text), lang:ar ? 'ar-SA' : 'fr-FR' };
+  VA.last = { text:spoken, lang, tail };
   if(sayEl){ sayEl.dir = ar ? 'rtl' : 'ltr'; sayEl.textContent = text; sayEl.classList.remove('pop'); void sayEl.offsetWidth; sayEl.classList.add('pop'); }
   VA.yes = o.yes || null;
   vaRenderChips(o.chips);
   const F = vaFox();
-  if(F) F.play('talk', { dur:Math.max(1.6, text.length * 0.065), side:Math.random() < 0.5 ? 1 : -1 });
+  // 👄 il articule sa phrase (bouche, sourcils, gestes) avec la voix posée du conteur
+  if(F) F.play('talk', { dur:Math.max(1.6, spoken.length * 0.065), side:Math.random() < 0.5 ? 1 : -1, text:spoken, rate:narratorRate() });
   document.getElementById('vaFox') && document.getElementById('vaFox').classList.add('talking');
   const done = () => {
     const box = document.getElementById('vaFox'); if(box) box.classList.remove('talking');
     if(F && F.st.act && F.st.act.name === 'talk') F.still();
+    if(o.afterSpeech && !o._after){ o._after = true; try{ o.afterSpeech(); }catch(e){ console.warn('assistant', e); } }
     if(VA.open && o.listen && VA.autoListen && VA.quiet < 2 && vaCanListen()) setTimeout(() => { if(VA.open && !VA.listening) vaListen(true); }, 250);
   };
-  speak(fxCleanSpeech(text), ar ? 'ar-SA' : 'fr-FR', done);
+  ttsForcePersona = narratorPersona();
+  speak(spoken, lang, () => {
+    if(tail && tail.text){ ttsForcePersona = narratorPersona(); if(F && vaFox() === F) F.play('talk', { text:tail.text, rate:narratorRate(), side:1 }); speak(tail.text, tail.lang || 'ar-SA', done); }
+    else done();
+  });
   if(o.then){
     if(o.stay){ o.then(); return; }
     // on t'emmène pendant qu'il parle encore
@@ -37261,7 +37524,7 @@ function vaReply(o){
   }
 }
 function vaFox(){ return (typeof fox3d !== 'undefined' && fox3d.ready && fox3d.cameo && fox3d.cameo.canvas.parentNode && fox3d.cameo.canvas.parentNode.id === 'vaFox') ? fox3d.cameo : null; }
-function vaCanListen(){ return !VA.noRec && !!(window.SpeechRecognition || window.webkitSpeechRecognition); }
+function vaCanListen(){ return !VA.noRec && voiceHelpOn() && !!(window.SpeechRecognition || window.webkitSpeechRecognition); }
 /* 🎤 Pas de reconnaissance vocale ici (Firefox, appli iPhone installée, micro bloqué…) : le gros micro reste là
    et passe par la dictée du clavier — le 🎤 du clavier du téléphone, ou Windows + H sur un PC. */
 function vaDictate(reason){
@@ -37329,6 +37592,7 @@ function vaHandle(text, alts){
   vaShowHeard(text, false);
   const t = vaNorm(text);
   if(VA.yes && /^(oui|ouais|d accord|ok|okay|vas y|allons y|go|c est parti|نعم|واخا|اه)\b/.test(t)){ const y = VA.yes; VA.yes = null; return vaChip(y); }
+  if(VA.pending && VA.pending.search){ VA.pending = null; const q = vaSearchQuery(t) || t.replace(/^(je cherche |cherche |le mot |la |le |les |l |un |une )+/, '').trim(); if(q) return vaAct({ kind:'search', q, raw:text }); }
   let intent = vaUnderstand(text);
   if(intent.kind === 'unknown' && alts && alts.length > 1){ for(const a of alts.slice(1)){ const i2 = vaUnderstand(a); if(i2.kind !== 'unknown'){ intent = i2; break; } } }
   if(intent.kind !== 'unknown') VA.misses = 0;
@@ -37336,6 +37600,8 @@ function vaHandle(text, alts){
 }
 function vaChip(key){
   if(key === 'help') return vaAct({ kind:'help' });
+  if(key === 'do:stream'){ vaShowHeard('🎧 Écouter mes audios', false); return vaAct({ kind:'stream' }); }
+  if(key === 'do:search'){ vaShowHeard('🔍 Chercher un mot', false); VA.pending = { search:true }; return vaReply({ fr:'Quel mot cherches-tu ? Dis-le-moi, ou écris-le juste en dessous. 🔍', ar:'ما الكلمة التي تبحث عنها؟ قلها لي. 🔍', listen:true }); }
   const ex = key.startsWith('ex:'), id = ex ? key.slice(3) : key;
   const d = VA_DEST.find(x => x.id === id);
   if(!d) return;
@@ -37348,16 +37614,18 @@ function vaRenderChips(chips){
   const list = chips || VA_CHIPS;
   box.innerHTML = list.map(([k, label]) => {
     const id = k.replace(/^ex:/, ''), d = VA_DEST.find(x => x.id === id);
-    const icon = k === 'help' ? '💡' : (k.startsWith('ex:') ? ((chips && d) ? d.icon : '✍️') : (d ? d.icon : '•'));   // « exercices dans quoi ? » : l'icône du sujet
+    const icon = k === 'help' ? '💡' : VA_DO_ICONS[k] ? VA_DO_ICONS[k] : (k.startsWith('ex:') ? ((chips && d) ? d.icon : '✍️') : (d ? d.icon : '•'));   // « exercices dans quoi ? » : l'icône du sujet
     return `<button type="button" class="va-chip${chips ? ' ctx' : ''}" data-va-chip="${k}"><span class="va-chip-ic">${icon}</span><span>${escapeHtml(label)}</span></button>`;
   }).join('') + (chips ? `<button type="button" class="va-chip more" data-va-chip="__all"><span class="va-chip-ic">☰</span><span>Tout voir</span></button>` : '');
-  box.querySelectorAll('[data-va-chip]').forEach(b => b.addEventListener('click', () => { const k = b.dataset.vaChip; if(k === '__all') vaRenderChips(); else vaChip(k); }));
+  box.querySelectorAll('[data-va-chip]').forEach(b => b.addEventListener('click', () => { vvPrimeAudio(); const k = b.dataset.vaChip; if(k === '__all') vaRenderChips(); else vaChip(k); }));
 }
 function vaUi(){
   const mic = document.getElementById('vaMic'); if(!mic) return;
   mic.classList.toggle('on', VA.listening);
   const lbl = mic.querySelector('.va-mic-lbl');
-  if(lbl) lbl.textContent = VA.listening ? (vaIsAr() ? 'أنا أستمع…' : "Je t'écoute…") : (vaIsAr() ? 'اضغط وتكلم' : 'Touche et parle');
+  if(lbl) lbl.textContent = VA.listening ? (vaIsAr() ? 'أنا أستمع…' : "Je t'écoute… parle-moi") : (vaIsAr() ? 'اضغط وتكلم' : 'Touche et parle');
+  const ic = mic.querySelector('.va-mic-ic'); if(ic) ic.textContent = VA.listening ? '👂' : '🗣️';   // pas d'icône de micro : c'est le renard qui écoute
+  const box = document.getElementById('vaFox'); if(box) box.classList.toggle('listening', VA.listening);
 }
 /* 🪟 Ouvrir / fermer la fenêtre de conversation */
 function vaOpen(){
@@ -37378,11 +37646,11 @@ function vaOpen(){
         <button type="button" class="va-close" aria-label="Fermer">✕</button>
       </div>
       <div class="va-stage">
-        <div class="va-fox" id="vaFox"><i class="va-fox-img"></i></div>
+        <div class="va-fox" id="vaFox" role="button" tabindex="0" aria-label="Touche le renard et parle-lui"><i class="va-fox-img"></i><span class="va-ear" aria-hidden="true">👂</span></div>
         <div class="va-say" id="vaSay" aria-live="polite" title="Touche pour réécouter" role="button" tabindex="0"></div>
       </div>
       <div class="va-heard" id="vaHeard" aria-live="polite"></div>
-      <button type="button" class="va-mic" id="vaMic" aria-label="Parler"><span class="va-mic-ring"></span><span class="va-mic-ic">🎤</span><span class="va-mic-lbl">Touche et parle</span></button>
+      <button type="button" class="va-mic" id="vaMic" aria-label="Parler au renard"><span class="va-mic-ring"></span><span class="va-mic-ic">🗣️</span><span class="va-mic-lbl">Touche et parle</span></button>
       <form class="va-type" id="vaForm" autocomplete="off"><input id="vaInput" type="text" placeholder="… ou écris ici (ex. : conjugaison)" enterkeyhint="send"><button type="submit" aria-label="Envoyer">➤</button></form>
       <div class="va-chips-title">Ou touche simplement :</div>
       <div class="va-chips" id="vaChips"></div>
@@ -37396,14 +37664,22 @@ function vaOpen(){
   if(use3d && !fox3d.cameo){ try{ fox3d.cameo = fox3dCreate(THREE, 220); }catch(e){ fox3d.cameo = null; } }
   if(use3d && fox3d.cameo){
     box.appendChild(fox3d.cameo.canvas); box.classList.add('has3d');
-    const F = fox3d.cameo; F.setFemale(Math.random() < 0.35); F.st.intro = 0; F.pop(); setTimeout(() => { if(VA.open) F.play('wave', { side:1, dur:1.4 }); }, 900);
+    const F = fox3d.cameo; F.setFemale(narratorIsFemale()); F.st.intro = 0; F.pop(); setTimeout(() => { if(VA.open && !(F.st.act && /talk|listen/.test(F.st.act.name))) F.play('wave', { side:1, dur:1.4 }); }, 900);   // Souky (voix de dame) ou Abdel (voix de monsieur)
   }
   vaRenderChips();
   vaUi();
   ov.querySelector('.va-close').addEventListener('click', () => vaClose());
-  ov.querySelector('#vaSay').addEventListener('click', () => { if(VA.last){ vaStopListen(); speak(VA.last.text, VA.last.lang); } });   // 🔊 toucher la bulle = réécouter
+  ov.querySelector('#vaSay').addEventListener('click', () => {   // 🔊 toucher la bulle = réécouter
+    if(!VA.last) return;
+    vaStopListen(); const L = VA.last, F = vaFox();
+    if(F) F.play('talk', { text:L.text, rate:narratorRate(), side:1 });
+    ttsForcePersona = narratorPersona();
+    speak(L.text, L.lang, () => { if(L.tail){ ttsForcePersona = narratorPersona(); speak(L.tail.text, L.tail.lang); } });
+  });
   ov.addEventListener('click', (e) => { if(e.target === ov) vaClose(); });
-  ov.querySelector('#vaMic').addEventListener('click', () => { if(VA.listening) vaStopListen(); else { VA.quiet = 0; VA.autoListen = true; vaListen(false); } });
+  const talkTap = () => { vvPrimeAudio(); if(VA.listening) vaStopListen(); else { VA.quiet = 0; VA.autoListen = true; vaListen(false); } };
+  ov.querySelector('#vaMic').addEventListener('click', talkTap);
+  ov.querySelector('#vaFox').addEventListener('click', talkTap);   // toucher le renard = lui parler
   ov.querySelector('#vaForm').addEventListener('submit', (e) => { e.preventDefault(); const i = ov.querySelector('#vaInput'); const v = i.value.trim(); if(!v) return; i.value = ''; try{ i.blur(); }catch(er){} vaHandle(v, null); });
   ov.querySelectorAll('[data-va-lang]').forEach(b => b.addEventListener('click', () => {
     VA.lang = b.dataset.vaLang; try{ localStorage.setItem('vocabVision.vaLang', VA.lang); }catch(e){}
@@ -37411,7 +37687,7 @@ function vaOpen(){
     vaReply({ fr:'Très bien, je t\'écoute en français !', ar:'حسنًا، أنا أستمع إليك بالعربية!', listen:true });
   }));
   document.addEventListener('keydown', vaEsc, true);
-  vaReply({ fr:`${vaHelloWord()}${name ? ' ' + name : ''} ! 😊 Qu'est-ce qu'on fait aujourd'hui ? Dis-moi par exemple « la conjugaison » ou « je veux lire ».`, ar:`مرحبًا${name ? ' ' + name : ''}! 😊 ماذا نفعل اليوم؟ قل مثلًا: التصريف، أو أريد أن أقرأ.`, listen:true });
+  vaReply({ fr:`${vaHelloWord()}${name ? ' ' + name : ''} ! 😊 Qu'est-ce qu'on fait aujourd'hui ? Dis-moi par exemple « je veux lire », « je veux écouter » ou « la conjugaison ».`, ar:`مرحبًا${name ? ' ' + name : ''}! 😊 ماذا نفعل اليوم؟ قل مثلًا: التصريف، أو أريد أن أقرأ.`, listen:true });
 }
 function vaEsc(e){ if(e.key === 'Escape' && VA.open){ e.stopPropagation(); vaClose(); } }
 function vaClose(keepVoice){
@@ -37428,18 +37704,27 @@ function vaClose(keepVoice){
 }
 /* le renard de l'accueil (3D ou image) et le micro de la barre du haut ouvrent la conversation */
 document.addEventListener('click', (e) => {
-  const t = e.target.closest && e.target.closest('#heroMascotContainer, #vaNavBtn, .va-hero-pill');
+  const t = e.target.closest && e.target.closest('#heroMascotContainer, #vaNavBtn, .va-hero-pill, #vaFab');
   if(!t) return;
   e.preventDefault();
-  try{ fxSound('pop'); }catch(er){}
   const h = (typeof fox3d !== 'undefined') ? fox3d.hero : null;
-  if(h && h.act && t.id !== 'vaNavBtn') h.act('wave');
+  if(!voiceHelpOn()){ if(h && h.act && t.id === 'heroMascotContainer') h.act('wave'); return; }   // aide vocale coupée pour ce profil
+  try{ fxSound('pop'); }catch(er){}
+  vvPrimeAudio();
+  if(h && h.act && t.id !== 'vaNavBtn' && t.id !== 'vaFab') h.act('wave');
   vaOpen();
 });
 
 /* 👋 Bonjour + prénom à voix haute, à l'ouverture (dès que le navigateur l'autorise) et à la connexion */
 function vaGreetAloud(text){
-  const say = () => { try{ speak(text, 'fr-FR'); }catch(e){} };
+  const say = () => {
+    try{
+      const clean = fxCleanSpeech(text);
+      const h = (typeof fox3d !== 'undefined') ? fox3d.hero : null;
+      if(h && h.play && h.canvas && h.canvas.offsetParent) h.play('talk', { text:clean, rate:narratorRate(), side:1 });   // le renard de l'accueil articule son bonjour
+      speakNarrator(clean, 'fr-FR');
+    }catch(e){}
+  };
   const active = navigator.userActivation ? navigator.userActivation.hasBeenActive : false;
   if(active){ say(); return; }
   let used = false;
@@ -37450,9 +37735,530 @@ function vaGreetAloud(text){
 function vaGreetLogin(username, isNew){
   const n = vaFirstName(username);
   const msg = isNew ? `Bienvenue ${n} ! Ravi de faire ta connaissance 🦊` : `${vaHelloWord()} ${n} ! Ravi de te revoir 😊`;
-  try{ speak(fxCleanSpeech(msg), 'fr-FR'); }catch(e){}
+  try{ speakNarrator(fxCleanSpeech(msg), 'fr-FR'); }catch(e){}
   setTimeout(() => { try{ cameoLast = 0; foxCameo('wave', msg, { force:true, edge:'bottom', hold:3200 }); }catch(e){} }, 700);
 }
+
+/* ============ 🧓 SIMPLE POUR TOUS — aide vocale par profil, conteur, lecture accompagnée, écoute, recherche à la voix ============
+   Pensé pour les personnes qui ne savent pas (ou n'aiment pas) manipuler l'appli : on parle au renard et il fait le reste.
+   • Aide vocale : activée par défaut, désactivable PAR PROFIL depuis le menu ☰ (« Aide vocale »).
+   • Le conteur : une voix posée de dame 👵 ou de monsieur 👴 (jamais de voix d'enfant) pour le renard et la lecture.
+   • « Je veux lire » : le Bouquinage s'ouvre là où on s'était arrêté, et le renard demande « Je te lis, ou tu lis toi-même ? ».
+   • « Je veux écouter » : l'Audiothèque reprend tout de suite là où on s'était arrêté.
+   • « Cherche le mot maison », « Que veut dire… » : la recherche de mots à la voix. */
+
+/* 🎤 Aide vocale par profil */
+const VOICE_HELP_KEY = 'lexiqueQuiz::voiceHelp';
+function voiceHelpOn(){ try{ return localStorage.getItem(nsKey(VOICE_HELP_KEY)) !== 'off'; }catch(e){ return true; } }
+function vvCanHear(){ return voiceHelpOn() && !!(window.SpeechRecognition || window.webkitSpeechRecognition) && !(typeof VA !== 'undefined' && VA.noRec === 'blocked'); }
+function applyVoiceHelp(){
+  const on = voiceHelpOn();
+  document.body.classList.toggle('vh-off', !on);
+  document.body.classList.toggle('vh-hear', vvCanHear());
+  const lbl = document.getElementById('voiceHelpLbl'); if(lbl) lbl.textContent = on ? 'Aide vocale : activée' : 'Aide vocale : désactivée';
+  const sw = document.getElementById('voiceHelpSw'); if(sw) sw.classList.toggle('on', on);
+}
+function setVoiceHelp(on){
+  try{ localStorage.setItem(nsKey(VOICE_HELP_KEY), on ? 'on' : 'off'); }catch(e){}
+  applyVoiceHelp();
+  if(!on && typeof VA !== 'undefined' && VA.open) vaClose();
+  if(!on) vvHearStop();
+  try{ showGoalToast(on ? 'Aide vocale activée' : 'Aide vocale désactivée', on ? 'Touche le renard pour lui parler 🦊' : 'Pour ce profil. Tu peux la réactiver dans le menu ☰', on ? '🦊' : '🔕'); }catch(e){}
+}
+
+/* 👵👴 Le conteur : la voix du renard et de la lecture (réglage « voix de lecture » du profil) */
+function narratorPersona(){
+  let v = null; try{ v = readingVoiceGender; }catch(e){}
+  if(v && v !== 'c') return v;
+  const c = castList().filter(k => k !== 'c');
+  return c[0] || 'g';
+}
+function narratorIsFemale(){ const p = narratorPersona(); return p === 'g' || p === 'f'; }
+function narratorRate(base){ return (base || voicePrefs.rate || 0.96) * (['g', 'p'].includes(narratorPersona()) ? 0.9 : 1); }
+function speakNarrator(text, lang, onEnd, rate){ ttsForcePersona = narratorPersona(); speak(text, lang || 'fr-FR', onEnd, rate); }
+/* attendre que la voix ait fini de parler (pour ne pas couper le renard) */
+function vvWhenQuiet(fn, maxMs){
+  const t0 = Date.now(), lim = maxMs || 7000;
+  const tick = () => {
+    let busy = false; try{ busy = ttsSpeaking || window.speechSynthesis.speaking; }catch(e){}
+    if(!busy || Date.now() - t0 > lim) fn(); else setTimeout(tick, 150);
+  };
+  setTimeout(tick, 120);
+}
+
+/* 👂 Écouter une seule phrase (renard, choix de lecture, réponse orale, recherche) */
+let vvHearing = null;
+function vvHearStop(){ if(vvHearing){ const h = vvHearing; vvHearing = null; try{ h.rec.onend = null; h.rec.onresult = null; h.rec.onerror = null; h.rec.abort(); }catch(e){} try{ h.o.onEnd && h.o.onEnd(); }catch(e){} } }
+function vvHear(o){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR || (typeof VA !== 'undefined' && VA.noRec === 'blocked')){ o.onFail && o.onFail('nosr'); return null; }
+  vvHearStop();
+  try{ stopRecognition(); }catch(e){}
+  try{ window.speechSynthesis.cancel(); ttsSpeaking = false; }catch(e){}
+  let rec; try{ rec = new SR(); }catch(e){ o.onFail && o.onFail('blocked'); return null; }
+  rec.lang = o.lang || 'fr-FR'; rec.interimResults = !!o.onInterim; rec.maxAlternatives = 4; rec.continuous = false;
+  const h = { rec, o }; vvHearing = h;
+  let final = '', alts = [], failed = false;
+  rec.onresult = (e) => {
+    let interim = '';
+    for(let i = e.resultIndex; i < e.results.length; i++){ const r = e.results[i]; if(r.isFinal){ final += r[0].transcript; alts = Array.from(r).map(x => x.transcript); } else interim += r[0].transcript; }
+    if(!final && interim && o.onInterim) o.onInterim(interim);
+  };
+  rec.onerror = (e) => {
+    const er = e.error;
+    if(er === 'no-speech' || er === 'aborted') return;
+    failed = true;
+    const reason = er === 'not-allowed' ? 'denied' : er === 'audio-capture' ? 'nomic' : 'blocked';
+    if(reason === 'blocked' && typeof VA !== 'undefined') VA.noRec = 'blocked';
+    if(vvHearing === h) vvHearing = null;
+    try{ o.onFail && o.onFail(reason); }catch(err){}
+    try{ o.onEnd && o.onEnd(); }catch(err){}
+    applyVoiceHelp();
+  };
+  rec.onend = () => {
+    if(failed) return;
+    if(vvHearing === h) vvHearing = null;
+    try{ if(final.trim()) o.onText(final.trim(), alts.length ? alts : [final]); else o.onFail && o.onFail('silence'); }catch(err){ console.warn('écoute', err); }
+    try{ o.onEnd && o.onEnd(); }catch(err){}
+  };
+  try{ rec.start(); }catch(e){ if(vvHearing === h) vvHearing = null; o.onFail && o.onFail('blocked'); return null; }
+  return h;
+}
+
+/* 🦊 Emprunter le petit renard 3D (celui des surprises) pour l'afficher ailleurs — et le rendre */
+function vvBorrowFox(box, female){
+  if(!box || typeof fox3d === 'undefined' || !fox3d.ready || fox3d.reduced || typeof THREE === 'undefined') return null;
+  if(!fox3d.cameo){ try{ fox3d.cameo = fox3dCreate(THREE, 220); }catch(e){ fox3d.cameo = null; } }
+  const F = fox3d.cameo; if(!F) return null;
+  box.appendChild(F.canvas); box.classList.add('has3d');
+  try{ F.setFemale(female); F.still(); }catch(e){}
+  return F;
+}
+function vvReturnFox(){
+  const F = (typeof fox3d !== 'undefined') ? fox3d.cameo : null;
+  if(!F || !F.canvas.parentNode || F.canvas.parentNode.id === 'vaFox') return;
+  if(!F.canvas.parentNode.classList.contains('bq-fox')) return;
+  try{ F.still(); }catch(e){}
+  const st = document.querySelector('#foxCameo .cameo-fox'); if(st) st.appendChild(F.canvas); else F.canvas.remove();
+}
+
+/* ================= 📖 LECTURE ACCOMPAGNÉE (Bouquinage) ================= */
+const BQ_RESUME_KEY = 'lexiqueQuiz::bouqResume';
+const BQ = { idx:-1, sents:[], cur:0, playing:false, token:0, mode:'', title:'', gapT:0, scrollT:0, lastMode:'' };
+function bqLoadResume(){ try{ const r = JSON.parse(localStorage.getItem(nsKey(BQ_RESUME_KEY)) || 'null'); return (r && Number.isInteger(r.idx)) ? r : null; }catch(e){ return null; } }
+function bqSaveResume(idx, sent, done){ try{ localStorage.setItem(nsKey(BQ_RESUME_KEY), JSON.stringify({ idx, sent:sent || 0, done:!!done, at:Date.now() })); }catch(e){} }
+/* où reprendre : le texte en cours (et la phrase), sinon le prochain texte pas encore lu */
+function bqResumeTarget(){
+  const n = BOUQUINAGE_TEXTS.length;
+  const nextUnread = (from) => { for(let k = 0; k < n; k++){ const i = (from + k) % n; if(!isBouquinageRead(i)) return i; } return ((from % n) + n) % n; };
+  const r = bqLoadResume();
+  if(!r || r.idx >= n) return { idx:nextUnread(0), sent:0, fresh:true };
+  if(r.done) return { idx:nextUnread(r.idx + 1), sent:0, fresh:true };
+  return { idx:r.idx, sent:r.sent || 0, fresh:false };
+}
+function bqOpenResume(o){ const r = bqResumeTarget(); renderBouquinageDetail(r.idx, Object.assign({ sent:r.sent, resumed:!r.fresh && r.sent > 0, fresh:r.fresh }, o || {})); }
+function bqSplit(text){
+  const out = []; let buf = ''; const s = String(text || '');
+  for(let i = 0; i < s.length; i++){
+    const ch = s[i]; buf += ch;
+    if(/[.!?…]/.test(ch)){
+      while(i + 1 < s.length && /[.!?…»"”')\]]/.test(s[i + 1])) buf += s[++i];
+      if(i + 1 >= s.length || /\s/.test(s[i + 1])){ if(buf.trim()) out.push(buf.trim()); buf = ''; }
+    }
+  }
+  if(buf.trim()) out.push(buf.trim());
+  return out;
+}
+function bqTextParts(t){
+  const sents = [];
+  const paras = String(t.body || '').split(/\n+/).map(p => p.trim()).filter(Boolean);
+  const body = paras.map(p => '<p class="bq-p">' + bqSplit(p).map(x => { const i = sents.push(x) - 1; return `<span class="bq-sent" data-s="${i}">${escapeHtml(x)}</span>`; }).join(' ') + '</p>').join('');
+  let quote = '';
+  if(t.quote){ const i = sents.push(t.quote) - 1; quote = `<div class="bq-quote">« <span class="bq-sent" data-s="${i}">${escapeHtml(t.quote)}</span> »</div>`; }
+  return { body, quote, sents };
+}
+function bqCoachHtml(idx){
+  return `<div class="bq-coach" id="bqCoach" data-idx="${idx}">
+    <div class="bq-fox" id="bqFox" role="button" tabindex="0" aria-label="Le renard"><i class="bq-fox-img"></i></div>
+    <div class="bq-coach-main"><div class="bq-say" id="bqSay"></div><div class="bq-heard" id="bqHeard"></div></div>
+    <div class="bq-btns" id="bqBtns"></div>
+  </div>`;
+}
+function bqAlive(){ const c = document.getElementById('bqCoach'); return !!c && +c.dataset.idx === BQ.idx; }
+function bqFox(){ const F = (typeof fox3d !== 'undefined') ? fox3d.cameo : null; return (F && F.canvas.parentNode && F.canvas.parentNode.id === 'bqFox') ? F : null; }
+function bqFoxTalk(text, rate){
+  const F = bqFox(); if(F){ try{ F.play('talk', { text:fxCleanSpeech(text), rate:rate || narratorRate(), side:Math.random() < 0.5 ? 1 : -1, dur:2 }); }catch(e){} }
+  const box = document.getElementById('bqFox'); if(box){ box.classList.add('talking'); vvWhenQuiet(() => box.classList.remove('talking'), 60000); }
+}
+function bqHighlight(i){
+  document.querySelectorAll('#quizCard .bq-sent.on').forEach(e => e.classList.remove('on'));
+  if(i < 0) return;
+  const el = document.querySelector(`#quizCard .bq-sent[data-s="${i}"]`);
+  if(el){ el.classList.add('on'); const r = el.getBoundingClientRect(); if(r.top < 90 || r.bottom > window.innerHeight - 110) el.scrollIntoView({ behavior:'smooth', block:'center' }); }
+}
+function bqWire(idx, opts){
+  opts = opts || {};
+  bqStop(true);
+  const t = BOUQUINAGE_TEXTS[idx];
+  BQ.idx = idx; BQ.sents = bqTextParts(t).sents; BQ.title = t.title; BQ.mode = '';
+  const r = bqLoadResume();
+  let at = (opts.sent != null) ? opts.sent : ((r && r.idx === idx && !r.done) ? (r.sent || 0) : 0);
+  BQ.cur = Math.max(0, Math.min(at, BQ.sents.length - 1));
+  bqSaveResume(idx, BQ.cur, false);                       // c'est maintenant « le texte en cours »
+  if(BQ.cur > 0){
+    const el = document.querySelector(`#quizCard .bq-sent[data-s="${BQ.cur}"]`);
+    if(el){ el.classList.add('here'); el.insertAdjacentHTML('beforebegin', '<span class="bq-here-pin">📍 Tu t\'étais arrêté ici</span>'); }
+  }
+  document.querySelectorAll('#quizCard .bq-sent').forEach(el => el.addEventListener('click', () => {
+    const i = +el.dataset.s;
+    if(BQ.playing) bqSpeak(i); else bqSpeakOne(i);
+  }));
+  const box = document.getElementById('bqFox');
+  if(vvBorrowFox(box, narratorIsFemale())){ const F = bqFox(); try{ F.pop(); setTimeout(() => { if(bqFox() === F && !BQ.playing) F.play('wave', { side:1, dur:1.3 }); }, 700); }catch(e){} }
+  if(box) box.addEventListener('click', () => { if(BQ.playing) bqPause(); else if(BQ.mode !== 'read') bqAsk(true); });
+  if(opts.autoRead){ bqCoach('reading'); vvWhenQuiet(() => { if(bqAlive()) bqPlay(BQ.cur); }); return; }
+  bqCoach('ask', { resumed:opts.resumed || BQ.cur > 0, fresh:opts.fresh });
+  if(opts.ask) vvWhenQuiet(() => { if(bqAlive() && !BQ.playing && !BQ.mode) bqAsk(true, { resumed:opts.resumed || BQ.cur > 0, fresh:opts.fresh }); });
+}
+/* le renard pose la question à voix haute, puis écoute la réponse */
+function bqAsk(speakIt, o){
+  const text = bqCoach('ask', o || {});
+  if(!speakIt) return;
+  bqFoxTalk(text);
+  speakNarrator(fxCleanSpeech(text), 'fr-FR', () => { if(bqAlive() && !BQ.playing && !BQ.mode) bqListen(); });
+}
+function bqListen(){
+  if(!vvCanHear()) return;
+  const heard = document.getElementById('bqHeard'), box = document.getElementById('bqFox');
+  const F = bqFox(); if(F) try{ F.play('listen', { dur:10, side:1 }); }catch(e){}
+  if(box) box.classList.add('listening');
+  if(heard){ heard.className = 'bq-heard on'; heard.textContent = '👂 Je t\'écoute… dis « lis-moi » ou « moi-même »'; }
+  vvHear({ lang:'fr-FR', onInterim:(t) => { if(heard) heard.textContent = '🗣️ ' + t; },
+    onText:(text, alts) => {
+      if(!bqAlive()) return;
+      if(heard){ heard.className = 'bq-heard'; heard.textContent = '🗣️ « ' + text + ' »'; }
+      const ok = [text].concat(alts || []).some(a => bqChoice(a));
+      if(!ok){ const s = document.getElementById('bqSay'); if(s) s.textContent = "Je n'ai pas bien compris… Touche simplement un des boutons 👇"; }
+    },
+    onFail:(r) => { if(heard){ heard.className = 'bq-heard'; heard.textContent = r === 'silence' ? 'Touche un bouton 👇 (ou le renard pour me reparler)' : ''; } },
+    onEnd:() => { if(box) box.classList.remove('listening'); const F2 = bqFox(); if(F2 && F2.st.act && F2.st.act.name === 'listen') F2.still(); } });
+}
+function bqChoice(raw){
+  const t = vaNorm(raw);
+  if(BQ.mode === 'done'){
+    if(/\b(oui|ouais|d accord|ok|vas y|allez|suivant|le suivant|encore|continue|volontiers|نعم|واخا)\b/.test(t)) { bqAction('next'); return true; }
+    if(/\b(non|stop|arrete|ca suffit|plus tard|merci|لا)\b/.test(t)) { bqAction('home'); return true; }
+    if(/\b(relis|relire|encore une fois|recommence)\b/.test(t)) { bqAction('again'); return true; }
+    return false;
+  }
+  if(/\b(moi meme|tout seul|toute seule|seul|seule|moi qui lis|je lis|je vais lire|je le lis|je prefere lire|non|بنفسي|وحدي)\b/.test(t)){ bqSelf(true); return true; }
+  if(/\b(lis|lire|lisez|toi|toi meme|vas y|ecouter|ecoute|oui|ouais|d accord|ok|volontiers|raconte|اقرا|نعم|اسمع)\b/.test(t)){ bqPlay(BQ.cur); return true; }
+  return false;
+}
+function bqCoach(state, o){
+  o = o || {};
+  const say = document.getElementById('bqSay'), btns = document.getElementById('bqBtns');
+  if(!say || !btns) return '';
+  const T = BQ.title;
+  const B = (id, label, cls) => `<button type="button" class="bq-btn ${cls || ''}" data-bqa="${id}">${label}</button>`;
+  let text = '', html = '';
+  if(state === 'ask'){
+    text = (o.resumed ? `On reprend « ${T} », là où tu t'étais arrêté. ` : (o.fresh ? `Voici un nouveau texte : « ${T} ». ` : '')) + 'Je te le lis, ou tu lis toi-même ?';
+    html = B('read', '🔊 Lis-moi', 'main') + B('self', '👀 Je lis moi-même');
+  } else if(state === 'reading'){
+    text = 'Je te lis le texte… 🎧 Touche une phrase pour y aller, ou ⏸ pour faire une pause.';
+    html = B('pause', '⏸ Pause', 'main') + B('self', '👀 Je lis moi-même');
+  } else if(state === 'paused'){
+    text = 'Pause ! On reprend quand tu veux.';
+    html = B('resume', '▶ Reprendre', 'main') + B('restart', '⏮ Depuis le début');
+  } else if(state === 'self'){
+    text = 'Prends ton temps 😊 Si une phrase est difficile, touche-la : je te la lis.';
+    html = B('done', '✅ J\'ai fini ce texte', 'main') + B('read', '🔊 Lis-moi plutôt');
+  } else if(state === 'done'){
+    text = `Bravo, tu as fini « ${T} » ! 👏 On lit le texte suivant ?`;
+    html = B('next', '▶ Oui, le suivant', 'main') + B('again', '🔁 Relire') + B('home', '✋ Non, merci');
+  }
+  say.textContent = text; btns.innerHTML = html;
+  const heard = document.getElementById('bqHeard'); if(heard && state !== 'ask' && state !== 'done'){ heard.className = 'bq-heard'; heard.textContent = ''; }
+  btns.querySelectorAll('[data-bqa]').forEach(b => b.addEventListener('click', () => bqAction(b.dataset.bqa)));
+  return text;
+}
+function bqAction(id){
+  vvHearStop();
+  if(id === 'read') return bqPlay(BQ.cur);
+  if(id === 'self') return bqSelf(true);
+  if(id === 'pause') return bqPause();
+  if(id === 'resume') return bqResume();
+  if(id === 'restart' || id === 'again') return bqPlay(0);
+  if(id === 'done') return bqFinished(true);
+  if(id === 'next'){ const wasRead = BQ.lastMode === 'read'; const r = bqResumeTarget(); return renderBouquinageDetail(r.idx, wasRead ? { autoRead:true, sent:0 } : { ask:true, sent:0, fresh:true }); }
+  if(id === 'home'){ BQ.mode = ''; bqCoach('ask'); speakNarrator("D'accord ! À très bientôt pour une autre lecture. 😊"); bqFoxTalk("D'accord ! À très bientôt pour une autre lecture."); }
+}
+function bqPlay(from){
+  if(BQ.idx < 0 || !bqAlive()) return;
+  vvHearStop();
+  BQ.playing = true; BQ.mode = 'read'; BQ.lastMode = 'read';
+  document.querySelectorAll('#quizCard .bq-here-pin').forEach(e => e.remove());
+  bqCoach('reading'); bqPlayerShow();
+  bqSpeak(from != null ? from : BQ.cur);
+}
+function bqSpeak(i){
+  clearTimeout(BQ.gapT);
+  if(i < 0) i = 0;
+  if(i >= BQ.sents.length) return bqFinished(false);
+  const tok = ++BQ.token;
+  BQ.cur = i; bqHighlight(i); bqSaveResume(BQ.idx, i, false); bqPlayerUpdate();
+  const text = BQ.sents[i];
+  bqFoxTalk(text, readingRate * 0.9);
+  speakNarrator(text, 'fr-FR', () => {
+    if(tok !== BQ.token || !BQ.playing || !bqAlive()) return;
+    BQ.gapT = setTimeout(() => { if(tok === BQ.token && BQ.playing && bqAlive()) bqSpeak(i + 1); }, 280);
+  }, readingRate);
+}
+/* toucher une phrase (en lisant seul) : le renard la lit, puis se tait */
+function bqSpeakOne(i){
+  const tok = ++BQ.token;
+  BQ.cur = i; bqHighlight(i); bqSaveResume(BQ.idx, i, false);
+  bqFoxTalk(BQ.sents[i], readingRate * 0.9);
+  speakNarrator(BQ.sents[i], 'fr-FR', () => { if(tok === BQ.token && !BQ.playing) bqHighlight(-1); }, readingRate);
+}
+function bqHush(){ BQ.token++; clearTimeout(BQ.gapT); try{ window.speechSynthesis.cancel(); }catch(e){} ttsSpeaking = false; const F = bqFox(); if(F) try{ F.still(); }catch(e){} }
+function bqPause(){ BQ.playing = false; bqHush(); bqCoach('paused'); bqPlayerUpdate(); }
+function bqResume(){ if(!bqAlive()) return; BQ.playing = true; BQ.mode = 'read'; bqCoach('reading'); bqPlayerShow(); bqSpeak(BQ.cur); }
+function bqStop(quiet){
+  const was = BQ.playing || BQ.mode;
+  BQ.playing = false; clearTimeout(BQ.gapT); BQ.token++;
+  vvHearStop();
+  if(was && !quiet){ try{ window.speechSynthesis.cancel(); }catch(e){} ttsSpeaking = false; }
+  bqPlayerHide(); bqHighlight(-1); window.removeEventListener('scroll', bqOnScroll);
+}
+function bqSelf(talk){
+  BQ.playing = false; bqHush(); bqPlayerHide();
+  BQ.mode = 'self'; BQ.lastMode = 'self';
+  const text = bqCoach('self');
+  const el = document.querySelector(`#quizCard .bq-sent[data-s="${BQ.cur}"]`);
+  if(el) el.scrollIntoView({ behavior:'smooth', block:'center' });
+  window.removeEventListener('scroll', bqOnScroll); window.addEventListener('scroll', bqOnScroll, { passive:true });
+  if(talk){ bqFoxTalk(text); speakNarrator(fxCleanSpeech(text)); }
+}
+/* en lisant seul : on retient la phrase en haut de l'écran (pour reprendre au bon endroit) */
+function bqOnScroll(){
+  if(BQ.mode !== 'self' || !bqAlive()){ window.removeEventListener('scroll', bqOnScroll); return; }
+  clearTimeout(BQ.scrollT);
+  BQ.scrollT = setTimeout(() => {
+    const els = [...document.querySelectorAll('#quizCard .bq-sent')];
+    const first = els.find(e => e.getBoundingClientRect().bottom > 120);
+    if(first){ BQ.cur = +first.dataset.s; bqSaveResume(BQ.idx, BQ.cur, false); }
+  }, 400);
+}
+function bqFinished(byUser){
+  const idx = BQ.idx;
+  BQ.playing = false; bqPlayerHide(); bqHighlight(-1); window.removeEventListener('scroll', bqOnScroll);
+  if(!isBouquinageRead(idx)){
+    markBouquinageRead(idx);
+    try{ playCorrectSound(); }catch(e){}
+    const mb = document.getElementById('markReadBtn');
+    if(mb){ mb.textContent = '✅ Marqué comme lu (cliquer pour annuler)'; mb.style.background = 'var(--surface-sunken)'; mb.style.border = '1px solid rgba(34,197,94,0.5)'; mb.style.color = '#16A34A'; mb.style.boxShadow = 'none'; }
+  }
+  bqSaveResume(idx, 0, true);
+  BQ.mode = 'done';
+  const text = bqCoach('done');
+  vvWhenQuiet(() => {
+    if(!bqAlive() || BQ.mode !== 'done') return;
+    bqFoxTalk(text);
+    speakNarrator(fxCleanSpeech(text), 'fr-FR', () => { if(bqAlive() && BQ.mode === 'done') bqListen(); });
+  }, byUser ? 1500 : 4000);
+}
+/* barre de lecture (en bas de l'écran) : phrase précédente, pause, phrase suivante, arrêter */
+function bqPlayerShow(){
+  let p = document.getElementById('bqPlayer');
+  if(!p){
+    p = document.createElement('div'); p.id = 'bqPlayer'; p.className = 'bq-player';
+    p.innerHTML = `<button type="button" data-bqp="prev" aria-label="Phrase précédente">⏮</button><button type="button" data-bqp="toggle" class="main" aria-label="Pause">⏸</button><button type="button" data-bqp="next" aria-label="Phrase suivante">⏭</button><button type="button" data-bqp="stop" aria-label="Arrêter">⏹</button><span class="bq-prog" id="bqProg"></span>`;
+    document.body.appendChild(p);
+    p.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-bqp]'); if(!b) return;
+      const k = b.dataset.bqp;
+      if(k === 'toggle'){ if(BQ.playing) bqPause(); else bqResume(); }
+      else if(k === 'prev'){ BQ.playing = true; BQ.mode = 'read'; bqCoach('reading'); bqSpeak(Math.max(0, BQ.cur - 1)); }
+      else if(k === 'next'){ BQ.playing = true; BQ.mode = 'read'; bqCoach('reading'); bqSpeak(BQ.cur + 1); }
+      else if(k === 'stop'){ bqHush(); bqStop(); BQ.mode = ''; bqCoach('ask'); }
+    });
+  }
+  p.classList.add('in'); bqPlayerUpdate();
+}
+function bqPlayerUpdate(){
+  const p = document.getElementById('bqPlayer'); if(!p) return;
+  const t = p.querySelector('[data-bqp="toggle"]'); if(t){ t.textContent = BQ.playing ? '⏸' : '▶'; t.setAttribute('aria-label', BQ.playing ? 'Pause' : 'Reprendre'); }
+  const g = document.getElementById('bqProg'); if(g) g.textContent = `${Math.min(BQ.cur + 1, BQ.sents.length)} / ${BQ.sents.length}`;
+}
+function bqPlayerHide(){ const p = document.getElementById('bqPlayer'); if(p) p.remove(); }
+/* on quitte la page de lecture : on se tait, on range la barre et le renard */
+(function bqWatch(){
+  const card = document.getElementById('quizCard'); if(!card) return;
+  new MutationObserver(() => {
+    if(BQ.idx >= 0 && !bqAlive()){ const was = BQ.playing; bqStop(!was); if(was){ try{ window.speechSynthesis.cancel(); }catch(e){} ttsSpeaking = false; } BQ.idx = -1; BQ.mode = ''; vvReturnFox(); }
+  }).observe(card, { childList:true });
+})();
+
+/* ================= 🎧 « Je veux écouter » : l'Audiothèque reprend là où on s'était arrêté ================= */
+async function vvStreamTarget(){
+  let d = audioLib.data;
+  if(!d){ try{ d = audioLib.data = await audioFetchLibrary(false); }catch(e){ return null; } }
+  if(!d || !d.playlists) return null;
+  const total = d.playlists.reduce((k, p) => k + p.tracks.length, 0);
+  if(!total) return { empty:true };
+  const el = audioLib.el, c = audioCurrent();
+  if(c && el && el.src) return { current:true, playing:!el.paused, title:c.t.title, at:el.currentTime || 0 };
+  let last = ''; try{ last = localStorage.getItem(AUDIO_LAST_KEY) || ''; }catch(e){}
+  let pl = 0, tr = 0;
+  if(last){ const i = d.playlists.findIndex(p => p.tracks.some(t => t.file === last)); if(i >= 0){ pl = i; tr = d.playlists[i].tracks.findIndex(t => t.file === last); } }
+  const tracks = d.playlists[pl].tracks;
+  let pos = audioLoadPos()[tracks[tr].file], next = false;
+  if(pos && pos.done && tr + 1 < tracks.length){ tr++; pos = audioLoadPos()[tracks[tr].file]; next = true; }
+  return { pl, tr, title:tracks[tr].title, list:d.playlists[pl].title, at:(pos && !pos.done) ? pos.t : 0, next, first:!last };
+}
+function vvStreamPlay(tg){
+  if(!tg) return;
+  if(tg.current){ const el = audioLib.el; if(el && el.paused){ audioLib.autoPaused = false; el.play().catch(() => {}); } }
+  else audioPlay(tg.pl, tg.tr);
+  setTimeout(() => { const el = audioLib.el; if(el && el.paused && !el.ended){ try{ showGoalToast('Touche ▶ pour écouter', 'Ton téléphone demande un petit toucher pour lancer le son.', '🎧'); }catch(e){} } }, 1500);
+}
+function vvSpokenTime(sec){
+  sec = Math.floor(sec || 0);
+  const h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60), s = sec % 60;
+  if(h) return `${h} heure${h > 1 ? 's' : ''}${m ? ' ' + m : ''}`;
+  if(m) return `${m} minute${m > 1 ? 's' : ''}${s >= 10 && m < 10 ? ' ' + s : ''}`;
+  return `${s} secondes`;
+}
+/* 🍏 iPhone : le son doit être « débloqué » par un toucher — on le fait discrètement au premier toucher du renard */
+const VV_SILENT = 'data:audio/wav;base64,UklGRkQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YSAAAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgA==';
+function vvPrimeAudio(){
+  if(vvPrimeAudio.done) return;
+  const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  if(!ios) return;
+  try{
+    const el = audioEnsureEl(); if(el.src) return;
+    vvPrimeAudio.done = true;
+    el.muted = true; el.src = VV_SILENT;
+    const p = el.play();
+    const reset = () => { try{ el.pause(); el.muted = false; if(el.src === VV_SILENT){ el.removeAttribute('src'); el.load(); } }catch(e){} };
+    if(p && p.then) p.then(reset, reset); else reset();
+  }catch(e){}
+}
+
+/* ================= 🔍 Chercher un mot à la voix ================= */
+function arStripMarks(s){ return String(s || '').replace(/[ً-ْٰـ]/g, '').replace(/[أإآ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه').trim(); }
+function dictRank(w, qn, qa){
+  const f = normalizeForSearch(w.fr), fc = f.replace(/^(le |la |les |l'|l’|un |une |des |se |s'|s’)/, '');
+  if(qn && (f === qn || fc === qn)) return 0;
+  if(qa && arStripMarks(w.ar) === qa) return 0;
+  if(qn && fc.startsWith(qn)) return 1;
+  if(qa && arStripMarks(w.ar).includes(qa)) return 1.5;
+  if(qn && f.includes(qn)) return 2;
+  if(qn && normalizeForSearch(w.def || '').includes(qn)) return 3;
+  return 9;
+}
+function vaDictFind(q){
+  const qn = normalizeForSearch(q), qa = /[؀-ۿ]/.test(q) ? arStripMarks(q) : '';
+  return WORDS.map(w => ({ w, r:dictRank(w, /[؀-ۿ]/.test(q) ? '' : qn, qa) })).filter(x => x.r < 9).sort((a, b) => a.r - b.r).map(x => x.w);
+}
+function vaSearchQuery(t){
+  const clean = (q) => String(q || '').trim().replace(/^(le mot|un mot|les mots|le|la|les|l|un|une|des|du|de|d)\s+/, '').replace(/\s+(s il te plait|s il vous plait|stp|svp|en arabe|en francais|par coeur)$/, '').replace(/\s+(s il te plait|stp|svp)$/, '').trim();
+  const ok = (q) => q && q.split(' ').length <= 4 && !/^(un mot|mot|mots|quelque chose|un truc)$/.test(q);
+  let m = t.match(/(?:que veut dire|qu est ce que veut dire|qu est ce que ca veut dire|ca veut dire quoi|que signifie|qu est ce que signifie|la definition de|definition de|le sens de|la signification de|traduis moi|traduis|traduire|la traduction de|traduction de|comment (?:on dit|dit on|dire|on traduit|se dit)|ما معنى|ما معني|ابحث عن|كيف نقول|كيف اقول|ترجم)\s+(?:le mot\s+|كلمه\s+)?(.+)$/);
+  if(m){ const q = clean(m[1].replace(/\s+(en arabe|en francais|بالفرنسيه|بالعربيه)$/, '')); if(ok(q)) return q; }
+  m = t.match(/^(?:le mot\s+)?(.+?)\s+(?:ca veut dire quoi|veut dire quoi|c est quoi en arabe|en arabe c est quoi|ca se dit comment en arabe)$/);
+  if(m){ const q = clean(m[1]); if(ok(q)) return q; }
+  m = t.match(/^(?:je (?:veux |voudrais )?|tu peux |peux tu |pourrais tu )?(?:cherche[rz]?|recherche[rz]?|trouve[rz]?)\s+(?:moi\s+)?(.+)$/);
+  if(m){ const q = clean(m[1]); if(ok(q) && (/^(le mot|un mot|les mots|la traduction|la definition)\b/.test(m[1]) || !vaFindDest(q, q.split(' ')))) return q; }   // « cherche le mot maison » ≠ « cherche la conjugaison »
+  m = t.match(/^le mot\s+(.+)$/);
+  if(m){ const q = clean(m[1]); if(ok(q)) return q; }
+  return null;
+}
+
+/* le renard répond aux demandes « écouter » et « chercher un mot » */
+async function vaStream(){
+  const tg = await vvStreamTarget();
+  if(!VA.open){ if(tg && !tg.empty) vvStreamPlay(tg); return; }
+  if(!tg) return vaReply({ fr:"Je n'arrive pas à charger tes audios… Vérifie la connexion internet, puis redemande-moi.", ar:'لا أستطيع تحميل التسجيلات… تحقق من الاتصال بالإنترنت.', listen:true });
+  if(tg.empty) return vaReply({ fr:"Ton audiothèque est encore vide. Je t'y emmène : on peut y ajouter des audios !", ar:'مكتبتك الصوتية فارغة. سآخذك إليها.', then:() => renderAudioLibrary() });
+  if(tg.current && tg.playing) return vaReply({ fr:`C'est déjà en route : « ${tg.title} ». Bonne écoute ! 🎧`, ar:'التسجيل قيد التشغيل. استماعًا ممتعًا! 🎧', then:() => renderAudioLibrary() });
+  const when = tg.at > 5 ? `, à ${vvSpokenTime(tg.at)}` : (tg.next ? ' : l\'épisode suivant' : '');
+  const fr = tg.first ? `Je lance « ${tg.title} ». Bonne écoute ! 🎧` : `Je reprends « ${tg.title} »${when}, là où tu t'étais arrêté. Bonne écoute ! 🎧`;
+  return vaReply({ fr, ar:'أتابع الاستماع من حيث توقفت. استماعًا ممتعًا! 🎧', afterSpeech:() => { vaClose(true); vvStreamPlay(tg); renderAudioLibrary(); } });
+}
+function vaSearch(q){
+  q = String(q || '').trim();
+  const res = vaDictFind(q);
+  const show = () => { dictQuery = q; dictCat = null; renderDictionaryView(); };
+  if(!res.length) return vaReply({ fr:`Je n'ai pas trouvé « ${q} » dans tes mots… Dis un autre mot, ou écris-le juste en dessous.`, ar:`لم أجد « ${q} »… جرّب كلمة أخرى.`, listen:true });
+  const w = res[0];
+  const isAr = /[\u0600-\u06FF]/.test(q);
+  const exact = dictRank(w, isAr ? '' : normalizeForSearch(q), isAr ? arStripMarks(q) : '') === 0;
+  const head = (exact || res.length === 1) ? `« ${w.fr} »` : `J'ai trouvé ${res.length} mots. Le premier, « ${w.fr} »,`;
+  return vaReply({ fr:`${head} se dit « ${w.ar} » en arabe. 🔍`, say:`${head} se dit, en arabe :`, tail:{ text:w.ar, lang:'ar-SA' },
+    ar:`« ${w.ar} » بالفرنسية:`, tailAr:{ text:w.fr, lang:'fr-FR' }, then:show });
+}
+
+/* ================= 🗣️ Conjugaison : répondre à voix haute ================= */
+/* « clé phonétique » grossière : à l'oral, « mangeais / mangé / manger » ou « mange / manges / mangent » se confondent */
+function conjPhon(s){
+  let t = String(s || '').toLowerCase().replace(/[’`´ʼ]/g, "'").replace(/[.,!?;:«»"]/g, ' ').replace(/\s+/g, ' ').trim();
+  t = t.replace(/^(que |qu')/, '').replace(/^(j'|je |tu |il |elle |on |nous |vous |ils |elles )/, '');
+  return t.split(/[\s']+/).filter(Boolean).map(w => {
+    w = w.replace(/ç/g, 's').replace(/(aient|ais|ait|ai|ées|ée|és|é|er|ez|et)$/, '§');
+    w = w.normalize('NFD').replace(/[̀-ͯ]/g, '');
+    if(w.length > 4) w = w.replace(/ent$/, '');
+    w = w.replace(/[stxde]+$/, '').replace(/e(?=§)/, '');
+    return w.replace(/ge(?=[aou])/g, 'j').replace(/g(?=[ei§])/g, 'j').replace(/c(?=[ei§])/g, 's');
+  }).join(' ');
+}
+function conjOralAnswer(ch){
+  const input = document.getElementById('conjAnswerInput'), btn = document.getElementById('conjSayBtn');
+  if(!input || input.disabled || !btn) return;
+  if(btn.classList.contains('on')){ vvHearStop(); return; }
+  const label = btn.innerHTML;
+  btn.classList.add('on'); btn.innerHTML = '👂 Je t\'écoute…';
+  const correct = ch.verb.tenses[ch.tense][ch.pronounIdx];
+  const strip = (a) => String(a || '').replace(/[.,!?;:]+/g, ' ').replace(/\s+/g, ' ').trim();
+  vvHear({ lang:'fr-FR', onInterim:(t) => { input.value = t; },
+    onText:(text, alts) => {
+      if(input.disabled) return;
+      const cands = [text].concat(alts || []).map(strip).filter(Boolean);
+      const exact = cands.find(a => conjAnswerMatches(a, correct));
+      let oral = false;
+      if(exact) input.value = exact;
+      else if(cands.some(a => conjPhon(a) === conjPhon(correct))){ input.value = correct; oral = true; }
+      else input.value = cands[0] || text;
+      validateConjugationAnswer();
+      const rv = document.getElementById('conjReveal');
+      if(rv && (oral || exact)) rv.insertAdjacentHTML('beforeend', `<div class="conj-oral">🗣️ Bien dit ! ${oral ? `À l'écrit, ça s'écrit : <b>${escapeHtml(correct)}</b>` : 'Réponse dite à voix haute.'}</div>`);
+    },
+    onFail:(r) => {
+      const hint = document.getElementById('conjHints');
+      if(r === 'silence'){ if(hint) hint.insertAdjacentHTML('beforeend', '<div class="cq-hint">👂 Je n\'ai rien entendu… touche « 🗣️ Dire » et dis par exemple « je mange ».</div>'); }
+      else { btn.style.display = 'none'; try{ showGoalToast('Réponse à voix haute indisponible', r === 'denied' ? 'Le micro est bloqué pour ce site.' : 'Ce navigateur ne sait pas écouter : écris ta réponse.', '✍️'); }catch(e){} }
+    },
+    onEnd:() => { btn.classList.remove('on'); btn.innerHTML = label; } });
+}
+
+applyVoiceHelp();
+
+/* ================= 🦊 Bouton « Aide » toujours là (sauf pendant un exercice) ================= */
+(function vvFab(){
+  const b = document.createElement('button');
+  b.type = 'button'; b.id = 'vaFab'; b.className = 'va-fab';
+  b.setAttribute('aria-label', 'Demander de l\'aide au renard');
+  b.innerHTML = '<i class="vv-logo" style="--s:38px"></i><span>Aide</span>';
+  document.body.appendChild(b);
+  // « Aide » s'affiche à chaque nouvelle page, puis se replie en petite tête de renard (pour ne rien cacher)
+  let t = 0;
+  const show = () => { b.classList.remove('mini'); clearTimeout(t); t = setTimeout(() => b.classList.add('mini'), 4000); };
+  const card = document.getElementById('quizCard');
+  if(card) new MutationObserver(show).observe(card, { childList:true });
+  show();
+})();
 
 /* 📱 Paysage (téléphone à l'horizontale) : à chaque nouvelle question, la carte se cale en haut de l'écran
    pour que la question et les réponses soient visibles sans faire défiler. */

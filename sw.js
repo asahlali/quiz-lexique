@@ -3,7 +3,7 @@
    et permet l'installation depuis le navigateur (PWA). */
 
 // 🏷️ Version publiée : mise à jour automatiquement par publier-site.cmd (même numéro que dans index.html)
-const VERSION = '1.0.1';
+const VERSION = '1.0.2';
 const CACHE = 'vocabvision-' + VERSION;
 const ASSETS = [
   './',
