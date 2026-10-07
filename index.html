@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- 🏷️ Version de l'appli : augmentée automatiquement par publier-site.cmd à chaque publication -->
-<meta name="app-version" content="1.0.2" data-date="2026-10-06">
+<meta name="app-version" content="1.0.3" data-date="2026-10-07">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <title>VocabVISION — Vocabulaire Français ↔ Arabe</title>
 <script>
@@ -2808,6 +2808,22 @@
   .va-ear{ position:absolute; right:10px; top:14px; z-index:3; font-size:30px; opacity:0; transform:scale(.6); transition:opacity .2s, transform .2s; pointer-events:none; }
   .va-fox:not(.has3d).listening .va-ear{ opacity:1; transform:scale(1); animation:vaEar 1s ease-in-out infinite; }
   @keyframes vaEar{ 0%,100%{ transform:scale(1) rotate(-6deg); } 50%{ transform:scale(1.15) rotate(6deg); } }
+  /* 🗣️ mode mains libres : la barre du renard en bas de l'écran */
+  body.vh-off .vh-only{ display:none !important; }
+  .vs-bar{ position:fixed; left:50%; bottom:calc(env(safe-area-inset-bottom, 0px) + 12px); z-index:58; transform:translateX(-50%); width:min(94vw, 470px); display:flex; align-items:center; gap:8px; padding:6px 8px 6px 6px; border-radius:999px; background:linear-gradient(135deg,#4C1D95,#7C3AED); color:#fff; box-shadow:0 14px 34px rgba(76,29,149,.45); font-family:'Nunito','Inter',sans-serif; }
+  .vs-bar.high, body:has(#audioMini[style*="flex"]) .vs-bar{ bottom:calc(env(safe-area-inset-bottom, 0px) + 92px); }
+  .vs-main{ flex:1; min-width:0; display:flex; align-items:center; gap:10px; border:none; background:none; color:inherit; text-align:left; cursor:pointer; padding:0; }
+  .vs-fox{ border-radius:50%; background-color:#fff; box-shadow:0 0 0 3px rgba(255,255,255,.35); }
+  .vs-bar[data-state="listen"] .vs-fox{ box-shadow:0 0 0 3px #22C55E, 0 0 0 7px rgba(34,197,94,.35); animation:vsPulse 1.4s ease-in-out infinite; }
+  .vs-bar[data-state="speak"] .vs-fox{ animation:vaTalk .45s ease-in-out infinite; }
+  .vs-bar[data-state="pause"]{ background:linear-gradient(135deg,#475569,#334155); }
+  @keyframes vsPulse{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.08); } }
+  .vs-txt{ min-width:0; display:flex; flex-direction:column; gap:1px; }
+  .vs-txt b{ font-weight:900; font-size:16px; }
+  .vs-txt small{ font-weight:700; font-size:12.5px; opacity:.85; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .vs-x{ flex:none; width:40px; height:40px; border-radius:50%; border:none; background:rgba(255,255,255,.16); color:#fff; font-size:16px; cursor:pointer; }
+  body.vs-on .va-fab{ display:none !important; }
+  body.vs-on{ padding-bottom:84px; }
   /* 📖 lecture accompagnée */
   .bq-resume-btn{ display:flex; align-items:center; gap:12px; width:100%; max-width:460px; margin:14px auto 0; padding:14px 16px; border:none; border-radius:18px; background:linear-gradient(135deg,#F97316,#EC4899); color:#fff; text-align:left; cursor:pointer; box-shadow:0 10px 24px rgba(236,72,153,.35); }
   .bq-resume-btn .bq-rb-ic{ font-size:32px; flex:none; }
@@ -3188,6 +3204,8 @@
   <div class="menu-group">
     <div class="menu-label">Réglages</div>
     <button class="menu-item" id="voiceHelpBtn"><span class="mi-ic">💬</span> <span id="voiceHelpLbl" style="flex:1;">Aide vocale : activée</span><span class="vh-sw on" id="voiceHelpSw" aria-hidden="true"></span></button>
+    <button class="menu-item vh-only" id="handsFreeBtn"><span class="mi-ic">🗣️</span> Tout faire à la voix (mains libres)</button>
+    <button class="menu-item vh-only" id="voiceAutoBtn"><span class="mi-ic">🦻</span> <span style="flex:1;">Le renard m'écoute dès l'ouverture</span><span class="vh-sw" id="voiceAutoSw" aria-hidden="true"></span></button>
     <button class="menu-item" id="autoSpeakBtn"><span class="mi-ic">🔊</span> Voix : ON</button>
     <button class="menu-item" id="installBtn" style="display:none;"><span class="mi-ic">📲</span> Installer l'application</button>
   </div>
@@ -3371,7 +3389,7 @@ const PRO_MENU_ICONS = {
   switchAppBtn:'shuffle', audioLibMenuBtn:'headphones', colorSettingsBtn:'palette', soundSettingsBtn:'volume', voiceSettingsBtn:'mic',
   authAccountBtn:'lock', whatsNewBtn:'sparkles', soundTestBtn:'volume', leaderboardBtn:'trophy', timeBreakdownBtn:'pie', homeBtn:'home',
   dictBtn:'search', historyBtn:'history', profileBtn:'user', addWordsBtn:'plus', importBtn:'upload', exportBtn:'download', syncBtn:'cloud',
-  resetBtn:'rotate', autoSpeakBtn:'volume', installBtn:'phone', voiceHelpBtn:'message',
+  resetBtn:'rotate', autoSpeakBtn:'volume', installBtn:'phone', voiceHelpBtn:'message', handsFreeBtn:'volume', voiceAutoBtn:'eye',
 };
 function proApplyChromeIcons(){
   try{
@@ -7425,6 +7443,7 @@ function updateMicButtonUI(){
 function speak(text, lang, onEnd, rateOverride){
   const slot = ttsNextSlot; ttsNextSlot = null; // capturé tout de suite (le vrai départ est différé)
   const forced = ttsForcePersona; ttsForcePersona = null;
+  try{ if(vvHearing) vvHearStop(); }catch(e){}   // jamais écouter pendant qu'il parle (il s'entendrait)
   if(!speechAvailable || !text){ if(onEnd) onEnd(); return; }
   try{
     stopRecognition(); // le micro ne doit JAMAIS écouter pendant que l'app parle (sinon il s'entend lui-même)
@@ -7733,6 +7752,7 @@ function saveAutoSpeak(on){
 }
 let autoSpeak = loadAutoSpeak();
 function autoSpeakWord(text, lang){
+  if(typeof VS !== 'undefined' && VS && VS.on) return;   // mode voix : c'est le renard qui lit la question
   if(autoSpeak){ if(typeof mascotTalk==='function') mascotTalk(); speak(text, lang); }
 }
 
@@ -8453,6 +8473,13 @@ function updateAutoSpeakBtn(){
   if(btn){ btn.innerHTML = `<span class="mi-ic">${proIcon(autoSpeak ? 'volume' : 'mute', 18)}</span> Voix : ${autoSpeak ? 'ON' : 'OFF'}`; }
 }
 document.getElementById('voiceHelpBtn').addEventListener('click', () => setVoiceHelp(!voiceHelpOn()));   // 💬 aide vocale : pour CE profil
+document.getElementById('voiceAutoBtn').addEventListener('click', () => setVoiceAuto(!voiceAutoOn()));      // 🦻 écoute dès l'ouverture : pour CE profil
+document.getElementById('handsFreeBtn').addEventListener('click', () => {                                   // 🗣️ tout faire à la voix, tout de suite
+  if(typeof closeMenu === 'function') closeMenu(); else document.body.classList.remove('menu-open');
+  vvPrimeAudio();
+  const n = vaUserFirstName();
+  if(!vsStart(`D'accord${n ? ' ' + n : ''} ! Je t'écoute. Dis-moi ce que tu veux faire, ou dis « aide ».`)){ try{ showGoalToast('Mode voix indisponible', "Ce navigateur ne sait pas écouter : essaie Chrome (Android) ou Safari (iPhone).", '🔇'); }catch(e){} }
+});
 document.getElementById('autoSpeakBtn').addEventListener('click', () => {
   autoSpeak = !autoSpeak;
   saveAutoSpeak(autoSpeak);
@@ -12904,9 +12931,10 @@ function renderConjugationQuizCard(){
   });
   document.getElementById('conjRuleBtn').addEventListener('click', () => { const ids = conjSheetIds(ch); if(ids.length) conjSheetPeek(ids[0]); });
   const sayBtn = document.getElementById('conjSayBtn'); if(sayBtn) sayBtn.addEventListener('click', () => conjOralAnswer(ch));   // 🗣️ répondre à voix haute
-  input.focus();
+  if(!(typeof VS !== 'undefined' && VS && VS.on)) input.focus();
   input.addEventListener('keydown', (e) => { if(e.key === 'Enter'){ e.preventDefault(); validateConjugationAnswer(); } });
   document.getElementById('conjValidateBtn').addEventListener('click', validateConjugationAnswer);
+  if((typeof VS !== 'undefined' && VS && VS.on)) vsConjCard();   // 🗣️ mode voix : le renard lit la question et écoute la réponse
 }
 
 function validateConjugationAnswer(){
@@ -12955,6 +12983,7 @@ function validateConjugationAnswer(){
   const myIdx = st.idx;
   st.hold = false;
   const advance = () => { if(conjQuizState !== st || st.idx !== myIdx) return; st.hold = false; st.idx++; renderConjugationQuizCard(); };
+  st.vsAdvance = advance;   // 🗣️ en mode voix, on passe à la suite quand le renard a fini de parler
   const holdNow = () => { st.hold = true; const nb = reveal.querySelector('.conj-next'); if(nb) nb.style.display = ''; };
   // ✅ juste : on avance tout seul… sauf si tu ouvres « Pourquoi ? » ou une fiche (tu prends le temps de lire)
   const go = () => { if(st.hold || document.getElementById('conjSheetPeek')){ holdNow(); return; } advance(); };
@@ -12971,16 +13000,16 @@ function validateConjugationAnswer(){
   }
   if(isCorrect){
     // 🔊 juste : on entend le verbe, puis question suivante dès la fin de la lecture
-    if(st.speak){
+    if(st.speak && !st.vs){
       const t0 = Date.now();
       setTimeout(() => {
         if(conjQuizState !== st || st.idx !== myIdx) return;
         speak(spoken, 'fr-FR', () => setTimeout(go, Math.max(300, 1000 - (Date.now() - t0))));
       }, 380);
-    } else setTimeout(go, 900);
+    } else if(!st.vs) setTimeout(go, 900);
   } else {
     // ❌ faux : on entend la bonne réponse, et on attend « Suivant » (correction + écoute)
-    if(st.speak) setTimeout(() => { if(conjQuizState === st && st.idx === myIdx) speak(spoken, 'fr-FR'); }, 450);
+    if(st.speak && !st.vs) setTimeout(() => { if(conjQuizState === st && st.idx === myIdx) speak(spoken, 'fr-FR'); }, 450);
     advanceAfterAnswer(false, advance);
     why.open = true;   // ❌ faux : l'explication est ouverte d'office, avant « Suivant »
     const bar = reveal.querySelector('.fix-bar');
@@ -13023,6 +13052,7 @@ function endConjugationQuiz(){
   document.getElementById('conjEndBackBtn').addEventListener('click', () => renderConjugationHome());
   document.getElementById('conjBackBtn').addEventListener('click', () => renderConjugationHome());
   document.getElementById('conjSetupAgainBtn').addEventListener('click', () => renderConjPracticeSetup());
+  if((typeof VS !== 'undefined' && VS && VS.on)) setTimeout(() => vsConjEnd(st), 50);   // 🗣️ le renard annonce le score et propose de recommencer
   document.getElementById('conjAgainBtn').addEventListener('click', () => startConjugationQuiz(st.pool || getAllVerbs(), st.tenses || st.tense, st.contextMode, Object.assign({}, st.opts, { speak:st.speak })));
 }
 
@@ -18491,6 +18521,8 @@ const COLOR_PRESETS = {
 /* ============ 🆕 NOUVEAUTÉS — pour que tout ce qui a été ajouté reste découvrable ============ */
 const WHATS_NEW_SECTIONS = [
   { icon:'🆕', title:'Nouveautés', items:[
+    { name:'🗣️ Tout faire à la voix', desc:"Dès que tu as parlé au renard, la conversation continue de page en page (barre du renard en bas). Exercices : il lit la question et les choix, écoute ta réponse, corrige et épelle. Partout : « où suis-je ? », le nom d'un bouton, « lis la page », « retour », « répète », « aide », « stop ». Menu ☰ : « Tout faire à la voix » et « Le renard m'écoute dès l'ouverture » (malvoyants)." },
+    { name:'🌈 Conjugaison à la voix', desc:"« Des exercices de conjugaison » : tous les temps ou un seul, puis tu réponds à voix haute (« je mangeais »). « Un indice », « répète », « je ne sais pas »… À la fin, il te donne ton score et te propose de recommencer." },
     { name:'📖 « Je veux lire »', desc:"Dis-le au renard (ou touche « Reprendre ma lecture ») : le Bouquinage s'ouvre là où tu t'étais arrêté et il te demande « Je te le lis, ou tu lis toi-même ? ». Il lit phrase par phrase (pause, phrase précédente/suivante), et en lisant seul tu peux toucher une phrase pour l'entendre." },
     { name:'🎧 « Je veux écouter »', desc:"L'Audiothèque reprend tout de suite ton audio là où tu t'étais arrêté." },
     { name:'🔍 Chercher un mot à la voix', desc:"« Cherche le mot maison », « Que veut dire opportunité ? », « Comment on dit merci en arabe ? » — ou le bouton 🗣️ dans « Mots & recherche ». Le renard te dit la traduction." },
@@ -34930,6 +34962,7 @@ function renderVoiceSettings(){
     </div>
     <div style="font-weight:800;color:var(--purple);margin:18px 0 8px;">💬 Aide vocale <span style="font-weight:600;color:var(--text-dim);font-size:12px;">(parler au renard, répondre à voix haute — pour ce profil)</span></div>
     <button type="button" class="vs-help" id="vsHelpBtn"><span>${voiceHelpOn() ? 'Activée' : 'Désactivée'}</span><i class="vh-sw ${voiceHelpOn() ? 'on' : ''}"></i></button>
+    ${voiceHelpOn() ? `<button type="button" class="vs-help" id="vsAutoBtn" style="margin-top:8px;"><span>🦻 Le renard m'écoute dès l'ouverture<br><small style="font-weight:700;color:var(--text-dim);">Pour les personnes malvoyantes : on touche l'écran, il dit bonjour et on fait tout à la voix.</small></span><i class="vh-sw ${voiceAutoOn() ? 'on' : ''}"></i></button>` : ''}
 
     <div style="font-weight:800;color:var(--purple);margin:18px 0 8px;">🎭 Façon de lire</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;">
@@ -34961,6 +34994,7 @@ function renderVoiceSettings(){
   document.getElementById('backFromVoicesBtn').addEventListener('click', renderBlockSelect);
   card.querySelectorAll('[data-narr]').forEach(b => b.addEventListener('click', () => { const v = b.dataset.narr; readingVoiceGender = v; saveReadingVoice(v); speakAsPersona(VOICE_CAST[v].demo, 'fr-FR', v); const y = window.scrollY; renderVoiceSettings(); window.scrollTo(0, y); }));
   document.getElementById('vsHelpBtn').addEventListener('click', () => { setVoiceHelp(!voiceHelpOn()); const y = window.scrollY; renderVoiceSettings(); window.scrollTo(0, y); });
+  const vab = document.getElementById('vsAutoBtn'); if(vab) vab.addEventListener('click', () => { setVoiceAuto(!voiceAutoOn()); const y = window.scrollY; renderVoiceSettings(); window.scrollTo(0, y); });
   card.querySelectorAll('[data-voice-mode]').forEach(b => b.addEventListener('click', () => { voicePrefs.mode = b.dataset.voiceMode; saveVoicePrefs(); renderVoiceSettings(); }));
   card.querySelectorAll('[data-cast-toggle]').forEach(b => b.addEventListener('click', () => {
     const k = b.dataset.castToggle;
@@ -37364,6 +37398,18 @@ const VA_DEST = [
   { id:'nouveautes', icon:'🆕', label:'Nouveautés', ar:'الجديد', words:['nouveautes', 'quoi de neuf', 'nouveau'], go:() => renderWhatsNew(), say:"Voici les nouveautés ! 🆕" },
   { id:'sons', icon:'🔊', label:'Sons', ar:'الأصوات', words:['reglage des sons', 'les sons', 'son', 'sons'], go:() => renderSoundSettings(), say:"Voici les réglages des sons ! 🔊" },
   { id:'voix', icon:'🗣️', label:'Voix', ar:'الصوت', words:['voix', 'la voix', 'vitesse de lecture'], go:() => renderVoiceSettings(), say:"Voici les réglages de la voix ! 🗣️" },
+  // 🧭 toutes les autres rubriques du menu, accessibles à la voix
+  { id:'historique', icon:'🏆', label:'Historique', ar:'السجل', words:['historique', 'mes resultats', 'resultats', 'mes scores', 'mes notes', 'السجل', 'النتائج'], go:() => renderHistoryView(), say:"Voici ton historique ! 🏆" },
+  { id:'profil', icon:'👤', label:'Profil', ar:'الملف الشخصي', words:['profil', 'mon profil', 'mes statistiques', 'statistiques', 'stats', 'الملف الشخصي'], go:() => renderProfileView(), say:"Voici ton profil ! 👤" },
+  { id:'classement', icon:'🏅', label:'Classement du jour', ar:'الترتيب', words:['classement', 'classement du jour', 'les meilleurs', 'qui est premier', 'الترتيب'], go:() => { const b = document.getElementById('leaderboardBtn'); if(b) b.click(); }, say:"Voici le classement du jour ! 🏅" },
+  { id:'tempspasse', icon:'📊', label:'Répartition du temps', ar:'توزيع الوقت', words:['repartition du temps', 'mon temps', 'temps passe', 'combien de temps', 'temps d etude'], go:() => { const b = document.getElementById('timeBreakdownBtn'); if(b) b.click(); }, say:"Voici le temps passé sur chaque activité. 📊" },
+  { id:'couleurs', icon:'🎨', label:'Couleurs', ar:'الألوان', words:['couleurs', 'couleur', 'personnaliser les couleurs', 'changer les couleurs', 'الالوان'], go:() => renderColorSettings(), say:"Choisis tes couleurs ! 🎨" },
+  { id:'compte', icon:'🔐', label:'Mon compte', ar:'حسابي', words:['mon compte', 'compte', 'connexion', 'se connecter', 'mot de passe', 'deconnexion', 'se deconnecter', 'حسابي'], go:() => { const b = document.getElementById('authAccountBtn'); if(b) b.click(); }, say:"Voici ton compte. 🔐" },
+  { id:'objectifs', icon:'🎯', label:'Mes objectifs', ar:'أهدافي', words:['objectifs', 'mes objectifs', 'objectif du jour', 'objectifs du jour', 'quetes', 'اهدافي'], go:() => renderQuestSettings(), say:"Voici tes objectifs du jour. 🎯" },
+  { id:'ajoutmots', icon:'➕', label:'Ajouter des mots', ar:'إضافة كلمات', words:['ajouter des mots', 'ajouter un mot', 'ajoute un mot', 'nouveau mot', 'mes propres mots'], go:() => renderAddWordsScreen(), say:"Tu peux ajouter tes propres mots ici. ➕" },
+  { id:'fiches', icon:'📎', label:'Fiches pratiques', ar:'البطاقات العملية', words:['fiches', 'fiches pratiques', 'fiche pratique', 'les fiches'], go:() => renderPracticalSheetsHome(), say:"Voici les fiches pratiques ! 📎" },
+  { id:'situations', icon:'🗺️', label:'Situations', ar:'مواقف', words:['situations', 'situation', 'la vie de tous les jours', 'vie quotidienne', 'au quotidien'], go:() => renderSituationsHome(), say:"Voici les situations de la vie de tous les jours ! 🗺️" },
+  { id:'applis', icon:'🔀', label:"Changer d'application", ar:'تغيير التطبيق', words:['changer d application', 'autre application', 'les applications', 'mode qcm', 'application qcm'], go:() => { const b = document.getElementById('switchAppBtn'); if(b) b.click(); }, say:"Voici les applications. 🔀" },
   { id:'accueil', icon:'🏠', label:'Accueil', ar:'الرئيسية', words:['accueil', 'retour', 'revenir', 'maison', 'menu principal', 'page principale', 'debut', 'الرئيسيه', 'رجوع', 'البدايه'], go:() => renderBlockSelect(), say:"On rentre à l'accueil ! 🏠" },
 ];
 const VA_EX = ['exercice', 'exercices', 'exo', 'exos', 'entrainer', 'entraine', 'entrainement', 'pratiquer', 'pratique', 'tester', 'teste', 'interroger', 'interroge', 'quiz', 'faire des', 'commencer', 'tamarin', 'تمارين', 'تمرين', 'تدرب'];
@@ -37374,7 +37420,7 @@ const VA_CHIPS = [
   ['ex:conjugaison', 'Exercices de conjugaison'], ['grammaire', 'Grammaire'], ['orthographe', 'Orthographe'], ['ex:vocabulaire', 'Quiz de vocabulaire'],
   ['oral', 'Expression orale'], ['oratoire', 'Art oratoire'], ['arabe', "Leçon d'arabe"], ['jeux', 'Jeux'], ['accueil', 'Accueil'],
 ];
-const VA_DO_ICONS = { 'do:stream':'🎧', 'do:search':'🔍' };
+const VA_DO_ICONS = { 'do:stream':'🎧', 'do:search':'🔍', 'do:ct:all':'🌈', 'do:ct:present':'⏺️', 'do:ct:passeCompose':'⏮️', 'do:ct:imparfait':'🕰️', 'do:ct:futur':'🚀', 'do:ct:conditionnel':'🤔' };
 const VA_JOKES = ["Pourquoi Abdel porte des lunettes ? Pour mieux lire les règles de conjugaison ! 🤓", "Quel est le temps préféré des renards ? Le futur… parce qu'ils ont toujours un coup d'avance ! 🦊", "Que dit un verbe à l'imparfait ? « Avant, j'étais tranquille… » 😄"];
 const vaArStrip = (w) => w.replace(/^(وال|بال|كال|فال|لل|ال)/, '');   // l'article arabe « ال » (التصريف = تصريف)
 function vaHasWord(t, toks, key){
@@ -37449,7 +37495,13 @@ function vaAct(intent){
       if(d.id === 'conjugaison'){
         if(intent.verb && !intent.ex){ const v = intent.verb; return go(() => renderVerbTable(v, getAllVerbs(), intent.tense || 'present'), `Voici le verbe « ${v.inf} »${intent.tense ? ' ' + TENSE_AU[intent.tense] : ''} ! Touche 🔊 pour l'écouter.`, arGo); }
         if(intent.verb && intent.ex){ const v = intent.verb; return go(() => startConjugationQuiz([v], intent.tense ? [intent.tense] : CONJ_TENSES.slice(), 'mix', { count:intent.tense ? 6 : 30 }), `On s'entraîne sur le verbe « ${v.inf} »${intent.tense ? ' ' + TENSE_AU[intent.tense] : ', à tous les temps'} ! 💪`, arGo); }
-        if(intent.tense){ const tz = intent.tense; return go(() => startConjugationQuiz(getAllVerbs(), [tz], true, { count:20 }), `D'accord ! Des exercices ${TENSE_AU[tz]}, en phrases. 💪`, arGo); }
+        if(intent.tense && !intent.verb){ const all = vaConjTenseFrom(intent.t); return vaConjGo(all && all.length > 1 ? all : [intent.tense]); }
+        if(intent.ex && /\b(tous les temps|tout les temps|tous temps|tous|melange)\b/.test(intent.t || '')) return vaConjGo(CONJ_TENSES.slice());
+        if(intent.ex){   // 🌈 « exercices de conjugaison » : avec quels temps ?
+          VA.pending = { conjTense:true };
+          return vaReply({ fr:"Avec plaisir ! Avec tous les temps, ou un seul : le présent, le passé composé, l'imparfait, le futur ou le conditionnel ?", ar:'بكل سرور! كل الأزمنة أم زمن واحد؟',
+            chips:[['do:ct:all', 'Tous les temps'], ['do:ct:present', 'Présent'], ['do:ct:passeCompose', 'Passé composé'], ['do:ct:imparfait', 'Imparfait'], ['do:ct:futur', 'Futur'], ['do:ct:conditionnel', 'Conditionnel']], listen:true });
+        }
         if(intent.rules && !intent.ex) return go(d.rules, d.sayRules, arGo);
         if(intent.ex) return go(d.ex, d.sayEx, arGo);
         return go(d.go, d.say, arGo);
@@ -37482,7 +37534,7 @@ function vaAct(intent){
       voicePrefs.rate = Math.max(0.6, Math.min(1.4, (voicePrefs.rate || 0.96) + intent.value)); saveVoicePrefs();
       return vaReply({ fr:intent.value < 0 ? "D'accord, je parle plus doucement. C'est mieux comme ça ?" : "D'accord, je parle un peu plus vite !", ar:'حسنًا!', listen:true });
     }
-    case 'bye': return vaReply({ fr:`À tout de suite${name ? ' ' + name : ''} ! 👋`, ar:'إلى اللقاء! 👋', then:() => {}, close:true });
+    case 'bye': if(VS.on) vsStop(); return vaReply({ fr:`À tout de suite${name ? ' ' + name : ''} ! 👋`, ar:'إلى اللقاء! 👋', then:() => {}, close:true });
     default:
       VA.misses++;
       return vaReply({ fr:VA.misses > 1 ? "Désolé, je n'ai toujours pas compris… Touche simplement un des gros boutons ci-dessous 👇" : `Hmm, je n'ai pas bien compris${intent.raw ? ' « ' + intent.raw + ' »' : ''}. Tu peux répéter, ou toucher un bouton 👇`, ar:'لم أفهم جيدًا… أعد من فضلك، أو اضغط على زر 👇', listen:VA.misses < 2 });
@@ -37490,7 +37542,7 @@ function vaAct(intent){
 }
 /* 🗨️ Le renard répond : bulle + voix + il parle (3D), puis il t'emmène (then) */
 function vaReply(o){
-  if(!VA.open) return;
+  if(!VA.open){ if(typeof VS !== 'undefined' && VS.on) vsReply(o); return; }
   vaStopListen();
   const ar = vaIsAr() && o.ar;
   const text = ar ? o.ar : o.fr;
@@ -37579,7 +37631,7 @@ function vaListen(auto){
   rec.onend = () => {
     VA.listening = false; VA.rec = null; vaUi();
     const F2 = vaFox(); if(F2 && F2.st.act && F2.st.act.name === 'listen') F2.still();
-    if(finalText.trim()){ VA.quiet = 0; vaHandle(finalText.trim(), alts); }
+    if(finalText.trim()){ VA.quiet = 0; vsStart(); vaHandle(finalText.trim(), alts); }   // on lui a parlé : la conversation continue ensuite de page en page
     else if(!heard && !auto) vaShowHeard("Je n'ai rien entendu… touche le micro et parle-moi 🎤", true);
   };
   try{ rec.start(); }catch(e){ VA.listening = false; VA.rec = null; vaUi(); if(!auto) vaDictate('blocked'); }
@@ -37592,6 +37644,7 @@ function vaHandle(text, alts){
   vaShowHeard(text, false);
   const t = vaNorm(text);
   if(VA.yes && /^(oui|ouais|d accord|ok|okay|vas y|allons y|go|c est parti|نعم|واخا|اه)\b/.test(t)){ const y = VA.yes; VA.yes = null; return vaChip(y); }
+  if(VA.pending && VA.pending.conjTense){ const tz = vaConjTenseFrom(t); if(tz){ VA.pending = null; return vaConjGo(tz); } }
   if(VA.pending && VA.pending.search){ VA.pending = null; const q = vaSearchQuery(t) || t.replace(/^(je cherche |cherche |le mot |la |le |les |l |un |une )+/, '').trim(); if(q) return vaAct({ kind:'search', q, raw:text }); }
   let intent = vaUnderstand(text);
   if(intent.kind === 'unknown' && alts && alts.length > 1){ for(const a of alts.slice(1)){ const i2 = vaUnderstand(a); if(i2.kind !== 'unknown'){ intent = i2; break; } } }
@@ -37600,6 +37653,7 @@ function vaHandle(text, alts){
 }
 function vaChip(key){
   if(key === 'help') return vaAct({ kind:'help' });
+  if(key.startsWith('do:ct:')){ VA.pending = null; const k = key.slice(6); vaShowHeard(k === 'all' ? 'Tous les temps' : TENSE_LABELS[k], false); return vaConjGo(k === 'all' ? CONJ_TENSES.slice() : [k]); }
   if(key === 'do:stream'){ vaShowHeard('🎧 Écouter mes audios', false); return vaAct({ kind:'stream' }); }
   if(key === 'do:search'){ vaShowHeard('🔍 Chercher un mot', false); VA.pending = { search:true }; return vaReply({ fr:'Quel mot cherches-tu ? Dis-le-moi, ou écris-le juste en dessous. 🔍', ar:'ما الكلمة التي تبحث عنها؟ قلها لي. 🔍', listen:true }); }
   const ex = key.startsWith('ex:'), id = ex ? key.slice(3) : key;
@@ -37693,6 +37747,7 @@ function vaEsc(e){ if(e.key === 'Escape' && VA.open){ e.stopPropagation(); vaClo
 function vaClose(keepVoice){
   if(!VA.open) return;
   VA.open = false;
+  if(!keepVoice && typeof VS !== 'undefined' && VS.on) vsStop();
   vaStopListen();
   if(!keepVoice){ try{ window.speechSynthesis.cancel(); }catch(e){} }
   document.removeEventListener('keydown', vaEsc, true);
@@ -37717,6 +37772,7 @@ document.addEventListener('click', (e) => {
 
 /* 👋 Bonjour + prénom à voix haute, à l'ouverture (dès que le navigateur l'autorise) et à la connexion */
 function vaGreetAloud(text){
+  if(voiceHelpOn() && voiceAutoOn()) return;   // le mode voix dit bonjour lui-même (et écoute)
   const say = () => {
     try{
       const clean = fxCleanSpeech(text);
@@ -37757,6 +37813,7 @@ function applyVoiceHelp(){
   document.body.classList.toggle('vh-hear', vvCanHear());
   const lbl = document.getElementById('voiceHelpLbl'); if(lbl) lbl.textContent = on ? 'Aide vocale : activée' : 'Aide vocale : désactivée';
   const sw = document.getElementById('voiceHelpSw'); if(sw) sw.classList.toggle('on', on);
+  const sw2 = document.getElementById('voiceAutoSw'); if(sw2) sw2.classList.toggle('on', on && voiceAutoOn());
 }
 function setVoiceHelp(on){
   try{ localStorage.setItem(nsKey(VOICE_HELP_KEY), on ? 'on' : 'off'); }catch(e){}
@@ -37796,13 +37853,14 @@ function vvHear(o){
   try{ stopRecognition(); }catch(e){}
   try{ window.speechSynthesis.cancel(); ttsSpeaking = false; }catch(e){}
   let rec; try{ rec = new SR(); }catch(e){ o.onFail && o.onFail('blocked'); return null; }
-  rec.lang = o.lang || 'fr-FR'; rec.interimResults = !!o.onInterim; rec.maxAlternatives = 4; rec.continuous = false;
+  rec.lang = o.lang || 'fr-FR'; rec.interimResults = !!o.onInterim; rec.maxAlternatives = 4; rec.continuous = !!o.continuous;   // continu : moins de « bips » de reprise
   const h = { rec, o }; vvHearing = h;
   let final = '', alts = [], failed = false;
   rec.onresult = (e) => {
     let interim = '';
     for(let i = e.resultIndex; i < e.results.length; i++){ const r = e.results[i]; if(r.isFinal){ final += r[0].transcript; alts = Array.from(r).map(x => x.transcript); } else interim += r[0].transcript; }
     if(!final && interim && o.onInterim) o.onInterim(interim);
+    if(final && o.continuous){ try{ rec.stop(); }catch(err){} }   // la première phrase complète suffit
   };
   rec.onerror = (e) => {
     const er = e.error;
@@ -37938,6 +37996,7 @@ function bqListen(){
       if(!bqAlive()) return;
       if(heard){ heard.className = 'bq-heard'; heard.textContent = '🗣️ « ' + text + ' »'; }
       const ok = [text].concat(alts || []).some(a => bqChoice(a));
+      if(!ok && VS.on){ vsOnText(text, alts); return; }   // « accueil », « je veux écouter »… : le mode voix s'en occupe
       if(!ok){ const s = document.getElementById('bqSay'); if(s) s.textContent = "Je n'ai pas bien compris… Touche simplement un des boutons 👇"; }
     },
     onFail:(r) => { if(heard){ heard.className = 'bq-heard'; heard.textContent = r === 'silence' ? 'Touche un bouton 👇 (ou le renard pour me reparler)' : ''; } },
@@ -38258,6 +38317,502 @@ applyVoiceHelp();
   const card = document.getElementById('quizCard');
   if(card) new MutationObserver(show).observe(card, { childList:true });
   show();
+})();
+
+/* ============ 🗣️ MODE MAINS LIBRES — tout faire à la voix (malvoyants, personnes âgées) ============
+   Dès qu'on a parlé au renard, la conversation continue de page en page : il écoute, répond, et enchaîne.
+   • Exercices : il lit la question (et les choix A, B, C, D), écoute la réponse, corrige, épelle, passe à la suite.
+   • Partout : « où suis-je ? » (il lit la page et ses boutons), le nom d'un bouton pour le toucher,
+     « lis la page », « retour », « accueil », « répète », « aide », « stop ».
+   • Une petite barre en bas montre ce qu'il fait (👂 il écoute, 🔊 il parle) ; la toucher = lui parler.
+   • Option par profil : « le renard m'écoute dès l'ouverture » (pour les personnes malvoyantes). */
+var VS = { on:false, paused:false, hearing:false, saying:false, misses:0, unk:0, lastSay:'', tok:0, timer:0, page:null, claimTs:0, announce:false, busyUntil:0 };
+const VOICE_AUTO_KEY = 'lexiqueQuiz::voiceAuto';
+function voiceAutoOn(){ try{ return localStorage.getItem(nsKey(VOICE_AUTO_KEY)) === 'on'; }catch(e){ return false; } }
+function setVoiceAuto(on){
+  try{ localStorage.setItem(nsKey(VOICE_AUTO_KEY), on ? 'on' : 'off'); }catch(e){}
+  applyVoiceHelp();
+  try{ showGoalToast(on ? 'Le renard t\'écoute dès l\'ouverture' : 'Écoute à l\'ouverture coupée', on ? 'À chaque ouverture : touche l\'écran, il te dit bonjour et t\'écoute.' : 'Touche le renard pour lui parler.', on ? '🦻' : '🦊'); }catch(e){}
+}
+const VS_STOP = /^(stop|arrete|arrete toi|arretez|tais toi|taisez vous|silence|chut|ca suffit|au revoir|bye|fin|termine|ferme|ferme toi|bonne nuit)( s il te plait| merci)?$/;
+
+/* barre d'état */
+function vsBar(){
+  let b = document.getElementById('vsBar');
+  if(!VS.on){ if(b) b.remove(); document.body.classList.remove('vs-on'); return null; }
+  if(!b){
+    b = document.createElement('div'); b.id = 'vsBar'; b.className = 'vs-bar'; b.setAttribute('role', 'status'); b.setAttribute('aria-live', 'polite');
+    b.innerHTML = `<button type="button" class="vs-main" id="vsMain" aria-label="Parler au renard"><i class="vv-logo vs-fox" style="--s:42px"></i><span class="vs-txt"><b id="vsState"></b><small id="vsHeard"></small></span></button><button type="button" class="vs-x" id="vsX" aria-label="Arrêter le mode voix">✕</button>`;
+    document.body.appendChild(b);
+    b.querySelector('#vsMain').addEventListener('click', () => {
+      vvPrimeAudio();
+      // toucher la barre : il se tait et t'écoute tout de suite
+      VS.tok++; VS.saying = false; try{ window.speechSynthesis.cancel(); }catch(e){} ttsSpeaking = false;
+      VS.paused = false; VS.misses = 0; VS.busyUntil = 0; vvHearStop(); vsListen();
+    });
+    b.querySelector('#vsX').addEventListener('click', () => vsStop(true));
+  }
+  document.body.classList.add('vs-on');
+  return b;
+}
+function vsState(state, heard){
+  const b = vsBar(); if(!b) return;
+  b.dataset.state = state;
+  const map = { listen:"👂 Je t'écoute…", speak:'🔊 Je te parle…', pause:'⏸ En pause — touche-moi pour parler', think:'…' };
+  const s = b.querySelector('#vsState'); if(s) s.textContent = map[state] || state;
+  const h = b.querySelector('#vsHeard'); if(h && heard !== undefined) h.textContent = heard;
+}
+function vsStart(greet){
+  if(!vvCanHear()) return false;
+  const was = VS.on;
+  VS.on = true; VS.paused = false; VS.misses = 0; VS.unk = 0;
+  vsBar(); if(!was) vsState('listen', 'Dis « aide » pour savoir quoi me dire');
+  clearInterval(VS.timer); VS.timer = setInterval(vsTick, 600);
+  if(greet) vsSay(greet);
+  return true;
+}
+function vsStop(talk){
+  if(!VS.on) return;
+  VS.on = false; VS.page = null; VS.tok++; VS.saying = false;
+  clearInterval(VS.timer); vvHearStop();
+  vsBar();
+  if(talk){ try{ window.speechSynthesis.cancel(); }catch(e){} speakNarrator("D'accord, je me tais. Touche le renard quand tu veux me reparler."); }
+}
+function vsPause(msg){ VS.paused = true; vvHearStop(); vsState('pause', ''); if(msg) speakNarrator(msg); }
+function vsTick(){
+  if(!VS.on) return;
+  if(!voiceHelpOn()){ vsStop(); return; }
+  const b = document.getElementById('vsBar'); if(b) b.classList.toggle('high', !!document.getElementById('bqPlayer'));
+  if(VS.paused || !vsCanListenNow()) return;
+  vsListen();
+}
+function vsCanListenNow(){
+  let busy = false; try{ busy = ttsSpeaking || window.speechSynthesis.speaking; }catch(e){}
+  if(busy || VS.saying || VS.hearing || Date.now() < VS.busyUntil) return false;
+  if(typeof VA !== 'undefined' && VA.open) return false;                 // la fenêtre du renard écoute elle-même
+  if(typeof BQ !== 'undefined' && BQ.playing) return false;               // il lit un texte
+  if(vvHearing || document.hidden) return false;
+  const mic = document.querySelector('#micBtn, #repeatMicBtn, #shadowMicBtn'); if(mic && mic.offsetParent) return false;   // l'exercice a son propre micro
+  return true;
+}
+function vsListen(){
+  if(!VS.on || VS.hearing) return;
+  VS.hearing = true; vsState('listen');
+  const h = vvHear({ lang:(typeof VA !== 'undefined' && VA.lang) || 'fr-FR', continuous:true,
+    onInterim:(t) => vsState('listen', '🗣️ ' + t),
+    onText:(text, alts) => { VS.hearing = false; VS.misses = 0; vsState('think', '🗣️ « ' + text + ' »'); try{ vsOnText(text, alts); }catch(e){ console.warn('mode voix', e); } },
+    onFail:(r) => {
+      VS.hearing = false;
+      if(r === 'silence'){ VS.misses++; if(VS.misses >= 6) vsPause("Je me mets en pause. Touche le renard en bas de l'écran quand tu veux me reparler."); }
+      else if(r !== 'aborted'){ vsStop(); try{ showGoalToast('Mode voix arrêté', r === 'denied' ? 'Le micro est bloqué pour ce site.' : "Ce navigateur ne sait pas écouter ici.", '🔇'); }catch(e){} }
+    },
+    onEnd:() => { VS.hearing = false; } });
+  if(!h) VS.hearing = false;
+}
+/* il parle : phrase par phrase, chaque morceau arabe avec une voix arabe ; ensuite il réécoute (via vsTick) */
+function vsParts(text){
+  const out = [];
+  bqSplit(fxCleanSpeech(String(text || ''))).forEach(sent => {
+    const re = /([؀-ۿ][؀-ۿً-ْ\s،؟]*)/g; let last = 0, m;
+    const push = (t, lang) => { t = t.trim(); if(t && /[\p{L}\p{N}]/u.test(t)) out.push({ t, lang }); };
+    while((m = re.exec(sent))){ push(sent.slice(last, m.index), 'fr-FR'); push(m[1], 'ar-SA'); last = m.index + m[1].length; }
+    push(sent.slice(last), 'fr-FR');
+  });
+  return out;
+}
+function vsSay(text, o){
+  o = o || {};
+  if(!VS.on && !o.force) return;
+  const start = () => {
+    vvHearStop(); VS.hearing = false;
+    const tok = ++VS.tok;
+    VS.lastSay = text; VS.saying = true; VS.unk = 0;
+    vsState('speak');
+    const parts = vsParts(text);
+    const next = (i) => {
+      if(tok !== VS.tok) return;
+      if(i >= parts.length){ VS.saying = false; VS.busyUntil = Date.now() + 300; if(o.then){ try{ o.then(); }catch(e){ console.warn('mode voix', e); } } return; }
+      ttsForcePersona = narratorPersona();
+      speak(parts[i].t, parts[i].lang, () => next(i + 1), o.rate);
+    };
+    next(0);
+  };
+  if(o.wait){   // il attend d'avoir fini de parler (et que la fenêtre du renard soit fermée) avant de lire la question
+    VS.busyUntil = Date.now() + 700; const t0 = Date.now();
+    const poll = () => {
+      let busy = false; try{ busy = ttsSpeaking || window.speechSynthesis.speaking; }catch(e){}
+      const vaOpenNow = typeof VA !== 'undefined' && VA.open;
+      if((VS.saying || busy || vaOpenNow) && Date.now() - t0 < 20000) setTimeout(poll, 150);
+      else if(!vaOpenNow && VS.on) start();
+    };
+    setTimeout(poll, 120);
+  }
+  else start();
+}
+/* le renard (fenêtre fermée) répond pendant le mode mains libres */
+function vsReply(o){
+  const ar = vaIsAr() && o.ar;
+  const spoken = ar ? (o.sayAr || o.ar) : (o.say || o.fr);
+  const tail = ar ? o.tailAr : o.tail;
+  VA.yes = o.yes || null;
+  if(o.then){ if(o.stay) { try{ o.then(); }catch(e){} } else setTimeout(() => { try{ o.then(); }catch(e){ console.warn('assistant', e); } }, 250); }
+  vsSay(spoken + (tail && tail.text ? ' ' + tail.text : ''), { then:() => { if(o.then) VS.busyUntil = Date.now() + 900; if(o.afterSpeech && !o._after){ o._after = true; try{ o.afterSpeech(); }catch(e){} } } });
+}
+
+/* ce qu'on lui dit */
+function vsOnText(text, alts){
+  const t = vaNorm(text);
+  if(!t) return;
+  if(VS_STOP.test(t)) return vsStop(true);
+  if(/^(pause|attends|attend|une seconde|un instant)\b/.test(t)) return vsPause('Je fais une pause. Touche le renard en bas pour reprendre.');
+  if(/^(repete|repeter|redis|repete s il te plait|tu peux repeter|encore une fois|quoi|comment|pardon|j ai pas compris|je n ai pas compris)\b/.test(t) && t.split(' ').length <= 5){
+    if(VS.page && VS.page.repeat) return VS.page.repeat();
+    return vsSay(VS.lastSay || "Dis-moi ce que tu veux faire.");
+  }
+  if(/\b(ou suis je|ou je suis|je suis ou|on est ou|quelle page|qu est ce qu il y a|il y a quoi|quels sont les choix|quels choix|quelles sont les options|qu est ce que je peux faire|quoi faire ici|lis l ecran|decris|les boutons|quels boutons)\b/.test(t)) return vsDescribe();
+  if(/\b(lis la page|lis le texte de la page|lis moi la page|lis tout|lis la fiche|lis moi la fiche|lis ce qui est ecrit|qu est ce qui est ecrit)\b/.test(t)) return vsReadPage();
+  if(/^(retour|reviens|revenir|page precedente|en arriere|retourne|recule)\b/.test(t)) return vsBack();
+  if(/^(aide|aide moi|au secours|je suis perdu|je suis perdue|comment ca marche|qu est ce que je dis|que dire|qu est ce que je peux dire|tu sais faire quoi)\b/.test(t)) return vsHelp();
+  if(/\b(mode mains libres|mode voix)\b/.test(t)) return vsSay("Le mode voix est en marche. Dis-moi ce que tu veux faire, ou dis « aide ».");
+  // la page en cours (un exercice) d'abord
+  if(VS.page && VS.page.onText && VS.page.onText(text, alts, t)) return;
+  // le renard : aller quelque part, lire, écouter, chercher un mot…
+  const pending = VA.yes || (VA.pending && (VA.pending.search || VA.pending.ex || VA.pending.conjTense));
+  const intent = vaUnderstand(text);
+  if(pending || intent.kind !== 'unknown') return vaHandle(text, alts);
+  // un bouton de l'écran
+  if(vsClickByName(t)) return;
+  VS.unk++;
+  vsSay(VS.unk > 1 ? "Je n'ai toujours pas compris. Dis « aide » pour savoir quoi me dire, ou « où suis-je » pour connaître les boutons de la page." : `Je n'ai pas compris « ${text} ». Tu peux répéter ?`);
+}
+function vsHelp(){
+  vsSay("Tu peux me dire par exemple : « des exercices de conjugaison », « un quiz de vocabulaire », « je veux lire », « je veux écouter », « cherche le mot maison », « la grammaire ». Sur chaque page, dis « où suis-je » pour connaître les boutons, puis le nom d'un bouton. Dis aussi « répète », « retour », « accueil », ou « stop » pour m'arrêter.");
+}
+function vsBack(){
+  const chip = [...document.querySelectorAll('#scoreboard button, #scoreboard .chip')].find(b => b.offsetParent && /←|retour|quitter/i.test(b.textContent));
+  const nb = document.getElementById('navBackBtn');
+  VS.announce = true; setTimeout(() => { VS.announce = false; }, 2500);
+  if(chip){ vsSay('Retour.'); chip.click(); return; }
+  if(nb && !nb.disabled){ vsSay('Retour.'); nb.click(); return; }
+  VS.announce = false;
+  vsSay("Il n'y a pas de page précédente. Dis « accueil » pour revenir au début.");
+}
+/* les boutons visibles de la page, avec leur nom lisible */
+function vsLabel(el){
+  let s = (el.getAttribute('aria-label') || '') || el.textContent || el.title || '';
+  if(el.classList.contains('opt')){ const k = el.querySelector('.opt-key'); if(k) s = s.replace(k.textContent, ''); }
+  return s.replace(/[\u{1F000}-\u{1FFFF}☀-➿️‍]/gu, ' ').replace(/[←→▶◀⏮⏭⏸⏹✓✕☐✅⛶↺⤒⤓🔀]/g, ' ').replace(/\s+/g, ' ').trim();
+}
+function vsTargets(){
+  const out = [], seen = new Set();
+  ['scoreboard', 'quizCard'].forEach(id => {
+    const sc = document.getElementById(id); if(!sc) return;
+    sc.querySelectorAll('button, a[href], [role="button"], summary').forEach(el => {
+      if(!el.offsetParent || el.disabled || el.closest('#bqPlayer')) return;
+      const label = vsLabel(el);
+      if(label.length < 2 || seen.has(label)) return;
+      seen.add(label);
+      out.push({ el, label, n:vaNorm(label) });
+    });
+  });
+  return out;
+}
+const VS_STOPW = new Set(['le', 'la', 'les', 'l', 'un', 'une', 'des', 'de', 'du', 'd', 'et', 'a', 'au', 'aux', 'en', 'sur', 'pour', 'mon', 'ma', 'mes', 'ce', 'cette', 'je', 'veux', 'voudrais', 's', 'il', 'te', 'plait']);
+function vsSim(a, b){
+  if(!a || !b) return 0;
+  if(a === b) return 1;
+  const A = a.split(' ').filter(w => w.length > 1 && !VS_STOPW.has(w)), B = b.split(' ').filter(w => w.length > 1 && !VS_STOPW.has(w));
+  if(!A.length || !B.length) return 0;
+  let hit = 0;
+  A.forEach(w => { if(B.some(x => x === w || (w.length > 3 && x.length > 3 && (x.startsWith(w) || w.startsWith(x) || levenshtein(w, x) <= (w.length > 6 ? 2 : 1))))) hit++; });
+  const prec = hit / A.length, rec = hit / B.length;
+  return Math.min(1, prec * 0.65 + rec * 0.35 + (b.includes(a) && a.length > 3 ? 0.1 : 0));
+}
+function vsClickByName(t){
+  t = t.replace(/^(clique sur|clique|cliquer sur|appuie sur|appuie|appuyer sur|touche|ouvre|ouvrir|choisis|choisir|selectionne|va sur|aller sur|lance|lancer|commence|commencer)\s+/, '');
+  if(!t) return false;
+  let best = null, bs = 0, second = 0;
+  vsTargets().forEach(x => { const s = vsSim(t, x.n); if(s > bs){ second = bs; bs = s; best = x; } else if(s > second) second = s; });
+  if(!best || bs < 0.62 || bs - second < 0.08) return false;
+  VS.announce = true; setTimeout(() => { VS.announce = false; }, 2500);
+  vsSay(`D'accord : ${best.label}.`);
+  setTimeout(() => { try{ best.el.click(); }catch(e){} }, 120);
+  return true;
+}
+/* « où suis-je ? » : le titre de la page et ses boutons */
+function vsDescribe(afterNav){
+  const card = document.getElementById('quizCard'); if(!card) return;
+  const tag = card.querySelector('.cat-tag'), title = card.querySelector('.word-fr, h2');
+  const clean = (e) => e ? vsLabel(e).slice(0, 80) : '';
+  const where = [clean(tag), clean(title)].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i).join(' : ');
+  const T = vsTargets().map(x => x.label.replace(/\b\d+\s*(phrases?|mots?|textes?|questions?|verbes?|fiches?|exercices?)\b/gi, '').replace(/\s+/g, ' ').trim()).filter(l => l && !/^(retour|tous les textes|quitter)/i.test(l) && l.length <= 50).slice(0, 8);
+  const say = `${afterNav ? '' : 'Tu es sur la page '}${where || 'en cours'}. ` + (T.length ? `Tu peux dire : ${T.join(', ')}. Ou « retour ».` : 'Dis « retour » ou « accueil ».');
+  vsSay(say, { wait:!!afterNav });
+}
+/* « lis la page » : le texte de la page (sans les boutons) */
+function vsReadPage(){
+  const card = document.getElementById('quizCard'); if(!card) return;
+  const c = card.cloneNode(true);
+  c.querySelectorAll('button, input, select, textarea, svg, .cat-tag, .reading-toolbar, .kbd-hint, script, style, .bq-coach').forEach(e => e.remove());
+  c.querySelectorAll('.blank-slot').forEach(e => { e.textContent = ' … '; });
+  const txt = (c.textContent || '').replace(/\s+/g, ' ').trim();
+  if(!txt) return vsSay("Il n'y a pas de texte à lire sur cette page. Dis « où suis-je » pour connaître les boutons.");
+  vsSay(txt.slice(0, 2500) + (txt.length > 2500 ? ' … La suite est un peu longue : dis « lis la page » encore une fois plus tard.' : ''));
+}
+/* une nouvelle page s'affiche : exercice → on lit la question ; sinon, si on y est allé à la voix, on la présente */
+const VS_QCM_SEL = '#optionsWrap, #ccOptions, #stOptions, #recoOptions, #tcOptions, #sheetQOptions, #qcmOptionsWrap2, #entOptions';
+function vsOnPage(){
+  if(!VS.on) return;
+  VS.unk = 0;
+  if(Date.now() - VS.claimTs < 500) return;            // déjà pris en charge (conjugaison…)
+  VS.page = null;
+  const q = vsFindQcm(); if(q) return vsQcmCard(q);
+  const fi = vsFindInput(); if(fi) return vsInputCard(fi);
+  if(document.getElementById('bqCoach')){ VS.page = { name:'bq' }; return; }   // la lecture accompagnée parle d'elle-même
+  if(VS.announce){ VS.announce = false; vsDescribe(true); }
+}
+(function vsWatch(){
+  const card = document.getElementById('quizCard'); if(!card) return;
+  let t = 0;
+  new MutationObserver(() => { if(!VS.on) return; clearTimeout(t); t = setTimeout(vsOnPage, 140); }).observe(card, { childList:true });
+})();
+
+/* ---------- QCM (vocabulaire et autres quiz à choix) ---------- */
+function vsFindQcm(){
+  const card = document.getElementById('quizCard'); if(!card) return null;
+  const wrap = card.querySelector(VS_QCM_SEL); if(!wrap) return null;
+  const opts = [...wrap.querySelectorAll('button')].filter(b => b.offsetParent && !b.disabled && !b.classList.contains('disabled')).map(el => ({ el, text:vsLabel(el) })).filter(o => o.text);
+  return opts.length >= 2 ? { wrap, opts } : null;
+}
+function vsQuestionText(wrap){
+  const card = document.getElementById('quizCard');
+  const blank = (t) => t.replace(/\s*_{2,}\s*/g, ', blanc, ').replace(/^, /, '').replace(/\s*…\s*/g, ', blanc, ');   // le trou de la phrase se dit « blanc »
+  const els = [...card.querySelectorAll('.word-fr, .word-ar, .question-line, .word-def, .cq-sentence, .def-text, .tc-sentence, .sentence, h2, h3')]
+    .filter(e => e.offsetParent && !wrap.contains(e) && (e.compareDocumentPosition(wrap) & Node.DOCUMENT_POSITION_FOLLOWING));
+  const kept = els.filter(e => !els.some(o => o !== e && o.contains(e)));
+  return kept.map(e => { const c = e.cloneNode(true); c.querySelectorAll('button, svg').forEach(x => x.remove()); c.querySelectorAll('.blank-slot').forEach(x => { x.textContent = ' ___ '; }); return c.textContent.replace(/\s+/g, ' ').trim(); })
+    .filter(Boolean).map(blank).join('. ').slice(0, 500);
+}
+
+/* ---------- exercices « à écrire » (grammaire, orthographe…) : on dit la réponse, il l'écrit et valide ---------- */
+function vsFindInput(){
+  const card = document.getElementById('quizCard'); if(!card) return null;
+  const input = [...card.querySelectorAll('input[type="text"], input:not([type]), textarea')].find(i => i.offsetParent && !i.disabled && !i.readOnly && !['dictInput', 'vaInput'].includes(i.id));
+  if(!input) return null;
+  const btn = [...card.querySelectorAll('button')].find(b => b.offsetParent && !b.disabled && /valider|v[ée]rifier|corriger|^\s*✓|\bok\b/i.test(b.textContent));
+  return btn ? { input, btn } : null;
+}
+function vsInputCard(f){
+  VS.claimTs = Date.now();
+  try{ clearQuestionTimer(); }catch(e){}
+  const first = !VS.inputTold; VS.inputTold = true;
+  const say = vsQuestionText(f.input) + (first ? ' Dis la réponse : je l\'écris pour toi et je vérifie. Tu peux aussi dire « la règle » ou « je ne sais pas ».' : '');
+  VS.page = { name:'input', repeat:() => vsSay(say), onText:(text, alts, t) => vsInputAnswer(f, text, alts, t) };
+  vsSay(say, { wait:true });
+}
+function vsInputAnswer(f, text, alts, t){
+  if(!f.input.isConnected) return false;
+  const card = document.getElementById('quizCard');
+  if(f.input.disabled || f.done){
+    if(/\b(suivant|suivante|continue|continuer|ok|oui|d accord|la suite|vas y|allez)\b/.test(t)){ vsClickNext(); return true; }
+    return false;
+  }
+  if(/\b(la regle|regle|rappel|indice|un indice|aide moi|explique)\b/.test(t)){
+    const b = [...card.querySelectorAll('button')].find(x => x.offsetParent && /r[èe]gle|indice|rappel/i.test(x.textContent));
+    if(b){ b.click(); setTimeout(() => { const h = [...card.querySelectorAll('[id*="Rule"], [id*="Hint"], .cq-hint, [class*="rule"], [class*="hint"]')].filter(e => e.offsetParent && vsLabel(e).length > 10).pop(); vsSay(h ? vsLabel(h) : "Je n'ai pas de règle pour cet exercice."); }, 200); }
+    else vsSay("Il n'y a pas de règle sur cette page.");
+    return true;
+  }
+  const skip = /\b(je ne sais pas|je sais pas|sais pas|passe|aucune idee|donne moi la reponse)\b/.test(t);
+  if(!skip){ const it = vaUnderstand(text); if(it.kind !== 'unknown' && !['hello', 'thanks'].includes(it.kind)) return false; }
+  let ans = String(text || '').replace(/[.!?]+$/, '').trim().replace(/^(c'est|je dis|je pense que c'est|la réponse est|réponse|euh|heu|hmm)\s+/i, '');
+  // un seul mot attendu : on enlève les mots déjà dans la phrase (« la mémoire » → « la »)
+  if(/\bmot\b/i.test(f.input.placeholder || '') && ans.split(/\s+/).length > 1){
+    const known = new Set(vaNorm(vsQuestionText(f.input)).split(' '));
+    const rest = ans.split(/\s+/).filter(w => !known.has(vaNorm(w)));
+    ans = rest[0] || ans.split(/\s+/)[0];
+  }
+  f.done = true;
+  f.input.value = skip ? '?' : ans;
+  f.input.dispatchEvent(new Event('input', { bubbles:true }));
+  f.btn.click();
+  setTimeout(() => {
+    const fb = [...card.querySelectorAll('.pass-banner, .big-feedback, .fb-text, .feedback')].filter(e => e.offsetParent).pop();
+    const okk = fb ? /\bok\b|correct|good/.test(fb.className) : null;
+    const praised = fb && /^(tr[èe]s bien|bravo|bien jou|parfait|exact|super)/i.test(vsLabel(fb));
+    const msg = (okk === true ? (praised ? '' : 'Bravo ! ') : okk === false ? (skip ? "Ce n'est pas grave. " : 'Pas tout à fait. ') : '') + (fb ? vsLabel(fb) : "C'est noté.");
+    vsSay(msg, { then:() => { VS.busyUntil = Date.now() + 2000; setTimeout(() => { if(!vsClickNext()){ VS.busyUntil = 0; } }, 250); } });
+  }, 450);
+  return true;
+}
+function vsQcmCard(q){
+  VS.claimTs = Date.now();
+  try{ clearQuestionTimer(); }catch(e){}                  // pas de minuteur quand on répond à la voix
+  const prompt = vsQuestionText(q.wrap);   // les choix sont numérotés comme à l'écran : 1, 2, 3, 4
+  const say = `${prompt}. ${q.opts.map((o, i) => `Réponse ${i + 1} : ${o.text}`).join('. ')}.` + (VS.qcmTold ? '' : ' Dis le numéro, par exemple « la deux », ou la réponse.');
+  VS.qcmTold = true;
+  VS.page = { name:'qcm', repeat:() => vsSay(say), onText:(text, alts, t) => vsQcmAnswer(q, text, alts, t) };
+  vsSay(say, { wait:true });
+}
+function vsPickOption(cands, opts){
+  const LET = { a:0, ah:0, b:1, be:1, bai:1, c:2, ce:2, ces:2, ses:2, sait:2, 'c est':2, d:3, de:3, des:3, e:4, f:5 };
+  const NUM = { un:0, une:0, premier:0, premiere:0, 1:0, deux:1, deuxieme:1, second:1, seconde:1, 2:1, trois:2, troisieme:2, 3:2, quatre:3, quatrieme:3, 4:3, cinq:4, cinquieme:4, 5:4, six:5, sixieme:5, 6:5 };
+  for(const raw of cands){
+    let t = vaNorm(raw).replace(/^(reponse|la reponse|lettre|la lettre|choix|le choix|c est la|c est le|c est|je dis|je choisis|je prends|numero|la|le)\s+/, '').replace(/\s+(s il te plait|stp|reponse|choix)$/, '').trim();
+    if(LET[t] != null && LET[t] < opts.length) return LET[t];
+    if(NUM[t] != null && NUM[t] < opts.length) return NUM[t];
+  }
+  const said = vaNorm(cands[0]);
+  let best = -1, bs = 0, second = 0;
+  opts.forEach((o, i) => { const s = vsSim(said, vaNorm(o.text)); if(s > bs){ second = bs; bs = s; best = i; } else if(s > second) second = s; });
+  return (bs >= 0.6 && bs - second >= 0.12) ? best : -1;
+}
+function vsQcmAnswer(q, text, alts, t){
+  if(!q.wrap.isConnected) return false;
+  if(q.done){
+    if(/\b(suivant|suivante|continue|continuer|ok|oui|d accord|la suite|vas y|allez)\b/.test(t)){ vsClickNext(); return true; }
+    return false;
+  }
+  if(/\b(je ne sais pas|je sais pas|sais pas|aucune idee|passe)\b/.test(t)){ vsSay(`Choisis un numéro, même au hasard : de 1 à ${q.opts.length} !`); return true; }
+  const idx = vsPickOption([text].concat(alts || []), q.opts);
+  if(idx < 0){
+    const it = vaUnderstand(text);
+    if(it.kind !== 'unknown' && it.kind !== 'hello') return false;      // il veut aller ailleurs
+    vsSay(`Je n'ai pas compris ta réponse. Dis un numéro de 1 à ${q.opts.length}, ou répète la réponse.`);
+    return true;
+  }
+  q.done = true;
+  const chosen = q.opts[idx].el;
+  chosen.click();
+  setTimeout(() => vsQcmFeedback(q, chosen), 380);
+  return true;
+}
+function vsQcmFeedback(q, chosen){
+  const btns = q.opts.map(o => o.el);
+  const good = btns.find(b => /\b(correct|good|right|success)\b/.test(b.className));
+  let ok = null;
+  if(good) ok = good === chosen;
+  else if(/\b(wrong|bad|ko|error)\b/.test(chosen.className)) ok = false;
+  let msg;
+  if(ok === true) msg = ['Bravo !', 'Bonne réponse !', 'Très bien !', 'Exact !'][Math.floor(Math.random() * 4)];
+  else if(ok === false) msg = `Ce n'est pas ça. La bonne réponse était ${good ? 'la ' + (btns.indexOf(good) + 1) + ' : ' + vsLabel(good) : ''}.`;
+  else { const fb = document.querySelector('#quizCard .big-feedback, #quizCard .pass-banner, #quizCard .fb-text'); msg = fb ? vsLabel(fb) : "C'est noté."; }
+  const w = window.__currentWord;
+  if(w && document.getElementById('revealWrap') && ok !== null) msg += ` « ${w.fr} », en arabe : ${w.ar}.`;
+  vsSay(msg, { then:() => { VS.busyUntil = Date.now() + 2000; setTimeout(() => { if(!vsClickNext() && q.wrap.isConnected){ VS.busyUntil = 0; vsSay('Dis « suivant » pour continuer.'); } }, 250); } });
+}
+function vsClickNext(){
+  const card = document.getElementById('quizCard'); if(!card) return false;
+  const b = [...card.querySelectorAll('button')].find(x => x.offsetParent && !x.disabled && (x.id === 'nextBtn' || x.classList.contains('fix-next') || x.classList.contains('next-btn') || x.classList.contains('conj-next') || /\b(suivant|suivante|continuer|mot suivant|question suivante)\b/i.test(x.textContent)));
+  if(b){ const pause = /pause/i.test(b.textContent); b.click(); if(pause && b.isConnected) b.click(); return true; }   // « ⏸️ Pause (3s) » : 1er toucher = pause, 2e = suivant
+  return false;
+}
+
+/* ---------- Conjugaison à la voix ---------- */
+function vsSpell(w){
+  const M = { 'é':'e accent aigu', 'è':'e accent grave', 'ê':'e accent circonflexe', 'ë':'e tréma', 'à':'a accent grave', 'â':'a accent circonflexe', 'î':'i accent circonflexe', 'ï':'i tréma', 'ô':'o accent circonflexe', 'û':'u accent circonflexe', 'ù':'u accent grave', 'ç':'c cédille', "'":'apostrophe', '’':'apostrophe', '-':'tiret' };
+  return [...String(w || '').toLowerCase()].filter(c => c.trim()).map(c => M[c] || c).join(', ');
+}
+function vsConjStart(tenses){
+  tenses = (tenses && tenses.length) ? tenses : CONJ_TENSES.slice();
+  const easy = conjScopeVerbs('debutant');
+  startConjugationQuiz(easy.length >= 8 ? easy : getAllVerbs(), tenses, true, { count:10, speak:false });
+  if(conjQuizState) conjQuizState.vsCfg = { tenses };
+}
+function vsConjPrompt(st, ch, first){
+  const form = ch.verb.tenses[ch.tense][ch.pronounIdx];
+  const pl = conjPronounLabel(ch.pronounIdx, form, ch.verb.inf);
+  const pron = pl === "j'" ? 'je' : pl;
+  const hideT = !!(st.guess && ch.sentence);
+  const q = ch.sentence ? `${ch.marker.replace(/,$/, '')}, ${pron}, blanc, ${ch.ctx}.` : `${pron}, blanc.`;
+  return `Question ${st.idx + 1} sur ${st.queue.length}. ${q} Le verbe ${ch.verb.inf}, ${hideT ? 'à toi de trouver le temps' : TENSE_AU[ch.tense]}.`
+    + (first ? ' Dis toute la réponse, par exemple « je mange ». Tu peux aussi dire « répète », « un indice », ou « je ne sais pas ».' : '');
+}
+function vsConjCard(){
+  const st = conjQuizState; if(!st || !VS.on) return;
+  VS.claimTs = Date.now();
+  st.vs = true;
+  const ch = st.queue[st.idx];
+  const first = !VS.conjTold; VS.conjTold = true;
+  VS.page = { name:'conj', repeat:() => vsSay(vsConjPrompt(st, ch, false)), onText:(text, alts, t) => vsConjAnswer(st, ch, text, alts, t) };
+  vsSay(vsConjPrompt(st, ch, first), { wait:true });
+}
+function vsConjAnswer(st, ch, text, alts, t){
+  if(conjQuizState !== st || st.queue[st.idx] !== ch) return false;
+  const input = document.getElementById('conjAnswerInput'); if(!input) return false;
+  if(input.disabled){
+    if(/\b(suivant|suivante|continue|continuer|ok|oui|d accord|la suite|vas y|allez)\b/.test(t)){ if(st.vsAdvance) st.vsAdvance(); return true; }
+    return false;
+  }
+  if(/\b(indice|un indice|aide moi|je bloque|un coup de main|aide)\b/.test(t)){
+    const hb = document.getElementById('conjHintBtn');
+    if(hb && !hb.disabled){ hb.click(); const hs = document.querySelectorAll('#conjHints .cq-hint'); const last = hs[hs.length - 1]; vsSay(last ? vsLabel(last) : "Plus d'indice."); }
+    else vsSay("Il n'y a plus d'indice. Essaie, ou dis « je ne sais pas ».");
+    return true;
+  }
+  if(/\b(la regle|regle|explique|explication)\b/.test(t)){ const d = document.createElement('div'); d.innerHTML = conjFormationHtml(ch, true); vsSay(d.textContent.replace(/\s+/g, ' ')); return true; }
+  if(/\b(quitter|quitte|arrete l exercice|arreter l exercice|on arrete|j arrete|fini l exercice)\b/.test(t)){ conjQuizState = null; renderConjugationHome(); vsSay("D'accord, on arrête l'exercice. Dis-moi ce que tu veux faire."); return true; }
+  const skip = /\b(je ne sais pas|je sais pas|sais pas|passe|je passe|aucune idee|donne moi la reponse|dis moi la reponse|c est quoi la reponse)\b/.test(t);
+  const correct = ch.verb.tenses[ch.tense][ch.pronounIdx];
+  const strip = (a) => String(a || '').replace(/[.,!?;:]+/g, ' ').replace(/\s+/g, ' ').trim();
+  const cands = [text].concat(alts || []).map(strip).filter(Boolean);
+  const exact = skip ? null : cands.find(a => conjAnswerMatches(a, correct));
+  const phon = !skip && !exact && cands.some(a => conjPhon(a) === conjPhon(correct));
+  if(!skip && !exact && !phon){
+    const it = vaUnderstand(text);
+    if(it.kind !== 'unknown' && !['hello', 'thanks', 'howareyou'].includes(it.kind)) return false;   // il veut aller ailleurs
+  }
+  input.value = skip ? '—' : (exact || (phon ? correct : cands[0]));
+  const ok = !!(exact || phon);
+  const myIdx = st.idx;
+  validateConjugationAnswer();
+  if(ok && phon){ const rv = document.getElementById('conjReveal'); if(rv) rv.insertAdjacentHTML('beforeend', `<div class="conj-oral">🗣️ Bien dit ! À l'écrit, ça s'écrit : <b>${escapeHtml(correct)}</b></div>`); }
+  const withPron = conjWithPronoun(ch.pronounIdx, correct, ch.verb.inf);
+  const full = ch.sentence ? `${ch.marker} ${withPron} ${ch.ctx}.` : withPron + '.';
+  const msg = ok ? `${['Bravo !', 'Très bien !', 'Exact !', 'Parfait !'][Math.floor(Math.random() * 4)]} ${full}` + (phon && conjNormText(correct).length > 3 ? ` Ça s'écrit : ${vsSpell(correct)}.` : '')
+                 : `${skip ? "Ce n'est pas grave." : 'Pas tout à fait.'} La bonne réponse : ${full} Ça s'écrit : ${vsSpell(correct)}.`;
+  vsSay(msg, { then:() => { VS.busyUntil = Date.now() + 2000; setTimeout(() => { if(conjQuizState === st && st.idx === myIdx && st.vsAdvance) st.vsAdvance(); }, 300); } });   // pas d'écoute avant la question suivante
+  return true;
+}
+function vsConjEnd(st){
+  if(!VS.on || !st) return;
+  VS.claimTs = Date.now();
+  const c = st.score.correct, n = st.score.total;
+  const say = `C'est fini ! Tu as ${c} bonne${c > 1 ? 's' : ''} réponse${c > 1 ? 's' : ''} sur ${n}. ${c === n ? 'Sans faute, bravo !' : c >= n * 0.7 ? 'Bien joué !' : 'Continue, ça vient !'} Tu veux recommencer ? Dis « encore », ou dis où tu veux aller.`;
+  const cfg = st.vsCfg;
+  VS.page = { name:'conjEnd', repeat:() => vsSay(say), onText:(text, alts, t) => {
+    if(/\b(encore|recommence|recommencer|oui|on continue|continue|une autre fois|rejouer|on recommence)\b/.test(t)){ if(cfg) vsConjStart(cfg.tenses); else { const b = document.getElementById('conjAgainBtn'); if(b) b.click(); } return true; }
+    return false;
+  } };
+  vsSay(say, { wait:true });
+}
+/* le choix des temps, à la voix : « tous les temps », « le présent », « l'imparfait »… */
+function vaConjTenseFrom(t){
+  if(/\b(tous|tout|toutes|melange|melanges|n importe|peu importe|les cinq|tous les temps)\b/.test(t)) return CONJ_TENSES.slice();
+  const out = [];
+  for(const [w, id] of VA_TENSE_WORDS){ if((' ' + t + ' ').includes(' ' + w + ' ') && CONJ_TENSES.includes(id) && !out.includes(id)) out.push(id); }
+  return out.length ? out : null;
+}
+function vaConjGo(tenses){
+  const label = tenses.length === CONJ_TENSES.length ? 'avec tous les temps' : tenses.map(x => TENSE_AU[x]).join(' et ');
+  const voice = VS.on;
+  return vaReply({ fr:`C'est parti, ${label} ! ${voice ? 'Je lis chaque question, et tu réponds à voix haute.' : 'Bonne chance ! 💪'}`, ar:'هيا بنا! 💪',
+    then:() => { if(voice) vsConjStart(tenses); else { const c = conjSetupLoad(); startConjugationQuiz(conjScopeVerbs(c.scope), tenses, true, { count:c.count || 20, speak:c.speak }); } } });
+}
+
+/* ---------- écoute dès l'ouverture (option du profil) ---------- */
+(function vsAutoAtOpen(){
+  if(!voiceHelpOn() || !voiceAutoOn()) return;
+  let done = false;
+  const go = () => {
+    if(done) return; done = true;
+    ['pointerdown', 'keydown'].forEach(ev => document.removeEventListener(ev, go, true));
+    setTimeout(() => {
+      const n = vaUserFirstName();
+      vsStart(`${vaHelloWord()}${n ? ' ' + n : ''} ! Je t'écoute. Que veux-tu faire ? Par exemple : des exercices de conjugaison, je veux lire, ou je veux écouter.`);
+    }, 900);
+  };
+  ['pointerdown', 'keydown'].forEach(ev => document.addEventListener(ev, go, true));
 })();
 
 /* 📱 Paysage (téléphone à l'horizontale) : à chaque nouvelle question, la carte se cale en haut de l'écran
