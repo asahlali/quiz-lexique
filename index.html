@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- 🏷️ Version de l'appli : augmentée automatiquement par publier-site.cmd à chaque publication -->
-<meta name="app-version" content="1.0.3" data-date="2026-10-07">
+<meta name="app-version" content="1.0.4" data-date="2026-10-10">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <title>VocabVISION — Vocabulaire Français ↔ Arabe</title>
 <script>
@@ -2808,6 +2808,38 @@
   .va-ear{ position:absolute; right:10px; top:14px; z-index:3; font-size:30px; opacity:0; transform:scale(.6); transition:opacity .2s, transform .2s; pointer-events:none; }
   .va-fox:not(.has3d).listening .va-ear{ opacity:1; transform:scale(1); animation:vaEar 1s ease-in-out infinite; }
   @keyframes vaEar{ 0%,100%{ transform:scale(1) rotate(-6deg); } 50%{ transform:scale(1.15) rotate(6deg); } }
+  /* 🏆 grande fête de l'objectif du jour */
+  .gf{ position:fixed; inset:0; z-index:9990; display:flex; flex-direction:column; align-items:center; justify-content:space-between; padding:calc(env(safe-area-inset-top, 0px) + 22px) 16px calc(env(safe-area-inset-bottom, 0px) + 20px); color:#fff; font-family:'Nunito','Inter',sans-serif; opacity:0; transition:opacity .45s ease; overflow:hidden; }
+  .gf.in{ opacity:1; }
+  .gf.out{ opacity:0; }
+  .gf-bg{ position:absolute; inset:0; background:radial-gradient(circle at 50% 56%, #7C3AED 0%, #4C1D95 38%, #1E0B4B 72%, #0B0420 100%); }
+  .gf-rays{ position:absolute; left:50%; top:56%; width:240vmax; height:240vmax; margin:-120vmax 0 0 -120vmax; background:repeating-conic-gradient(from 0deg, rgba(255,233,140,.13) 0deg 7deg, transparent 7deg 20deg); -webkit-mask-image:radial-gradient(circle, #000 0%, transparent 55%); mask-image:radial-gradient(circle, #000 0%, transparent 55%); animation:gfSpin 22s linear infinite; }
+  .gf-fw{ position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+  .gf-top{ position:relative; text-align:center; max-width:640px; }
+  .gf-trophy{ font-size:clamp(52px,14vw,74px); line-height:1; filter:drop-shadow(0 8px 22px rgba(253,224,71,.7)); animation:gfDrop .9s cubic-bezier(.2,1.6,.4,1) both, gfFloat 2.6s ease-in-out 1s infinite; }
+  .gf-title{ margin-top:6px; font-weight:900; text-transform:uppercase; line-height:.98; letter-spacing:.01em; }
+  .gf-title span > span{ display:inline-block; animation:gfPop .55s cubic-bezier(.2,1.7,.4,1) both; animation-delay:calc(var(--i) * 45ms + .25s); }
+  .gf-title .l1{ display:block; font-size:clamp(25px,7.6vw,44px); color:#FDE68A; text-shadow:0 2px 0 #B45309, 0 4px 0 #92400E, 0 6px 0 #78350F, 0 12px 20px rgba(0,0,0,.45); }
+  .gf-title .l2{ display:block; font-size:clamp(44px,14vw,84px); color:#FFF7D6; text-shadow:0 3px 0 #F59E0B, 0 6px 0 #D97706, 0 9px 0 #B45309, 0 12px 0 #92400E, 0 18px 30px rgba(0,0,0,.5), 0 0 40px rgba(253,224,71,.55); }
+  .gf-stats{ margin-top:12px; display:flex; gap:7px; justify-content:center; flex-wrap:wrap; }
+  .gf-stat{ background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.28); border-radius:999px; padding:7px 12px; font-weight:900; font-size:clamp(13px,3.6vw,15px); -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px); animation:gfUp .5s ease both; animation-delay:calc(1.1s + var(--d) * .13s); }
+  .gf-fox2d{ position:absolute; left:calc(50% - min(31vw,150px)); top:calc(50% - min(31vw,150px)); width:min(62vw,300px); height:min(62vw,300px); background:var(--vv-fox-cheer-m) center/contain no-repeat; animation:gfDrop 1s cubic-bezier(.2,1.6,.4,1) .3s both, gfBounce 1.1s ease-in-out 1.4s infinite; }
+  .gf.has3d .gf-fox2d{ display:none; }
+  .gf-bottom{ position:relative; width:min(520px,100%); display:flex; flex-direction:column; align-items:center; gap:12px; z-index:2; }
+  .gf-msg{ position:relative; background:#fff; color:#1E1B4B; border-radius:20px; padding:13px 18px; font-weight:800; font-size:clamp(16px,4.4vw,19px); line-height:1.38; text-align:center; box-shadow:0 14px 34px rgba(0,0,0,.4); opacity:0; transform:translateY(14px) scale(.95); transition:opacity .35s ease, transform .4s cubic-bezier(.2,1.4,.4,1); }
+  .gf-msg::before{ content:''; position:absolute; top:-10px; left:50%; margin-left:-11px; border:11px solid transparent; border-top:0; border-bottom-color:#fff; }
+  .gf-msg.on{ opacity:1; transform:none; }
+  .gf-msg:empty{ display:none; }
+  .gf-go{ min-height:58px; padding:0 30px; border:none; border-radius:999px; background:linear-gradient(135deg,#F97316,#EC4899); color:#fff; font:900 19px 'Nunito','Inter',sans-serif; box-shadow:0 12px 28px rgba(236,72,153,.55); cursor:pointer; animation:gfUp .5s ease 2.2s both, gfBeat 1.8s ease-in-out 3s infinite; }
+  .quests-alldone[role="button"]{ cursor:pointer; }
+  @keyframes gfSpin{ to{ transform:rotate(360deg); } }
+  @keyframes gfDrop{ from{ transform:translateY(-60px) scale(.3); opacity:0; } to{ opacity:1; } }
+  @keyframes gfFloat{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-8px); } }
+  @keyframes gfPop{ from{ transform:scale(0) rotate(-14deg); opacity:0; } to{ transform:none; opacity:1; } }
+  @keyframes gfUp{ from{ transform:translateY(18px); opacity:0; } to{ transform:none; opacity:1; } }
+  @keyframes gfBeat{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.06); } }
+  @keyframes gfBounce{ 0%,100%{ transform:none; } 50%{ transform:translateY(-8%) rotate(-3deg); } }
+  @media (prefers-reduced-motion: reduce){ .gf-rays, .gf-trophy, .gf-fox2d, .gf-go, .gf-title span > span{ animation:none !important; } }
   /* 🗣️ mode mains libres : la barre du renard en bas de l'écran */
   body.vh-off .vh-only{ display:none !important; }
   .vs-bar{ position:fixed; left:50%; bottom:calc(env(safe-area-inset-bottom, 0px) + 12px); z-index:58; transform:translateX(-50%); width:min(94vw, 470px); display:flex; align-items:center; gap:8px; padding:6px 8px 6px 6px; border-radius:999px; background:linear-gradient(135deg,#4C1D95,#7C3AED); color:#fff; box-shadow:0 14px 34px rgba(76,29,149,.45); font-family:'Nunito','Inter',sans-serif; }
@@ -3854,6 +3886,7 @@ function reloadAllUserState(){
   // 👵 réglages de lecture et 💬 aide vocale : ils suivent le profil
   try{ readingVoiceGender = loadReadingVoice(); readingRate = loadReadingRate(); readingScale = loadReadingScale(); applyReadingScale(); }catch(e){}
   try{ applyVoiceHelp(); }catch(e){}
+  try{ gfWasDone = null; }catch(e){}   // 🏆 nouveau profil : on repart de ses propres objectifs
   const custom = loadCustomWords();
   WORDS = custom ? custom : DEFAULT_WORDS.slice();
   activeFilterCat = null; currentBlock = null;
@@ -7858,6 +7891,7 @@ function renderSoundSettings(){
       <button class="mode-chip ${celebFreq === 'half' ? 'active' : ''}" data-celeb="half">Une sur deux</button>
       <button class="mode-chip ${celebFreq === 'off' ? 'active' : ''}" data-celeb="off">Seulement les séries</button>
       <button class="mode-chip" id="celebDemoBtn">🦊 Voir une fête</button>
+      <button class="mode-chip" id="finaleDemoBtn">🏆 Voir la grande fête de l'objectif du jour</button>
     </div>
     <button class="restart-btn" id="goVoiceSettingsBtn" style="margin-top:20px;">🗣️ Choisir les voix de lecture →</button>
   `;
@@ -7871,6 +7905,7 @@ function renderSoundSettings(){
   });
   card.querySelectorAll('[data-celeb]').forEach(b => b.addEventListener('click', () => { celebFreq = b.dataset.celeb; try{ localStorage.setItem(CELEB_FREQ_KEY, celebFreq); }catch(e){} renderSoundSettings(); }));
   document.getElementById('celebDemoBtn').addEventListener('click', () => { if(fxOn) foxCelebrate({ force:true }); });
+  document.getElementById('finaleDemoBtn').addEventListener('click', () => goalFinale(true));
   document.getElementById('goVoiceSettingsBtn').addEventListener('click', () => renderVoiceSettings());
   document.getElementById('backFromSoundsBtn').addEventListener('click', renderBlockSelect);
 
@@ -14956,7 +14991,7 @@ function renderBlockSelect(){
       </div>
       <div id="questsBody" style="display:${questsCollapsed ? 'none' : 'block'};">
       ${xpMultiplier() > 1 ? `<div class="mult-banner">⚡ Bonus points <b>×${xpMultiplier()}</b> actif — série de ${curStreak} jours ! Joue pour en profiter.</div>` : ''}
-      ${allQuestsDone ? `<div class="quests-alldone">🎉 Tu as terminé tous les défis du jour !</div>` : ''}
+      ${allQuestsDone ? `<div class="quests-alldone" role="button" tabindex="0" title="Revoir la grande fête">🎉 Tu as terminé tous les défis du jour ! <u>Revoir la fête 🏆</u></div>` : ''}
       ${quests.map(q => {
         const done = q.cur >= q.goal;
         const pctq = Math.round((q.cur / q.goal) * 100);
@@ -18521,6 +18556,7 @@ const COLOR_PRESETS = {
 /* ============ 🆕 NOUVEAUTÉS — pour que tout ce qui a été ajouté reste découvrable ============ */
 const WHATS_NEW_SECTIONS = [
   { icon:'🆕', title:'Nouveautés', items:[
+    { name:"🏆 La grande fête de l'objectif du jour", desc:"Quand tous tes objectifs du jour sont atteints : feu d'artifice, « OBJECTIF DU JOUR ATTEINT ! » en relief, et le renard 3D en grand qui jaillit en fusée, fait un salto, te félicite à voix haute, danse et te salue. Pour la revoir : touche « Tu as terminé tous les défis du jour » sur l'accueil, ou 🔊 Sons." },
     { name:'🗣️ Tout faire à la voix', desc:"Dès que tu as parlé au renard, la conversation continue de page en page (barre du renard en bas). Exercices : il lit la question et les choix, écoute ta réponse, corrige et épelle. Partout : « où suis-je ? », le nom d'un bouton, « lis la page », « retour », « répète », « aide », « stop ». Menu ☰ : « Tout faire à la voix » et « Le renard m'écoute dès l'ouverture » (malvoyants)." },
     { name:'🌈 Conjugaison à la voix', desc:"« Des exercices de conjugaison » : tous les temps ou un seul, puis tu réponds à voix haute (« je mangeais »). « Un indice », « répète », « je ne sais pas »… À la fin, il te donne ton score et te propose de recommencer." },
     { name:'📖 « Je veux lire »', desc:"Dis-le au renard (ou touche « Reprendre ma lecture ») : le Bouquinage s'ouvre là où tu t'étais arrêté et il te demande « Je te le lis, ou tu lis toi-même ? ». Il lit phrase par phrase (pause, phrase précédente/suivante), et en lisant seul tu peux toucher une phrase pour l'entendre." },
@@ -36986,6 +37022,7 @@ function kbUpdate(){
 function foxCameo(kind, msg, opts){
   opts = opts || {};
   if(typeof VA !== 'undefined' && VA.open) return false;   // on discute avec le renard : pas de surprise
+  if(document.getElementById('goalFinale')) return false;     // 🏆 la grande fête est en cours
   if(!fxOn || cameoBusy) return false;
   const now = Date.now();
   if(!opts.force && now - cameoLast < (opts.minGap || 5000)) return false;
@@ -37262,6 +37299,7 @@ function foxCelebrate(opts){
   opts = opts || {};
   if(typeof VA !== 'undefined' && VA.open) return false;
   if(!fxOn || document.hidden) return false;
+  if(opts.route !== 'finale' && document.getElementById('goalFinale')) return false;   // 🏆 pendant la grande fête : rien d'autre
   if(!opts.force){
     if(celebFreq === 'off') return false;
     if(celebFreq === 'half' && (celeb.n++ % 2)) return false;
@@ -37287,7 +37325,8 @@ function foxCelebrate(opts){
   P.resize();
   // parcours tiré d'un « sac » mélangé : tous y passent avant qu'un revienne, jamais deux fois de suite
   const names = Object.keys(CELEB_ROUTES);
-  let name = opts.route && CELEB_ROUTES[opts.route] ? opts.route : '';
+  const special = (typeof CELEB_SPECIAL !== 'undefined' && opts.route && CELEB_SPECIAL[opts.route]) ? CELEB_SPECIAL[opts.route] : null;   // 🏆 la grande fête (hors tirage au sort)
+  let name = special ? opts.route : (opts.route && CELEB_ROUTES[opts.route] ? opts.route : '');
   if(!name){
     if(!celeb.bag.length){ celeb.bag = names.slice().sort(() => Math.random() - 0.5); if(celeb.bag[0] === celeb.lastRoute) celeb.bag.push(celeb.bag.shift()); }
     name = celeb.bag.shift();
@@ -37299,7 +37338,7 @@ function foxCelebrate(opts){
   P.mover.rotation.order = 'ZYX'; P.mover.rotation.set(0, 0, 0); P.mover.position.set(0, -500, 0);
   const c = celebCtx(P);
   P.mover.scale.setScalar(c.u);
-  const route = CELEB_ROUTES[name](c);
+  const route = special ? special(c) : CELEB_ROUTES[name](c);
   const evs = (route.events || []).slice().sort((a, b) => a[0] - b[0]);
   let t = 0;
   celeb.busy = true; celeb.draining = false;
@@ -38814,6 +38853,186 @@ function vaConjGo(tenses){
   };
   ['pointerdown', 'keydown'].forEach(ev => document.addEventListener(ev, go, true));
 })();
+
+/* ============ 🏆 GRANDE FÊTE DE L'OBJECTIF DU JOUR ============
+   Quand tous les objectifs du jour sont atteints (une fois par jour et par profil) : écran de fête plein écran,
+   feu d'artifice, « OBJECTIF DU JOUR ATTEINT ! » en relief, et le renard 3D en GRAND qui jaillit en fusée,
+   fait un salto, te félicite à voix haute (il articule), danse, te salue et repart. */
+const CELEB_SPECIAL = {
+  finale(c){
+    const { P, u, vw } = c;
+    // en grand, mais entre le titre (en haut) et la bulle (en bas)
+    const big = Math.max(1.1, Math.min(1.9, window.innerHeight * 0.46 / c.foxPx));
+    const yIn = -vw.h - 4 * u, yMid = vw.h * 0.02;
+    const st = { phase:'intro', tTalk:0, tNext:0, tEnd:-1 };
+    const route = { dur:40,
+      frame(t){
+        let sc = big, y = yMid;
+        if(t < 1.0){ const k = celOut(t / 1.0); sc = celLerp(0.45, big, k); y = celLerp(yIn, yMid + 0.7 * u, k); P.mover.rotation.y = (1 - k) * Math.PI * 4; }
+        else if(t < 1.35){ y = celLerp(yMid + 0.7 * u, yMid, celBack(celSeg(t, 1.0, 1.35))); P.mover.rotation.y = 0; }
+        else if(st.tEnd < 0) y = yMid + Math.sin(t * 2.1) * 0.07 * u;
+        if(st.tEnd >= 0){ const k = celIn(celSeg(t, st.tEnd, st.tEnd + 1.0)); y = celLerp(yMid, vw.h + 5 * u, k); P.mover.rotation.y = k * Math.PI * 3; if(k >= 1) route.dur = t; }
+        P.mover.position.set(0, y, 0);
+        P.mover.scale.setScalar(c.u * sc);
+        const speaking = typeof ttsSpeaking !== 'undefined' && ttsSpeaking;
+        // il parle → il danse → il salue → il repart (en fusée)
+        if(st.phase === 'talk' && t - st.tTalk > 1.6 && (!speaking || t - st.tTalk > 16)){ st.phase = 'dance'; st.tNext = t; P.play('dance', { dur:1.7 }); P.fx('notes', P.anchor('head'), { count:4 }); P.fx('confetti', null, { count:36 }); c.sound('pop'); }
+        if(st.phase === 'dance' && t - st.tNext > 1.8){ st.phase = 'wave'; st.tNext = t; P.play('wave', { dur:1.6, side:1 }); P.fx('hearts', P.anchor('head'), { count:7 }); }
+        if(st.phase === 'wave' && t - st.tNext > 1.7){ st.phase = 'end'; st.tEnd = t; P.play('rocket', { dur:1.1 }); P.emit('flame', true); c.sound('jet'); P.fx('sparkles', P.anchor('feet'), { count:16 }); }
+      },
+      events:[
+        [0, () => { P.setFemale(narratorIsFemale()); P.play('rocket', { dur:1.0 }); P.emit('flame', true); c.sound('jet'); }],
+        [1.0, () => { P.emit('flame', false); P.play('cheer', { dur:1.5 }); P.fx('ring', null, { size:6 }); P.fx('ring', null, { size:4, flat:true }); P.fx('cannon', null, { count:42 }); P.fx('stars', null, { count:16, speed:8 }); c.sound('boom'); }],
+        [1.55, () => { P.fx('coins', P.anchor('top'), { count:22, dir:Math.PI / 2, spread:1.5, speed:12, g:13, life:1.7 }); c.sound('coin'); }],
+        [2.55, () => { P.play('flip', { dur:1.2, h:1.4 }); c.sound('whoosh'); }],
+        [3.0, () => { P.fx('rain', null, { count:80 }); P.fx('sparkles', P.anchor('head'), { count:18 }); }],
+        [3.85, () => { st.phase = 'talk'; st.tTalk = 3.85; const txt = (window.__gfState || {}).text || 'Bravo !'; P.play('talk', { text:fxCleanSpeech(txt), rate:narratorRate(), dur:3, side:1 }); gfTalk(); }],
+      ] };
+    return route;
+  },
+};
+let gfWasDone = null, gfFw = null;
+const GOAL_FINALE_KEY = 'lexiqueQuiz::goalFinaleDay';
+function gfText(){
+  const name = vaUserFirstName();
+  let streak = 0; try{ streak = computeStreak(); }catch(e){}
+  const lines = ['Tu peux être fier de toi !', 'Quel travail ! Tu progresses chaque jour.', "Chaque jour compte, et aujourd'hui tu as tout donné !", 'Tu es un vrai champion !', 'Continue comme ça, tu vas très loin !'];
+  return `Bravo${name ? ' ' + name : ''} ! Objectif du jour atteint ! ${streak >= 2 ? `Ça fait ${streak} jours de suite, c'est énorme ! ` : ''}${lines[Math.floor(Math.random() * lines.length)]} On se retrouve demain ?`;
+}
+/* il dit ses félicitations (la bulle s'affiche en même temps) */
+function gfTalk(){
+  const s = window.__gfState; if(!s || s.talked) return;
+  s.talked = true;
+  const m = document.getElementById('gfMsg'); if(m){ m.textContent = s.text; m.classList.add('on'); }
+  try{ window.speechSynthesis.cancel(); }catch(e){}
+  speakNarrator(fxCleanSpeech(s.text), 'fr-FR');
+}
+function goalFinale(preview){
+  if(document.getElementById('goalFinale')) return;
+  try{ if(typeof VA !== 'undefined' && VA.open) vaClose(); }catch(e){}
+  try{ celebStop(); }catch(e){}
+  let streak = 0, today = {}; try{ streak = computeStreak(); today = dailyStats[todayKey()] || {}; }catch(e){}
+  const min = Math.max(1, Math.round((today.seconds || 0) / 60)), xp = today.xp || 0;
+  let nq = 0; try{ nq = getDailyQuests().length; }catch(e){}
+  window.__gfState = { text:gfText(), talked:false };
+  const word = (w, i0) => [...w].map((ch, i) => `<span style="--i:${i0 + i}">${ch === ' ' ? '&nbsp;' : escapeHtml(ch)}</span>`).join('');
+  const ov = document.createElement('div');
+  ov.id = 'goalFinale'; ov.className = 'gf'; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-label', 'Objectif du jour atteint');
+  ov.innerHTML = `
+    <div class="gf-bg"></div><div class="gf-rays"></div><canvas class="gf-fw" id="gfFw"></canvas>
+    <div class="gf-top">
+      <div class="gf-trophy">🏆</div>
+      <div class="gf-title"><span class="l1">${word('Objectif du jour', 0)}</span><span class="l2">${word('ATTEINT !', 16)}</span></div>
+      <div class="gf-stats">
+        ${nq ? `<span class="gf-stat" style="--d:0">🎯 ${nq} objectif${nq > 1 ? 's' : ''} sur ${nq}</span>` : ''}
+        ${streak >= 1 ? `<span class="gf-stat" style="--d:1">🔥 ${streak} jour${streak > 1 ? 's' : ''} de suite</span>` : ''}
+        <span class="gf-stat" style="--d:2">⏱️ ${min} min</span>
+        ${xp ? `<span class="gf-stat" style="--d:3">⭐ ${xp} points</span>` : ''}
+      </div>
+    </div>
+    <div class="gf-fox2d" aria-hidden="true"></div>
+    <div class="gf-bottom"><div class="gf-msg" id="gfMsg" aria-live="polite"></div><button type="button" class="gf-go" id="gfGo">Continuer ➜</button></div>`;
+  document.body.appendChild(ov);
+  requestAnimationFrame(() => ov.classList.add('in'));
+  try{ playUnlockSound(); }catch(e){}
+  try{ vibrate([60, 80, 60, 80, 160]); }catch(e){}
+  try{ gfFw = gfFireworks(ov.querySelector('#gfFw')); }catch(e){}
+  try{ launchGravityConfetti(); }catch(e){}
+  const close = () => {
+    if(!ov.isConnected) return;
+    ov.classList.remove('in'); ov.classList.add('out');
+    try{ celebStop(); }catch(e){}
+    try{ window.speechSynthesis.cancel(); ttsSpeaking = false; }catch(e){}
+    if(gfFw){ gfFw.stop(); gfFw = null; }
+    setTimeout(() => ov.remove(), 450);
+    document.removeEventListener('keydown', onKey, true);
+  };
+  const onKey = (e) => { if(e.key === 'Escape' || e.key === 'Enter'){ e.preventDefault(); close(); } };
+  document.addEventListener('keydown', onKey, true);
+  ov.querySelector('#gfGo').addEventListener('click', close);
+  // le grand renard 3D (sinon : le renard en image qui saute)
+  const ok3d = (typeof fox3d !== 'undefined' && fox3d.ready && !fox3d.reduced && fxOn) ? foxCelebrate({ force:true, route:'finale' }) : false;
+  if(ok3d && fox3d.party){ ov.classList.add('has3d'); }
+  else setTimeout(gfTalk, 1800);
+  // fermeture toute seule un peu après son départ (ou au bout de 45 s)
+  const t0 = Date.now();
+  const watch = setInterval(() => {
+    if(!ov.isConnected){ clearInterval(watch); return; }
+    const partyOn = typeof celeb !== 'undefined' && (celeb.busy || celeb.draining);
+    if((ov.classList.contains('has3d') && !partyOn && Date.now() - t0 > 6000) || (!ov.classList.contains('has3d') && Date.now() - t0 > 14000 && !ttsSpeaking) || Date.now() - t0 > 45000){
+      clearInterval(watch); setTimeout(close, 3500);
+    }
+  }, 500);
+  return true;
+}
+/* feu d'artifice (2D) derrière le renard */
+function gfFireworks(canvas){
+  const ctx = canvas.getContext('2d');
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  let W = 0, H = 0;
+  const resize = () => { W = window.innerWidth; H = window.innerHeight; canvas.width = W * dpr; canvas.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); };
+  resize(); window.addEventListener('resize', resize);
+  const COLORS = ['#FDE047', '#F97316', '#EC4899', '#A78BFA', '#38BDF8', '#34D399', '#F87171', '#FFFFFF'];
+  const pickC = () => COLORS[(Math.random() * COLORS.length) | 0];
+  const rockets = [], sparks = [];
+  let run = true, last = performance.now(), next = 0.2, n = 0;
+  const reduced = typeof fox3d !== 'undefined' && fox3d.reduced;
+  const launch = () => { rockets.push({ x:W * (0.12 + Math.random() * 0.76), y:H + 8, vx:(Math.random() - 0.5) * 50, vy:-(H * (1.05 + Math.random() * 0.35)), c:pickC() }); if(n++ % 2 === 0){ try{ fxSound('whistle'); }catch(e){} } };
+  const explode = (r) => {
+    const cnt = reduced ? 30 : 70 + ((Math.random() * 50) | 0), c2 = pickC(), ring = Math.random() < 0.3;
+    for(let i = 0; i < cnt; i++){
+      const a = Math.random() * Math.PI * 2, sp = ring ? 230 : 70 + Math.random() * 230;
+      sparks.push({ x:r.x, y:r.y, vx:Math.cos(a) * sp, vy:Math.sin(a) * sp, life:1 + Math.random() * 0.9, age:0, c:Math.random() < 0.7 ? r.c : c2, s:1.6 + Math.random() * 1.8 });
+    }
+    try{ fxSound('pop'); }catch(e){}
+  };
+  const frame = (now) => {
+    if(!run) return;
+    requestAnimationFrame(frame);
+    const dt = Math.max(0, Math.min(0.05, (now - last) / 1000)); last = now;
+    ctx.globalCompositeOperation = 'destination-out'; ctx.fillStyle = 'rgba(0,0,0,0.22)'; ctx.fillRect(0, 0, W, H);
+    ctx.globalCompositeOperation = 'lighter';
+    next -= dt; if(next <= 0){ launch(); next = (reduced ? 1.2 : 0.32) + Math.random() * 0.55; }
+    for(let i = rockets.length - 1; i >= 0; i--){
+      const r = rockets[i]; r.x += r.vx * dt; r.y += r.vy * dt; r.vy += H * 0.95 * dt;
+      ctx.globalAlpha = 1; ctx.fillStyle = r.c; ctx.beginPath(); ctx.arc(r.x, r.y, 2.4, 0, 6.283); ctx.fill();
+      if(r.vy > -H * 0.08){ explode(r); rockets.splice(i, 1); }
+    }
+    for(let i = sparks.length - 1; i >= 0; i--){
+      const s = sparks[i]; s.age += dt;
+      if(s.age >= s.life){ sparks.splice(i, 1); continue; }
+      s.vx *= (1 - 1.6 * dt); s.vy = s.vy * (1 - 1.6 * dt) + 140 * dt; s.x += s.vx * dt; s.y += s.vy * dt;
+      ctx.globalAlpha = Math.max(0, 1 - s.age / s.life) * (0.75 + 0.25 * Math.sin(s.age * 40));
+      ctx.fillStyle = s.c; ctx.beginPath(); ctx.arc(s.x, s.y, Math.max(0.4, s.s * (1 - s.age / s.life * 0.5)), 0, 6.283); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  };
+  requestAnimationFrame(frame);
+  return { stop(){ run = false; window.removeEventListener('resize', resize); } };
+}
+/* on surveille : tous les objectifs du jour viennent d'être atteints → la grande fête (une fois par jour et par profil) */
+function goalFinaleCheck(){
+  let done = false;
+  try{ done = questsAllDone(); }catch(e){ return; }
+  if(gfWasDone === null){ gfWasDone = done; return; }   // à l'ouverture : on note juste où on en est
+  if(done && !gfWasDone){
+    gfWasDone = true;
+    let shown = ''; try{ shown = localStorage.getItem(nsKey(GOAL_FINALE_KEY)) || ''; }catch(e){}
+    if(shown === todayKey()) return;
+    try{ localStorage.setItem(nsKey(GOAL_FINALE_KEY), todayKey()); }catch(e){}
+    const t0 = Date.now();
+    const go = () => {
+      const busy = (typeof VA !== 'undefined' && VA.open) || document.getElementById('splashScreen') || document.body.classList.contains('kb-open') || document.hidden || document.getElementById('goalFinale');
+      if(busy && Date.now() - t0 < 120000) setTimeout(go, 1000); else goalFinale();
+    };
+    setTimeout(go, 1600);   // juste après les confettis de fin d'exercice
+  }
+  if(!done) gfWasDone = false;
+}
+setTimeout(goalFinaleCheck, 2500);
+setInterval(goalFinaleCheck, 3000);
+/* « 🎉 Tu as terminé tous les défis du jour ! » sur l'accueil : toucher = revoir la fête */
+document.addEventListener('click', (e) => { const t = e.target.closest && e.target.closest('.quests-alldone'); if(t) goalFinale(true); });
 
 /* 📱 Paysage (téléphone à l'horizontale) : à chaque nouvelle question, la carte se cale en haut de l'écran
    pour que la question et les réponses soient visibles sans faire défiler. */
