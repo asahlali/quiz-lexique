@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- 🏷️ Version de l'appli : augmentée automatiquement par publier-site.cmd à chaque publication -->
-<meta name="app-version" content="1.0.5" data-date="2026-10-11">
+<meta name="app-version" content="1.0.6" data-date="2026-10-12">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <title>VocabVISION — Vocabulaire Français ↔ Arabe</title>
 <script>
@@ -4593,7 +4593,7 @@ function extraActiveDays(){
     const sr = loadSheetResults();
     Object.values(sr).forEach(r => { if(r && r.passed && r.lastAt) set.add(todayKey(new Date(r.lastAt))); });
     const br = loadBouquinageRead();
-    Object.values(br).forEach(r => { if(r && r.lastAt) set.add(todayKey(new Date(r.lastAt))); });
+    Object.values(br).forEach(r => { if(r && r.read !== false && r.lastAt) set.add(todayKey(new Date(r.lastAt))); });
   }catch(e){}
   extraActiveDaysCache = set; extraActiveDaysAt = Date.now();
   return set;
@@ -7012,7 +7012,7 @@ function bumpCombo(isCorrect){
   if(isCorrect){
     comboStreak++;
     if(comboStreak > bestCombo) bestCombo = comboStreak;
-    if([3,5,10,15,20,30,50,75,100].includes(comboStreak) || (comboStreak > 100 && comboStreak % 50 === 0)){ mascotMilestone(comboStreak); }
+    if([3,5,10,15,20].includes(comboStreak) || (comboStreak > 20 && comboStreak % 10 === 0)){ mascotMilestone(comboStreak); }
   }
   else { comboStreak = 0; }
   saveComboStreak();
@@ -7949,12 +7949,14 @@ function renderSoundSettings(){
       <button class="mode-chip ${fxOn ? '' : 'active'}" data-fx="0">🙈 Désactivées</button>
       <button class="mode-chip" id="fxDemoBtn">🎬 Voir la démo</button>
     </div>
-    <div style="font-weight:800;color:var(--purple);margin:18px 0 8px;">🎉 Fête du renard à chaque bonne réponse</div>
+    <div style="font-weight:800;color:var(--purple);margin:18px 0 8px;">🎉 Quand le renard sort pour fêter ça</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="mode-chip ${celebFreq === 'series' ? 'active' : ''}" data-celeb="series">🔥 Aux séries : 5, 10, 20… d'affilée</button>
       <button class="mode-chip ${celebFreq === 'all' ? 'active' : ''}" data-celeb="all">À chaque bonne réponse</button>
       <button class="mode-chip ${celebFreq === 'half' ? 'active' : ''}" data-celeb="half">Une sur deux</button>
-      <button class="mode-chip ${celebFreq === 'off' ? 'active' : ''}" data-celeb="off">Seulement les séries</button>
+      <button class="mode-chip ${celebFreq === 'none' ? 'active' : ''}" data-celeb="none">Jamais</button>
       <button class="mode-chip" id="celebDemoBtn">🦊 Voir une fête</button>
+      <button class="mode-chip" id="celebStreakDemoBtn">🔥 Voir les fêtes 5 · 10 · 20</button>
       <button class="mode-chip" id="finaleDemoBtn">🏆 Voir la grande fête de l'objectif du jour</button>
     </div>
     <button class="restart-btn" id="goVoiceSettingsBtn" style="margin-top:20px;">🗣️ Choisir les voix de lecture →</button>
@@ -7969,6 +7971,8 @@ function renderSoundSettings(){
   });
   card.querySelectorAll('[data-celeb]').forEach(b => b.addEventListener('click', () => { celebFreq = b.dataset.celeb; try{ localStorage.setItem(CELEB_FREQ_KEY, celebFreq); }catch(e){} renderSoundSettings(); }));
   document.getElementById('celebDemoBtn').addEventListener('click', () => { if(fxOn) foxCelebrate({ force:true }); });
+  let demoN = 0;
+  document.getElementById('celebStreakDemoBtn').addEventListener('click', (e) => { if(!fxOn) return; const n = [5, 10, 20][demoN++ % 3]; e.currentTarget.textContent = `🔥 Fête des ${n} d'affilée (touche encore : ${[5, 10, 20][demoN % 3]})`; celebStreak(n); });
   document.getElementById('finaleDemoBtn').addEventListener('click', () => goalFinale(true));
   document.getElementById('goVoiceSettingsBtn').addEventListener('click', () => renderVoiceSettings());
   document.getElementById('backFromSoundsBtn').addEventListener('click', renderBlockSelect);
@@ -14737,13 +14741,13 @@ function saveSheetResults(results){
 }
 function markSheetPassed(sheetId, pct){
   const results = loadSheetResults();
-  const prevBest = results[sheetId] ? results[sheetId].pct : 0;
+  const prevBest = (results[sheetId] && results[sheetId].passed) ? (results[sheetId].pct || 0) : 0;
   results[sheetId] = { passed: true, pct: Math.max(pct, prevBest), lastAt: Date.now() };
   saveSheetResults(results);
 }
 function unmarkSheetPassed(sheetId){
   const results = loadSheetResults();
-  delete results[sheetId];
+  results[sheetId] = { passed:false, pct:0, lastAt:Date.now() };   // trace datée : « défaite » aussi sur l'autre appareil
   saveSheetResults(results);
 }
 /* Met à jour le badge « ✅ Validée » et le bouton Valider/Dévalider de la fiche ouverte. */
@@ -14777,12 +14781,12 @@ function markBouquinageRead(idx){
 }
 function unmarkBouquinageRead(idx){
   const read = loadBouquinageRead();
-  delete read[idx];
+  read[idx] = { read:false, lastAt:Date.now() };
   saveBouquinageRead(read);
 }
 function isBouquinageRead(idx){
   const read = loadBouquinageRead();
-  return !!read[idx];
+  return !!(read[idx] && read[idx].read !== false);
 }
 /* 🎯 Compte combien d'éléments d'une catégorie ont été marqués faits AUJOURD'HUI — utilisé par
    les objectifs configurables (1 Bouquinage, 1 Fiche, 1 Atelier, 1 Grammaire avancée…). */
@@ -14792,7 +14796,7 @@ function isTodayTimestamp(ts){
 }
 function countTodayBouquinageRead(){
   const read = loadBouquinageRead();
-  return Object.values(read).filter(v => v && isTodayTimestamp(v.lastAt)).length;
+  return Object.values(read).filter(v => v && v.read !== false && isTodayTimestamp(v.lastAt)).length;
 }
 function countTodayPassedInSection(section){
   const results = loadSheetResults();
@@ -17705,7 +17709,7 @@ function collectLocalData(){
     for(let i = 0; i < localStorage.length; i++){
       const key = localStorage.key(i);
       if(!key || !key.startsWith('lexiqueQuiz::')) continue;
-      if(SYNC_EXCLUDED.includes(key)) continue;
+      if(SYNC_EXCLUDED.includes(key) || key.startsWith('lexiqueQuiz::leaderboard::')) continue;   // le classement des autres n'est pas à renvoyer
       data[key] = localStorage.getItem(key);
     }
   }catch(e){}
@@ -18037,13 +18041,17 @@ async function cloudRequest(bodyObj){
 async function cloudPush(){
   const data = collectLocalData();
   const out = await cloudRequest({ action: 'push', data });
+  const base = syncLoadBase(); Object.keys(data).forEach(k => { base[k] = syncHash(data[k]); }); syncSaveBase();
   try{ localStorage.setItem(LAST_SYNC_KEY, String(Date.now())); }catch(e){}
-  return out.saved || 0;
+  return out.saved || Object.keys(data).length;
 }
 
 async function cloudPull(){
   const out = await cloudRequest({ action: 'pull' });
-  const changed = mergeRemoteData(out.data || {});
+  syncState.merging = true;   // les écritures de la fusion ne relancent pas une synchro
+  let changed = false;
+  try{ changed = mergeRemoteData(out.data || {}); }finally{ syncState.merging = false; }
+  syncState.lastPull = Date.now();
   try{ localStorage.setItem(LAST_SYNC_KEY, String(Date.now())); }catch(e){}
   return changed;
 }
@@ -18053,15 +18061,31 @@ function cloudDeleteKeys(keys){
   cloudRequest({ action: 'delete', keys }).catch(() => {});
 }
 
-/* Fusionne les données distantes dans le stockage local, sans rien perdre. */
+/* Fusionne les données distantes dans le stockage local, sans rien perdre.
+   ☁️ Synchro v2 (1.0.6) : on retient ce que contient le cloud pour chaque donnée (une empreinte, « base ») :
+   • le cloud n'a pas bougé depuis → c'est nous qui avons changé : on garde, on l'enverra ;
+   • le cloud a bougé (l'autre appareil) → on fusionne : fiches faites, lectures, statistiques, records…
+     s'ajoutent (jamais un écrasement de toute la liste) ; un réglage modifié ici et pas encore envoyé n'est pas écrasé. */
 function mergeRemoteData(remote){
   let changed = false;
+  const base = syncLoadBase();
   const mySuffix = '::u:' + getCurrentUserId();
+  const getL = (k) => { try{ return localStorage.getItem(k); }catch(e){ return null; } };
+  const putL = (k, v) => { try{ localStorage.setItem(k, v); }catch(e){} };
+  const BEST_KEYS = [BLITZ_BEST_KEY, 'lexiqueQuiz::entMissionBest', 'lexiqueQuiz::besConjBest', 'lexiqueQuiz::besMissionBest', 'lexiqueQuiz::besGenreBest', 'lexiqueQuiz::redMissionBest'];
   for(const key of Object.keys(remote)){
+    if(key.startsWith('lexiqueQuiz::leaderboard::')) continue;              // le classement n'est pas gardé ici
     if(key.includes('::u:') && !key.endsWith(mySuffix)) continue; // données d'un autre profil : on ignore
+    if(SYNC_EXCLUDED.includes(key)) continue;
     const baseKey = key.endsWith(mySuffix) ? key.slice(0, -mySuffix.length) : key;
     const rv = remote[key].v;
     if(rv == null) continue;
+    const rh = syncHash(rv);
+    const lv = getL(key);
+    if(lv === rv){ base[key] = rh; continue; }                     // déjà pareil des deux côtés
+    if(base[key] === rh) continue;                                 // le cloud n'a pas bougé : la modif est ici, elle partira à l'envoi
+    const dirty = lv != null && base[key] !== undefined && syncHash(lv) !== base[key];   // modifié ici depuis la dernière synchro
+    base[key] = rh;
 
     if(baseKey === DAILY_LOG_KEY){
       const remoteLog = safeParse(rv, {});
@@ -18077,13 +18101,16 @@ function mergeRemoteData(remote){
       let m = false;
       for(const day of Object.keys(remoteStats)){
         const r = remoteStats[day] || {};
-        const l = dailyStats[day] || { seconds:0, passed:0, xp:0, modesPlayed:[] };
+        const l = dailyStats[day] || { seconds:0, passed:0, xp:0, modesPlayed:[], bySubject:{} };
         const mergedModes = Array.from(new Set([...(l.modesPlayed||[]), ...(r.modesPlayed||[])]));
+        const bySubject = Object.assign({}, l.bySubject || {});   // ⏱️ le temps par matière ne se perd plus
+        Object.keys(r.bySubject || {}).forEach(s => { bySubject[s] = Math.max(bySubject[s] || 0, r.bySubject[s] || 0); });
         const merged = {
           seconds: Math.max(l.seconds||0, r.seconds||0),
           passed: Math.max(l.passed||0, r.passed||0),
           xp: Math.max(l.xp||0, r.xp||0),
           modesPlayed: mergedModes,
+          bySubject,
         };
         if(JSON.stringify(merged) !== JSON.stringify(l)){ dailyStats[day] = merged; m = true; }
       }
@@ -18105,19 +18132,57 @@ function mergeRemoteData(remote){
       }
       if(m){ saveWordStats(); changed = true; }
 
+    } else if(baseKey === VERB_STATS_KEY){
+      // 📖 statistiques des verbes : pour chaque verbe, celle qui a le plus d'essais
+      const ro = safeParse(rv, {}), lo = safeParse(lv, {}) || {};
+      let m = false;
+      Object.keys(ro || {}).forEach(v => { const r = ro[v], l = lo[v]; if(r && (!l || ((r.correct||0) + (r.wrong||0)) > ((l.correct||0) + (l.wrong||0)))){ lo[v] = r; m = true; } });
+      if(m){ putL(key, JSON.stringify(lo)); changed = true; }
+
+    } else if(baseKey === SHEET_RESULTS_KEY || baseKey === BOUQUINAGE_READ_KEY){
+      // ✅ fiches faites / 📚 textes lus : fiche par fiche (le plus récent gagne), jamais toute la liste écrasée
+      const flag = baseKey === SHEET_RESULTS_KEY ? 'passed' : 'read';
+      const r = syncMergeStamped(safeParse(lv, {}) || {}, safeParse(rv, {}) || {}, flag);
+      if(r.m){ putL(key, JSON.stringify(r.out)); changed = true; }
+
+    } else if(baseKey === SUBJECT_LIFETIME_KEY || baseKey === BLOCK_WASTED_TIME_KEY){
+      // compteurs : on garde le plus grand
+      const ro = safeParse(rv, {}) || {}, lo = safeParse(lv, {}) || {};
+      let m = false;
+      Object.keys(ro).forEach(k => { const n = +ro[k] || 0; if(n > (+lo[k] || 0)){ lo[k] = n; m = true; } });
+      if(m){ putL(key, JSON.stringify(lo)); changed = true; }
+
+    } else if(BEST_KEYS.includes(baseKey) || baseKey === GOAL_FINALE_KEY){
+      // 🏅 records : le meilleur des deux · 🏆 jour de la grande fête : le plus récent
+      const num = baseKey !== GOAL_FINALE_KEY;
+      const better = num ? (parseInt(rv, 10) || 0) > (parseInt(lv, 10) || 0) : String(rv) > String(lv || '');
+      if(better){ putL(key, rv); changed = true; }
+
+    } else if(baseKey === DAILY_CHALLENGE_KEY){
+      // 📅 défis du jour : jour par jour, le meilleur score
+      const ro = safeParse(rv, {}) || {}, lo = safeParse(lv, {}) || {};
+      let m = false;
+      Object.keys(ro).forEach(d => { const r = ro[d], l = lo[d]; if(r && (!l || (r.correct || 0) > (l.correct || 0))){ lo[d] = r; m = true; } });
+      if(m){ putL(key, JSON.stringify(lo)); changed = true; }
+
+    } else if(baseKey === CONJ_RESUME_KEY || baseKey === BQ_RESUME_KEY){
+      // ⏸️ exercice / 📖 lecture en cours : le plus récent des deux appareils
+      const ro = safeParse(rv, null), lo = safeParse(lv, null);
+      if(ro && (!lo || (ro.at || 0) > (lo.at || 0))){ putL(key, rv); changed = true; }
+
     } else if(baseKey === CUSTOM_WORDS_KEY){
       const remoteWords = safeParse(rv, null);
       if(Array.isArray(remoteWords) && remoteWords.length){
-        const base = loadCustomWords() || WORDS.slice();
-        const seen = new Set(base.map(w => w.fr.toLowerCase()));
+        const base0 = loadCustomWords() || WORDS.slice();
+        const seen = new Set(base0.map(w => w.fr.toLowerCase()));
         let added = 0;
         remoteWords.forEach(w => {
           if(!w || !w.fr) return;
           const k = w.fr.toLowerCase();
-          if(!seen.has(k)){ seen.add(k); base.push(w); added++; }
+          if(!seen.has(k)){ seen.add(k); base0.push(w); added++; }
         });
         if(added > 0 || !loadCustomWords()){
-          WORDS = base;
+          WORDS = base0;
           reconcileWordsOrder(); // ordre déterministe : "Bloc N" reste identique une fois synchronisé
           changed = true;
         }
@@ -18140,12 +18205,11 @@ function mergeRemoteData(remote){
               const rr = rb.results && rb.results[mode];
               const lr = local.results && local.results[mode];
               if(rr && (!lr || (rr.finishedAt||0) > (lr.finishedAt||0))){
+                local.results = local.results || {};
                 local.results[mode] = rr;
                 m = true;
               }
             });
-            // Un renommage/déplacement local plus récent ne doit pas être perdu ;
-            // on ne prend la version distante que si elle est manifestement plus riche (résultats en plus).
           }
         });
         if(m){ saveCustomBlocks(customBlocks); changed = true; }
@@ -18159,21 +18223,13 @@ function mergeRemoteData(remote){
       if(m){ saveFrozenDays(); changed = true; }
 
     } else if(baseKey === QUEST_SETTINGS_KEY){
-      // 🎯 Objectifs : on garde le réglage le PLUS RÉCENT (avant, le cloud écrasait systématiquement
-      // un objectif modifié localement si l'envoi n'avait pas encore eu lieu → retour aux anciennes valeurs).
+      // 🎯 Objectifs : on garde le réglage le PLUS RÉCENT
       const remoteQS = safeParse(rv, null);
-      const localRaw = (()=>{ try{ return localStorage.getItem(key); }catch(e){ return null; } })();
-      const localQS = localRaw ? safeParse(localRaw, null) : null;
-      if(remoteQS && (!localQS || (remoteQS.updatedAt||0) > (localQS.updatedAt||0))){
-        try{ localStorage.setItem(key, rv); }catch(e){}
-        changed = true;
-      } else if(localQS && (!remoteQS || (localQS.updatedAt||0) > (remoteQS.updatedAt||0))){
-        window.__pendingQuestPush = true; // le local est plus récent : on le renverra au cloud
-      }
+      const localQS = lv ? safeParse(lv, null) : null;
+      if(remoteQS && (!localQS || (remoteQS.updatedAt||0) > (localQS.updatedAt||0))){ putL(key, rv); changed = true; }
 
     } else if(baseKey === BLOCK_TITLES_KEY){
-      // Union des titres personnalisés : un renommage fait sur un autre appareil vient compléter
-      // les nôtres, sans jamais écraser un titre déjà présent localement.
+      // Union des titres personnalisés
       const remoteTitles = safeParse(rv, {});
       let m = false;
       Object.keys(remoteTitles).forEach(k => {
@@ -18184,20 +18240,22 @@ function mergeRemoteData(remote){
     } else if(rv.includes('finishedAt')){
       // résultat de bloc : on garde le plus récent
       const remoteRes = safeParse(rv, null);
-      const localRaw = (()=>{ try{ return localStorage.getItem(key); }catch(e){ return null; } })();
-      const localRes = localRaw ? safeParse(localRaw, null) : null;
-      if(remoteRes && (!localRes || (remoteRes.finishedAt||0) > (localRes.finishedAt||0))){
-        try{ localStorage.setItem(key, rv); }catch(e){}
-        changed = true;
-      }
+      const localRes = lv ? safeParse(lv, null) : null;
+      if(remoteRes && (!localRes || (remoteRes.finishedAt||0) > (localRes.finishedAt||0))){ putL(key, rv); changed = true; }
 
+    } else if(dirty){
+      // modifié ici ET sur l'autre appareil : listes et tableaux fusionnés ; un simple réglage → on garde le nôtre (plus récent)
+      const lo = safeParse(lv, undefined), ro = safeParse(rv, undefined);
+      if(lo && ro && typeof lo === 'object' && typeof ro === 'object'){
+        const mv = JSON.stringify(syncUnion(lo, ro));
+        if(mv !== lv){ putL(key, mv); changed = true; }
+      }
     } else {
-      // petites préférences (durée du chrono, affichage...) : le cloud gagne
-      try{
-        if(localStorage.getItem(key) !== rv){ localStorage.setItem(key, rv); changed = true; }
-      }catch(e){}
+      // le cloud a changé (l'autre appareil), pas nous : on prend sa version
+      putL(key, rv); changed = true;
     }
   }
+  syncSaveBase();
 
   if(changed){
     quizTimerSeconds = loadTimerSetting();
@@ -18206,27 +18264,187 @@ function mergeRemoteData(remote){
     dailyStats = loadDailyStats();
     xpTotal = loadXpTotal();
     questSettings = loadQuestSettings();
+    try{
+      verbStats = loadVerbStats(); subjectLifetime = loadSubjectLifetime(); blockWastedTime = loadBlockWastedTime();
+      blitzBest = loadBlitzBest(); dailyChallengeLog = loadDailyChallengeLog(); customVerbs = loadCustomVerbs(); qcmSets = loadQcmSets();
+      streakFreezes = loadStreakFreezes(); soundPrefs = loadSoundPrefs(); customColors = loadCustomColors(); if(typeof applyCustomColors === 'function') applyCustomColors();
+      readingVoiceGender = loadReadingVoice(); readingRate = loadReadingRate(); readingScale = loadReadingScale(); applyReadingScale(); applyVoiceHelp();
+      if(typeof extraActiveDaysCache !== 'undefined') extraActiveDaysCache = null;
+    }catch(e){ console.warn('synchro', e); }
     if(typeof updateAutoSpeakBtn === 'function'){ updateAutoSpeakBtn(); }
     try{ const dv = localStorage.getItem(nsKey('lexiqueQuiz::dictView')); if(dv==='list'||dv==='cards') dictView = dv; }catch(e){}
-    rebuildBlocks();
+    if(!document.body.classList.contains('quiz-active')) rebuildBlocks();
   }
   return changed;
 }
 
 let cloudPushPending = false;
-function cloudAutoPush(){
-  if(!getSyncUrl()) return;
-  if(syncBusy){ cloudPushPending = true; return; } // ⏳ une synchro tourne déjà : on renverra juste après, au lieu de perdre la modif
-  syncBusy = true;
-  cloudPushPending = false;
-  cloudPush()
-    .then(() => { setStatus('☁️ Scores synchronisés.', 'ok'); pushLeaderboardEntry(); })
-    .catch((e) => { setStatus('☁️ Synchro impossible : ' + (e && e.message ? e.message : 'erreur inconnue'), 'err'); console.error('Sync push error:', e); })
-    .finally(() => {
-      syncBusy = false;
-      if(cloudPushPending || window.__pendingQuestPush){ window.__pendingQuestPush = false; setTimeout(cloudAutoPush, 1500); }
-    });
+/* ============ ☁️ SYNCHRO RAPIDE ET FIABLE (1.0.6) ============
+   • Chaque modification (fiche faite, score, réglage…) part toute seule quelques secondes après
+     (avant, certaines — comme « fiche faite » — attendaient la fin d'un exercice ou la prochaine ouverture).
+   • On n'envoie que ce qui a changé (plus rapide pour le Google Sheet), et on récupère d'abord ce que
+     l'autre appareil a envoyé, pour fusionner au lieu d'écraser.
+   • L'appli récupère les nouveautés de l'autre appareil quand on revient dessus, et toutes les minutes
+     quand elle est ouverte (pas pendant un exercice : à la fin). En quittant l'appli, ce qui reste part tout de suite. */
+var SYNC_BASE_KEY = 'vocabVision.syncBase';   // ce que contient le cloud (empreintes) — propre à cet appareil, jamais envoyé
+var syncBase = null;
+var syncState = { running:false, again:false, timer:0, due:0, merging:false, lastPull:0, lastOk:0, errAt:0, lastLb:0 };
+var SYNC_LAZY = /::(conjResume|bouqResume|audioLibPos|inProgressSession|comboStreak|homeSectionsCollapsed|questsCollapsed|filterRowCollapsed|dictView)(::|$)/;
+function syncHash(s){
+  s = String(s == null ? '' : s);
+  let h = 0x811c9dc5;
+  for(let i = 0; i < s.length; i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193); }
+  return (h >>> 0).toString(36) + '.' + s.length.toString(36);
 }
+function syncLoadBase(){ if(syncBase) return syncBase; try{ syncBase = JSON.parse(localStorage.getItem(SYNC_BASE_KEY) || '{}') || {}; }catch(e){ syncBase = {}; } return syncBase; }
+function syncSaveBase(){ try{ localStorage.setItem(SYNC_BASE_KEY, JSON.stringify(syncBase || {})); }catch(e){} }
+function syncTracked(key){ return !!key && key.startsWith('lexiqueQuiz::') && !SYNC_EXCLUDED.includes(key) && !key.startsWith('lexiqueQuiz::leaderboard::'); }
+/* fiches / textes : entrée par entrée, la plus récente gagne (une fiche « défaite » garde sa date : elle ne revient pas) */
+function syncMergeStamped(lo, ro, flag){
+  const out = Object.assign({}, lo); let m = false;
+  Object.keys(ro).forEach(id => {
+    const r = ro[id], l = lo[id];
+    if(!r || typeof r !== 'object') return;
+    if(!l){ out[id] = r; m = true; return; }
+    const rt = r.lastAt || 0, lt = l.lastAt || 0;
+    if(rt > lt){
+      const v = Object.assign({}, r);
+      if(flag === 'passed' && v.passed && l.passed) v.pct = Math.max(v.pct || 0, l.pct || 0);
+      out[id] = v; m = true;
+    } else if(rt === lt && r[flag] && !l[flag]){ out[id] = r; m = true; }
+    else if(flag === 'passed' && rt <= lt && l.passed && r.passed && (r.pct || 0) > (l.pct || 0)){ out[id] = Object.assign({}, l, { pct:r.pct }); m = true; }
+  });
+  return { out, m };
+}
+function syncStampOf(o){ return (o && typeof o === 'object') ? (o.lastAt || o.updatedAt || o.at || o.ts || o.finishedAt || 0) : 0; }
+function syncUnion(lo, ro){
+  if(Array.isArray(lo) && Array.isArray(ro)){
+    const id = (x) => (x && typeof x === 'object') ? String(x.id || x.inf || x.fr || JSON.stringify(x)) : JSON.stringify(x);
+    const seen = new Set(lo.map(id)); const out = lo.slice();
+    ro.forEach(x => { const k = id(x); if(!seen.has(k)){ seen.add(k); out.push(x); } });
+    return out;
+  }
+  if(lo && ro && typeof lo === 'object' && typeof ro === 'object' && !Array.isArray(lo) && !Array.isArray(ro)){
+    const out = Object.assign({}, ro, lo);
+    Object.keys(ro).forEach(k => { if(k in lo && syncStampOf(ro[k]) > syncStampOf(lo[k])) out[k] = ro[k]; });
+    return out;
+  }
+  return lo;
+}
+/* ce qui a changé ici depuis la dernière synchro */
+function syncDirtyData(){
+  const base = syncLoadBase(), all = collectLocalData(), out = {};
+  Object.keys(all).forEach(k => { if(syncHash(all[k]) !== base[k]) out[k] = all[k]; });
+  return out;
+}
+async function syncPushDirty(){
+  const d = syncDirtyData(), keys = Object.keys(d);
+  if(!keys.length) return 0;
+  await cloudRequest({ action:'push', data:d });
+  const base = syncLoadBase();
+  keys.forEach(k => { base[k] = syncHash(d[k]); });
+  syncSaveBase();
+  try{ localStorage.setItem(LAST_SYNC_KEY, String(Date.now())); }catch(e){}
+  return keys.length;
+}
+/* un tour de synchro : récupérer + fusionner (sauf pendant un exercice), puis envoyer ce qui a changé */
+async function syncCycle(opts){
+  opts = opts || {};
+  if(!getSyncUrl()) return { pulled:false, changed:false, sent:0 };
+  if(syncState.running || syncBusy){ syncState.again = true; return null; }
+  syncState.running = true; syncBusy = true;
+  if(opts.indicator) setSyncIndicator(true);
+  let changed = false, sent = 0, pulled = false;
+  try{
+    if(opts.force || !document.body.classList.contains('quiz-active')){ changed = await cloudPull(); pulled = true; }
+    if(changed) syncAfterRemoteChange();   // l'écran se met à jour tout de suite
+    sent = await syncPushDirty();
+    syncState.lastOk = Date.now();
+    if(syncState.errAt){ syncState.errAt = 0; setStatus('☁️ Synchro rétablie.', 'ok'); }
+    if(sent && Date.now() - syncState.lastLb > 5 * 60000){ syncState.lastLb = Date.now(); pushLeaderboardEntry(); }
+  }catch(e){
+    console.error('Sync error:', e);
+    if(opts.loud || !syncState.errAt || Date.now() - syncState.errAt > 10 * 60000) setStatus('☁️ Synchro impossible : ' + (e && e.message ? e.message : 'erreur inconnue'), 'err');
+    syncState.errAt = Date.now();
+    syncSoon(60000);   // on réessaiera
+  }finally{
+    syncState.running = false; syncBusy = false;
+    if(opts.indicator) setSyncIndicator(false);
+    if(syncState.again || cloudPushPending){ syncState.again = false; cloudPushPending = false; syncSoon(1500); }
+  }
+  return { pulled, changed, sent };
+}
+function syncSoon(ms){
+  if(!syncState || !getSyncUrl() || syncState.merging) return;
+  const due = Date.now() + (ms == null ? 4000 : ms);
+  if(syncState.timer && syncState.due <= due) return;   // un tour est déjà prévu plus tôt
+  clearTimeout(syncState.timer);
+  syncState.due = due;
+  syncState.timer = setTimeout(() => { syncState.timer = 0; syncCycle(); }, Math.max(0, due - Date.now()));
+}
+/* compatibilité : partout où l'appli disait « envoie au cloud » */
+function cloudAutoPush(){
+  if(!syncState || syncState.merging) return;
+  syncSoon(document.body.classList.contains('quiz-active') ? 20000 : 2500);
+}
+/* 📲 de nouvelles données sont arrivées de l'autre appareil : on rafraîchit ce qui est à l'écran */
+function syncAfterRemoteChange(){
+  try{ if(autoApplyStreakFreeze()) cloudPushPending = true; }catch(e){}
+  setStatus('☁️ Synchronisé — nouveautés de ton autre appareil récupérées ✓', 'ok');
+  if(document.body.classList.contains('quiz-active')) return;
+  const inp = document.querySelector('#quizCard .ss-input');
+  const typing = inp && (document.activeElement === inp || inp.value);
+  try{
+    if(isHomeScreen && !typing){ renderBlockSelect(); return; }
+    // listes de fiches : les ✅ se mettent à jour sur place
+    document.querySelectorAll('#quizCard [data-sheet], #quizCard [data-ent-sheet]').forEach(b => {
+      const id = b.dataset.sheet || b.dataset.entSheet;
+      if(isSheetPassed(id) && !b.querySelector('.sync-done') && !/✅/.test(b.textContent)){
+        b.insertAdjacentHTML('beforeend', '<span class="sync-done" title="Validée (sur ton autre appareil)" style="font-size:18px;color:#16A34A;">✅</span>');
+        b.style.background = 'rgba(34,197,94,0.12)'; b.style.borderColor = 'rgba(34,197,94,0.4)';
+      }
+    });
+    if(typeof window.__currentSheetDetailId === 'string' && document.getElementById('sheetValidatedTag')) refreshSheetValidateUi(window.__currentSheetDetailId);
+  }catch(e){}
+}
+/* en quittant l'appli (ou en changeant d'onglet) : ce qui n'est pas encore parti part tout de suite */
+function syncFlushNow(){
+  try{
+    const url = getSyncUrl(); if(!url || syncState.merging) return;
+    const d = syncDirtyData(); if(!Object.keys(d).length) return;
+    const body = JSON.stringify({ action:'push', data:d });
+    fetch(url, { method:'POST', headers:{ 'Content-Type':'text/plain;charset=utf-8' }, body, keepalive:body.length < 60000 }).catch(() => {});
+  }catch(e){}
+}
+(function syncWatch(){
+  // chaque écriture d'une donnée de progression programme un envoi (rien à ajouter dans le reste de l'appli)
+  try{
+    const S = Storage.prototype, set0 = S.setItem, rem0 = S.removeItem;
+    const touched = (st, k) => {
+      if(st !== window.localStorage || syncState.merging || !syncTracked(k)) return;
+      if(SYNC_LAZY.test(k)) syncSoon(45000);
+      else syncSoon(document.body.classList.contains('quiz-active') ? 20000 : 4000);
+    };
+    S.setItem = function(k, v){ const r = set0.apply(this, arguments); try{ touched(this, String(k)); }catch(e){} return r; };
+    S.removeItem = function(k){ const r = rem0.apply(this, arguments); try{ touched(this, String(k)); }catch(e){} return r; };
+  }catch(e){}
+  // revenir sur l'appli → on récupère tout de suite ce que l'autre appareil a fait
+  const wake = () => { if(document.visibilityState === 'visible' && Date.now() - syncState.lastPull > 10000) syncSoon(300); };
+  document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'hidden') syncFlushNow(); else wake(); });
+  window.addEventListener('focus', wake);
+  window.addEventListener('online', () => syncSoon(500));
+  window.addEventListener('pagehide', syncFlushNow);
+  // appli ouverte : un coup d'œil toutes les minutes (pas pendant un exercice, pas si on ne l'utilise plus depuis 15 min)
+  setInterval(() => {
+    if(document.visibilityState !== 'visible' || !getSyncUrl() || syncState.running) return;
+    if(document.body.classList.contains('quiz-active')) return;
+    let idle = 0; try{ idle = Date.now() - lastInteractionAt; }catch(e){}
+    if(idle > 15 * 60000) return;
+    if(Date.now() - syncState.lastPull > 60000) syncCycle();
+  }, 15000);
+  // ménage : les anciennes copies locales du classement (elles ralentissaient chaque envoi)
+  setTimeout(() => { try{ const ks = []; for(let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); if(k && k.startsWith('lexiqueQuiz::leaderboard::')) ks.push(k); } ks.forEach(k => localStorage.removeItem(k)); }catch(e){} }, 3000);
+})();
 
 /* ============ 🏆 CLASSEMENT JOURNALIER ============
    Ne nécessite AUCUNE nouvelle fonction côté serveur : on réutilise simplement push/pull avec
@@ -18338,24 +18556,9 @@ function hideSyncOverlay(){
 
 async function autoSyncOnLoad(){
   if(!getSyncUrl()){ return; }
-  if(syncBusy){ return; } // une autre synchro est déjà en cours : on évite les requêtes concurrentes
-  syncBusy = true;
-  setSyncIndicator(true);
-  try{
-    setStatus('☁️ Synchronisation en arrière-plan...', 'ok');
-    const changed = await cloudPull();
-    await cloudPush();
-    setStatus(changed ? '☁️ Synchronisé — nouvelles données récupérées !' : '☁️ Synchronisé.', 'ok');
-    if(changed){ try{ if(autoApplyStreakFreeze()) cloudPushPending = true; }catch(e){} } // données d'un autre appareil : on revérifie la série
-    if(changed && isHomeScreen){ renderBlockSelect(); }
-  }catch(e){
-    setStatus('☁️ Synchro impossible : ' + (e && e.message ? e.message : 'erreur inconnue'), 'err');
-    console.error('Sync error:', e);
-  }finally{
-    syncBusy = false;
-    setSyncIndicator(false);
-    if(cloudPushPending){ setTimeout(cloudAutoPush, 1500); } // une modif faite pendant la synchro part maintenant
-  }
+  setStatus('☁️ Synchronisation en arrière-plan...', 'ok');
+  const r = await syncCycle({ force:true, indicator:true, loud:true });
+  if(r && !syncState.errAt) setStatus(r.changed ? '☁️ Synchronisé — nouvelles données récupérées !' : '☁️ Synchronisé.', 'ok');
 }
 
 /* ---------- 💾 Sauvegarde complète (fichier local, garantie ultime) ---------- */
@@ -18505,6 +18708,7 @@ function renderSyncView(){
     syncBusy = true;
     setSyncMsg('⏳ Envoi en cours...', true);
     try{
+      await cloudPull();   // d'abord ce que l'autre appareil a envoyé : on fusionne, on n'écrase pas
       const n = await cloudPush();
       setSyncMsg(`✓ ${n} élément${n>1?'s':''} envoyé${n>1?'s':''} vers ta feuille Google !`, true);
     }catch(e){ setSyncMsg('✗ Échec de l\'envoi : ' + escapeHtml(e.message), false); }
@@ -18655,6 +18859,8 @@ const COLOR_PRESETS = {
 /* ============ 🆕 NOUVEAUTÉS — pour que tout ce qui a été ajouté reste découvrable ============ */
 const WHATS_NEW_SECTIONS = [
   { icon:'🆕', title:'Nouveautés', items:[
+    { name:'☁️ Synchro téléphone ↔ PC rapide et fiable', desc:"Chaque modification part toute seule en quelques secondes (une fiche faite, un score, un réglage…), seulement ce qui a changé. L'appli récupère ce que tu as fait sur l'autre appareil dès que tu reviens dessus, et toutes les minutes quand elle est ouverte. Les fiches faites se fusionnent : plus jamais une fiche validée qui disparaît d'un appareil." },
+    { name:"🔥 Le renard sort pour les séries", desc:"Par défaut, le renard ne sort plus à chaque réponse : il arrive à 5, 10, 20, 30… bonnes réponses d'affilée, avec 7 nouvelles fêtes (trampoline, feu d'artifice, orbite, magicien, pluie d'or, zigzag, podium) — les plus grandes à partir de 10. Réglable dans 🔊 Sons." },
     { name:'🔎 Chercher dans chaque rubrique', desc:"Une barre « 🔎 Chercher… » en haut de l'accueil et de chaque rubrique (Atelier, Conjugaison, Grammaire, Orthographe, fiches, Bescherelle, Entreprise…) : les fiches par leur titre et leur contenu, les verbes même conjugués (« mangeons » → manger), les exercices de la page, et ce qu'il y a ailleurs dans l'appli. Sans accents, en arabe, ou à la voix 🗣️. Au renard : « cherche la fiche sur le subjonctif »." },
     { name:'🔁 Conjugaison : refaire ses erreurs', desc:"Une erreur ? La question revient à la fin de l'exercice (🔁 à refaire) jusqu'à ce que tu la réussisses. Le score compte ton premier essai, et la fin te dit combien d'erreurs tu as corrigées." },
     { name:'🎤 Conjugaison : redire la phrase', desc:"Double exercice : tu écris le verbe, puis tu redis toute la phrase au micro. Les mots bien dits passent en vert, les autres en orange. Réglage dans 🎯 Entraînement sur mesure (ou « Ne plus demander »)." },
@@ -37181,7 +37387,13 @@ function foxCameo(kind, msg, opts){
    musique, onde de choc, flammes et paillettes, plus un « Bravo ! » en relief.
    Réglable dans 🔊 Sons : à chaque bonne réponse, une sur deux, ou seulement pour les séries. */
 const CELEB_FREQ_KEY = 'lexiqueQuiz::celebFreq';
-let celebFreq = (() => { try{ return localStorage.getItem(CELEB_FREQ_KEY) || 'all'; }catch(e){ return 'all'; } })();
+// 'series' (par défaut) : le renard ne sort qu'aux séries de bonnes réponses (5, 10, 20, 30… d'affilée) · 'all' · 'half' · 'none'
+let celebFreq = (() => { try{
+  let v = localStorage.getItem(CELEB_FREQ_KEY);
+  if(!localStorage.getItem('vocabVision.celebV2')){ localStorage.setItem('vocabVision.celebV2', '1'); if(!v || v === 'all' || v === 'off'){ v = 'series'; localStorage.setItem(CELEB_FREQ_KEY, v); } }
+  return v === 'off' ? 'series' : (v || 'series');
+}catch(e){ return 'series'; } })();
+const celebEach = () => celebFreq === 'all' || celebFreq === 'half';   // le renard sort aussi en dehors des séries ?
 const CELEB_PRAISE = ['Bravo !', 'Super !', 'Excellent !', 'Génial !', 'Top !', 'Parfait !', 'Bien joué !', 'Trop fort !', 'Waouh !', 'Champion·ne !', 'Impeccable !', 'Magnifique !', 'Tu assures !', 'Incroyable !', 'Yes !', 'Bingo !'];
 const celeb = { busy:false, draining:false, last:0, n:0, bag:[], lastRoute:'', skip:false, manual:false, safety:0, route:'' };
 const celCl = (x) => Math.max(0, Math.min(1, x));
@@ -37331,6 +37543,120 @@ const CELEB_ROUTES = {
       },
       events:[[0.12, () => { P.play('clap', { dur:1.3 }); c.sound('whoosh'); }], [0.42, () => { P.fx('sparkles', P.anchor('head')); c.praise({ side:true }); }], [0.85, () => P.fx('sparkles', P.anchor('head'), { count:10 })]] };
   },
+  /* ---------- 🆕 1.0.6 : les fêtes des séries (5, 10, 20… d'affilée) ---------- */
+  // Trampoline : trois rebonds de plus en plus hauts, salto au dernier
+  trampoline(c){
+    const { P, u, vw } = c;
+    const x = c.clampX(c.rnd(-0.3, 0.3) * vw.w), y0 = -vw.h + 1.9 * u, yIn = -vw.h - 2.4 * u;
+    const hs = [1.1, 1.8, 2.7], T = [0.35, 0.95, 1.65, 2.45];
+    return { dur:2.9,
+      frame(t){
+        let y;
+        if(t < T[0]) y = celLerp(yIn, y0, celOut(t / T[0]));
+        else if(t < T[3]){ let i = 0; while(t >= T[i + 1]) i++; const k = (t - T[i]) / (T[i + 1] - T[i]); y = y0 + Math.sin(Math.PI * k) * hs[i] * u; }
+        else y = celLerp(y0, yIn, celIn(celSeg(t, T[3], 2.9)));
+        P.mover.position.set(x, y, 0);
+      },
+      events:[[T[0], () => { c.sound('boing'); P.fx('ring', P.anchor('feet'), { flat:true, size:2.4 }); P.play('cheer', { dur:0.6 }); }],
+        [T[1], () => { c.sound('boing'); P.fx('ring', P.anchor('feet'), { flat:true, size:3.2 }); P.play('cheer', { dur:0.7 }); P.fx('stars', null, { count:6, speed:5 }); }],
+        [T[2], () => { c.sound('boing'); P.fx('ring', P.anchor('feet'), { flat:true, size:4 }); P.play('flip', { dur:0.8, h:1.2 }); }],
+        [T[2] + 0.4, () => { P.fx('confetti'); c.sound('pop'); c.praise(); }]] };
+  },
+  // Feu d'artifice : il décolle en fusée, explose en étoiles là-haut, puis redescend en saluant sous une pluie de confettis
+  feuArtifice(c){
+    const { P, u, vw } = c;
+    const x = c.clampX(c.rnd(-0.25, 0.25) * vw.w), yIn = -vw.h - 2.4 * u, yTop = vw.h - 2.6 * u, yMid = vw.h * 0.02;
+    return { dur:3.0,
+      frame(t){
+        let y;
+        if(t < 0.8){ y = celLerp(yIn, yTop, celInOut(t / 0.8)); P.mover.rotation.y = t * 9; }
+        else if(t < 1.0){ y = yTop; P.mover.rotation.y = 0; }
+        else if(t < 2.5){ y = celLerp(yTop, yMid, celOut(celSeg(t, 1.0, 2.5))) + Math.sin(t * 4) * 0.08 * u; P.mover.rotation.z = Math.sin(t * 3) * 0.12; }
+        else { y = celLerp(yMid, yIn, celIn(celSeg(t, 2.5, 3.0))); P.mover.rotation.z = 0; }
+        P.mover.position.set(x, y, 0);
+      },
+      events:[[0, () => { P.play('rocket', { dur:0.85 }); P.emit('flame', true); c.sound('jet'); }],
+        [0.82, () => { P.emit('flame', false); c.sound('boom'); P.fx('ring', null, { size:6 }); P.fx('cannon', null, { count:40 }); P.fx('stars', null, { count:14, speed:8 }); }],
+        [1.0, () => { P.play('wave', { dur:1.4 }); P.fx('rain', null, { count:60 }); c.praise({ below:true }); }],
+        [1.9, () => { P.play('clap', { dur:0.6 }); P.fx('sparkles'); }]] };
+  },
+  // Orbite : il fait le tour de l'écran en traînée d'étoiles, les bras en l'air
+  orbite(c){
+    const { P, u, vw, s } = c;
+    const rx = vw.w * 0.6, ry = vw.h * 0.4, cy = vw.h * 0.02;
+    const pos = (a) => c.v(s * Math.cos(a) * rx, cy + Math.sin(a) * ry);
+    const a0 = Math.PI, a1 = Math.PI + Math.PI * 2.25, xOut = s * (vw.w + 2.8 * u);
+    return { dur:2.7,
+      frame(t){
+        if(t < 0.35){ const p = pos(a0); P.mover.position.set(celLerp(-xOut, p.x, celOut(t / 0.35)), p.y, 0); return; }
+        if(t < 2.3){ const p = pos(celLerp(a0, a1, celInOut(celSeg(t, 0.35, 2.3)))); P.mover.position.copy(p); P.mover.rotation.y = Math.sin(t * 5) * 0.5; return; }
+        const pe = pos(a1); P.mover.position.set(celLerp(pe.x, xOut, celIn(celSeg(t, 2.3, 2.7))), pe.y, 0);
+      },
+      events:[[0, () => { P.play('cheer', { dur:2.4 }); P.emit('trail', true); c.sound('whoosh'); }],
+        [0.9, () => { P.fx('stars', null, { count:8, speed:5 }); c.praise({ pt:{ x:window.innerWidth / 2, y:window.innerHeight / 2 } }); }],
+        [1.6, () => { P.fx('sparkles'); c.sound('whoosh'); }], [2.6, () => P.emit('trail', false)]] };
+  },
+  // Magicien : il apparaît d'un coup dans un nuage d'étincelles, clin d'œil, applaudit… et disparaît
+  magicien(c){
+    const { P, u, vw } = c;
+    const x = c.clampX(c.rnd(-0.35, 0.35) * vw.w), y = c.rnd(-0.3, 0.05) * vw.h;
+    return { dur:2.4,
+      frame(t){
+        const k = t < 0.45 ? celBack(t / 0.45) : (t < 2.0 ? 1 : 1 - celIn(celSeg(t, 2.0, 2.35)));
+        P.mover.scale.setScalar(c.u * Math.max(0.001, k));
+        P.mover.rotation.y = t < 0.45 ? (1 - t / 0.45) * Math.PI * 4 : (t > 2.0 ? (t - 2.0) * 22 : 0);
+        P.mover.position.set(x, y + Math.sin(t * 3) * 0.06 * u, 0);
+      },
+      events:[[0, () => { P.fx('ring', null, { size:4 }); P.fx('sparkles'); c.sound('pop'); }],
+        [0.5, () => { P.play('wink', { dur:0.9 }); P.fx('stars', null, { count:8, speed:4 }); c.praise(); }],
+        [1.3, () => { P.play('clap', { dur:0.7 }); P.fx('hearts', P.anchor('head'), { count:4 }); }],
+        [2.0, () => { P.fx('sparkles'); P.fx('ring', null, { size:3 }); c.sound('whoosh'); }]] };
+  },
+  // Pluie d'or : il descend du ciel en se balançant, les pièces pleuvent, il applaudit en bas
+  pluieOr(c){
+    const { P, u, vw } = c;
+    const x0 = c.clampX(c.rnd(-0.4, 0.4) * vw.w), yHi = vw.h + 2.4 * u, yLow = -vw.h + 2.0 * u, yIn = -vw.h - 2.4 * u;
+    return { dur:2.8,
+      frame(t){
+        let y, x = x0;
+        if(t < 2.25){ const k = celSeg(t, 0, 2.0); y = celLerp(yHi, yLow, celOut(k)); x = x0 + Math.sin(t * 3.2) * 0.6 * u * (1 - k); P.mover.rotation.z = Math.sin(t * 3.2) * 0.25 * (1 - k); }
+        else { y = celLerp(yLow, yIn, celIn(celSeg(t, 2.25, 2.8))); P.mover.rotation.z = 0; }
+        P.mover.position.set(x, y, 0);
+      },
+      events:[[0, () => { P.play('cheer', { dur:1.9 }); P.fx('coins', P.anchor('top'), { count:16, dir:-Math.PI / 2, spread:2.8, speed:3, g:8, life:2 }); c.sound('coin'); }],
+        [0.7, () => { P.fx('rain', null, { count:50 }); c.sound('coin'); }],
+        [1.6, () => { P.play('clap', { dur:0.6 }); c.praise({ pt:{ x:window.innerWidth / 2, y:window.innerHeight * 0.3 } }); P.fx('sparkles'); }]] };
+  },
+  // Zigzag : quatre bonds éclair d'un bout à l'autre de l'écran, salto au milieu
+  zigzag(c){
+    const { P, u, vw, s } = c;
+    const pts = [c.v(-s * (vw.w + 2 * u), -vw.h * 0.55), c.v(-s * vw.w * 0.45, -vw.h * 0.15), c.v(s * vw.w * 0.4, -vw.h * 0.45), c.v(-s * vw.w * 0.2, vw.h * 0.2), c.v(s * (vw.w + 2 * u), vw.h * 0.45)];
+    const d = 2.4 / (pts.length - 1);
+    return { dur:2.4,
+      frame(t){
+        const i = Math.min(pts.length - 2, Math.floor(t / d)), k = celInOut(celSeg(t, i * d, (i + 1) * d));
+        P.mover.position.set(celLerp(pts[i].x, pts[i + 1].x, k), celLerp(pts[i].y, pts[i + 1].y, k) + Math.sin(Math.PI * k) * 0.6 * u, 0);
+        P.mover.rotation.y = (pts[i + 1].x > pts[i].x ? 1 : -1) * 0.5;
+      },
+      events:[[0, () => P.emit('trail', true)], [2.3, () => P.emit('trail', false)]].concat(pts.slice(1, -1).map((p, j) => [(j + 1) * d, () => {
+        c.sound('whoosh'); P.play(j === 1 ? 'flip' : 'cheer', { dur:0.55, h:0.8 }); P.fx('stars', null, { count:5, speed:4 }); if(j === 1) c.praise();
+      }])) };
+  },
+  // Podium : il monte comme un champion, applaudit sous les cœurs, danse, confettis
+  podium(c){
+    const { P, u, vw } = c;
+    const x = c.clampX(c.rnd(-0.2, 0.2) * vw.w), yIn = -vw.h - 2.4 * u, yUp = -vw.h + 2.2 * u;
+    return { dur:2.9,
+      frame(t){
+        const k = t < 0.5 ? celOut(t / 0.5) : (t < 2.5 ? 1 : 1 - celIn(celSeg(t, 2.5, 2.9)));
+        P.mover.position.set(x, celLerp(yIn, yUp, k), 0);
+        P.mover.rotation.y = t < 0.5 ? (1 - k) * Math.PI * 2 : 0;
+      },
+      events:[[0.45, () => { P.play('clap', { dur:0.8 }); P.fx('ring', P.anchor('feet'), { flat:true, size:3.2 }); c.sound('pop'); }],
+        [0.6, () => { P.fx('hearts', P.anchor('head'), { count:6 }); P.fx('stars', null, { count:10, dir:Math.PI / 2, spread:1.6, speed:7 }); c.praise(); }],
+        [1.3, () => { P.play('dance', { dur:1.2 }); P.fx('notes', P.anchor('head'), { count:4 }); }],
+        [2.2, () => P.fx('confetti')]] };
+  },
 };
 
 function celebCtx(P){
@@ -37352,7 +37678,8 @@ function celebCtx(P){
 function celebPraise(P, c, o){
   if(!fxOn) return;
   o = o || {};
-  const word = o.text || pick(CELEB_PRAISE);
+  const word = o.text || celeb.word || pick(CELEB_PRAISE);
+  celeb.word = '';
   const streak = (typeof comboStreak === 'number' && comboStreak >= 2) ? comboStreak : 0;
   const el = document.createElement('div');
   el.className = 'celeb-praise celeb-' + pick(['flip', 'zoom', 'swing', 'spin']);
@@ -37404,7 +37731,7 @@ function foxCelebrate(opts){
   if(!fxOn || document.hidden) return false;
   if(opts.route !== 'finale' && document.getElementById('goalFinale')) return false;   // 🏆 pendant la grande fête : rien d'autre
   if(!opts.force){
-    if(celebFreq === 'off') return false;
+    if(!celebEach()) return false;
     if(celebFreq === 'half' && (celeb.n++ % 2)) return false;
   }
   if(celeb.busy || cameoBusy) return false;
@@ -37456,6 +37783,24 @@ function foxCelebrate(opts){
   clearTimeout(celeb.safety);
   if(!celeb.manual) celeb.safety = setTimeout(celebStop, route.dur * 1000 + 3000);   // filet de sécurité
   return true;
+}
+
+/* 🔥 Les séries : le renard sort à 5, 10, 20, 30… bonnes réponses d'affilée, avec une fête différente à chaque fois
+   (les plus grandes — feu d'artifice, trampoline, orbite, magicien, pluie d'or, podium… — à partir de 10). */
+const CELEB_BIG = ['feuArtifice', 'trampoline', 'orbite', 'magicien', 'pluieOr', 'podium', 'zigzag', 'fusee', 'jackpot', 'heros'];
+function celebFoxAt(n){ return n === 5 || n === 10 || n === 20 || (n > 20 && n % 10 === 0); }
+function celebStreak(n, tries){
+  if(!fxOn || celebFreq === 'none') return false;
+  if((celeb.busy || cameoBusy) && (tries || 0) < 5){ setTimeout(() => celebStreak(n, (tries || 0) + 1), 450); return true; }   // il finit ce qu'il fait, puis il arrive
+  let route = '';
+  if(n >= 10){
+    if(!celeb.bigBag || !celeb.bigBag.length){ celeb.bigBag = CELEB_BIG.filter(r => CELEB_ROUTES[r]).sort(() => Math.random() - 0.5); if(celeb.bigBag[0] === celeb.lastRoute) celeb.bigBag.push(celeb.bigBag.shift()); }
+    route = celeb.bigBag.shift();
+  }
+  celeb.word = n >= 20 ? pick(['👑 Légendaire !', '🏆 Imbattable !', '🚀 Phénoménal !']) : n >= 10 ? pick(['⚡ Électrique !', '🌟 Incroyable !', '💎 Brillant !']) : pick(['🔥 En feu !', '💪 Bravo !', '✨ Génial !']);
+  const ok = foxCelebrate({ force:true, route });
+  if(!ok) celeb.word = '';
+  return ok;
 }
 
 /* ============ 🦊 PARLE AVEC ABDEL & SOUKY : l'assistant vocal ============
@@ -39479,7 +39824,7 @@ function conjSaveResume(st, idx){
   }catch(e){}
 }
 function conjResumeIdx(st){ return (st && st.answeredIdx === st.idx) ? st.idx + 1 : (st ? st.idx : 0); }
-function conjClearResume(){ try{ localStorage.removeItem(nsKey(CONJ_RESUME_KEY)); }catch(e){} }
+function conjClearResume(){ try{ localStorage.setItem(nsKey(CONJ_RESUME_KEY), JSON.stringify({ cleared:true, at:Date.now() })); }catch(e){} }
 function conjLoadResume(){
   try{
     const r = JSON.parse(localStorage.getItem(nsKey(CONJ_RESUME_KEY)) || 'null');
@@ -39721,23 +40066,25 @@ function vsConjRepeat(st, ch, myIdx, full, form, advance){
   const okFn = playCorrectSound, koFn = playWrongSound;
   playCorrectSound = function(){
     okFn.apply(this, arguments); window.__answerFx = { ok:true, t:Date.now() }; fxHideKeyboard();
-    if(fxOn){ fxSparkleAtPointer(); if(!celeb.skip) setTimeout(() => foxCelebrate(), 90); }   // la série (3, 5, 10…) garde sa grande fête
+    if(fxOn){ fxSparkleAtPointer(); if(!celeb.skip && celebEach()) setTimeout(() => foxCelebrate(), 90); }   // par défaut, le renard ne sort qu'aux séries
   };
   playWrongSound = function(){
     koFn.apply(this, arguments); window.__answerFx = { ok:false, t:Date.now() }; fxHideKeyboard();
-    if(fxOn){ fxShake(380); foxCameo('oops', pick(CAMEO_OOPS), { minGap:7000 }); }
+    if(fxOn){ fxShake(380); if(celebEach()) foxCameo('oops', pick(CAMEO_OOPS), { minGap:7000 }); }
   };
   const msFn = mascotMilestone;
   mascotMilestone = function(n){
     msFn.apply(this, arguments);
     if(!fxOn) return;
-    if(n >= 15 && n % 5 === 0){ fxStorm(true, 2400); setTimeout(() => fxExplosion(null, null, true), 500); setTimeout(() => fxFireworks(4), 1100); fxBigText(n >= 30 ? '👑 LÉGENDAIRE !' : `🚀 ${n} D'AFFILÉE !`, '#FFD23F'); foxCameo('party', `${n} sans faute ! Tu es une légende 👑`, { force:true, edge:'top' }); }
-    else if(n === 10){ fxStorm(true, 2000); setTimeout(() => fxExplosion(null, null, true), 450); fxBigText('⚡ ÉLECTRIQUE !', '#FFD23F'); foxCameo('party', '10 d\'affilée ! Tu es électrique ⚡', { force:true }); }
-    else if(n === 5){ fxFireworks(3); fxBigText('🎆 x5 COMBO !', '#FF5DA2'); foxCameo('party', pick(CAMEO_CHEER), { force:true }); }
-    else if(n === 3){ fxBurst(fx.w / 2, fx.h, { count:50, angle:-Math.PI / 2, spread:0.6, speed:1100, speedMin:500, gravity:900, colors:['#FFD23F', '#FF8A1F', '#FF4D5E'], shape:'spark', size:6 }); fxBigText('🔥 EN FEU !', '#FF8A1F'); foxCameo('cheer', pick(CAMEO_CHEER), { force:true, edge:pick(['left', 'right', 'bl', 'br']) }); }
+    if(n >= 20){ fxStorm(true, 2400); setTimeout(() => fxExplosion(null, null, true), 500); setTimeout(() => fxFireworks(4), 1100); fxBigText(n >= 30 ? '👑 LÉGENDAIRE !' : `🚀 ${n} D'AFFILÉE !`, '#FFD23F'); }
+    else if(n === 15){ fxStorm(true, 2000); fxBigText("🚀 15 D'AFFILÉE !", '#FFD23F'); }
+    else if(n === 10){ fxStorm(true, 2000); setTimeout(() => fxExplosion(null, null, true), 450); fxBigText('⚡ ÉLECTRIQUE !', '#FFD23F'); }
+    else if(n === 5){ fxFireworks(3); fxBigText('🎆 x5 COMBO !', '#FF5DA2'); }
+    else if(n === 3){ fxBurst(fx.w / 2, fx.h, { count:50, angle:-Math.PI / 2, spread:0.6, speed:1100, speedMin:500, gravity:900, colors:['#FFD23F', '#FF8A1F', '#FF4D5E'], shape:'spark', size:6 }); fxBigText('🔥 EN FEU !', '#FF8A1F'); }
+    if(celebFoxAt(n)) celebStreak(n);   // 🦊 le renard sort : 5, 10, 20, 30… d'affilée
   };
   const gcFn = launchGravityConfetti;
-  launchGravityConfetti = function(){ gcFn.apply(this, arguments); if(fxOn){ fxFireworks(5); setTimeout(() => foxCameo('party', 'Session réussie ! 🎉 Je suis fier de toi', { force:true, edge:'bottom' }), 400); } };
+  launchGravityConfetti = function(){ gcFn.apply(this, arguments); if(fxOn){ fxFireworks(5); if(celebEach()) setTimeout(() => foxCameo('party', 'Session réussie ! 🎉 Je suis fier de toi', { force:true, edge:'bottom' }), 400); } };
 })();
 // De temps en temps, le renard passe la tête pour motiver (jamais pendant une correction)
 setInterval(() => {
@@ -39746,10 +40093,10 @@ setInterval(() => {
   const since = Date.now() - cameoLast;
   const inQuiz = document.body.classList.contains('quiz-active');
   const recentAnswer = Date.now() - (window.__answerFx.t || 0) < 3000;
-  if(inQuiz && !recentAnswer && since > rnd(70000, 130000)) foxCameo('wave', pick(CAMEO_MOTIV));
-  else if(isHomeScreen && since > 180000) foxCameo('wave', pick(CAMEO_HOME), { edge:pick(['left', 'right', 'bl', 'br']) });
+  if(inQuiz && !recentAnswer && since > rnd(70000, 130000) && celebEach()) foxCameo('wave', pick(CAMEO_MOTIV));   // par défaut, pendant un exercice il ne sort qu'aux séries
+  else if(isHomeScreen && !inQuiz && since > 180000) foxCameo('wave', pick(CAMEO_HOME), { edge:pick(['left', 'right', 'bl', 'br']) });
 }, 12000);
-setTimeout(() => { if(fxOn && isHomeScreen) foxCameo('wave', pick(CAMEO_HOME), { edge:pick(['bl', 'br', 'right']) }); }, 6500);
+setTimeout(() => { if(fxOn && isHomeScreen && !document.body.classList.contains('quiz-active')) foxCameo('wave', pick(CAMEO_HOME), { edge:pick(['bl', 'br', 'right']) }); }, 6500);
 
 /* ---------- ✅ Correction : ne jamais passer tout seul après une erreur ---------- */
 function fxCleanSpeech(text){
