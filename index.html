@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- 🏷️ Version de l'appli : augmentée automatiquement par publier-site.cmd à chaque publication -->
-<meta name="app-version" content="1.0.13" data-date="2026-10-14">
+<meta name="app-version" content="1.0.15" data-date="2026-10-15">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <title>VocabVISION — Vocabulaire Français ↔ Arabe</title>
 <script>
@@ -1750,6 +1750,16 @@
   .bq-text:has(.dx-m){ line-height:2.15; }
   #bqDxRules{ margin-top:12px; }
   .rep-show[hidden]{ display:none; }
+  /* 🌙 1.0.15 : prendre de l'avance sur demain */
+  .adv-offer{ margin:0 0 10px; text-align:center; }
+  .adv-go{ border:0; border-radius:14px; padding:10px 16px; font:800 14.5px 'Nunito','Inter',sans-serif; color:#fff; background:linear-gradient(135deg,#312E81,#7C3AED); box-shadow:0 3px 0 #1E1B4B; cursor:pointer; }
+  .adv-go:active{ transform:translateY(2px); box-shadow:0 1px 0 #1E1B4B; }
+  .adv-hint{ font-size:12.5px; color:var(--text-dim); margin-top:6px; line-height:1.4; }
+  .adv-on-box{ background:linear-gradient(135deg,rgba(49,46,129,.12),rgba(124,58,237,.12)); border:1px solid rgba(124,58,237,.35); color:var(--text); border-radius:12px; padding:10px 12px; font-size:13px; line-height:1.45; margin:0 0 10px; text-align:left; }
+  .adv-stop{ display:block; margin:8px auto 0; border:1px solid var(--border); background:var(--surface); color:var(--purple); border-radius:999px; padding:5px 12px; font:800 12.5px 'Nunito','Inter',sans-serif; cursor:pointer; }
+  .adv-banked{ background:rgba(124,58,237,.08); border:1px dashed rgba(124,58,237,.4); border-radius:12px; padding:8px 12px; font-size:12.5px; font-weight:700; color:var(--text); margin:0 0 10px; }
+  body.adv-on #questPeekFab{ background:linear-gradient(135deg,#312E81,#7C3AED) !important; color:#fff; }
+  body.adv-on #questPeekFab::after{ content:'🌙'; position:absolute; top:-8px; left:-6px; font-size:16px; }
   .rep-long{ font-size:11.5px; font-weight:800; color:#C2410C; background:rgba(249,115,22,.16); padding:2px 8px; border-radius:999px; }
   .repeat-sentence.hidden{ letter-spacing:.3em;color:var(--purple);font-size:26px; }
   .rw{ transition:background .2s,color .2s;border-radius:6px;padding:0 2px; }
@@ -4717,7 +4727,7 @@ let dailyLog = loadDailyLog();
 
 /* Enregistre un bloc terminé pour aujourd'hui. Renvoie true si l'objectif du jour vient d'être atteint. */
 function recordDailyActivity(){
-  const k = todayKey();
+  const k = questDayKey();   // 🌙 1.0.15 : en mode avance, ça compte pour demain
   const before = dailyLog[k] || 0;
   dailyLog[k] = before + 1;
   saveDailyLog();
@@ -4745,9 +4755,9 @@ function extraActiveDays(){
     const ds = (typeof dailyStats !== 'undefined' && dailyStats) || {};
     Object.keys(ds).forEach(k => { const d = ds[k] || {}; if((d.seconds || 0) >= 60 || (d.passed || 0) > 0 || (d.xp || 0) > 0) set.add(k); });
     const sr = loadSheetResults();
-    Object.values(sr).forEach(r => { if(r && r.passed && r.lastAt) set.add(todayKey(new Date(r.lastAt))); });
+    Object.values(sr).forEach(r => { if(r && r.passed && r.lastAt) set.add(advDayOf(r.lastAt)); });
     const br = loadBouquinageRead();
-    Object.values(br).forEach(r => { if(r && r.read !== false && r.lastAt) set.add(todayKey(new Date(r.lastAt))); });
+    Object.values(br).forEach(r => { if(r && r.read !== false && r.lastAt) set.add(advDayOf(r.lastAt)); });
   }catch(e){}
   extraActiveDaysCache = set; extraActiveDaysAt = Date.now();
   return set;
@@ -4895,7 +4905,7 @@ function saveXpTotal(){ try{ localStorage.setItem(nsKey(XP_TOTAL_KEY), String(xp
 let xpTotal = loadXpTotal();
 
 function todayStats(){
-  const k = todayKey();
+  const k = questDayKey();   // 🌙 en mode avance : les stats de demain
   if(!dailyStats[k]) dailyStats[k] = { seconds:0, passed:0, xp:0, modesPlayed:[], bySubject:{} };
   if(!dailyStats[k].modesPlayed) dailyStats[k].modesPlayed = [];
   if(!dailyStats[k].bySubject) dailyStats[k].bySubject = {};
@@ -4936,8 +4946,9 @@ function recordDailyStats(seconds, passed90, xpEarned, mode){
 
 /* Les défis du jour, à la Duolingo — objectifs personnalisables via renderQuestSettings(). */
 function getDailyQuests(){
-  const lessons = dailyLog[todayKey()] || 0;
-  const s = dailyStats[todayKey()] || { seconds:0, passed:0, xp:0, modesPlayed:[], bySubject:{} };
+  const qk = questDayKey();   // 🌙 aujourd'hui, ou demain en mode avance
+  const lessons = dailyLog[qk] || 0;
+  const s = dailyStats[qk] || { seconds:0, passed:0, xp:0, modesPlayed:[], bySubject:{} };
   const timeGoalSec = questSettings.timeGoalMin * 60;
   const quests = [
     { key:'lessons', icon:'📗', label:`Termine ${questSettings.lessonGoal} exercice${questSettings.lessonGoal>1?'s':''} (tous modes)`, cur:Math.min(lessons, questSettings.lessonGoal), goal:questSettings.lessonGoal },
@@ -14981,7 +14992,7 @@ function isBouquinageRead(idx){
    les objectifs configurables (1 Bouquinage, 1 Fiche, 1 Atelier, 1 Grammaire avancée…). */
 function isTodayTimestamp(ts){
   if(!ts) return false;
-  return todayKey(new Date(ts)) === todayKey();
+  return advDayOf(ts) === questDayKey();   // 🌙 une fiche faite hier soir en mode avance compte pour aujourd'hui
 }
 function countTodayBouquinageRead(){
   const read = loadBouquinageRead();
@@ -15273,7 +15284,7 @@ function renderBlockSelect(){
 
     <div class="quests-card">
       <div class="quests-head" id="questsHead" style="cursor:pointer;">
-        <span class="q-head-l"><span class="q-ring" style="--p:${questPct};"><span>${questsDone}/${quests.length}</span></span><span>Défis du jour</span></span>
+        <span class="q-head-l"><span class="q-ring" style="--p:${questPct};"><span>${questsDone}/${quests.length}</span></span><span>${advActive() ? '🌙 Défis de demain' : 'Défis du jour'}</span></span>
         <span style="display:flex;align-items:center;gap:8px;">
           <span class="quests-xp">⭐ ${xpTotal} pts</span>
           <button id="questSettingsBtn" title="Personnaliser mes objectifs" style="border:1px solid var(--border);background:var(--surface-sunken);color:var(--purple);width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:13px;">⚙️</button>
@@ -15282,7 +15293,8 @@ function renderBlockSelect(){
       </div>
       <div id="questsBody" style="display:${questsCollapsed ? 'none' : 'block'};">
       ${xpMultiplier() > 1 ? `<div class="mult-banner">⚡ Bonus points <b>×${xpMultiplier()}</b> actif — série de ${curStreak} jours ! Joue pour en profiter.</div>` : ''}
-      ${allQuestsDone ? `<div class="quests-alldone" role="button" tabindex="0" title="Revoir la grande fête">🎉 Tu as terminé tous les défis du jour ! <u>Revoir la fête 🏆</u></div>` : ''}
+      ${allQuestsDone ? `<div class="quests-alldone" role="button" tabindex="0" title="Revoir la grande fête">${advActive() ? '🎉 Les défis de demain sont déjà faits ! Demain, tu peux souffler.' : '🎉 Tu as terminé tous les défis du jour !'} <u>Revoir la fête 🏆</u></div>` : ''}
+      ${advPanelHtml(allQuestsDone)}
       ${quests.map(q => {
         const done = q.cur >= q.goal;
         const pctq = Math.round((q.cur / q.goal) * 100);
@@ -19088,6 +19100,8 @@ const COLOR_PRESETS = {
 /* ============ 🆕 NOUVEAUTÉS — pour que tout ce qui a été ajouté reste découvrable ============ */
 const WHATS_NEW_SECTIONS = [
   { icon:'🆕', title:'Nouveautés', items:[
+    { name:"🌙 Prendre de l'avance sur demain", desc:"Tes défis du jour sont faits et tu as du temps ce soir ? Touche « 🌙 Prendre de l'avance sur demain » (dans les défis) : ce que tu fais ensuite compte pour les défis de demain. Pas fini ce soir ? Tu continues demain, là où tu en étais. Fini ? Demain est déjà validé, ta série continue même si tu n'as pas le temps. À minuit, le mode s'arrête tout seul." },
+    { name:'🎙️ 12 fiches de prise de parole', desc:"Dans Art oratoire : les pauses et le silence, la voix (débit, volume, intonation), les mots de remplissage, 6 plans pour structurer ses idées (PRI, PREP, règle de 3…), être clair, gérer le trac, le langage du corps, ethos-pathos-logos, gérer un désaccord, répondre calmement aux attaques, les phrases qui ouvrent la discussion, et les atouts des personnes discrètes. Les fiches à phrases se travaillent au micro 🎤 et en quiz." },
     { name:'🃏 Mots en ordre : 3 jokers par phrase', desc:"Bloqué ? Le joker pose un mot au bon endroit (en doré, il ne bouge plus) — 3 par phrase, le dernier mot reste à toi. Tu gagnes ⭐⭐⭐ : une étoile de moins par joker ou par essai raté. Après un essai raté, l'appli te dit combien de mots sont déjà à la bonne place. Tuiles colorées, petit « pop » quand un mot se pose, et une vague quand la phrase est juste (aussi en Dictée)." },
     { name:"✍️ Phrases d'exemple en bon français", desc:"Pour les verbes et les expressions, la phrase d'exemple est maintenant conjuguée : « Ce mot dérive du latin » (et plus « Ce mot dériver du latin »), « Ma grand-mère a la main verte ». Partout où la phrase entière est dite ou affichée : Répétition, Mots en ordre, Dictée, Prononciation, la radio… Pour tes mots à toi, le verbe est conjugué automatiquement quand c'est sûr." },
     { name:'🫁 Liaisons & pauses : aussi en Bouquinage et en Shadow', desc:"Dans Bouquinage, le texte montre les liaisons, les pauses et où respirer (et la voix marque les pauses). Dans le jeu Shadow, la phrase à écouter porte les mêmes marques, et la case « 👁 Voir la phrase » permet d'afficher la phrase cachée pour la lire au micro." },
@@ -29780,6 +29794,227 @@ const PRACTICAL_SHEETS = [
     ],
     note: "S'enregistrer en lisant, puis se réécouter, est l'un des meilleurs moyens de progresser en prononciation.",
   },
+  // ============ 🎙️ PRISE DE PAROLE (1.0.14) — pauses, voix, structure, trac, corps, désaccords, phrases utiles ============
+  {
+    id: 'pp-pauses-silence',
+    section: 'oratoire',
+    category: 'Prise de parole',
+    icon: '⏸️',
+    title: 'Les pauses et le silence : vos meilleurs alliés',
+    intro: "Un silence bien placé ne trahit pas un trou de mémoire : il montre que vous maîtrisez ce que vous dites.",
+    type: 'rule',
+    blocks: [
+      { heading: 'Une pause avant de répondre', text: "Avant de répondre à une question, laissez passer une ou deux secondes. Vous évitez de vous précipiter, vous choisissez vos mots, et vous paraissez plus sûr de vous.", examples: ["Bonne question. Je vois deux raisons.", "Je comprends. Laissez-moi vous expliquer ce qui s'est passé."] },
+      { heading: 'Une pause après une idée forte', text: "Quand vous venez de dire quelque chose d'important, arrêtez-vous. Ce court silence laisse à votre auditoire le temps de comprendre et de retenir.", examples: ["Nous avons réduit les délais de moitié. Voici comment."] },
+      { heading: 'Ne comblez pas le silence', text: "Le réflexe de remplir chaque blanc (« euh », « donc », « voilà ») affaiblit le message. Le silence, lui, donne du poids à ce qui précède et montre votre calme." },
+      { heading: 'La bonne longueur', text: "Trop courte, la pause passe inaperçue ; trop longue, elle casse le rythme. Visez une à trois secondes, et profitez-en pour respirer." },
+    ],
+    note: "Dans l'appli, les marques ‖ et | (🫁 Liaisons & pauses) montrent où placer ces pauses dans une phrase. Entraîne-toi avec « Prépare ton texte ».",
+  },
+  {
+    id: 'pp-voix-debit',
+    section: 'oratoire',
+    category: 'Prise de parole',
+    icon: '🎚️',
+    title: 'Votre voix : débit, volume et intonation',
+    intro: "Une voix monotone endort l'auditoire, même avec un excellent contenu. Quelques réglages simples suffisent à la rendre vivante.",
+    type: 'rule',
+    blocks: [
+      { heading: 'Le débit', text: "Ralentissez sur les points clés, accélérez légèrement sur les détails. Ce contraste guide l'attention de vos auditeurs vers l'essentiel." },
+      { heading: 'Le volume', text: "Parlez un peu plus fort que d'habitude, surtout si votre voix est faible : on doit vous entendre sans effort, même au fond de la salle." },
+      { heading: "L'intonation", text: "Variez la mélodie : la voix monte pour annoncer une suite, et descend pour conclure. Une phrase qui finit vers le haut sonne comme une question… ou comme un doute.", examples: ["Demain, nous lançons le projet. (la voix descend : c'est décidé)"] },
+      { heading: 'Baisser la voix pour appuyer', text: "Pour souligner une idée, baissez légèrement le ton et ralentissez. Gardez de l'énergie jusqu'au dernier mot : avaler la fin d'une phrase lui enlève sa force.", examples: ["Et c'est là que tout a changé."] },
+      { heading: 'Rester calme sous tension', text: "Dans une discussion tendue, une voix lente et posée apaise et inspire le respect. Hausser le ton fait exactement l'inverse." },
+    ],
+    note: "Exercice : lis la même phrase trois fois — vite, lentement, puis en ralentissant seulement sur le mot important. Écoute la différence.",
+  },
+  {
+    id: 'pp-mots-remplissage',
+    section: 'oratoire',
+    category: 'Prise de parole',
+    icon: '🧹',
+    title: 'Se débarrasser des mots de remplissage',
+    intro: "« Euh », « du coup », « voilà », « tu vois »… Ces petits mots sortent tout seuls quand le cerveau cherche la suite.",
+    type: 'rule',
+    blocks: [
+      { heading: 'Pourquoi on les dit', text: "Ils remplissent le silence pendant qu'on réfléchit. Le plus souvent, on ne s'en rend même pas compte : c'est un automatisme." },
+      { heading: 'Étape 1 : en prendre conscience', text: "Enregistre-toi deux minutes en racontant ta journée, puis réécoute en comptant tes mots de remplissage. On ne corrige bien que ce qu'on a remarqué." },
+      { heading: 'Étape 2 : les remplacer par une pause', text: "Dès que tu sens un « euh » arriver, ferme la bouche et marque une courte pause. Le silence passe beaucoup mieux qu'on ne le croit." },
+      { heading: 'Étape 3 : préparer ses transitions', text: "Les « euh » apparaissent surtout entre deux idées. Prépare des phrases de liaison toutes prêtes.", examples: ['Premier point…', 'Concrètement…', "Prenons un exemple.", 'Pour résumer…'] },
+    ],
+    note: "Le but n'est pas zéro « euh », mais assez peu pour qu'on ne les remarque plus.",
+  },
+  {
+    id: 'pp-structures',
+    section: 'oratoire',
+    category: 'Prise de parole',
+    icon: '🧱',
+    title: 'Structurer ses idées : 6 plans qui marchent',
+    intro: "Sans structure, même une bonne idée se perd. Avec un plan simple en tête, vous savez toujours où vous allez — même quand on vous prend de court.",
+    type: 'rule',
+    blocks: [
+      { heading: "PRI : Point, Raison, Impact", text: "Donnez votre avis, UNE raison, puis ce que ça change concrètement. Idéal pour répondre en réunion.", examples: ["Je propose de décaler le lancement de deux semaines. Les tests ne sont pas terminés. Nous réduirons ainsi les risques de panne."] },
+      { heading: "PREP : Point, Raison, Exemple, Point", text: "Votre idée, pourquoi, un exemple concret, puis vous redites l'idée pour conclure.", examples: ["Il faut former l'équipe au nouvel outil. Sans formation, chacun perd du temps. La semaine dernière, trois demandes ont été bloquées. Une formation courte réglerait le problème."] },
+      { heading: "La règle de 3", text: "Regroupez vos idées par trois : trois arguments, trois priorités, trois étapes. C'est facile à suivre et à retenir.", examples: ["Ce projet a trois atouts : il est rapide, il est économique et il est simple à mettre en place."] },
+      { heading: "Passé → Présent → Futur", text: "D'où l'on vient, où l'on en est, où l'on va. Parfait pour faire un point d'avancement.", examples: ["Le mois dernier, nous avions dix jours de retard. Aujourd'hui, il n'en reste que deux. La semaine prochaine, nous serons à jour."] },
+      { heading: "Problème → Solution → Bénéfice", text: "Le souci, votre proposition, ce qu'on y gagne. Très efficace pour convaincre en entreprise.", examples: ["Nos clients attendent trop longtemps une réponse. Je propose une réponse automatique en moins d'une heure. Nous gagnerons en satisfaction."] },
+      { heading: "Question → Importance → Action", text: "Une question, pourquoi elle compte, ce qu'il faut faire. Utile pour mobiliser une équipe.", examples: ["Combien de clients perdons-nous chaque mois ? Chacun représente des mois de travail. Appelons dès lundi ceux qui sont partis."] }
+    ],
+    note: "Choisis une seule structure avant de parler : ton cerveau n'a plus qu'à la dérouler, au lieu de te juger pendant que tu parles.",
+  },
+  {
+    id: 'pp-clarte',
+    section: 'oratoire',
+    category: 'Prise de parole',
+    icon: '🎯',
+    title: 'Être clair et captiver',
+    intro: "On n'écoute pas forcément ce qui est important : on écoute ce qui est clair, simple et concret.",
+    type: 'rule',
+    blocks: [
+      { heading: "L'idée principale en 10 secondes", text: "Commencez par l'essentiel, sans long préambule. Les détails viendront ensuite, si on vous les demande.", examples: ["❌ L'autre jour, je réfléchissais à quelque chose…", "✅ Nous perdons des clients parce que nos e-mails sont trop généraux. Voici ce que je propose."] },
+      { heading: 'Des mots simples', text: "Parler clairement, ce n'est pas employer des mots compliqués. Votre message doit pouvoir être compris par un enfant de dix ans.", examples: ["❌ J'ai une disposition particulière pour l'allocution orale.", "✅ J'aime prendre la parole en public."] },
+      { heading: 'Des phrases courtes', text: "Une idée par phrase. Les phrases à rallonge font décrocher l'auditoire.", examples: ["❌ Nous devons optimiser nos processus afin d'améliorer l'efficacité et de réduire les points de blocage.", "✅ Simplifions notre fonctionnement. Concentrons-nous sur trois priorités."] },
+      { heading: "Parlez de ce qui compte pour l'autre", text: "Celui qui vous écoute se demande : « Qu'est-ce que j'y gagne ? » Répondez-lui.", examples: ["❌ Je pense que c'est une très bonne idée.", "✅ Cela vous aidera à atteindre vos objectifs plus vite."] },
+      { heading: 'Racontez une histoire', text: "Un exemple concret se retient bien mieux qu'une liste de chiffres.", examples: ["❌ La satisfaction client a baissé de dix pour cent.", "✅ Le mois dernier, cent clients n'ont pas reçu de réponse à temps. Voici ce qui s'est passé."] },
+      { heading: 'Appelez la personne par son prénom', text: "Entendre son prénom réveille l'attention et crée tout de suite un lien.", examples: ["❌ J'ai une idée.", "✅ Karim, j'ai une idée qui pourrait t'intéresser."] },
+      { heading: 'Écrire pour mieux parler', text: "Si ce n'est pas clair à l'écrit, ce ne sera pas clair à l'oral. Exercice : lis un chapitre, résume-le en trois phrases, puis explique-le à quelqu'un." },
+    ],
+  },
+  {
+    id: 'pp-trac',
+    section: 'oratoire',
+    category: 'Prise de parole',
+    icon: '😮‍💨',
+    title: 'Gérer le trac avant de parler',
+    intro: "Le trac est normal : la plupart des gens le ressentent avant de parler en public. Ce n'est pas un défaut, c'est le signe que l'enjeu compte pour vous.",
+    type: 'rule',
+    blocks: [
+      { heading: 'La préparation, premier remède', text: "Une grande partie de l'angoisse vient du sentiment de ne pas être prêt. Préparez au moins votre structure, votre première phrase et votre conclusion." },
+      { heading: 'Une minute de respiration', text: "Juste avant de parler, respirez lentement : inspirez sur quatre temps, expirez sur six. Le cœur ralentit et la voix se pose." },
+      { heading: 'Posture et regard', text: "Tenez-vous droit, les deux pieds bien ancrés, et cherchez un visage bienveillant dans l'auditoire." },
+      { heading: 'Pensez au message, pas à vous', text: "Le stress grandit quand on se juge en parlant. Concentrez-vous sur ce que vous voulez transmettre à ceux qui vous écoutent." },
+      { heading: 'La peur est un signal, pas un verdict', text: "Les orateurs qui semblent à l'aise n'étaient pas nés comme ça : ils ont simplement plus pratiqué. La confiance se travaille, comme un muscle." },
+      { heading: 'Après : pas de rumination', text: "Notez une chose réussie et une seule chose à améliorer… puis passez à autre chose." },
+    ],
+    note: "Commence petit : poser une question en réunion, c'est déjà prendre la parole.",
+  },
+  {
+    id: 'pp-corps',
+    section: 'oratoire',
+    category: 'Prise de parole',
+    icon: '🧍',
+    title: 'Le langage du corps',
+    intro: "Votre corps parle avant vous : on juge votre assurance en quelques secondes, avant même vos premiers mots.",
+    type: 'rule',
+    blocks: [
+      { heading: 'Le regard', text: "Regardez les gens dans les yeux, une personne à la fois, le temps d'une idée. Fuir les regards fait paraître hésitant." },
+      { heading: "L'ancrage", text: "Restez stable sur vos deux pieds. Les allers-retours et le balancement trahissent la nervosité." },
+      { heading: 'Des gestes utiles', text: "Gardez les mains visibles et faites des gestes qui accompagnent vos mots (montrer deux options, ouvrir les bras). Évitez de jouer avec un stylo ou vos cheveux." },
+      { heading: "S'arrêter sur l'essentiel", text: "Quand vous dites quelque chose d'important, arrêtez de bouger : l'immobilité donne du poids à vos paroles." },
+      { heading: 'Prendre sa place', text: "Ne vous faites pas tout petit : épaules ouvertes, tête droite. Vous avez le droit d'être là." },
+      { heading: 'Le visage', text: "Un léger sourire au début détend tout le monde. Votre expression doit correspondre à ce que vous dites." },
+    ],
+    note: "Pour aller plus loin, relis la fiche « Le geste : un usage mesuré ».",
+  },
+  {
+    id: 'pp-ethos-pathos-logos',
+    section: 'oratoire',
+    category: 'Prise de parole',
+    icon: '🏛️',
+    title: 'Convaincre : ethos, pathos, logos',
+    intro: "Selon Aristote, un discours convaincant repose sur trois piliers. Ils marchent toujours, en réunion comme sur scène.",
+    type: 'rule',
+    blocks: [
+      { heading: "Ethos — la crédibilité", text: "On écoute d'abord QUI parle. Votre attitude, votre cohérence et votre assurance inspirent-elles confiance ?", examples: ["J'ai mené trois projets de ce type : voici ce que j'en ai appris."] },
+      { heading: 'Pathos — l\'émotion', text: "Montrez que vous comprenez ce que l'autre ressent, racontez une histoire qui touche, créez un lien sincère.", examples: ["Je sais que ces dernières semaines ont été épuisantes pour vous."] },
+      { heading: 'Logos — la logique', text: "Des faits, des chiffres, un raisonnement clair : la cause, puis la conséquence.", examples: ["Les retards viennent des validations. Si nous les regroupons, nous gagnons deux jours."] },
+    ],
+    note: "Les trois se complètent : la crédibilité ouvre l'écoute, l'émotion crée le lien, la logique emporte la décision.",
+  },
+  {
+    id: 'pp-desaccord',
+    section: 'oratoire',
+    category: 'Prise de parole',
+    icon: '🤝',
+    title: 'Gérer un désaccord sans perdre son calme',
+    intro: "Une objection inattendue en réunion, et tout dérape ? Cinq étapes pour garder le contrôle de la discussion.",
+    type: 'rule',
+    blocks: [
+      { heading: 'Étape 1 : une pause mentale', text: "Respirez, et demandez-vous : « Est-ce vraiment une attaque, ou simplement un avis différent ? »" },
+      { heading: 'Étape 2 : une voix calme et posée', text: "Parlez lentement, sans hausser le ton. Une voix posée garde la conversation constructive." },
+      { heading: "Étape 3 : reformuler le point de vue de l'autre", text: "Votre interlocuteur se sent écouté, et la tension retombe aussitôt.", examples: ["Si je comprends bien, tu penses qu'il faut donner la priorité à ce projet pour tenir les délais, c'est bien ça ?"] },
+      { heading: 'Étape 4 : rester factuel', text: "Parlez des faits et des résultats, pas des personnes ni de vos émotions.", examples: ["Si nous donnons la priorité à ce projet, deux tâches importantes prendront du retard. Voici ce que nous pouvons faire pour équilibrer les deux."] },
+      { heading: 'Étape 5 : demander à donner son avis', text: "En demandant la permission, vous ouvrez un espace de dialogue respectueux.", examples: ["Est-ce que je peux te donner mon point de vue ?"] },
+      { heading: 'Ne pas laisser pourrir un conflit', text: "Un conflit ignoré ne disparaît pas : il s'étend. Écoutez chaque partie, cherchez une solution où chacun gagne." },
+    ],
+    note: "Un désaccord n'est pas une bataille à gagner : c'est l'occasion de montrer votre calme.",
+  },
+  {
+    id: 'pp-repliques',
+    section: 'oratoire',
+    category: 'Prise de parole',
+    icon: '🛡️',
+    title: 'Répondre calmement aux attaques',
+    intro: "Des phrases prêtes à l'emploi pour garder votre calme et reprendre la main, sans entrer dans le conflit.",
+    type: 'table',
+    columns: ['Situation', 'Réponse calme'],
+    micCol: 1,
+    quizLabel: 'Que répondre calmement ?',
+    rows: [
+      ["On critique votre travail sans nuance : « Ton analyse est complètement fausse. »", "Qu'est-ce que tu veux dire exactement par « complètement fausse » ?"],
+      ['On déforme vos propos', "Non, ce n'est pas ce que je dis. Ce que je dis, c'est que…"],
+      ['On vous accuse injustement', "Qu'est-ce qui t'a fait voir les choses comme ça ?"],
+      ['On vous provoque pour tester votre réaction', "Tu voulais vraiment connaître mon avis, ou juste voir comment je réagis ?"],
+      ['On essaie de vous culpabiliser', "J'ai l'impression que tu me rends responsable de quelque chose qui ne dépend pas de moi."],
+      ['On vous rabaisse avec ironie', "C'est intéressant, la façon dont tu as choisi de dire ça."],
+      ['On vous coupe la parole', "J'aimerais d'abord terminer mon idée, ensuite je serai ravi d'entendre la tienne."],
+      ["On vous met la pression : « Si ce dossier n'est pas fini demain, je le confie à quelqu'un d'autre. »", "Je comprends que ce projet soit important pour toi. J'aimerais qu'on en parle ouvertement : qu'est-ce qui te préoccupe vraiment ?"],
+      ["On rejette votre idée : « Ce que tu dis n'a aucun sens. »", "Qu'est-ce qui ne te semble pas cohérent ? Je peux préciser."],
+    ],
+    note: "Le principe : posez une question. Celui qui questionne mène la conversation ; l'autre doit préciser, et l'attaque perd sa force. Évitez de vous justifier tout de suite : plus on s'explique, plus on paraît faible.",
+  },
+  {
+    id: 'pp-phrases-ouvrent',
+    section: 'oratoire',
+    category: 'Prise de parole',
+    icon: '🚪',
+    title: 'Les phrases qui ferment… et celles qui ouvrent',
+    intro: "Certaines petites phrases bloquent la discussion sans qu'on s'en rende compte. Voici quoi dire à la place.",
+    type: 'table',
+    columns: ['À éviter', 'À dire plutôt'],
+    micCol: 1,
+    quizLabel: 'Que dire à la place ?',
+    rows: [
+      ['Oui, mais…', 'Oui, et…'],
+      ['Tu te trompes.', "Je vois les choses différemment. Est-ce que tu me permets de te donner mon point de vue ?"],
+      ['Tu aurais dû…', 'Et si, la prochaine fois, on essayait…'],
+      ["Je te l'avais dit.", "Je craignais que ça arrive. Tu as essayé, et maintenant on sait."],
+      ['On a toujours fait comme ça.', "Qu'est-ce qu'on gagnerait à faire autrement, selon toi ?"],
+      ["Je n'ai pas le temps pour ça.", "Ça mérite qu'on en parle dans de bonnes conditions. On se fixe un moment ?"],
+      ['Débrouille-toi.', "Qu'est-ce qui est le plus difficile pour toi dans cette tâche ?"],
+      ["Ce n'est pas mon problème.", "Dis-moi comment je peux t'aider à débloquer la situation."],
+      ['Tu es trop sensible.', "Ça a l'air important pour toi. Tu veux m'en dire plus ?"],
+      ["Ce n'est pas comme ça que ça marche.", "Laisse-moi te donner un peu de contexte, ça va nous aider."],
+    ],
+    note: "Face à une phrase qui bloque, fais une pause… et choisis celle qui ouvre la porte.",
+  },
+  {
+    id: 'pp-discrets',
+    section: 'oratoire',
+    category: 'Prise de parole',
+    icon: '🌙',
+    title: 'Discret ou introverti : un orateur qui s\'ignore',
+    intro: "Être réservé n'empêche pas de bien parler. Les personnes discrètes ont même des atouts précieux à l'oral.",
+    type: 'rule',
+    blocks: [
+      { heading: 'Leurs forces', text: "Elles réfléchissent avant de parler, écoutent vraiment, observent ce que les autres ne voient pas, rassurent par leur calme et prennent des décisions réfléchies." },
+      { heading: 'Préparer plutôt qu\'improviser', text: "C'est quand elles ont pu se préparer qu'elles brillent : demandez l'ordre du jour, notez vos trois idées clés à l'avance." },
+      { heading: 'Commencer en petit comité', text: "Un échange en tête-à-tête ou en petit groupe est un excellent terrain pour gagner en assurance." },
+      { heading: 'Se ressourcer', text: "Après une réunion intense, prévoyez un moment calme : c'est ainsi qu'elles rechargent leur énergie." },
+      { heading: 'Pour un manager', text: "Laissez du temps de préparation, acceptez les retours écrits, félicitez en privé, et écoutez activement." },
+    ],
+    note: "On peut être discret et très convaincant : la clarté compte plus que le volume.",
+  },
   // ============ 💼 FRANÇAIS DES AFFAIRES (A2-B1) — communication professionnelle ============
   {
     id: 'aff-presenter-accueillir',
@@ -39677,7 +39912,9 @@ function gfText(){
   let streak = 0; try{ streak = computeStreak(); }catch(e){}
   const pick = (a) => a[Math.floor(Math.random() * a.length)];
   const hi = pick(['Bravo', 'Génial', 'Youpi', 'Super', 'Chapeau', 'Magnifique', 'Waouh', 'Félicitations', 'Incroyable', 'Hourra', 'Excellent']) + N + ' !';
-  const goal = pick(['Objectif du jour atteint !', "Tu as atteint ton objectif du jour !", 'Mission du jour accomplie !', 'Tous tes objectifs du jour sont faits !', 'Le défi du jour est relevé !']);
+  const adv = (() => { try{ return advActive(); }catch(e){ return false; } })();
+  const goal = adv ? pick(["L'objectif de demain est déjà atteint !", 'Demain est déjà dans la poche !', "Tu as pris de l'avance : les défis de demain sont faits !"]) + ' ' + pick(['Demain, tu peux souffler.', 'Ta série est protégée pour demain.'])
+    : pick(['Objectif du jour atteint !', "Tu as atteint ton objectif du jour !", 'Mission du jour accomplie !', 'Tous tes objectifs du jour sont faits !', 'Le défi du jour est relevé !']);
   const ser = streak >= 2 ? pick([`Ça fait ${streak} jours de suite, c'est énorme !`, `${streak} jours d'affilée : tu es inarrêtable !`, `Ta série monte à ${streak} jours, bravo pour ta régularité !`, `${streak} jours de suite… la régularité, c'est ta force !`]) + ' ' : '';
   let k = 0, last = -1; try{ last = +(localStorage.getItem(nsKey('lexiqueQuiz::gfLastMotiv')) || -1); }catch(e){}
   do{ k = Math.floor(Math.random() * GF_MOTIV.length); }while(k === last && GF_MOTIV.length > 1);
@@ -39698,7 +39935,8 @@ function goalFinale(preview){
   if(document.getElementById('goalFinale')) return;
   try{ if(typeof VA !== 'undefined' && VA.open) vaClose(); }catch(e){}
   try{ celebStop(); }catch(e){}
-  let streak = 0, today = {}; try{ streak = computeStreak(); today = dailyStats[todayKey()] || {}; }catch(e){}
+  let streak = 0, today = {}; try{ streak = computeStreak(); today = dailyStats[questDayKey()] || {}; }catch(e){}
+  const advMode = (() => { try{ return advActive(); }catch(e){ return false; } })();
   const min = Math.max(1, Math.round((today.seconds || 0) / 60)), xp = today.xp || 0;
   let nq = 0; try{ nq = getDailyQuests().length; }catch(e){}
   window.__gfState = { text:gfText(), talked:false };
@@ -39709,7 +39947,7 @@ function goalFinale(preview){
     <div class="gf-bg"></div><div class="gf-rays"></div><canvas class="gf-fw" id="gfFw"></canvas>
     <div class="gf-top">
       <div class="gf-trophy">${['🏆', '🥇', '👑', '🌟', '🎖️'][Math.floor(Math.random() * 5)]}</div>
-      <div class="gf-title"><span class="l1">${word('Objectif du jour', 0)}</span><span class="l2">${word('ATTEINT !', 16)}</span></div>
+      <div class="gf-title"><span class="l1">${word(advMode ? 'Objectif de demain' : 'Objectif du jour', 0)}</span><span class="l2">${word(advMode ? 'DÉJÀ ATTEINT !' : 'ATTEINT !', 18)}</span></div>
       <div class="gf-stats">
         ${nq ? `<span class="gf-stat" style="--d:0">🎯 ${nq} objectif${nq > 1 ? 's' : ''} sur ${nq}</span>` : ''}
         ${streak >= 1 ? `<span class="gf-stat" style="--d:1">🔥 ${streak} jour${streak > 1 ? 's' : ''} de suite</span>` : ''}
@@ -39805,8 +40043,8 @@ function goalFinaleCheck(){
   if(done && !gfWasDone){
     gfWasDone = true;
     let shown = ''; try{ shown = localStorage.getItem(nsKey(GOAL_FINALE_KEY)) || ''; }catch(e){}
-    if(shown === todayKey()) return;
-    try{ localStorage.setItem(nsKey(GOAL_FINALE_KEY), todayKey()); }catch(e){}
+    if(shown === questDayKey()) return;
+    try{ localStorage.setItem(nsKey(GOAL_FINALE_KEY), questDayKey()); }catch(e){}
     const t0 = Date.now();
     const go = () => {
       const busy = (typeof VA !== 'undefined' && VA.open) || document.getElementById('splashScreen') || document.body.classList.contains('kb-open') || document.hidden || document.getElementById('goalFinale');
@@ -41169,7 +41407,7 @@ function renderDictionLab(){
   paint();
 }
 /* le bouton d'accès, dans les fiches de liaison / respiration / lecture à voix haute */
-var DX_LAB_SHEETS = ['atelier-liaisons', 'orat-respiration', 'orat-liaisons', 'orat-lecture-haute-voix', 'orat-discours-pauses', 'phon-rythme-accent', 'phon-liaisons-types', 'phon-liaisons-classification', 'phon-h-aspire', 'phon-e-muet', 'phon-lecture-voix-haute', 'phon-intonation-declarative', 'phon-interrogation'];
+var DX_LAB_SHEETS = ['pp-pauses-silence', 'pp-voix-debit', 'atelier-liaisons', 'orat-respiration', 'orat-liaisons', 'orat-lecture-haute-voix', 'orat-discours-pauses', 'phon-rythme-accent', 'phon-liaisons-types', 'phon-liaisons-classification', 'phon-h-aspire', 'phon-e-muet', 'phon-lecture-voix-haute', 'phon-intonation-declarative', 'phon-interrogation'];
 renderPracticalSheetDetail = (function(orig){
   return function(id){
     const r = orig.apply(this, arguments);
@@ -41589,6 +41827,93 @@ function shdBind(){
     shdRedraw();
   });
 }
+
+/* ============ 🌙 1.0.15 : PRENDRE DE L'AVANCE SUR L'OBJECTIF DE DEMAIN ============
+   Tes défis du jour sont faits et tu as du temps ce soir (alors que demain sera chargé) ?
+   « 🌙 Prendre de l'avance » : tout ce que tu fais ensuite compte pour les défis de DEMAIN.
+   Pas fini ce soir ? Demain, tu repars de là où tu en es. Fini ? Demain est déjà validé (la série continue).
+   • on ne peut avancer que sur demain, et seulement une fois les défis d'aujourd'hui terminés ;
+   • à minuit, le mode s'arrête tout seul (demain est devenu aujourd'hui) ;
+   • les moments passés en mode avance sont notés : une fiche validée hier soir en avance compte pour aujourd'hui. */
+
+
+function advTomorrowKey(){ const d = new Date(); d.setDate(d.getDate() + 1); return todayKey(d); }
+function advState(){ try{ return JSON.parse(localStorage.getItem(nsKey('lexiqueQuiz::advanceMode')) || 'null'); }catch(e){ return null; } }
+function advLog(){ try{ const a = JSON.parse(localStorage.getItem(nsKey('lexiqueQuiz::advanceLog')) || '[]'); return Array.isArray(a) ? a : []; }catch(e){ return []; } }
+function advSaveLog(a){ try{ localStorage.setItem(nsKey('lexiqueQuiz::advanceLog'), JSON.stringify(a.slice(-40))); }catch(e){} }
+function advEndOfDay(ts){ const d = new Date(ts); d.setHours(23, 59, 59, 999); return d.getTime(); }
+function advActive(){ const s = advState(); return !!(s && s.on && s.target && s.target > todayKey()); }
+/* le jour pour lequel on travaille (demain en mode avance, sinon aujourd'hui) */
+function questDayKey(){ return advActive() ? advState().target : todayKey(); }
+/* le jour « compté » pour un moment donné (une fiche faite hier soir en mode avance compte pour aujourd'hui) */
+function advDayOf(ts){
+  const t = +ts; if(!t) return '';
+  try{ for(const r of advLog()){ if(r && r.a && t >= r.a && t <= (r.b || advEndOfDay(r.a))) return r.day; } }catch(e){}
+  return todayKey(new Date(t));
+}
+function advDayLabel(key){
+  try{ const [y, m, d] = key.split('-').map(Number); return new Date(y, m - 1, d).toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long' }); }catch(e){ return 'demain'; }
+}
+function advStart(){
+  if(advActive()) return true;
+  let done = false; try{ done = questsAllDone(); }catch(e){}
+  if(!done){ setStatus("🌙 Termine d'abord les défis d'aujourd'hui : ensuite, tu pourras prendre de l'avance sur demain.", 'err'); return false; }
+  const target = advTomorrowKey();
+  try{ localStorage.setItem(nsKey('lexiqueQuiz::advanceMode'), JSON.stringify({ on:true, target, at:Date.now() })); }catch(e){}
+  const L = advLog(); L.push({ a:Date.now(), b:0, day:target }); advSaveLog(L);
+  try{ gfWasDone = false; }catch(e){}            // la grande fête pourra saluer l'objectif de demain
+  setStatus(`🌙 C'est parti ! Ce que tu fais maintenant compte pour demain (${advDayLabel(target)}).`, 'ok');
+  advRefreshUi();
+  return true;
+}
+function advStop(quiet){
+  const s = advState();
+  if(s && s.on){ s.on = false; s.stopAt = Date.now(); try{ localStorage.setItem(nsKey('lexiqueQuiz::advanceMode'), JSON.stringify(s)); }catch(e){} }
+  const L = advLog(); const last = L[L.length - 1];
+  if(last && !last.b){ last.b = Math.min(Date.now(), advEndOfDay(last.a)); advSaveLog(L); }
+  try{ gfWasDone = null; }catch(e){}
+  if(!quiet) setStatus("📅 Retour à aujourd'hui. Ce que tu as fait en avance reste compté pour demain.", 'ok');
+  advRefreshUi();
+}
+/* ce qui a déjà été fait en avance pour aujourd'hui (hier soir) */
+function advBankedToday(){ const k = todayKey(); return advLog().some(r => r && r.day === k); }
+function advRefreshUi(){
+  document.body.classList.toggle('adv-on', advActive());
+  try{ if(typeof isHomeScreen !== 'undefined' && isHomeScreen) renderBlockSelect(); }catch(e){}
+  try{ refreshQuestPeekFab(); }catch(e){}
+  const ov = document.getElementById('questPeekOverlay');
+  try{ if(ov && ov.classList.contains('show')){ closeQuestPeek(); openQuestPeek(); } }catch(e){}   // fermer/rouvrir : le chrono de la partie reste bien en pause
+}
+/* le petit encart dans les défis (accueil et liste flottante) */
+function advPanelHtml(allDone){
+  if(advActive()){
+    const t = advState().target;
+    return `<div class="adv-on-box">🌙 <b>Mode avance</b> : tout ce que tu fais compte pour <b>demain</b> (${escapeHtml(advDayLabel(t))}). Pas fini ce soir ? Tu continueras demain.
+      <button type="button" class="adv-stop" data-adv="stop">📅 Revenir à aujourd'hui</button></div>`;
+  }
+  if(allDone) return `<div class="adv-offer"><button type="button" class="adv-go" data-adv="start">🌙 Prendre de l'avance sur demain</button>
+      <div class="adv-hint">Du temps ce soir, une journée chargée demain ? Ce que tu fais maintenant comptera pour les défis de demain. Pas fini ? Tu continues demain.</div></div>`;
+  if(advBankedToday()) return `<div class="adv-banked">🌙 Tu as pris de l'avance hier soir : ce que tu as fait compte déjà dans les défis ci-dessous.</div>`;
+  return '';
+}
+document.addEventListener('click', (e) => {
+  const b = e.target.closest && e.target.closest('[data-adv]');
+  if(!b) return;
+  e.preventDefault(); e.stopPropagation();
+  if(b.dataset.adv === 'start') advStart(); else advStop();
+});
+/* au chargement et toutes les minutes : à minuit, le mode avance s'arrête tout seul */
+(function advWatch(){
+  const tick = () => {
+    try{
+      const s = advState();
+      if(s && s.on && !(s.target > todayKey())){ advStop(true); }
+      document.body.classList.toggle('adv-on', advActive());
+    }catch(e){}
+  };
+  setTimeout(tick, 1500);
+  setInterval(tick, 60000);
+})();
 
 /* 📱 Paysage (téléphone à l'horizontale) : à chaque nouvelle question, la carte se cale en haut de l'écran
    pour que la question et les réponses soient visibles sans faire défiler. */
@@ -43326,7 +43651,7 @@ function goToQuest(key){
   questPeekPausedTimer = false;
   const ov = document.getElementById('questPeekOverlay');
   if(ov) ov.classList.remove('show');
-  const today = dailyStats[todayKey()] || { bySubject:{}, modesPlayed:[] };
+  const today = dailyStats[questDayKey()] || { bySubject:{}, modesPlayed:[] };
   if(key && key.startsWith('section:')){
     const secKey = key.slice(8);
     const sec = SHEET_SECTIONS.find(x => x.key === secKey);
@@ -43425,10 +43750,13 @@ function openQuestPeek(){
       ${isDone ? '' : `<button class="quest-go" data-quest-go="${escapeHtml(q.key)}" title="Y aller">Go ▶</button>`}
     </div>`;
   };
+  const qhd = document.querySelector('#questPeekOverlay .summary-box-head span');
+  if(qhd) qhd.textContent = advActive() ? '🌙 Mes objectifs de demain' : '🎯 Mes objectifs du jour';
   body.innerHTML = `
     <div style="padding:2px 4px 12px;text-align:left;">
+      ${advPanelHtml(left.length === 0)}
       ${left.length === 0
-        ? `<div class="quests-alldone">🎉 Tous les défis du jour sont faits !</div>`
+        ? `<div class="quests-alldone">${advActive() ? '🎉 Les défis de demain sont déjà faits !' : '🎉 Tous les défis du jour sont faits !'}</div>`
         : `<div style="font-size:13px;color:var(--text-dim);font-weight:700;margin-bottom:6px;">⏳ Il te reste ${left.length} défi${left.length>1?'s':''} :</div>${left.map(row).join('')}`}
       ${done.length ? `<div style="font-size:13px;color:var(--text-dim);font-weight:700;margin:14px 0 6px;">✅ Déjà faits (${done.length})</div>${done.map(row).join('')}` : ''}
       ${questPeekPausedTimer ? `<div style="margin-top:12px;font-size:12px;color:var(--text-dim);text-align:center;">⏸️ Le chrono de la question est en pause.</div>` : ''}
