@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- 🏷️ Version de l'appli : augmentée automatiquement par publier-site.cmd à chaque publication -->
-<meta name="app-version" content="1.0.11" data-date="2026-10-14">
+<meta name="app-version" content="1.0.13" data-date="2026-10-14">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <title>VocabVISION — Vocabulaire Français ↔ Arabe</title>
 <script>
@@ -1657,6 +1657,99 @@
   .rep-show{ display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:8px 10px; margin:10px auto 6px; padding:10px 14px; border-radius:12px; border:1px solid var(--border); background:var(--surface-sunken); font-weight:700; font-size:14.5px; color:var(--text); cursor:pointer; width:fit-content; max-width:100%; user-select:none; -webkit-tap-highlight-color:transparent; }
   .rep-show input{ width:22px; height:22px; margin:0; accent-color:#4F46E5; cursor:pointer; flex:none; }
   .rep-show.long{ border-color:rgba(249,115,22,.5); background:rgba(249,115,22,.08); }
+  /* 🫁 1.0.12 : liaisons & respiration (règles de l'Art oratoire) */
+  :root{ --dx-ob:#EA580C; --dx-en:#94A3B8; --dx-in:#DC2626; --dx-p3:#1D4ED8; --dx-p2:#2563EB; --dx-p1:#3B82F6; --dx-p0:#7C3AED; --dx-mel:#64748B; }
+  html[data-theme="dark"]{ --dx-ob:#FB923C; --dx-en:#7C8BA1; --dx-in:#F87171; --dx-p3:#93C5FD; --dx-p2:#93C5FD; --dx-p1:#60A5FA; --dx-p0:#C4B5FD; --dx-mel:#94A3B8; }
+  .dx-c-ob,.dx-c-fa{ color:var(--dx-ob); } .dx-c-fa{ opacity:.55; } .dx-c-en{ color:var(--dx-en); } .dx-c-in{ color:var(--dx-in); }
+  .dx-c-p3,.dx-c-p2{ color:var(--dx-p3); } .dx-c-p1{ color:var(--dx-p1); } .dx-c-p0{ color:var(--dx-p0); } .dx-c-mel{ color:var(--dx-mel); }
+  .dx-m{ display:inline; position:relative; font-style:normal; white-space:nowrap; }
+  .dx-m.dx-ob,.dx-m.dx-fa,.dx-m.dx-en{ padding:0 .04em; font-weight:900; color:var(--dx-ob); }
+  .dx-m.dx-fa{ opacity:.5; }
+  .dx-m.dx-en{ color:var(--dx-en); font-weight:700; }
+  .dx-m i{ position:absolute; left:50%; top:-1.15em; transform:translateX(-50%); font-size:.6em; font-style:normal; font-weight:900; color:var(--dx-ob); letter-spacing:0; }
+  .dx-m.dx-in{ color:var(--dx-in); font-weight:900; font-size:.85em; opacity:.9; }
+  .dx-m.dx-p{ font-weight:900; margin:0 .02em; color:var(--dx-p1); }
+  .dx-m.dx-p i{ top:-1.3em; left:60%; font-size:.55em; color:var(--dx-mel); }
+  .dx-m.dx-p3,.dx-m.dx-p2{ color:var(--dx-p3); } .dx-m.dx-p2{ opacity:.8; } .dx-m.dx-p0{ color:var(--dx-p0); }
+  .dx-hy{ position:relative; display:inline; }
+  .dx-hy::after{ content:'‿'; position:absolute; left:50%; bottom:-.5em; transform:translateX(-50%); font-weight:900; color:var(--dx-ob); line-height:1; }
+  .dx-hy.dx-en::after{ color:var(--dx-en); }
+  .dx-hy i{ position:absolute; left:50%; top:-.95em; transform:translateX(-50%); font-size:.6em; font-style:normal; font-weight:900; color:var(--dx-ob); }
+  .repeat-sentence:has(.dx-m), .cq-rep-s:has(.dx-m){ line-height:2.05; }
+  html[data-theme="dark"] .repeat-sentence{ background:var(--surface-sunken, #1B1F2A); }   /* thème sombre : la phrase restait claire sur fond clair */
+  .rw .dx-hy i, .rw.spoken .dx-hy::after{ text-shadow:none; }
+  .rep-tools{ display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:4px 10px; }
+  .rep-tools .rep-show{ margin:10px 0 6px; }
+  .dx-chip{ font-weight:800; }
+  .dx-chip.active{ border-color:rgba(234,88,12,.55); }
+  .dx-panel{ max-width:660px; margin:2px auto 8px; text-align:left; }
+  .dx-legend{ display:flex; flex-wrap:wrap; justify-content:center; gap:3px 12px; font-size:12px; font-weight:700; color:var(--text-dim); margin:2px 0 6px; }
+  .dx-legend b{ font-weight:900; font-size:15px; margin-right:2px; }
+  .dx-why{ border:1px solid var(--border); border-radius:12px; background:var(--surface-sunken); padding:8px 12px; margin:6px 0; text-align:left; }
+  .dx-why > summary{ cursor:pointer; font-weight:800; font-size:14px; color:var(--text); list-style:none; padding:2px 0; }
+  .dx-why > summary::-webkit-details-marker{ display:none; }
+  .dx-why > summary::after{ content:'▾'; float:right; color:var(--text-dim); }
+  .dx-why[open] > summary::after{ content:'▴'; }
+  .dx-sum-n{ font-size:11.5px; font-weight:800; color:var(--text-dim); background:var(--surface); border:1px solid var(--border); border-radius:999px; padding:1px 8px; margin-left:6px; }
+  .dx-tip{ font-size:13px; color:var(--text-dim); margin:8px 0 6px; line-height:1.45; }
+  .dx-tip b[class^="dx-c-"]{ font-size:15px; }
+  .dx-rule{ display:flex; align-items:flex-start; gap:10px; padding:7px 0; border-top:1px dashed var(--border); font-size:13.5px; line-height:1.4; color:var(--text); }
+  .dx-sym{ flex:none; width:30px; text-align:center; font-weight:900; font-size:18px; line-height:1.15; }
+  .dx-rt{ flex:1; min-width:0; overflow-wrap:anywhere; }
+  .dx-here{ font-size:12.5px; color:var(--text-dim); margin-top:2px; }
+  .dx-sheet{ flex:none; border:1px solid var(--border); background:var(--surface); color:var(--text); border-radius:9px; width:36px; height:32px; cursor:pointer; font-size:15px; }
+  .dx-sheet:hover{ background:var(--surface-hover, var(--surface)); }
+  .dx-exbox{ margin-top:10px; }
+  .dx-ex-line{ display:block; font-size:17px; font-weight:700; line-height:2.1; margin:10px 0 4px; text-align:center; color:var(--text); }
+  .dx-ex-btns{ display:flex; justify-content:center; margin:2px 0 6px; }
+  .dx-lab-text{ display:block; width:100%; box-sizing:border-box; margin-top:14px; border:1px solid var(--border); border-radius:12px; background:var(--surface); color:var(--text); padding:12px; font:600 15px/1.5 'Nunito','Inter',sans-serif; resize:vertical; }
+  .dx-lab-samples{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; justify-content:center; margin:10px 0 6px; font-size:13px; font-weight:700; color:var(--text-dim); }
+  .dx-lab-out{ background:var(--surface-sunken); border:1px solid var(--border); border-radius:14px; padding:14px 16px 6px; margin:6px 0 8px; font:700 clamp(17px,3.6vw,21px)/2.15 'Nunito','Inter',sans-serif; color:var(--text); text-align:left; overflow-wrap:anywhere; }
+  .dx-lab-out p{ margin:0 0 8px; }
+  .dx-empty{ color:var(--text-dim); font-size:15px; }
+  .dx-lab-btns{ display:flex; gap:8px; flex-wrap:wrap; justify-content:center; align-items:center; margin:6px 0; }
+  .dx-lab-btns .speak-ar-btn{ margin:0; }
+  .dx-lab-go{ margin:12px auto 0 !important; display:flex; gap:8px; align-items:center; background:linear-gradient(135deg,#0EA5E9,#6366F1) !important; color:#fff !important; box-shadow:0 4px 0 #3730A3 !important; max-width:100%; white-space:normal; text-align:center; }
+  /* 🔀 1.0.13 : Mots en ordre ludique (jokers, étoiles, tuiles) */
+  .ord-bar{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin:0 0 10px; }
+  .ord-stars{ font-size:21px; letter-spacing:2px; line-height:1; }
+  .ord-stars .off, .ord-stars-end .off{ filter:grayscale(1); opacity:.3; }
+  .ord-stars-end{ font-size:.85em; margin-left:6px; white-space:nowrap; }
+  .ord-perfect{ display:inline-block; margin-left:8px; font-size:12.5px; font-weight:900; color:#B45309; background:#FEF3C7; border:1px solid #FCD34D; border-radius:999px; padding:2px 10px; vertical-align:middle; }
+  .ord-joker{ display:inline-flex; align-items:center; gap:8px; border:2px solid #F59E0B; background:linear-gradient(135deg,#FEF3C7,#FDE68A); color:#92400E; font:900 15px 'Nunito','Inter',sans-serif; border-radius:14px; padding:8px 14px; cursor:pointer; box-shadow:0 3px 0 #D97706; transition:transform .1s, box-shadow .1s; -webkit-tap-highlight-color:transparent; }
+  .ord-joker:active:not([disabled]){ transform:translateY(2px); box-shadow:0 1px 0 #D97706; }
+  .ord-joker[disabled]{ opacity:.45; cursor:not-allowed; box-shadow:none; }
+  .ord-joker b{ min-width:1ch; }
+  .ord-jk-cards{ display:inline-flex; gap:3px; perspective:200px; }
+  .ord-jk-cards i{ width:13px; height:18px; border-radius:3px; background:linear-gradient(135deg,#7C3AED,#EC4899); box-shadow:0 1px 2px rgba(0,0,0,.25); display:inline-block; transition:transform .45s, opacity .45s, background .45s; }
+  .ord-jk-cards i.used{ transform:rotateY(180deg) scale(.8); opacity:.3; background:#94A3B8; }
+  .ord-mm{ text-align:center; font-weight:800; font-size:14px; color:#B45309; background:rgba(245,158,11,.10); border:1px dashed rgba(245,158,11,.5); border-radius:12px; padding:7px 12px; margin:-4px 0 12px; }
+  .ord-mm[hidden]{ display:none; }
+  html body .order-sentence .order-chip.locked{ background:linear-gradient(135deg,#F59E0B,#D97706); color:#fff; border-color:#B45309; box-shadow:0 3px 0 #92400E; cursor:default; position:relative; }
+  .order-chip.locked::after{ content:'🃏'; position:absolute; top:-11px; right:-9px; font-size:13px; line-height:1; }
+  .order-pool .order-chip{ border-bottom-width:4px; transform:rotate(var(--r,0deg)); }
+  .order-pool .order-chip:hover:not(.disabled){ transform:translateY(-3px) rotate(0deg); }
+  html body .order-pool .order-chip:nth-child(6n+1){ background:#E0F2FE; border-color:#7DD3FC; color:#075985; }
+  html body .order-pool .order-chip:nth-child(6n+2){ background:#FCE7F3; border-color:#F9A8D4; color:#9D174D; }
+  html body .order-pool .order-chip:nth-child(6n+3){ background:#DCFCE7; border-color:#86EFAC; color:#166534; }
+  html body .order-pool .order-chip:nth-child(6n+4){ background:#FEF9C3; border-color:#FDE047; color:#854D0E; }
+  html body .order-pool .order-chip:nth-child(6n+5){ background:#EDE9FE; border-color:#C4B5FD; color:#5B21B6; }
+  html body .order-pool .order-chip:nth-child(6n+6){ background:#FFEDD5; border-color:#FDBA74; color:#9A3412; }
+  .ord-enter .order-chip{ animation:ordIn .5s cubic-bezier(.34,1.56,.64,1) both; animation-delay:var(--d,0ms); }
+  @keyframes ordIn{ from{ opacity:0; transform:translateY(16px) scale(.55) rotate(-10deg); } }
+  .order-chip.ord-pop{ animation:ordPop .38s ease; }
+  @keyframes ordPop{ 0%{ transform:scale(.7); } 60%{ transform:scale(1.16); } 100%{ transform:scale(1); } }
+  .order-chip.ord-wave{ animation:ordWave .55s ease both; animation-delay:var(--d,0ms); }
+  @keyframes ordWave{ 0%{ transform:none; } 45%{ transform:translateY(-9px) scale(1.1); } 100%{ transform:none; } }
+  @media (prefers-reduced-motion: reduce){ .ord-enter .order-chip, .order-chip.ord-pop, .order-chip.ord-wave{ animation:none; } }
+  /* 🔎 Mots & recherche */
+  #dictCatRow[hidden]{ display:none !important; }
+  .dict-cat-x{ border:1px solid var(--border); background:var(--surface); color:var(--text-dim); border-radius:999px; padding:2px 10px; font:700 12px inherit; cursor:pointer; margin-left:4px; }
+  /* 📚 Bouquinage : liaisons & pauses */
+  .bq-dx{ display:flex; flex-direction:column; align-items:center; gap:4px; margin:6px 0 0; }
+  .bq-text:has(.dx-m){ line-height:2.15; }
+  #bqDxRules{ margin-top:12px; }
+  .rep-show[hidden]{ display:none; }
   .rep-long{ font-size:11.5px; font-weight:800; color:#C2410C; background:rgba(249,115,22,.16); padding:2px 8px; border-radius:999px; }
   .repeat-sentence.hidden{ letter-spacing:.3em;color:var(--purple);font-size:26px; }
   .rw{ transition:background .2s,color .2s;border-radius:6px;padding:0 2px; }
@@ -2844,6 +2937,16 @@
   @keyframes gfUp{ from{ transform:translateY(18px); opacity:0; } to{ transform:none; opacity:1; } }
   @keyframes gfBeat{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.06); } }
   @keyframes gfBounce{ 0%,100%{ transform:none; } 50%{ transform:translateY(-8%) rotate(-3deg); } }
+  /* 🎲 1.0.13 : le renard en image a lui aussi plusieurs façons d'arriver et de faire la fête */
+  .gf-fox2d.v2{ animation:gfSpinIn 1s cubic-bezier(.2,1.4,.4,1) .3s both, gfWiggle 1.3s ease-in-out 1.4s infinite; }
+  .gf-fox2d.v3{ animation:gfSlideIn .9s cubic-bezier(.2,1.3,.4,1) .3s both, gfHop .9s ease-in-out 1.3s infinite; }
+  .gf-fox2d.v4{ animation:gfZoomIn .8s cubic-bezier(.2,1.6,.4,1) .3s both, gfSwing 1.6s ease-in-out 1.2s infinite; }
+  @keyframes gfSpinIn{ from{ transform:rotate(-540deg) scale(.2); opacity:0; } to{ opacity:1; } }
+  @keyframes gfWiggle{ 0%,100%{ transform:rotate(0); } 25%{ transform:rotate(-7deg); } 75%{ transform:rotate(7deg); } }
+  @keyframes gfSlideIn{ from{ transform:translateX(-120vw) rotate(-20deg); } }
+  @keyframes gfHop{ 0%,100%{ transform:none; } 40%{ transform:translateY(-14%) scale(1.03,.97); } 60%{ transform:translateY(-14%); } }
+  @keyframes gfZoomIn{ from{ transform:scale(2.4); opacity:0; } to{ opacity:1; } }
+  @keyframes gfSwing{ 0%,100%{ transform:rotate(-5deg); } 50%{ transform:rotate(5deg) translateY(-4%); } }
   @media (prefers-reduced-motion: reduce){ .gf-rays, .gf-trophy, .gf-fox2d, .gf-go, .gf-title span > span{ animation:none !important; } }
   /* 🗣️ mode mains libres : la barre du renard en bas de l'écran */
   body.vh-off .vh-only{ display:none !important; }
@@ -4307,7 +4410,7 @@ function playPeekCurrent(){
       if(!stillPlaying()) return;
       setTimeout(() => {
         if(!stillPlaying()) return;
-        const sentence = w.ex.replace(/~/g, w.fr);
+        const sentence = exFull(w);
         showStage('💬', sentence);
         speak(sentence, 'fr-FR', () => {
           if(!stillPlaying()) return;
@@ -9462,7 +9565,7 @@ function updateRadioUI(){
     stageLabel.textContent = labels[radioState.stage] || labels.fr;
   }
   if(wordEl){
-    const texts = { fr: w.fr, def: w.def, ar: w.ar, ex: w.ex.replace(/~/g, w.fr) };
+    const texts = { fr: w.fr, def: w.def, ar: w.ar, ex: exFull(w) };
     wordEl.textContent = texts[radioState.stage] || w.fr;
     wordEl.className = 'radio-word' + (radioState.stage === 'ar' ? ' radio-word-ar' : '') + (radioState.stage === 'def' ? ' radio-word-def' : '');
   }
@@ -9537,7 +9640,7 @@ function radioPlayWord(){
             if(!radioState || !radioState.playing) return;
             radioState.stage = 'ex';
             updateRadioUI();
-            speak(w.ex.replace(/~/g, w.fr), 'fr-FR', () => {
+            speak(exFull(w), 'fr-FR', () => {
               if(myToken !== radioPlayToken) return;
               if(!radioState || !radioState.playing) return;
               setTimeout(() => {
@@ -10376,7 +10479,7 @@ function buildGrammarChallenges(categoryKey){
   const challenges = [];
   WORDS.forEach(w => {
     if(!w.ex || !w.ex.includes('~')) return;
-    const sentence = w.ex.replace(/~/g, w.fr).trim();
+    const sentence = exFull(w).trim();
     if(!sentence) return;
     const tokens = sentence.split(/(\s+)/); // garde les espaces comme jetons pour reconstruire facilement
     for(let i=0;i<tokens.length;i++){
@@ -11988,7 +12091,7 @@ function findOrthoSentenceForPair(pairKey){
   const pair = ORTHO_PAIRS[pairKey];
   for(const w of WORDS){
     if(!w.ex || !w.ex.includes('~')) continue;
-    const sentence = w.ex.replace(/~/g, w.fr).trim();
+    const sentence = exFull(w).trim();
     const tokens = sentence.split(/(\s+)/);
     for(let i=0;i<tokens.length;i++){
       const raw = tokens[i];
@@ -14141,10 +14244,7 @@ function renderScoreboard(){
   if(gameMode === 'chrono'){
     html += `<div class="chip streak-chip" id="streakChip">🔥 Série <b>${chronoStreak}</b></div>`;
   }
-  for(const c of Object.keys(catScore)){
-    const s = catScore[c];
-    html += `<div class="chip">${escapeHtml(c)} <b>${s.c}/${s.t}</b></div>`;
-  }
+  // 🏷️ 1.0.13 : plus de puce par catégorie ici (avec des mots importés, ça faisait des dizaines de puces) — le détail reste dans « 📊 Résumé »
   html += `<button class="chip" id="peekSummaryBtn" style="cursor:pointer;">📊 Résumé</button>`;
   if(score.total > 0){
     html += `<button class="chip" id="finishNowBtn" style="cursor:pointer;color:var(--purple);font-weight:800;">🏁 Terminer</button>`;
@@ -14321,6 +14421,11 @@ function renderDictResults(){
   }
 
   countEl.textContent = `${matches.length} mot${matches.length>1?'s':''}${dictCat ? ' · ' + dictCat : ''}${limitNote}`;
+  if(dictCat && String(dictQuery || '').trim()){   // catégories cachées pendant la recherche : on peut quand même enlever le filtre
+    const x = document.createElement('button'); x.type = 'button'; x.className = 'dict-cat-x'; x.textContent = '✕ toutes catégories';
+    x.addEventListener('click', () => { dictCat = null; renderDictionaryView(); });
+    countEl.appendChild(document.createTextNode(' ')); countEl.appendChild(x);
+  }
 
   if(matches.length === 0){
     resultsEl.innerHTML = `<div class="no-results">Aucun mot trouvé${dictQuery ? ' pour « ' + escapeHtml(dictQuery.trim()) + ' »' : ''}.</div>`;
@@ -14631,8 +14736,11 @@ function renderDictionaryView(){
     catRow.appendChild(chip);
   });
 
+  // 🔎 1.0.13 : quand on tape une recherche, la liste des catégories se cache (elle revient quand le champ est vide)
+  const syncCatRow = () => { catRow.hidden = !!String(dictQuery || '').trim(); };
+  syncCatRow();
   const input = document.getElementById('dictInput');
-  input.addEventListener('input', () => { dictQuery = input.value; renderDictResults(); });
+  input.addEventListener('input', () => { dictQuery = input.value; syncCatRow(); renderDictResults(); });
   // 🗣️ chercher en disant le mot : « maison », « que veut dire opportunité »… puis on t'en lit la traduction
   const dSay = document.getElementById('dictSayBtn');
   if(dSay) dSay.addEventListener('click', () => {
@@ -14644,7 +14752,7 @@ function renderDictionaryView(){
       onText:(text) => {
         const t = vaNorm(text);
         const q = vaSearchQuery(t) || (lang.startsWith('ar') ? text.trim() : t.replace(/^(le mot |le |la |les |l |un |une |des )/, '').trim());
-        input.value = q; dictQuery = q; renderDictResults();
+        input.value = q; dictQuery = q; syncCatRow(); renderDictResults();
         const w = vaDictFind(q)[0];
         if(w){ ttsForcePersona = narratorPersona(); speak(w.fr, 'fr-FR', () => { ttsForcePersona = narratorPersona(); speak(w.ar, 'ar-SA'); }); }
         else { ttsForcePersona = narratorPersona(); speak(`Je n'ai pas trouvé ${q}.`, 'fr-FR'); }
@@ -15815,25 +15923,7 @@ function normalizeSpokenNumbers(s){
   return digitsToFrenchWords(timeToFrenchWords(s));
 }
 
-function speechMatches(transcript, expected){
-  const clean = s => normalizeSpokenNumbers(normalizeForSearch(s)).replace(/[^a-z\s]/g,'').trim();
-  const t = clean(transcript);
-  const e = clean(expected);
-  if(!t || !e) return false;
-  if(t === e) return true;
-  // le mot attendu apparaît dans la phrase reconnue
-  const words = t.split(/\s+/);
-  if(words.includes(e)) return true;
-  // tolérance : distance de Levenshtein courte sur le meilleur mot
-  for(const w of words){
-    const dist = levenshtein(w, e);
-    const tol = e.length <= 4 ? 1 : (e.length <= 7 ? 2 : 3);
-    if(dist <= tol) return true;
-  }
-  // ou distance courte sur la phrase entière (mots composés)
-  if(levenshtein(t, e) <= (e.length <= 7 ? 2 : 3)) return true;
-  return false;
-}
+/* speechMatches : réécrite en 1.0.12 (mots à tiret, apostrophes, œ, nombres) — voir « 🗣️ 1.0.12 : PRONONCIATION ». */
 
 /* 🎤 Pratique orale légère, indépendante du flux de quiz principal (n'utilise ni "answered" ni
    "handleSpeakResult") : pour un bouton mic posé sur une fiche (tableau d'expressions, etc.). Compare
@@ -16085,11 +16175,13 @@ function handleSpeakResult(isCorrect, word, info){
       </button>
     </div>
     <div class="ex-text">${renderExample(word.ex)}</div>
+    ${dxExampleHtml(word)}
     ${renderStreakProgressHtml(word.fr)}
     ${renderVariantsExtra(word)}
     <button class="next-btn" id="nextBtn">Suivant →</button>
   `;
   document.getElementById('speakFrBtn').addEventListener('click', () => speak(word.fr, 'fr-FR'));
+  dxBindExample(revealWrap);
   attachAutoAdvance('nextBtn', () => { renderCard(); });
   autoSpeakWord(word.fr, 'fr-FR');
   focusReveal(revealWrap);
@@ -16288,73 +16380,16 @@ const DIALOGUE_INTROS = [
 let repeatContinuous = false;
 
 /* Similarité entre la phrase dite et la phrase cible : fraction de mots retrouvés. */
-function sentenceSimilarity(said, target){
-  const norm = s => normalizeSpokenNumbers(normalizeForSearch(s)).replace(/[^a-z\s]/g,' ').split(/\s+/).filter(Boolean);
-  const a = norm(said), b = norm(target);
-  if(!b.length) return 0;
-  const bset = [...b];
-  let hit = 0;
-  a.forEach(w => {
-    const idx = bset.indexOf(w);
-    if(idx >= 0){ hit++; bset.splice(idx,1); }
-    else {
-      // tolérance orthographique
-      const near = bset.findIndex(x => levenshtein(x, w) <= (x.length <= 4 ? 1 : 2));
-      if(near >= 0){ hit++; bset.splice(near,1); }
-    }
-  });
-  return hit / b.length;
-}
+/* sentenceSimilarity : réécrite en 1.0.12 (mots à tiret, apostrophes, œ, nombres) — voir « 🗣️ 1.0.12 : PRONONCIATION ». */
 
 /* Découpe la phrase en mots cliquables/surlignables (cachés = ▁▁▁ tant que non dits). */
-function buildRepeatWords(sentence, hidden){
-  const tokens = sentence.split(/(\s+)/);
-  return tokens.map(tok => {
-    if(/^\s+$/.test(tok)) return ' ';
-    const norm = normalizeForSearch(tok).replace(/[^a-z]/g,'');
-    if(!norm) return escapeHtml(tok);
-    const display = hidden ? '▁'.repeat(Math.max(2, Math.min(tok.length, 10))) : escapeHtml(tok);
-    return `<span class="rw ${hidden?'rw-hidden':''}" data-norm="${norm}" data-word="${escapeHtml(tok)}">${display}</span>`;
-  }).join('');
-}
+/* buildRepeatWords : réécrite en 1.0.12 (mots à tiret, apostrophes, œ, nombres) — voir « 🗣️ 1.0.12 : PRONONCIATION ». */
 
 /* Surligne (et révèle si caché) les mots déjà prononcés, en temps réel. */
-function highlightSpokenWords(transcript){
-  const spoken = normalizeSpokenNumbers(normalizeForSearch(transcript)).replace(/[^a-z\s]/g,' ').split(/\s+/).filter(Boolean);
-  const counts = {};
-  spoken.forEach(w => { counts[w] = (counts[w]||0) + 1; });
-  document.querySelectorAll('#repeatSentence .rw').forEach(span => {
-    const nw = span.dataset.norm;
-    let matched = counts[nw] > 0;
-    if(!matched){
-      // tolérance orthographique
-      for(const w of Object.keys(counts)){
-        if(counts[w] > 0 && levenshtein(w, nw) <= (nw.length <= 4 ? 1 : 2)){ matched = true; break; }
-      }
-    }
-    if(matched && !span.classList.contains('spoken')){
-      span.classList.add('spoken');
-      if(span.classList.contains('rw-hidden')){ span.textContent = span.dataset.word; span.classList.remove('rw-hidden'); }
-    }
-  });
-}
+/* highlightSpokenWords : réécrite en 1.0.12 (mots à tiret, apostrophes, œ, nombres) — voir « 🗣️ 1.0.12 : PRONONCIATION ». */
 
 /* Reconstruit la phrase avec surlignage définitif : vert = mot bien prononcé, rouge = mot manqué. */
-function buildScoredSentenceHtml(sentence, heardText){
-  const heardWords = normalizeForSearch(heardText || '').replace(/[^a-z\s]/g,' ').split(/\s+/).filter(Boolean);
-  const pool = heardWords.slice();
-  const tokens = sentence.split(/(\s+)/);
-  return tokens.map(tok => {
-    if(/^\s+$/.test(tok)) return ' ';
-    const norm = normalizeForSearch(tok).replace(/[^a-z]/g,'');
-    if(!norm) return escapeHtml(tok);
-    let idx = pool.indexOf(norm);
-    if(idx < 0){ idx = pool.findIndex(w => levenshtein(w, norm) <= (norm.length <= 4 ? 1 : 2)); }
-    const ok = idx >= 0;
-    if(ok){ pool.splice(idx, 1); }
-    return `<span class="rw ${ok ? 'spoken' : 'missed'}">${escapeHtml(tok)}</span>`;
-  }).join('');
-}
+/* buildScoredSentenceHtml : réécrite en 1.0.12 (mots à tiret, apostrophes, œ, nombres) — voir « 🗣️ 1.0.12 : PRONONCIATION ». */
 
 function renderRepeatCard(){
   const word = queue[0];
@@ -16362,7 +16397,7 @@ function renderRepeatCard(){
   repeatAttemptCount = 0;
   repeatHeardUnion = '';
   window.__currentWord = word;
-  const sentence = word.ex.replace(/~/g, word.fr);
+  const sentence = exFull(word);
   window.__repeatSentence = sentence;
 
   const card = document.getElementById('quizCard');
@@ -16397,7 +16432,8 @@ function renderRepeatCard(){
     <div class="repeat-sentence ${hidden ? 'hidden' : ''}" id="repeatSentence">
       ${buildRepeatWords(sentence, hidden)}
     </div>
-    <label class="rep-show ${isLong ? 'long' : ''}" for="repShowChk"><input type="checkbox" id="repShowChk" ${hidden ? '' : 'checked'}><span>👁 Voir la phrase pour la lire à voix haute</span>${isLong ? '<span class="rep-long">phrase longue</span>' : ''}</label>
+    <div class="rep-tools"><label class="rep-show ${isLong ? 'long' : ''}" for="repShowChk"><input type="checkbox" id="repShowChk" ${hidden ? '' : 'checked'}><span>👁 Voir la phrase pour la lire à voix haute</span>${isLong ? '<span class="rep-long">phrase longue</span>' : ''}</label>${dxChipHtml('dxRepChip')}</div>
+    <div class="dx-panel" id="dxRepPanel" hidden></div>
     <button class="speak-ar-btn" id="hearSentenceBtn">🔊 ${hidden ? 'Réécouter' : 'Écouter'} la phrase</button>
     <div class="mic-zone">
       <button class="mic-btn" id="micBtn" aria-label="Parler">
@@ -16417,14 +16453,13 @@ function renderRepeatCard(){
     <div class="reveal" id="revealWrap"></div>
   `;
 
-  const playSentence = (onDone) => { mascotTalk(); speak(sentence, 'fr-FR', onDone); };
+  const playSentence = (onDone) => { mascotTalk(); speak(dxOn() ? dxSpeakText(sentence) : sentence, 'fr-FR', onDone); };   // 🫁 la voix marque aussi les pauses de sens
   document.getElementById('repShowChk').addEventListener('change', (e) => {
     const on = e.target.checked;
     window.__repeatHidden = !on;
     const el = document.getElementById('repeatSentence');
-    el.classList.toggle('hidden', !on);
-    el.innerHTML = buildRepeatWords(sentence, !on);
-    try{ if(repeatHeardUnion) highlightSpokenWords(repeatHeardUnion); }catch(err){}   // les mots déjà dits restent surlignés
+    el.classList.toggle('hidden', !on && !answered);
+    dxRepRedraw();   // les mots déjà dits restent surlignés (+ 🫁 liaisons & pauses quand la phrase est visible)
     const ql = document.getElementById('repeatLine'); if(ql) ql.textContent = on ? '📖 Lis la phrase à voix haute au micro' : '👂 Écoute la phrase, puis répète-la au micro';
     const hb = document.getElementById('hearSentenceBtn'); if(hb) hb.textContent = on ? '🔊 Écouter la phrase' : '🔊 Réécouter la phrase';
     if(isLong){ try{ localStorage.setItem(nsKey('lexiqueQuiz::repeatShowLong'), on ? '1' : '0'); }catch(err){} }   // retenu pour les prochaines phrases longues
@@ -16440,6 +16475,8 @@ function renderRepeatCard(){
     b.textContent = repeatContinuous ? '🎙️ Micro continu : ON' : '🎙️ Activer micro continu';
     if(repeatContinuous && !ttsSpeaking){ startRepeatRecognition(sentence); }
   });
+  dxBindChip('dxRepChip', dxRepRedraw);
+  dxRepRefresh();
   renderProgress();
 
   // Lecture auto de la phrase à l'affichage (surtout si cachée) — le micro n'écoute qu'une fois le TTS terminé
@@ -16622,6 +16659,7 @@ function handleRepeatResult(similarity, info){
   // révèle la phrase (surtout si elle était cachée)
   const rs = document.getElementById('repeatSentence');
   if(rs){ rs.classList.remove('hidden'); rs.innerHTML = buildScoredSentenceHtml(sentence, repeatHeardUnion); }
+  try{ dxRepRefresh(); }catch(e){}
 
   revealWrap.classList.add('show');
   revealWrap.innerHTML = `
@@ -16651,7 +16689,7 @@ function renderListenOrderCard(){
   window.__currentWord = word;
   window.__orderAttemptCount = 0;
 
-  const sentence = word.ex.replace(/~/g, word.fr);
+  const sentence = exFull(word);
   const fullWords = sentence.trim().split(/\s+/).filter(Boolean);
   const maxBlanks = ORDER_MODE_MAX_WORDS;
   const blankIndices = fullWords.length <= maxBlanks
@@ -16663,6 +16701,7 @@ function renderListenOrderCard(){
   window.__orderBlankSlots = new Array(blankIndices.length).fill(null);
   window.__orderPool = shuffle(blankIndices.map((idx, i) => ({ word: fullWords[idx], uid: i })));
   orderDrag = null;
+  ordInit();   // 🃏 3 jokers, ⭐⭐⭐
 
   const card = document.getElementById('quizCard');
   const micSection = speechRecoAvailable ? `
@@ -16680,6 +16719,7 @@ function renderListenOrderCard(){
     <div class="chrono-timer-track"><div class="chrono-timer-fill" id="quizTimerFill"></div></div>
     <div class="question-line" style="text-align:center;">🎧 Écoute bien, puis reconstitue la phrase avec les mots ci-dessous — aucun texte n'est affiché avant que tu répondes.</div>
     <button class="restart-btn" id="listenReplayBtn" style="display:flex;align-items:center;gap:8px;margin:10px auto 16px;background:linear-gradient(135deg,#6366F1,#4F46E5);border-color:#3730A3;">🔊 Écouter la phrase</button>
+    ${ordBarHtml()}
     <div class="order-sentence" id="orderSentence"></div>
     <div class="order-pool" id="orderPool"></div>
     ${micSection}
@@ -16695,6 +16735,7 @@ function renderListenOrderCard(){
   const orderMicBtn = document.getElementById('orderMicBtn');
   if(orderMicBtn){ orderMicBtn.addEventListener('click', () => startOrderVoiceInput()); }
   renderOrderZones(false);
+  ordBind();
   // 🔊 Lecture automatique de la phrase à l'arrivée sur la carte
   setTimeout(() => { if(!answered && window.__currentWord === word){ speak(sentence, 'fr-FR'); } }, 350);
   renderProgress();
@@ -16707,7 +16748,7 @@ function renderDialogueCard(){
   window.__currentWord = word;
   window.__orderAttemptCount = 0; // pour la seconde chance avant échec définitif
 
-  const sentence = word.ex.replace(/~/g, word.fr);
+  const sentence = exFull(word);
   const fullWords = sentence.trim().split(/\s+/).filter(Boolean);
   const maxBlanks = ORDER_MODE_MAX_WORDS;
   const blankIndices = fullWords.length <= maxBlanks
@@ -16719,6 +16760,7 @@ function renderDialogueCard(){
   window.__orderBlankSlots = new Array(blankIndices.length).fill(null); // état ORDONNÉ des trous, dans l'ordre de la phrase
   window.__orderPool = shuffle(blankIndices.map((idx, i) => ({ word: fullWords[idx], uid: i })));
   orderDrag = null;
+  ordInit();   // 🃏 3 jokers, ⭐⭐⭐
 
   const allBlank = blankIndices.length === fullWords.length;
   const instruction = allBlank
@@ -16741,6 +16783,7 @@ function renderDialogueCard(){
     <div class="chrono-timer-track"><div class="chrono-timer-fill" id="quizTimerFill"></div></div>
     <div class="question-line" style="text-align:center;">${instruction}</div>
     <div class="order-hint">💡 indice : le mot clé se traduit par <span class="order-hint-ar">${escapeHtml(word.ar)}</span></div>
+    ${ordBarHtml()}
     <div class="order-sentence" id="orderSentence"></div>
     <div class="order-pool" id="orderPool"></div>
     ${micSection}
@@ -16755,6 +16798,7 @@ function renderDialogueCard(){
   const orderMicBtn = document.getElementById('orderMicBtn');
   if(orderMicBtn){ orderMicBtn.addEventListener('click', () => startOrderVoiceInput()); }
   renderOrderZones(false);
+  ordBind();
   renderProgress();
   startQuestionTimer(() => handleOrderAnswer(true), Math.max(quizTimerSeconds * 4, 25));
 }
@@ -16779,19 +16823,31 @@ function pickBlankIndices(words, maxBlanks){
 /* Insère "item" à la position blankPos parmi les trous, EN DÉCALANT les mots entre l'ancienne et
    la nouvelle position (comme dans une vraie liste) — au lieu de simplement écraser une case. */
 function insertIntoBlankSlots(item, blankPos){
+  // 🃏 1.0.13 : les mots posés par le joker sont bloqués — on décale seulement les autres places
   const slots = window.__orderBlankSlots;
-  const curPos = slots.findIndex(f => f && f.uid === item.uid);
-  if(curPos >= 0){ slots.splice(curPos, 1); }
-  const target = Math.max(0, Math.min(blankPos, slots.length));
-  slots.splice(target, 0, item);
-  if(slots.length > window.__orderBlankIndices.length){
-    slots.pop(); // le mot évincé en bout de liste retourne simplement au pool (il n'est plus dans les trous)
+  if(item && item.locked) return;
+  const free = slots.map((f, q) => q).filter(q => !(slots[q] && slots[q].locked));
+  if(!free.length) return;
+  let t = free.indexOf(blankPos);
+  if(t < 0){ t = free.findIndex(q => q > blankPos); if(t < 0) t = free.length - 1; }   // lâché sur un mot du joker : la place libre d'à côté
+  const vals = free.map(q => slots[q]);
+  const cur = vals.findIndex(f => f && f.uid === item.uid);
+  if(cur >= 0){ vals.splice(cur, 1); vals.push(null); }
+  vals.splice(Math.max(0, Math.min(t, vals.length)), 0, item);
+  if(vals.length > free.length){
+    const hole = vals.findIndex((f, k) => k > t && !f);
+    if(hole >= 0) vals.splice(hole, 1); else vals.pop();   // un trou vide plus loin absorbe le décalage ; sinon le dernier mot retourne aux tuiles
   }
+  free.forEach((q, k) => { slots[q] = vals[k] || null; });
 }
 function removeFromBlankSlots(uid){
   const slots = window.__orderBlankSlots;
-  const curPos = slots.findIndex(f => f && f.uid === uid);
-  if(curPos >= 0){ slots.splice(curPos, 1); slots.push(null); }
+  const q0 = slots.findIndex(f => f && f.uid === uid);
+  if(q0 < 0 || slots[q0].locked) return;
+  const free = slots.map((f, q) => q).filter(q => !(slots[q] && slots[q].locked));
+  const vals = free.map(q => slots[q]);
+  vals.splice(vals.findIndex(f => f && f.uid === uid), 1); vals.push(null);
+  free.forEach((q, k) => { slots[q] = vals[k] || null; });
 }
 
 function renderOrderZones(animate){
@@ -16816,7 +16872,7 @@ function renderOrderZones(animate){
     const blankPos = blankIndices.indexOf(i);
     const f = slots[blankPos];
     if(f){
-      return `<button type="button" class="order-chip placed order-slot-filled" data-blankpos="${blankPos}" data-uid="${f.uid}">${escapeHtml(f.word)}</button>`;
+      return `<button type="button" class="order-chip placed order-slot-filled${f.locked ? ' locked' : ''}${window.__ordLastUid === f.uid ? ' ord-pop' : ''}" data-blankpos="${blankPos}" data-uid="${f.uid}"${f.locked ? ' title="Placé par le joker"' : ''}>${escapeHtml(f.word)}</button>`;
     }
     return `<span class="order-slot-empty" data-blankpos="${blankPos}">…</span>`;
   }).join(' ');
@@ -16824,9 +16880,12 @@ function renderOrderZones(animate){
   const usedUids = new Set(slots.filter(Boolean).map(f => f.uid));
   poolZone.innerHTML = window.__orderPool
     .filter(p => !usedUids.has(p.uid))
-    .map(p => `<button type="button" class="order-chip" data-uid="${p.uid}" data-kind="pool">${escapeHtml(p.word)}</button>`).join('');
+    .map((p, k) => `<button type="button" class="order-chip" data-uid="${p.uid}" data-kind="pool" style="--d:${k * 45}ms;--r:${((p.uid * 37) % 7) - 3}deg">${escapeHtml(p.word)}</button>`).join('');
+  if(!animate){ poolZone.classList.add('ord-enter'); setTimeout(() => poolZone.classList.remove('ord-enter'), 1200); }   // les tuiles arrivent en rebondissant (seulement à l'arrivée)
+  else poolZone.classList.remove('ord-enter');
+  window.__ordLastUid = null;
 
-  sentenceEl.querySelectorAll('.order-slot-filled').forEach(el => attachOrderDrag(el));
+  sentenceEl.querySelectorAll('.order-slot-filled:not(.locked)').forEach(el => attachOrderDrag(el));
   poolZone.querySelectorAll('.order-chip').forEach(el => attachOrderDrag(el));
 
   // FLIP : on anime chaque mot depuis sa position précédente vers sa nouvelle position (glissement visible)
@@ -16851,6 +16910,7 @@ function renderOrderZones(animate){
     const complete = slots.every(Boolean);
     validateBtn.style.display = complete ? 'inline-flex' : 'none';
   }
+  try{ ordRefreshBar(); }catch(e){}
 }
 
 function attachOrderDrag(el){
@@ -16930,6 +16990,7 @@ function onOrderDragEnd(){
     removeFromBlankSlots(orderDrag.item.uid);
   }
 
+  try{ if(window.__orderBlankSlots.some(f => f && f.uid === orderDrag.item.uid)){ window.__ordLastUid = orderDrag.item.uid; playClickSound(); } }catch(e){}   // petit « pop » quand le mot se pose
   if(orderDrag.ghost && orderDrag.ghost.parentNode){ orderDrag.ghost.parentNode.removeChild(orderDrag.ghost); }
   orderDrag = null;
   renderOrderZones(true);
@@ -16937,7 +16998,7 @@ function onOrderDragEnd(){
 
 function resetOrderSelection(){
   if(answered) return;
-  window.__orderBlankSlots = new Array(window.__orderBlankIndices.length).fill(null);
+  window.__orderBlankSlots = window.__orderBlankSlots.map(f => (f && f.locked) ? f : null);   // les mots du joker restent
   renderOrderZones(true);
 }
 
@@ -16971,25 +17032,28 @@ function startOrderVoiceInput(){
     // On reconstruit TOUT le placement à partir de zéro à chaque fois, dans l'ordre exact où les mots
     // ont été prononcés (jamais "corrigé" vers le bon ordre) — ainsi, redire la phrase efface et remplace
     // le placement précédent au lieu de s'accumuler par-dessus.
-    const spoken = normalizeForSearch(transcriptText).replace(/[^a-z\s]/g,' ').split(/\s+/).filter(Boolean);
-    const newSlots = new Array(window.__orderBlankSlots.length).fill(null);
-    const usedThisPass = new Set();
-    let cursor = 0;
-    spoken.forEach(sw => {
-      if(!sw || cursor >= newSlots.length) return;
-      const candidate = window.__orderPool.find(p => {
-        if(usedThisPass.has(p.uid)) return false;
-        const norm = normalizeForSearch(p.word).replace(/[^a-z]/g,'');
-        if(!norm) return false;
-        if(norm === sw) return true;
-        return levenshtein(norm, sw) <= (norm.length <= 4 ? 1 : 2);
-      });
-      if(candidate){
-        newSlots[cursor] = candidate;
-        usedThisPass.add(candidate.uid);
-        cursor++;
+    // 🗣️ 1.0.12 : même découpage que la Répétition — « peut-être », « l'homme », « qu'il » se placent aussi à la voix
+    const spoken = spTokens(transcriptText);
+    const newSlots = window.__orderBlankSlots.map(f => (f && f.locked) ? f : null);   // 🃏 les mots du joker restent
+    const usedThisPass = new Set(newSlots.filter(Boolean).map(f => f.uid));
+    let cursor = 0, k = 0;
+    const skipLocked = () => { while(cursor < newSlots.length && newSlots[cursor]) cursor++; };
+    skipLocked();
+    while(k < spoken.length && cursor < newSlots.length){
+      let best = null, bestL = 0;
+      for(const fuzzy of [false, true]){
+        window.__orderPool.forEach(p => {
+          if(usedThisPass.has(p.uid)) return;
+          const norm = spCompact(p.word);
+          if(!norm) return;
+          const L = spMatchAt(norm, spoken, k, null, fuzzy);
+          if(L > bestL){ best = p; bestL = L; }
+        });
+        if(best) break;
       }
-    });
+      if(best){ newSlots[cursor++] = best; usedThisPass.add(best.uid); k += bestL; skipLocked(); }
+      else k++;
+    }
     window.__orderBlankSlots = newSlots;
     renderOrderZones(true);
   };
@@ -17035,6 +17099,8 @@ function startOrderVoiceInput(){
 function showOrderRetryFeedback(){
   playWrongSound();
   reactMascot('ko');
+  // 🎯 1.0.13 : combien de mots sont déjà à la bonne place (sans dire lesquels) — et une étoile de moins
+  try{ if(window.__ord){ window.__ord.misses++; ordRefreshBar(); const g = ordGoodCount(), tot = window.__orderBlankIndices.length; ordSay(`🎯 <b>${g}</b> mot${g > 1 ? 's' : ''} sur ${tot} ${g > 1 ? 'sont' : 'est'} déjà à la bonne place — cherche les autres !`); } }catch(e){}
   const sentenceEl = document.getElementById('orderSentence');
   if(sentenceEl){
     sentenceEl.classList.remove('shake');
@@ -17100,7 +17166,7 @@ function handleOrderAnswer(timedOut){
       const blankPos = blankIndices.indexOf(i);
       const f = slots[blankPos];
       const ok = f && normalizeForSearch(f.word) === normalizeForSearch(w2);
-      return `<span class="order-chip disabled ${ok ? 'correct' : 'wrong'}">${escapeHtml(f ? f.word : '…')}</span>`;
+      return `<span class="order-chip disabled ${ok ? 'correct' : 'wrong'}${isCorrect ? ' ord-wave' : ''}" style="--d:${blankPos * 70}ms">${escapeHtml(f ? f.word : '…')}</span>`;
     }).join(' ');
   }
   const poolZone = document.getElementById('orderPool');
@@ -17119,7 +17185,8 @@ function handleOrderAnswer(timedOut){
   renderScoreboard();
   renderProgress();
 
-  const headline = isCorrect ? '🎉 Phrase complétée !' : (timedOut ? '⏱️ Temps écoulé — voici la phrase :' : '💛 Pas tout à fait — voici la phrase :');
+  const headline = isCorrect ? `🎉 Phrase complétée ! <span class="ord-stars-end">${ordStarsHtml(ordStars())}</span>${window.__ord && !window.__ord.used && !window.__ord.misses ? '<span class="ord-perfect">Parfait, sans joker !</span>' : ''}` : (timedOut ? '⏱️ Temps écoulé — voici la phrase :' : '💛 Pas tout à fait — voici la phrase :');
+  try{ ordRefreshBar(); }catch(e){}
   const revealWrap = document.getElementById('revealWrap');
   revealWrap.classList.add('show');
   revealWrap.innerHTML = `
@@ -17203,7 +17270,7 @@ function renderBlankCard(){
     <div class="reveal" id="revealWrap"></div>
   `;
   document.getElementById('speakWordBtn').addEventListener('click', () => {
-    speak(word.ex.replace(/~/g, word.fr), 'fr-FR');
+    speak(exFull(word), 'fr-FR');
   });
   document.querySelectorAll('#quizCard .opt').forEach(btn => {
     btn.addEventListener('click', () => handleAnswer(parseInt(btn.dataset.i)));
@@ -17485,7 +17552,7 @@ function handleChronoAnswer(playerSaysTrue){
     <button class="next-btn" id="nextBtn">Suivant →</button>
   `;
   document.getElementById('speakExBtn').addEventListener('click', () => {
-    speak(word.ex.replace(/~/g, word.fr), 'fr-FR');
+    speak(exFull(word), 'fr-FR');
   });
   attachAutoAdvance('nextBtn', () => { renderCard(); });
   autoSpeakWord(word.fr, 'fr-FR');
@@ -17571,7 +17638,7 @@ function handleAnswer(i){
     <button class="next-btn" id="nextBtn">Mot suivant →</button>
   `;
   document.getElementById('speakExBtn').addEventListener('click', () => {
-    const fullSentence = word.ex.replace(/~/g, word.fr);
+    const fullSentence = exFull(word);
     speak(fullSentence, 'fr-FR');
   });
   attachAutoAdvance('nextBtn', () => { renderCard(); });
@@ -19021,6 +19088,14 @@ const COLOR_PRESETS = {
 /* ============ 🆕 NOUVEAUTÉS — pour que tout ce qui a été ajouté reste découvrable ============ */
 const WHATS_NEW_SECTIONS = [
   { icon:'🆕', title:'Nouveautés', items:[
+    { name:'🃏 Mots en ordre : 3 jokers par phrase', desc:"Bloqué ? Le joker pose un mot au bon endroit (en doré, il ne bouge plus) — 3 par phrase, le dernier mot reste à toi. Tu gagnes ⭐⭐⭐ : une étoile de moins par joker ou par essai raté. Après un essai raté, l'appli te dit combien de mots sont déjà à la bonne place. Tuiles colorées, petit « pop » quand un mot se pose, et une vague quand la phrase est juste (aussi en Dictée)." },
+    { name:"✍️ Phrases d'exemple en bon français", desc:"Pour les verbes et les expressions, la phrase d'exemple est maintenant conjuguée : « Ce mot dérive du latin » (et plus « Ce mot dériver du latin »), « Ma grand-mère a la main verte ». Partout où la phrase entière est dite ou affichée : Répétition, Mots en ordre, Dictée, Prononciation, la radio… Pour tes mots à toi, le verbe est conjugué automatiquement quand c'est sûr." },
+    { name:'🫁 Liaisons & pauses : aussi en Bouquinage et en Shadow', desc:"Dans Bouquinage, le texte montre les liaisons, les pauses et où respirer (et la voix marque les pauses). Dans le jeu Shadow, la phrase à écouter porte les mêmes marques, et la case « 👁 Voir la phrase » permet d'afficher la phrase cachée pour la lire au micro." },
+    { name:'🎲 La grande fête de l\'objectif du jour change à chaque fois', desc:"Quand tu atteins ton objectif du jour, le renard arrive à chaque fois autrement (en fusée, en tombant du ciel, par magie, en courant…), enchaîne des figures tirées au hasard (danse, salto, roue, toupie, pluie de pièces…) et te dit des félicitations différentes — jamais la même phrase deux jours de suite." },
+    { name:'🏷️ Moins de puces', desc:"Pendant un exercice, la barre du haut ne montre plus une puce par catégorie (juste le bloc et les boutons). Dans « Mots & recherche », les catégories se cachent dès que tu tapes une recherche." },
+    { name:'🫁 Liaisons et respiration', desc:"Quand tu t'entraînes à dire une phrase (Répétition, « Redis la phrase » en conjugaison, l'exemple en Prononciation), l'appli marque les liaisons obligatoires ‿ (avec le son : z, t, n…), facultatives et interdites /, les enchaînements, les petites pauses | et les endroits où respirer ‖ — même là où il n'y a pas de ponctuation —, et la mélodie ↗↘. « 💡 Pourquoi ces marques ? » donne la règle de chaque marque, avec un 📘 qui ouvre la fiche d'Art oratoire d'où elle vient. Bouton « 🫁 Liaisons & pauses » pour l'activer ou non." },
+    { name:'✍️ Art oratoire : Prépare ton texte', desc:"Dans Art oratoire (et depuis les fiches sur les liaisons, la respiration et la lecture à voix haute) : écris ou colle un texte, l'appli le prépare avec les liaisons, les pauses et les respirations, te le lit en marquant les pauses, puis t'écoute le lire et te dit quels mots ne sont pas passés." },
+    { name:'🗣️ Mots à tiret bien reconnus', desc:"Au micro, « peut-être », « c'est-à-dire », « arc-en-ciel », « qu'il », « aujourd'hui », « trente-et-un », « cœur »/« coeur » et les nombres (« 500 », « 21e ») sont maintenant reconnus en Répétition, en Prononciation et dans « Remettre dans l'ordre » : avant, ces mots restaient en rouge même bien dits." },
     { name:'👁 Répétition : voir la phrase', desc:"Dans le mode Répétition, chaque phrase a une case « 👁 Voir la phrase pour la lire à voix haute » : coche-la pour afficher la phrase cachée et la lire au micro (pratique pour les phrases longues). Si tu la coches sur une phrase longue, les prochaines phrases longues s'affichent d'office." },
     { name:'⏸️ Chronos en pause quand l\'appli est réduite', desc:"Quand tu réduis l'appli (ou changes d'onglet), le compte à rebours, le chrono de la question, le Blitz et l'association s'arrêtent, et reprennent là où ils en étaient à ton retour." },
     { name:'🔊 La phrase est lue jusqu\'au bout', desc:"Après une bonne réponse, le compte à rebours ne coupe plus la phrase : s'il se termine pendant la lecture, l'appli attend que la phrase soit lue en entier (même avec une voix lente), laisse un petit temps, puis passe à la suite." },
@@ -32218,7 +32293,9 @@ function renderSheetsHomeBySection(section, catTag, heroTitle, heroSubtitle){
   const hubLink = (section === 'avance' && typeof renderBescherelleHub === 'function')
     ? `<button class="restart-btn" id="goBesHubFromAvBtn" style="margin:14px auto 0;display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#2563EB,#7C3AED);color:#fff;box-shadow:0 4px 0 #3730A3;">📘 Grammaire & conjugaison (Bescherelle) →</button>`
     : (section === 'situations' && typeof renderEntrepriseHub === 'function')
-    ? `<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:14px;"><button class="restart-btn" id="goEntHubFromSitBtn" style="margin:0;display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#1D4ED8,#1E3A8A);color:#fff;box-shadow:0 4px 0 #172554;">🏢 Français en entreprise →</button><button class="restart-btn" id="goRedHubFromSitBtn" style="margin:0;display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#8B5CF6,#6D28D9);color:#fff;box-shadow:0 4px 0 #4C1D95;">✍️ Rédiger & communiquer →</button></div>` : '';
+    ? `<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:14px;"><button class="restart-btn" id="goEntHubFromSitBtn" style="margin:0;display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#1D4ED8,#1E3A8A);color:#fff;box-shadow:0 4px 0 #172554;">🏢 Français en entreprise →</button><button class="restart-btn" id="goRedHubFromSitBtn" style="margin:0;display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#8B5CF6,#6D28D9);color:#fff;box-shadow:0 4px 0 #4C1D95;">✍️ Rédiger & communiquer →</button></div>`
+    : (section === 'oratoire' && typeof renderDictionLab === 'function')
+    ? `<button class="restart-btn dx-lab-go" id="goDxLabBtn">🫁 Prépare ton texte : liaisons &amp; respiration →</button>` : '';
   card.innerHTML = `
     <div class="cat-tag">${catTag}</div>
     <div class="word-fr" style="font-size:clamp(22px,4.5vw,28px);">${escapeHtml(heroTitle)}</div>
@@ -32247,6 +32324,8 @@ function renderSheetsHomeBySection(section, catTag, heroTitle, heroSubtitle){
   if(besLink){ besLink.addEventListener('click', () => renderBescherelleHub()); }
   const redLink = document.getElementById('goRedHubFromSitBtn');
   if(redLink){ redLink.addEventListener('click', () => renderRedactionHub()); }
+  const dxLab = document.getElementById('goDxLabBtn');
+  if(dxLab){ dxLab.addEventListener('click', () => renderDictionLab()); }
   card.querySelectorAll('[data-sheet]').forEach(btn => {
     btn.addEventListener('click', () => renderPracticalSheetDetail(btn.dataset.sheet));
   });
@@ -33703,8 +33782,10 @@ function renderBouquinageDetail(idx, opts){
     <div class="word-fr" style="font-size:clamp(19px,4vw,24px);">${escapeHtml(t.title)}</div>
     ${bqCoachHtml(idx)}
     ${buildReadingToolbarHtml()}
+    <div class="bq-dx">${dxChipHtml('bqDxChip')}${dxOn() ? dxLegendHtml() : ''}</div>
     <div class="reading-text bq-text" id="bouquinageReadingTarget" style="text-align:left;margin-top:12px;">${bqParts.body}</div>
     ${bqParts.quote}
+    <div id="bqDxRules">${dxOn() ? dxRulesHtml(String(t.body || '').replace(/\s*\n+\s*/g, ' ') + (t.quote ? ' ' + t.quote : '')) : ''}</div>
     <button class="restart-btn" id="markReadBtn" style="margin:16px auto 0;${read ? 'background:var(--surface-sunken);border:1px solid rgba(34,197,94,0.5);color:#16A34A;box-shadow:none;' : 'background:linear-gradient(135deg,#22C55E,#16A34A);border-color:#15803D;'}">
       ${read ? '✅ Marqué comme lu (cliquer pour annuler)' : '☐ Marquer comme lu'}
     </button>
@@ -33726,6 +33807,8 @@ function renderBouquinageDetail(idx, opts){
   setQuickNavTarget(() => document.getElementById(isBouquinageRead(idx) && idx < BOUQUINAGE_TEXTS.length - 1 ? 'bouquinageNextBtn' : 'markReadBtn'));
   startSectionReading('bouquinage');
   bqWire(idx, opts);   // 🦊 « Je te lis, ou tu lis toi-même ? » + reprise là où on s'était arrêté
+  conjBindSheetPeeks(document.getElementById('bqDxRules'));
+  dxBindChip('bqDxChip', () => { const cur = (BQ && BQ.idx === idx) ? BQ.cur : 0; bqStop(true); renderBouquinageDetail(idx, { sent:cur }); });
 }
 
 function renderLessonList(){
@@ -34096,8 +34179,10 @@ function renderShadowCard(){
     <div class="cat-tag">🎭 Shadow — comme Répétition, mais de mémoire</div>
     <div class="question-line" id="shadowInstruction" style="text-align:center;margin-bottom:8px;">📖 Lis et écoute la phrase, elle va bientôt disparaître...</div>
     <div style="font-family:'Changa',sans-serif;direction:rtl;font-size:20px;color:var(--purple);font-weight:700;text-align:center;margin-bottom:10px;">${escapeHtml(item.ar)}</div>
-    <div class="repeat-sentence" id="repeatSentence">${escapeHtml(item.full)}</div>
+    <div class="repeat-sentence" id="repeatSentence">${shdSentHtml(item.full)}</div>
     ${hasExtra ? `<button class="mode-chip" id="shadowToggleExtraBtn" style="margin-top:8px;">🙈 Cacher l'explication entre parenthèses</button>` : ''}
+    <div class="rep-tools"><label class="rep-show ${shdIsLong(item.clean) ? 'long' : ''}" for="shadowShowChk" id="shadowShowLbl" hidden><input type="checkbox" id="shadowShowChk"><span>👁 Voir la phrase pour la lire à voix haute</span>${shdIsLong(item.clean) ? '<span class="rep-long">phrase longue</span>' : ''}</label>${dxChipHtml('dxShadowChip')}</div>
+    <div class="dx-panel" id="dxShadowPanel" hidden></div>
     <button class="speak-ar-btn" id="shadowReplayBtn" style="margin-top:10px;">🔊 Réécouter la phrase</button>
     <div id="shadowMicWrap" style="display:none;">
       <div class="mic-zone" style="margin-top:16px;">
@@ -34113,12 +34198,14 @@ function renderShadowCard(){
     <div class="reveal" id="shadowReveal"></div>
   `;
   let parensShown = true;
+  window.__shadowUi = { item, phase:'intro', parensShown:true, heard:'' }; window.__shadowRunning = '';
   const toggleBtn = document.getElementById('shadowToggleExtraBtn');
   if(toggleBtn){
     toggleBtn.addEventListener('click', () => {
       parensShown = !parensShown;
       const sentEl = document.getElementById('repeatSentence');
-      if(sentEl && !sentEl.classList.contains('hidden')){ sentEl.textContent = parensShown ? item.full : item.clean; }
+      window.__shadowUi.parensShown = parensShown;
+      if(sentEl && !sentEl.classList.contains('hidden') && window.__shadowUi.phase === 'intro'){ shdRedraw(); }
       toggleBtn.textContent = parensShown ? "🙈 Cacher l'explication entre parenthèses" : "👁 Afficher l'explication entre parenthèses";
     });
   }
@@ -34133,13 +34220,14 @@ function renderShadowCard(){
     const micBtn = document.getElementById('shadowMicBtn');
     if(micBtn){ micBtn.classList.remove('listening'); }
     const sentEl = document.getElementById('repeatSentence');
-    if(sentEl){ sentEl.classList.remove('hidden'); sentEl.textContent = parensShown ? item.full : item.clean; }
+    if(sentEl){ window.__shadowUi.phase = 'intro'; shdRedraw(); }   // 🫁 avec les liaisons et les pauses
     const instr = document.getElementById('shadowInstruction');
     if(instr){ instr.textContent = '📖 Lis et écoute la phrase, elle va bientôt disparaître...'; }
     if(toggleBtn){ toggleBtn.style.display = ''; }
-    speak(item.clean, 'fr-FR', () => startShadowHiddenPhase(item));
+    speak(dxOn() ? dxSpeakText(item.clean) : item.clean, 'fr-FR', () => startShadowHiddenPhase(item));
   };
   document.getElementById('shadowReplayBtn').addEventListener('click', playIntro);
+  shdBind();
   playIntro();
 }
 
@@ -34151,8 +34239,7 @@ function startShadowHiddenPhase(item){
   if(instr){ instr.textContent = '🙈 À toi de répéter la phrase de mémoire !'; }
   const toggleBtn = document.getElementById('shadowToggleExtraBtn');
   if(toggleBtn){ toggleBtn.style.display = 'none'; }
-  sentEl.classList.add('hidden');
-  sentEl.innerHTML = buildRepeatWords(item.clean, true);
+  shdHiddenPhase();   // ▁▁▁ ▁▁ (ou la phrase, si « 👁 Voir la phrase » est cochée)
   const micWrap = document.getElementById('shadowMicWrap');
   if(micWrap){ micWrap.style.display = 'block'; }
   startShadowRecognition(item.clean);
@@ -34209,6 +34296,7 @@ function startShadowRecognition(targetSentence){
     const running = (finalTranscript + ' ' + interim).trim();
     if(micTr){ micTr.textContent = running ? `Tu dis : « ${running} »` : ''; }
     highlightSpokenWords(running); // 🔴 surlignage en temps réel, mot par mot
+    window.__shadowRunning = running;
 
     const allWords = document.querySelectorAll('#repeatSentence .rw');
     const spokenWords = document.querySelectorAll('#repeatSentence .rw.spoken');
@@ -34293,6 +34381,7 @@ function finalizeShadowAnswer(isCorrect, targetSentence, heardText){
   st.attempts++;
   const sentEl = document.getElementById('repeatSentence');
   if(sentEl){ sentEl.classList.remove('hidden'); sentEl.innerHTML = buildScoredSentenceHtml(targetSentence, heardText); }
+  if(window.__shadowUi){ window.__shadowUi.phase = 'done'; window.__shadowUi.heard = heardText || ''; shdRedraw(); }
   const micWrap = document.getElementById('shadowMicWrap');
   if(micWrap){ micWrap.style.display = 'none'; }
   const reveal = document.getElementById('shadowReveal');
@@ -34321,7 +34410,7 @@ function finalizeShadowAnswer(isCorrect, targetSentence, heardText){
       `;
       document.getElementById('shadowRetryBtn').addEventListener('click', () => {
         reveal.innerHTML = '';
-        if(sentEl){ sentEl.classList.add('hidden'); sentEl.innerHTML = buildRepeatWords(targetSentence, true); }
+        if(window.__shadowUi){ shdHiddenPhase(); } else if(sentEl){ sentEl.classList.add('hidden'); sentEl.innerHTML = buildRepeatWords(targetSentence, true); }
         if(micWrap){ micWrap.style.display = 'block'; }
         startShadowRecognition(targetSentence);
       });
@@ -38595,9 +38684,11 @@ function bqSplit(text){
 function bqTextParts(t){
   const sents = [];
   const paras = String(t.body || '').split(/\n+/).map(p => p.trim()).filter(Boolean);
-  const body = paras.map(p => '<p class="bq-p">' + bqSplit(p).map(x => { const i = sents.push(x) - 1; return `<span class="bq-sent" data-s="${i}">${escapeHtml(x)}</span>`; }).join(' ') + '</p>').join('');
+  const dx = (() => { try{ return dxOn(); }catch(e){ return false; } })();   // 🫁 1.0.13 : liaisons & respiration dans le texte
+  const sh = (x) => dx ? dxDecorate(x) : escapeHtml(x);
+  const body = paras.map(p => '<p class="bq-p">' + bqSplit(p).map(x => { const i = sents.push(x) - 1; return `<span class="bq-sent" data-s="${i}">${sh(x)}</span>`; }).join(' ') + '</p>').join('');
   let quote = '';
-  if(t.quote){ const i = sents.push(t.quote) - 1; quote = `<div class="bq-quote">« <span class="bq-sent" data-s="${i}">${escapeHtml(t.quote)}</span> »</div>`; }
+  if(t.quote){ const i = sents.push(t.quote) - 1; quote = `<div class="bq-quote">« <span class="bq-sent" data-s="${i}">${sh(t.quote)}</span> »</div>`; }
   return { body, quote, sents };
 }
 function bqCoachHtml(idx){
@@ -38734,7 +38825,7 @@ function bqSpeak(i){
   BQ.cur = i; bqHighlight(i); bqSaveResume(BQ.idx, i, false); bqPlayerUpdate();
   const text = BQ.sents[i];
   bqFoxTalk(text, readingRate * 0.9);
-  speakNarrator(text, 'fr-FR', () => {
+  speakNarrator(dxOn() ? dxSpeakText(text) : text, 'fr-FR', () => {   // 🫁 la voix marque aussi les pauses de sens
     if(tok !== BQ.token || !BQ.playing || !bqAlive()) return;
     BQ.gapT = setTimeout(() => { if(tok === BQ.token && BQ.playing && bqAlive()) bqSpeak(i + 1); }, 280);
   }, readingRate);
@@ -38744,7 +38835,7 @@ function bqSpeakOne(i){
   const tok = ++BQ.token;
   BQ.cur = i; bqHighlight(i); bqSaveResume(BQ.idx, i, false);
   bqFoxTalk(BQ.sents[i], readingRate * 0.9);
-  speakNarrator(BQ.sents[i], 'fr-FR', () => { if(tok === BQ.token && !BQ.playing) bqHighlight(-1); }, readingRate);
+  speakNarrator(dxOn() ? dxSpeakText(BQ.sents[i]) : BQ.sents[i], 'fr-FR', () => { if(tok === BQ.token && !BQ.playing) bqHighlight(-1); }, readingRate);
 }
 function bqHush(){ BQ.token++; clearTimeout(BQ.gapT); try{ window.speechSynthesis.cancel(); }catch(e){} ttsSpeaking = false; const F = bqFox(); if(F) try{ F.still(); }catch(e){} }
 function bqPause(){ BQ.playing = false; bqHush(); bqCoach('paused'); bqPlayerUpdate(); }
@@ -39488,45 +39579,112 @@ function vaConjGo(tenses){
    feu d'artifice, « OBJECTIF DU JOUR ATTEINT ! » en relief, et le renard 3D en GRAND qui jaillit en fusée,
    fait un salto, te félicite à voix haute (il articule), danse, te salue et repart. */
 const CELEB_SPECIAL = {
+  /* 🎲 1.0.13 : chaque grande fête est différente — une arrivée, deux figures, ses félicitations, deux ou trois
+     figures de plus (danse, salto, roue, toupie, clin d'œil, pluie de pièces…), un au revoir et une sortie, tirés au hasard */
   finale(c){
     const { P, u, vw } = c;
-    // en grand, mais entre le titre (en haut) et la bulle (en bas)
     const big = Math.max(1.1, Math.min(1.9, window.innerHeight * 0.46 / c.foxPx));
-    const yIn = -vw.h - 4 * u, yMid = vw.h * 0.02;
-    const st = { phase:'intro', tTalk:0, tNext:0, tEnd:-1 };
-    const route = { dur:40,
+    const pick = (a) => a[Math.floor(Math.random() * a.length)];
+    const mix = (a) => { const b = a.slice(); for(let i = b.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; };
+    const yIn = -vw.h - 4 * u, yMid = vw.h * 0.02, yOut = vw.h + 5 * u;
+    const side = Math.random() < 0.5 ? 1 : -1, xSide = side * (vw.w + 4 * u);
+    const entry = pick(['rocket', 'drop', 'magic', 'run', 'bounce']);
+    const exit = pick(['rocket', 'magic', 'jump', 'run']);
+    const ACTS = {
+      dance:{ d:1.8, go:() => { P.play('dance', { dur:1.7 }); P.fx('notes', P.anchor('head'), { count:5 }); P.fx('confetti', null, { count:30 }); c.sound('pop'); } },
+      clap:{ d:1.2, go:() => { P.play('clap', { dur:1.1 }); P.fx('hearts', P.anchor('head'), { count:6 }); } },
+      flip:{ d:1.3, go:() => { P.play('flip', { dur:1.2, h:1.4 }); P.fx('stars', null, { count:12, speed:7 }); c.sound('whoosh'); } },
+      cartwheel:{ d:1.7, go:() => { P.play('cartwheel', { dur:1.6, turns:2, side }); P.fx('sparkles', P.anchor('feet'), { count:14 }); c.sound('whoosh'); } },
+      spin:{ d:1.3, go:() => { P.play('spinTop', { dur:1.2 }); P.fx('ring', null, { size:5 }); P.fx('sparkles'); c.sound('whoosh'); } },
+      wink:{ d:1.1, go:() => { P.play('wink', { dur:1.0 }); P.fx('hearts', P.anchor('head'), { count:5 }); } },
+      cheer:{ d:1.4, go:() => { P.play('cheer', { dur:1.3 }); P.fx('confetti', null, { count:40 }); P.fx('stars', null, { count:10, speed:6 }); c.sound('pop'); } },
+      coins:{ d:1.4, go:() => { P.play('cheer', { dur:1.2 }); P.fx('coins', P.anchor('top'), { count:22, dir:Math.PI / 2, spread:1.5, speed:12, g:13, life:1.7 }); c.sound('coin'); } },
+      rain:{ d:1.4, go:() => { P.play('clap', { dur:1.2 }); P.fx('rain', null, { count:70 }); P.fx('sparkles', P.anchor('head'), { count:12 }); } },
+    };
+    const names = mix(Object.keys(ACTS));
+    const pre = names.slice(0, 2), post = names.slice(2, 4 + (Math.random() < 0.5 ? 1 : 0));
+    const t1 = 1.6, t2 = t1 + ACTS[pre[0]].d + 0.1, tTalk = t2 + ACTS[pre[1]].d + 0.15;
+    const st = { phase:'intro', tTalk:0, tNext:0, wait:0, tEnd:-1, queue:post.slice() };
+    const goOut = () => {
+      if(exit === 'rocket'){ P.play('rocket', { dur:1.1 }); P.emit('flame', true); c.sound('jet'); P.fx('sparkles', P.anchor('feet'), { count:16 }); }
+      else if(exit === 'magic'){ P.fx('ring', null, { size:5 }); P.fx('sparkles', null, { count:20 }); c.sound('whoosh'); }
+      else if(exit === 'jump'){ P.play('flip', { dur:1.0, h:1.6 }); c.sound('boing'); P.fx('ring', P.anchor('feet'), { flat:true, size:3.4 }); }
+      else { P.emit('trail', true); P.play('cheer', { dur:1.0 }); c.sound('whoosh'); }
+    };
+    const route = { dur:45,
       frame(t){
-        let sc = big, y = yMid;
-        if(t < 1.0){ const k = celOut(t / 1.0); sc = celLerp(0.45, big, k); y = celLerp(yIn, yMid + 0.7 * u, k); P.mover.rotation.y = (1 - k) * Math.PI * 4; }
-        else if(t < 1.35){ y = celLerp(yMid + 0.7 * u, yMid, celBack(celSeg(t, 1.0, 1.35))); P.mover.rotation.y = 0; }
-        else if(st.tEnd < 0) y = yMid + Math.sin(t * 2.1) * 0.07 * u;
-        if(st.tEnd >= 0){ const k = celIn(celSeg(t, st.tEnd, st.tEnd + 1.0)); y = celLerp(yMid, vw.h + 5 * u, k); P.mover.rotation.y = k * Math.PI * 3; if(k >= 1) route.dur = t; }
-        P.mover.position.set(0, y, 0);
+        let sc = big, x = 0, y = yMid;
+        if(t < 1.35){
+          const k = celOut(Math.min(1, t)), k2 = celSeg(t, 1.0, 1.35);
+          if(entry === 'rocket'){ sc = celLerp(0.45, big, k); y = t < 1 ? celLerp(yIn, yMid + 0.7 * u, k) : celLerp(yMid + 0.7 * u, yMid, celBack(k2)); P.mover.rotation.y = t < 1 ? (1 - k) * Math.PI * 4 : 0; }
+          else if(entry === 'drop'){ y = t < 1 ? celLerp(yOut, yMid, celIn(Math.min(1, t))) : yMid + Math.sin(Math.PI * k2) * 0.5 * u; }
+          else if(entry === 'magic'){ const kk = celBack(Math.min(1, t / 0.6)); sc = big * Math.max(0.001, kk); P.mover.rotation.y = t < 0.6 ? (1 - t / 0.6) * Math.PI * 6 : 0; }
+          else if(entry === 'run'){ const kr = Math.min(1, t / 1.1); x = celLerp(xSide, 0, celOut(kr)); y = yMid + Math.abs(Math.sin(t * 9)) * 0.25 * u * (1 - kr); P.mover.rotation.y = side * -0.7 * (1 - kr); }
+          else { y = t < 1 ? celLerp(yIn, yMid, celOut(Math.min(1, t))) + Math.sin(Math.PI * Math.min(1, t)) * 1.6 * u : yMid + Math.sin(Math.PI * k2) * 0.4 * u; }
+        } else if(st.tEnd < 0){ y = yMid + Math.sin(t * 2.1) * 0.07 * u; if(st.phase !== 'intro') P.mover.rotation.y = 0; }
+        if(st.tEnd >= 0){
+          const k = celIn(celSeg(t, st.tEnd, st.tEnd + 1.0));
+          if(exit === 'rocket'){ y = celLerp(yMid, yOut, k); P.mover.rotation.y = k * Math.PI * 3; }
+          else if(exit === 'magic'){ sc = big * Math.max(0.001, 1 - k); P.mover.rotation.y = k * Math.PI * 8; }
+          else if(exit === 'jump'){ y = yMid + Math.sin(Math.PI * Math.min(1, k * 1.6)) * 1.4 * u * (1 - k) + k * k * (yOut - yMid); }
+          else { x = celLerp(0, -xSide, k); y = yMid + Math.abs(Math.sin(t * 9)) * 0.25 * u; P.mover.rotation.y = side * 0.7; }
+          if(k >= 1){ route.dur = t; P.emit('flame', false); P.emit('trail', false); }
+        }
+        P.mover.position.set(x, y, 0);
         P.mover.scale.setScalar(c.u * sc);
         const speaking = typeof ttsSpeaking !== 'undefined' && ttsSpeaking;
-        // il parle → il danse → il salue → il repart (en fusée)
-        if(st.phase === 'talk' && t - st.tTalk > 1.6 && (!speaking || t - st.tTalk > 16)){ st.phase = 'dance'; st.tNext = t; P.play('dance', { dur:1.7 }); P.fx('notes', P.anchor('head'), { count:4 }); P.fx('confetti', null, { count:36 }); c.sound('pop'); }
-        if(st.phase === 'dance' && t - st.tNext > 1.8){ st.phase = 'wave'; st.tNext = t; P.play('wave', { dur:1.6, side:1 }); P.fx('hearts', P.anchor('head'), { count:7 }); }
-        if(st.phase === 'wave' && t - st.tNext > 1.7){ st.phase = 'end'; st.tEnd = t; P.play('rocket', { dur:1.1 }); P.emit('flame', true); c.sound('jet'); P.fx('sparkles', P.anchor('feet'), { count:16 }); }
+        // il parle → quelques figures au hasard → il salue → il s'en va
+        if(st.phase === 'talk' && t - st.tTalk > 1.6 && (!speaking || t - st.tTalk > 16)){ st.phase = 'post'; st.tNext = t; st.wait = 0; }
+        if(st.phase === 'post' && t - st.tNext >= st.wait){
+          const n = st.queue.shift();
+          if(n){ st.tNext = t; st.wait = ACTS[n].d; ACTS[n].go(); }
+          else { st.phase = 'bye'; st.tNext = t; P.play('wave', { dur:1.5, side:1 }); P.fx('hearts', P.anchor('head'), { count:7 }); }
+        }
+        if(st.phase === 'bye' && t - st.tNext > 1.6){ st.phase = 'end'; st.tEnd = t; goOut(); }
       },
       events:[
-        [0, () => { P.setFemale(narratorIsFemale()); P.play('rocket', { dur:1.0 }); P.emit('flame', true); c.sound('jet'); }],
-        [1.0, () => { P.emit('flame', false); P.play('cheer', { dur:1.5 }); P.fx('ring', null, { size:6 }); P.fx('ring', null, { size:4, flat:true }); P.fx('cannon', null, { count:42 }); P.fx('stars', null, { count:16, speed:8 }); c.sound('boom'); }],
-        [1.55, () => { P.fx('coins', P.anchor('top'), { count:22, dir:Math.PI / 2, spread:1.5, speed:12, g:13, life:1.7 }); c.sound('coin'); }],
-        [2.55, () => { P.play('flip', { dur:1.2, h:1.4 }); c.sound('whoosh'); }],
-        [3.0, () => { P.fx('rain', null, { count:80 }); P.fx('sparkles', P.anchor('head'), { count:18 }); }],
-        [3.85, () => { st.phase = 'talk'; st.tTalk = 3.85; const txt = (window.__gfState || {}).text || 'Bravo !'; P.play('talk', { text:fxCleanSpeech(txt), rate:narratorRate(), dur:3, side:1 }); gfTalk(); }],
+        [0, () => {
+          P.setFemale(narratorIsFemale());
+          if(entry === 'rocket'){ P.play('rocket', { dur:1.0 }); P.emit('flame', true); c.sound('jet'); }
+          else if(entry === 'magic'){ P.fx('ring', null, { size:5 }); P.fx('sparkles', null, { count:22 }); c.sound('pop'); }
+          else if(entry === 'run'){ P.emit('trail', true); c.sound('whoosh'); P.play('cheer', { dur:1.0 }); }
+          else c.sound('whoosh');
+        }],
+        [1.0, () => { P.emit('flame', false); P.emit('trail', false); if(entry === 'drop' || entry === 'bounce') c.sound('boing'); P.play('cheer', { dur:1.4 }); P.fx('ring', null, { size:6 }); P.fx('ring', null, { size:4, flat:true }); P.fx('cannon', null, { count:42 }); P.fx('stars', null, { count:16, speed:8 }); c.sound('boom'); }],
+        [t1, () => ACTS[pre[0]].go()],
+        [t2, () => ACTS[pre[1]].go()],
+        [tTalk, () => { st.phase = 'talk'; st.tTalk = tTalk; const txt = (window.__gfState || {}).text || 'Bravo !'; P.play('talk', { text:fxCleanSpeech(txt), rate:narratorRate(), dur:3, side:1 }); gfTalk(); }],
       ] };
     return route;
   },
 };
 let gfWasDone = null, gfFw = null;
 const GOAL_FINALE_KEY = 'lexiqueQuiz::goalFinaleDay';
+/* 🎲 1.0.13 : des félicitations différentes à chaque fois (jamais la même phrase deux fois de suite) */
+var GF_MOTIV = [
+  'Tu peux être fier de toi !', 'Quel travail ! Tu progresses chaque jour.', "Chaque jour compte, et aujourd'hui tu as tout donné !", 'Tu es un vrai champion !', 'Continue comme ça, tu vas très loin !',
+  'Chaque mot appris est une petite victoire.', "Petit à petit, l'oiseau fait son nid… et toi, tu fais ton français !", "Les grands progrès sont faits de petits efforts, répétés chaque jour.",
+  "Tu es plus fort qu'hier, et moins fort que demain !", 'Ton cerveau te dit merci !', "Rome ne s'est pas faite en un jour, mais tu poses une pierre chaque jour.",
+  'Tu avances, et ça se voit !', 'Quelle détermination !', 'Ta persévérance paie !', 'Tu es sur la bonne voie, continue !',
+  "Apprendre une langue, c'est s'ouvrir un nouveau monde.", "C'est en forgeant qu'on devient forgeron… et en pratiquant qu'on parle couramment !",
+  'Ton futur toi te remercie déjà.', "Rien ne t'arrête !", 'Une journée de plus dans la poche !', 'Ta motivation est contagieuse !',
+  "Ce que tu as appris aujourd'hui, personne ne pourra te l'enlever.", "L'effort d'aujourd'hui, c'est la réussite de demain.", 'Tu fais ça comme un pro !',
+  'Impressionnant, vraiment !', 'Avec toi, même les verbes irréguliers filent droit !', 'La régularité, c\'est ton super-pouvoir !', 'Encore un pas vers la maîtrise du français !',
+  "Ton français devient plus solide chaque jour.", 'Tu as fait honneur à ton objectif !'
+];
 function gfText(){
-  const name = vaUserFirstName();
+  const name = vaUserFirstName(), N = name ? ' ' + name : '';
   let streak = 0; try{ streak = computeStreak(); }catch(e){}
-  const lines = ['Tu peux être fier de toi !', 'Quel travail ! Tu progresses chaque jour.', "Chaque jour compte, et aujourd'hui tu as tout donné !", 'Tu es un vrai champion !', 'Continue comme ça, tu vas très loin !'];
-  return `Bravo${name ? ' ' + name : ''} ! Objectif du jour atteint ! ${streak >= 2 ? `Ça fait ${streak} jours de suite, c'est énorme ! ` : ''}${lines[Math.floor(Math.random() * lines.length)]} On se retrouve demain ?`;
+  const pick = (a) => a[Math.floor(Math.random() * a.length)];
+  const hi = pick(['Bravo', 'Génial', 'Youpi', 'Super', 'Chapeau', 'Magnifique', 'Waouh', 'Félicitations', 'Incroyable', 'Hourra', 'Excellent']) + N + ' !';
+  const goal = pick(['Objectif du jour atteint !', "Tu as atteint ton objectif du jour !", 'Mission du jour accomplie !', 'Tous tes objectifs du jour sont faits !', 'Le défi du jour est relevé !']);
+  const ser = streak >= 2 ? pick([`Ça fait ${streak} jours de suite, c'est énorme !`, `${streak} jours d'affilée : tu es inarrêtable !`, `Ta série monte à ${streak} jours, bravo pour ta régularité !`, `${streak} jours de suite… la régularité, c'est ta force !`]) + ' ' : '';
+  let k = 0, last = -1; try{ last = +(localStorage.getItem(nsKey('lexiqueQuiz::gfLastMotiv')) || -1); }catch(e){}
+  do{ k = Math.floor(Math.random() * GF_MOTIV.length); }while(k === last && GF_MOTIV.length > 1);
+  try{ localStorage.setItem(nsKey('lexiqueQuiz::gfLastMotiv'), String(k)); }catch(e){}
+  const h = new Date().getHours();
+  const end = h >= 21 ? pick(['Bonne soirée, et dors bien : ton cerveau va tout ranger cette nuit !', 'Repose-toi bien, tu l\'as mérité !']) : (h < 11 ? pick(['Et la journée ne fait que commencer !', 'Quelle belle façon de commencer la journée !']) : pick(['On se retrouve demain ?', 'À demain pour la suite !', 'Demain, on continue ensemble ?', 'Garde cette énergie pour demain !', "Prends une pause, tu l'as bien méritée !"]));
+  return `${hi} ${goal} ${ser}${GF_MOTIV[k]} ${end}`;
 }
 /* il dit ses félicitations (la bulle s'affiche en même temps) */
 function gfTalk(){
@@ -39550,7 +39708,7 @@ function goalFinale(preview){
   ov.innerHTML = `
     <div class="gf-bg"></div><div class="gf-rays"></div><canvas class="gf-fw" id="gfFw"></canvas>
     <div class="gf-top">
-      <div class="gf-trophy">🏆</div>
+      <div class="gf-trophy">${['🏆', '🥇', '👑', '🌟', '🎖️'][Math.floor(Math.random() * 5)]}</div>
       <div class="gf-title"><span class="l1">${word('Objectif du jour', 0)}</span><span class="l2">${word('ATTEINT !', 16)}</span></div>
       <div class="gf-stats">
         ${nq ? `<span class="gf-stat" style="--d:0">🎯 ${nq} objectif${nq > 1 ? 's' : ''} sur ${nq}</span>` : ''}
@@ -39559,7 +39717,7 @@ function goalFinale(preview){
         ${xp ? `<span class="gf-stat" style="--d:3">⭐ ${xp} points</span>` : ''}
       </div>
     </div>
-    <div class="gf-fox2d" aria-hidden="true"></div>
+    <div class="gf-fox2d v${1 + Math.floor(Math.random() * 4)}" aria-hidden="true"></div>
     <div class="gf-bottom"><div class="gf-msg" id="gfMsg" aria-live="polite"></div><button type="button" class="gf-go" id="gfGo">Continuer ➜</button></div>`;
   document.body.appendChild(ov);
   requestAnimationFrame(() => ov.classList.add('in'));
@@ -40162,7 +40320,7 @@ function conjRepPanel(reveal, sentence){
   box.className = 'cq-rep';
   box.setAttribute('aria-live', 'polite');
   box.innerHTML = `<div class="cq-rep-h"><span class="cq-rep-ear" aria-hidden="true">👂</span><b>À toi ! Redis toute la phrase à voix haute</b></div>
-    <div class="cq-rep-s">${escapeHtml(sentence)}</div>
+    <div class="cq-rep-s">${dxOn() ? dxDecorate(sentence) : escapeHtml(sentence)}</div>
     <div class="cq-rep-st">🔊 Écoute d'abord…</div>
     <div class="cq-rep-btns"><button type="button" class="mode-chip cq-rep-go" hidden>🎤 Je la redis</button><button type="button" class="mode-chip cq-rep-skip">Passer ⏭</button><button type="button" class="mode-chip cq-rep-off">🙊 Ne plus demander</button></div>`;
   const anchor = reveal.querySelector('.conj-clue') || reveal.querySelector('.conj-answer');
@@ -40296,6 +40454,1141 @@ function vsConjRepeat(st, ch, myIdx, full, form, advance){
     try{ if(isHomeScreen && !card.querySelector('#conjResumeBox')){ const h = conjResumeBannerHtml(); const hero = card.querySelector('.home-hero'); if(h && hero){ hero.insertAdjacentHTML('beforebegin', h); conjBindResumeBanner(card); } } }catch(e){}
   }
 })();
+
+/* ============ 🗣️ 1.0.12 : PRONONCIATION — mots à tiret, apostrophes, œ, nombres ============
+   Avant, la phrase attendue et ce que le micro entend n'étaient pas découpées de la même façon :
+   « peut-être » devenait un seul mot « peutetre » d'un côté, mais « peut » + « être » de l'autre
+   (idem « qu'il », « aujourd'hui », « trente-et-un », « cœur » / « coeur »…) → le mot restait rouge,
+   la phrase n'était jamais « complète ». Désormais les deux côtés passent par le même découpage, et
+   un mot attendu peut correspondre à plusieurs morceaux entendus collés (peut + être = peut-être). */
+function spNumWords(n){
+  const U = ['zero','un','deux','trois','quatre','cinq','six','sept','huit','neuf','dix','onze','douze','treize','quatorze','quinze','seize'];
+  const T = { 2:'vingt', 3:'trente', 4:'quarante', 5:'cinquante', 6:'soixante' };
+  const u100 = (x) => {
+    if(x <= 16) return U[x];
+    if(x < 20) return 'dix ' + U[x - 10];
+    let d = Math.floor(x / 10), r = x % 10;
+    if(d === 7 || d === 9){ d -= 1; r += 10; }
+    const base = d === 8 ? 'quatre vingt' : T[d];
+    if(r === 0) return d === 8 ? 'quatre vingts' : base;
+    if((r === 1 || r === 11) && d !== 8) return base + ' et ' + U[r];
+    return base + ' ' + u100(r);
+  };
+  const u1000 = (x) => {
+    const c = Math.floor(x / 100), r = x % 100;
+    let s = c === 0 ? '' : (c === 1 ? 'cent' : U[c] + ' cent' + (r === 0 ? 's' : ''));
+    if(r) s += (s ? ' ' : '') + u100(r);
+    return s || 'zero';
+  };
+  if(n < 1000) return u1000(n);
+  const k = Math.floor(n / 1000), r = n % 1000;
+  return (k === 1 ? 'mille' : u1000(k) + ' mille') + (r ? ' ' + u1000(r) : '');
+}
+var SP_ORD = { un:'premier', deux:'deuxieme', trois:'troisieme', quatre:'quatrieme', cinq:'cinquieme', six:'sixieme', sept:'septieme', huit:'huitieme', neuf:'neuvieme', dix:'dixieme', onze:'onzieme', douze:'douzieme', vingt:'vingtieme', cent:'centieme', mille:'millieme' };
+/* minuscules, sans accents, œ → oe, nombres en lettres (même règle pour le texte attendu et le micro) */
+function spFold(s){
+  let t = String(s == null ? '' : s).toLowerCase().replace(/[’`´ʼ‘]/g, "'").replace(/œ/g, 'oe').replace(/æ/g, 'ae');
+  t = t.normalize('NFD').replace(/[̀-ͯ]/g, '');
+  t = t.replace(/(\d)[\s  .](?=\d{3}\b)/g, '$1');                 // 1 000 / 1.000 → 1000
+  t = t.replace(/\b1(er|re)\b/g, (m, x) => x === 'er' ? 'premier' : 'premiere');
+  t = t.replace(/\b(\d+)(e|eme|ieme)\b/g, (m, d) => { const n = parseInt(d, 10); if(n > 999999) return m; const w = spNumWords(n).split(' '); const last = w.pop(); return w.concat([(w.length && last === 'un') ? 'unieme' : ((SP_ORD || {})[last] || (last.replace(/e$/, '') + 'ieme'))]).join(' '); });
+  t = timeToFrenchWords(t);
+  t = t.replace(/\d+/g, (m) => { const n = parseInt(m, 10); return (m.length <= 6 && n > 100) ? ' ' + spNumWords(n) + ' ' : m; });
+  return digitsToFrenchWords(t);
+}
+/* les morceaux de lettres (les tirets, apostrophes et la ponctuation séparent) */
+function spTokens(s){ return spFold(s).replace(/[^a-z0-9]+/g, ' ').trim().split(/\s+/).filter(Boolean); }
+function spCompact(s){ return spTokens(s).join(''); }
+/* clé « à l'oreille » : mangé / manger / mangez, cœur / coeur, est / et… se prononcent pareil */
+function spPhon(w){
+  let t = String(w || '');
+  if(t.length < 3) return t;
+  t = t.replace(/^h/, '').replace(/ph/g, 'f').replace(/qu/g, 'k').replace(/c(?=[eiy])/g, 's').replace(/c/g, 'k').replace(/gu(?=[eiy])/g, 'g').replace(/g(?=[eiy])/g, 'j');
+  t = t.replace(/eaux?$/, 'o').replace(/eau/g, 'o').replace(/au/g, 'o').replace(/(ai|ei)/g, 'e').replace(/y/g, 'i').replace(/oe/g, 'e');
+  t = t.replace(/(aient|ais|ait|er|ez|es|et|ent)$/, 'e').replace(/[stxdzp]+$/, '').replace(/e$/, (m) => t.length > 3 ? '' : m);
+  t = t.replace(/([bcdfgjklmnprstvz])\1/g, '$1').replace(/h/g, '');
+  return t;
+}
+/* deux formes « collées » (sans espace) sont-elles le même mot à l'oral ? */
+function spSame(target, heard, fuzzy){
+  if(!target || !heard) return false;
+  if(target === heard) return true;
+  if(!fuzzy) return false;
+  if(target.length >= 3 && heard.length >= 2 && spPhon(target) === spPhon(heard)) return true;
+  const n = target.length;
+  const tol = n <= 2 ? (heard.length === n ? 1 : 0) : (n <= 4 ? 1 : (n <= 9 ? 2 : 3));
+  if(!tol || Math.abs(n - heard.length) > tol) return false;
+  return levenshtein(target, heard) <= tol;
+}
+/* le mot attendu correspond-il aux morceaux entendus à partir de k ? → combien de morceaux (0 = non) */
+function spMatchAt(norm, sp, k, used, fuzzy){
+  let c = '';
+  for(let L = 1; L <= 6 && k + L - 1 < sp.length; L++){
+    if(used && used[k + L - 1]) break;
+    c += sp[k + L - 1];
+    if(spSame(norm, c, fuzzy)) return L;
+    if(c.length > norm.length + 2) break;
+  }
+  return 0;
+}
+/* aligne les mots attendus sur ce qui a été dit : d'abord dans l'ordre, puis n'importe où pour le reste */
+function spAlign(norms, sp){
+  const used = new Array(sp.length).fill(false), hit = new Array(norms.length).fill(false);
+  const take = (i, k, L) => { for(let q = k; q < k + L; q++) used[q] = true; hit[i] = true; };
+  let cur = 0;
+  norms.forEach((norm, i) => {
+    if(!norm) return;
+    for(const fuzzy of [false, true]){
+      for(let k = cur; k < Math.min(sp.length, cur + 5); k++){
+        if(used[k]) continue;
+        const L = spMatchAt(norm, sp, k, used, fuzzy);
+        if(L){ take(i, k, L); cur = k + L; return; }
+      }
+    }
+  });
+  norms.forEach((norm, i) => {
+    if(hit[i] || !norm) return;
+    for(const fuzzy of [false, true]){
+      for(let k = 0; k < sp.length; k++){
+        if(used[k]) continue;
+        const L = spMatchAt(norm, sp, k, used, fuzzy);
+        if(L){ take(i, k, L); return; }
+      }
+    }
+  });
+  return hit;
+}
+/* les mots d'une phrase tels qu'affichés (séparés par les espaces) + leur forme collée */
+function spSentenceWords(sentence){
+  return String(sentence || '').split(/(\s+)/).map(tok => ({ tok, space:/^\s+$/.test(tok), norm:/^\s+$/.test(tok) ? '' : spCompact(tok) }));
+}
+/* variantes acceptées pour un mot/expression : « (se) lever » → « lever » ou « se lever » ; « beau / belle » */
+function spVariants(expected){
+  const e = String(expected || '');
+  const out = new Set([e]);
+  if(/[()[\]]/.test(e)){ out.add(e.replace(/\([^)]*\)|\[[^\]]*\]/g, ' ')); out.add(e.replace(/[()[\]]/g, ' ')); }
+  if(/\//.test(e) && e.length < 60) e.split(/\s*\/\s*/).forEach(p => p.trim() && out.add(p));
+  return [...out].map(v => v.replace(/\s+/g, ' ').trim()).filter(Boolean);
+}
+/* ---- les fonctions de l'appli, réécrites sur ce découpage commun ---- */
+function speechMatches(transcript, expected){
+  const t = spTokens(transcript);
+  if(!t.length) return false;
+  return spVariants(expected).some(v => {
+    const e = spTokens(v);
+    if(!e.length) return false;
+    const ec = e.join('');
+    const tol = ec.length <= 4 ? 1 : (ec.length <= 7 ? 2 : 3);
+    // le mot (ou l'expression) attendu, collé, correspond à une suite de morceaux entendus : « peut » + « être »
+    for(let k = 0; k < t.length; k++){
+      let c = '';
+      for(let L = 1; k + L <= t.length; L++){
+        c += t[k + L - 1];
+        if(c === ec) return true;
+        if(Math.abs(c.length - ec.length) <= tol && levenshtein(c, ec) <= tol) return true;
+        if(ec.length >= 3 && c.length >= 2 && spPhon(c) === spPhon(ec)) return true;
+        if(c.length > ec.length + tol) break;
+      }
+    }
+    // longue expression : chaque mot a été entendu
+    if(e.length >= 3 && spAlign(e, t).every(Boolean)) return true;
+    return false;
+  });
+}
+function sentenceSimilarity(said, target){
+  const norms = spSentenceWords(target).filter(w => w.norm).map(w => w.norm);
+  if(!norms.length) return 0;
+  const hit = spAlign(norms, spTokens(said));
+  return hit.filter(Boolean).length / norms.length;
+}
+/* Répétition : la phrase en mots surlignables (▁▁▁ tant que non dits si elle est cachée) — avec les marques
+   🫁 liaisons & pauses quand la phrase est visible et que l'option est active */
+function buildRepeatWords(sentence, hidden){
+  const wrap = (tok, inner) => {
+    const norm = spCompact(tok);
+    if(!norm) return inner != null ? inner : escapeHtml(tok);
+    const display = hidden ? '▁'.repeat(Math.max(2, Math.min(tok.length, 10))) : (inner != null ? inner : escapeHtml(tok));
+    return `<span class="rw ${hidden ? 'rw-hidden' : ''}" data-norm="${norm}" data-word="${escapeHtml(tok)}">${display}</span>`;
+  };
+  if(!hidden && dxOn()){ try{ return dxDecorate(sentence, (raw, i, inner) => wrap(raw, inner)); }catch(e){ console.error(e); } }
+  return String(sentence || '').split(/(\s+)/).map(tok => /^\s+$/.test(tok) ? ' ' : wrap(tok)).join('');
+}
+/* Surligne (et révèle si caché) les mots déjà prononcés, en temps réel. */
+function highlightSpokenWords(transcript){
+  const spans = [...document.querySelectorAll('#repeatSentence .rw')];
+  if(!spans.length) return;
+  const hit = spAlign(spans.map(s => s.dataset.norm || ''), spTokens(transcript));
+  spans.forEach((span, i) => {
+    if(hit[i] && !span.classList.contains('spoken')){
+      span.classList.add('spoken');
+      if(span.classList.contains('rw-hidden')){ span.textContent = span.dataset.word; span.classList.remove('rw-hidden'); }
+    }
+  });
+}
+/* La phrase avec le surlignage définitif : vert = bien prononcé, rouge = manqué (+ marques 🫁 si actives). */
+function buildScoredSentenceHtml(sentence, heardText){
+  const words = spSentenceWords(sentence);
+  const norms = words.filter(w => !w.space && w.norm).map(w => w.norm);
+  const hit = spAlign(norms, spTokens(heardText || ''));
+  let k = 0;
+  const cls = (tok) => spCompact(tok) ? (hit[k++] ? 'spoken' : 'missed') : '';
+  if(dxOn()){
+    try{ return dxDecorate(sentence, (raw, i, inner) => { const c = cls(raw); return c ? `<span class="rw ${c}">${inner}</span>` : inner; }); }
+    catch(e){ console.error(e); k = 0; }
+  }
+  return words.map(w => { if(w.space) return ' '; const c = cls(w.tok); return c ? `<span class="rw ${c}">${escapeHtml(w.tok)}</span>` : escapeHtml(w.tok); }).join('');
+}
+
+/* ============ 🫁 1.0.12 : LIAISONS ET RESPIRATION — les règles de l'Art oratoire sur la phrase ============
+   Sur la phrase à dire, l'appli marque :
+     ‿  liaison obligatoire (avec le son qui s'entend : z, t, n…)   ‿ en pointillés : liaison facultative (soutenu)
+     /  liaison interdite (après « et », devant un h aspiré, après un nom singulier ou un nom propre…)
+     ◡  enchaînement (la consonne déjà prononcée passe à la syllabe suivante : elle‿arrive)
+     ‖  respire (au point ; un peu moins au point-virgule et aux deux-points)
+     |  petite pause : à la virgule (très peu d'air) ou là où un nouveau groupe de sens commence, même sans ponctuation
+     ↗ ↘ la mélodie : la voix monte à la fin de chaque groupe et descend à la fin de la phrase
+   Chaque marque a sa règle (💡 Pourquoi ?) avec un lien 📘 vers la fiche d'Art oratoire / de phonétique d'où elle vient. */
+function dxOn(){ try{ return localStorage.getItem(nsKey('lexiqueQuiz::dictionMarks')) !== '0'; }catch(e){ return true; } }
+function dxSet(on){ try{ localStorage.setItem(nsKey('lexiqueQuiz::dictionMarks'), on ? '1' : '0'); }catch(e){} }
+function dxFold(s){ return String(s == null ? '' : s).toLowerCase().replace(/[’`´ʼ‘]/g, "'").replace(/œ/g, 'oe').replace(/æ/g, 'ae').normalize('NFD').replace(/[\u0300-\u036f]/g, ''); }
+function dxSet_(str){ const o = Object.create(null); str.split(/\s+/).forEach(w => { if(w) o[w] = 1; }); return o; }
+/* les listes de mots et les règles (préparées au premier usage) */
+var DX = null, DX_HASP = null, DX_RULES = null, DX_SYM = null;
+function dxInit(){
+  if(DX && DX_RULES) return;
+  DX = {
+  det: dxSet_('les des ces mes tes ses nos vos leurs aux un aucun mon ton son quels quelles certains certaines plusieurs quelques differents differentes divers diverses autres d\'autres'),
+  num: dxSet_('deux trois six dix vingt vingts cent cents'),
+  detSing: dxSet_("le la l' un une ce cet cette mon ton son ma ta sa notre votre leur du au chaque quel quelle aucun aucune"),
+  detPlur: dxSet_('les des ces mes tes ses nos vos leurs aux quelques plusieurs certains certaines quels quelles'),
+  pron: dxSet_('nous vous ils elles on en'),
+  adj: dxSet_('petit petits petites grand grands grandes gros grosses bon bons bonnes mauvais mauvaises bel beaux belles vieil vieux vieilles nouvel nouveaux nouvelles jeunes longs longues faux fausses premier premiers premieres dernier derniers dernieres leger ancien anciens anciennes certain plein chers cheres vrais vraies simples memes seuls seules nombreux nombreuses jolis jolies pareils tels telles rares divers diverses differents differentes autres'),
+  inv: dxSet_('tres tout dans chez sans sous dont'),
+  facAdv: dxSet_('pas plus bien trop beaucoup jamais toujours souvent assez moins rien apres avant depuis pendant devant vers'),
+  facVerb: dxSet_('est sont etait etaient ont avait avaient suis es sommes etes avons avez allons allez vont font peut peuvent peux doit doivent dois faut veut veux sait fait vais vas serait aurait seraient auraient soit soient ait aient sera seront aura auront'),
+  prep: dxSet_("a au aux de d' du des en dans chez pour par sur sous avec sans vers contre entre parmi selon malgre pendant depuis apres avant devant derriere jusqu' jusque envers durant hors pres"),
+  clitic: dxSet_("je j' tu il elle on nous vous ils elles me m' te t' se s' ce c' ne n' le la les l' lui leur y en qu' que"),
+  coord: dxSet_('et mais ou donc or ni car puis'),
+  rel: dxSet_('qui que dont lequel laquelle lesquels lesquelles auquel auxquels duquel desquels'),
+  sub: dxSet_('quand lorsque puisque quoique comme parce afin tandis'),
+  prepBreak: dxSet_('pour avec sans dans depuis malgre contre apres avant vers chez sous sur entre parmi selon grace afin durant envers devant derriere aupres pendant lors jusqu\' jusque'),
+  aux: dxSet_('a ai as avons avez ont est suis es sommes etes sont avait avais avions aviez avaient etait etais etions etiez etaient aura auras aurons aurez auront sera seras serons serez seront aurait aurais serait serais auraient seraient va vais vas vont allons allez peut peux pouvons pouvez peuvent doit dois devons devez doivent veut veux voulons voulez veulent faut sait savons savez fait font faire ete'),
+  weak: dxSet_("de d' du des a au aux en par"),
+  queLoc: dxSet_("parce alors bien pour afin avant apres des tandis pendant sans ainsi plutot tant ce c' celui celle ceux celles depuis sitot aussitot encore si de"),
+  compar: dxSet_("plus moins aussi autant meme autre tel telle si tant ne n'"),
+  wh: dxSet_("qui que qu' quoi quel quelle quels quelles ou quand comment pourquoi combien lequel laquelle"),
+  elide: dxSet_("l' d' j' m' t' s' c' n' qu' jusqu' lorsqu' puisqu' quoiqu'"),
+  nLiaison: dxSet_('un aucun mon ton son en on rien bien bon certain ancien plein moyen prochain commun'),
+  rSilentNo: dxSet_('cher fer mer ver fier hier hiver amer enfer super laser tiers'),
+  cSilent: dxSet_('blanc franc banc flanc tronc porc tabac estomac accroc escroc caoutchouc marc clerc jonc'),
+  lSilent: dxSet_('gentil fusil outil sourcil nombril persil saoul'),
+  finPron: dxSet_('but net brut dot mat sept huit zut chut ouest christ deficit transit rapt concept abrupt direct correct strict infect contact tact intact impact compact district verdict exact kit test toast bus tennis fils ours helas sens mars virus cactus bonus campus vis atlas moeurs gratis jadis autobus terminus consensus processus prospectus lapsus focus hiatus blocus humus cosmos albatros iris oasis tournevis index lynx silex thorax larynx phenix box fax relax sphinx onyx latex reflex duplex inox'),
+  hAspExact: dxSet_('hale haler halo hair hais hait huit huitieme huitaine humer hue huee huer hetre heros'),
+};
+  DX_HASP = ['hache', 'hachis', 'hachur', 'hagard', 'haie', 'haillon', 'hain', 'halage', 'haletant', 'haleter', 'hall', 'halte', 'hamac', 'hamburger', 'hameau', 'hamster', 'hanche', 'handball', 'handicap', 'hangar', 'hanneton', 'hant', 'happ', 'harangu', 'haras', 'harass', 'harcel', 'hardi', 'harem', 'hareng', 'hargn', 'haricot', 'harnach', 'harnais', 'harpe', 'harpon', 'hasard', 'hasch', 'hate', 'hatif', 'hauss', 'haut', 'havre', 'heaume', 'hennir', 'heriss', 'hernie', 'heron', 'herse', 'heurt', 'hibou', 'hideu', 'hierarch', 'hiss', 'hobby', 'hoch', 'hockey', 'holland', 'homard', 'hongr', 'honte', 'hoquet', 'horde', 'hors', 'hotte', 'houblon', 'houle', 'houppe', 'hourra', 'housse', 'houx', 'hublot', 'hurl', 'hutte', 'hyene'];
+  DX_RULES = {
+  det:      { k:'ob', label:'Liaison obligatoire', why:'déterminant + nom (ou adjectif)', sheet:'atelier-liaisons' },
+  num:      { k:'ob', label:'Liaison obligatoire', why:'nombre + nom (deux‿ans, six‿euros)', sheet:'phon-liaisons-classification' },
+  pron:     { k:'ob', label:'Liaison obligatoire', why:'pronom + verbe (nous‿avons, ils‿ont)', sheet:'phon-liaisons-classification' },
+  adj:      { k:'ob', label:'Liaison obligatoire', why:'adjectif placé avant le nom (un grand‿homme)', sheet:'phon-liaisons-classification' },
+  inv:      { k:'ob', label:'Liaison obligatoire', why:'après un petit mot invariable : très, tout, dans, chez, sans, sous, dont', sheet:'atelier-liaisons' },
+  en:       { k:'ob', label:'Liaison obligatoire', why:'après « en » (en‿avance, en‿effet, j\'en‿ai)', sheet:'atelier-liaisons' },
+  quand:    { k:'ob', label:'Liaison obligatoire', why:'quand + il / elle / on (quand‿il pleut)', sheet:'phon-liaisons-classification' },
+  invers:   { k:'ob', label:'Liaison obligatoire', why:'verbe + pronom inversé : le t (ou le s) se prononce (dit-il, a-t-elle)', sheet:'atelier-liaisons' },
+  compose:  { k:'ob', label:'Liaison obligatoire', why:'mot composé ou expression figée (peut-être, tout‿à fait, Comment‿allez-vous ?)', sheet:'phon-liaisons-classification' },
+  fac_v:    { k:'fa', label:'Liaison facultative', why:'après un verbe : plus soutenu si tu la fais (il est‿arrivé)', sheet:'atelier-liaisons' },
+  fac_adv:  { k:'fa', label:'Liaison facultative', why:'après pas, plus, bien, trop, jamais… : registre soutenu (pas‿encore)', sheet:'atelier-liaisons' },
+  fac_pl:   { k:'fa', label:'Liaison facultative', why:'nom au pluriel + mot suivant : soutenu, sans excès (des enfants‿adorables)', sheet:'orat-liaisons' },
+  no_et:    { k:'in', label:'Liaison interdite', why:'jamais après « et »', sheet:'phon-liaisons-classification' },
+  no_h:     { k:'in', label:'Liaison interdite', why:'devant un h aspiré (les / haricots, des / héros)', sheet:'phon-h-aspire' },
+  no_onze:  { k:'in', label:'Liaison interdite', why:'devant « onze », « oui » et les mots en ya-, yo- (yaourt, yoga)', sheet:'atelier-liaisons' },
+  no_nom:   { k:'in', label:'Liaison interdite', why:'après un nom singulier : sujet, ou suivi de son adjectif (un enfant / intelligent)', sheet:'phon-liaisons-classification' },
+  no_propre:{ k:'in', label:'Liaison interdite', why:'après un nom propre (Jean / est arrivé)', sheet:'phon-liaisons-classification' },
+  no_inv:   { k:'in', label:'Liaison interdite', why:'après un pronom inversé (Sont-ils / arrivés ?)', sheet:'phon-liaisons-types' },
+  no_wh:    { k:'in', label:'Liaison interdite', why:'après « comment » ou « quand » qui posent une question (sauf « Comment‿allez-vous ? »)', sheet:'phon-liaisons-classification' },
+  ench:     { k:'en', label:'Enchaînement', why:'la consonne qu\'on entend déjà passe à la syllabe suivante, sans coupure (elle‿arrive, une‿idée)', sheet:'phon-liaisons-types' },
+  p3:       { k:'p3', label:'Respire', why:'fin de phrase : on respire davantage aux points', sheet:'orat-respiration' },
+  p2:       { k:'p2', label:'Respire un peu', why:'point-virgule et deux-points : un peu moins qu\'au point', sheet:'orat-respiration' },
+  p1:       { k:'p1', label:'Petite pause', why:'à la virgule : très peu d\'air, juste de quoi marquer le sens', sheet:'orat-respiration' },
+  p0:       { k:'p0', label:'Pause de sens (sans ponctuation)', why:'un nouveau groupe de sens commence : on peut reprendre un peu d\'air sans hacher la phrase', sheet:'phon-lecture-voix-haute' },
+  into:     { k:'mel', label:'La mélodie', why:'la voix monte ↗ à la fin de chaque groupe, et descend ↘ à la fin de la phrase', sheet:'phon-intonation-declarative' },
+  q:        { k:'mel', label:'La question', why:'oui/non : la voix monte ↗ ; avec un mot interrogatif en tête (où, quand, comment…) : elle descend ↘', sheet:'phon-interrogation' },
+};
+  DX_SYM = { ob:'‿', fa:'‿', in:'/', en:'◡', p3:'‖', p2:'‖', p1:'|', p0:'|', mel:'↗↘' };
+}
+function dxHAsp(w){ dxInit(); return !!DX.hAspExact[w] || DX_HASP.some(p => w.startsWith(p)); }
+/* le mot commence-t-il par un son voyelle ? → 'v' (oui), 'h' (h aspiré), 'y' (onze, oui, yaourt…), '' (consonne) */
+function dxOnset(w){ dxInit();
+  if(!w) return '';
+  if(/^h/.test(w)) return dxHAsp(w) ? 'h' : 'v';
+  if(/^(onze|onzieme|oui|ouistiti|ouate|uhlan)$/.test(w) || /^y[aou]/.test(w)) return 'y';
+  return /^[aeiouy]/.test(w) ? 'v' : '';
+}
+/* nombre de syllabes (approximatif, comme on le dit en lisant) */
+function dxSyl(w){
+  let t = String(w || '').toLowerCase().replace(/[^a-zàâäéèêëîïôöûùüç]/g, '');
+  if(!t) return 0;
+  if(t.length > 2) t = t.replace(/([^aeiouyàâäéèêëîïôöûùü])es?$/, '$1');
+  return (t.match(/[aeiouyàâäéèêëîïôöûùü]+/g) || []).length || 1;
+}
+/* découpe d'un mot affiché : ponctuation autour, élision (l', qu'…), parties à tiret */
+function dxSplitTok(raw){
+  const m = String(raw).match(/^([«"“(\[¡¿—–]*)(.*?)([»"”)\].,;:!?…—–]*)$/) || ['', '', raw, ''];
+  const lead = m[1], core = m[2], trail = m[3];
+  const f = dxFold(core);
+  let pre = '', main = core, mainF = f;
+  const em = f.match(/^(l|d|j|m|t|s|c|n|qu|jusqu|lorsqu|puisqu|quoiqu)'(.+)$/);
+  if(em && DX.elide[em[1] + "'"]){ pre = em[1] + "'"; main = core.slice(em[1].length + 1); mainF = em[2]; }
+  const parts = main.split('-'), partsF = mainF.split('-'), partsA = parts.map(p => p.toLowerCase().replace(/œ/g, 'oe').replace(/æ/g, 'ae'));
+  return { raw, lead, core, trail, pre, parts, partsF, partsA, isWord:/[a-z0-9]/.test(f), cap:/^[A-ZÀ-Ý]/.test(main) };
+}
+/* le son de liaison d'un mot qui finit par une consonne muette (ou '' s'il ne lie pas) */
+function dxLzSound(w){ dxInit();
+  if(DX.finPron[w] || /ss$/.test(w)) return '';          // la consonne finale se prononce déjà (contact, bus, stress) → enchaînement
+  const c = w.slice(-1);
+  if('sxz'.includes(c)) return 'z';
+  if('td'.includes(c)) return 't';
+  if(c === 'n') return DX.nLiaison[w] ? 'n' : '';
+  if(c === 'p') return /^(trop|beaucoup)$/.test(w) ? 'p' : '';
+  if(c === 'r') return /(ier|er)$/.test(w) && !DX.rSilentNo[w] && /^(premier|dernier|leger)$/.test(w) ? 'r' : '';
+  if(c === 'f') return w === 'neuf' ? 'v' : '';
+  return '';
+}
+/* la consonne finale s'entend-elle déjà ? (→ enchaînement) */
+function dxPronouncedEnd(wA){ dxInit();
+  if(!wA || /[éèêëàâîôûù]$/.test(wA)) return false;
+  const w = dxFold(wA);
+  if(w.length < 2) return false;
+  const c = w.slice(-1);
+  if(/[^aeiouy]e$/.test(w) && w.length > 2) return true;            // elle, une, quatre, notre (e muet)
+  if(/[^aeiouy]es$/.test(w)) return false;
+  if(c === 'c') return !DX.cSilent[w];
+  if(c === 'f') return !/^(clef|nerf|cerf)$/.test(w);
+  if(c === 'l') return !DX.lSilent[w];
+  if(c === 'q') return true;
+  if(DX.finPron[w] || /ss$/.test(w)) return true;
+  if(c === 'r') return !/er$/.test(w) || !!DX.rSilentNo[w];
+  return false;
+}
+/* ---------- l'analyse ---------- */
+function dxAnalyze(text){ dxInit();
+  const parts = String(text || '').split(/(\s+)/);
+  const toks = [];
+  parts.forEach((p, pi) => { if(p && !/^\s+$/.test(p)) toks.push(Object.assign(dxSplitTok(p), { pi })); });
+  const N = toks.length;
+  const gap = new Array(N).fill(null);        // marque entre le mot i et le mot i+1 (liaison / interdite / enchaînement)
+  const inner = new Array(N).fill(null);      // liaisons à l'intérieur d'un mot à tiret (dit-il, peut-être)
+  const pause = new Array(N).fill(null);      // pause après le mot i
+  const used = [];
+  const use = (key, sample) => { let u = used.find(x => x.key === key); if(!u){ u = { key, ex:[] }; used.push(u); } if(sample && u.ex.length < 3 && !u.ex.includes(sample)) u.ex.push(sample); };
+  const lastF = (t) => t.partsF[t.partsF.length - 1] || '';
+  const firstF = (t) => t.pre ? t.pre : (t.partsF[0] || '');
+  const punctOf = (t) => t.trail || (!t.isWord ? t.core : '');
+  /* 1) liaisons et enchaînements */
+  for(let i = 0; i < N; i++){
+    const A = toks[i];
+    if(!A.isWord) continue;
+    // à l'intérieur du mot (parties à tiret)
+    if(A.partsF.length > 1){
+      for(let j = 0; j < A.partsF.length - 1; j++){
+        const L = A.partsF[j], R = A.partsF[j + 1];
+        if(!L || !R || dxOnset(R) !== 'v') continue;
+        const snd = /[sxz]$/.test(L) ? 'z' : (/[td]$/.test(L) ? 't' : (/n$/.test(L) && DX.nLiaison[L] ? 'n' : ''));
+        const sample = A.parts[j] + '-' + A.parts[j + 1];
+        if(snd){
+          (inner[i] = inner[i] || [])[j] = { k:'ob', s:snd, r:/^(il|ils|elle|elles|on)$/.test(R) ? 'invers' : 'compose' };
+          use(/^(il|ils|elle|elles|on)$/.test(R) ? 'invers' : 'compose', sample);
+        } else if(dxPronouncedEnd(A.partsA[j])){ (inner[i] = inner[i] || [])[j] = { k:'en', r:'ench' }; use('ench', sample); }
+      }
+    }
+    if(i === N - 1) continue;
+    const B = toks[i + 1];
+    if(!B.isWord || A.trail || B.lead) continue;            // ponctuation entre les deux : on s'arrête, pas de liaison
+    const a = lastF(A), b = firstF(B);
+    const aPrev = A.partsF.length > 1 ? A.partsF[A.partsF.length - 2] : (A.pre ? A.pre : (i > 0 && toks[i - 1].isWord && !toks[i - 1].trail ? lastF(toks[i - 1]) : ''));
+    const on = B.pre ? '' : dxOnset(b);
+    if(!on) continue;
+    const sample = (A.parts.length === 1 ? A.pre : '') + A.parts[A.parts.length - 1] + ' ' + B.parts[0];
+    const snd = dxLzSound(a);
+    const set = (k, r, s) => { gap[i] = { k, r, s:s || '' }; use(r, sample.replace(' ', k === 'ob' || k === 'fa' ? '‿' : (k === 'en' ? '‿' : ' / '))); };
+    const invPron = A.partsF.length > 1 && /^(ils|elles|vous|nous|on)$/.test(a);
+    // ❌ interdites d'abord
+    if(a === 'et'){ set('in', 'no_et'); continue; }
+    if(on === 'h' && (snd || DX.det[a] || DX.num[a] || a === 'un')){ set('in', 'no_h'); continue; }
+    if(on === 'y' && (snd || DX.det[a])){ set('in', 'no_onze'); continue; }
+    if(on !== 'v') continue;
+    // ✅ expressions figées
+    if((a === 'tout' && /^(a|au)$/.test(b)) || (a === 'comment' && /^allez/.test(B.partsF.join('-'))) || (a === 'temps' && b === 'en') || (a === 'petit' && b === 'a') || (a === 'vingt' && b === 'et') || (a === 'quand' && B.partsF.join('-') === 'est-ce')){ set('ob', 'compose', a === 'temps' ? 'z' : 't'); continue; }
+    if(invPron){ if(/^(en|y)$/.test(b)) set('ob', 'compose', snd || 'z'); else set('in', 'no_inv'); continue; }
+    if(a === 'comment' || (a === 'quand' && i === 0 && !/^(il|ils|elle|elles|on|un|une)$/.test(b))){ set('in', 'no_wh'); continue; }
+    if(A.cap && i > 0 && snd && !DX.det[a] && !DX.pron[a] && !(toks[i - 1].trail && /[.!?…]/.test(toks[i - 1].trail)) && !DX.clitic[a]){ set('in', 'no_propre'); continue; }
+    // ✅ obligatoires
+    if(snd && DX.num[a]){ set('ob', 'num', snd); continue; }
+    if(a === 'neuf' && /^(ans|heures|hommes)$/.test(b)){ set('ob', 'num', 'v'); continue; }
+    if(snd && DX.det[a] && !DX.coord[b]){ set('ob', 'det', snd); continue; }
+    if(a === 'en'){ set('ob', 'en', 'n'); continue; }
+    if(snd && DX.pron[a] && !DX.prep[aPrev] && !/^(et|ou)$/.test(b)){ set('ob', 'pron', snd); continue; }
+    if(snd && DX.adj[a] && (DX.det[aPrev] || DX.detSing[aPrev] || DX.detPlur[aPrev] || /^(de|d'|tres|si|plus|aussi|bien)$/.test(aPrev)) && !DX.coord[b] && !DX.prep[b]){ set('ob', 'adj', snd); continue; }
+    if(snd && DX.inv[a]){ set('ob', 'inv', snd); continue; }
+    if(a === 'quand' && /^(il|ils|elle|elles|on|un|une)$/.test(b)){ set('ob', 'quand', 't'); continue; }
+    // ❌ nom singulier / ⚠️ facultatives
+    const aPrev2 = A.pre || A.partsF.length > 1 ? '' : (i > 1 && toks[i - 2].isWord && !toks[i - 2].trail ? lastF(toks[i - 2]) : '');
+    const objPron = /^(le|la|les|l')$/.test(aPrev) && /^(je|j'|tu|il|elle|on|nous|vous|ils|elles|ne|n'|me|m'|te|t'|se|s')$/.test(aPrev2);
+    if(snd && DX.detSing[aPrev] && !objPron && !DX.adj[a] && !DX.facVerb[a] && !DX.clitic[a] && !DX.det[a] && !DX.facAdv[a] && a.length > 2){ set('in', 'no_nom'); continue; }
+    if(snd && (DX.facVerb[a] || (A.pre === "c'" && a === 'est'))){ if(!DX.coord[b]) set('fa', 'fac_v', snd); continue; }
+    if(snd && DX.facAdv[a]){ if(!DX.coord[b]) set('fa', 'fac_adv', snd); continue; }
+    if(snd === 'z' && DX.detPlur[aPrev] && !DX.clitic[b] && !DX.prep[b] && !DX.coord[b] && a.length > 2){ set('fa', 'fac_pl', 'z'); continue; }
+    // ◡ enchaînement
+    if(dxPronouncedEnd(A.partsA[A.partsA.length - 1]) && !snd){ set('en', 'ench'); continue; }
+  }
+  /* 2) pauses : ponctuation, puis groupes de sens sans ponctuation */
+  let sentStartIdx = 0;
+  for(let i = 0; i < N; i++){
+    if(i > 0 && /[(—–]/.test(toks[i].lead) && !pause[i - 1]) pause[i - 1] = { lvl:1, arrow:'↗', why:toks[i].lead };
+    const p = punctOf(toks[i]);
+    if(!p) continue;
+    let lvl = -1, kind = '';
+    if(/[.!?…]/.test(p)) { lvl = 3; kind = /\?/.test(p) ? '?' : (/!/.test(p) ? '!' : (/…|\.\.\./.test(p) ? '…' : '.')); }
+    else if(/[;:]/.test(p)) lvl = 2;
+    else if(/[,—–()]/.test(p)) lvl = 1;
+    if(lvl < 0) continue;
+    const at = i;   // ponctuation isolée (« Bonjour ! ») : la marque vient juste après le « ! »
+    let arrow = '↗';
+    if(lvl === 3){
+      if(kind === '?'){ const w0 = toks.slice(sentStartIdx).find(t => t.isWord); const w = w0 ? (w0.pre === "qu'" ? "qu'" : w0.partsF[0]) : ''; arrow = DX.wh[w] ? '↘' : '↗'; use('q'); }
+      else if(kind === '…') arrow = '→';
+      else arrow = '↘';
+      sentStartIdx = i + 1;
+    }
+    if(!pause[at] || pause[at].lvl < lvl) pause[at] = { lvl, arrow, why:p.trim() };
+  }
+  // un texte qui se termine sans ponctuation : on respire quand même à la fin
+  { let last = N - 1; while(last >= 0 && !toks[last].isWord && !punctOf(toks[last])) last--;
+    if(last >= 3 && !pause[last] && toks.filter(t => t.isWord).length >= 4) pause[last] = { lvl:3, arrow:'↘', why:'fin' }; }
+  // groupes de sens à l'intérieur des segments sans ponctuation : on choisit les coupures qui donnent
+  // des groupes d'une dizaine de syllabes au plus, de préférence avant « et, mais, qui, que, quand… »,
+  // puis avant « pour, avec, dans… », et jamais au milieu d'un groupe (déterminant + nom, liaison obligatoire…)
+  const syl = toks.map(t => t.isWord ? t.partsA.reduce((n, w) => n + dxSyl(w), 0) + (/^(jusqu|lorsqu|puisqu|quoiqu)'$/.test(t.pre) ? 1 : 0) : 0);
+  const segs = []; let st = 0;
+  for(let i = 0; i < N; i++){ if(pause[i] || i === N - 1){ segs.push([st, i]); st = i + 1; } }
+  const breakCost = (i, s0) => {                     // coût d'une coupure entre le mot i et le mot i+1
+    const A = toks[i], B = toks[i + 1];
+    if(!A.isWord || !B.isWord) return Infinity;
+    const a = lastF(A), aA = A.partsA[A.partsA.length - 1] || '', b0 = B.pre ? B.pre : B.partsF[0], b0A = B.pre ? B.pre : (B.partsA[0] || '');
+    if(gap[i] && gap[i].k === 'ob') return Infinity;                     // on ne coupe jamais une liaison obligatoire
+    if(DX.det[a] || DX.detSing[a] || DX.prep[aA === 'a' ? 'x' : a] || aA === 'à' || DX.clitic[a] || DX.aux[a] || /^(tres|plus|si|ne|tout|bien|aussi|trop|moins|ce|cet|cette|quel|quelle)$/.test(a)) return Infinity;
+    const B2 = toks[i + 2], b1 = B2 && B2.isWord ? (B2.pre ? B2.pre : B2.partsF[0]) : '';
+    if(DX.coord[b0]) return -1.5;
+    if(DX.rel[b0] || B.pre === "qu'"){
+      const back = toks.slice(Math.max(s0, i - 2), i + 1).map(lastF);
+      if((b0 === 'que' || B.pre === "qu'") && (DX.queLoc[a] || back.some(w => DX.compar[w]))) return Infinity;
+      if(DX.queLoc[a] && b0 === 'qui') return Infinity;
+      return -1.5;
+    }
+    if(DX.sub[b0] || (B.pre === "s'" && /^ils?$/.test(B.partsF[0])) || (b0 === 'si' && /^(tu|il|elle|on|nous|vous|ils|elles|je|j')$/.test(b1))) return -1.5;
+    if(DX.queLoc[b0] && (b1 === 'que' || b1 === "qu'" || b1 === 'qui') && !/^(de|si|encore|ce|c')$/.test(b0)) return -1.5;
+    if(/^(ce|celui|celle|ceux|celles)$/.test(b0) && /^(qui|que|qu'|dont)$/.test(b1)) return -1.5;
+    if(DX.prepBreak[b0]) return 4.5;
+    if(b0A === 'à' || /^(de|d'|du|des|au|aux|en|par)$/.test(b0)) return 9;
+    if(/^(je|j'|tu|il|elle|on|nous|vous|ils|elles|c')$/.test(b0)) return 3.5;   // avant un nouveau sujet (« à la campagne | nous avons »)
+    if(DX.clitic[b0] || DX.det[b0] || DX.detSing[b0]) return 13;      // avant un pronom complément, un déterminant
+    return 16;
+  };
+  const groupCost = (n) => (n > 12 ? (n - 12) * (n - 12) : 0) + (n < 4 ? 6 * (4 - n) : 0);
+  segs.forEach(([s0, s1]) => {
+    let total = 0; for(let i = s0; i <= s1; i++) total += syl[i];
+    if(total <= 8) return;
+    // f[j] = meilleur coût pour les mots s0..j-1 avec une coupure juste avant le mot j
+    const n = s1 - s0 + 1, f = new Array(n + 1).fill(Infinity), from = new Array(n + 1).fill(-1), pre = [0];
+    for(let k = 0; k < n; k++) pre.push(pre[k] + syl[s0 + k]);
+    f[0] = 0;
+    for(let j = 1; j <= n; j++){
+      const bc = j < n ? breakCost(s0 + j - 1, s0) : 0;
+      if(bc === Infinity) continue;
+      for(let i = 0; i < j; i++){
+        if(f[i] === Infinity) continue;
+        const c = f[i] + groupCost(pre[j] - pre[i]) + bc;
+        if(c < f[j]){ f[j] = c; from[j] = i; }
+      }
+    }
+    for(let j = from[n]; j > 0; j = from[j]){
+      const i = s0 + j - 1, B = toks[i + 1];
+      pause[i] = { lvl:0, arrow:'↗', why:B.core, before:B.core };
+      use('p0', (B.pre || '') + B.parts.join('-'));
+    }
+  });
+  pause.forEach(p => { if(!p) return; if(p.lvl === 3) use('p3', p.why); else if(p.lvl === 2) use('p2', p.why); else if(p.lvl === 1) use('p1', p.why); });
+  if(pause.some(p => p && p.lvl < 3) || pause.some(p => p && p.lvl === 3 && p.arrow === '↘')) use('into');
+  return { parts, toks, gap, inner, pause, used };
+}
+function dxMarkHtml(g){ dxInit();
+  const R = DX_RULES[g.r] || {};
+  const t = escapeHtml(R.label + ' — ' + R.why);
+  if(g.k === 'in') return `<span class="dx-m dx-in" title="${t}">\u00a0/ </span>`;
+  return `<span class="dx-m dx-${g.k}" title="${t}">\u2060‿\u2060${g.s ? `<i>${escapeHtml(g.s)}</i>` : ''}</span>`;
+}
+function dxPauseHtml(p){ dxInit();
+  const R = DX_RULES['p' + p.lvl];
+  const t = escapeHtml(R.label + ' — ' + (p.lvl === 0 ? `avant « ${p.before} » : ` : '') + R.why);
+  return `<span class="dx-m dx-p dx-p${p.lvl}" title="${t}"><i>${p.arrow}</i>${p.lvl >= 2 ? '‖' : '|'}</span>`;
+}
+/* le texte d'un mot avec ses liaisons internes (dit-il, peut-être) */
+function dxTokHtml(raw, innerMarks){ dxInit();
+  if(!innerMarks || !innerMarks.length) return escapeHtml(raw);
+  const t = dxSplitTok(raw);
+  let out = escapeHtml(t.lead + t.pre);
+  t.parts.forEach((p, j) => {
+    out += escapeHtml(p);
+    if(j < t.parts.length - 1){
+      const m = innerMarks[j];
+      out += m ? `<span class="dx-hy dx-${m.k}" title="${escapeHtml((DX_RULES[m.r] || {}).label + ' — ' + (DX_RULES[m.r] || {}).why)}">-<i>${m.s ? escapeHtml(m.s) : ''}</i></span>` : '-';
+    }
+  });
+  return out + escapeHtml(t.trail);
+}
+/* la phrase annotée ; wordFn(raw, wordIndex, innerHtml) permet d'habiller chaque mot (Répétition : <span class="rw">) */
+function dxDecorate(text, wordFn, an){ dxInit();
+  an = an || dxAnalyze(text);
+  const { parts, toks, gap, inner, pause } = an;
+  let out = '', ti = 0;
+  for(let pi = 0; pi < parts.length; pi++){
+    const p = parts[pi];
+    if(!p) continue;
+    if(/^\s+$/.test(p)){
+      const prev = toks[ti - 1];
+      if(prev && (gap[ti - 1] || pause[ti - 1])) continue;          // l'espace est remplacé par la marque
+      out += ' '; continue;
+    }
+    const i = ti++;
+    const innerHtml = dxTokHtml(p, inner[i]);
+    out += wordFn ? wordFn(p, i, innerHtml) : innerHtml;
+    if(gap[i] && !pause[i]) out += dxMarkHtml(gap[i]);
+    else if(pause[i]) out += '\u00a0' + dxPauseHtml(pause[i]) + (i < toks.length - 1 ? ' ' : '');
+  }
+  return out;
+}
+function dxHtml(text){ return `<span class="dx-line">${dxDecorate(text)}</span>`; }
+/* 🔊 lire la phrase en marquant les pauses de sens (le TTS s'arrête aux virgules) */
+function dxSpeakText(text){
+  try{
+    const an = dxAnalyze(text);
+    if(!an.pause.some(p => p && p.lvl === 0)) return text;
+    let out = '', ti = 0;
+    an.parts.forEach(p => { if(!p) return; if(/^\s+$/.test(p)){ out += p; return; } const i = ti++; out += p + (an.pause[i] && an.pause[i].lvl === 0 ? ',' : ''); });
+    return out;
+  }catch(e){ return text; }
+}
+/* 💡 la légende + les règles appliquées à CETTE phrase, chacune avec sa fiche 📘 */
+function dxRulesHtml(text, opts){ dxInit();
+  opts = opts || {};
+  const an = dxAnalyze(text);
+  if(!an.used.length) return '';
+  const order = ['det', 'num', 'pron', 'adj', 'inv', 'en', 'quand', 'invers', 'compose', 'fac_v', 'fac_adv', 'fac_pl', 'no_et', 'no_h', 'no_onze', 'no_nom', 'no_propre', 'no_inv', 'no_wh', 'ench', 'p3', 'p2', 'p1', 'p0', 'into', 'q'];
+  const items = an.used.slice().sort((x, y) => order.indexOf(x.key) - order.indexOf(y.key));
+  const sheetTitle = (id) => { const s = (typeof PRACTICAL_SHEETS !== 'undefined') && PRACTICAL_SHEETS.find(x => x.id === id); return s ? s.title : 'la fiche'; };
+  const sym = (R, key) => {
+    if(R.k === 'mel') return `<span class="dx-sym dx-c-mel">${key === 'q' ? '?↗' : '↗↘'}</span>`;
+    if(R.k === 'p3' || R.k === 'p2') return `<span class="dx-sym dx-c-${R.k}">‖</span>`;
+    if(R.k === 'p1' || R.k === 'p0') return `<span class="dx-sym dx-c-${R.k}">|</span>`;
+    return `<span class="dx-sym dx-c-${R.k}">${DX_SYM[R.k] === '◡' ? '‿' : DX_SYM[R.k]}</span>`;
+  };
+  const rows = items.map(u => {
+    const R = DX_RULES[u.key]; if(!R) return '';
+    let here = '';
+    if(u.ex.length){
+      if(u.key === 'p0') here = `avant ${u.ex.map(x => '« ' + escapeHtml(x) + ' »').join(', ')}`;
+      else if(/^p[123]$/.test(u.key)) here = '';
+      else here = u.ex.map(escapeHtml).join(' · ');
+    }
+    return `<div class="dx-rule">${sym(R, u.key)}<div class="dx-rt"><b>${escapeHtml(R.label)}</b> — ${escapeHtml(R.why)}${here ? `<div class="dx-here">Ici : ${here}</div>` : ''}</div><button type="button" class="dx-sheet" data-sheet-peek="${escapeHtml(R.sheet)}" title="Relire la fiche : ${escapeHtml(sheetTitle(R.sheet))}">📘</button></div>`;
+  }).join('');
+  const tip = `<div class="dx-tip">Lis <b>groupe par groupe</b> : fais les liaisons <b class="dx-c-ob">‿</b> sans t'arrêter, marque une petite pause aux <b class="dx-c-p0">|</b> et respire aux <b class="dx-c-p3">‖</b>. Ni oublier les liaisons, ni en abuser : l'oreille d'abord.</div>`;
+  if(opts.bare) return `<div class="dx-rules">${tip}${rows}</div>`;
+  return `<details class="dx-why"${opts.open ? ' open' : ''}><summary>💡 Pourquoi ces marques ? <span class="dx-sum-n">${items.length} règle${items.length > 1 ? 's' : ''}</span></summary>${tip}${rows}</details>`;
+}
+function dxLegendHtml(){
+  return `<div class="dx-legend" aria-hidden="true"><span><b class="dx-c-ob">‿</b> liaison</span><span><b class="dx-c-fa">‿</b> facultative</span><span><b class="dx-c-in">/</b> interdite</span><span><b class="dx-c-en">‿</b> enchaînement</span><span><b class="dx-c-p0">|</b> pause</span><span><b class="dx-c-p3">‖</b> respire</span><span><b class="dx-c-mel">↗↘</b> mélodie</span></div>`;
+}
+/* le bouton « 🫁 Liaisons & pauses » (retenu pour ton profil) */
+function dxChipHtml(id){ const on = dxOn(); return `<button type="button" class="mode-chip dx-chip ${on ? 'active' : ''}" id="${id}" aria-pressed="${on}">🫁 Liaisons &amp; pauses${on ? ' : ON' : ''}</button>`; }
+function dxBindChip(id, onChange){
+  const b = document.getElementById(id); if(!b) return;
+  b.addEventListener('click', () => {
+    const on = !dxOn(); dxSet(on);
+    b.classList.toggle('active', on); b.setAttribute('aria-pressed', String(on));
+    b.innerHTML = `🫁 Liaisons &amp; pauses${on ? ' : ON' : ''}`;
+    try{ onChange && onChange(on); }catch(e){ console.error(e); }
+  });
+}
+
+/* ---------- 🫁 dans les exercices ---------- */
+/* Répétition : la légende + « Pourquoi ces marques ? » sous la phrase (seulement quand elle est visible) */
+function dxRepRefresh(){
+  const panel = document.getElementById('dxRepPanel'); if(!panel) return;
+  const sentence = window.__repeatSentence;
+  const visible = !window.__repeatHidden || answered;
+  const rules = (dxOn() && visible && sentence) ? dxRulesHtml(sentence) : '';
+  if(!rules){ panel.innerHTML = ''; panel.hidden = true; return; }
+  panel.hidden = false;
+  panel.innerHTML = dxLegendHtml() + rules;
+  conjBindSheetPeeks(panel);
+}
+/* la phrase de Répétition redessinée (option changée, case « Voir la phrase »…) */
+function dxRepRedraw(){
+  const el = document.getElementById('repeatSentence'), sentence = window.__repeatSentence;
+  if(!el || !sentence) return;
+  if(answered) el.innerHTML = buildScoredSentenceHtml(sentence, repeatHeardUnion);
+  else { el.innerHTML = buildRepeatWords(sentence, !!window.__repeatHidden); try{ if(repeatHeardUnion) highlightSpokenWords(repeatHeardUnion); }catch(e){} }
+  dxRepRefresh();
+}
+/* Prononciation (après la réponse) : l'exemple à dire, avec ses liaisons et ses pauses */
+function dxExampleHtml(word){
+  if(!word || !dxOn()) return '';
+  const s = exFull(word).trim();
+  if(!s) return '';
+  const an = dxAnalyze(s);
+  if(!an.used.length) return '';
+  return `<details class="dx-why dx-exbox" data-dx-text="${escapeHtml(s)}"><summary>🫁 Dis l'exemple avec les liaisons et les pauses</summary>
+    <div class="dx-ex-line">${dxDecorate(s, null, an)}</div>
+    <div class="dx-ex-btns"><button type="button" class="mode-chip dx-say">🔊 Écouter avec les pauses</button></div>
+    ${dxLegendHtml()}${dxRulesHtml(s, { bare:true })}</details>`;
+}
+function dxBindExample(root){
+  (root || document).querySelectorAll('.dx-exbox').forEach(d => {
+    if(d.__dxBound) return; d.__dxBound = true;
+    conjBindSheetPeeks(d);
+    d.addEventListener('toggle', () => {
+      if(!d.open) return;
+      // on ouvre l'aide : l'avance automatique se met en pause (le temps de lire et de répéter)
+      const nb = document.getElementById('nextBtn');
+      if(nb && /Pause \(/.test(nb.textContent)) nb.click();
+    });
+    const say = d.querySelector('.dx-say');
+    if(say) say.addEventListener('click', (e) => { e.preventDefault(); speak(dxSpeakText(d.dataset.dxText || ''), 'fr-FR'); });
+  });
+}
+
+/* ---------- ✍️ Art oratoire : « Prépare ton texte » ---------- */
+function dxLabSamples(){
+  return [
+    "Les enfants arrivent en avance, et ils attendent dans un grand hall que le spectacle commence.",
+    "Quand il fait beau, nous allons souvent nous promener avec nos amis au bord de la mer.",
+    "Comment allez-vous ? Je suis très heureux de vous revoir après tant d'années passées à l'étranger.",
+    "Le héros de ce roman est un homme ordinaire qui découvre peu à peu un courage qu'il ne soupçonnait pas.",
+    "Depuis que nous habitons à la campagne nous avons pris l'habitude de marcher chaque matin dans les bois.",
+    "On respire davantage aux points, un peu moins aux points-virgules ; et très peu aux virgules.",
+  ];
+}
+let dxLabRec = null;
+function dxLabStopMic(){ if(dxLabRec){ try{ dxLabRec.onend = null; dxLabRec.stop(); }catch(e){} dxLabRec = null; } }
+function renderDictionLab(){
+  clearQuestionTimer();
+  dxLabStopMic();
+  document.body.classList.remove('quiz-active');
+  currentBlock = null;
+  isHomeScreen = false;
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="dxLabBack" style="cursor:pointer;">← Art oratoire</button>`;
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('footerNote').textContent = '';
+  const card = document.getElementById('quizCard');
+  const KEY = nsKey('lexiqueQuiz::dictionText');
+  const samples = dxLabSamples();
+  let text = ''; try{ text = localStorage.getItem(KEY) || ''; }catch(e){}
+  if(!text.trim()) text = samples[0];
+  card.innerHTML = `
+    <div class="cat-tag">🎤 Art oratoire · ✍️ Prépare ton texte</div>
+    <div class="word-fr" style="font-size:clamp(20px,4.2vw,26px);">🫁 Liaisons et respiration</div>
+    <div class="word-def" style="margin-top:4px;">Écris ou colle un texte : l'appli marque les liaisons, les enchaînements, les petites pauses et les endroits où respirer — même là où il n'y a pas de ponctuation —, avec la règle de tes fiches. Puis lis-le à voix haute.</div>
+    <textarea id="dxLabText" class="dx-lab-text" rows="4" spellcheck="false" aria-label="Ton texte">${escapeHtml(text)}</textarea>
+    <div class="dx-lab-samples"><span>💡 Pour t'entraîner :</span>${samples.map((s, i) => `<button type="button" class="mode-chip" data-dx-sample="${i}">Texte ${i + 1}</button>`).join('')}<button type="button" class="mode-chip" id="dxLabMine">🎲 Une phrase de mes mots</button></div>
+    ${dxLegendHtml()}
+    <div class="dx-lab-out" id="dxLabOut" aria-live="polite"></div>
+    <div class="dx-lab-btns">
+      <button type="button" class="speak-ar-btn" id="dxLabHear">🔊 Écouter avec les pauses</button>
+      <button type="button" class="mode-chip" id="dxLabMic">🎤 Je le lis à voix haute</button>
+    </div>
+    <div class="mic-transcript" id="dxLabTr"></div>
+    <div id="dxLabRules"></div>
+  `;
+  const ta = document.getElementById('dxLabText'), out = document.getElementById('dxLabOut'), rulesEl = document.getElementById('dxLabRules'), tr = document.getElementById('dxLabTr');
+  const paint = () => {
+    const t = ta.value;
+    const paras = t.split(/\n\s*\n|\n/).map(p => p.trim()).filter(Boolean);
+    out.innerHTML = paras.length ? paras.map(p => `<p class="dx-line">${dxDecorate(p, (raw, i, inner) => { const n = spCompact(raw); return n ? `<span class="rw" data-norm="${n}">${inner}</span>` : inner; })}</p>`).join('') : '<p class="dx-empty">✍️ Écris une phrase au-dessus…</p>';
+    rulesEl.innerHTML = paras.length ? dxRulesHtml(paras.join(' '), { open:true }) : '';
+    conjBindSheetPeeks(rulesEl);
+    tr.textContent = '';
+  };
+  let tmr = 0;
+  ta.addEventListener('input', () => { clearTimeout(tmr); tmr = setTimeout(() => { paint(); try{ localStorage.setItem(KEY, ta.value.slice(0, 3000)); }catch(e){} }, 250); });
+  card.querySelectorAll('[data-dx-sample]').forEach(b => b.addEventListener('click', () => { ta.value = samples[+b.dataset.dxSample]; paint(); try{ localStorage.setItem(KEY, ta.value); }catch(e){} }));
+  document.getElementById('dxLabMine').addEventListener('click', () => {
+    const pool = (typeof WORDS !== 'undefined' ? WORDS : []).filter(w => w && w.ex && w.fr && w.ex.includes('~'));
+    if(!pool.length) return;
+    const longOnes = pool.filter(w => w.ex.length > 45);
+    const w = (longOnes.length ? longOnes : pool)[Math.floor(Math.random() * (longOnes.length ? longOnes : pool).length)];
+    ta.value = exFull(w); paint();
+  });
+  document.getElementById('dxLabHear').addEventListener('click', () => { dxLabStopMic(); const t = ta.value.trim(); if(t){ try{ mascotTalk(); }catch(e){} speak(dxSpeakText(t.replace(/\s*\n\s*/g, ' ')), 'fr-FR'); } });
+  const micBtn = document.getElementById('dxLabMic');
+  micBtn.addEventListener('click', () => {
+    if(dxLabRec){ dxLabStopMic(); micBtn.classList.remove('active'); micBtn.textContent = '🎤 Je le lis à voix haute'; return; }
+    if(!speechRecoAvailable){ tr.textContent = '🎤 Le micro n\'est pas disponible dans ce navigateur (essaie Chrome ou Edge).'; return; }
+    try{ window.speechSynthesis.cancel(); }catch(e){}
+    const spans = [...out.querySelectorAll('.rw')];
+    spans.forEach(s => s.classList.remove('spoken', 'missed'));
+    let rec; try{ rec = new SpeechRec(); rec.lang = 'fr-FR'; rec.interimResults = true; rec.continuous = true; rec.maxAlternatives = 1; }catch(e){ return; }
+    dxLabRec = rec;
+    micBtn.classList.add('active'); micBtn.textContent = '⏹ J\'ai fini';
+    tr.textContent = '👂 Je t\'écoute… lis ton texte à voix haute, en respectant les marques.';
+    let heard = '', silence = 0;
+    const score = (final) => {
+      const hit = spAlign(spans.map(s => s.dataset.norm || ''), spTokens(heard));
+      spans.forEach((s, i) => { s.classList.toggle('spoken', !!hit[i]); if(final) s.classList.toggle('missed', !hit[i]); });
+      return hit.length ? Math.round(100 * hit.filter(Boolean).length / hit.length) : 0;
+    };
+    const end = () => {
+      clearTimeout(silence);
+      if(dxLabRec === rec) dxLabRec = null;
+      micBtn.classList.remove('active'); micBtn.textContent = '🎤 Je le relis';
+      if(!heard.trim()){ tr.textContent = '🤫 Rien entendu — appuie sur 🎤 et parle bien fort.'; return; }
+      const pct = score(true);
+      tr.innerHTML = `${pct >= 85 ? '🎉 <b>Bravo !</b>' : (pct >= 60 ? '🙂 <b>Pas mal !</b>' : '💪 <b>Continue !</b>')} ${pct} % des mots bien entendus. ${pct < 100 ? 'Les mots en rouge ne sont pas passés : relis-les en articulant.' : ''}`;
+    };
+    rec.onresult = (ev) => {
+      let all = ''; for(let i = 0; i < ev.results.length; i++) all += ev.results[i][0].transcript + ' ';
+      heard = all; tr.textContent = '🗣️ ' + all.trim();
+      score(false);
+      clearTimeout(silence); silence = setTimeout(() => { try{ rec.stop(); }catch(e){} }, 3000);
+    };
+    rec.onerror = (ev) => { if(ev.error === 'not-allowed' || ev.error === 'service-not-allowed'){ tr.textContent = '🔒 Micro refusé — autorise le micro pour ce site.'; } };
+    rec.onend = end;
+    try{ rec.start(); }catch(e){ end(); }
+  });
+  document.getElementById('dxLabBack').addEventListener('click', () => { dxLabStopMic(); renderArtOratoireHome(); });
+  paint();
+}
+/* le bouton d'accès, dans les fiches de liaison / respiration / lecture à voix haute */
+var DX_LAB_SHEETS = ['atelier-liaisons', 'orat-respiration', 'orat-liaisons', 'orat-lecture-haute-voix', 'orat-discours-pauses', 'phon-rythme-accent', 'phon-liaisons-types', 'phon-liaisons-classification', 'phon-h-aspire', 'phon-e-muet', 'phon-lecture-voix-haute', 'phon-intonation-declarative', 'phon-interrogation'];
+renderPracticalSheetDetail = (function(orig){
+  return function(id){
+    const r = orig.apply(this, arguments);
+    try{
+      if((DX_LAB_SHEETS || []).includes(id)){
+        const card = document.getElementById('quizCard'), def = card && card.querySelector('.word-def');
+        if(def && !card.querySelector('#dxLabFromSheet')){
+          def.insertAdjacentHTML('afterend', `<button type="button" class="restart-btn dx-lab-go" id="dxLabFromSheet">🫁 S'entraîner : marquer les liaisons et les pauses d'un texte →</button>`);
+          document.getElementById('dxLabFromSheet').addEventListener('click', renderDictionLab);
+        }
+      }
+    }catch(e){}
+    return r;
+  };
+})(renderPracticalSheetDetail);
+
+/* ============ ✍️ 1.0.13 : LA PHRASE D'EXEMPLE EN BON FRANÇAIS ============
+   Les phrases d'exemple ont un « ~ » à la place du mot : « Ce mot ~ du latin. » Pour un verbe, on
+   remplaçait « ~ » par l'infinitif → « Ce mot dériver du latin. » (faux, et c'est ce que tu répétais).
+   Maintenant la phrase complète est en bon français : « Ce mot dérive du latin. »
+   • mots de l'appli : phrases vérifiées une par une (EX_FIX) ;
+   • tes mots à toi : le verbe est conjugué automatiquement quand c'est sûr (après j'ai / il est /
+     nous / les enfants… → « a dérivé », « dérive », « dérivent »), sinon la phrase reste telle quelle.
+   Le « ~ » reste un trou pour la Phrase à trous : seule la phrase complète change. */
+function exHash(s){ s = String(s || ''); let h = 0x811c9dc5; for(let i = 0; i < s.length; i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193); } return (h >>> 0).toString(36).slice(0, 5); }
+function exStripAcc(s){ return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); }
+/* verbes du 3e groupe en -ir les plus courants (présent : 3 radicaux) */
+function exIrr3(inf){
+  const T = [
+    [/^(.*)(venir|tenir)$/, (p, v) => { const t = v[0]; return { pres:[t + 'iens', t + 'iens', t + 'ient', t + 'enons', t + 'enez', t + 'iennent'].map(x => p + x), pp:p + t + 'enu' }; }],
+    [/^(.*)(ouvrir|couvrir|offrir|souffrir|cueillir)$/, (p, v) => { const st = v.slice(0, -2); return { pres:[st + 'e', st + 'es', st + 'e', st + 'ons', st + 'ez', st + 'ent'].map(x => p + x), pp:p + ({ ouvrir:'ouvert', couvrir:'couvert', offrir:'offert', souffrir:'souffert', cueillir:'cueilli' })[v] }; }],
+    [/^(.*)(courir)$/, (p) => ({ pres:['cours', 'cours', 'court', 'courons', 'courez', 'courent'].map(x => p + x), pp:p + 'couru' })],
+    [/^(.*)(partir|sortir|dormir|servir|sentir|mentir)$/, (p, v) => { const st = v.slice(0, -2), s1 = st.slice(0, -1); return { pres:[s1 + 's', s1 + 's', s1 + 't', st + 'ons', st + 'ez', st + 'ent'].map(x => p + x), pp:p + st + 'i' }; }],
+    [/^(.*)(battre|mettre)$/, (p, v) => { const st = v.slice(0, -3); const pp = v === 'mettre' ? 'mis' : 'battu'; return { pres:[st + 's', st + 's', st, st + 'tons', st + 'tez', st + 'tent'].map(x => p + x), pp:p + pp }; }],
+    [/^(.*)(prendre)$/, (p) => ({ pres:['prends', 'prends', 'prend', 'prenons', 'prenez', 'prennent'].map(x => p + x), pp:p + 'pris' })],
+    [/^(.*)(attendre|entendre|tendre|rendre|vendre|perdre|répondre|descendre|défendre|fendre|pendre|fondre|mordre|tordre|pondre|tondre|répandre|épandre)$/, (p, v) => { const st = p + v.slice(0, -2); return { pres:[st + 's', st + 's', st, st + 'ons', st + 'ez', st + 'ent'], pp:st + 'u' }; }],
+  ];
+  for(const [re, fn] of T){ const m = inf.match(re); if(m){ const r = fn(m[1], m[2]); if(r) return r; } }
+  return null;
+}
+var EX_IRR3 = /(venir|tenir|ouvrir|couvrir|offrir|souffrir|cueillir|courir|partir|sortir|dormir|servir|sentir|mentir|mourir|acquérir|conquérir|requérir|fuir|bouillir|vêtir|faillir|assaillir|haïr|ouïr)$/;
+/* les formes d'un verbe : présent (6), participe passé, impératif (tu), et toutes les formes connues */
+var exFormsCache = null;
+function exVerbForms(inf){
+  inf = String(inf || '').toLowerCase().replace(/^s'|^se /, '');
+  if(!exFormsCache) exFormsCache = Object.create(null);
+  if(inf in exFormsCache) return exFormsCache[inf];
+  let out = null;
+  try{
+    const v = (typeof getAllVerbs === 'function' ? getAllVerbs() : []).find(x => x && (x.inf === inf || x.inf === "s'" + inf || x.inf === 'se ' + inf));
+    if(v && v.tenses && v.tenses.present && v.tenses.present.length === 6){
+      const T = v.tenses, clean = (f) => String(f).replace(/^(me |te |se |nous |vous |m'|t'|s')/, '').trim();
+      const pc = T.passeCompose && T.passeCompose[0] ? String(T.passeCompose[0]).trim().split(/\s+/) : [];
+      const pp = pc.length ? pc[pc.length - 1] : '';
+      const pres = T.present.map(clean);
+      const imp = (T.imperatif && T.imperatif[0]) ? clean(T.imperatif[0]) : (/er$/.test(inf) || inf === 'aller' ? pres[1].replace(/s$/, '') : pres[1]);
+      const all = new Set();
+      ['present', 'futur', 'imparfait', 'conditionnel', 'imperatif'].forEach(k => (T[k] || []).forEach(f => all.add(exStripAcc(clean(f)))));
+      out = { pres, pp, imp, all };
+    }
+  }catch(e){}
+  if(!out && /er$/.test(inf) && inf !== 'aller'){
+    const st = inf.slice(0, -2); let s1 = st, sN = st;
+    if(/g$/.test(st)) sN = st + 'e';
+    if(/c$/.test(st)) sN = st.slice(0, -1) + 'ç';
+    if(/(appel|rappel|jet|rejet|interpel|épel|renouvel|feuillet|cachet|ficel|étincel|ruissel)$/.test(st)) s1 = st + st.slice(-1);
+    else if(/é([bcdfgjklmnpqrstvz]|[bcdfgptv][rl])$/.test(st)) s1 = st.replace(/é([bcdfgjklmnpqrstvz]{1,2})$/, 'è$1');
+    else if(/[^aeiouyéèê]e[bcdfgjklmnpqrstvz]$/.test(st)) s1 = st.replace(/e([bcdfgjklmnpqrstvz])$/, 'è$1');
+    if(/[ou]y$/.test(st)) s1 = st.slice(0, -1) + 'i';
+    out = { pres:[s1 + 'e', s1 + 'es', s1 + 'e', sN + 'ons', st + 'ez', s1 + 'ent'], pp:st + 'é', imp:s1 + 'e' };
+  }
+  if(!out){
+    const OIR = { valoir:[['vaux', 'vaux', 'vaut', 'valons', 'valez', 'valent'], 'valu'], pleuvoir:[['pleus', 'pleus', 'pleut', 'pleuvons', 'pleuvez', 'pleuvent'], 'plu'], falloir:[['faut', 'faut', 'faut', 'faut', 'faut', 'faut'], 'fallu'], prévaloir:[['prévaux', 'prévaux', 'prévaut', 'prévalons', 'prévalez', 'prévalent'], 'prévalu'] };
+    let r = OIR[inf] ? { pres:OIR[inf][0], pp:OIR[inf][1] } : null;
+    const cv = inf.match(/^(.*)cevoir$/); if(!r && cv) r = { pres:['çois', 'çois', 'çoit', 'cevons', 'cevez', 'çoivent'].map(x => cv[1] + x), pp:cv[1] + 'çu' };
+    const vo = inf.match(/^(|pré|re|entre)voir$/); if(!r && vo) r = { pres:['vois', 'vois', 'voit', 'voyons', 'voyez', 'voient'].map(x => vo[1] + x), pp:vo[1] + 'vu' };
+    if(r) out = { pres:r.pres, pp:r.pp, imp:r.pres[1] };
+  }
+  if(!out){ const r = exIrr3(inf); if(r) out = { pres:r.pres, pp:r.pp, imp:r.pres[1].replace(/s$/, (m) => /(ouvr|couvr|offr|souffr|cueill)es$/.test(r.pres[1]) ? '' : m) }; }
+  if(!out && /[^o]ir$/.test(inf) && !EX_IRR3.test(inf) && !/^(avenir|désir|loisir|plaisir|soupir|saphir|élixir|souvenir|cuir|tir)$/.test(inf)){
+    const st = inf.slice(0, -2);
+    out = { pres:[st + 'is', st + 'is', st + 'it', st + 'issons', st + 'issez', st + 'issent'], pp:st + 'i', imp:st + 'is' };
+  }
+  if(out && !out.all) out.all = new Set();
+  if(out){ out.pres.concat([out.pp, out.imp]).forEach(f => f && out.all.add(exStripAcc(f))); }
+  exFormsCache[inf] = out;
+  return out;
+}
+var EX_SUBJ = { je:0, "j'":0, tu:1, il:2, elle:2, on:2, qui:2, cela:2, ça:2, ceci:2, chacun:2, personne:2, nous:3, vous:4, ils:5, elles:5 };
+var EX_DET_PL = /^(les|des|ces|mes|tes|ses|nos|vos|leurs|plusieurs|certains|certaines|quelques|deux|trois|quatre|cinq|six|dix|nombreux|nombreuses|tous|toutes)$/;
+var EX_DET_SG = /^(le|la|l'|un|une|ce|cet|cette|mon|ton|son|ma|ta|sa|notre|votre|leur|chaque|tout|toute|aucun|aucune)$/;
+var EX_DET_FEM = /^(la|une|cette|ma|ta|sa|toute|aucune)$/;
+var EX_CLITIC = /^(me|m'|te|t'|se|s'|nous|vous|le|la|les|l'|lui|leur|y|en|ne|n')$/;
+var EX_ADV = /^(encore|déjà|bien|enfin|toujours|jamais|pas|plus|vraiment|finalement|malheureusement|vite|tous|toutes|complètement|souvent|beaucoup|trop|mal|aussi|presque|rarement|parfois|seulement|même|longtemps|tout|très|certainement|sûrement|probablement|également|désormais|ensuite|puis|parfaitement|totalement|rapidement|clairement|largement|carrément|franchement|soudain|aussitôt|alors|donc|bientôt|sans doute|peut-être|surtout|vraiment|plutôt|assez|tellement|si)$/;
+var EX_AVOIR = /^(avoir|ai|as|a|avons|avez|ont|avait|avais|avions|aviez|avaient|aura|auras|aurai|aurons|aurez|auront|aurait|aurais|aurions|auriez|auraient|eu|ayant|eut)$/;
+var EX_ETRE = /^(être|suis|es|est|sommes|êtes|sont|était|étais|étions|étiez|étaient|sera|seras|serai|serons|serez|seront|serait|serais|serions|seriez|seraient|été|fut|soit|sois|soient)$/;
+var EX_VOW = /^[aeiouyàâäéèêëîïôöûùüœæh]/i;
+/* « m'a », « s'est », « j'ai » → « m' » + « a »… */
+function exToks(prefix){
+  const out = [];
+  String(prefix || '').trim().split(/\s+/).filter(Boolean).forEach(t => {
+    const m = t.match(/^(j|m|t|s|l|n|qu|c|d)['’](.+)$/i);
+    if(m && !/^aujourd/i.test(t)){ out.push(m[1].toLowerCase() + "'"); out.push(m[2]); } else out.push(t);
+  });
+  return out;
+}
+/* on recolle : élisions (« je apprécie » → « j'apprécie », « de abandonner » → « d'abandonner ») et contractions (« de les » → « des ») */
+function exJoin(prefix, x, suffix){
+  let p = prefix, s = suffix;
+  x = x.replace(/\s+/g, ' ').trim();
+  const x0 = exStripAcc(x.split(/[\s'-]/)[0]);
+  if(EX_VOW.test(x) && !(/^h/.test(x0) && typeof dxHAsp === 'function' && dxHAsp(x0))){
+    p = p.replace(/(^|\s)(je|me|te|se|ne|le|la|que|de)\s$/i, (m, sp, w) => sp + w.slice(0, -1) + "'");
+  }
+  if(/(^|\s)(de|que|ne|le|la)$/i.test(x) && /^\s+[aeiouyàâéèêîôûh]/i.test(s)) { x = x.slice(0, -1) + "'"; s = s.replace(/^\s+/, ''); }
+  if(/(^|\s)de$/i.test(x) && /^\s+(de|du|des|d')\b/i.test(s)) x = x.replace(/\s*\bde$/i, '');
+  else if(/(^|\s)de$/i.test(x) && /^\s+les\b/i.test(s)){ x = x.replace(/\s*\bde$/i, ''); s = s.replace(/^\s+les\b/i, ' des'); }
+  else if(/(^|\s)de$/i.test(x) && /^\s+le\b/i.test(s)){ x = x.replace(/\s*\bde$/i, ''); s = s.replace(/^\s+le\b/i, ' du'); }
+  else if(/(^|\s)à$/i.test(x) && /^\s+le\b/i.test(s)){ x = x.replace(/\s*\bà$/i, ''); s = s.replace(/^\s+le\b/i, ' au'); }
+  else if(/(^|\s)à$/i.test(x) && /^\s+les\b/i.test(s)){ x = x.replace(/\s*\bà$/i, ''); s = s.replace(/^\s+les\b/i, ' aux'); }
+  return (p + x + s).replace(/ {2,}/g, ' ');
+}
+/* « son / sa / ses » selon la personne (je → mon, tu → ton…) */
+function exPoss(txt, person){
+  if(person < 0 || person === 2) return txt;
+  const M = { son:['mon', 'ton', 'son', 'notre', 'votre', 'leur'], sa:['ma', 'ta', 'sa', 'notre', 'votre', 'leur'], ses:['mes', 'tes', 'ses', 'nos', 'vos', 'leurs'], soi:['moi', 'toi', 'soi', 'nous', 'vous', 'eux'] };
+  return txt.replace(/\b(son|sa|ses|soi)\b/g, (w) => M[w][person]);
+}
+/* la phrase complète, en bon français, pour un mot (null = rien à corriger ou pas sûr) */
+var EX_MODAL = /^(peut|peux|peuvent|pouvons|pouvez|pourra|pourront|pourrait|pourraient|doit|dois|doivent|devons|devez|devra|devront|devrait|devraient|va|vais|vas|vont|allons|allez|ira|iront|veut|veux|veulent|voulons|voulez|voudrait|sait|sais|savent|savons|savez|saura|faut|faudra|faudrait|souhaite|souhaitent|aime|aiment|préfère|préfèrent|semble|semblent|espère|espèrent|adore|adorent|désire|désirent|ose|osent|compte|comptent|pense|pensent|laisse|laissent|fait|font|vient|viennent|tente|tentent|essaie|essaient|décide|décident|refuse|refusent|risque|risquent|cherche|cherchent|commence|commencent|continue|continuent|arrive|arrivent|permet|permettent|aide|aident|apprend|apprennent|reste|restent)$/;
+function exAutoFix(fr, ex, cat){
+  ex = String(ex || ''); fr = String(fr || '').trim();
+  if((ex.match(/~/g) || []).length !== 1) return null;
+  const m = fr.match(/^(ne pas |n'|ne )?(se |s')?([a-zàâçéèêëîïôûùüÿœ-]+(?:er|ir|re|oir|ïr))\b(.*)$/i);
+  if(!m) return null;
+  const neg = !!m[1], refl = !!m[2], inf = m[3].toLowerCase();
+  let restX = (m[4] || '').trim(), restChanged = false;
+  // un verbe ? (connu de l'appli, ou rangé dans une catégorie de verbes / d'expressions) — sinon c'est sans doute un nom (« dossier », « atelier »)
+  const known = (typeof getAllVerbs === 'function') && getAllVerbs().some(v => v && (v.inf === inf || v.inf === "s'" + inf || v.inf === 'se ' + inf));
+  if(!known && !neg && !refl && !/verb|action|expression|locution|idiom/i.test(String(cat || ''))) return null;
+  let [prefix, suffix] = ex.split('~');
+  const toks = exToks(prefix);
+  let i = toks.length - 1, sawRefl = false;
+  while(i >= 0){
+    const t = toks[i].toLowerCase();
+    if(/^(nous|vous)$/.test(t) && (i === 0 || /[,;:]$/.test(toks[i - 1]))) break;      // « Nous ~ », « Depuis une semaine, nous ~ » : c'est le sujet
+    if(EX_CLITIC.test(t)){ if(/^(me|m'|te|t'|se|s'|nous|vous)$/.test(t)) sawRefl = true; i--; continue; }
+    if(EX_ADV.test(t)){ i--; continue; }
+    break;
+  }
+  const anchorRaw = i >= 0 ? toks[i] : '', anchor = anchorRaw.toLowerCase();
+  if(/[,;:.!?]$/.test(anchorRaw)) return null;
+  // « quelqu'un » / « quelque chose » de l'expression : la phrase dit déjà qui (l', le, me… ou « du professeur »)
+  if(/\b(quelqu'un|quelque chose|qqn|qqch)\b/i.test(restX)){
+    const objBefore = toks.slice(Math.max(1, i - 2)).some((t, k, arr) => /^(le|la|l'|les|me|m'|te|t'|nous|vous|lui|leur)$/i.test(t));
+    const nounAfter = /^\s+(du|de|des|d'|le|la|les|l'|un|une|mon|ton|son|ma|ta|sa|mes|tes|ses|notre|votre|leur|leurs|nos|vos|ce|cet|cette|ces)\b/i.test(suffix);
+    if(objBefore || nounAfter){
+      restChanged = true;
+      restX = restX.replace(/\s*\bde (quelqu'un|quelque chose|qqn|qqch)$/i, nounAfter ? '' : '$&').replace(/\s*\b(quelqu'un|quelque chose|qqn|qqch)\b/i, '').replace(/\s{2,}/g, ' ').trim();
+    }
+  }
+  const hasNe = /(^|\s)(ne|n')/i.test(prefix) || /^n'/i.test(prefix);
+  const hasNeg = /\b(pas|plus|jamais|rien|guère)\b/i.test(prefix) || /^\s*(pas|plus|jamais|rien)\b/i.test(suffix);
+  const subjTok = toks.find(t => EX_SUBJ[t.toLowerCase()] !== undefined);
+  let person = subjTok ? EX_SUBJ[subjTok.toLowerCase()] : -1;
+  const first = (toks[0] || '').toLowerCase();
+  const F = exVerbForms(inf);
+  const sameVerb = (w) => { if(!F) return false; const k = exStripAcc(String(w).split('-')[0]); return [k, k.replace(/s$/, ''), k.replace(/e$/, ''), k.replace(/es$/, '')].some(x => F.all.has(x)); };
+  const negWrap = (verb, restPart) => {
+    // « ne pas » de l'expression : ne … pas autour du verbe (sauf si la phrase les a déjà)
+    let v = verb, r = restPart;
+    if(neg && !hasNeg) v = v + ' pas';
+    if(neg && !hasNe) v = (EX_VOW.test(v) ? "n'" : 'ne ') + v;
+    // « Ne ~ pas les enfants » + complément de l'expression : « pas » juste après le verbe
+    if(r && /^\s*pas\b/i.test(suffix)){ v = v + ' pas'; suffix = suffix.replace(/^\s*pas\b/i, ''); }
+    return r ? v + ' ' + r : v;
+  };
+  // « Pourquoi fais-tu ~ ? », « il faisait ~ » : le verbe de l'expression est déjà conjugué juste avant
+  if(anchor && restX && sameVerb(anchor) && !EX_AVOIR.test(anchor) && !EX_ETRE.test(anchor)) return exJoin(prefix, exPoss((neg && !hasNeg ? 'pas ' : '') + restX, person), suffix);
+  // après avoir / être
+  if(EX_AVOIR.test(anchor) || EX_ETRE.test(anchor)){
+    if((inf === 'avoir' && EX_AVOIR.test(anchor)) || (inf === 'être' && EX_ETRE.test(anchor))){
+      if(!restX) return null;
+      return exJoin(prefix, exPoss((neg && !hasNeg ? 'pas ' : '') + restX, person), suffix);
+    }
+    if(!F || !F.pp) return null;
+    let pp = F.pp;
+    if(EX_ETRE.test(anchor) && !(refl && /^(le|la|les|l'|un|une|des|du|ses|sa|son|mes|ma|mon|tes|ta|ton|nos|vos|leurs?|toute?s?)\b/i.test(restX))){
+      const s = subjTok ? subjTok.toLowerCase() : '';
+      let fem = s === 'elle' || s === 'elles', pl = s === 'ils' || s === 'elles' || s === 'nous';
+      if(!subjTok){ if(EX_DET_FEM.test(first)) fem = true; if(EX_DET_PL.test(first)) pl = true; }
+      if(!/[^é]e$/.test(pp) || /é$/.test(pp)){ if(fem) pp += 'e'; }
+      if(pl && !/s$/.test(pp)) pp += 's';
+    }
+    return exJoin(prefix, exPoss(negWrap(pp, restX), person), suffix);
+  }
+  if(!F) return exKeepInf();
+  // sujet : pronom (« il ~ ») ou nom en tête (« Les idées ~ », « Cette centrale ~ »)
+  let p = EX_SUBJ[anchor] !== undefined ? EX_SUBJ[anchor] : -1;
+  const article = /^(le|la|l'|les|un|une|des|mon|ton|son|ma|ta|sa|mes|tes|ses|notre|votre|leur|nos|vos|leurs|ce|cet|cette|ces)$/.test(first);
+  const verbIn = toks.slice(1, i + 1).some((t, k) => { const l = t.toLowerCase(); return (EX_MODAL.test(l) && !(k === 0 && article)) || (k > 0 && exVerbFormSet().has(exStripAcc(l))); });
+  if(p < 0 && i >= 1 && i <= 4 && !verbIn){
+    const ok = toks.slice(0, i + 1).every(t => /^[a-zàâçéèêëîïôûùüÿœ'-]+$/i.test(t)) && !toks.slice(1, i + 1).some(t => EX_SUBJ[t.toLowerCase()] !== undefined || EX_AVOIR.test(t.toLowerCase()) || EX_ETRE.test(t.toLowerCase()) || DX_PREP_EX.test(t.toLowerCase()));
+    if(ok){ if(EX_DET_PL.test(first)) p = 5; else if(EX_DET_SG.test(first)) p = 2; }
+  }
+  if(p >= 0){
+    let x = F.pres[p];
+    if(refl && !sawRefl){ const rp = ['me', 'te', 'se', 'nous', 'vous', 'se'][p]; x = (EX_VOW.test(x) && rp.length === 2 ? rp[0] + "'" : rp + ' ') + x; }
+    return exJoin(prefix, exPoss(negWrap(x, restX), p), suffix);
+  }
+  // « Ne ~ pas » en tête de phrase : impératif (tu)
+  if(i < 0 && /^\s*ne\b/i.test(prefix) && F.imp){
+    let v = F.imp, s0 = suffix;
+    const hasPas = /^\s*(pas|plus|jamais)\b/i.test(s0);
+    if(!hasPas) v += ' pas';
+    else if(restX){ v += ' pas'; suffix = s0.replace(/^\s*(pas)\b/i, ''); }
+    return exJoin(prefix, exPoss(restX ? v + ' ' + restX : v, 1), suffix);
+  }
+  return exKeepInf();
+  // l'infinitif reste (« Il veut ~ »), mais sans « quelqu'un » en trop ni « se » en double (« Tu vas t'en ~ »)
+  function exKeepInf(){
+    if(!restChanged && !(refl && sawRefl)) return null;
+    const v = (m[1] || '') + (refl && sawRefl ? '' : (m[2] || '')) + m[3];
+    return exJoin(prefix, restX ? v + ' ' + restX : v, suffix);
+  }
+}
+/* toutes les formes conjuguées connues (pour ne pas prendre « peut », « souhaite »… pour un nom) */
+var exAllForms = null;
+function exVerbFormSet(){
+  if(exAllForms) return exAllForms;
+  exAllForms = new Set();
+  try{ getAllVerbs().forEach(v => { const T = (v && v.tenses) || {}; ['present', 'imparfait', 'futur', 'conditionnel'].forEach(k => (T[k] || []).forEach(f => exAllForms.add(exStripAcc(String(f).split(/\s+/).pop())))); }); }catch(e){}
+  return exAllForms;
+}
+var DX_PREP_EX = /^(à|de|d'|du|des|pour|par|avec|sans|dans|sur|sous|en|vers|chez|entre|après|avant|depuis|pendant|comme|que|qu'|quand|si)$/;
+/* un nom : pluriel après « mes / les / de nouvelles… » (« Mes ~ sont » + collègue → collègues), élision (« te avertir » → « t'avertir ») */
+function exPlural(w){
+  if(/[sxz]$/i.test(w)) return w;
+  if(/^(bijou|caillou|chou|genou|hibou|joujou|pou)$/i.test(w)) return w + 'x';
+  if(/(au|eau|eu)$/i.test(w) && !/^(pneu|bleu|landau|sarrau|émeu)$/i.test(w)) return w + 'x';
+  if(/al$/i.test(w) && !/^(bal|carnaval|chacal|festival|récital|régal|cérémonial|étal|natal|naval|fatal|banal|final)$/i.test(w)) return w.slice(0, -2) + 'aux';
+  if(/^(travail|vitrail|corail|émail|bail|soupirail|vantail)$/i.test(w)) return w.slice(0, -3) + 'aux';
+  return w + 's';
+}
+function exNounFix(fr, ex){
+  if((ex.match(/~/g) || []).length !== 1) return null;
+  const [prefix, suffix] = ex.split('~');
+  let x = fr;
+  const pl = /(^|\s)(les|des|mes|tes|ses|nos|vos|leurs|ces|quelques|plusieurs|certains|certaines|deux|trois|quatre|cinq|six|sept|huit|neuf|dix|nombreux|nombreuses|de nouvelles|de nouveaux|de nombreux|de nombreuses|ces nouvelles|ces nouveaux)\s$/i.test(prefix) && /^\s+(sont|ont|étaient|seront|doivent|peuvent|vont|font|restent|semblent|deviennent|[a-zàâçéèêëîïôûùü]+ent)\b/i.test(suffix);
+  if(pl && /^[a-zàâçéèêëîïôûùüÿœ-]+$/i.test(fr) && !/[sxz]$/i.test(fr)) x = exPlural(fr);
+  const out = exJoin(prefix, x, suffix);
+  return out === ex.replace(/~/g, fr) ? null : out;
+}
+/* la phrase complète d'un mot (à utiliser partout à la place de ex.replace(/~/g, fr)) */
+var exFullCache = null;
+function exFull(w){
+  if(!w) return '';
+  const ex = String(w.ex || ''), fr = String(w.fr || '');
+  if(!ex.includes('~')) return ex;
+  const key = fr + '|' + exHash(ex);
+  if(!exFullCache) exFullCache = new Map();
+  if(exFullCache.has(key)) return exFullCache.get(key);
+  let out = null;
+  try{
+    const fix = (typeof EX_FIX !== 'undefined' && EX_FIX) ? EX_FIX[key] : undefined;
+    if(fix === 0) out = null;                          // phrase déjà correcte telle quelle
+    else if(typeof fix === 'string') out = fix.charAt(0) === '=' ? fix.slice(1) : ex.replace('~', fix);   // « =… » : toute la phrase
+    else out = exAutoFix(fr, ex, w.cat) || exNounFix(fr, ex);
+  }catch(e){ out = null; }
+  if(!out) out = ex.replace(/~/g, fr);
+  if(exFullCache.size > 5000) exFullCache.clear();
+  exFullCache.set(key, out);
+  return out;
+}
+/* ce qui remplace « ~ » dans la phrase complète (pour le surligner) */
+function exFullForm(w){
+  const ex = String(w && w.ex || ''), full = exFull(w);
+  const parts = ex.split('~');
+  if(parts.length !== 2) return w ? w.fr : '';
+  const [a, b] = parts;
+  if(full.startsWith(a) && full.endsWith(b) && full.length >= a.length + b.length) return full.slice(a.length, full.length - b.length).trim() || w.fr;
+  return w.fr;
+}
+
+/* phrases des mots de l'appli corrigées à la main (clé : mot | empreinte de la phrase d'origine — si tu modifies la phrase, la correction ne s'applique plus) */
+var EX_FIX = {
+  "avoir carte blanche|18uq1": "carte blanche",
+  "payer les pots cassés|1c0ee": "paient les pots cassés",
+  "avoir la puce à l'oreille|1ot36": "mis la puce à l'oreille",
+  "être hors de soi|8xm3h": "hors de lui",
+  "avoir le vent contre soi|wdkfl": "le vent contre elle",
+  "être franc du collier|1jmfb": "francs du collier",
+  "être plié de rire|36y77": "pliés de rire",
+  "faire un pas vers|jkdk7": "=Les deux parties ont fait un pas l'une vers l'autre.",
+  "passer au crible|jh5hd": "passées au crible",
+  "tourner mal|3if60": "mal tourné",
+  "venir en aide à|13una": "=Les voisins nous sont venus en aide.",
+  "donner le meilleur de soi-même|1tqzz": "donné le meilleur d'elle-même",
+  "venir aux nouvelles|1q23s": "=Je viens aux nouvelles.",
+  "être maître de soi|1tx27": "maître de lui",
+  "contaminer|nrfan": "contaminée",
+  "charger|1bv7q": "=On l'a chargé de cette responsabilité.",
+};
+
+/* ============ 🔀 1.0.13 : MOTS EN ORDRE plus ludique — 🃏 3 jokers, ⭐ étoiles, 🎯 indice ============
+   • 🃏 Joker (3 par phrase) : il pose un mot au bon endroit (doré, bloqué). Le dernier mot, c'est à toi.
+   • ⭐⭐⭐ : on perd une étoile par joker et par essai raté (au moins une quand la phrase est trouvée).
+   • 🎯 après un essai raté : « 4 mots sur 7 sont déjà à la bonne place » (sans dire lesquels).
+   • des tuiles colorées qui arrivent en rebondissant, un petit « pop » quand on pose un mot, une vague à la fin. */
+var ORD_JOKERS = 3;
+function ordInit(){ window.__ord = { jokers:ORD_JOKERS, used:0, misses:0 }; window.__ordLastUid = null; }
+function ordStars(){ const s = window.__ord || { used:0, misses:0 }; return Math.max(1, 3 - s.used - s.misses); }
+function ordStarsHtml(n){ return [0, 1, 2].map(k => `<span class="${k < n ? 'on' : 'off'}">⭐</span>`).join(''); }
+function ordBarHtml(){
+  const s = window.__ord || { jokers:ORD_JOKERS };
+  return `<div class="ord-bar">
+      <div class="ord-stars" id="ordStars" title="Tes étoiles pour cette phrase">${ordStarsHtml(ordStars())}</div>
+      <button type="button" class="ord-joker" id="ordJokerBtn" title="Le joker pose un mot au bon endroit">🃏 Joker <span class="ord-jk-cards">${[0, 1, 2].map(k => `<i class="${k < ORD_JOKERS - s.jokers ? 'used' : ''}"></i>`).join('')}</span><b id="ordJokerN">${s.jokers}</b></button>
+    </div>
+    <div class="ord-mm" id="ordMM" hidden></div>`;
+}
+function ordRefreshBar(){
+  const s = window.__ord; if(!s) return;
+  const st = document.getElementById('ordStars'); if(st) st.innerHTML = ordStarsHtml(ordStars());
+  const b = document.getElementById('ordJokerBtn');
+  if(b){
+    b.querySelectorAll('.ord-jk-cards i').forEach((c, k) => c.classList.toggle('used', k < ORD_JOKERS - s.jokers));
+    const n = document.getElementById('ordJokerN'); if(n) n.textContent = s.jokers;
+    b.disabled = answered || s.jokers <= 0;
+  }
+}
+function ordBind(){ const b = document.getElementById('ordJokerBtn'); if(b) b.addEventListener('click', ordJoker); ordRefreshBar(); }
+function ordSay(msg){ const mm = document.getElementById('ordMM'); if(mm){ mm.hidden = false; mm.innerHTML = msg; } }
+/* 🃏 le joker : la première place pas encore juste reçoit son mot, doré et bloqué */
+function ordJoker(){
+  const s = window.__ord;
+  if(answered || !s || s.jokers <= 0) return;
+  const slots = window.__orderBlankSlots, idxs = window.__orderBlankIndices, full = window.__orderFullTarget;
+  if(!slots || !idxs || !full) return;
+  const n = (w) => normalizeForSearch(String(w || ''));
+  const okAt = (p) => !!slots[p] && n(slots[p].word) === n(full[idxs[p]]);
+  const freeLeft = slots.filter(f => !(f && f.locked)).length;
+  if(freeLeft <= 1){ ordSay('🃏 Le dernier mot, c\'est à toi de le placer !'); return; }
+  const p = slots.findIndex((f, q) => !okAt(q) && !(f && f.locked));
+  if(p < 0){ ordSay('🎯 Tous les mots sont déjà bien placés : valide ta phrase !'); return; }
+  const want = n(full[idxs[p]]);
+  const pool = window.__orderPool || [];
+  const placedOk = (it) => slots.some((f, q) => f && f.uid === it.uid && okAt(q));
+  const item = pool.find(it => !it.locked && n(it.word) === want && !placedOk(it)) || pool.find(it => !it.locked && n(it.word) === want);
+  if(!item) return;
+  const cur = slots.findIndex(f => f && f.uid === item.uid);
+  if(cur >= 0) slots[cur] = null;
+  slots[p] = item; item.locked = true;
+  s.jokers--; s.used++;
+  window.__ordLastUid = item.uid;
+  renderOrderZones(true);
+  ordRefreshBar();
+  ordSay(`🃏 Joker ! « <b>${escapeHtml(item.word)}</b> » est à sa place. ${s.jokers ? `Encore ${s.jokers} joker${s.jokers > 1 ? 's' : ''}.` : 'Plus de joker : à toi de jouer !'}`);
+  try{ playChime([784, 1047, 1319], { type:'triangle', noteDur:0.09, gap:0.03, volume:0.08 }); }catch(e){}
+  try{ const el = document.querySelector(`#orderSentence [data-uid="${item.uid}"]`); if(el){ const r = el.getBoundingClientRect(); burstStars(r.left + r.width / 2, r.top + r.height / 2); } }catch(e){}
+  try{ if(!ttsSpeaking) speak(item.word, 'fr-FR'); }catch(e){}
+}
+/* 🎯 combien de mots sont déjà à la bonne place */
+function ordGoodCount(){
+  const slots = window.__orderBlankSlots || [], idxs = window.__orderBlankIndices || [], full = window.__orderFullTarget || [];
+  const n = (w) => normalizeForSearch(String(w || ''));
+  return slots.filter((f, p) => f && n(f.word) === n(full[idxs[p]])).length;
+}
+
+/* ============ 🎭 1.0.13 : SHADOW — liaisons & pauses + « 👁 Voir la phrase » (comme en Répétition) ============ */
+function shdSentHtml(text){ try{ return dxOn() ? dxDecorate(text) : escapeHtml(text); }catch(e){ return escapeHtml(text); } }
+function shdIsLong(s){ return String(s || '').split(/\s+/).filter(Boolean).length >= 9 || String(s || '').length >= 55; }
+function shdPanelRefresh(){
+  const ui = window.__shadowUi, panel = document.getElementById('dxShadowPanel');
+  if(!panel || !ui) return;
+  const chk = document.getElementById('shadowShowChk');
+  const visible = ui.phase !== 'hidden' || !!(chk && chk.checked);
+  const text = (ui.phase === 'intro' && ui.parensShown) ? ui.item.full : ui.item.clean;
+  const rules = (dxOn() && visible) ? dxRulesHtml(text) : '';
+  panel.hidden = !rules;
+  panel.innerHTML = rules ? dxLegendHtml() + rules : '';
+  if(rules) conjBindSheetPeeks(panel);
+}
+/* la phrase redessinée selon l'étape : lecture (avec marques), de mémoire (▁▁ ou visible si la case est cochée), corrigée */
+function shdRedraw(){
+  const ui = window.__shadowUi, el = document.getElementById('repeatSentence');
+  if(!ui || !el) return;
+  const chk = document.getElementById('shadowShowChk'), lbl = document.getElementById('shadowShowLbl');
+  if(lbl) lbl.hidden = ui.phase !== 'hidden';
+  if(ui.phase === 'intro'){ el.classList.remove('hidden'); el.innerHTML = shdSentHtml(ui.parensShown ? ui.item.full : ui.item.clean); }
+  else if(ui.phase === 'hidden'){
+    const on = !!(chk && chk.checked);
+    el.classList.toggle('hidden', !on);
+    el.innerHTML = buildRepeatWords(ui.item.clean, !on);
+    try{ if(window.__shadowRunning) highlightSpokenWords(window.__shadowRunning); }catch(e){}   // les mots déjà dits restent surlignés
+    const ins = document.getElementById('shadowInstruction');
+    if(ins) ins.textContent = on ? '📖 Lis la phrase à voix haute au micro' : '🙈 À toi de répéter la phrase de mémoire !';
+  }
+  else if(ui.phase === 'done'){ el.classList.remove('hidden'); el.innerHTML = buildScoredSentenceHtml(ui.item.clean, ui.heard || ''); }
+  shdPanelRefresh();
+}
+/* passer à l'étape « de mémoire » (après l'écoute, ou pour réessayer) */
+function shdHiddenPhase(){
+  const ui = window.__shadowUi; if(!ui) return;
+  ui.phase = 'hidden'; ui.heard = ''; window.__shadowRunning = '';
+  const chk = document.getElementById('shadowShowChk');
+  let pref = false; try{ pref = localStorage.getItem(nsKey('lexiqueQuiz::shadowShowLong')) === '1'; }catch(e){}
+  if(chk) chk.checked = shdIsLong(ui.item.clean) && pref;
+  shdRedraw();
+}
+function shdBind(){
+  dxBindChip('dxShadowChip', shdRedraw);
+  const chk = document.getElementById('shadowShowChk');
+  if(chk) chk.addEventListener('change', () => {
+    const ui = window.__shadowUi;
+    if(ui && shdIsLong(ui.item.clean)){ try{ localStorage.setItem(nsKey('lexiqueQuiz::shadowShowLong'), chk.checked ? '1' : '0'); }catch(e){} }
+    shdRedraw();
+  });
+}
 
 /* 📱 Paysage (téléphone à l'horizontale) : à chaque nouvelle question, la carte se cale en haut de l'écran
    pour que la question et les réponses soient visibles sans faire défiler. */
