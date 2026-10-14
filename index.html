@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- 🏷️ Version de l'appli : augmentée automatiquement par publier-site.cmd à chaque publication -->
-<meta name="app-version" content="1.0.9" data-date="2026-10-14">
+<meta name="app-version" content="1.0.11" data-date="2026-10-14">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <title>VocabVISION — Vocabulaire Français ↔ Arabe</title>
 <script>
@@ -1654,6 +1654,10 @@
     font-family:'Nunito','Inter',sans-serif;font-weight:700;font-size:clamp(20px,4.6vw,28px);text-align:center;
     color:var(--ink);background:#F1F5F9;border-radius:16px;padding:22px 18px;margin:6px 0 10px;line-height:1.5;
   }
+  .rep-show{ display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:8px 10px; margin:10px auto 6px; padding:10px 14px; border-radius:12px; border:1px solid var(--border); background:var(--surface-sunken); font-weight:700; font-size:14.5px; color:var(--text); cursor:pointer; width:fit-content; max-width:100%; user-select:none; -webkit-tap-highlight-color:transparent; }
+  .rep-show input{ width:22px; height:22px; margin:0; accent-color:#4F46E5; cursor:pointer; flex:none; }
+  .rep-show.long{ border-color:rgba(249,115,22,.5); background:rgba(249,115,22,.08); }
+  .rep-long{ font-size:11.5px; font-weight:800; color:#C2410C; background:rgba(249,115,22,.16); padding:2px 8px; border-radius:999px; }
   .repeat-sentence.hidden{ letter-spacing:.3em;color:var(--purple);font-size:26px; }
   .rw{ transition:background .2s,color .2s;border-radius:6px;padding:0 2px; }
   .rw.spoken{ background:rgba(74,222,128,0.22);color:var(--green-dark);font-weight:800;animation:rwPop .3s ease; }
@@ -2408,6 +2412,7 @@
   html body .chip{ background:var(--surface); border:1px solid var(--border); color:var(--text); font-weight:600; box-shadow:none; border-radius:999px; }
   html body .chip.total{ color:var(--text); }
   html body .speak-btn, html body .speak-ar-btn{ background:var(--btn) !important; box-shadow:0 1px 2px rgba(16,24,40,.15) !important; border:none !important; }
+  html body .speak-ar-btn{ color:#fff !important; }   /* le texte « 🔊 Écouter la phrase » était invisible (violet sur indigo) */
   html body .mic-btn{ box-shadow:0 1px 2px rgba(16,24,40,.15) !important; }
   html body .hist-btn, html body .lab-mini-btn, html body .peek-ctrl-btn{ border-radius:10px; box-shadow:none; font-weight:600; }
   html body .fix-listen{ background:var(--surface) !important; color:var(--accent) !important; border:1px solid var(--accent-line) !important; box-shadow:none !important; font-weight:600 !important; border-radius:11px !important; }
@@ -7146,17 +7151,28 @@ function attachAutoAdvance(btnId, onAdvance){
   let paused = false;
 
   // ⏳ Au bout du délai, si une phrase est encore en train d'être lue à voix haute, on n'avance
-  // PAS tout de suite — on attend qu'elle se termine, pour ne jamais la couper en plein milieu.
+  // PAS tout de suite — on attend qu'elle soit lue EN ENTIER (même en plusieurs morceaux, même avec une voix lente),
+  // puis on souffle un petit instant, et on passe.
+  const speechBusy = () => {
+    let b = ttsSpeaking;
+    try{ b = b || window.speechSynthesis.speaking || window.speechSynthesis.pending; }catch(e){}
+    return b || Date.now() - (ttsLastEndAt || 0) < 500;   // un petit blanc entre deux morceaux de la même lecture
+  };
   const waitForAudioThenAdvance = () => {
-    if(!ttsSpeaking){ clearAutoAdvance(); onAdvance(); return; }
-    btn.textContent = "🔊 Fin de l'audio...";
+    const go = () => { clearAutoAdvance(); onAdvance(); };
+    if(!speechBusy()){ go(); return; }
+    btn.textContent = '🔊 Fin de la phrase…';
+    const t0 = Date.now(); let quietSince = 0;
     autoAdvanceIntervalId = setInterval(() => {
-      if(!ttsSpeaking){ clearAutoAdvance(); onAdvance(); }
-    }, 250);
+      if(speechBusy() && Date.now() - t0 < 30000){ quietSince = 0; return; }
+      if(!quietSince){ quietSince = Date.now(); return; }
+      if(Date.now() - quietSince >= 450) go();   // la phrase est finie : un petit temps, puis la suivante
+    }, 150);
   };
 
   btn.textContent = `⏸️ Pause (${remaining}s)`;
   autoAdvanceIntervalId = setInterval(() => {
+    if(document.hidden) return;   // ⏸️ appli réduite : le compte à rebours attend ton retour
     remaining--;
     if(remaining <= 0){
       clearAutoAdvance();
@@ -7580,6 +7596,7 @@ function pickVoice(langPrefix, gender, slot){
 }
 
 let ttsSpeaking = false; // vrai tant que la synthèse vocale (TTS) est en train de parler
+let ttsLastEndAt = 0;     // fin de la dernière phrase lue (pour ne pas couper une lecture en plusieurs morceaux)
 
 function updateMicButtonUI(){
   const micBtn = document.getElementById('micBtn');
@@ -7616,7 +7633,7 @@ function speak(text, lang, onEnd, rateOverride){
         u.rate = (rateOverride || voicePrefs.rate || 0.96) * pv.rate;
         u.pitch = pv.pitch; // hauteur propre au personnage (indépendante de la vitesse choisie)
         let finished = false;
-        const finish = () => { if(finished) return; finished = true; ttsSpeaking = false; updateMicButtonUI(); if(onEnd) onEnd(); };
+        const finish = () => { if(finished) return; finished = true; ttsSpeaking = false; ttsLastEndAt = Date.now(); updateMicButtonUI(); if(onEnd) onEnd(); };
         u.onend = finish;
         u.onerror = finish;
         u.onstart = () => fox3dLip('start');                        // 👄 le renard articule en même temps que la voix
@@ -7624,8 +7641,17 @@ function speak(text, lang, onEnd, rateOverride){
         window.speechSynthesis.speak(u);
         // Filet de sécurité : si le navigateur ne déclenche jamais onend/onerror (arrive parfois),
         // on ne reste pas bloqué indéfiniment — estimation large de la durée + marge (plus longue si on lit lentement).
+        // 🐢 1.0.10 : une voix lente (téléphone, voix posée) peut dépasser cette estimation — avant, on déclarait la phrase
+        // finie trop tôt et la question suivante la coupait. Tant que la voix parle encore, on attend sa vraie fin.
         const estMs = Math.max(1500, text.length * 90 / Math.min(1, u.rate || 1));
-        setTimeout(finish, estMs);
+        const tStart = Date.now(), hardMs = Math.max(20000, estMs * 3);
+        const safety = () => {
+          if(finished) return;
+          let busy = false; try{ busy = window.speechSynthesis.speaking || window.speechSynthesis.pending; }catch(e){}
+          if(busy && Date.now() - tStart < hardMs){ setTimeout(safety, 400); return; }
+          finish();
+        };
+        setTimeout(safety, estMs);
       }catch(e){ ttsSpeaking = false; updateMicButtonUI(); if(onEnd) onEnd(); }
     }, 60);
   }catch(e){ ttsSpeaking = false; updateMicButtonUI(); if(onEnd) onEnd(); }
@@ -9603,6 +9629,7 @@ function startBlitz(){
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="blitzExitBtn" style="cursor:pointer;">← Quitter le Blitz</button>`;
   document.getElementById('blitzExitBtn') && document.getElementById('blitzExitBtn').addEventListener('click', () => { stopBlitz(); renderBlockSelect(); });
   blitzState.timerId = setInterval(() => {
+    if(document.hidden) return;   // ⏸️ appli réduite : le chrono s'arrête
     blitzState.timeLeft--;
     updateBlitzTimerUI();
     if(blitzState.timeLeft <= 0){ endBlitz(); }
@@ -10181,6 +10208,7 @@ function startAssociation(){
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="assocExitBtn" style="cursor:pointer;">← Quitter</button>`;
   document.getElementById('assocExitBtn').addEventListener('click', stopAssociationAndExit);
   assocState.timerId = setInterval(() => {
+    if(document.hidden) return;   // ⏸️ appli réduite : le chrono s'arrête
     assocState.timeLeft--;
     updateAssocTimerUI();
     if(assocState.timeLeft <= 0){ endAssociation(); }
@@ -16354,17 +16382,22 @@ function renderRepeatCard(){
   }
 
   // Aléatoire : phrase cachée (écoute seule) ou visible (lecture)
-  const hidden = Math.random() < 0.5;
+  // 👁 1.0.11 : sur chaque phrase, une case « Voir la phrase » pour l'afficher et la lire à voix haute
+  // (pratique pour les phrases longues) — retenue pour les phrases longues si tu la coches.
+  const isLong = sentence.split(/\s+/).filter(Boolean).length >= 9 || sentence.length >= 55;
+  let showLongPref = false; try{ showLongPref = localStorage.getItem(nsKey('lexiqueQuiz::repeatShowLong')) === '1'; }catch(e){}
+  const hidden = Math.random() < 0.5 && !(isLong && showLongPref);
   window.__repeatHidden = hidden;
 
   card.innerHTML = `
     <div class="cat-tag">${escapeHtml(word.cat)} · 🗣️ Répétition</div>
-    <div class="question-line" style="text-align:center;margin-bottom:8px;">
+    <div class="question-line" id="repeatLine" style="text-align:center;margin-bottom:8px;">
       ${hidden ? '👂 Écoute la phrase, puis répète-la au micro' : '📖 Lis la phrase à voix haute au micro'}
     </div>
     <div class="repeat-sentence ${hidden ? 'hidden' : ''}" id="repeatSentence">
       ${buildRepeatWords(sentence, hidden)}
     </div>
+    <label class="rep-show ${isLong ? 'long' : ''}" for="repShowChk"><input type="checkbox" id="repShowChk" ${hidden ? '' : 'checked'}><span>👁 Voir la phrase pour la lire à voix haute</span>${isLong ? '<span class="rep-long">phrase longue</span>' : ''}</label>
     <button class="speak-ar-btn" id="hearSentenceBtn">🔊 ${hidden ? 'Réécouter' : 'Écouter'} la phrase</button>
     <div class="mic-zone">
       <button class="mic-btn" id="micBtn" aria-label="Parler">
@@ -16377,7 +16410,7 @@ function renderRepeatCard(){
     </div>
     <div class="speak-actions">
       <button class="mode-chip ${repeatContinuous ? 'active' : ''}" id="repeatContBtn">${repeatContinuous ? '🎙️ Micro continu : ON' : '🎙️ Activer micro continu'}</button>
-      <button class="mode-chip" id="revealRepeatBtn">👁 Voir la phrase</button>
+      <button class="mode-chip" id="revealRepeatBtn">🏳️ Voir la réponse</button>
       <button class="mode-chip" id="skipRepeatBtn">⏭ Passer</button>
     </div>
     <div class="kbd-hint">⌨️ Espace = micro (ou suivant une fois la réponse révélée) · Entrée = suivant</div>
@@ -16385,6 +16418,17 @@ function renderRepeatCard(){
   `;
 
   const playSentence = (onDone) => { mascotTalk(); speak(sentence, 'fr-FR', onDone); };
+  document.getElementById('repShowChk').addEventListener('change', (e) => {
+    const on = e.target.checked;
+    window.__repeatHidden = !on;
+    const el = document.getElementById('repeatSentence');
+    el.classList.toggle('hidden', !on);
+    el.innerHTML = buildRepeatWords(sentence, !on);
+    try{ if(repeatHeardUnion) highlightSpokenWords(repeatHeardUnion); }catch(err){}   // les mots déjà dits restent surlignés
+    const ql = document.getElementById('repeatLine'); if(ql) ql.textContent = on ? '📖 Lis la phrase à voix haute au micro' : '👂 Écoute la phrase, puis répète-la au micro';
+    const hb = document.getElementById('hearSentenceBtn'); if(hb) hb.textContent = on ? '🔊 Écouter la phrase' : '🔊 Réécouter la phrase';
+    if(isLong){ try{ localStorage.setItem(nsKey('lexiqueQuiz::repeatShowLong'), on ? '1' : '0'); }catch(err){} }   // retenu pour les prochaines phrases longues
+  });
   document.getElementById('hearSentenceBtn').addEventListener('click', () => playSentence());
   document.getElementById('micBtn').addEventListener('click', () => startRepeatRecognition(sentence));
   document.getElementById('revealRepeatBtn').addEventListener('click', () => handleRepeatResult(0, { revealed:true }));
@@ -17266,6 +17310,7 @@ function renderChronoCard(){
 
 function startQuestionTimer(onTimeout, seconds){
   clearQuestionTimer();
+  window.__qtHiddenPaused = false;
   const secs = seconds || quizTimerSeconds;
   const fill = document.getElementById('quizTimerFill');
   if(!fill) return;
@@ -17288,6 +17333,7 @@ function pauseQuestionTimer(){
   return true;
 }
 function resumeQuestionTimer(){
+  if(document.hidden) return;   // on reprendra au retour sur l'appli
   if(!questionTimerInfo || questionTimerInfo.paused === null) return;
   const remaining = questionTimerInfo.paused;
   questionTimerInfo.paused = null;
@@ -17296,6 +17342,12 @@ function resumeQuestionTimer(){
   if(fill){ void fill.offsetWidth; fill.style.transition = `width ${remaining/1000}s linear`; fill.style.width = '0%'; }
   questionTimer = setTimeout(questionTimerInfo.cb, remaining);
 }
+/* ⏸️ 1.0.11 : appli réduite (PWA en arrière-plan, autre onglet) → le chrono de la question se met en pause,
+   et reprend là où il en était quand on revient (avant, il continuait de tourner et la question était perdue). */
+document.addEventListener('visibilitychange', () => {
+  if(document.hidden){ if(pauseQuestionTimer()) window.__qtHiddenPaused = true; }
+  else if(window.__qtHiddenPaused){ window.__qtHiddenPaused = false; resumeQuestionTimer(); }
+});
 /* 📖🏛️📎 Compte le temps passé à simplement LIRE (Bouquinage, Fiches pratiques, Atelier
    Français) dans les objectifs du jour — pas seulement le temps passé sur un exercice.
    Fonctionne par petites tranches : chaque nouvel écran de lecture flushe le temps du
@@ -18969,6 +19021,9 @@ const COLOR_PRESETS = {
 /* ============ 🆕 NOUVEAUTÉS — pour que tout ce qui a été ajouté reste découvrable ============ */
 const WHATS_NEW_SECTIONS = [
   { icon:'🆕', title:'Nouveautés', items:[
+    { name:'👁 Répétition : voir la phrase', desc:"Dans le mode Répétition, chaque phrase a une case « 👁 Voir la phrase pour la lire à voix haute » : coche-la pour afficher la phrase cachée et la lire au micro (pratique pour les phrases longues). Si tu la coches sur une phrase longue, les prochaines phrases longues s'affichent d'office." },
+    { name:'⏸️ Chronos en pause quand l\'appli est réduite', desc:"Quand tu réduis l'appli (ou changes d'onglet), le compte à rebours, le chrono de la question, le Blitz et l'association s'arrêtent, et reprennent là où ils en étaient à ton retour." },
+    { name:'🔊 La phrase est lue jusqu\'au bout', desc:"Après une bonne réponse, le compte à rebours ne coupe plus la phrase : s'il se termine pendant la lecture, l'appli attend que la phrase soit lue en entier (même avec une voix lente), laisse un petit temps, puis passe à la suite." },
     { name:'🔓 Tous les blocs au choix', desc:"Plus de cadenas : tu peux jouer n'importe quel bloc, même si tu n'as pas encore validé les précédents. « ▶ Continuer » te propose toujours le premier bloc pas encore validé." },
     { name:'🧩 Nouveaux mots : toujours à la fin', desc:"Les mots que tu ajoutes vont toujours dans les derniers blocs : ils ne se mélangent plus avec tes mots déjà faits et maîtrisés, et tes blocs terminés restent terminés. Une fois, l'appli remet tes anciens blocs en place (et leurs scores reviennent) ; les mots déjà travaillés viennent ensuite, puis les nouveaux. Même ordre sur le téléphone et le PC." },
     { name:'🎧 Écouter la liste, puis jouer… et ça compte', desc:"Après « Écouter cette liste », le mode choisi dans la fenêtre joue le bloc lui-même : le résultat compte pour ce bloc (avant, il se perdait), la fenêtre montre ce que tu as déjà fait dans chaque mode, et l'écran de fin te propose les autres modes. Pour les listes à thème (Entreprise, Rédaction, Bescherelle…), le résultat compte dans tes objectifs du jour et tu peux enchaîner avec un autre mode." },
