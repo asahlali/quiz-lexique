@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- 🏷️ Version de l'appli : augmentée automatiquement par publier-site.cmd à chaque publication -->
-<meta name="app-version" content="1.0.6" data-date="2026-10-12">
+<meta name="app-version" content="1.0.8" data-date="2026-10-14">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <title>VocabVISION — Vocabulaire Français ↔ Arabe</title>
 <script>
@@ -4116,7 +4116,19 @@ function renameNormalBlock(i, title){
 let peekPlayState = null; // { words, idx, playing, stage }
 let peekPlayToken = 0;
 
-function renderBlockWordsPeek(words, title, onBack){
+/* 🎧 D'où vient la liste écoutée : { block:i } (bloc), { custom:id } (bloc perso) ou { title } (liste libre :
+   Entreprise, Rédaction…). Le mode choisi dans le pop-up après l'écoute compte alors au BON endroit. */
+let peekSrc = null;
+function peekSourceOf(words, title, src){
+  if(src) return src;
+  const i = (typeof BLOCKS !== 'undefined') ? BLOCKS.indexOf(words) : -1;
+  if(i >= 0) return { block:i };
+  const cb = (typeof customBlocks !== 'undefined' ? customBlocks : []).find(b => b && b.words === words);
+  if(cb) return { custom:cb.id };
+  return { title };
+}
+function renderBlockWordsPeek(words, title, onBack, src){
+  peekSrc = Object.assign({}, peekSourceOf(words, title, src), { words, title, back:onBack || null });
   clearQuestionTimer();
   startSectionReading('ecoute'); // 🎧 le temps passé à revoir/écouter les mots compte dans l'objectif du jour
   document.body.classList.remove('quiz-active');
@@ -4325,7 +4337,8 @@ function advancePeekPlay(){
   if(peekPlayState.idx >= peekPlayState.words.length){
     const finishedWords = peekPlayState.words.slice(); // capturé avant que stopPeekPlay() ne vide l'état
     stopPeekPlay();
-    setTimeout(() => showModeSuggestPopup(finishedWords), 500);
+    const src = peekSrc;
+    setTimeout(() => showModeSuggestPopup(finishedWords, null, src), 500);
     return;
   }
   playPeekCurrent();
@@ -4373,26 +4386,58 @@ const PEEK_SUGGEST_MODES = [
   { mode:'repeat',  label:'🗣️ Répétition' },
   { mode:'listen',  label:'🎧 Dictée' },
 ];
-function showModeSuggestPopup(words, message){
+function showModeSuggestPopup(words, message, src){
   if(!words || words.length < 2) return; // pas assez de mots pour un mode digne de ce nom
   const overlay = document.getElementById('modeSuggestOverlay');
   const body = document.getElementById('modeSuggestBody');
   if(!overlay || !body) return;
+  src = src || { title:listTitleFrom(message) };
+  const done = listModeScores(src, words);   // le score déjà fait dans chaque mode (bloc, bloc perso ou liste)
+  const isBlock = typeof src.block === 'number' || !!src.custom;
+  const where = isBlock ? `ton résultat comptera pour <b>${escapeHtml(typeof src.block === 'number' ? getBlockTitle(src.block) : ((getCustomBlock(src.custom) || {}).title || 'ce bloc'))}</b> ✅` : 'ton résultat compte dans tes objectifs du jour ✅';
   body.innerHTML = `
     <div style="padding:4px 4px 16px;text-align:center;">
-      <div style="font-size:14px;color:var(--text-dim);margin-bottom:14px;">${message ? escapeHtml(message) : `Tu viens d'écouter ${words.length} mots — tu veux t'entraîner dessus tout de suite ?`}</div>
+      <div style="font-size:14px;color:var(--text-dim);margin-bottom:6px;">${message ? escapeHtml(message) : `Tu viens d'écouter ${words.length} mots — tu veux t'entraîner dessus tout de suite ?`}</div>
+      <div style="font-size:12.5px;color:var(--text-dim);margin-bottom:14px;">Choisis un mode : ${where}. À la fin, tu pourras enchaîner avec un autre mode.</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;">
-        ${PEEK_SUGGEST_MODES.map(m => `<button class="opt" data-suggest-mode="${m.mode}" style="padding:13px 16px;font-weight:800;">${m.label}</button>`).join('')}
+        ${PEEK_SUGGEST_MODES.map(m => { const p = done[m.mode]; return `<button class="opt" data-suggest-mode="${m.mode}" style="padding:13px 16px;font-weight:800;">${m.label}${p != null ? ` <span class="rp-score" style="${p >= PASS_THRESHOLD ? 'color:#16A34A;' : ''}">${p}%</span>` : ' <span class="rp-new">nouveau</span>'}</button>`; }).join('')}
       </div>
     </div>
   `;
   body.querySelectorAll('[data-suggest-mode]').forEach(btn => {
     btn.addEventListener('click', () => {
       hideModeSuggestPopup();
-      startModeWithWords(words, btn.dataset.suggestMode);
+      startListMode(words, btn.dataset.suggestMode, src);
     });
   });
   overlay.classList.add('show');
+}
+function listTitleFrom(message){ return String(message || 'Ma liste').replace(/\s*:\s*choisis.*$/i, '').trim() || 'Ma liste'; }
+/* 🎯 Lance un mode sur la liste : si elle vient d'un bloc (ou d'un bloc perso), c'est CE bloc qui est joué
+   (le résultat compte pour lui et l'écran de fin propose les autres modes) ; sinon, une liste libre. */
+function startListMode(words, mode, src){
+  src = src || {};
+  gameMode = mode;
+  if(typeof src.block === 'number' && BLOCKS[src.block] && BLOCKS[src.block].length){ buildDeck(src.block); }
+  else if(src.custom && getCustomBlock(src.custom)){ buildCustomDeck(src.custom); }
+  else { startModeWithWords(words, mode, { title:src.title || 'Ma liste', back:src.back || null }); return; }
+  renderScoreboard();
+  renderCard();
+}
+/* les scores déjà faits, mode par mode (en %) */
+const LIST_RESULTS_KEY = 'lexiqueQuiz::listResults';
+function loadListResults(){ try{ return JSON.parse(localStorage.getItem(nsKey(LIST_RESULTS_KEY)) || '{}') || {}; }catch(e){ return {}; } }
+function saveListResults(m){ try{ localStorage.setItem(nsKey(LIST_RESULTS_KEY), JSON.stringify(m)); }catch(e){} }
+function listKeyOf(title, words){ const ws = (words || []).slice().sort((x, y) => String(x.fr).localeCompare(String(y.fr))); return String(title || 'Ma liste').slice(0, 60) + '|' + ws.length + '|' + hashWords(ws); }   // même liste mélangée = même clé
+function listModeScores(src, words){
+  const out = {};
+  const pct = (r) => (r && r.total) ? Math.round(r.correct / r.total * 100) : null;
+  try{
+    if(typeof src.block === 'number'){ const per = blockResults[src.block] || {}; GAME_MODES.forEach(m => { const p = pct(per[m]); if(p != null) out[m] = p; }); }
+    else if(src.custom){ const b = getCustomBlock(src.custom); const per = (b && b.results) || {}; GAME_MODES.forEach(m => { const p = pct(per[m]); if(p != null) out[m] = p; }); }
+    else { const r = loadListResults()[listKeyOf(src.title, words)]; if(r && r.modes) Object.keys(r.modes).forEach(m => { out[m] = r.modes[m].best != null ? r.modes[m].best : r.modes[m].pct; }); }
+  }catch(e){}
+  return out;
 }
 function hideModeSuggestPopup(){
   const overlay = document.getElementById('modeSuggestOverlay');
@@ -4402,13 +4447,14 @@ function hideModeSuggestPopup(){
 }
 /* Démarre n'importe quel mode de jeu directement avec une liste de mots arbitraire (ex. celle
    qu'on vient de "peek"/écouter), sans passer par un bloc ou un bloc personnalisé enregistré. */
-function startModeWithWords(words, mode){
+function startModeWithWords(words, mode, info){
   gameMode = mode;
   customDeckPool = words.slice();
   currentBlock = null;
   window.__reviewSession = false;
   window.__customBlockId = null;
   setupDeckFromWords(words);
+  window.__freeList = { words:words.slice(), title:(info && info.title) || 'Ma liste', back:(info && info.back) || null };   // 🎧 l'écran de fin saura quoi proposer
   renderScoreboard();
   renderCard();
 }
@@ -6921,9 +6967,13 @@ function clearCustomWords(){
 function reconcileWordsOrder(){
   const defaultKeys = new Set(DEFAULT_WORDS.map(w => w.fr.toLowerCase()));
   const extra = WORDS.filter(w => !defaultKeys.has(w.fr.toLowerCase()));
-  extra.sort((a, b) => a.fr.localeCompare(b.fr, 'fr'));
+  // 🧩 1.0.8 : chaque mot ajouté garde sa date d'ajout → les nouveaux toujours à la FIN (avant : rangés de A à Z,
+  // chaque ajout décalait les blocs et mélangeait des mots déjà faits avec des nouveaux). Même ordre sur tous les appareils.
+  let stamped = false;
+  if(typeof wordsOrderFixed === 'function' && wordsOrderFixed()){ const now = Date.now(); extra.forEach((w, i) => { if(!w.addedAt){ w.addedAt = now + i; stamped = true; } }); }
+  extra.sort((a, b) => (a.addedAt || 0) - (b.addedAt || 0) || a.fr.localeCompare(b.fr, 'fr'));
   const newWords = DEFAULT_WORDS.concat(extra);
-  const changed = newWords.length !== WORDS.length || newWords.some((w, i) => !WORDS[i] || w.fr !== WORDS[i].fr);
+  const changed = stamped || newWords.length !== WORDS.length || newWords.some((w, i) => !WORDS[i] || w.fr !== WORDS[i].fr);
   WORDS = newWords;
   if(changed){ saveCustomWords(WORDS); }
   return changed;
@@ -7148,6 +7198,7 @@ function saveInProgressSession(){
     const state = {
       currentBlock, gameMode, customBlockId: window.__customBlockId || null,
       reviewSession: !!window.__reviewSession,
+      freeList: window.__freeList ? { words:window.__freeList.words, title:window.__freeList.title } : null,
       queue, score, masteredCount, comboStreak, sessionHistory, initialLength,
       blockStartTime, totalHiddenMs, savedAt: Date.now(),
     };
@@ -7173,6 +7224,8 @@ function resumeInProgressSession(){
   gameMode = state.gameMode;
   window.__customBlockId = state.customBlockId;
   window.__reviewSession = state.reviewSession;
+  window.__freeList = state.freeList ? { words:state.freeList.words || [], title:state.freeList.title || 'Ma liste', back:null } : null;
+  if(window.__freeList) customDeckPool = window.__freeList.words.slice();
   queue = state.queue;
   score = state.score;
   masteredCount = state.masteredCount;
@@ -8762,8 +8815,9 @@ function commitImport(words, skipNavigate){
   // ⚠️ Les mots ajoutés sont toujours mis à la SUITE du lexique (jamais insérés au milieu),
   // puis réordonnés de façon déterministe (reconcileWordsOrder) — indispensable pour que
   // "Bloc N" désigne exactement le même groupe de mots sur tous tes appareils une fois synchronisé.
-  WORDS = WORDS.concat(toAdd);
+  WORDS = WORDS.concat(stampNewWords(toAdd));   // 🧩 horodatés : ils vont à la fin, les blocs déjà faits ne bougent plus
   reconcileWordsOrder();
+  if(added > 0) saveCustomWords(WORDS);   // (avant, un mot rangé en dernier n'était pas enregistré : il disparaissait à la réouverture)
   activeFilterCat = null;
   rebuildBlocks();
   cloudAutoPush();
@@ -8901,6 +8955,7 @@ function makeOptions(word){
 }
 
 function setupDeckFromWords(words){
+  window.__freeList = null;   // (une liste libre le remet juste après, dans startModeWithWords)
   queue = shuffle(groupDuplicateWords(words));
   initialLength = queue.length;
   masteredCount = 0;
@@ -13782,7 +13837,7 @@ function renderCustomBlockManage(blockId){
   document.getElementById('backFromManageBtn').addEventListener('click', renderBlockSelect);
 
   document.getElementById('mgPeekBtn').addEventListener('click', () => {
-    renderBlockWordsPeek(block.words, block.title, () => renderCustomBlockManage(blockId));
+    renderBlockWordsPeek(block.words, block.title, () => renderCustomBlockManage(blockId), { custom:blockId });
   });
 
   document.getElementById('mgRenameBtn').addEventListener('click', () => {
@@ -13959,7 +14014,7 @@ function renderCustomBlockRecapView(blockId, result, justFinished){
     });
   }
   document.getElementById('peekWordsBtn').addEventListener('click', () => {
-    renderBlockWordsPeek(block.words, block.title, () => renderCustomBlockRecapView(blockId, result, false));
+    renderBlockWordsPeek(block.words, block.title, () => renderCustomBlockRecapView(blockId, result, false), { custom:blockId });
   });
   document.getElementById('renameCustomBlockBtn').addEventListener('click', () => {
     const newTitle = prompt('Nouveau nom pour ce bloc :', block.title);
@@ -14431,8 +14486,9 @@ function addCsvLinesToCustomBlock(raw){
   });
 
   if(newlyCreated.length){
-    WORDS = WORDS.concat(newlyCreated);
+    WORDS = WORDS.concat(stampNewWords(newlyCreated));
     reconcileWordsOrder();
+    saveCustomWords(WORDS);
     rebuildBlocks();
     cloudAutoPush();
   }
@@ -15218,7 +15274,7 @@ function renderBlockSelect(){
   if(savedSession && resumeSlot){
     const label = savedSession.customBlockId
       ? '🧩 bloc perso'
-      : (savedSession.reviewSession ? '🧠 révision' : `Bloc ${(savedSession.currentBlock ?? 0) + 1}`);
+      : (savedSession.reviewSession ? '🧠 révision' : savedSession.freeList ? `🎧 ${savedSession.freeList.title || 'Ma liste'}` : `Bloc ${(savedSession.currentBlock ?? 0) + 1}`);
     resumeSlot.innerHTML = `
       <div class="result-card" style="margin-top:12px;text-align:center;background:var(--surface-sunken);">
         <div style="font-size:12.5px;color:var(--text-dim);">⏸️ Session en cours, non terminée</div>
@@ -15587,14 +15643,14 @@ function renderBlockSelect(){
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       const i = parseInt(btn.dataset.peekBlock, 10);
-      renderBlockWordsPeek(BLOCKS[i] || [], getBlockTitle(i), () => renderBlockSelect());
+      renderBlockWordsPeek(BLOCKS[i] || [], getBlockTitle(i), () => renderBlockSelect(), { block:i });
     });
   });
   grid.querySelectorAll('[data-peek-custom]').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       const block = getCustomBlock(btn.dataset.peekCustom);
-      if(block){ renderBlockWordsPeek(block.words, block.title, () => renderBlockSelect()); }
+      if(block){ renderBlockWordsPeek(block.words, block.title, () => renderBlockSelect(), { custom:block.id }); }
     });
   });
   grid.querySelectorAll('[data-manage-custom]').forEach(btn => {
@@ -15652,6 +15708,7 @@ function goToEndScreen(){
   clearInProgressSession(); // la session est terminée normalement, plus besoin de la sauvegarde
   if(window.__reviewSession){ renderReviewEndScreen(); }
   else if(window.__customBlockId){ renderCustomBlockEndScreen(); }
+  else if(window.__freeList || currentBlock === null || currentBlock === undefined){ renderFreeListEndScreen(); }   // 🎧 liste libre : jamais un « bloc null »
   else { renderEndScreen(); }
 }
 
@@ -17590,7 +17647,7 @@ function renderRecapView(blockIndex, result, justFinished){
   document.getElementById('footerNote').textContent = justFinished ? 'Terminé' : '';
   document.getElementById('progressFill').style.width = '100%';
   document.getElementById('peekWordsBtn').addEventListener('click', () => {
-    renderBlockWordsPeek(BLOCKS[blockIndex] || [], getBlockTitle(blockIndex), () => renderRecapView(blockIndex, result, false));
+    renderBlockWordsPeek(BLOCKS[blockIndex] || [], getBlockTitle(blockIndex), () => renderRecapView(blockIndex, result, false), { block:blockIndex });
   });
   document.getElementById('renameBlockBtn').addEventListener('click', () => {
     const current = getBlockTitle(blockIndex);
@@ -17634,6 +17691,61 @@ function renderRecapView(blockIndex, result, justFinished){
       setTimeout(() => burstStars(r.left + r.width/2, r.top + r.height/2), 500);
     }, 350);
   }
+}
+
+/* 🎧 Fin d'un mode joué sur une liste libre (Entreprise, Rédaction, Bescherelle…) : le résultat compte
+   (objectifs du jour, points, temps), le score de chaque mode est gardé, et on peut rejouer la liste dans un autre mode. */
+function renderFreeListEndScreen(){
+  const fl = window.__freeList || { words:(customDeckPool || []).slice(), title:'Ma liste', back:null };
+  const durationSec = computeActiveDurationSec(blockStartTime);
+  const pctVal = score.total ? Math.round((score.correct / score.total) * 100) : 0;
+  const passed90 = pctVal >= PASS_THRESHOLD;
+  const flawless = score.total > 0 && score.correct === score.total;
+  const mult = xpMultiplier();
+  const xpEarned = ((score.correct * 10) + (bestCombo >= 5 ? 15 : 0) + (flawless ? 25 : 0) + (passed90 ? 15 : 0)) * mult;
+  const goalJustMet = recordDailyActivity();
+  const questsBefore = questsAllDone();
+  recordDailyStats(durationSec, passed90, xpEarned, gameMode);
+  const questsJustDone = !questsBefore && questsAllDone();
+  const all = loadListResults(), k = listKeyOf(fl.title, fl.words);
+  const entry = all[k] || { title:fl.title, modes:{} };
+  const prev = entry.modes[gameMode];
+  entry.modes[gameMode] = { correct:score.correct, total:score.total, pct:pctVal, best:Math.max(pctVal, prev ? (prev.best != null ? prev.best : prev.pct || 0) : 0), finishedAt:Date.now() };
+  entry.lastAt = Date.now();
+  all[k] = entry; saveListResults(all);
+  cloudAutoPush();
+  clearQuestionTimer();
+  document.body.classList.remove('quiz-active');
+  const back = () => { if(typeof fl.back === 'function') fl.back(); else renderBlockSelect(); };
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="flEndBackBtn" style="cursor:pointer;">← Retour</button>`;
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('footerNote').textContent = 'Terminé';
+  const scores = listModeScores({ title:fl.title }, fl.words);
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="end-screen">
+      <div class="cat-tag">${/^\p{Extended_Pictographic}/u.test(fl.title) ? '' : '🎧 '}${escapeHtml(fl.title)} · ${MODE_LABELS[gameMode] || gameMode} — terminé</div>
+      <div class="big">${score.correct} / ${score.total}</div>
+      <div class="sub" style="color:#6B6552;">${pctVal}% de bonnes réponses${flawless ? ' · sans erreur, bravo !' : ''}</div>
+      <div class="recap-meta">${durationSec ? `<span class="recap-meta-pill">⏱️ ${fmtDuration(durationSec)}</span>` : ''}<span class="recap-meta-pill xp">⭐ +${xpEarned} points${mult > 1 ? ` <b>×${mult}</b>` : ''}</span></div>
+      <div class="pass-banner ${passed90 ? 'ok' : 'todo'}">${passed90 ? '✅ Bravo ! ' : '🎯 '}Résultat enregistré : il compte dans tes objectifs du jour et tes points.</div>
+      <div style="font-family:'Nunito','Inter',sans-serif;font-weight:800;color:var(--purple);margin:20px 0 8px;font-size:15px;">🔁 Rejouer cette liste dans un autre mode :</div>
+      <div class="replay-modes" id="replayModes">${PEEK_SUGGEST_MODES.map(m => `<button class="replay-mode-btn${m.mode === gameMode ? ' current' : ''}" data-fl-mode="${m.mode}">${m.label}${scores[m.mode] != null ? ` <span class="rp-score">${scores[m.mode]}%</span>` : ' <span class="rp-new">nouveau</span>'}</button>`).join('')}</div>
+      <div style="display:flex;gap:12px;justify-content:center;margin-top:14px;flex-wrap:wrap;">
+        <button class="restart-btn" id="flPeekBtn" style="background:var(--surface-sunken);border:1px solid var(--border);color:var(--purple);box-shadow:none;">👁 Revoir les mots</button>
+        <button class="restart-btn" id="flBackBtn" style="background:var(--purple);color:#fff;box-shadow:0 4px 0 var(--purple-dark);">← Retour</button>
+      </div>
+      ${sessionHistory.length ? buildRecapTableHtml(sessionHistory) : ''}
+    </div>`;
+  card.querySelectorAll('[data-fl-mode]').forEach(b => b.addEventListener('click', () => startListMode(fl.words, b.dataset.flMode, { title:fl.title, back:fl.back })));
+  document.getElementById('flPeekBtn').addEventListener('click', () => renderBlockWordsPeek(fl.words, fl.title, fl.back || (() => renderBlockSelect()), { title:fl.title }));
+  document.getElementById('flBackBtn').addEventListener('click', back);
+  document.getElementById('flEndBackBtn').addEventListener('click', back);
+  try{ attachRecapSpeakHandlers(); }catch(e){}
+  if(pctVal >= PASS_THRESHOLD){ vibrate([40, 60, 40, 60, 90]); for(let i = 0; i < (flawless ? 5 : 3); i++) setTimeout(launchConfetti, i * 230); }
+  setTimeout(() => burstStars(window.innerWidth / 2, window.innerHeight * 0.35), 150);
+  if(goalJustMet){ setTimeout(showGoalToast, 650); }
+  if(questsJustDone){ launchGravityConfetti(); setTimeout(() => showGoalToast('🎉 Tous les défis du jour terminés !', 'Bravo, reviens demain pour de nouveaux défis !'), goalJustMet ? 4200 : 650); }
 }
 
 function renderEndScreen(){
@@ -18174,12 +18286,13 @@ function mergeRemoteData(remote){
       const remoteWords = safeParse(rv, null);
       if(Array.isArray(remoteWords) && remoteWords.length){
         const base0 = loadCustomWords() || WORDS.slice();
-        const seen = new Set(base0.map(w => w.fr.toLowerCase()));
+        const byKey = new Map(base0.map(w => [w.fr.toLowerCase(), w]));
         let added = 0;
         remoteWords.forEach(w => {
           if(!w || !w.fr) return;
-          const k = w.fr.toLowerCase();
-          if(!seen.has(k)){ seen.add(k); base0.push(w); added++; }
+          const k = w.fr.toLowerCase(), l = byKey.get(k);
+          if(!l){ byKey.set(k, w); base0.push(w); added++; }
+          else if(w.addedAt && (!l.addedAt || w.addedAt < l.addedAt)){ l.addedAt = w.addedAt; added++; }   // 🧩 même place dans les blocs partout
         });
         if(added > 0 || !loadCustomWords()){
           WORDS = base0;
@@ -18356,7 +18469,7 @@ async function syncCycle(opts){
   if(opts.indicator) setSyncIndicator(true);
   let changed = false, sent = 0, pulled = false;
   try{
-    if(opts.force || !document.body.classList.contains('quiz-active')){ changed = await cloudPull(); pulled = true; }
+    if(opts.force || !document.body.classList.contains('quiz-active')){ changed = await cloudPull(); pulled = true; try{ if(typeof wordsRepairMaybe === 'function') wordsRepairMaybe(); }catch(e){} }
     if(changed) syncAfterRemoteChange();   // l'écran se met à jour tout de suite
     sent = await syncPushDirty();
     syncState.lastOk = Date.now();
@@ -18859,6 +18972,8 @@ const COLOR_PRESETS = {
 /* ============ 🆕 NOUVEAUTÉS — pour que tout ce qui a été ajouté reste découvrable ============ */
 const WHATS_NEW_SECTIONS = [
   { icon:'🆕', title:'Nouveautés', items:[
+    { name:'🧩 Nouveaux mots : toujours à la fin', desc:"Les mots que tu ajoutes vont toujours dans les derniers blocs : ils ne se mélangent plus avec tes mots déjà faits et maîtrisés, et tes blocs terminés restent terminés. Une fois, l'appli remet tes anciens blocs en place (et leurs scores reviennent) ; les mots déjà travaillés viennent ensuite, puis les nouveaux. Même ordre sur le téléphone et le PC." },
+    { name:'🎧 Écouter la liste, puis jouer… et ça compte', desc:"Après « Écouter cette liste », le mode choisi dans la fenêtre joue le bloc lui-même : le résultat compte pour ce bloc (avant, il se perdait), la fenêtre montre ce que tu as déjà fait dans chaque mode, et l'écran de fin te propose les autres modes. Pour les listes à thème (Entreprise, Rédaction, Bescherelle…), le résultat compte dans tes objectifs du jour et tu peux enchaîner avec un autre mode." },
     { name:'☁️ Synchro téléphone ↔ PC rapide et fiable', desc:"Chaque modification part toute seule en quelques secondes (une fiche faite, un score, un réglage…), seulement ce qui a changé. L'appli récupère ce que tu as fait sur l'autre appareil dès que tu reviens dessus, et toutes les minutes quand elle est ouverte. Les fiches faites se fusionnent : plus jamais une fiche validée qui disparaît d'un appareil." },
     { name:"🔥 Le renard sort pour les séries", desc:"Par défaut, le renard ne sort plus à chaque réponse : il arrive à 5, 10, 20, 30… bonnes réponses d'affilée, avec 7 nouvelles fêtes (trampoline, feu d'artifice, orbite, magicien, pluie d'or, zigzag, podium) — les plus grandes à partir de 10. Réglable dans 🔊 Sons." },
     { name:'🔎 Chercher dans chaque rubrique', desc:"Une barre « 🔎 Chercher… » en haut de l'accueil et de chaque rubrique (Atelier, Conjugaison, Grammaire, Orthographe, fiches, Bescherelle, Entreprise…) : les fiches par leur titre et leur contenu, les verbes même conjugués (« mangeons » → manger), les exercices de la page, et ce qu'il y a ailleurs dans l'appli. Sans accents, en arabe, ou à la voix 🗣️. Au renard : « cherche la fiche sur le subjonctif »." },
@@ -39494,6 +39609,95 @@ setTimeout(goalFinaleCheck, 2500);
 setInterval(goalFinaleCheck, 3000);
 /* « 🎉 Tu as terminé tous les défis du jour ! » sur l'accueil : toucher = revoir la fête */
 document.addEventListener('click', (e) => { const t = e.target.closest && e.target.closest('.quests-alldone'); if(t) goalFinale(true); });
+
+/* ============ 🧩 BLOCS STABLES : les nouveaux mots toujours à la fin (1.0.8) ============
+   Avant, les mots ajoutés étaient rangés par ordre alphabétique : chaque ajout décalait tous les blocs
+   suivants, des mots déjà faits et maîtrisés se retrouvaient mélangés avec des nouveaux, et le bloc
+   « déjà fait » redevenait « à faire » (son résultat est lié à ses mots exacts).
+   Maintenant chaque mot ajouté garde la date de son ajout : les nouveaux vont toujours à la fin, et l'ordre
+   est le même sur tous les appareils. Une seule fois, on remet les anciens blocs en place : grâce aux résultats
+   enregistrés (chacun garde la liste de ses mots), on retrouve les blocs déjà faits et leurs scores reviennent ;
+   les mots déjà travaillés viennent ensuite, puis les nouveaux. */
+var WORDS_ORDER_KEY = 'lexiqueQuiz::wordsOrderV2';
+function wordsOrderFixed(){ try{ return !!localStorage.getItem(nsKey('lexiqueQuiz::wordsOrderV2')); }catch(e){ return false; } }   // (clé en clair : appelée dès le démarrage)
+function stampNewWords(list){ const now = Date.now(); (list || []).forEach((w, i) => { if(w && !w.addedAt) w.addedAt = now + i; }); return list; }
+function wordsRepairMaybe(){
+  if(typeof DEFAULT_WORDS === 'undefined' || wordsOrderFixed()) return null;
+  const setFlag = () => { try{ localStorage.setItem(nsKey(WORDS_ORDER_KEY), String(Date.now())); }catch(e){} };
+  const isDef = new Set(DEFAULT_WORDS.map(w => w.fr.toLowerCase()));
+  const user = (w) => !isDef.has(String(w.fr).toLowerCase());
+  const legacy = WORDS.filter(w => user(w) && !w.addedAt);
+  if(!legacy.length){ setFlag(); return { moved:0, blocks:0 }; }
+  const byFr = new Map(WORDS.map(w => [w.fr, w]));
+  const pos = new Map(WORDS.map((w, i) => [w.fr, i]));   // l'ordre actuel (lexique de base, puis A → Z)
+  const uid = getCurrentUserId();
+  const esc = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const re = new RegExp('^lexiqueQuiz::all::(h[0-9a-z]+_(\\d+))::([a-zA-Z]+)::u:' + esc(uid) + '$');
+  // 1) les blocs déjà joués, retrouvés avec leurs mots exacts
+  const groups = {};
+  for(let i = 0; i < localStorage.length; i++){
+    const k = localStorage.key(i); const m = k && k.match(re); if(!m) continue;
+    let r = null; try{ r = JSON.parse(localStorage.getItem(k)); }catch(e){}
+    if(!r || !Array.isArray(r.history)) continue;
+    const g = groups[m[1]] || (groups[m[1]] = { hash:m[1], n:+m[2], fr:new Set(), passed:0, at:0 });
+    r.history.forEach(h => { if(h && h.fr) g.fr.add(h.fr); });
+    if(r.total && r.correct / r.total * 100 >= PASS_THRESHOLD) g.passed++;
+    g.at = Math.max(g.at, r.finishedAt || 0);
+  }
+  const tail = DEFAULT_WORDS.length % BLOCK_SIZE;   // mots du lexique de base dans le premier bloc « à toi »
+  const cands = Object.values(groups).filter(g => {
+    if(g.n !== BLOCK_SIZE || g.fr.size !== g.n) return false;              // seulement les blocs complets
+    const ws = [...g.fr].map(f => byFr.get(f)); if(ws.some(w => !w)) return false;
+    const mine = ws.filter(user);
+    if(!mine.length || mine.some(w => w.addedAt)) return false;            // des mots ajoutés, tous anciens
+    const defs = ws.length - mine.length;
+    if(defs && (defs !== tail || ws.some(w => !user(w) && pos.get(w.fr) < DEFAULT_WORDS.length - tail))) return false;
+    ws.sort((a, b) => pos.get(a.fr) - pos.get(b.fr));
+    g.words = ws; g.defs = defs;
+    return hashWords(ws) === g.hash;                                       // c'est bien CE bloc (même empreinte)
+  });
+  // 2) sans conflit : un mot n'est que dans un seul bloc (d'abord les mieux réussis, puis les plus récents)
+  cands.sort((a, b) => b.passed - a.passed || b.at - a.at);
+  const used = new Set(), chosen = [];
+  cands.forEach(g => { if(g.words.some(w => used.has(w.fr))) return; g.words.forEach(w => used.add(w.fr)); chosen.push(g); });
+  const head = chosen.filter(g => g.defs > 0).slice(0, 1);
+  let rest = chosen.filter(g => !g.defs).sort((a, b) => (b.passed > 0) - (a.passed > 0) || pos.get(a.words[0].fr) - pos.get(b.words[0].fr));
+  // 3) le nouvel ordre : anciens blocs retrouvés → mots déjà travaillés → mots jamais vus (chacun de A à Z)
+  const seen = (w) => { const s = wordStats[w.fr]; return !!(s && ((s.correct || 0) + (s.wrong || 0) > 0)); };
+  const sortLeft = (l) => { l.sort((a, b) => pos.get(a.fr) - pos.get(b.fr)); return l.filter(seen).concat(l.filter(w => !seen(w))); };
+  const inChosen = new Set(); head.concat(rest).forEach(g => g.words.forEach(w => inChosen.add(w.fr)));
+  let left = sortLeft(legacy.filter(w => !inChosen.has(w.fr)));
+  const order = [];
+  if(head.length) head[0].words.forEach(w => { if(user(w)) order.push(w); });
+  else if(tail && rest.length){
+    // le premier bloc « à toi » commence avec des mots du lexique de base : on le complète d'abord, pour que les blocs retrouvés tombent juste
+    const need = BLOCK_SIZE - tail;
+    if(left.length >= need) left.splice(0, need).forEach(w => order.push(w));
+    else { rest.forEach(g => g.words.forEach(w => left.push(w))); rest = []; left = sortLeft(left); }
+  }
+  rest.forEach(g => g.words.forEach(w => order.push(w)));
+  left.forEach(w => order.push(w));
+  chosen.length = 0; head.concat(rest).forEach(g => chosen.push(g));
+  const before = WORDS.map(w => w.fr).join('|');
+  order.forEach((w, i) => { w.addedAt = i + 1; });   // petits numéros : avant tout mot ajouté désormais (horodaté)
+  setFlag();
+  reconcileWordsOrder();
+  saveCustomWords(WORDS);
+  rebuildBlocks();
+  const moved = before !== WORDS.map(w => w.fr).join('|');
+  try{ cloudAutoPush(); }catch(e){}
+  if(moved){
+    try{ if(isHomeScreen && !document.body.classList.contains('quiz-active')) renderBlockSelect(); }catch(e){}
+    try{ showGoalToast('🧩 Tes blocs sont remis en ordre', `${chosen.length ? chosen.length + ' bloc' + (chosen.length > 1 ? 's' : '') + ' déjà fait' + (chosen.length > 1 ? 's' : '') + ' retrouvé' + (chosen.length > 1 ? 's' : '') + ' · ' : ''}les nouveaux mots sont à la fin`, '✅'); }catch(e){}
+  }
+  return { moved:moved ? 1 : 0, blocks:chosen.length };
+}
+(function wordsRepairSchedule(){
+  // une seule fois : après la première synchro réussie (pour partir des mêmes données que l'autre appareil),
+  // ou tout de suite si la synchro n'est pas utilisée, ou au bout de 25 s si elle n'aboutit pas
+  const run = () => { try{ wordsRepairMaybe(); }catch(e){ console.warn('ordre des mots', e); } };
+  try{ if(!getSyncUrl()) setTimeout(run, 1200); else setTimeout(run, 25000); }catch(e){}
+})();
 
 /* ============ 🔎 CHERCHER DANS CHAQUE SECTION ============
    Une barre « 🔎 Chercher… » en haut de chaque rubrique (accueil, Atelier, Conjugaison, Grammaire, Orthographe,
