@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- 🏷️ Version de l'appli : augmentée automatiquement par publier-site.cmd à chaque publication -->
-<meta name="app-version" content="1.0.8" data-date="2026-10-14">
+<meta name="app-version" content="1.0.9" data-date="2026-10-14">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <title>VocabVISION — Vocabulaire Français ↔ Arabe</title>
 <script>
@@ -13872,7 +13872,6 @@ function renderCustomBlockManage(blockId){
         <select id="mgMoveSelect" class="search-input" style="cursor:pointer;">
           ${buildPositionOptionsHtml(block.afterBlockIndex)}
         </select>
-        <div style="font-size:12px;color:var(--text-dim);">🔒 Impossible de le placer après un bloc verrouillé.</div>
         <button class="mode-chip" id="mgMoveConfirmBtn" style="background:var(--purple);color:#fff;">✓ Confirmer le déplacement</button>
       `;
       document.getElementById('mgMoveConfirmBtn').addEventListener('click', () => {
@@ -14046,7 +14045,6 @@ function renderCustomBlockRecapView(blockId, result, justFinished){
         <select id="cbMoveSelect" class="search-input" style="cursor:pointer;">
           ${buildPositionOptionsHtml(block.afterBlockIndex)}
         </select>
-        <div style="font-size:12px;color:var(--text-dim);">🔒 Impossible de le placer après un bloc verrouillé.</div>
         <button class="mode-chip" id="cbMoveConfirmBtn" style="background:var(--purple);color:#fff;">✓ Confirmer le déplacement</button>
       `;
       document.getElementById('cbMoveConfirmBtn').addEventListener('click', () => {
@@ -14354,7 +14352,6 @@ décider;يقرر;faire un choix;Il faut ~ rapidement."></textarea>
     <select id="cbPositionSelect" class="search-input" style="cursor:pointer;">
       ${positionOptions}
     </select>
-    <div class="question-line" style="text-align:left;font-size:12px;margin-top:6px;">🔒 Impossible de placer un bloc après un bloc verrouillé — débloque-le d'abord (≥${PASS_THRESHOLD}%).</div>
 
     <button class="restart-btn" id="cbCreateBtn" style="margin-top:22px;" ${customBlockDraftWords.length === 0 ? 'disabled' : ''}>
       ✓ Créer ce bloc (${customBlockDraftWords.length} mot${customBlockDraftWords.length>1?'s':''})
@@ -14877,13 +14874,13 @@ function blockHasResult(i){
   const perMode = blockResults[i] || {};
   return GAME_MODES.some(m => perMode[m]);
 }
-/* Bloc débloqué : le 1er toujours ; sinon uniquement si le bloc précédent est validé à ≥90%. */
+/* 🔓 1.0.9 : tous les blocs sont au choix — on peut jouer n'importe quel bloc, même sans avoir validé les précédents.
+   (« ▶ Continuer » propose toujours le premier bloc pas encore validé, dans l'ordre.) */
 function isBlockUnlocked(i){
-  if(i === 0) return true;
-  return isBlockPassed(i - 1);
+  return i >= 0;
 }
 
-/* ▶ Trouve le premier bloc débloqué mais pas encore validé (≥90%) — pour sauter directement
+/* ▶ Trouve le premier bloc pas encore validé (≥90%), dans l'ordre — pour sauter directement
    dedans sans avoir à chercher/scroller dans la grille. Si tout est validé, reprend le tout dernier. */
 function findNextBlockToPlay(){
   for(let i=0;i<BLOCKS.length;i++){
@@ -17593,8 +17590,8 @@ function renderRecapView(blockIndex, result, justFinished){
     ${flawlessBanner}
     <div class="pass-banner ${passed ? 'ok' : 'todo'}">
       ${passed
-        ? `✅ Bloc validé à ${pct}% !${nextUnlocked ? ' Bloc ' + (blockIndex+2) + ' débloqué 🔓' : ''}`
-        : `🎯 ${pct}% — il te faut au moins ${PASS_THRESHOLD}% pour valider ce bloc${nextUnlocked ? ' et débloquer le suivant' : ''}. Réessaie !`}
+        ? `✅ Bloc validé à ${pct}% !${nextUnlocked ? ' Prochain : ' + escapeHtml(getBlockTitle(blockIndex + 1)) + ' (ou le bloc de ton choix)' : ''}`
+        : `🎯 ${pct}% — il te faut au moins ${PASS_THRESHOLD}% pour valider ce bloc. Réessaie !`}
     </div>
     ${comboLine}`;
 
@@ -18972,6 +18969,7 @@ const COLOR_PRESETS = {
 /* ============ 🆕 NOUVEAUTÉS — pour que tout ce qui a été ajouté reste découvrable ============ */
 const WHATS_NEW_SECTIONS = [
   { icon:'🆕', title:'Nouveautés', items:[
+    { name:'🔓 Tous les blocs au choix', desc:"Plus de cadenas : tu peux jouer n'importe quel bloc, même si tu n'as pas encore validé les précédents. « ▶ Continuer » te propose toujours le premier bloc pas encore validé." },
     { name:'🧩 Nouveaux mots : toujours à la fin', desc:"Les mots que tu ajoutes vont toujours dans les derniers blocs : ils ne se mélangent plus avec tes mots déjà faits et maîtrisés, et tes blocs terminés restent terminés. Une fois, l'appli remet tes anciens blocs en place (et leurs scores reviennent) ; les mots déjà travaillés viennent ensuite, puis les nouveaux. Même ordre sur le téléphone et le PC." },
     { name:'🎧 Écouter la liste, puis jouer… et ça compte', desc:"Après « Écouter cette liste », le mode choisi dans la fenêtre joue le bloc lui-même : le résultat compte pour ce bloc (avant, il se perdait), la fenêtre montre ce que tu as déjà fait dans chaque mode, et l'écran de fin te propose les autres modes. Pour les listes à thème (Entreprise, Rédaction, Bescherelle…), le résultat compte dans tes objectifs du jour et tu peux enchaîner avec un autre mode." },
     { name:'☁️ Synchro téléphone ↔ PC rapide et fiable', desc:"Chaque modification part toute seule en quelques secondes (une fiche faite, un score, un réglage…), seulement ce qui a changé. L'appli récupère ce que tu as fait sur l'autre appareil dès que tu reviens dessus, et toutes les minutes quand elle est ouverte. Les fiches faites se fusionnent : plus jamais une fiche validée qui disparaît d'un appareil." },
