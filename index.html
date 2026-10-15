@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- 🏷️ Version de l'appli : augmentée automatiquement par publier-site.cmd à chaque publication -->
-<meta name="app-version" content="1.0.15" data-date="2026-10-15">
+<meta name="app-version" content="1.0.16" data-date="2026-10-16">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <title>VocabVISION — Vocabulaire Français ↔ Arabe</title>
 <script>
@@ -31,7 +31,7 @@
 <meta name="apple-mobile-web-app-title" content="VocabVISION">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,700;0,7..72,800;1,7..72,400&display=swap" rel="stylesheet">
 <style>
   :root, [data-theme="light"]{
     /* 🎨 Palette « ludique & pro » : fond crème-lavande, surfaces blanches, accents vifs */
@@ -1760,6 +1760,201 @@
   .adv-banked{ background:rgba(124,58,237,.08); border:1px dashed rgba(124,58,237,.4); border-radius:12px; padding:8px 12px; font-size:12.5px; font-weight:700; color:var(--text); margin:0 0 10px; }
   body.adv-on #questPeekFab{ background:linear-gradient(135deg,#312E81,#7C3AED) !important; color:#fff; }
   body.adv-on #questPeekFab::after{ content:'🌙'; position:absolute; top:-8px; left:-6px; font-size:16px; }
+  /* 📰 1.0.16 : La Tablette — une liseuse plein écran, papier gris « encre électronique », surligneur fluo */
+  .tb{ --tb-paper:#EDF0EC; --tb-ink:#1B1F27; --tb-ink2:#5A6170; --tb-rule:#D3D8D0; --tb-chrome:rgba(237,240,236,.9); --tb-card:#F7F8F5;
+    --tb-hl:#FFE14D; --tb-hl-ink:#1B1F27; --tb-acc:#5B21B6; --tb-on-acc:#fff; --tb-band:rgba(91,33,182,.08); --tb-hit:rgba(91,33,182,.17);
+    --tb-ok:#15803D; --tb-miss:#C2410C; --tb-fs:19px; --tb-lh:1.65;
+    position:fixed; inset:0; z-index:9980; display:flex; flex-direction:column; overflow:hidden;
+    background:var(--tb-paper); color:var(--tb-ink); font-family:'Nunito','Inter',system-ui,sans-serif; -webkit-text-size-adjust:100%; }
+  [data-theme="dark"] .tb{ --tb-paper:#10151E; --tb-ink:#DCE2EB; --tb-ink2:#8F99A9; --tb-rule:#252E3C; --tb-chrome:rgba(16,21,30,.9); --tb-card:#171E29;
+    --tb-hl:#EBC72E; --tb-hl-ink:#15120A; --tb-acc:#B9A2FF; --tb-on-acc:#14102A; --tb-band:rgba(185,162,255,.11); --tb-hit:rgba(185,162,255,.27);
+    --tb-ok:#4ADE80; --tb-miss:#FDBA74; }
+  body.tb-open{ overflow:hidden; }
+  .tb button{ font-family:inherit; -webkit-tap-highlight-color:transparent; }
+  .tb button:focus-visible, .tb [role="button"]:focus-visible, .tb input:focus-visible{ outline:2px solid var(--tb-acc); outline-offset:2px; }
+  .tb-top{ position:absolute; top:0; left:0; right:0; z-index:4; display:flex; align-items:center; gap:2px; padding:calc(env(safe-area-inset-top, 0px) + 6px) 6px 6px;
+    background:var(--tb-chrome); -webkit-backdrop-filter:blur(14px) saturate(1.3); backdrop-filter:blur(14px) saturate(1.3); border-bottom:1px solid var(--tb-rule); transition:transform .28s ease; }
+  .tb.top-hide .tb-top{ transform:translateY(-100%); }
+  .tb-ib{ flex:none; width:42px; height:42px; border:0; border-radius:12px; background:transparent; color:var(--tb-ink); display:inline-grid; place-items:center; font-weight:800; font-size:18px; line-height:1; cursor:pointer; }
+  .tb-ib:hover{ background:var(--tb-band); }
+  .tb-ib.sm{ width:32px; height:32px; font-size:14px; border-radius:9px; }
+  .tb-brand{ flex:1; min-width:0; font-family:'Literata',Georgia,'Times New Roman',serif; font-weight:700; font-size:17px; padding-left:2px; }
+  .tb-aa{ font-family:'Literata',Georgia,serif; font-size:18px; }
+  .tb-find{ position:absolute; inset:calc(env(safe-area-inset-top, 0px) + 6px) 6px 6px 6px; display:flex; align-items:center; gap:2px; background:var(--tb-card); border:1px solid var(--tb-rule); border-radius:14px; padding:0 2px 0 10px; }
+  .tb-find[hidden]{ display:none; }
+  .tb-find input{ flex:1; min-width:0; border:0; background:transparent; color:var(--tb-ink); font:700 16px/1.2 'Nunito','Inter',sans-serif; outline:none; padding:8px 0; }
+  .tb-find input::-webkit-search-cancel-button{ display:none; }
+  .tb-find input:focus-visible{ outline:none; }
+  .tb-find:focus-within{ border-color:var(--tb-acc); box-shadow:0 0 0 3px var(--tb-hit); }
+  .tb-find .tb-ib{ width:36px; height:36px; font-size:20px; }
+  .tb-find-n{ font-size:12.5px; font-weight:800; color:var(--tb-ink2); white-space:nowrap; padding:0 4px; }
+  .tb-prog{ position:absolute; left:0; right:0; bottom:-1px; height:2px; pointer-events:none; }
+  .tb-prog i{ display:block; height:100%; width:0; background:var(--tb-acc); transition:width .2s linear; }
+  /* la page */
+  .tb-scroll{ flex:1; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; touch-action:pan-y;
+    padding:calc(env(safe-area-inset-top, 0px) + 66px) 0 calc(env(safe-area-inset-bottom, 0px) + 118px); }
+  .tb-page{ font-size:var(--tb-fs); max-width:44em; margin:0 auto; padding:0 clamp(12px, 3.6vw, 34px); }
+  .tb-meta{ display:flex; flex-wrap:wrap; gap:4px 16px; font-size:13px; font-weight:700; color:var(--tb-ink2); margin:6px 0 10px; }
+  .tb-h1{ font-family:'Literata',Georgia,'Times New Roman',serif; font-weight:800; font-size:1.5em; line-height:1.2; letter-spacing:-.012em; margin:0 0 .75em; text-wrap:balance; color:var(--tb-ink); }
+  .tb-body{ font-family:'Literata',Georgia,'Times New Roman',serif; font-weight:400; line-height:var(--tb-lh); text-align:left; hyphens:auto; -webkit-hyphens:auto; overflow-wrap:break-word; }
+  .tb-body p{ margin:0 0 .95em; }
+  .tb.pinching .tb-body{ transition:none; }
+  .tbw{ border-radius:.22em; cursor:pointer; transition:background-color .15s, color .2s; }
+  @media (hover:hover){ .tbw:hover{ background-color:var(--tb-band); } }
+  .tbw.sel{ background-color:var(--tb-hit); box-shadow:0 0 0 .12em var(--tb-hit); }
+  .tbw.hit{ background-color:var(--tb-hit); }
+  .tbw.hit.cur{ outline:2px solid var(--tb-acc); outline-offset:1px; }
+  /* 🖍 le surligneur : un vrai coup de feutre, légèrement de biais */
+  .tbw.tag{ background-color:transparent; background-image:linear-gradient(102deg, transparent 0 .12em, var(--tb-hl) .3em calc(100% - .25em), transparent calc(100% - .06em));
+    background-repeat:no-repeat; background-position:0 62%; background-size:100% 74%; border-radius:.5em .2em .55em .25em; color:var(--tb-hl-ink);
+    -webkit-box-decoration-break:clone; box-decoration-break:clone; }
+  .tbw.tag.new{ animation:tbSwipe .42s cubic-bezier(.3,.75,.3,1) both; }
+  @keyframes tbSwipe{ from{ background-size:0% 74%; } to{ background-size:100% 74%; } }
+  .tb-hunt .tbw{ cursor:crosshair; }
+  .tbw.hint{ text-decoration:underline dotted var(--tb-acc); text-decoration-thickness:.12em; text-underline-offset:.24em; animation:tbHint 1.6s ease-out 1; }
+  @keyframes tbHint{ 0%{ background-color:var(--tb-hit); } 100%{ background-color:transparent; } }
+  .tbw.ok{ color:var(--tb-ok); }
+  .tbw.miss{ color:var(--tb-miss); text-decoration:underline wavy var(--tb-miss); text-underline-offset:.22em; text-decoration-thickness:.07em; }
+  .tb-s.on{ background-color:var(--tb-band); box-shadow:0 0 0 .16em var(--tb-band); border-radius:.3em; -webkit-box-decoration-break:clone; box-decoration-break:clone; }
+  .tb-s.flash{ animation:tbFlash 1.5s ease-out 1; border-radius:.3em; }
+  @keyframes tbFlash{ 0%,30%{ background-color:var(--tb-hit); } 100%{ background-color:transparent; } }
+  .tb-pin{ display:block; width:max-content; margin:.2em 0 .5em; padding:4px 10px; border-radius:999px; background:var(--tb-band); color:var(--tb-acc); font:800 12.5px/1.3 'Nunito','Inter',sans-serif; }
+  .tb .dx-legend{ margin:6px 0 2px; }
+  .tb-end{ text-align:center; padding:18px 0 8px; }
+  .tb-fin{ font-family:'Literata',Georgia,serif; font-size:1.4em; color:var(--tb-ink2); }
+  .tb-end-t{ font-weight:800; font-size:14px; color:var(--tb-ink2); margin:6px 0 12px; }
+  .tb-end-b{ display:flex; flex-wrap:wrap; gap:8px; justify-content:center; }
+  /* boutons */
+  .tb-btn{ border:1px solid var(--tb-rule); background:var(--tb-card); color:var(--tb-ink); border-radius:14px; padding:10px 14px; font-weight:800; font-size:14px; line-height:1.2; cursor:pointer; }
+  .tb-btn:disabled{ opacity:.55; cursor:default; }
+  .tb-btn.hl{ background:var(--tb-hl); color:#1B1F27; border-color:transparent; }
+  [data-theme="dark"] .tb-btn.hl{ background:#FFDE40; }
+  .tb-btn.pri{ background:var(--tb-acc); color:var(--tb-on-acc); border-color:transparent; }
+  .tb-btn.wide{ display:block; width:100%; margin-top:10px; }
+  .tb-btn.sm{ padding:7px 10px; font-size:12.5px; border-radius:11px; flex:none; }
+  .tb-chip{ border:1px solid var(--tb-rule); background:var(--tb-paper); color:var(--tb-ink); border-radius:999px; padding:7px 12px; font-weight:800; font-size:13.5px; cursor:pointer; }
+  .tb-chip.big{ font-size:16px; }
+  .tb-link{ border:0; background:none; color:var(--tb-acc); font-weight:800; font-size:12.5px; cursor:pointer; padding:4px; }
+  /* barre du bas */
+  .tb-dock{ position:absolute; left:50%; transform:translateX(-50%); bottom:calc(env(safe-area-inset-bottom, 0px) + 10px); z-index:4; width:min(calc(100% - 16px), 480px);
+    display:flex; align-items:center; gap:2px; padding:6px; border-radius:22px; background:var(--tb-chrome); -webkit-backdrop-filter:blur(16px) saturate(1.4); backdrop-filter:blur(16px) saturate(1.4);
+    border:1px solid var(--tb-rule); box-shadow:0 12px 30px -14px rgba(15,23,42,.45); }
+  .tb-dk{ flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; gap:3px; border:0; background:transparent; color:var(--tb-ink); padding:6px 2px 5px; border-radius:16px; font-weight:800; font-size:11.5px; line-height:1.1; cursor:pointer; }
+  .tb-dk-i{ font-size:20px; line-height:1; position:relative; }
+  .tb-dk.on{ background:var(--tb-band); color:var(--tb-acc); }
+  .tb-dk.bump .tb-dk-i{ animation:tbBump .45s ease-out; }
+  @keyframes tbBump{ 0%{ transform:scale(1); } 40%{ transform:scale(1.35) rotate(-8deg); } 100%{ transform:scale(1); } }
+  .tb-badge{ position:absolute; top:-7px; right:-13px; min-width:17px; height:17px; padding:0 4px; border-radius:9px; background:var(--tb-acc); color:var(--tb-on-acc); font:800 10.5px/17px 'Nunito','Inter',sans-serif; text-align:center; }
+  .tb-badge:empty{ display:none; }
+  .tb-dock.pl{ gap:4px; padding:6px 8px; }
+  .tb-pb{ flex:none; width:40px; height:40px; border:0; border-radius:50%; background:transparent; color:var(--tb-ink); font-size:17px; line-height:1; cursor:pointer; display:grid; place-items:center; }
+  .tb-pb.main{ width:46px; height:46px; background:var(--tb-acc); color:var(--tb-on-acc); font-size:19px; }
+  .tb-pl-n, .tb-pl-r{ font-size:12px; font-weight:800; color:var(--tb-ink2); white-space:nowrap; }
+  .tb-pl-n{ flex:1; text-align:center; }
+  .tb-self-msg{ flex:1; min-width:0; font-weight:800; font-size:13px; line-height:1.25; color:var(--tb-ink); }
+  .tb-mic{ flex:none; width:36px; height:36px; display:grid; place-items:center; border-radius:50%; background:var(--tb-band); font-size:17px; }
+  .tb-mic.on{ animation:tbMic 1.3s ease-in-out infinite; }
+  @keyframes tbMic{ 0%,100%{ box-shadow:0 0 0 0 rgba(220,38,38,.35); } 50%{ box-shadow:0 0 0 8px rgba(220,38,38,0); } }
+  /* panneaux */
+  .tb-pop{ position:absolute; top:calc(env(safe-area-inset-top, 0px) + 60px); right:8px; z-index:5; width:min(340px, calc(100% - 16px)); max-height:calc(100% - 150px); overflow-y:auto;
+    background:var(--tb-card); border:1px solid var(--tb-rule); border-radius:18px; padding:10px 12px 12px; box-shadow:0 18px 40px -14px rgba(15,23,42,.5); }
+  .tb-pop[hidden], .tb-res[hidden], .tb-hud[hidden]{ display:none; }
+  .tb-pop-row{ display:flex; align-items:center; gap:8px; padding:6px 0; }
+  .tb-pop-l{ flex:none; width:74px; font-size:13px; font-weight:800; color:var(--tb-ink2); }
+  .tb-pop-hint{ font-size:12px; color:var(--tb-ink2); margin:0 0 4px 82px; line-height:1.35; }
+  .tb-sh-in .tb-pop-hint{ margin:8px 2px 0; }
+  .tb-out{ min-width:54px; text-align:center; font-weight:800; font-size:13px; }
+  .tb-seg{ flex:1; display:flex; gap:2px; padding:3px; border-radius:12px; background:var(--tb-paper); border:1px solid var(--tb-rule); }
+  .tb-seg button{ flex:1; min-width:0; border:0; background:transparent; color:var(--tb-ink); border-radius:9px; padding:7px 4px; font-weight:800; font-size:12.5px; cursor:pointer; }
+  .tb-seg button.on{ background:var(--tb-card); color:var(--tb-acc); box-shadow:0 1px 3px rgba(15,23,42,.18); }
+  .tb-res{ position:absolute; top:calc(env(safe-area-inset-top, 0px) + 55px); left:0; right:0; z-index:3; max-height:44vh; overflow-y:auto; background:var(--tb-card); border-bottom:1px solid var(--tb-rule); box-shadow:0 16px 30px -18px rgba(15,23,42,.5); }
+  .tb-res-h{ display:flex; align-items:center; justify-content:space-between; gap:8px; padding:8px 14px; font-size:13px; font-weight:800; color:var(--tb-ink2); }
+  .tb-r{ display:flex; align-items:flex-start; gap:10px; padding:10px 14px; border-top:1px solid var(--tb-rule); }
+  .tb-r-t{ flex:1; min-width:0; font-family:'Literata',Georgia,serif; font-size:15px; line-height:1.45; cursor:pointer; }
+  .tb-r-t mark, .tb-ctx mark{ background:var(--tb-hl); color:var(--tb-hl-ink); border-radius:.2em; padding:0 .08em; }
+  .tb-res-f{ padding:8px 14px 10px; font-size:12px; color:var(--tb-ink2); border-top:1px solid var(--tb-rule); }
+  .tb-hud{ position:absolute; top:calc(env(safe-area-inset-top, 0px) + 62px); left:50%; transform:translateX(-50%); z-index:3; display:flex; align-items:center; gap:8px; max-width:calc(100% - 16px);
+    padding:5px 5px 5px 14px; border-radius:999px; background:var(--tb-ink); color:var(--tb-paper); font-weight:800; font-size:13px; white-space:nowrap; box-shadow:0 10px 24px -12px rgba(15,23,42,.6); transition:top .28s ease; }
+  .tb.top-hide .tb-hud{ top:calc(env(safe-area-inset-top, 0px) + 8px); }
+  .tb-hud > span{ overflow:hidden; text-overflow:ellipsis; }
+  .tb-hud b{ flex:none; min-width:24px; text-align:center; background:#FFDE40; color:#1B1F27; border-radius:999px; padding:2px 8px; }
+  .tb-hud button{ flex:none; border:0; border-radius:999px; padding:7px 10px; background:rgba(127,127,127,.22); color:inherit; font-weight:800; font-size:12.5px; cursor:pointer; }
+  .tb-hud button.on{ background:#FFDE40; color:#1B1F27; }
+  /* fiche d'un mot / carnet */
+  .tb-sheet{ position:absolute; left:0; right:0; bottom:0; z-index:6; max-height:min(76vh, 680px); overflow-y:auto; overscroll-behavior:contain;
+    background:var(--tb-card); border-radius:22px 22px 0 0; box-shadow:0 -18px 44px -18px rgba(15,23,42,.5);
+    transform:translateY(105%); visibility:hidden; transition:transform .3s cubic-bezier(.2,.9,.3,1), visibility 0s linear .3s; }
+  .tb-sheet.open{ transform:none; visibility:visible; transition:transform .3s cubic-bezier(.2,.9,.3,1), visibility 0s; }
+  .tb-sh-in{ max-width:44em; margin:0 auto; padding:6px clamp(14px, 4vw, 28px) calc(env(safe-area-inset-bottom, 0px) + 18px); }
+  .tb-grab{ width:42px; height:5px; border-radius:3px; background:var(--tb-rule); margin:2px auto 8px; }
+  .tb-sh-top{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+  .tb-sh-w{ font-family:'Literata',Georgia,serif; font-weight:800; font-size:30px; line-height:1.1; overflow-wrap:anywhere; }
+  .tb-sh-ipa{ font-family:'Charis SIL','Doulos SIL','Gentium Plus','Literata',Georgia,serif; color:var(--tb-ink2); font-size:15px; margin-top:4px; min-height:1em; }
+  .tb-sh-lemma{ font-size:13.5px; color:var(--tb-ink2); margin-top:4px; }
+  .tb-sh-lemma:empty{ display:none; }
+  .tb-sh-say{ display:flex; flex-wrap:wrap; gap:6px; margin:12px 0 10px; }
+  .tb-info{ padding:10px 12px; border-radius:14px; background:var(--tb-paper); border:1px solid var(--tb-rule); }
+  .tb-info-l{ font-size:14px; color:var(--tb-ink2); line-height:1.45; padding:4px 0; }
+  .tb-ar{ font-family:'IBM Plex Sans Arabic',sans-serif; font-size:22px; font-weight:600; line-height:1.4; }
+  .tb-defs{ margin:6px 0 0; padding-left:1.2em; font-size:15px; line-height:1.45; }
+  .tb-defs li + li{ margin-top:4px; }
+  .tb-src{ font-size:11.5px; color:var(--tb-ink2); margin-top:6px; font-weight:700; }
+  .tb-ctx{ margin:12px 0; padding:2px 0 2px 12px; border-left:3px solid var(--tb-hl); font-family:'Literata',Georgia,serif; font-size:16px; line-height:1.6; color:var(--tb-ink); }
+  .tb-sh-act{ display:flex; gap:8px; }
+  .tb-sh-act .tb-btn{ flex:1; }
+  .tb-addf{ margin-top:10px; padding:12px; border-radius:14px; background:var(--tb-paper); border:1px solid var(--tb-rule); }
+  .tb-addf[hidden]{ display:none; }
+  .tb-lbl{ display:block; font-size:12px; font-weight:800; color:var(--tb-ink2); margin-bottom:8px; }
+  .tb-in{ display:block; width:100%; box-sizing:border-box; margin-top:4px; border:1px solid var(--tb-rule); background:var(--tb-card); color:var(--tb-ink); border-radius:10px; padding:9px 11px; font:600 15px/1.3 'Nunito','Inter',sans-serif; }
+  textarea.tb-in{ resize:vertical; min-height:2.9em; line-height:1.4; }
+  .tb-in.ar{ font-family:'IBM Plex Sans Arabic',sans-serif; font-size:17px; text-align:right; }
+  .tb-rules{ margin-top:12px; font-size:14px; }
+  .tb-cr{ padding:12px 0; border-top:1px solid var(--tb-rule); }
+  .tb-cr-h{ display:flex; align-items:center; gap:4px; }
+  .tb-cr-w{ font-family:'Literata',Georgia,serif; font-size:19px; background-image:linear-gradient(102deg, transparent 0 .1em, var(--tb-hl) .25em calc(100% - .2em), transparent); background-repeat:no-repeat; background-position:0 64%; background-size:100% 70%; padding:0 .15em; }
+  .tb-cr-f{ font-size:13px; color:var(--tb-ink2); }
+  .tb-cr-st{ margin-left:auto; font-size:12px; font-weight:800; color:var(--tb-ok); white-space:nowrap; }
+  .tb-cr .tb-in{ margin-top:6px; }
+  .tb-cr-s{ margin-top:6px; font-family:'Literata',Georgia,serif; font-size:13.5px; line-height:1.45; color:var(--tb-ink2); }
+  .tb-cr.done .tb-cr-s{ opacity:.7; }
+  .tb-toast{ position:absolute; left:50%; bottom:calc(env(safe-area-inset-bottom, 0px) + 92px); z-index:8; transform:translate(-50%, 16px); opacity:0; pointer-events:none;
+    max-width:calc(100% - 32px); width:max-content; padding:10px 16px; border-radius:14px; background:var(--tb-ink); color:var(--tb-paper); font-weight:800; font-size:13.5px; line-height:1.35; text-align:center; transition:opacity .25s, transform .25s; }
+  .tb-toast.show{ opacity:1; transform:translate(-50%, 0); }
+  .tb-fly{ position:fixed; z-index:9; pointer-events:none; padding:1px 8px; border-radius:8px; background:#FFDE40; color:#1B1F27; font:800 15px/1.4 'Literata',Georgia,serif; box-shadow:0 8px 18px -8px rgba(15,23,42,.6); white-space:nowrap; }
+  @media (prefers-reduced-motion: reduce){ .tbw.tag.new, .tb-dk.bump .tb-dk-i, .tbw.hint, .tb-s.flash, .tb-mic.on{ animation:none; } .tb-sheet, .tb-top{ transition:none; } }
+  /* l'accueil de la Tablette (dans l'appli) */
+  .tbk-h{ font-family:'Literata',Georgia,serif; font-weight:800; font-size:clamp(21px, 4.6vw, 27px); line-height:1.2; color:var(--text); margin:10px 0 6px; text-wrap:balance; }
+  .tbk-sub{ font-size:14px; line-height:1.5; color:var(--text-dim); max-width:36em; margin:0 auto; }
+  .tbk-device{ position:relative; max-width:600px; margin:16px auto 4px; padding:16px 12px 14px; border-radius:30px; background:linear-gradient(160deg, #2B3242, #151A23); box-shadow:inset 0 1px 0 rgba(255,255,255,.09), 0 24px 40px -24px rgba(15,23,42,.7); }
+  .tbk-cam{ position:absolute; top:6px; left:50%; width:6px; height:6px; margin-left:-3px; border-radius:50%; background:#465066; }
+  .tbk-screen{ background:#EDF0EC; border-radius:18px; padding:12px 14px; text-align:left; color:#1B1F27; }
+  [data-theme="dark"] .tbk-screen{ background:#10151E; color:#DCE2EB; }
+  .tbk-screen .tbk-title{ display:block; width:100%; box-sizing:border-box; border:0; border-bottom:1px solid rgba(90,97,112,.3); background:transparent; color:inherit; font:800 19px/1.3 'Literata',Georgia,serif; padding:4px 2px 8px; outline:none; }
+  .tbk-screen .tbk-text{ display:block; width:100%; box-sizing:border-box; min-height:150px; border:0; background:transparent; color:inherit; resize:vertical; font:400 16px/1.6 'Literata',Georgia,serif; padding:10px 2px; outline:none; }
+  .tbk-screen .tbk-title:focus, .tbk-screen .tbk-text:focus{ box-shadow:none; border-color:rgba(90,97,112,.3); }
+  .tbk-title::placeholder, .tbk-text::placeholder{ color:#7A8191; }
+  .tbk-row{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .tbk-paste{ border:1px solid rgba(90,97,112,.35); background:transparent; color:inherit; border-radius:12px; padding:9px 12px; font-weight:800; font-size:13.5px; cursor:pointer; }
+  .tbk-count{ font-size:12.5px; font-weight:800; color:#7A8191; }
+  .tbk-open{ margin-left:auto; border:0; border-radius:14px; padding:11px 16px; background:#FFDE40; color:#1B1F27; font-weight:900; font-size:14.5px; cursor:pointer; box-shadow:0 3px 0 #C9A800; }
+  .tbk-open:disabled{ opacity:.5; cursor:default; box-shadow:none; }
+  .tbk-open:active:not(:disabled){ transform:translateY(2px); box-shadow:0 1px 0 #C9A800; }
+  .tbk-cancel{ display:block; margin:8px 0 0 auto; border:0; background:none; color:#7A8191; font-weight:800; font-size:12.5px; cursor:pointer; }
+  .tbk-sec{ text-align:left; font-weight:900; font-size:15px; color:var(--text); margin:20px 2px 8px; }
+  .tbk-list{ display:flex; flex-direction:column; gap:8px; text-align:left; }
+  .tbk-item{ display:flex; align-items:center; gap:4px; padding:10px 6px 10px 14px; border:1px solid var(--border); border-radius:16px; background:var(--surface); cursor:pointer; }
+  .tbk-item:hover{ background:var(--surface-hover, var(--surface)); }
+  .tbk-main{ flex:1; min-width:0; }
+  .tbk-main b{ display:block; font-family:'Literata',Georgia,serif; font-size:15.5px; line-height:1.3; color:var(--text); }
+  .tbk-meta{ display:flex; flex-wrap:wrap; gap:2px 12px; margin-top:3px; font-size:12px; font-weight:700; color:var(--text-dim); }
+  .tbk-done{ color:#16A34A; }
+  .tbk-bar{ display:block; height:3px; border-radius:2px; background:var(--surface-sunken); margin-top:7px; overflow:hidden; }
+  .tbk-bar i{ display:block; height:100%; background:#F2C200; border-radius:2px; }
+  .tbk-ib{ flex:none; min-width:36px; height:36px; border:0; background:transparent; border-radius:10px; font-size:16px; cursor:pointer; color:var(--text); }
+  .tbk-ib.warn{ padding:0 10px; background:#FEE2E2; color:#B91C1C; font-weight:800; font-size:12.5px; }
+  .tbk-empty{ font-size:13.5px; color:var(--text-dim); padding:12px 14px; border:1px dashed var(--border); border-radius:14px; }
+  .tbk-ph{ display:flex; flex-direction:column; align-items:center; gap:12px; padding:20px 8px; font-family:'Literata',Georgia,serif; font-size:16px; color:var(--text); }
+  .tbk-ph .tbk-open{ margin-left:0; }
   .rep-long{ font-size:11.5px; font-weight:800; color:#C2410C; background:rgba(249,115,22,.16); padding:2px 8px; border-radius:999px; }
   .repeat-sentence.hidden{ letter-spacing:.3em;color:var(--purple);font-size:26px; }
   .rw{ transition:background .2s,color .2s;border-radius:6px;padding:0 2px; }
@@ -3583,6 +3778,7 @@ const PRO_ICON_PATHS = {
   repeat:'<path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/>',
   chevronLeft:'<path d="m15 18-6-6 6-6"/>',
   chevronRight:'<path d="m9 18 6-6-6-6"/>',
+  tablet:'<rect x="4" y="2" width="16" height="20" rx="2.5"/><path d="M8 7h8M8 11h8M8 15h5"/>',
   tag:'<path d="M20.59 13.41 13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><circle cx="7" cy="7" r="1"/>',
 };
 function proIcon(name, size, sw){
@@ -3594,7 +3790,7 @@ function proIcon(name, size, sw){
 const PRO_TILE_ICONS = {
   blitzBtn:'zap', swipeBtn:'swap', flashcardsBtn:'layers', associationBtn:'link', dailyChallengeBtn:'calendar', badgesBtn:'award',
   trainingCenterBtn:'cap', conjugationBtn:'clock', grammarBtn:'ruler', orthoBtn:'pen',
-  practicalSheetsBtn:'file', atelierBtn:'landmark', conjugaisonBtn:'table', bouquinageBtn:'book', avanceBtn:'trending', oratoireBtn:'mic',
+  practicalSheetsBtn:'file', atelierBtn:'landmark', conjugaisonBtn:'table', bouquinageBtn:'book', tabletteBtn:'tablet', avanceBtn:'trending', oratoireBtn:'mic',
   situationsBtn:'message', entrepriseBtn:'briefcase', redactionBtn:'mail', bescherelleBtn:'bookmark',
   dailyReadingBtn:'news', dailyLessonBtn:'languages', jeuxMotsBtn:'grid', radioBtn:'radio', audioLibBtn:'headphones',
 };
@@ -3639,7 +3835,7 @@ const NAV_TITLES = {
   renderProfileView:'Profil', renderHistoryView:'Historique', renderLeaderboard:'Classement', renderSyncView:'Synchronisation',
   renderSheetsHomeBySection:'Fiches', renderJeuxMotsHome:'Jeux de mots', renderMotsMeles:'Mots mêlés', renderAnagrammeGame:'Anagrammes',
   renderCharadeGame:'Charades', renderIntrusGame:'L’intrus', renderMotMystere:'Mot mystère', renderTexteATrous:'Texte à trous', renderQCMFinal:'QCM final',
-  renderConjugueGame:'Conjugue !', renderTCFQuiz:'TCF', renderPracticalSheetDetail:'Fiche', renderBouquinageHome:'Bouquinage', renderBouquinageDetail:'Lecture',
+  renderConjugueGame:'Conjugue !', renderTCFQuiz:'TCF', renderPracticalSheetDetail:'Fiche', renderBouquinageHome:'Bouquinage', renderBouquinageDetail:'Lecture', renderTabletteHome:'La Tablette', renderTabletteReader:'Tablette',
   renderLessonList:'Leçons', renderDailyLesson:'Leçon du jour', renderDailyReading:'Lecture du jour', renderTimeBreakdown:'Temps passé',
   renderSoundTest:'Test du son', renderWhatsNew:'Nouveautés', renderQcmSetManage:'Jeu de QCM', renderQcmSetBuilder:'Éditeur de QCM',
   renderEntrepriseHub:'Entreprise', renderRedactionHub:'Rédaction', renderBescherelleHub:'Bescherelle', renderAudioLibrary:'Audiothèque',
@@ -3652,11 +3848,12 @@ const NAV_CFG = (() => {
   const c = {};
   Object.keys(NAV_TITLES).forEach(n => { if(n !== '__quiz') c[n] = {}; });
   // écrans dont les arguments désignent une autre « page » (on empile) — sinon on remplace (onglets, rafraîchissements)
-  ['renderPracticalSheetDetail','renderBouquinageDetail','renderOrthoLesson','renderCustomBlockManage','renderTrainingChunkPicker',
+  ['renderPracticalSheetDetail','renderBouquinageDetail','renderTabletteReader','renderOrthoLesson','renderCustomBlockManage','renderTrainingChunkPicker',
    'renderAudioManager','renderSheetsHomeBySection','renderGenericRecoIntro','renderQcmSetManage','startSheetQuiz','startGenericRecoQuiz','startQcmPractice']
     .forEach(n => { c[n].push = true; });
   c.renderAudioLibrary.ser = () => [];
   c.renderBouquinageDetail.ser = (a) => [a[0]];   // on ne rejoue pas « lis-moi » en revenant en arrière
+  c.renderTabletteReader.ser = (a) => [a[0]];
   c.renderVerbTable = { ser: (a) => (a[0] && a[0].inf) ? [a[0].inf, a[2] || null] : null, fb:'renderConjugationHome',
     res: (a) => { const all = getAllVerbs(); const v = all.find(x => x.inf === a[0]); if(!v) return false; renderVerbTable(v, all, a[1] || 'present'); return true; } };
   c.renderConjListenSetup.ser = () => null; c.renderConjListenSetup.fb = 'renderConjugationHome';
@@ -15344,6 +15541,7 @@ function renderBlockSelect(){
       ${tile('atelierBtn', '🏛️', 'Atelier Français', 'Grammaire & ortho', '#FF5A5F', '#C81E3A', bySec('atelier'))}
       ${tile('conjugaisonBtn', '🔤', 'Conjugaison', 'Tableaux & jeux', '#1CB0F6', '#0E7490', bySec('conjugaison'))}
       ${tile('bouquinageBtn', '📖', 'Bouquinage', 'Textes à lire', '#9B6BFF', '#6D28D9', bouqProg)}
+      ${tile('tabletteBtn', '📰', 'La Tablette', 'Colle un texte, lis-le', '#3B4558', '#161B24')}
       ${tile('avanceBtn', '🎓', 'Grammaire avancée', 'Niveau C1-C2', '#12B886', '#0B7A5C', bySec('avance'))}
       ${tile('oratoireBtn', '🎤', 'Art oratoire', 'Parler en public', '#F59F00', '#B45309', bySec('oratoire'))}
       ${tile('situationsBtn', '💬', 'Expressions B2-C1', 'Situations réelles', '#F0509A', '#BE185D', bySec('situations'))}
@@ -15490,6 +15688,7 @@ function renderBlockSelect(){
   document.getElementById('atelierBtn').addEventListener('click', () => renderAtelierHome());
   document.getElementById('conjugaisonBtn').addEventListener('click', () => renderConjugaisonHome());
   document.getElementById('bouquinageBtn').addEventListener('click', () => renderBouquinageHome());
+  document.getElementById('tabletteBtn').addEventListener('click', () => renderTabletteHome());
   document.getElementById('avanceBtn').addEventListener('click', () => renderGrammaireAvanceeHome());
   document.getElementById('oratoireBtn').addEventListener('click', () => renderArtOratoireHome());
   document.getElementById('situationsBtn').addEventListener('click', () => renderSituationsHome());
@@ -19100,6 +19299,7 @@ const COLOR_PRESETS = {
 /* ============ 🆕 NOUVEAUTÉS — pour que tout ce qui a été ajouté reste découvrable ============ */
 const WHATS_NEW_SECTIONS = [
   { icon:'🆕', title:'Nouveautés', items:[
+    { name:"📰 La Tablette", desc:"Colle n'importe quel texte (article, mail, passage de livre) : il s'ouvre en plein écran, bord à bord, avec les liaisons et les pauses. Touche un mot pour l'entendre et voir son sens (en arabe aussi). ▶ la voix te lit le texte, 🎤 « Je lis » : tu le lis à voix haute et les mots reconnus s'allument. 🔍 cherche un mot, choisis la phrase, 🖍 tague-le ; 🖍 Chasse : surligne les mots difficiles, ils filent dans ton carnet, puis ➕ dans tes mots, avec la phrase pour exemple. Zoom : A−/A+ ou pince l'écran avec deux doigts." },
     { name:"🌙 Prendre de l'avance sur demain", desc:"Tes défis du jour sont faits et tu as du temps ce soir ? Touche « 🌙 Prendre de l'avance sur demain » (dans les défis) : ce que tu fais ensuite compte pour les défis de demain. Pas fini ce soir ? Tu continues demain, là où tu en étais. Fini ? Demain est déjà validé, ta série continue même si tu n'as pas le temps. À minuit, le mode s'arrête tout seul." },
     { name:'🎙️ 12 fiches de prise de parole', desc:"Dans Art oratoire : les pauses et le silence, la voix (débit, volume, intonation), les mots de remplissage, 6 plans pour structurer ses idées (PRI, PREP, règle de 3…), être clair, gérer le trac, le langage du corps, ethos-pathos-logos, gérer un désaccord, répondre calmement aux attaques, les phrases qui ouvrent la discussion, et les atouts des personnes discrètes. Les fiches à phrases se travaillent au micro 🎤 et en quiz." },
     { name:'🃏 Mots en ordre : 3 jokers par phrase', desc:"Bloqué ? Le joker pose un mot au bon endroit (en doré, il ne bouge plus) — 3 par phrase, le dernier mot reste à toi. Tu gagnes ⭐⭐⭐ : une étoile de moins par joker ou par essai raté. Après un essai raté, l'appli te dit combien de mots sont déjà à la bonne place. Tuiles colorées, petit « pop » quand un mot se pose, et une vague quand la phrase est juste (aussi en Dictée)." },
@@ -38354,6 +38554,8 @@ const VA_DEST = [
     go:() => renderArtOratoireHome(), say:"Bienvenue à l'art oratoire : diction, voix et prise de parole ! 🎤" },
   { id:'bouquinage', icon:'📚', label:'Bouquinage', ar:'القراءة', words:['bouquinage', 'bouquin', 'livre', 'livres', 'lire', 'lecture', 'lectures', 'histoire', 'histoires', 'roman', 'romans', 'textes', 'texte', 'قراءه', 'القراءه', 'اقرا', 'كتاب', 'قصه'],
     go:() => bqOpenResume({ ask:true }), say:"Installe-toi bien ! J'ouvre ta lecture, là où tu t'étais arrêté. 📚" },
+  { id:'tablette', icon:'📰', label:'La Tablette', ar:'اللوحة', words:['tablette', 'la tablette', 'tablette journal', 'journal', 'journaux', 'presse', 'coller un texte', 'mon texte', 'mes textes', 'mon article', 'mes articles', 'لوحه', 'جريده'],
+    go:() => renderTabletteHome(), say:"Voici ta Tablette ! Colle un texte et lis-le comme un pro. 📰" },
   { id:'lecturejour', icon:'📰', label:'Lecture du jour', ar:'قراءة اليوم', words:['lecture du jour', 'texte du jour', 'article du jour'], go:() => renderDailyReading(), say:"Voici la lecture du jour ! 📰" },
   { id:'arabe', icon:'☀️', label:"Leçon d'arabe", ar:'درس اليوم', words:['lecon du jour', 'lecon d arabe', 'arabe', 'apprendre l arabe', 'dialogue', 'dialogues', 'العربيه', 'درس اليوم', 'درس'],
     go:() => renderLessonList(), say:"Voici les leçons d'arabe, avec les dialogues ! ☀️" },
@@ -41667,6 +41869,7 @@ function exFull(w){
   if(!w) return '';
   const ex = String(w.ex || ''), fr = String(w.fr || '');
   if(!ex.includes('~')) return ex;
+  if(w.exForm && typeof w.exForm === 'string') return ex.replace('~', w.exForm);   // 📰 mot ajouté depuis la Tablette : la forme exacte du texte
   const key = fr + '|' + exHash(ex);
   if(!exFullCache) exFullCache = new Map();
   if(exFullCache.has(key)) return exFullCache.get(key);
@@ -41914,6 +42117,1136 @@ document.addEventListener('click', (e) => {
   setTimeout(tick, 1500);
   setInterval(tick, 60000);
 })();
+
+/* ============ 📰 1.0.16 : LA TABLETTE — lire n'importe quel texte comme sur une liseuse ============
+   Tu colles un texte (article, mail, passage de livre) : il s'ouvre en plein écran, bord à bord.
+   • 🫁 liaisons, pauses et respiration marquées (mêmes règles que Répétition / Bouquinage) ;
+   • chaque mot se touche : on l'entend, on voit son sens (ton lexique, sinon le Wiktionnaire) ;
+   • ▶ la voix lit le texte phrase par phrase ; 🎤 « Je lis » : tu lis à voix haute, les mots s'allument ;
+   • 🔍 chercher un mot → les phrases où il se trouve → 🖍 le taguer avec CETTE phrase pour exemple ;
+   • 🖍 Chasse aux mots difficiles : tu surlignes, ils filent dans ton carnet, puis ➕ dans tes mots ;
+   • zoom : A−/A+, pincer avec deux doigts (ou Ctrl + molette).
+   Les textes restent sur l'appareil (ils peuvent être longs) ; les mots ajoutés, eux, se synchronisent. */
+var TB = { art:null, sents:[], toks:[], sentToks:[], spans:[], mode:'', playing:false, cur:0, token:0, gapT:0, hunt:false, hintsOn:false,
+  q:'', hits:[], hitI:-1, sheetK:-1, idx:null, idxN:-1, known:null, ui:null, dict:null, pts:null, pinch:null, noTapUntil:0,
+  lastY:0, saveT:0, scrollT:0, selfTry:0, selfSil:0, selfScores:{}, edit:null, draft:null, look:{} };
+function tbArtKey(){ return nsKey('vocabVision.tablette'); }     // (hors synchro : les textes peuvent être longs)
+function tbLoad(){ try{ const a = JSON.parse(localStorage.getItem(tbArtKey()) || '[]'); return Array.isArray(a) ? a.filter(x => x && x.id) : []; }catch(e){ return []; } }
+function tbSave(list){ try{ localStorage.setItem(tbArtKey(), JSON.stringify(list.slice(0, 40))); return true; }catch(e){ return false; } }
+function tbGet(id){ return tbLoad().find(a => a.id === id) || null; }
+function tbPut(art){ const L = tbLoad(); const i = L.findIndex(a => a.id === art.id); if(i >= 0) L[i] = art; else L.unshift(art); return tbSave(L); }
+function tbDel(id){ tbSave(tbLoad().filter(a => a.id !== id)); }
+function tbUi(){
+  if(!TB.ui){ let u = null; try{ u = JSON.parse(localStorage.getItem(nsKey('lexiqueQuiz::tabletteUi')) || 'null'); }catch(e){} TB.ui = Object.assign({ fs:19, lh:1.65 }, u || {}); }
+  return TB.ui;
+}
+function tbSaveUi(){ try{ localStorage.setItem(nsKey('lexiqueQuiz::tabletteUi'), JSON.stringify(TB.ui)); }catch(e){} }
+var TB_SAMPLE = { id:'sample', src:"Texte d'exemple", title:'Dans les quartiers, on replante des arbres',
+  text:"Depuis le début de l'automne, les habitants de plusieurs quartiers se mobilisent pour replanter des arbres. Les mairies fournissent les jeunes plants, et les écoles organisent des ateliers le mercredi après-midi.\n" +
+    "« C'est un petit geste, mais il change tout », explique une enseignante. Selon les urbanistes, un arbre adulte peut abaisser la température d'une rue de plusieurs degrés en été. Les espaces verts atténuent aussi le bruit et favorisent les rencontres entre voisins.\n" +
+    "Il reste pourtant des obstacles : les racines abîment parfois les canalisations, et l'entretien coûte cher. Les élus envisagent donc de confier certaines parcelles aux associations, qui s'engagent à arroser les arbres pendant les premières années.\n" +
+    "En attendant, les enfants ont déjà adopté leur arbre. Chacun lui a donné un prénom, et ils viennent le voir après les cours." };
+/* mots très courants (6 lettres et plus, sans accents) : jamais proposés comme « mots difficiles » */
+var TB_COMMON = (function(){ const o = Object.create(null); ('toujours pendant depuis encore maintenant aujourd\'hui quelque quelques quelqu\'un beaucoup pourquoi comment plusieurs certains certaines autres chaque ' +
+  'personne personnes premier premiere premiers premieres dernier derniere derniers dernieres nouveau nouvelle nouveaux nouvelles grande grands grandes petite petits petites meilleur meilleure meilleurs simple simples ' +
+  'important importante importants importantes possible possibles ensemble souvent jamais parfois surtout ensuite pourtant cependant vraiment seulement exemple travail enfants enfant famille familles maison maisons ' +
+  'moment moments journee journees matin semaine semaines annee annees heures minutes histoire histoires question questions probleme problemes raison raisons besoin besoins chose choses francais francaise francaises ' +
+  'france paris monsieur madame mademoiselle parents personne quartier quartiers ecoles village villages pays ville villes groupe groupes nombre nombres partie parties endroit endroits exemple exemples ' +
+  'toutes autour devant derriere dessus dessous contre entre parmi avant apres comme ailleurs presque environ ainsi aussitot bientot tellement plutot assez autant davantage beaucoup lorsque puisque quand ' +
+  'pourquoi laquelle lesquels lesquelles duquel auquel celui celle ceux celles celui-ci celle-ci ceux-ci quelle quelles lequel autrui chacun chacune aucune aucun plusieurs certaines certains quiconque ' +
+  'premier deuxieme troisieme quatrieme cinquieme dixieme centaine centaines milliers millier millions million milliards cinquante soixante quarante trente quatre-vingt soixante-dix douze treize quatorze quinze seize ' +
+  'lundi mardi mercredi jeudi vendredi samedi dimanche janvier fevrier avril juillet septembre octobre novembre decembre printemps automne l\'automne l\'hiver hiver l\'ete ' +
+  'matinee soiree minuit enfance jeunesse adulte adultes garcon garcons fille filles femme femmes hommes homme gens voisin voisins voisine voisines collegue collegues amis amies copain copine ' +
+  'mairie mairies ecole eleve eleves enseignant enseignante enseignants professeur professeurs medecin docteur hopital magasin magasins marche marches boutique cuisine chambre salon jardin jardins ' +
+  'voiture voitures train trains bateau avion velo route routes chemin chemins pont ponts arbre arbres fleurs fleur animaux animal chiens chien chats chat oiseau oiseaux soleil nuages pluie neige ' +
+  'telephone ordinateur internet message messages photo photos musique cinema film films livre livres journal journaux article articles lettre lettres papier crayon stylo cahier tableau ' +
+  'argent euros prix achat achats vendre acheter manger boire dormir partir sortir venir devenir revenir prendre apprendre comprendre attendre entendre repondre descendre perdre vendre rendre ' +
+  'parler aimer donner trouver penser passer porter montrer jouer tomber rester arriver entrer monter chercher regarder ecouter travailler commencer continuer demander expliquer ' +
+  'beaucoup heureux heureuse content contente triste facile faciles difficile difficiles rapide rapides lentement rapidement doucement vraiment simplement facilement certainement ' +
+  'vraiment toujours ensemble bonjour bonsoir merci pardon d\'accord peut-etre c\'est-a-dire quelquefois autrefois desormais aussitot tout-a-fait plusieurs suivant suivante prochain prochaine ' +
+  'derniere dernier ancien ancienne anciens jeunes jeune vieux vieille vieilles propre propres public publique publics publiques general generale national nationale nationaux social sociale sociaux ' +
+  'politique economie economique societe entreprise entreprises gouvernement president ministre ministres question reponse reponses solution solutions resultat resultats ' +
+  'pourcent pourcentage environ presque moitie plupart plusieurs certaines quelques autres autre' ).split(/\s+/).forEach(w => { if(w) o[w] = 1; }); return o; })();
+
+/* ---------- les mots : nettoyage, forme de base (lemme), mots déjà connus ---------- */
+function tbClean(raw){
+  let w = String(raw || '').replace(/[’ʼ‘`´]/g, "'");
+  w = w.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, '');
+  const m = w.match(/^(l|d|j|m|t|s|c|n|qu|jusqu|lorsqu|puisqu|quoiqu)'(.+)$/i);
+  if(m) w = m[2];
+  return w;
+}
+function tbIndex(){
+  const n = (typeof WORDS !== 'undefined' && Array.isArray(WORDS)) ? WORDS.length : 0;
+  if(TB.idx && TB.idxN === n) return TB.idx;
+  const m = new Map(), known = new Set();
+  const put = (k, v) => { k = dxFold(k); if(k && !m.has(k)) m.set(k, v); };
+  try{
+    (WORDS || []).forEach(w => {
+      const fr = String(w && w.fr || '').trim();
+      if(!fr) return;
+      known.add(dxFold(fr));
+      if(/\s/.test(fr)) return;
+      const v = { fr, ar:w.ar || '', def:w.def || '', known:true };
+      put(fr, v);
+      if(w.exForm) put(w.exForm, v);                      // mot ajouté depuis la Tablette : sa forme dans le texte
+      if(!/[sxz]$/.test(fr)) put(fr + 's', v);
+      if(/al$/.test(fr)) put(fr.replace(/al$/, 'aux'), v);
+      if(/(eau|eu)$/.test(fr)) put(fr + 'x', v);
+      if(/adjectif/i.test(w.cat || '')){ put(fr + 'e', v); put(fr + 'es', v); }
+      if(/verbe/i.test(w.cat || '') && /(er|ir|re|oir)$/.test(fr) && typeof exVerbForms === 'function'){
+        const F = exVerbForms(fr);
+        if(F){ (F.all || []).forEach(f => put(f, v)); if(F.pp) ['', 'e', 's', 'es'].forEach(x => put(F.pp + x, v)); }
+      }
+    });
+    (typeof getAllVerbs === 'function' ? getAllVerbs() : []).forEach(vb => {
+      const inf = String(vb && vb.inf || '').replace(/^s'|^se /, '');
+      if(!inf) return;
+      const v = { fr:inf, ar:vb.ar || '', def:'', verb:true };
+      put(inf, v);
+      Object.values(vb.tenses || {}).forEach(arr => (arr || []).forEach(f => {
+        const parts = String(f || '').trim().split(/\s+/);
+        const last = parts[parts.length - 1];
+        if(last) put(last.replace(/^(m'|t'|s'|j')/, ''), v);
+      }));
+    });
+  }catch(e){ console.warn('tablette : index', e); }
+  TB.idx = m; TB.idxN = n; TB.known = known;
+  return m;
+}
+function tbEntry(form){ return tbIndex().get(dxFold(form)) || null; }
+function tbIsKnown(lemma){ tbIndex(); return !!(TB.known && TB.known.has(dxFold(lemma))); }
+/* le mot tel qu'on l'ajoute : la forme de base si on la connaît, sinon le mot en minuscules (sauf nom propre) */
+function tbLemmaOf(tk){
+  const e = tbEntry(tk.form);
+  if(e) return e.fr;
+  const f = tk.form;
+  if(/^\p{Lu}\p{Ll}*$/u.test(f) && (tk.t === 0 || /^[«"“(—–-]/.test(TB.sents[tk.s] || ''))) return f.toLowerCase();
+  if(/^\p{Lu}/u.test(f)) return f;
+  return f.toLowerCase();
+}
+
+/* ---------- 📖 dictionnaire : ton lexique, sinon le Wiktionnaire (+ traduction arabe) ---------- */
+function tbDictLoad(){ if(!TB.dict){ try{ TB.dict = JSON.parse(localStorage.getItem('vocabVision.tbDict') || '{}') || {}; }catch(e){ TB.dict = {}; } } return TB.dict; }
+function tbDictPut(k, v){
+  const d = tbDictLoad(); d[k] = Object.assign({}, v, { at:Date.now() });
+  const ks = Object.keys(d);
+  if(ks.length > 400) ks.sort((a, b) => (d[a].at || 0) - (d[b].at || 0)).slice(0, ks.length - 400).forEach(x => delete d[x]);
+  try{ localStorage.setItem('vocabVision.tbDict', JSON.stringify(d)); }catch(e){}
+}
+async function tbFetchJson(url, ms){
+  const ctl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+  const t = setTimeout(() => { try{ ctl && ctl.abort(); }catch(e){} }, ms || 8000);
+  try{ const r = await fetch(url, ctl ? { signal:ctl.signal } : {}); if(!r.ok) return null; return await r.json(); }
+  catch(e){ return null; }
+  finally{ clearTimeout(t); }
+}
+function tbWikiClean(s){
+  let x = String(s || '')
+    .replace(/<ref[^>]*\/>|<ref[^>]*>[\s\S]*?<\/ref>/g, '').replace(/<!--[\s\S]*?-->/g, '').replace(/<[^>]+>/g, '')
+    .replace(/\{\{(?:lien|l|w|lien web)\|([^|}]+)[^{}]*\}\}/g, '$1')
+    .replace(/\{\{term\|([^|}]+)[^{}]*\}\}/g, '($1)')
+    .replace(/\{\{lexique\|([^|}]+)(?:\|[^{}]*)?\}\}/g, '($1)')
+    .replace(/\{\{([a-zàâçéèêëîïôûùü -]{3,24})\|fr\}\}/gi, (m0, a) => /^(pron|réf|ref|nom w pc|siècle)$/i.test(a) ? '' : '(' + a + ')');
+  for(let k = 0; k < 3; k++) x = x.replace(/\{\{[^{}]*\}\}/g, '');
+  return x.replace(/\[\[(?:[^\]|]*\|)?([^\]]+)\]\]/g, '$1').replace(/'''?/g, '').replace(/\s+/g, ' ').replace(/\s+([,.;:])/g, '$1').replace(/^[\s,;:.]+/, '').trim();
+}
+function tbParseWikt(wt){
+  const a = wt.search(/==\s*\{\{langue\|fr\}\}\s*==/);
+  if(a < 0) return null;
+  let fr = wt.slice(a);
+  const b = fr.slice(10).search(/\n==\s*\{\{langue\|/);
+  if(b >= 0) fr = fr.slice(0, b + 10);
+  const out = { ipa:'', defs:[], ar:[], pos:'', lemma:'' };
+  const ipa = fr.match(/\{\{pron\|([^|}]+)\|fr\}\}/);
+  if(ipa) out.ipa = ipa[1].trim();
+  const re = /===\s*\{\{S\|([^|}]+)\|fr([^}]*)\}\}\s*===([\s\S]*?)(?=\n===?\s*\{\{S\||$)/g;
+  let m;
+  while((m = re.exec(fr))){
+    const pos = m[1].trim(), flex = /flexion/.test(m[2]);
+    const lines = m[3].split('\n').filter(l => /^#(?![*:#])/.test(l)).map(l => l.replace(/^#\s*/, ''));
+    if(!lines.length) continue;
+    if(flex){ if(!out.lemma){ const L = lines[0].match(/\[\[([^\]|#]+)/); if(L) out.lemma = L[1].trim(); } continue; }
+    if(!out.pos) out.pos = pos;
+    lines.forEach(l => { const c = tbWikiClean(l); if(c && c.length > 2 && out.defs.length < 3) out.defs.push(c.length > 220 ? c.slice(0, 217) + '…' : c); });
+    if(out.defs.length) break;
+  }
+  const tr = /\{\{trad[+-]?\|ar\|([^|}]+)/g;
+  let t;
+  while((t = tr.exec(fr)) && out.ar.length < 3){ const w = t[1].trim(); if(w && !out.ar.includes(w)) out.ar.push(w); }
+  return out;
+}
+async function tbWikt(title){
+  const j = await tbFetchJson('https://fr.wiktionary.org/w/api.php?action=parse&format=json&formatversion=2&prop=wikitext&redirects=1&origin=*&page=' + encodeURIComponent(title));
+  return (j && j.parse && j.parse.wikitext) ? tbParseWikt(j.parse.wikitext) : null;
+}
+async function tbLookup(form){
+  const key = String(form || '').toLowerCase();
+  if(!key) return null;
+  const d = tbDictLoad();
+  if(d[key] && (d[key].defs && d[key].defs.length || d[key].ar && d[key].ar.length)) return d[key];
+  const e = tbEntry(form);
+  const res = { lemma: e ? e.fr : key, ipa:'', ipaOf:'', defs: e && e.def ? [e.def] : [], ar: e && e.ar ? [e.ar] : [], pos:'', src: e && e.known ? 'lexique' : '' };
+  if(res.defs.length && res.ar.length) return res;
+  if(typeof navigator !== 'undefined' && navigator.onLine === false) return res;
+  const cands = e ? [e.fr] : [key];
+  const hy = key.match(/^(.+?)-(je|tu|il|elle|on|nous|vous|ils|elles|t-il|t-elle|t-on|ce|moi|toi|le|la|les|lui|leur|y|en)$/);
+  if(hy && !e) cands.push(hy[1]);
+  let w = null, used = '';
+  for(const c of cands){ w = await tbWikt(c); used = c; if(w && (w.defs.length || w.lemma)) break; }
+  if(w){
+    if(w.ipa){ res.ipa = w.ipa; res.ipaOf = used; }
+    if(!w.defs.length && w.lemma){
+      res.lemma = w.lemma;
+      const w2 = await tbWikt(w.lemma);
+      if(w2){ if(!res.defs.length) res.defs = w2.defs; if(!res.ar.length) res.ar = w2.ar; res.pos = w2.pos; if(!res.ipa && w2.ipa){ res.ipa = w2.ipa; res.ipaOf = w.lemma; } }
+    } else {
+      if(!e && used !== key) res.lemma = used;
+      if(!res.defs.length) res.defs = w.defs;
+      if(!res.ar.length) res.ar = w.ar;
+      res.pos = w.pos;
+    }
+    if(w.defs.length || res.defs.length) res.src = res.src || 'Wiktionnaire';
+  }
+  if(!res.ar.length){
+    const j = await tbFetchJson('https://api.mymemory.translated.net/get?langpair=fr|ar&q=' + encodeURIComponent(res.lemma), 7000);
+    const t = j && j.responseData && j.responseData.translatedText;
+    if(t && /[؀-ۿ]/.test(t) && !/MYMEMORY/i.test(t)) res.ar = [String(t).trim()];
+  }
+  if(res.defs.length || res.ar.length) tbDictPut(key, res);
+  return res;
+}
+
+/* ---------- le texte en phrases et en mots touchables ---------- */
+function tbBuild(art){
+  const paras = String(art.text || '').replace(/\r/g, '').split(/\n+/).map(p => p.trim()).filter(Boolean);
+  TB.sents = []; TB.toks = []; TB.sentToks = [];
+  const dx = (() => { try{ return dxOn(); }catch(e){ return false; } })();
+  return paras.map(p => '<p>' + bqSplit(p).map(sent => {
+    const s = TB.sents.push(sent) - 1;
+    TB.sentToks[s] = [];
+    const wrap = (raw, i, inner) => {
+      const form = tbClean(raw);
+      if(!form) return inner != null ? inner : escapeHtml(raw);
+      const k = TB.toks.push({ s, t:i, raw, form }) - 1;
+      TB.sentToks[s].push(k);
+      const at = `class="tbw" data-k="${k}" data-n="${escapeHtml(spCompact(raw))}"`;
+      if(inner == null || inner === escapeHtml(raw)){        // la ponctuation reste hors du mot (surligneur, couleurs du micro)
+        const m = String(raw).match(/^([^\p{L}\p{N}]*)([\s\S]*?)([^\p{L}\p{N}]*)$/u);
+        if(m && m[2]) return escapeHtml(m[1]) + `<span ${at}>${escapeHtml(m[2])}</span>` + escapeHtml(m[3]);
+      }
+      return `<span ${at}>${inner}</span>`;
+    };
+    const before = TB.toks.length;
+    let html = null;
+    if(dx){ try{ html = dxDecorate(sent, (raw, i, inner) => wrap(raw, i, inner)); }catch(e){ html = null; TB.toks.length = before; TB.sentToks[s] = []; } }
+    if(html == null){ let i = 0; html = sent.split(/(\s+)/).map(x => /^\s+$/.test(x) ? ' ' : (x ? wrap(x, i++, null) : '')).join(''); }
+    return `<span class="tb-s" data-s="${s}">${html}</span>`;
+  }).join(' ') + '</p>').join('');
+}
+function tbWordsCount(text){ return (String(text || '').match(/[\p{L}\p{N}]+(?:['’-][\p{L}\p{N}]+)*/gu) || []).length; }
+function tbAutoTitle(text){
+  const first = bqSplit(String(text || '').split(/\n+/).find(x => x.trim()) || '')[0] || 'Mon texte';
+  const w = first.replace(/[«»"]/g, '').trim().split(/\s+/);
+  return w.length > 9 ? w.slice(0, 9).join(' ') + '…' : first.replace(/[.!?…]+$/, '');
+}
+function tbDateLabel(ts){ try{ return new Date(ts).toLocaleDateString('fr-FR', { day:'numeric', month:'long' }); }catch(e){ return ''; } }
+
+/* ---------- 🏠 la page d'accueil de la Tablette (dans l'appli) ---------- */
+function renderTabletteHome(){
+  clearQuestionTimer();
+  document.body.classList.remove('quiz-active');
+  currentBlock = null;
+  isHomeScreen = false;
+  tbClose(true);
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromTabletteBtn" style="cursor:pointer;">← Retour</button>`;
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('footerNote').textContent = '';
+  const card = document.getElementById('quizCard');
+  const L = tbLoad().filter(a => a.id !== 'sample');
+  const editing = TB.edit ? tbGet(TB.edit) : null;
+  const draft = editing ? { title:editing.title, text:editing.text } : (TB.draft || { title:'', text:'' });
+  const item = (a) => {
+    const n = tbWordsCount(a.text), tags = (a.tags || []).length, pct = Math.round(Math.min(1, a.pct || 0) * 100);
+    return `<div class="tbk-item" data-tbk-open="${escapeHtml(a.id)}" role="button" tabindex="0">
+      <div class="tbk-main"><b>${escapeHtml(a.title || 'Sans titre')}</b>
+        <span class="tbk-meta"><span>${n} mots</span><span>≈ ${Math.max(1, Math.round(n / 170))} min</span>${tags ? `<span>🖍 ${tags} tagué${tags > 1 ? 's' : ''}</span>` : ''}${a.done ? '<span class="tbk-done">✓ lu</span>' : (pct > 2 ? `<span>lu à ${pct} %</span>` : '')}${a.src && a.src !== 'Collé' ? `<span>${escapeHtml(a.src)}</span>` : ''}</span>
+        <span class="tbk-bar"><i style="width:${a.done ? 100 : pct}%;"></i></span></div>
+      ${a.src !== 'Collé' ? '' : `<button type="button" class="tbk-ib" data-tbk-edit="${escapeHtml(a.id)}" aria-label="Modifier « ${escapeHtml(a.title || '')} »">✏️</button>`}
+      <button type="button" class="tbk-ib" data-tbk-del="${escapeHtml(a.id)}" aria-label="Supprimer « ${escapeHtml(a.title || '')} »">🗑</button>
+    </div>`;
+  };
+  card.innerHTML = `<div class="tbk" id="tbkRoot">
+    <div class="cat-tag">📰 La Tablette</div>
+    <div class="tbk-h">Colle un texte, lis‑le comme un pro</div>
+    <div class="tbk-sub">Les liaisons et les pauses s'affichent, chaque mot se touche pour l'entendre, et tu chasses les mots difficiles pour les ajouter à tes mots.</div>
+    <div class="tbk-device">
+      <i class="tbk-cam" aria-hidden="true"></i>
+      <div class="tbk-screen">
+        <input type="text" class="tbk-title" id="tbkTitle" maxlength="120" placeholder="Titre (facultatif)" value="${escapeHtml(draft.title || '')}">
+        <textarea class="tbk-text" id="tbkText" rows="7" placeholder="Colle ici un article, un mail, un passage de livre…">${escapeHtml(draft.text || '')}</textarea>
+        <div class="tbk-row">
+          <button type="button" class="tbk-paste" id="tbkPaste">📋 Coller</button>
+          <span class="tbk-count" id="tbkCount"></span>
+          <button type="button" class="tbk-open" id="tbkOpen" disabled>${editing ? 'Enregistrer et ouvrir' : 'Ouvrir sur la Tablette'}</button>
+        </div>
+        ${editing ? `<button type="button" class="tbk-cancel" id="tbkCancel">Annuler la modification</button>` : ''}
+      </div>
+    </div>
+    <div class="tbk-sec">Mes textes</div>
+    <div class="tbk-list">${L.length ? L.map(item).join('') : `<div class="tbk-empty">Aucun texte pour l'instant : colle ton premier article ci-dessus, ou essaie un texte ci-dessous.</div>`}</div>
+    <div class="tbk-sec">Pour essayer</div>
+    <div class="tbk-list">
+      ${tbGet('sample') ? item(tbGet('sample')) : `<div class="tbk-item" data-tbk-open="sample" role="button" tabindex="0"><div class="tbk-main"><b>${escapeHtml(TB_SAMPLE.title)}</b><span class="tbk-meta"><span>Texte d'exemple</span><span>${tbWordsCount(TB_SAMPLE.text)} mots</span></span></div></div>`}
+      ${typeof BOUQUINAGE_TEXTS !== 'undefined' && BOUQUINAGE_TEXTS.length ? `<div class="tbk-item" data-tbk-bq="1" role="button" tabindex="0"><div class="tbk-main"><b>🎲 Un texte du Bouquinage</b><span class="tbk-meta"><span>${BOUQUINAGE_TEXTS.length} textes de motivation</span></span></div></div>` : ''}
+    </div></div>`;
+  const root = document.getElementById('tbkRoot');
+  const ta = document.getElementById('tbkText'), ti = document.getElementById('tbkTitle'), openB = document.getElementById('tbkOpen'), cnt = document.getElementById('tbkCount');
+  const sync = () => {
+    const n = tbWordsCount(ta.value);
+    cnt.textContent = n ? `${n} mot${n > 1 ? 's' : ''}` : '';
+    openB.disabled = n < 1;
+    if(!TB.edit) TB.draft = { title:ti.value, text:ta.value };
+  };
+  ta.addEventListener('input', sync); ti.addEventListener('input', sync); sync();
+  document.getElementById('backFromTabletteBtn').addEventListener('click', () => { TB.edit = null; renderBlockSelect(); });
+  document.getElementById('tbkPaste').addEventListener('click', async () => {
+    try{
+      const t = await navigator.clipboard.readText();
+      if(t && t.trim()){ ta.value = (ta.value.trim() ? ta.value.replace(/\s+$/, '') + '\n\n' : '') + t.trim(); sync(); ta.focus(); return; }
+      setStatus('📋 Le presse-papiers est vide : copie d\'abord un texte.', 'err');
+    }catch(e){ ta.focus(); setStatus('📋 Appuie longuement dans la zone de texte puis choisis « Coller ».', 'err'); }
+  });
+  openB.addEventListener('click', () => {
+    let text = ta.value.replace(/\r/g, '').replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+    if(!text) return;
+    if(text.length > 60000){ text = text.slice(0, 60000); setStatus('✂️ Texte très long : on garde les 60 000 premiers caractères.', 'err'); }
+    const title = ti.value.trim() || tbAutoTitle(text);
+    let art;
+    if(editing){ art = Object.assign({}, editing, { title, text, pos:0, pct:0, done:false }); }
+    else art = { id:'t' + Date.now().toString(36), title, text, src:'Collé', at:Date.now(), pos:0, pct:0, tags:[] };
+    if(!tbPut(art)) setStatus("⚠️ Plus de place pour garder ce texte sur l'appareil : il s'ouvre quand même.", 'err');
+    TB.edit = null; TB.draft = null; TB.mem = art;
+    renderTabletteReader(art.id);
+  });
+  const cancel = document.getElementById('tbkCancel');
+  if(cancel) cancel.addEventListener('click', () => { TB.edit = null; renderTabletteHome(); });
+  root.addEventListener('click', (e) => {
+    const del = e.target.closest('[data-tbk-del]');
+    if(del){
+      e.stopPropagation();
+      if(del.classList.contains('warn')){ tbDel(del.dataset.tbkDel); renderTabletteHome(); }
+      else { del.classList.add('warn'); del.textContent = 'Supprimer ?'; setTimeout(() => { if(del.isConnected){ del.classList.remove('warn'); del.textContent = '🗑'; } }, 3500); }
+      return;
+    }
+    const ed = e.target.closest('[data-tbk-edit]');
+    if(ed){ e.stopPropagation(); TB.edit = ed.dataset.tbkEdit; renderTabletteHome(); const t = document.getElementById('tbkText'); if(t){ t.focus(); t.scrollIntoView({ block:'center' }); } return; }
+    if(e.target.closest('[data-tbk-bq]')){ renderTabletteReader(tbFromBouquinage()); return; }
+    const op = e.target.closest('[data-tbk-open]');
+    if(op) renderTabletteReader(op.dataset.tbkOpen);
+  });
+  root.addEventListener('keydown', (e) => { if(e.key === 'Enter' && e.target.matches && e.target.matches('.tbk-item')) e.target.click(); });
+  setQuickNavTarget(() => document.getElementById(ta.value.trim() ? 'tbkOpen' : 'tbkText'));
+  startSectionReading('tablette');
+}
+function tbFromBouquinage(){
+  const i = Math.floor(Math.random() * BOUQUINAGE_TEXTS.length), t = BOUQUINAGE_TEXTS[i], id = 'bq' + i;
+  if(!tbGet(id)) tbPut({ id, title:t.title, text:String(t.body || '') + (t.quote ? '\n« ' + t.quote + ' »' : ''), src:'Bouquinage', at:Date.now(), pos:0, pct:0, tags:[] });
+  return id;
+}
+
+/* ---------- 📰 la lecture, en plein écran ---------- */
+function renderTabletteReader(id){
+  let art = tbGet(id);
+  if(!art && id === 'sample'){ art = Object.assign({ at:Date.now(), pos:0, pct:0, tags:[] }, TB_SAMPLE); tbPut(art); }
+  if(!art && TB.mem && TB.mem.id === id) art = TB.mem;      // (pas pu être gardé sur l'appareil)
+  if(!art){ renderTabletteHome(); return; }
+  clearQuestionTimer();
+  document.body.classList.remove('quiz-active');
+  currentBlock = null;
+  isHomeScreen = false;
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromTabletteReaderBtn" style="cursor:pointer;">← Mes textes</button>`;
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('footerNote').textContent = '';
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `<div class="cat-tag">📰 La Tablette</div><div class="tbk-ph" id="tbAnchor">« ${escapeHtml(art.title)} » est ouvert sur la Tablette.<button type="button" class="tbk-open" id="tbReopen">📰 Rouvrir</button></div>`;
+  document.getElementById('backFromTabletteReaderBtn').addEventListener('click', renderTabletteHome);
+  document.getElementById('tbReopen').addEventListener('click', () => tbOpen(tbGet(art.id) || art));
+  tbOpen(art);
+  startSectionReading('tablette');
+}
+function tbOpen(art){
+  tbClose(true);
+  TB.art = art; TB.ui = null; tbUi();
+  if(!Array.isArray(art.tags)) art.tags = [];
+  TB.mode = ''; TB.playing = false; TB.hunt = false; TB.hintsOn = false; TB.q = ''; TB.hits = []; TB.hitI = -1; TB.sheetK = -1; TB.selfScores = {};
+  const el = document.createElement('div');
+  el.id = 'tbReader'; el.className = 'tb';
+  el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', 'La Tablette : ' + art.title);
+  const n = tbWordsCount(art.text);
+  el.innerHTML = `
+    <header class="tb-top" id="tbTop">
+      <button type="button" class="tb-ib" data-tb="close" aria-label="Fermer la Tablette">${proIcon('chevronLeft', 22) || '‹'}</button>
+      <div class="tb-brand">La Tablette</div>
+      <button type="button" class="tb-ib" data-tb="search" aria-label="Chercher un mot">${proIcon('search', 20) || '🔍'}</button>
+      <button type="button" class="tb-ib tb-aa" data-tb="aa" aria-label="Taille du texte et affichage" aria-expanded="false">Aa</button>
+      <form class="tb-find" id="tbFind" hidden>
+        <input id="tbQ" type="search" placeholder="Chercher un mot…" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" aria-label="Mot à chercher dans le texte">
+        <span class="tb-find-n" id="tbFindN" aria-live="polite"></span>
+        <button type="button" class="tb-ib" data-tb="hit-prev" aria-label="Résultat précédent">‹</button>
+        <button type="button" class="tb-ib" data-tb="hit-next" aria-label="Résultat suivant">›</button>
+        <button type="button" class="tb-ib" data-tb="find-x" aria-label="Fermer la recherche">✕</button>
+      </form>
+      <div class="tb-prog"><i id="tbProg"></i></div>
+    </header>
+    <div class="tb-res" id="tbRes" hidden></div>
+    <div class="tb-pop" id="tbAa" hidden></div>
+    <div class="tb-hud" id="tbHud" hidden>
+      <span>🖍 Touche les mots difficiles</span><b id="tbHudN">0</b>
+      <button type="button" data-tb="hints">💡 Indices</button><button type="button" data-tb="hunt">Terminer</button>
+    </div>
+    <main class="tb-scroll" id="tbScroll">
+      <article class="tb-page" id="tbPage" lang="fr">
+        <div class="tb-meta"><span>${escapeHtml(art.src && art.src !== 'Collé' ? art.src : 'Ajouté le ' + tbDateLabel(art.at))}</span><span>${n} mots</span><span>≈ ${Math.max(1, Math.round(n / 170))} min de lecture</span></div>
+        <div class="tb-h1" role="heading" aria-level="1">${escapeHtml(art.title)}</div>
+        <div class="tb-body" id="tbBody"></div>
+        <div class="tb-end" id="tbEnd"></div>
+      </article>
+    </main>
+    <nav class="tb-dock" id="tbDock" aria-label="Outils de lecture"></nav>
+    <div class="tb-sheet" id="tbSheet" aria-hidden="true"></div>
+    <div class="tb-toast" id="tbToast" role="status" aria-live="polite"></div>`;
+  document.body.appendChild(el);
+  document.body.classList.add('tb-open');
+  tbApplyUi();
+  tbRender(false);
+  tbDock();
+  tbWire(el);
+  const sc = document.getElementById('tbScroll');
+  if(art.pos > 0 && !art.done){
+    const s = el.querySelector(`.tb-s[data-s="${art.pos}"]`);
+    if(s){ s.insertAdjacentHTML('beforebegin', '<span class="tb-pin">📍 Tu t\'étais arrêté ici</span>'); requestAnimationFrame(() => { sc.scrollTop = Math.max(0, s.offsetTop - 90); }); }
+  }
+  try{ markUserInteraction(); }catch(e){}
+}
+function tbClose(quiet){
+  const el = document.getElementById('tbReader');
+  if(TB.mode){ tbStopModes(); }
+  if(TB.art && el) tbSaveArtNow();
+  if(el) el.remove();
+  document.body.classList.remove('tb-open');
+  if(!quiet){ try{ window.speechSynthesis.cancel(); }catch(e){} }
+}
+function tbSaveArt(){ clearTimeout(TB.saveT); TB.saveT = setTimeout(tbSaveArtNow, 500); }
+function tbSaveArtNow(){ clearTimeout(TB.saveT); if(TB.art){ if(!tbPut(TB.art)) TB.mem = TB.art; } }
+function tbRender(keep){
+  const body = document.getElementById('tbBody');
+  if(!body) return;
+  const anchor = keep ? tbAnchorGet() : null;
+  body.innerHTML = tbBuild(TB.art);
+  TB.spans = [...body.querySelectorAll('.tbw')];
+  tbRelocateTags();
+  tbPaintTags(); tbPaintHits(); if(TB.hintsOn) tbPaintHints(true);
+  tbEndHtml();
+  if(anchor) tbAnchorSet(anchor);
+}
+function tbAnchorGet(){
+  const sc = document.getElementById('tbScroll'); if(!sc) return null;
+  const top = sc.getBoundingClientRect().top + 64;
+  for(const el of sc.querySelectorAll('.tb-s')){ const r = el.getBoundingClientRect(); if(r.bottom > top) return { s:+el.dataset.s, off:r.top - top }; }
+  return null;
+}
+function tbAnchorSet(a){
+  const sc = document.getElementById('tbScroll'); if(!sc || !a) return;
+  const el = sc.querySelector(`.tb-s[data-s="${a.s}"]`); if(!el) return;
+  const top = sc.getBoundingClientRect().top + 64;
+  sc.scrollTop += (el.getBoundingClientRect().top - top) - a.off;
+}
+function tbFirstVisibleSent(){ const a = tbAnchorGet(); return a ? a.s : 0; }
+function tbEndHtml(){
+  const end = document.getElementById('tbEnd'); if(!end) return;
+  const n = (TB.art.tags || []).length;
+  end.innerHTML = `<div class="tb-fin" aria-hidden="true">❦</div>
+    <div class="tb-end-t">${n ? `🖍 ${n} mot${n > 1 ? 's' : ''} dans ton carnet` : 'Fin du texte'}</div>
+    <div class="tb-end-b">
+      ${n ? `<button type="button" class="tb-btn hl" data-tb="carnet">🏷️ Ouvrir le carnet</button>` : `<button type="button" class="tb-btn hl" data-tb="hunt">🖍 Chasser les mots difficiles</button>`}
+      <button type="button" class="tb-btn" data-tb="self-0">🎤 Le lire à voix haute</button>
+      <button type="button" class="tb-btn" data-tb="top">↑ Revenir en haut</button>
+    </div>`;
+}
+/* ---------- réglages : taille, interligne, jour/nuit, voix, marques ---------- */
+function tbApplyUi(){
+  const el = document.getElementById('tbReader'); if(!el) return;
+  const u = tbUi();
+  el.style.setProperty('--tb-fs', u.fs + 'px');
+  el.style.setProperty('--tb-lh', String(u.lh));
+  const o = document.getElementById('tbFs'); if(o) o.textContent = Math.round(u.fs / 19 * 100) + ' %';
+}
+function tbSetFs(v, save){
+  const u = tbUi();
+  const nv = Math.max(14, Math.min(44, Math.round(v * 2) / 2));
+  if(nv === u.fs) return;
+  const a = tbAnchorGet();
+  u.fs = nv; tbApplyUi();
+  if(a) tbAnchorSet(a);
+  if(save !== false) tbSaveUi();
+}
+function tbAaHtml(){
+  const u = tbUi(), dark = document.documentElement.getAttribute('data-theme') === 'dark', dx = dxOn();
+  const lh = (v, l) => `<button type="button" data-tb="lh" data-v="${v}" class="${Math.abs(u.lh - v) < 0.01 ? 'on' : ''}">${l}</button>`;
+  return `
+    <div class="tb-pop-row"><span class="tb-pop-l">Taille</span><button type="button" class="tb-chip" data-tb="fs-" aria-label="Texte plus petit">A−</button><output id="tbFs" class="tb-out"></output><button type="button" class="tb-chip big" data-tb="fs+" aria-label="Texte plus grand">A+</button></div>
+    <div class="tb-pop-hint">Ou pince l'écran avec deux doigts (Ctrl + molette sur ordinateur).</div>
+    <div class="tb-pop-row"><span class="tb-pop-l">Interligne</span><div class="tb-seg">${lh(1.5, 'Serré')}${lh(1.65, 'Normal')}${lh(1.9, 'Aéré')}</div></div>
+    <div class="tb-pop-row"><span class="tb-pop-l">Fond</span><div class="tb-seg"><button type="button" data-tb="theme" data-v="light" class="${dark ? '' : 'on'}">☀️ Jour</button><button type="button" data-tb="theme" data-v="dark" class="${dark ? 'on' : ''}">🌙 Nuit</button></div></div>
+    <div class="tb-pop-row"><span class="tb-pop-l">Voix</span><button type="button" class="tb-chip" data-tb="rate-" aria-label="Voix plus lente">🐢</button><output class="tb-out" id="tbRate">${readingRate.toFixed(2)}×</output><button type="button" class="tb-chip" data-tb="rate+" aria-label="Voix plus rapide">🐇</button></div>
+    <div class="tb-pop-row"><span class="tb-pop-l">Marques</span><div class="tb-seg"><button type="button" data-tb="marks-set" data-v="1" class="${dx ? 'on' : ''}">🫁 Affichées</button><button type="button" data-tb="marks-set" data-v="0" class="${dx ? '' : 'on'}">Masquées</button></div></div>
+    ${dx ? dxLegendHtml() : ''}
+    ${TB.art && TB.art.src === 'Collé' ? `<button type="button" class="tb-btn wide" data-tb="edit">✏️ Modifier le texte</button>` : ''}`;
+}
+function tbToggleAa(force){
+  const p = document.getElementById('tbAa'); if(!p) return;
+  const open = force != null ? force : p.hidden;
+  if(open){ p.innerHTML = tbAaHtml(); tbApplyUi(); }
+  p.hidden = !open;
+  const b = document.querySelector('#tbReader [data-tb="aa"]'); if(b) b.setAttribute('aria-expanded', String(open));
+}
+function tbSetMarks(on){
+  dxSet(on);
+  tbRender(true);
+  if(TB.sheetK >= 0) tbCloseSheet();
+  if(!document.getElementById('tbAa').hidden) tbToggleAa(true);
+  tbDock();
+  tbToast(on ? '🫁 Liaisons et pauses affichées' : 'Marques masquées');
+}
+/* ---------- la barre du bas : outils, lecteur, micro ---------- */
+function tbDock(){
+  const d = document.getElementById('tbDock'); if(!d) return;
+  const n = (TB.art && TB.art.tags || []).length;
+  if(TB.mode === 'play'){
+    d.className = 'tb-dock pl';
+    d.innerHTML = `<button type="button" class="tb-pb" data-tb="pl-prev" aria-label="Phrase précédente">⏮</button>
+      <button type="button" class="tb-pb main" data-tb="pl-toggle" aria-label="${TB.playing ? 'Pause' : 'Reprendre'}">${TB.playing ? '⏸' : '▶'}</button>
+      <button type="button" class="tb-pb" data-tb="pl-next" aria-label="Phrase suivante">⏭</button>
+      <span class="tb-pl-n" id="tbPlN">${Math.min(TB.cur + 1, TB.sents.length)} / ${TB.sents.length}</span>
+      <button type="button" class="tb-pb" data-tb="rate-" aria-label="Plus lent">🐢</button><span class="tb-pl-r" id="tbRateD">${readingRate.toFixed(2)}×</span><button type="button" class="tb-pb" data-tb="rate+" aria-label="Plus rapide">🐇</button>
+      <button type="button" class="tb-pb" data-tb="pl-stop" aria-label="Arrêter la lecture">✕</button>`;
+    return;
+  }
+  if(TB.mode === 'self'){
+    d.className = 'tb-dock pl self';
+    d.innerHTML = `<span class="tb-mic ${TB.selfPaused ? '' : 'on'}" aria-hidden="true">🎤</span>
+      <span class="tb-self-msg" id="tbSelfMsg">${escapeHtml(TB.selfMsg || 'Lis la phrase surlignée à voix haute')}</span>
+      ${TB.selfPaused ? `<button type="button" class="tb-pb main" data-tb="self-go" aria-label="Reprendre">🎤</button>` : ''}
+      <button type="button" class="tb-pb" data-tb="self-hear" aria-label="Écouter la phrase d'abord">🔊</button>
+      <button type="button" class="tb-pb" data-tb="self-skip" aria-label="Passer à la phrase suivante">⏭</button>
+      <button type="button" class="tb-pb" data-tb="self-stop" aria-label="Arrêter">✕</button>`;
+    return;
+  }
+  d.className = 'tb-dock';
+  d.innerHTML = `
+    <button type="button" class="tb-dk" data-tb="listen"><span class="tb-dk-i">▶</span><span>Écouter</span></button>
+    <button type="button" class="tb-dk" data-tb="self"><span class="tb-dk-i">🎤</span><span>Je lis</span></button>
+    <button type="button" class="tb-dk ${dxOn() ? 'on' : ''}" data-tb="marks" aria-pressed="${dxOn()}"><span class="tb-dk-i">🫁</span><span>Liaisons</span></button>
+    <button type="button" class="tb-dk ${TB.hunt ? 'on' : ''}" data-tb="hunt" aria-pressed="${TB.hunt}"><span class="tb-dk-i">🖍</span><span>Chasse</span></button>
+    <button type="button" class="tb-dk" data-tb="carnet"><span class="tb-dk-i">🏷️<b class="tb-badge" id="tbBadge">${n || ''}</b></span><span>Carnet</span></button>`;
+}
+function tbToast(msg, ms){
+  const t = document.getElementById('tbToast'); if(!t) return;
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(TB.toastT); TB.toastT = setTimeout(() => t.classList.remove('show'), ms || 2400);
+}
+function tbHl(i, scroll){
+  document.querySelectorAll('#tbBody .tb-s.on').forEach(e => e.classList.remove('on'));
+  if(i < 0) return;
+  const el = document.querySelector(`#tbBody .tb-s[data-s="${i}"]`);
+  if(!el) return;
+  el.classList.add('on');
+  if(scroll){
+    const sc = document.getElementById('tbScroll'), r = el.getBoundingClientRect(), R = sc.getBoundingClientRect();
+    if(r.top < R.top + 70 || r.bottom > R.bottom - 110) el.scrollIntoView({ block:'center', behavior:'smooth' });
+  }
+}
+function tbSentSpans(i){ return (TB.sentToks[i] || []).map(k => TB.spans[k]).filter(Boolean); }
+/* ▶ la voix lit le texte, phrase par phrase */
+function tbPlay(from){
+  tbStopModes();
+  TB.mode = 'play'; TB.playing = true;
+  tbDock();
+  tbSpeak(from != null ? from : tbFirstVisibleSent());
+}
+function tbSpeak(i){
+  clearTimeout(TB.gapT);
+  if(i < 0) i = 0;
+  if(i >= TB.sents.length){
+    TB.playing = false; TB.mode = ''; tbHl(-1); tbDock();
+    TB.art.done = true; TB.art.pct = 1; tbSaveArt();
+    tbToast('✓ Texte écouté jusqu\'au bout');
+    return;
+  }
+  const tok = ++TB.token;
+  TB.cur = i; tbHl(i, true);
+  const n = document.getElementById('tbPlN'); if(n) n.textContent = `${i + 1} / ${TB.sents.length}`;
+  const s = TB.sents[i];
+  speakNarrator(dxOn() ? dxSpeakText(s) : s, 'fr-FR', () => {
+    if(tok !== TB.token || !TB.playing || !document.getElementById('tbReader')) return;
+    TB.gapT = setTimeout(() => { if(tok === TB.token && TB.playing) tbSpeak(i + 1); }, 260);
+  }, readingRate);
+}
+function tbHush(){ TB.token++; clearTimeout(TB.gapT); try{ window.speechSynthesis.cancel(); }catch(e){} try{ ttsSpeaking = false; }catch(e){} }
+function tbPause(){ TB.playing = false; tbHush(); tbDock(); }
+function tbResume(){ TB.playing = true; tbDock(); tbSpeak(TB.cur); }
+function tbStopModes(){
+  const was = TB.mode;
+  TB.mode = ''; TB.playing = false; TB.selfPaused = false; TB.selfMsg = '';
+  tbHush();
+  try{ vvHearStop(); }catch(e){}
+  tbHl(-1);
+  if(was === 'self') document.querySelectorAll('#tbBody .tbw.ok, #tbBody .tbw.miss').forEach(e => e.classList.remove('ok', 'miss'));
+  tbDock();
+}
+/* 🎤 « Je lis » : tu lis à voix haute, les mots reconnus s'allument */
+function tbSelfStart(from){
+  tbStopModes();
+  TB.mode = 'self'; TB.selfTry = 0; TB.selfSil = 0; TB.selfPaused = false; TB.selfScores = {};
+  tbDock();
+  tbSelfSent(from != null ? from : tbFirstVisibleSent(), false);
+}
+function tbSelfSay(msg){ TB.selfMsg = msg; const m = document.getElementById('tbSelfMsg'); if(m) m.textContent = msg; }
+function tbSelfSent(i, keepMarks){
+  if(TB.mode !== 'self') return;
+  if(i >= TB.sents.length) return tbSelfDone();
+  if(i !== TB.cur) TB.selfTry = 0;
+  TB.cur = i; TB.selfPaused = false;
+  tbHl(i, true);
+  const spans = tbSentSpans(i);
+  if(!keepMarks) spans.forEach(sp => sp.classList.remove('ok', 'miss'));
+  tbDock();
+  tbSelfSay(`Phrase ${i + 1} / ${TB.sents.length} : lis-la à voix haute`);
+  const norms = spans.map(sp => sp.dataset.n || '');
+  const tok = ++TB.token;
+  const mark = (txt, final) => {
+    const hit = spAlign(norms, spTokens(txt));
+    spans.forEach((sp, j) => { if(hit[j]){ sp.classList.add('ok'); sp.classList.remove('miss'); } else if(final) sp.classList.add('miss'); });
+    return hit.filter(Boolean).length / Math.max(1, norms.filter(Boolean).length);
+  };
+  vvHear({ lang:'fr-FR', continuous:true,
+    onInterim:(t) => { if(tok === TB.token && TB.mode === 'self') mark(t, false); },
+    onText:(t, alts) => {
+      if(tok !== TB.token || TB.mode !== 'self') return;
+      TB.selfSil = 0;
+      let best = t, bestN = -1;
+      (alts && alts.length ? alts : [t]).forEach(a => { const n = spAlign(norms, spTokens(a)).filter(Boolean).length; if(n > bestN){ bestN = n; best = a; } });
+      const ratio = mark(best, true);
+      TB.selfScores[i] = Math.max(TB.selfScores[i] || 0, ratio);
+      if(ratio >= 0.7){
+        try{ playChime([660, 990], { type:'sine', noteDur:0.07, gap:0.02, volume:0.06 }); }catch(e){}
+        tbSelfSay(ratio >= 0.95 ? '✓ Parfait !' : `✓ Bien lu (${Math.round(ratio * 100)} %)`);
+        setTimeout(() => { if(tok === TB.token && TB.mode === 'self') tbSelfSent(i + 1, false); }, 800);
+      } else if(TB.selfTry >= 2){
+        tbSelfSay('On passe à la suivante : relis plus tard les mots en orange.');
+        setTimeout(() => { if(tok === TB.token && TB.mode === 'self') tbSelfSent(i + 1, false); }, 1300);
+      } else {
+        TB.selfTry++;
+        tbSelfSay(`Presque (${Math.round(ratio * 100)} %) : relis les mots en orange`);
+        setTimeout(() => { if(tok === TB.token && TB.mode === 'self') tbSelfSent(i, true); }, 1200);
+      }
+    },
+    onFail:(r) => {
+      if(tok !== TB.token || TB.mode !== 'self') return;
+      if(r === 'silence'){
+        TB.selfSil++;
+        if(TB.selfSil <= 2){ setTimeout(() => { if(tok === TB.token && TB.mode === 'self') tbSelfSent(i, true); }, 250); }
+        else { TB.selfPaused = true; tbDock(); tbSelfSay("Je n'entends rien : touche 🎤 quand tu es prêt."); }
+        return;
+      }
+      tbToast(r === 'denied' ? '🎤 Autorise le micro pour lire à voix haute.' : "🎤 Le micro n'est pas disponible ici.", 3500);
+      tbStopModes();
+    } });
+}
+function tbSelfDone(){
+  const v = Object.values(TB.selfScores);
+  const avg = v.length ? Math.round(v.reduce((a, b) => a + b, 0) / v.length * 100) : 0;
+  tbStopModes();
+  TB.art.readAloud = Math.max(TB.art.readAloud || 0, avg); TB.art.done = true; TB.art.pct = 1; tbSaveArt();
+  try{ playCorrectSound(); }catch(e){}
+  try{ if(avg >= 80) launchConfetti(); }catch(e){}
+  tbToast(`🎉 Texte lu à voix haute en entier : ${avg} % des mots reconnus`, 4200);
+}
+/* ---------- 🖍 tags (mots difficiles) ---------- */
+function tbTagAt(k){ const tk = TB.toks[k]; if(!tk) return -1; return (TB.art.tags || []).findIndex(g => g.s === tk.s && g.t === tk.t); }
+function tbRelocateTags(){
+  (TB.art.tags || []).forEach(g => {
+    const tk = TB.toks.find(x => x.s === g.s && x.t === g.t);
+    if(tk && dxFold(tk.form) === dxFold(g.w)) return;
+    const k = TB.toks.findIndex(x => dxFold(x.form) === dxFold(g.w));
+    if(k >= 0){ g.s = TB.toks[k].s; g.t = TB.toks[k].t; g.sent = TB.sents[g.s]; } else { g.s = -1; g.t = -1; }
+  });
+}
+function tbPaintTags(fresh){
+  TB.spans.forEach(sp => sp.classList.remove('tag'));
+  (TB.art.tags || []).forEach(g => {
+    const k = TB.toks.findIndex(x => x.s === g.s && x.t === g.t);
+    if(k >= 0 && TB.spans[k]){ TB.spans[k].classList.add('tag'); if(fresh === k){ TB.spans[k].classList.add('new'); setTimeout(() => TB.spans[k] && TB.spans[k].classList.remove('new'), 600); } }
+  });
+  const n = (TB.art.tags || []).length;
+  const b = document.getElementById('tbBadge'); if(b) b.textContent = n || '';
+  const h = document.getElementById('tbHudN'); if(h) h.textContent = n;
+}
+function tbToggleTag(k, opts){
+  const tk = TB.toks[k]; if(!tk) return false;
+  const tags = TB.art.tags || (TB.art.tags = []);
+  const i = tbTagAt(k);
+  if(i >= 0){ tags.splice(i, 1); tbPaintTags(); tbSaveArt(); tbEndHtml(); return false; }
+  const lemma = tbLemmaOf(tk), e = tbEntry(tk.form);
+  const j = tags.findIndex(g => dxFold(g.lemma) === dxFold(lemma));
+  if(j >= 0) tags.splice(j, 1);                        // même mot : on garde la phrase choisie maintenant
+  tags.push({ s:tk.s, t:tk.t, w:tk.form, lemma, sent:TB.sents[tk.s], ar:(e && e.ar) || '', def:(e && e.def) || '', at:Date.now() });
+  tbPaintTags(k); tbSaveArt(); tbEndHtml();
+  try{ playChime([523, 784], { type:'triangle', noteDur:0.05, gap:0.015, volume:0.07 }); }catch(e){}
+  if(!(opts && opts.noFly)) tbFly(TB.spans[k], tk.form);
+  if(tags.length === 5 && !TB.art.cheer5){
+    TB.art.cheer5 = true;
+    setTimeout(() => { try{ launchConfetti(); playCorrectSound(); }catch(e){} tbToast('🎯 5 mots chassés ! Ouvre ton carnet pour les ajouter à tes mots.', 3600); }, 650);
+  }
+  return true;
+}
+function tbFly(from, label){
+  const to = document.querySelector('#tbDock [data-tb="carnet"]');
+  if(!from || !to) return;
+  if(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const a = from.getBoundingClientRect(), b = to.getBoundingClientRect();
+  const f = document.createElement('div');
+  f.className = 'tb-fly'; f.textContent = label;
+  f.style.left = a.left + 'px'; f.style.top = a.top + 'px';
+  document.getElementById('tbReader').appendChild(f);
+  const dx = (b.left + b.width / 2) - (a.left + a.width / 2), dy = b.top - a.top;
+  try{
+    const an = f.animate([{ transform:'translate(0,0) scale(1)', opacity:1 }, { transform:`translate(${dx * 0.45}px, ${Math.min(-30, dy * 0.3 - 50)}px) scale(1.12)`, opacity:1, offset:0.45 }, { transform:`translate(${dx}px, ${dy}px) scale(.35)`, opacity:0.25 }], { duration:720, easing:'cubic-bezier(.45,0,.25,1)' });
+    an.onfinish = () => { f.remove(); to.classList.remove('bump'); void to.offsetWidth; to.classList.add('bump'); };
+  }catch(e){ f.remove(); }
+}
+/* 💡 indices : les mots qui ont l'air difficiles (pas dans ton lexique, rares, longs) */
+function tbHintKeys(){
+  const seen = new Map(), count = new Map();
+  TB.toks.forEach(tk => { const f = dxFold(tk.form); count.set(f, (count.get(f) || 0) + 1); });
+  TB.toks.forEach((tk, k) => {
+    const f = dxFold(tk.form);
+    if(f.length < 6 || /\d/.test(f) || TB_COMMON[f] || seen.has(f)) return;
+    if(/^\p{Lu}/u.test(tk.form) && tk.t > 0) return;               // nom propre
+    if(tbEntry(tk.form)) return;                                   // déjà dans ton lexique / verbe courant
+    if(/^(.+)(ment)$/.test(f) && f.length < 9) return;
+    seen.set(f, { k, score:f.length + (/[^\x00-\x7f]/.test(tk.form) ? 1.5 : 0) + (count.get(f) === 1 ? 1 : 0) + (/-/.test(f) ? 1 : 0) });
+  });
+  const all = [...seen.values()].sort((a, b) => b.score - a.score);
+  const n = Math.min(12, Math.max(4, Math.round(TB.toks.length / 28)));
+  return all.slice(0, n).map(x => x.k);
+}
+function tbPaintHints(on){
+  TB.spans.forEach(sp => sp.classList.remove('hint'));
+  if(!on) return 0;
+  const ks = tbHintKeys();
+  ks.forEach(k => TB.spans[k] && TB.spans[k].classList.add('hint'));
+  return ks.length;
+}
+function tbHuntToggle(force){
+  TB.hunt = force != null ? force : !TB.hunt;
+  const el = document.getElementById('tbReader'); if(!el) return;
+  el.classList.toggle('tb-hunt', TB.hunt);
+  document.getElementById('tbHud').hidden = !TB.hunt;
+  if(!TB.hunt){ TB.hintsOn = false; tbPaintHints(false); }
+  if(TB.hunt){ tbCloseSheet(); tbPaintTags(); tbToast('🖍 Chasse ouverte : touche chaque mot qui te pose problème'); }
+  tbDock();
+}
+/* ---------- 🔍 chercher un mot ---------- */
+function tbFindOpen(open){
+  const f = document.getElementById('tbFind'); if(!f) return;
+  f.hidden = !open;
+  document.getElementById('tbReader').classList.toggle('finding', open);
+  if(open){ tbToggleAa(false); const q = document.getElementById('tbQ'); q.value = TB.q || ''; setTimeout(() => q.focus(), 30); }
+  else { TB.q = ''; TB.hits = []; TB.hitI = -1; tbPaintHits(); document.getElementById('tbRes').hidden = true; }
+}
+function tbSearch(q){
+  TB.q = q;
+  const qf = dxFold(q).replace(/[«»"“”.,;:!?()]/g, ' ').replace(/\s+/g, ' ').trim();
+  TB.hits = []; TB.hitI = -1;
+  if(qf.length >= 2){
+    if(!/\s/.test(qf)){
+      const e = tbIndex().get(qf), ql = e ? dxFold(e.fr) : null;
+      TB.toks.forEach((tk, k) => {
+        const f = dxFold(tk.form);
+        if(f === qf || (qf.length >= 3 && f.startsWith(qf))) TB.hits.push(k);
+        else if(ql){ const e2 = tbIndex().get(f); if(e2 && dxFold(e2.fr) === ql) TB.hits.push(k); }
+      });
+    } else {
+      const words = qf.split(' ');
+      TB.sentToks.forEach((ks, s) => {
+        const fs = ks.map(k => dxFold(TB.toks[k].form));
+        for(let a = 0; a + words.length <= fs.length; a++){
+          if(words.every((w, j) => fs[a + j] === w || (j === words.length - 1 && w.length >= 3 && fs[a + j].startsWith(w)))) for(let j = 0; j < words.length; j++) TB.hits.push(ks[a + j]);
+        }
+      });
+    }
+  }
+  if(TB.hits.length) TB.hitI = 0;
+  tbPaintHits(); tbResults();
+  const n = document.getElementById('tbFindN');
+  if(n) n.textContent = qf.length < 2 ? '' : (TB.hits.length ? `1 / ${TB.hits.length}` : '0');
+  if(TB.hits.length) tbGoHit(0, false);
+}
+function tbPaintHits(){
+  TB.spans.forEach(sp => sp.classList.remove('hit', 'cur'));
+  TB.hits.forEach((k, i) => { const sp = TB.spans[k]; if(sp){ sp.classList.add('hit'); if(i === TB.hitI) sp.classList.add('cur'); } });
+}
+function tbGoHit(i, focus){
+  if(!TB.hits.length) return;
+  TB.hitI = (i + TB.hits.length) % TB.hits.length;
+  tbPaintHits();
+  const sp = TB.spans[TB.hits[TB.hitI]];
+  if(sp) sp.scrollIntoView({ block:'center', behavior:'smooth' });
+  const n = document.getElementById('tbFindN'); if(n) n.textContent = `${TB.hitI + 1} / ${TB.hits.length}`;
+  if(focus) document.getElementById('tbRes').hidden = true;
+}
+function tbResults(){
+  const box = document.getElementById('tbRes'); if(!box) return;
+  if(!TB.q || dxFold(TB.q).trim().length < 2){ box.hidden = true; return; }
+  const bySent = new Map();
+  TB.hits.forEach(k => { const s = TB.toks[k].s; if(!bySent.has(s)) bySent.set(s, []); bySent.get(s).push(k); });
+  if(!bySent.size){ box.innerHTML = `<div class="tb-res-h"><span>« ${escapeHtml(TB.q)} » n'apparaît pas dans ce texte.</span></div>`; box.hidden = false; return; }
+  const rows = [...bySent.entries()].map(([s, ks]) => {
+    const set = new Set(ks.map(k => TB.toks[k].t));
+    const html = TB.sents[s].split(/(\s+)/).reduce((acc, x) => { if(/^\s+$/.test(x)){ acc.out += ' '; return acc; } if(!x) return acc; const i = acc.i++; acc.out += set.has(i) ? `<mark>${escapeHtml(x)}</mark>` : escapeHtml(x); return acc; }, { out:'', i:0 }).out;
+    const tagged = ks.some(k => tbTagAt(k) >= 0);
+    return `<div class="tb-r"><div class="tb-r-t" data-tb="res-go" data-k="${ks[0]}" role="button" tabindex="0">${html}</div>
+      <button type="button" class="tb-btn hl sm" data-tb="res-tag" data-k="${ks[0]}" ${tagged ? 'disabled' : ''}>${tagged ? '✓ Tagué' : '🖍 Taguer'}</button></div>`;
+  }).join('');
+  box.innerHTML = `<div class="tb-res-h"><span>${bySent.size} phrase${bySent.size > 1 ? 's' : ''} avec « ${escapeHtml(TB.q.trim())} »</span><button type="button" class="tb-link" data-tb="res-hide">Masquer</button></div>${rows}
+    <div class="tb-res-f">🖍 Taguer : le mot part dans ton carnet avec cette phrase comme exemple.</div>`;
+  box.hidden = false;
+}
+/* ---------- la fiche d'un mot (on le touche) ---------- */
+function tbSay(text, slow){ speakNarrator(text, 'fr-FR', null, slow ? 0.6 : Math.max(0.8, readingRate)); }
+function tbCtxHtml(tk){
+  const s = TB.sents[tk.s] || '';
+  const mark = (raw, i, inner) => i === tk.t ? `<mark>${inner != null ? inner : escapeHtml(raw)}</mark>` : (inner != null ? inner : escapeHtml(raw));
+  if(dxOn()){ try{ return dxDecorate(s, mark); }catch(e){} }
+  let i = 0; return s.split(/(\s+)/).map(x => /^\s+$/.test(x) ? ' ' : (x ? mark(x, i++, null) : '')).join('');
+}
+function tbInfoHtml(r, tk){
+  if(!r) return `<div class="tb-info-l">🔎 Je cherche le sens de ce mot…</div>`;
+  const ar = (r.ar || []).filter(Boolean), defs = (r.defs || []).filter(Boolean);
+  if(!ar.length && !defs.length) return `<div class="tb-info-l">Pas trouvé dans le dictionnaire${navigator.onLine === false ? ' (pas de connexion)' : ''}. Tu peux écrire le sens toi-même en l'ajoutant à tes mots.</div>`;
+  return `${ar.length ? `<div class="tb-ar" dir="rtl" lang="ar">${escapeHtml(ar.join('، '))}</div>` : ''}
+    ${defs.length ? `<ol class="tb-defs">${defs.slice(0, 2).map(d => `<li>${escapeHtml(d)}</li>`).join('')}</ol>` : ''}
+    <div class="tb-src">${r.src === 'lexique' ? '✓ Dans ton lexique' : (r.src ? 'Source : ' + escapeHtml(r.src) : '')}${r.pos ? ` <span>(${escapeHtml(r.pos)})</span>` : ''}</div>`;
+}
+function tbOpenSheet(k){
+  const tk = TB.toks[k]; if(!tk) return;
+  const sh = document.getElementById('tbSheet'); if(!sh) return;
+  TB.sheetK = k;
+  TB.spans.forEach(sp => sp.classList.remove('sel'));
+  if(TB.spans[k]) TB.spans[k].classList.add('sel');
+  const lemma0 = tbLemmaOf(tk), tagged = tbTagAt(k) >= 0;
+  const e = tbEntry(tk.form);
+  const looked = TB.look[dxFold(tk.form)];
+  const lemma = (looked && looked.lemma) || lemma0, known = tbIsKnown(lemma) || tbIsKnown(lemma0);
+  const cached = looked || (known && e ? { lemma:e.fr, ar:[e.ar], defs:[e.def], src:'lexique' } : null);
+  let rules = '';
+  try{ if(dxOn()) rules = dxRulesHtml(TB.sents[tk.s]); }catch(err){}
+  sh.innerHTML = `<div class="tb-sh-in">
+    <div class="tb-grab" aria-hidden="true"></div>
+    <div class="tb-sh-top"><div><div class="tb-sh-w" lang="fr">${escapeHtml(tk.form)}</div><div class="tb-sh-ipa" id="tbIpa">${cached && cached.ipa && dxFold(cached.ipaOf || '') === dxFold(tk.form) ? '/' + escapeHtml(cached.ipa) + '/' : ''}</div></div>
+      <button type="button" class="tb-ib" data-tb="sheet-x" aria-label="Fermer">✕</button></div>
+    <div class="tb-sh-lemma" id="tbLemma">${dxFold(lemma) !== dxFold(tk.form) ? `forme de <b>${escapeHtml(lemma)}</b>` : ''}</div>
+    <div class="tb-sh-say"><button type="button" class="tb-chip" data-tb="say">🔊 Écouter</button><button type="button" class="tb-chip" data-tb="slow">🐢 Lentement</button><button type="button" class="tb-chip" data-tb="say-sent">🗣️ La phrase</button></div>
+    <div class="tb-info" id="tbInfo">${tbInfoHtml(cached, tk)}</div>
+    <blockquote class="tb-ctx" lang="fr">${tbCtxHtml(tk)}</blockquote>
+    <div class="tb-sh-act">
+      <button type="button" class="tb-btn hl" data-tb="tag" id="tbTagBtn">${tagged ? '✓ Tagué : retirer' : '🖍 Taguer ce mot'}</button>
+      <button type="button" class="tb-btn" data-tb="add" ${known ? 'disabled' : ''}>${known ? '✓ Déjà dans tes mots' : '➕ Ajouter à mes mots'}</button>
+    </div>
+    <div class="tb-addf" id="tbAddF" hidden></div>
+    ${rules ? `<div class="tb-rules">${rules}</div>` : ''}
+  </div>`;
+  sh.classList.add('open'); sh.setAttribute('aria-hidden', 'false');
+  try{ conjBindSheetPeeks(sh); }catch(err){}
+  tbSay(tk.form);
+  if(!cached || (!known && !(cached.defs && cached.defs.length))){
+    const fk = dxFold(tk.form);
+    tbLookup(tk.form).then(r => {
+      if(r) TB.look[fk] = r;
+      if(TB.sheetK !== k) return;
+      const info = document.getElementById('tbInfo'); if(info) info.innerHTML = tbInfoHtml(r || { ar:[], defs:[] }, tk);
+      if(r && r.ipa && (!r.ipaOf || dxFold(r.ipaOf) === fk)){ const ip = document.getElementById('tbIpa'); if(ip) ip.textContent = '/' + r.ipa + '/'; }
+      if(r && r.lemma && dxFold(r.lemma) !== fk){ const lm = document.getElementById('tbLemma'); if(lm) lm.innerHTML = `forme de <b>${escapeHtml(r.lemma)}</b>`; }
+      if(r && r.lemma && tbIsKnown(r.lemma)){ const ab = sh.querySelector('[data-tb="add"]'); if(ab){ ab.disabled = true; ab.textContent = '✓ Déjà dans tes mots'; } }
+    });
+  }
+}
+function tbCloseSheet(){
+  const sh = document.getElementById('tbSheet'); if(!sh) return;
+  sh.classList.remove('open'); sh.setAttribute('aria-hidden', 'true');
+  TB.sheetK = -1;
+  TB.spans.forEach(sp => sp.classList.remove('sel'));
+}
+/* l'exemple pour l'appli : la phrase du texte, le mot remplacé par « ~ » */
+function tbExFor(g){
+  let s = String(g.sent || '').trim();
+  const esc = String(g.w || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const re = new RegExp('(^|[^\\p{L}\\p{N}])(' + esc + ')(?![\\p{L}\\p{N}])', 'iu');
+  const m = s.match(re);
+  if(!esc || !m) return { ex:'~' };
+  const at = m.index + m[1].length, form = m[2];
+  let ex = s.slice(0, at) + '~' + s.slice(at + form.length);
+  if(ex.length > 200){
+    const p = ex.indexOf('~');
+    let a = Math.max(0, p - 90), b = Math.min(ex.length, p + 100);
+    while(a > 0 && !/\s/.test(ex[a - 1])) a--;
+    while(b < ex.length && !/\s/.test(ex[b])) b++;
+    ex = (a > 0 ? '… ' : '') + ex.slice(a, b).trim() + (b < ex.length ? ' …' : '');
+  }
+  return form === g.lemma ? { ex } : { ex, exForm:form };
+}
+function tbAddWords(items){
+  const words = items.map(x => { const w = { fr:x.fr, ar:x.ar || '', def:x.def, ex:x.ex || '~', cat:'Tablette' }; if(x.exForm) w.exForm = x.exForm; return w; });
+  let n = 0;
+  try{ n = commitImport(words, true); }catch(e){ console.error(e); }
+  try{ if(typeof exFullCache !== 'undefined' && exFullCache) exFullCache.clear(); }catch(e){}
+  TB.idx = null;
+  return n;
+}
+function tbAddForm(k){
+  const tk = TB.toks[k], box = document.getElementById('tbAddF'); if(!tk || !box) return;
+  const r = TB.look[dxFold(tk.form)] || {};
+  const lemma = r.lemma || tbLemmaOf(tk);
+  box.innerHTML = `<label class="tb-lbl">Mot<input class="tb-in" id="tbAfFr" value="${escapeHtml(lemma)}"></label>
+    <label class="tb-lbl">En arabe<input class="tb-in ar" id="tbAfAr" dir="rtl" lang="ar" value="${escapeHtml((r.ar || [])[0] || '')}" placeholder="الترجمة"></label>
+    <label class="tb-lbl">Définition<textarea class="tb-in" id="tbAfDef" rows="2" placeholder="Le sens du mot, avec tes mots">${escapeHtml((r.defs || [])[0] || '')}</textarea></label>
+    <button type="button" class="tb-btn pri wide" data-tb="add-go">➕ Ajouter à mes mots</button>`;
+  box.hidden = false;
+  box.scrollIntoView({ block:'nearest', behavior:'smooth' });
+  const d = document.getElementById(r.defs && r.defs.length ? 'tbAfAr' : 'tbAfDef'); if(d && !d.value) d.focus();
+}
+function tbAddFromForm(k){
+  const tk = TB.toks[k]; if(!tk) return;
+  const fr = (document.getElementById('tbAfFr').value || '').trim(), ar = (document.getElementById('tbAfAr').value || '').trim(), def = (document.getElementById('tbAfDef').value || '').trim();
+  if(!fr) return;
+  if(!def){ tbToast('Écris une petite définition (le sens du mot).'); document.getElementById('tbAfDef').focus(); return; }
+  const g = { w:tk.form, lemma:fr, sent:TB.sents[tk.s] };
+  const ex = tbExFor(g);
+  const n = tbAddWords([{ fr, ar, def, ex:ex.ex, exForm:ex.exForm }]);
+  const tag = (TB.art.tags || []).find(x => dxFold(x.lemma) === dxFold(fr) || (x.s === tk.s && x.t === tk.t));
+  if(tag){ tag.added = true; tag.lemma = fr; tag.ar = ar; tag.def = def; tbSaveArt(); }
+  if(n){ try{ playCorrectSound(); }catch(e){} tbToast(`➕ « ${fr} » ajouté à tes mots (bloc ${Math.floor((WORDS.length - 1) / 30) + 1})`, 3200); }
+  else tbToast(`« ${fr} » est déjà dans tes mots.`);
+  tbOpenSheet(k);
+}
+/* ---------- 🏷️ le carnet : les mots tagués → tes mots ---------- */
+function tbOpenCarnet(){
+  const sh = document.getElementById('tbSheet'); if(!sh) return;
+  TB.sheetK = -2;
+  const tags = TB.art.tags || [];
+  const rows = tags.map((g, i) => {
+    const known = g.added || tbIsKnown(g.lemma);
+    return `<div class="tb-cr ${known ? 'done' : ''}" data-i="${i}">
+      <div class="tb-cr-h"><b class="tb-cr-w">${escapeHtml(g.lemma)}</b>${dxFold(g.lemma) !== dxFold(g.w) ? `<span class="tb-cr-f">(${escapeHtml(g.w)})</span>` : ''}
+        <button type="button" class="tb-ib sm" data-tb="cr-say" data-i="${i}" aria-label="Écouter ${escapeHtml(g.lemma)}">🔊</button>
+        ${g.s >= 0 ? `<button type="button" class="tb-ib sm" data-tb="cr-go" data-i="${i}" aria-label="Voir dans le texte">↗</button>` : ''}
+        <span class="tb-cr-st">${known ? '✓ dans tes mots' : (g.look === 'busy' ? '🔎…' : '')}</span>
+        <button type="button" class="tb-ib sm" data-tb="cr-del" data-i="${i}" aria-label="Retirer du carnet">✕</button></div>
+      ${known ? '' : `<input class="tb-in ar" dir="rtl" lang="ar" data-cr="ar" data-i="${i}" value="${escapeHtml(g.ar || '')}" placeholder="الترجمة بالعربية">
+      <textarea class="tb-in" data-cr="def" data-i="${i}" rows="2" placeholder="Définition (obligatoire)">${escapeHtml(g.def || '')}</textarea>`}
+      <div class="tb-cr-s">${escapeHtml(String(g.sent || '').length > 160 ? String(g.sent).slice(0, 157) + '…' : (g.sent || ''))}</div>
+    </div>`;
+  }).join('');
+  const todo = tags.filter(g => !(g.added || tbIsKnown(g.lemma)));
+  sh.innerHTML = `<div class="tb-sh-in">
+    <div class="tb-grab" aria-hidden="true"></div>
+    <div class="tb-sh-top"><div><div class="tb-sh-w">Ton carnet</div><div class="tb-sh-ipa">${tags.length} mot${tags.length > 1 ? 's' : ''} tagué${tags.length > 1 ? 's' : ''} dans ce texte</div></div><button type="button" class="tb-ib" data-tb="sheet-x" aria-label="Fermer">✕</button></div>
+    ${tags.length ? rows : `<div class="tb-info-l">Ton carnet est vide. Touche 🖍 <b>Chasse</b>, puis chaque mot qui te pose problème : il arrive ici avec sa phrase.</div>
+      <button type="button" class="tb-btn hl wide" data-tb="hunt-on">🖍 Commencer la chasse</button>`}
+    ${todo.length ? `<button type="button" class="tb-btn pri wide" data-tb="cr-add" id="tbCrAdd">➕ Ajouter ${todo.length} mot${todo.length > 1 ? 's' : ''} à mes mots</button>
+      <div class="tb-pop-hint">Ils rejoignent la fin de ton lexique, avec la phrase du texte pour exemple. Sans définition, un mot attend ici.</div>` : ''}
+  </div>`;
+  sh.classList.add('open'); sh.setAttribute('aria-hidden', 'false');
+  tbCarnetLookups();
+}
+async function tbCarnetLookups(){
+  const tags = TB.art.tags || [];
+  for(const g of tags){
+    if(TB.sheetK !== -2) return;
+    if(g.added || tbIsKnown(g.lemma) || (g.def && g.ar) || g.look) continue;
+    g.look = 'busy';
+    const st = document.querySelector(`#tbSheet .tb-cr[data-i="${tags.indexOf(g)}"] .tb-cr-st`); if(st) st.textContent = '🔎…';
+    const r = await tbLookup(g.w);
+    g.look = 'done';
+    if(r){
+      if(r.lemma && dxFold(r.lemma) !== dxFold(g.lemma) && !tbEntry(g.w)) g.lemma = r.lemma;
+      if(!g.ar && r.ar && r.ar.length) g.ar = r.ar[0];
+      if(!g.def && r.defs && r.defs.length) g.def = r.defs[0];
+    }
+    tbSaveArt();
+    if(TB.sheetK !== -2) return;
+    const row = document.querySelector(`#tbSheet .tb-cr[data-i="${tags.indexOf(g)}"]`);
+    if(row){
+      const a = row.querySelector('[data-cr="ar"]'), d = row.querySelector('[data-cr="def"]'), w = row.querySelector('.tb-cr-w'), s = row.querySelector('.tb-cr-st');
+      if(a && !a.value) a.value = g.ar || ''; if(d && !d.value) d.value = g.def || ''; if(w) w.textContent = g.lemma; if(s) s.textContent = '';
+    }
+  }
+}
+function tbCarnetAdd(){
+  const tags = TB.art.tags || [];
+  const todo = tags.filter(g => !(g.added || tbIsKnown(g.lemma)));
+  const ready = todo.filter(g => String(g.def || '').trim());
+  if(!ready.length){ tbToast('Écris au moins une définition pour ajouter un mot.'); const d = document.querySelector('#tbSheet [data-cr="def"]'); if(d) d.focus(); return; }
+  const items = ready.map(g => { const ex = tbExFor(g); return { fr:g.lemma, ar:g.ar, def:String(g.def).trim(), ex:ex.ex, exForm:ex.exForm }; });
+  const n = tbAddWords(items);
+  ready.forEach(g => { g.added = true; });
+  tbSaveArt();
+  const left = todo.length - ready.length;
+  try{ playCorrectSound(); if(n >= 3) launchConfetti(); }catch(e){}
+  tbToast(`➕ ${n} mot${n > 1 ? 's' : ''} ajouté${n > 1 ? 's' : ''} à tes mots${left ? ` · ${left} sans définition attend${left > 1 ? 'ent' : ''}` : ''}`, 3800);
+  tbOpenCarnet();
+}
+/* ---------- les gestes : toucher, pincer, défiler, clavier ---------- */
+function tbWire(el){
+  const sc = document.getElementById('tbScroll');
+  el.addEventListener('click', (e) => {
+    const a = e.target.closest('[data-tb]');
+    if(a){ tbAction(a.dataset.tb, a, e); return; }
+    if(Date.now() < TB.noTapUntil) return;
+    const w = e.target.closest('.tbw');
+    if(w && sc.contains(w)){
+      const k = +w.dataset.k;
+      if(TB.mode === 'play'){ TB.playing = true; tbDock(); tbSpeak(TB.toks[k].s); return; }
+      if(TB.mode === 'self'){ tbSay(TB.toks[k].form); return; }
+      if(TB.hunt){ tbSay(TB.toks[k].form); tbToggleTag(k); return; }
+      tbOpenSheet(k);
+      return;
+    }
+    if(e.target.closest('#tbSheet, #tbAa, #tbRes, .tb-top, .tb-dock, .tb-hud')) return;
+    if(TB.sheetK !== -1) tbCloseSheet();
+    const aa = document.getElementById('tbAa'); if(aa && !aa.hidden) tbToggleAa(false);
+  });
+  el.addEventListener('input', (e) => {
+    if(e.target.id === 'tbQ'){ clearTimeout(TB.qT); const v = e.target.value; TB.qT = setTimeout(() => tbSearch(v), 140); return; }
+    const f = e.target.dataset && e.target.dataset.cr;
+    if(f){ const g = (TB.art.tags || [])[+e.target.dataset.i]; if(g){ g[f] = e.target.value; tbSaveArt(); } }
+  });
+  document.getElementById('tbFind').addEventListener('submit', (e) => { e.preventDefault(); if(TB.hits.length) tbGoHit(TB.hitI + 1, true); else tbSearch(document.getElementById('tbQ').value); });
+  el.addEventListener('keydown', (e) => {
+    if(e.key === 'Enter' && e.target.matches && e.target.matches('[role="button"][data-tb]')){ e.preventDefault(); e.target.click(); }
+  });
+  // défilement : progression, barre du haut qui se cache, position retenue
+  sc.addEventListener('scroll', () => {
+    const max = Math.max(1, sc.scrollHeight - sc.clientHeight), pct = Math.min(1, sc.scrollTop / max);
+    const p = document.getElementById('tbProg'); if(p) p.style.width = (pct * 100).toFixed(1) + '%';
+    const dy = sc.scrollTop - TB.lastY; TB.lastY = sc.scrollTop;
+    const finding = !document.getElementById('tbFind').hidden || !document.getElementById('tbAa').hidden;
+    if(dy > 6 && sc.scrollTop > 90 && !finding) el.classList.add('top-hide'); else if(dy < -6 || sc.scrollTop < 40) el.classList.remove('top-hide');
+    clearTimeout(TB.scrollT);
+    TB.scrollT = setTimeout(() => {
+      if(!TB.art) return;
+      TB.art.pos = tbFirstVisibleSent(); TB.art.pct = Math.max(TB.art.pct || 0, pct);
+      if(pct > 0.97 && !TB.art.done){ TB.art.done = true; }
+      tbSaveArt();
+      try{ markUserInteraction(); }catch(e){}
+    }, 450);
+  }, { passive:true });
+  // 🤏 pincer pour zoomer (deux doigts), Ctrl + molette sur ordinateur
+  const pts = new Map(), dist = () => { const [a, b] = [...pts.values()]; return Math.hypot(a.x - b.x, a.y - b.y) || 1; };
+  sc.addEventListener('pointerdown', (e) => {
+    pts.set(e.pointerId, { x:e.clientX, y:e.clientY });
+    if(pts.size === 2){ TB.pinch = { d:dist(), fs:tbUi().fs }; el.classList.add('pinching'); }
+  });
+  sc.addEventListener('pointermove', (e) => {
+    if(!pts.has(e.pointerId)) return;
+    pts.set(e.pointerId, { x:e.clientX, y:e.clientY });
+    if(TB.pinch && pts.size === 2){ e.preventDefault(); tbSetFs(TB.pinch.fs * dist() / TB.pinch.d, false); }
+  });
+  const up = (e) => {
+    pts.delete(e.pointerId);
+    if(TB.pinch && pts.size < 2){ TB.pinch = null; TB.noTapUntil = Date.now() + 400; el.classList.remove('pinching'); tbSaveUi(); tbToast(`Taille du texte : ${Math.round(tbUi().fs / 19 * 100)} %`, 1200); }
+  };
+  sc.addEventListener('pointerup', up); sc.addEventListener('pointercancel', up); sc.addEventListener('pointerleave', (e) => { if(e.pointerType === 'mouse') up(e); });
+  sc.addEventListener('wheel', (e) => {
+    if(!e.ctrlKey) return;
+    e.preventDefault();
+    tbSetFs(tbUi().fs * Math.exp(-e.deltaY / 320), false);
+    clearTimeout(TB.wheelT); TB.wheelT = setTimeout(tbSaveUi, 300);
+  }, { passive:false });
+}
+document.addEventListener('keydown', (e) => {
+  if(!document.getElementById('tbReader')) return;
+  if(e.key === 'Escape'){
+    if(TB.sheetK !== -1){ tbCloseSheet(); e.preventDefault(); return; }
+    const aa = document.getElementById('tbAa'); if(aa && !aa.hidden){ tbToggleAa(false); e.preventDefault(); return; }
+    const f = document.getElementById('tbFind'); if(f && !f.hidden){ tbFindOpen(false); e.preventDefault(); return; }
+    if(TB.hunt){ tbHuntToggle(false); e.preventDefault(); return; }
+    if(TB.mode){ tbStopModes(); e.preventDefault(); return; }
+    return;
+  }
+  if((e.ctrlKey || e.metaKey) && (e.key === '+' || e.key === '=' || e.key === '-')){ e.preventDefault(); tbSetFs(tbUi().fs + (e.key === '-' ? -1 : 1)); return; }
+  if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'f'){ e.preventDefault(); tbFindOpen(true); }
+});
+/* on quitte la page de la Tablette (retour, autre écran) : on range la liseuse */
+(function tbWatch(){
+  const card = document.getElementById('quizCard'); if(!card) return;
+  new MutationObserver(() => { if(document.getElementById('tbReader') && !document.getElementById('tbAnchor')) tbClose(); }).observe(card, { childList:true });
+})();
+function tbAction(id, btn, e){
+  switch(id){
+    case 'close': tbClose(); renderTabletteHome(); return;
+    case 'search': tbFindOpen(document.getElementById('tbFind').hidden); return;
+    case 'find-x': tbFindOpen(false); return;
+    case 'hit-prev': tbGoHit(TB.hitI - 1, true); return;
+    case 'hit-next': tbGoHit(TB.hitI + 1, true); return;
+    case 'res-hide': document.getElementById('tbRes').hidden = true; return;
+    case 'res-go': { const k = +btn.dataset.k; const i = TB.hits.indexOf(k); tbGoHit(i >= 0 ? i : 0, true); const s = TB.spans[k] && TB.spans[k].closest('.tb-s'); if(s){ s.classList.remove('flash'); void s.offsetWidth; s.classList.add('flash'); } return; }
+    case 'res-tag': { const k = +btn.dataset.k; if(tbTagAt(k) < 0) tbToggleTag(k); btn.disabled = true; btn.textContent = '✓ Tagué'; tbToast(`🖍 « ${TB.toks[k].form} » est dans ton carnet, avec cette phrase`); return; }
+    case 'aa': tbToggleAa(); return;
+    case 'fs-': tbSetFs(tbUi().fs - 1); return;
+    case 'fs+': tbSetFs(tbUi().fs + 1); return;
+    case 'lh': { const a = tbAnchorGet(); tbUi().lh = parseFloat(btn.dataset.v); tbSaveUi(); tbApplyUi(); if(a) tbAnchorSet(a); tbToggleAa(true); return; }
+    case 'theme': { const v = btn.dataset.v; if(v !== (document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light')){ const t = document.getElementById('themeToggle'); if(t) t.click(); else applyTheme(v); } tbToggleAa(true); return; }
+    case 'rate-': case 'rate+': {
+      const i = READING_RATES.indexOf(readingRate), j = Math.max(0, Math.min(READING_RATES.length - 1, (i < 0 ? 2 : i) + (id === 'rate+' ? 1 : -1)));
+      readingRate = READING_RATES[j]; saveReadingRate(readingRate);
+      ['tbRate', 'tbRateD'].forEach(x => { const o = document.getElementById(x); if(o) o.textContent = readingRate.toFixed(2) + '×'; });
+      return;
+    }
+    case 'marks': tbSetMarks(!dxOn()); return;
+    case 'marks-set': tbSetMarks(btn.dataset.v === '1'); return;
+    case 'edit': { const id2 = TB.art.id; tbClose(); TB.edit = id2; renderTabletteHome(); return; }
+    case 'listen': tbPlay(); return;
+    case 'pl-toggle': if(TB.playing) tbPause(); else tbResume(); return;
+    case 'pl-prev': TB.playing = true; tbDock(); tbSpeak(Math.max(0, TB.cur - 1)); return;
+    case 'pl-next': TB.playing = true; tbDock(); tbSpeak(TB.cur + 1); return;
+    case 'pl-stop': tbStopModes(); return;
+    case 'self': tbSelfStart(); return;
+    case 'self-0': tbSelfStart(0); return;
+    case 'self-go': TB.selfSil = 0; tbSelfSent(TB.cur, true); return;
+    case 'self-hear': { const i = TB.cur, tok = ++TB.token; try{ vvHearStop(); }catch(err){} tbSelfSay('Écoute bien, puis lis à ton tour…'); speakNarrator(dxOn() ? dxSpeakText(TB.sents[i]) : TB.sents[i], 'fr-FR', () => { if(tok === TB.token && TB.mode === 'self') tbSelfSent(i, false); }, readingRate); return; }
+    case 'self-skip': tbSelfSent(TB.cur + 1, false); return;
+    case 'self-stop': tbStopModes(); return;
+    case 'hunt': tbHuntToggle(); return;
+    case 'hunt-on': tbCloseSheet(); tbHuntToggle(true); return;
+    case 'hints': { TB.hintsOn = !TB.hintsOn; const n = tbPaintHints(TB.hintsOn); btn.classList.toggle('on', TB.hintsOn); if(TB.hintsOn) tbToast(n ? `💡 ${n} mots soulignés pourraient te poser problème` : "💡 Pas d'indice : tu connais déjà ces mots !"); return; }
+    case 'carnet': tbHuntToggle(false); tbOpenCarnet(); return;
+    case 'top': document.getElementById('tbScroll').scrollTo({ top:0, behavior:'smooth' }); return;
+    case 'sheet-x': tbCloseSheet(); return;
+    case 'say': if(TB.toks[TB.sheetK]) tbSay(TB.toks[TB.sheetK].form); return;
+    case 'slow': if(TB.toks[TB.sheetK]) tbSay(TB.toks[TB.sheetK].form, true); return;
+    case 'say-sent': { const tk = TB.toks[TB.sheetK]; if(tk){ const s = TB.sents[tk.s]; speakNarrator(dxOn() ? dxSpeakText(s) : s, 'fr-FR', null, readingRate); } return; }
+    case 'tag': { const k = TB.sheetK; const on = tbToggleTag(k, { noFly:true }); btn.textContent = on ? '✓ Tagué : retirer' : '🖍 Taguer ce mot'; if(on) tbToast('🖍 Ajouté à ton carnet, avec sa phrase'); const sp = TB.spans[k]; if(sp) sp.classList.add('sel'); return; }
+    case 'add': tbAddForm(TB.sheetK); return;
+    case 'add-go': tbAddFromForm(TB.sheetK); return;
+    case 'cr-say': { const g = TB.art.tags[+btn.dataset.i]; if(g) tbSay(g.lemma); return; }
+    case 'cr-go': { const g = TB.art.tags[+btn.dataset.i]; if(!g) return; const k = TB.toks.findIndex(x => x.s === g.s && x.t === g.t); tbCloseSheet(); if(TB.spans[k]){ TB.spans[k].scrollIntoView({ block:'center', behavior:'smooth' }); const s = TB.spans[k].closest('.tb-s'); if(s){ s.classList.remove('flash'); void s.offsetWidth; s.classList.add('flash'); } } return; }
+    case 'cr-del': { TB.art.tags.splice(+btn.dataset.i, 1); tbPaintTags(); tbSaveArt(); tbEndHtml(); tbOpenCarnet(); return; }
+    case 'cr-add': tbCarnetAdd(); return;
+  }
+}
 
 /* 📱 Paysage (téléphone à l'horizontale) : à chaque nouvelle question, la carte se cale en haut de l'écran
    pour que la question et les réponses soient visibles sans faire défiler. */
