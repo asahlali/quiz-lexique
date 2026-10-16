@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- 🏷️ Version de l'appli : augmentée automatiquement par publier-site.cmd à chaque publication -->
-<meta name="app-version" content="1.0.16" data-date="2026-10-16">
+<meta name="app-version" content="1.0.17" data-date="2026-10-16">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <title>VocabVISION — Vocabulaire Français ↔ Arabe</title>
 <script>
@@ -1793,10 +1793,11 @@
   /* la page */
   .tb-scroll{ flex:1; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; touch-action:pan-y;
     padding:calc(env(safe-area-inset-top, 0px) + 66px) 0 calc(env(safe-area-inset-bottom, 0px) + 118px); }
-  .tb-page{ font-size:var(--tb-fs); max-width:44em; margin:0 auto; padding:0 clamp(12px, 3.6vw, 34px); }
+  .tb-page{ font-size:var(--tb-fs); max-width:var(--tb-maxw, 44em); margin:0 auto; padding:0 clamp(12px, 3.6vw, 34px); box-sizing:border-box; }
+  .tb.tb-full .tb-page{ padding:0 10px; }
   .tb-meta{ display:flex; flex-wrap:wrap; gap:4px 16px; font-size:13px; font-weight:700; color:var(--tb-ink2); margin:6px 0 10px; }
   .tb-h1{ font-family:'Literata',Georgia,'Times New Roman',serif; font-weight:800; font-size:1.5em; line-height:1.2; letter-spacing:-.012em; margin:0 0 .75em; text-wrap:balance; color:var(--tb-ink); }
-  .tb-body{ font-family:'Literata',Georgia,'Times New Roman',serif; font-weight:400; line-height:var(--tb-lh); text-align:left; hyphens:auto; -webkit-hyphens:auto; overflow-wrap:break-word; }
+  .tb-body{ font-family:'Literata',Georgia,'Times New Roman',serif; font-weight:400; line-height:var(--tb-lh); text-align:var(--tb-align, left); text-justify:inter-word; hyphens:auto; -webkit-hyphens:auto; overflow-wrap:break-word; }
   .tb-body p{ margin:0 0 .95em; }
   .tb.pinching .tb-body{ transition:none; }
   .tbw{ border-radius:.22em; cursor:pointer; transition:background-color .15s, color .2s; }
@@ -1863,6 +1864,10 @@
   .tb-pop-l{ flex:none; width:74px; font-size:13px; font-weight:800; color:var(--tb-ink2); }
   .tb-pop-hint{ font-size:12px; color:var(--tb-ink2); margin:0 0 4px 82px; line-height:1.35; }
   .tb-sh-in .tb-pop-hint{ margin:8px 2px 0; }
+  .tb-range{ flex:1; min-width:0; accent-color:var(--tb-acc); height:28px; }
+  .tb-al{ display:inline-flex; flex-direction:column; gap:2px; width:14px; vertical-align:middle; margin-right:3px; }
+  .tb-al i{ display:block; height:2px; border-radius:1px; background:currentColor; }
+  .tb-al.l i:nth-child(2){ width:70%; } .tb-al.l i:nth-child(3){ width:85%; }
   .tb-out{ min-width:54px; text-align:center; font-weight:800; font-size:13px; }
   .tb-seg{ flex:1; display:flex; gap:2px; padding:3px; border-radius:12px; background:var(--tb-paper); border:1px solid var(--tb-rule); }
   .tb-seg button{ flex:1; min-width:0; border:0; background:transparent; color:var(--tb-ink); border-radius:9px; padding:7px 4px; font-weight:800; font-size:12.5px; cursor:pointer; }
@@ -2189,6 +2194,17 @@
   .quest-bar-fill{ background:linear-gradient(90deg,#3DDC84,#1CB0F6) !important; }
   .quest-ic{ border-radius:14px !important; }
 
+  /* 📰 1.0.17 : la Tablette sur l'accueil */
+  .home-tb{ display:flex; align-items:center; gap:12px; width:100%; box-sizing:border-box; text-align:left; border:0; cursor:pointer; margin:0 0 16px; padding:12px 14px; border-radius:22px;
+    background:linear-gradient(160deg,#2B3242,#151A23); color:#fff; box-shadow:0 4px 0 #0B0E14; font-family:inherit; -webkit-tap-highlight-color:transparent; }
+  .home-tb:active{ transform:translateY(2px); box-shadow:0 2px 0 #0B0E14; }
+  .home-tb-dev{ flex:none; width:42px; height:54px; box-sizing:border-box; border-radius:9px; background:#EDF0EC; border:3px solid #465066; display:flex; flex-direction:column; justify-content:center; gap:5px; padding:0 6px; }
+  .home-tb-dev i{ display:block; height:3px; border-radius:2px; background:#A3ABB8; }
+  .home-tb-dev i:nth-child(2){ background:#FFDE40; width:75%; } .home-tb-dev i:nth-child(4){ width:60%; }
+  .home-tb-t{ flex:1; min-width:0; }
+  .home-tb-t b{ display:block; font-family:'Literata',Georgia,serif; font-size:17px; line-height:1.2; }
+  .home-tb-t small{ display:block; margin-top:3px; font-size:12.5px; color:#B8C0CE; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .home-tb-go{ flex:none; background:#FFDE40; color:#1B1F27; font-weight:900; font-size:13px; padding:8px 12px; border-radius:12px; }
   .home-review{ display:flex; align-items:center; gap:12px; background:linear-gradient(135deg,#FFF1DE,#FFE7EC); border:2px solid #FFD3B0; border-radius:22px; padding:14px 16px; margin-bottom:16px; box-shadow:0 4px 0 #FFD9C0; }
   [data-theme="dark"] .home-review{ background:rgba(255,138,31,0.12); border-color:rgba(255,138,31,0.4); box-shadow:none; }
   .home-review-ic{ font-size:28px; }
@@ -2626,6 +2642,10 @@
   .sp-sound.blocked .lbl{ display:inline; }
   @keyframes spPulse{ 0%,100%{ box-shadow:0 0 0 0 rgba(253,186,116,.65); } 50%{ box-shadow:0 0 0 12px rgba(253,186,116,0); } }
   .sp2.leaving .sp-sound{ opacity:0 !important; transition:opacity .25s ease; }
+  .sp-quiet{ right:auto; left:14px; }
+  .sp-quiet .lbl{ display:inline; }
+  html body .sp-quiet.on{ background:#1E293B !important; border-color:#FDE047 !important; color:#FDE047 !important; }
+  html[data-theme="light"] body .sp-quiet.on{ background:#1E293B !important; color:#FDE047 !important; }
   @media (max-height:560px){ .sp-tag{ display:none; } .sp-bubble{ min-height:0; padding:10px 14px; } .sp-stage{ margin-top:0; } }
   @media (prefers-reduced-motion: reduce){
     .sp-aurora, .sp-rays, .sp-bg::before, .sp-portal i{ animation:none !important; }
@@ -3447,6 +3467,7 @@
     <div class="sp-bubble" id="spBubble" aria-live="polite"><span class="sp-hello" id="spHello"></span><span class="sp-msg" id="spMsg"></span></div>
   </div>
   <button class="sp-sound" id="spSound" type="button" aria-label="Activer le son"><span class="ic"></span><span class="lbl">Activer le son</span></button>
+  <button class="sp-sound sp-quiet" id="spQuiet" type="button" aria-pressed="false" title="Le renard ne parle plus à voix haute (retenu pour les prochaines fois)"><span class="ic">🦊</span><span class="lbl">Faire taire le renard</span></button>
   <div class="sp-foot"><div class="sp-hint">Touche l'écran pour commencer</div><div class="sp-bar"><i id="spBar"></i></div><div class="sp-ver" id="spVer"></div></div>
 </div>
 <script>(function(){ try{ var m = document.querySelector('meta[name="app-version"]'), el = document.getElementById('spVer'); if(m && el) el.textContent = 'Version ' + m.content; }catch(e){} })();</script>
@@ -3588,6 +3609,7 @@
   <div class="menu-group">
     <div class="menu-label">Navigation</div>
     <button class="menu-item" id="switchAppBtn"><span class="mi-ic">🔀</span> Changer d'application</button>
+    <button class="menu-item" id="tabletteMenuBtn"><span class="mi-ic">📰</span> La Tablette (lire un texte)</button>
     <button class="menu-item" id="audioLibMenuBtn"><span class="mi-ic">🎵</span> Audiothèque (MP3)</button>
     <button class="menu-item" id="colorSettingsBtn"><span class="mi-ic">🎨</span> Personnaliser les couleurs</button>
     <button class="menu-item" id="soundSettingsBtn"><span class="mi-ic">🔊</span> Personnaliser les sons</button>
@@ -3615,6 +3637,7 @@
     <button class="menu-item" id="voiceHelpBtn"><span class="mi-ic">💬</span> <span id="voiceHelpLbl" style="flex:1;">Aide vocale : activée</span><span class="vh-sw on" id="voiceHelpSw" aria-hidden="true"></span></button>
     <button class="menu-item vh-only" id="handsFreeBtn"><span class="mi-ic">🗣️</span> Tout faire à la voix (mains libres)</button>
     <button class="menu-item vh-only" id="voiceAutoBtn"><span class="mi-ic">🦻</span> <span style="flex:1;">Le renard m'écoute dès l'ouverture</span><span class="vh-sw" id="voiceAutoSw" aria-hidden="true"></span></button>
+    <button class="menu-item" id="foxQuietBtn"><span class="mi-ic">🦊</span> <span style="flex:1;">Le renard parle (bonjour, bravo)</span><span class="vh-sw on" id="foxQuietSw" aria-hidden="true"></span></button>
     <button class="menu-item" id="autoSpeakBtn"><span class="mi-ic">🔊</span> Voix : ON</button>
     <button class="menu-item" id="installBtn" style="display:none;"><span class="mi-ic">📲</span> Installer l'application</button>
   </div>
@@ -3796,7 +3819,7 @@ const PRO_TILE_ICONS = {
 };
 const PRO_SECTION_ICONS = { quick:'zap', modules:'cap', fiches:'library', daily:'calendar', jeux:'grid' };
 const PRO_MENU_ICONS = {
-  switchAppBtn:'shuffle', audioLibMenuBtn:'headphones', colorSettingsBtn:'palette', soundSettingsBtn:'volume', voiceSettingsBtn:'mic',
+  switchAppBtn:'shuffle', tabletteMenuBtn:'tablet', audioLibMenuBtn:'headphones', colorSettingsBtn:'palette', soundSettingsBtn:'volume', voiceSettingsBtn:'mic',
   authAccountBtn:'lock', whatsNewBtn:'sparkles', soundTestBtn:'volume', leaderboardBtn:'trophy', timeBreakdownBtn:'pie', homeBtn:'home',
   dictBtn:'search', historyBtn:'history', profileBtn:'user', addWordsBtn:'plus', importBtn:'upload', exportBtn:'download', syncBtn:'cloud',
   resetBtn:'rotate', autoSpeakBtn:'volume', installBtn:'phone', voiceHelpBtn:'message', handsFreeBtn:'volume', voiceAutoBtn:'eye',
@@ -8967,6 +8990,8 @@ function updateAutoSpeakBtn(){
 }
 document.getElementById('voiceHelpBtn').addEventListener('click', () => setVoiceHelp(!voiceHelpOn()));   // 💬 aide vocale : pour CE profil
 document.getElementById('voiceAutoBtn').addEventListener('click', () => setVoiceAuto(!voiceAutoOn()));      // 🦻 écoute dès l'ouverture : pour CE profil
+document.getElementById('foxQuietBtn').addEventListener('click', () => setFoxQuiet(!foxQuiet()));              // 🤫 renard muet : pour CE profil
+try{ applyFoxQuiet(); }catch(e){}
 document.getElementById('handsFreeBtn').addEventListener('click', () => {                                   // 🗣️ tout faire à la voix, tout de suite
   if(typeof closeMenu === 'function') closeMenu(); else document.body.classList.remove('menu-open');
   vvPrimeAudio();
@@ -15518,6 +15543,8 @@ function renderBlockSelect(){
       <button class="restart-btn" id="startReviewBtn" style="margin:0;">Revoir</button>
     </div>` : ''}
 
+    ${(() => { try{ return tbHomeCardHtml(); }catch(e){ return ''; } })()}
+
     <div class="home-title">Explorer</div>
 
     ${buildHomeSectionHtml('quick', '⚡', 'Révision rapide', `
@@ -15689,6 +15716,8 @@ function renderBlockSelect(){
   document.getElementById('conjugaisonBtn').addEventListener('click', () => renderConjugaisonHome());
   document.getElementById('bouquinageBtn').addEventListener('click', () => renderBouquinageHome());
   document.getElementById('tabletteBtn').addEventListener('click', () => renderTabletteHome());
+  const htb = document.getElementById('homeTabletteBtn');
+  if(htb) htb.addEventListener('click', () => { const r = tbResumeArt(); if(r) renderTabletteReader(r.id); else renderTabletteHome(); });
   document.getElementById('avanceBtn').addEventListener('click', () => renderGrammaireAvanceeHome());
   document.getElementById('oratoireBtn').addEventListener('click', () => renderArtOratoireHome());
   document.getElementById('situationsBtn').addEventListener('click', () => renderSituationsHome());
@@ -19299,6 +19328,8 @@ const COLOR_PRESETS = {
 /* ============ 🆕 NOUVEAUTÉS — pour que tout ce qui a été ajouté reste découvrable ============ */
 const WHATS_NEW_SECTIONS = [
   { icon:'🆕', title:'Nouveautés', items:[
+    { name:"📰 La Tablette sur l'accueil + 📐 texte justifié", desc:"La Tablette a maintenant sa carte sur l'accueil (avec « ▶ Reprendre » ta lecture en cours) et sa place dans le menu ☰. Dans la Tablette, « Aa » : texte à gauche ou justifié, et la largeur de la colonne que tu veux (jusqu'à tout l'écran)." },
+    { name:'🤫 Renard muet', desc:"À l'ouverture, touche « Faire taire le renard » (en haut à gauche) : il ne dira plus bonjour ni bravo à voix haute, et c'est retenu pour les prochaines fois. Pour le réentendre : menu ☰ › « Le renard parle ». Les voix des exercices et de la lecture restent." },
     { name:"📰 La Tablette", desc:"Colle n'importe quel texte (article, mail, passage de livre) : il s'ouvre en plein écran, bord à bord, avec les liaisons et les pauses. Touche un mot pour l'entendre et voir son sens (en arabe aussi). ▶ la voix te lit le texte, 🎤 « Je lis » : tu le lis à voix haute et les mots reconnus s'allument. 🔍 cherche un mot, choisis la phrase, 🖍 tague-le ; 🖍 Chasse : surligne les mots difficiles, ils filent dans ton carnet, puis ➕ dans tes mots, avec la phrase pour exemple. Zoom : A−/A+ ou pince l'écran avec deux doigts." },
     { name:"🌙 Prendre de l'avance sur demain", desc:"Tes défis du jour sont faits et tu as du temps ce soir ? Touche « 🌙 Prendre de l'avance sur demain » (dans les défis) : ce que tu fais ensuite compte pour les défis de demain. Pas fini ce soir ? Tu continues demain, là où tu en étais. Fini ? Demain est déjà validé, ta série continue même si tu n'as pas le temps. À minuit, le mode s'arrête tout seul." },
     { name:'🎙️ 12 fiches de prise de parole', desc:"Dans Art oratoire : les pauses et le silence, la voix (débit, volume, intonation), les mots de remplissage, 6 plans pour structurer ses idées (PRI, PREP, règle de 3…), être clair, gérer le trac, le langage du corps, ethos-pathos-logos, gérer un désaccord, répondre calmement aux attaques, les phrases qui ouvrent la discussion, et les atouts des personnes discrètes. Les fiches à phrases se travaillent au micro 🎤 et en quiz." },
@@ -35246,6 +35277,7 @@ document.getElementById('colorSettingsBtn').addEventListener('click', () => rend
 document.getElementById('soundSettingsBtn').addEventListener('click', () => renderSoundSettings());
 document.getElementById('voiceSettingsBtn').addEventListener('click', () => { if(typeof closeMenu === 'function') closeMenu(); renderVoiceSettings(); });
 document.getElementById('audioLibMenuBtn').addEventListener('click', () => { if(typeof closeMenu === 'function') closeMenu(); renderAudioLibrary(); });
+document.getElementById('tabletteMenuBtn').addEventListener('click', () => { if(typeof closeMenu === 'function') closeMenu(); renderTabletteHome(); });
 document.getElementById('authAccountBtn').addEventListener('click', () => {
   const session = getAuthSession();
   renderAuthScreen(session ? 'login' : 'choice');
@@ -38597,7 +38629,7 @@ const VA_EX = ['exercice', 'exercices', 'exo', 'exos', 'entrainer', 'entraine', 
 const VA_RULES = ['regle', 'regles', 'indice', 'indices', 'cours', 'explication', 'expliquer', 'explique', 'comprendre', 'قاعده', 'شرح'];
 const VA_TENSE_WORDS = [['passe compose', 'passeCompose'], ['present', 'present'], ['futur', 'futur'], ['imparfait', 'imparfait'], ['conditionnel', 'conditionnel'], ['passe', 'passeCompose']];
 const VA_CHIPS = [
-  ['bouquinage', "Lire (là où j'en étais)"], ['do:stream', 'Écouter mes audios'], ['do:search', 'Chercher un mot'], ['conjugaison', 'Conjugaison'],
+  ['bouquinage', "Lire (là où j'en étais)"], ['tablette', 'La Tablette'], ['do:stream', 'Écouter mes audios'], ['do:search', 'Chercher un mot'], ['conjugaison', 'Conjugaison'],
   ['ex:conjugaison', 'Exercices de conjugaison'], ['grammaire', 'Grammaire'], ['orthographe', 'Orthographe'], ['ex:vocabulaire', 'Quiz de vocabulaire'],
   ['oral', 'Expression orale'], ['oratoire', 'Art oratoire'], ['arabe', "Leçon d'arabe"], ['jeux', 'Jeux'], ['accueil', 'Accueil'],
 ];
@@ -38962,9 +38994,26 @@ document.addEventListener('click', (e) => {
 });
 
 /* 👋 Bonjour + prénom à voix haute, à l'ouverture (dès que le navigateur l'autorise) et à la connexion */
+/* 🤫 1.0.17 : « Renard muet » — il ne parle plus tout seul (bonjour à l'ouverture, bienvenue, grande fête).
+   Les voix des exercices, de la lecture et des mots que tu touches restent. Retenu pour ton profil. */
+function foxQuiet(){ try{ return localStorage.getItem(nsKey('lexiqueQuiz::foxQuiet')) === 'on'; }catch(e){ return false; } }
+function setFoxQuiet(on, silent){
+  try{ localStorage.setItem(nsKey('lexiqueQuiz::foxQuiet'), on ? 'on' : 'off'); }catch(e){}
+  if(on){ try{ window.speechSynthesis.cancel(); }catch(e){} try{ ttsSpeaking = false; }catch(e){} }
+  applyFoxQuiet();
+  if(!silent){ try{ showGoalToast(on ? 'Renard muet' : 'Le renard te parle', on ? "Il ne dit plus bonjour ni bravo à voix haute. Les exercices et la lecture gardent leur voix." : 'Il te dira bonjour à l\'ouverture et te félicitera.', on ? '🤫' : '🦊'); }catch(e){} }
+}
+function applyFoxQuiet(){
+  const q = foxQuiet();
+  const sw = document.getElementById('foxQuietSw'); if(sw) sw.classList.toggle('on', !q);
+  const qb = document.getElementById('spQuiet');
+  if(qb){ qb.classList.toggle('on', q); qb.setAttribute('aria-pressed', String(q)); const l = qb.querySelector('.lbl'); if(l) l.textContent = q ? 'Renard muet' : 'Faire taire le renard'; const i = qb.querySelector('.ic'); if(i) i.textContent = q ? '🤫' : '🦊'; }
+}
 function vaGreetAloud(text){
   if(voiceHelpOn() && voiceAutoOn()) return;   // le mode voix dit bonjour lui-même (et écoute)
+  if(foxQuiet()) return;                         // 🤫 renard muet
   const say = () => {
+    if(foxQuiet()) return;                       // (coupé entre-temps, par exemple sur l'écran d'accueil)
     try{
       const clean = fxCleanSpeech(text);
       const h = (typeof fox3d !== 'undefined') ? fox3d.hero : null;
@@ -38975,14 +39024,14 @@ function vaGreetAloud(text){
   const active = navigator.userActivation ? navigator.userActivation.hasBeenActive : false;
   if(active){ say(); return; }
   let used = false;
-  const once = () => { if(used) return; used = true; ['pointerdown', 'keydown'].forEach(ev => document.removeEventListener(ev, once, true)); if(Date.now() - t0 < 30000 && !VA.open) setTimeout(say, 150); };
+  const once = (ev) => { if(ev && ev.target && ev.target.closest && ev.target.closest('#spQuiet, #foxQuietBtn')) return; if(used) return; used = true; ['pointerdown', 'keydown'].forEach(ev => document.removeEventListener(ev, once, true)); if(Date.now() - t0 < 30000 && !VA.open) setTimeout(say, 150); };
   const t0 = Date.now();
   ['pointerdown', 'keydown'].forEach(ev => document.addEventListener(ev, once, true));
 }
 function vaGreetLogin(username, isNew){
   const n = vaFirstName(username);
   const msg = isNew ? `Bienvenue ${n} ! Ravi de faire ta connaissance 🦊` : `${vaHelloWord()} ${n} ! Ravi de te revoir 😊`;
-  try{ speakNarrator(fxCleanSpeech(msg), 'fr-FR'); }catch(e){}
+  if(!foxQuiet()){ try{ speakNarrator(fxCleanSpeech(msg), 'fr-FR'); }catch(e){} }
   setTimeout(() => { try{ cameoLast = 0; foxCameo('wave', msg, { force:true, edge:'bottom', hold:3200 }); }catch(e){} }, 700);
 }
 
@@ -39005,6 +39054,7 @@ function applyVoiceHelp(){
   const lbl = document.getElementById('voiceHelpLbl'); if(lbl) lbl.textContent = on ? 'Aide vocale : activée' : 'Aide vocale : désactivée';
   const sw = document.getElementById('voiceHelpSw'); if(sw) sw.classList.toggle('on', on);
   const sw2 = document.getElementById('voiceAutoSw'); if(sw2) sw2.classList.toggle('on', on && voiceAutoOn());
+  try{ applyFoxQuiet(); }catch(e){}
 }
 function setVoiceHelp(on){
   try{ localStorage.setItem(nsKey(VOICE_HELP_KEY), on ? 'on' : 'off'); }catch(e){}
@@ -40130,6 +40180,7 @@ function gfTalk(){
   const s = window.__gfState; if(!s || s.talked) return;
   s.talked = true;
   const m = document.getElementById('gfMsg'); if(m){ m.textContent = s.text; m.classList.add('on'); }
+  if(foxQuiet()) return;                         // 🤫 renard muet : la bulle seulement
   try{ window.speechSynthesis.cancel(); }catch(e){}
   speakNarrator(fxCleanSpeech(s.text), 'fr-FR');
 }
@@ -42137,7 +42188,7 @@ function tbGet(id){ return tbLoad().find(a => a.id === id) || null; }
 function tbPut(art){ const L = tbLoad(); const i = L.findIndex(a => a.id === art.id); if(i >= 0) L[i] = art; else L.unshift(art); return tbSave(L); }
 function tbDel(id){ tbSave(tbLoad().filter(a => a.id !== id)); }
 function tbUi(){
-  if(!TB.ui){ let u = null; try{ u = JSON.parse(localStorage.getItem(nsKey('lexiqueQuiz::tabletteUi')) || 'null'); }catch(e){} TB.ui = Object.assign({ fs:19, lh:1.65 }, u || {}); }
+  if(!TB.ui){ let u = null; try{ u = JSON.parse(localStorage.getItem(nsKey('lexiqueQuiz::tabletteUi')) || 'null'); }catch(e){} TB.ui = Object.assign({ fs:19, lh:1.65, align:'left', w:0 }, u || {}); }
   return TB.ui;
 }
 function tbSaveUi(){ try{ localStorage.setItem(nsKey('lexiqueQuiz::tabletteUi'), JSON.stringify(TB.ui)); }catch(e){} }
@@ -42449,6 +42500,20 @@ function renderTabletteHome(){
   setQuickNavTarget(() => document.getElementById(ta.value.trim() ? 'tbkOpen' : 'tbkText'));
   startSectionReading('tablette');
 }
+/* 🏠 sur l'accueil : la Tablette toujours à portée de main (et la lecture en cours à reprendre) */
+function tbResumeArt(){
+  const L = tbLoad().filter(a => !a.done && (a.pos > 0 || (a.pct || 0) > 0.02));
+  L.sort((a, b) => (b.readAt || b.at || 0) - (a.readAt || a.at || 0));
+  return L[0] || null;
+}
+function tbHomeCardHtml(){
+  const r = tbResumeArt();
+  return `<button type="button" class="home-tb" id="homeTabletteBtn">
+    <span class="home-tb-dev" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+    <span class="home-tb-t"><b>La Tablette</b><small>${r ? `Reprendre « ${escapeHtml(r.title)} »` : 'Colle un texte et lis-le comme un pro'}</small></span>
+    <span class="home-tb-go">${r ? '▶ Reprendre' : 'Ouvrir'}</span>
+  </button>`;
+}
 function tbFromBouquinage(){
   const i = Math.floor(Math.random() * BOUQUINAGE_TEXTS.length), t = BOUQUINAGE_TEXTS[i], id = 'bq' + i;
   if(!tbGet(id)) tbPut({ id, title:t.title, text:String(t.body || '') + (t.quote ? '\n« ' + t.quote + ' »' : ''), src:'Bouquinage', at:Date.now(), pos:0, pct:0, tags:[] });
@@ -42538,7 +42603,7 @@ function tbClose(quiet){
   if(!quiet){ try{ window.speechSynthesis.cancel(); }catch(e){} }
 }
 function tbSaveArt(){ clearTimeout(TB.saveT); TB.saveT = setTimeout(tbSaveArtNow, 500); }
-function tbSaveArtNow(){ clearTimeout(TB.saveT); if(TB.art){ if(!tbPut(TB.art)) TB.mem = TB.art; } }
+function tbSaveArtNow(){ clearTimeout(TB.saveT); if(TB.art){ TB.art.readAt = Date.now(); if(!tbPut(TB.art)) TB.mem = TB.art; } }
 function tbRender(keep){
   const body = document.getElementById('tbBody');
   if(!body) return;
@@ -42580,7 +42645,11 @@ function tbApplyUi(){
   const u = tbUi();
   el.style.setProperty('--tb-fs', u.fs + 'px');
   el.style.setProperty('--tb-lh', String(u.lh));
+  el.style.setProperty('--tb-align', u.align === 'justify' ? 'justify' : 'left');
+  el.style.setProperty('--tb-maxw', u.w ? u.w + '%' : '44em');
+  el.classList.toggle('tb-full', u.w >= 100);
   const o = document.getElementById('tbFs'); if(o) o.textContent = Math.round(u.fs / 19 * 100) + ' %';
+  const wo = document.getElementById('tbWOut'); if(wo) wo.textContent = u.w ? u.w + ' %' : 'Auto';
 }
 function tbSetFs(v, save){
   const u = tbUi();
@@ -42597,6 +42666,9 @@ function tbAaHtml(){
   return `
     <div class="tb-pop-row"><span class="tb-pop-l">Taille</span><button type="button" class="tb-chip" data-tb="fs-" aria-label="Texte plus petit">A−</button><output id="tbFs" class="tb-out"></output><button type="button" class="tb-chip big" data-tb="fs+" aria-label="Texte plus grand">A+</button></div>
     <div class="tb-pop-hint">Ou pince l'écran avec deux doigts (Ctrl + molette sur ordinateur).</div>
+    <div class="tb-pop-row"><span class="tb-pop-l">Texte</span><div class="tb-seg"><button type="button" data-tb="align" data-v="left" class="${u.align === 'justify' ? '' : 'on'}"><span class="tb-al l" aria-hidden="true"><i></i><i></i><i></i></span> À gauche</button><button type="button" data-tb="align" data-v="justify" class="${u.align === 'justify' ? 'on' : ''}"><span class="tb-al j" aria-hidden="true"><i></i><i></i><i></i></span> Justifié</button></div></div>
+    <div class="tb-pop-row"><span class="tb-pop-l">Largeur</span><input type="range" class="tb-range" id="tbW" min="40" max="100" step="1" value="${u.w || 100}" aria-label="Largeur de la colonne de texte"><output class="tb-out" id="tbWOut"></output></div>
+    <div class="tb-pop-hint">Glisse pour choisir la largeur du texte : 100 % = tout l'écran. <button type="button" class="tb-link" data-tb="w-auto">Remettre « Auto »</button></div>
     <div class="tb-pop-row"><span class="tb-pop-l">Interligne</span><div class="tb-seg">${lh(1.5, 'Serré')}${lh(1.65, 'Normal')}${lh(1.9, 'Aéré')}</div></div>
     <div class="tb-pop-row"><span class="tb-pop-l">Fond</span><div class="tb-seg"><button type="button" data-tb="theme" data-v="light" class="${dark ? '' : 'on'}">☀️ Jour</button><button type="button" data-tb="theme" data-v="dark" class="${dark ? 'on' : ''}">🌙 Nuit</button></div></div>
     <div class="tb-pop-row"><span class="tb-pop-l">Voix</span><button type="button" class="tb-chip" data-tb="rate-" aria-label="Voix plus lente">🐢</button><output class="tb-out" id="tbRate">${readingRate.toFixed(2)}×</output><button type="button" class="tb-chip" data-tb="rate+" aria-label="Voix plus rapide">🐇</button></div>
@@ -43130,6 +43202,7 @@ function tbWire(el){
   });
   el.addEventListener('input', (e) => {
     if(e.target.id === 'tbQ'){ clearTimeout(TB.qT); const v = e.target.value; TB.qT = setTimeout(() => tbSearch(v), 140); return; }
+    if(e.target.id === 'tbW'){ const a = tbAnchorGet(); tbUi().w = +e.target.value; tbApplyUi(); if(a) tbAnchorSet(a); clearTimeout(TB.wT); TB.wT = setTimeout(tbSaveUi, 300); return; }
     const f = e.target.dataset && e.target.dataset.cr;
     if(f){ const g = (TB.art.tags || [])[+e.target.dataset.i]; if(g){ g[f] = e.target.value; tbSaveArt(); } }
   });
@@ -43207,6 +43280,8 @@ function tbAction(id, btn, e){
     case 'aa': tbToggleAa(); return;
     case 'fs-': tbSetFs(tbUi().fs - 1); return;
     case 'fs+': tbSetFs(tbUi().fs + 1); return;
+    case 'align': { const a = tbAnchorGet(); tbUi().align = btn.dataset.v === 'justify' ? 'justify' : 'left'; tbSaveUi(); tbApplyUi(); if(a) tbAnchorSet(a); tbToggleAa(true); return; }
+    case 'w-auto': { const a = tbAnchorGet(); tbUi().w = 0; tbSaveUi(); tbApplyUi(); if(a) tbAnchorSet(a); tbToggleAa(true); return; }
     case 'lh': { const a = tbAnchorGet(); tbUi().lh = parseFloat(btn.dataset.v); tbSaveUi(); tbApplyUi(); if(a) tbAnchorSet(a); tbToggleAa(true); return; }
     case 'theme': { const v = btn.dataset.v; if(v !== (document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light')){ const t = document.getElementById('themeToggle'); if(t) t.click(); else applyTheme(v); } tbToggleAa(true); return; }
     case 'rate-': case 'rate+': {
@@ -45645,8 +45720,12 @@ function fox3dBindHeroClick(box){
     irisOpen(cx, cy, reduced ? 1 : 820);
     setTimeout(finish, reduced ? 450 : 900);
   };
+  // 🤫 « Faire taire le renard » : retenu pour les prochaines ouvertures
+  const qb = $('spQuiet');
+  try{ applyFoxQuiet(); }catch(e){}
+  if(qb) qb.addEventListener('click', (e) => { e.stopPropagation(); setFoxQuiet(!foxQuiet(), true); if(foxQuiet() && exitTimer){ clearTimeout(exitTimer); exitTimer = setTimeout(leave, 900); } });
   sp.addEventListener('click', (e) => {
-    if(e.target.closest && e.target.closest('#spSound')) return;
+    if(e.target.closest && e.target.closest('#spSound, #spQuiet')) return;
     // ce toucher est aussi l'occasion de débloquer le son (l'envolée sera sonorisée)
     if(!SFX.muted && SFX.blocked()) SFX.unlock().then(() => { if(state === 'leaving') SFX.leave(); });
     if(state === 'out'){ leave(); } else if(state === 'charging'){ emerge(); setTimeout(leave, 450); }
