@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- 🏷️ Version de l'appli : augmentée automatiquement par publier-site.cmd à chaque publication -->
-<meta name="app-version" content="1.0.20" data-date="2026-10-17">
+<meta name="app-version" content="1.0.21" data-date="2026-10-17">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <title>VocabVISION — Vocabulaire Français ↔ Arabe</title>
 <script>
@@ -2063,6 +2063,65 @@
     .tbk-tools{ gap:5px 6px; }
     .tbk-tools .tbk-tb{ width:34px; min-width:34px; }
     .tbk-style{ min-width:118px; }
+  }
+  /* 🖥️ 1.0.21 : la Tablette en grand écran — un vrai poste d'écriture (barre fixe, page réglable, texte qui s'agrandit) */
+  body.tbk-wide{ overflow-x:clip; }
+  body.tbk-wide #quizCard{ --cw:min(1480px, calc(100vw - 40px)); width:var(--cw); max-width:none; margin-left:calc((100% - var(--cw)) / 2); box-sizing:border-box; }
+  @media (min-width:1100px){ body.tbk-wide #quizCard{ --cw:min(1480px, calc(100vw - 250px)); } }
+  body.tbk-wide .tbk-h{ text-align:center; }
+  body.tbk-wide .tbk-sec, body.tbk-wide .tbk-list{ max-width:980px; margin-left:auto; margin-right:auto; }
+  .tbk-studio{ --pw:min(100%, 880px); --efs:18px; --desk:#E6E9EF; --paper:#FFFFFF; --ink:#1B1F27; --bar:var(--card, #fff); position:relative; margin:18px 0 6px; border:1px solid var(--border, rgba(90,97,112,.25)); border-radius:18px; background:var(--desk); text-align:left; color:var(--ink); }
+  [data-theme="dark"] .tbk-studio{ --desk:#0A0E14; --paper:#141A24; --ink:#DCE2EB; }
+  .tbk-studio .tbk-tools{ position:sticky; top:var(--tbk-top, 0px); z-index:6; background:var(--bar); border-bottom:1px solid var(--border, rgba(90,97,112,.25)); border-radius:18px 18px 0 0; padding:9px 10px; margin:0; gap:6px; color:var(--text); }
+  .tbk-studio .tbk-tools .tbk-tb{ width:34px; min-width:34px; }
+  .tbk-studio .tbk-style{ min-width:120px; }
+  .tbk-studio .tbk-tools.stuck{ border-radius:0; box-shadow:0 8px 18px -12px rgba(15,23,42,.45); }
+  .tbk-tbl{ width:auto !important; padding:0 10px 0 8px !important; gap:5px; font:800 12.5px 'Nunito','Inter',sans-serif; }
+  .tbk-a{ font:900 15px/1 'Literata',Georgia,serif; }
+  .tbk-a.sm{ font-size:11.5px; }
+  .tbk-fs{ min-width:24px; text-align:center; font:800 12.5px 'Nunito','Inter',sans-serif; opacity:.8; }
+  .tbk-view{ margin-left:auto; }
+  .tbk-pw{ display:inline-flex; align-items:center; gap:4px; padding:0 0 0 6px; height:34px; border-left:1px solid rgba(90,97,112,.22); margin-left:2px; cursor:default; }
+  .tbk-pw input[type=range]{ width:76px; accent-color:#7C3AED; }
+  .tbk-studio.pw-auto .tbk-pw [data-ed="w-auto"]{ background:#1B1F27; color:#FFDE40; }
+  [data-theme="dark"] .tbk-studio.pw-auto .tbk-pw [data-ed="w-auto"]{ background:#FFDE40; color:#1B1F27; }
+  .tbk-desk{ padding:28px 24px 34px; }
+  .tbk-page{ display:flex; flex-direction:column; position:relative; box-sizing:border-box; width:var(--pw); max-width:100%; margin:0 auto; min-height:62vh; padding:38px clamp(18px, 5%, 64px) 30px; background:var(--paper); color:var(--ink); border-radius:8px; box-shadow:0 1px 2px rgba(15,23,42,.08), 0 12px 32px -16px rgba(15,23,42,.35); transition:width .12s ease; }
+  .tbk-studio.resizing .tbk-page{ transition:none; outline:2px dashed rgba(124,58,237,.45); outline-offset:6px; }
+  .tbk-studio.resizing{ cursor:ew-resize; user-select:none; }
+  .tbk-grip{ position:absolute; top:0; bottom:0; width:16px; cursor:ew-resize; z-index:2; touch-action:none; }
+  .tbk-grip.l{ left:-16px; } .tbk-grip.r{ right:-16px; }
+  .tbk-grip::after{ content:''; position:absolute; top:calc(50% - 26px); left:5px; width:6px; height:52px; border-radius:6px; background:rgba(90,97,112,.35); transition:background .15s; }
+  .tbk-grip:hover::after, .tbk-studio.resizing .tbk-grip::after{ background:#7C3AED; }
+  .tbk-page .tbk-title{ display:block; width:100%; box-sizing:border-box; border:0; border-bottom:1px solid rgba(90,97,112,.22); background:transparent; color:inherit; font:800 calc(var(--efs) * 1.55)/1.25 'Literata',Georgia,serif; padding:2px 0 12px; margin:0 0 14px; outline:none; }
+  .tbk-page .tbk-title::placeholder{ color:#9AA1AE; }
+  .tbk-page .tbk-ed{ max-height:none; overflow:visible; min-height:44vh; padding:0 0 24px; font-size:var(--efs); line-height:1.72; color:var(--ink); letter-spacing:normal; }   /* couleur et espacement posés ici : l'éditeur ne rajoute plus de <span style> en recollant */
+  .tbk-page .tbk-ed p{ margin:0 0 .8em; }
+  .tbk-page .tbk-ed{ position:relative; flex:1; }
+  .tbk-page .tbk-edwrap{ flex:1; display:flex; flex-direction:column; }
+  .tbk-page .tbk-ed.empty::before{ position:absolute; left:0; right:0; top:0; }
+  .tbk-page .tbk-ed h2{ font-size:1.45em; }
+  .tbk-actions{ position:sticky; bottom:0; z-index:6; background:var(--bar); border-top:1px solid var(--border, rgba(90,97,112,.25)); border-radius:0 0 18px 18px; padding:10px 12px; color:var(--text); }
+  .tbk-actions .tbk-popt{ margin:0 0 8px; }
+  .tbk-actions .tbk-hint{ margin:0 0 8px; }
+  .tbk-actions .tbk-cancel{ display:inline-block; margin:0 0 0 auto; }
+  .tbk-actions .tbk-cancel + .tbk-open{ margin-left:0; }
+  /* ⛶ grand écran : la page occupe tout l'écran */
+  .tbk-studio.full{ position:fixed; inset:0; z-index:9985; margin:0; border:0; border-radius:0; display:flex; flex-direction:column; }
+  .tbk-studio.full .tbk-tools{ position:relative; top:auto; border-radius:0; padding-top:max(9px, env(safe-area-inset-top)); }
+  .tbk-studio.full .tbk-desk{ flex:1; min-height:0; overflow:auto; overscroll-behavior:contain; }
+  .tbk-studio.full .tbk-page{ min-height:calc(100% - 4px); }
+  .tbk-studio.full .tbk-actions{ position:relative; border-radius:0; padding-bottom:max(10px, env(safe-area-inset-bottom)); }
+  /* 📱 petit écran : la page prend toute la largeur */
+  @media (max-width:760px){
+    .tbk-pw, .tbk-grip{ display:none; }
+    .tbk-view{ margin-left:0; }
+    .tbk-desk{ padding:0; }
+    .tbk-page{ width:100%; border-radius:0; box-shadow:none; padding:18px 14px 20px; min-height:50vh; }
+    .tbk-studio{ margin:14px -6px 6px; border-radius:14px; }
+    .tbk-studio .tbk-tools{ position:relative; top:auto; border-radius:14px 14px 0 0; padding:8px; }
+    .tbk-actions{ position:relative; bottom:auto; border-radius:0 0 14px 14px; padding:8px; }
+    .tbk-studio.full{ margin:0; }
   }
   .tb-toast{ position:absolute; left:50%; bottom:calc(env(safe-area-inset-bottom, 0px) + 92px); z-index:8; transform:translate(-50%, 16px); opacity:0; pointer-events:none;
     max-width:calc(100% - 32px); width:max-content; padding:10px 16px; border-radius:14px; background:var(--tb-ink); color:var(--tb-paper); font-weight:800; font-size:13.5px; line-height:1.35; text-align:center; transition:opacity .25s, transform .25s; }
@@ -19472,6 +19531,9 @@ const COLOR_PRESETS = {
 /* ============ 🆕 NOUVEAUTÉS — pour que tout ce qui a été ajouté reste découvrable ============ */
 const WHATS_NEW_SECTIONS = [
   { icon:'🆕', title:'Nouveautés', items:[
+    { name:"🖥️ La Tablette en grand écran", desc:"L'éditeur prend toute la largeur de l'écran, comme un vrai traitement de texte : une page blanche au centre, la barre d'outils reste en haut quand tu descends dans le texte, et « Coller / Ajuster / Ouvrir » restent en bas. Règle la taille du texte (A / A) et la largeur de la page (curseur ↔, ou glisse les bords de la page ; « Auto » = largeur confortable). ⛶ Grand écran : la page occupe tout l'écran." },
+    { name:'⤵ Recoller les lignes à la main', desc:"Sélectionne des lignes coupées et touche « Recoller » : elles deviennent un seul paragraphe (sans sélection : le paragraphe et le suivant). Annuler (Ctrl+Z) les remet." },
+    { name:'🧹 Ajuster les textes de journal', desc:"« Ajuster » reconnaît maintenant les textes copiés depuis un journal, un PDF ou une liseuse (une ligne courte par paragraphe) : il recolle tout, en gardant les vraies fins de paragraphe, les titres et la signature. Le bandeau « phrases coupées » apparaît aussi dans la Tablette." },
     { name:"✍️ La Tablette : un vrai éditeur de texte", desc:"Sous le titre, une barre d'outils complète qui tient sur l'écran (plus rien de caché) : style du paragraphe (Paragraphe, Titre, Sous-titre, Chapeau, Citation), Gras, Italique, Souligné, effacer la mise en forme, aligner à gauche / centrer / à droite / justifier, liste à puces ou numérotée, saut de ligne, séparateur, image, annuler / rétablir et ⛶ plein écran. Les boutons s'allument selon l'endroit où tu écris. Raccourcis : Ctrl+B, Ctrl+I, Ctrl+U, Ctrl+Z, Ctrl+Y." },
     { name:'📋 Coller sans la mise en forme', desc:"Ce que tu colles garde les titres, les listes et les images, mais plus le gras ni le souligné de la page d'origine. Juste après un collage, choisis « Simple », « Avec le style » (gras, italique, souligné gardés) ou « Texte seul » (ton choix est retenu). Ctrl+Maj+V colle le texte seul." },
     { name:'🧹 Ajuster, même les lignes collées', desc:"« Ajuster » recolle maintenant aussi les phrases coupées par des retours à la ligne dans un texte collé depuis une page web ou un PDF, dans l'éditeur comme dans la Tablette." },
@@ -42734,7 +42796,7 @@ function tbDomToBlocks(root, opts){
   const walk = (node, t, s, a) => {
     for(const n of node.childNodes){
       if(n.nodeType === 3){
-        const x = n.textContent;
+        const x = n.textContent.replace(TB_INVIS, '');
         if(!x || (!cur && !x.trim())) continue;
         if(!cur){ cur = { t:t || 'p', r:[] }; if(a) cur.a = a; }
         cur.r.push({ x, s });
@@ -42811,35 +42873,68 @@ function tbTextToEdHtml(text){
   // une ligne = un paragraphe (« 🧹 Ajuster » recolle ensuite les phrases coupées) ; les sauts de ligne ↵ ajoutés à la main restent
   return t.split('\n').map(l => l.trim()).filter(Boolean).map(l => `<p>${escapeHtml(l)}</p>`).join('');
 }
-/* 🧹 recoller les lignes coupées, aussi dans un texte mis en page */
+/* 🧹 recoller les lignes coupées, aussi dans un texte mis en page
+   · texte « en colonnes » (journal, PDF, liseuse : beaucoup de lignes courtes) : on recolle tout,
+     sauf les vraies fins de paragraphe (une ligne courte qui finit par un point), les titres et la signature
+   · opts.breaks (on appuie sur « Ajuster ») : les sauts de ligne ↵ aussi */
+var TB_INVIS = /[\u200B\u200C\u2060\uFEFF\u00AD]/g;
 function tbReflowBlocks(blocks, opts){
   opts = opts || {};
-  if(!tbIsRich(blocks) && !opts.breaks){
-    const r = tbReflow(tbBlocksText(blocks));
-    return { blocks:tbTextToBlocks(r.text), joined:r.joined, changed:r.changed && r.joined > 0 };
-  }
-  const out = []; let joined = 0;
+  blocks = blocks || [];
+  const TXT = ['p', 'quote', 'lead'];
   const ENDS = /[.!?…:»"”]$/;
-  (blocks || []).forEach(b0 => {
+  const clean = (b) => tbBlockText(b).replace(TB_INVIS, '').replace(/[\s\u00a0]+/g, ' ').trim();
+  const lines = blocks.filter(b => b.r && TXT.includes(b.t)).map(clean).filter(Boolean);
+  const sorted = lines.map(x => x.length).sort((x, y) => x - y), med = sorted.length ? sorted[sorted.length >> 1] : 0;
+  const open = lines.filter(x => !ENDS.test(x)).length;
+  const column = lines.length >= 4 && med <= 75 && open >= lines.length * 0.5;
+  if(!tbIsRich(blocks) && !opts.breaks){        // texte simple : la règle « texte » (lignes vides, puces, titres)
+    const r = tbReflow(tbBlocksText(blocks));
+    return { blocks:tbTextToBlocks(r.text), joined:r.joined, changed:r.changed && r.joined > 0, column:false };
+  }
+  const out = []; let joined = 0, lastLen = 0;
+  blocks.forEach(b0 => {
     const b = JSON.parse(JSON.stringify(b0));
+    if(b.r) b.r.forEach(x => { x.x = x.x.replace(TB_INVIS, ''); });
     const prev = out[out.length - 1];
-    if(prev && prev.r && b.r && (!b.c || opts.breaks) && prev.t === b.t && (prev.a || '') === (b.a || '') && ['p', 'quote', 'lead'].includes(b.t)){      // un saut de ligne ↵ voulu (b.c) reste, sauf si on demande d'ajuster
-      const pt = tbBlockText(prev).replace(/\s+$/, ''), nt = tbBlockText(b).replace(/^\s+/, '');
+    const loose = opts.breaks || column;
+    if(prev && prev.r && b.r && prev.t === b.t && TXT.includes(b.t) && (!b.c || loose) && ((prev.a || '') === (b.a || '') || loose)){
+      const pt = clean(prev), nt = clean(b);
+      if(!nt){ return; }
       const hy = /\p{L}[-‐]$/u.test(pt) && /^\p{Ll}/u.test(nt);
-      const titleLike = !prev.c && pt.length <= 45 && /^[\p{Lu}0-9«"“]/u.test(pt) && !/[,;:-]$/.test(pt) && out.length && out[out.length - 1] === prev && (out.length === 1 || !out[out.length - 2].r || ENDS.test(tbBlockText(out[out.length - 2]).trim()));
-      if(hy || /^[\p{Ll}0-9,;)\]]/u.test(nt) || (!ENDS.test(pt) && !titleLike)){
+      const cont = /^[\p{Ll}0-9,;:.…)\]»”’]/u.test(nt);
+      const bullet = /^([-–—•·*▪►✓➤]|\d{1,2}[.)])\s/.test(nt);
+      const before = out.length > 1 ? out[out.length - 2] : null;
+      const afterBreak = !before || !before.r || before.t !== prev.t || ENDS.test(clean(before));
+      let join;
+      if(bullet) join = false;                                  // une puce, un tiret de dialogue : nouvelle ligne
+      else if(hy || cont) join = true;
+      else if(column){
+        const single = lastLen === pt.length;                  // prev n'a encore rien recollé : une ligne seule
+        const short = lastLen < med * 0.72;
+        const byline = single && /^\(.*\)$/.test(pt);
+        const titleLike = single && short && afterBreak && /^[\p{Lu}0-9«"“]/u.test(pt) && !/[,;:-]$/.test(pt) && !ENDS.test(pt);
+        join = !(byline || titleLike || (ENDS.test(pt) && lastLen < med * 0.8));
+      } else {
+        const titleLike = !prev.c && pt.length <= 45 && /^[\p{Lu}0-9«"“]/u.test(pt) && !/[,;:-]$/.test(pt) && afterBreak;
+        const byline = lastLen === pt.length && /^\(.*\)$/.test(pt) && pt.length <= 80;
+        join = !ENDS.test(pt) && !titleLike && !byline;
+      }
+      if(join){
         const last = prev.r[prev.r.length - 1];
-        last.x = last.x.replace(/\s+$/, '');
+        last.x = last.x.replace(/[\s\u00a0]+$/, '');
         if(hy) last.x = last.x.replace(/[-‐]$/, ''); else prev.r.push({ x:' ', s:'' });
-        const first = b.r[0]; if(first) first.x = first.x.replace(/^\s+/, '');
+        const first = b.r[0]; if(first) first.x = first.x.replace(/^[\s\u00a0]+/, '');
         prev.r = prev.r.concat(b.r);
+        lastLen = nt.length;
         joined++;
         return;
       }
     }
     out.push(b);
+    lastLen = b.r ? clean(b).length : 0;
   });
-  return { blocks:out, joined, changed:joined > 0 };
+  return { blocks:out, joined, changed:joined > 0, column };
 }
 function tbNeedsReflowArt(art){ try{ return tbReflowBlocks(tbBlocksOf(art)).joined >= 1; }catch(e){ return false; } }
 /* ---------- 🗣️ une seule voix pour tout le texte ---------- */
@@ -42977,7 +43072,9 @@ var TB_ICO = {
   redo:'<path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/>',
   full:'<path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/>',
   exitFull:'<path d="M8 3v3a2 2 0 0 1-2 2H3M21 8h-3a2 2 0 0 1-2-2V3M3 16h3a2 2 0 0 1 2 2v3M16 21v-3a2 2 0 0 1 2-2h3"/>',
-  paste:'<rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>'
+  paste:'<rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>',
+  join:'<path d="M3 6h9a4 4 0 0 1 4 4v1"/><path d="M3 18h9a4 4 0 0 0 4-4v-1"/><path d="M16 12h5"/><path d="M18.5 9.5 21 12l-2.5 2.5"/>',
+  width:'<path d="M3 12h18"/><path d="M6.5 8.5 3 12l3.5 3.5"/><path d="M17.5 8.5 21 12l-3.5 3.5"/><path d="M3 4v16M21 4v16" opacity=".45"/>'
 };
 function tbIcon(n){ return `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${TB_ICO[n] || ''}</svg>`; }
 /* coller « simple » : la structure (titres, listes, images) sans le gras ni le souligné de la page d'origine */
@@ -43019,47 +43116,58 @@ function renderTabletteHome(){
     </div>`;
   };
   const tb = (cmd, ico, title) => `<button type="button" class="tbk-tb" data-ed="${cmd}" title="${title}" aria-label="${title}" aria-pressed="false">${tbIcon(ico)}</button>`;
+  const u0 = tbUi(), efs = Math.max(13, Math.min(30, +u0.edFs || 18));
   card.innerHTML = `<div class="tbk" id="tbkRoot">
     <div class="cat-tag">📰 La Tablette</div>
     <div class="tbk-h">Colle un texte, lis‑le comme un pro</div>
     <div class="tbk-sub">Mets-le en page comme un journal (titres, images…) : les liaisons et les pauses s'affichent, chaque mot se touche pour l'entendre, et tu chasses les mots difficiles.</div>
-    <div class="tbk-device" id="tbkDevice">
-      <i class="tbk-cam" aria-hidden="true"></i>
-      <div class="tbk-screen">
-        <input type="text" class="tbk-title" id="tbkTitle" maxlength="120" placeholder="Titre (facultatif)" value="${escapeHtml(draft.title || '')}">
-        <div class="tbk-tools" id="tbkTools" role="toolbar" aria-label="Mise en page">
-          <select class="tbk-style" id="tbkStyle" aria-label="Style du paragraphe" title="Style du paragraphe">
-            <option value="p">Paragraphe</option><option value="h2">Titre</option><option value="h3">Sous-titre</option><option value="lead">Chapeau</option><option value="quote">Citation</option>
-          </select>
-          <span class="tbk-grp">${tb('bold', 'bold', 'Gras (Ctrl+B)')}${tb('italic', 'italic', 'Italique (Ctrl+I)')}${tb('underline', 'underline', 'Souligné (Ctrl+U)')}${tb('clear', 'clear', 'Effacer la mise en forme')}</span>
-          <span class="tbk-grp">${tb('al-l', 'alignLeft', 'Aligner à gauche')}${tb('al-c', 'alignCenter', 'Centrer')}${tb('al-r', 'alignRight', 'Aligner à droite')}${tb('al-j', 'alignJustify', 'Justifier')}</span>
-          <span class="tbk-grp">${tb('list', 'list', 'Liste à puces')}${tb('olist', 'listOrdered', 'Liste numérotée')}${tb('br', 'br', 'Saut de ligne (Maj+Entrée)')}${tb('hr', 'hr', 'Séparateur')}${tb('img', 'image', 'Ajouter une image (galerie ou appareil photo)')}</span>
-          <span class="tbk-grp">${tb('undo', 'undo', 'Annuler (Ctrl+Z)')}${tb('redo', 'redo', 'Rétablir (Ctrl+Y)')}${tb('full', 'full', 'Plein écran')}</span>
-        </div>
-        <div class="tbk-edwrap">
-          <div class="tbk-ed" id="tbkEd" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Ton texte" spellcheck="true" data-ph="Colle ici un article, un mail, un passage de livre… Les titres et les images passent aussi.">${draft.html || ''}</div>
-          <div class="tbk-popt" id="tbkPasteOpt" hidden role="group" aria-label="Options de collage">
-            <span>📋 Collé :</span>
-            <button type="button" data-pm="simple">Simple</button>
-            <button type="button" data-pm="full" title="Garder le gras, l'italique et le souligné du texte copié">Avec le style</button>
-            <button type="button" data-pm="plain">Texte seul</button>
+    <div class="tbk-studio" id="tbkDevice" style="--efs:${efs}px;">
+      <div class="tbk-tools" id="tbkTools" role="toolbar" aria-label="Mise en page">
+        <select class="tbk-style" id="tbkStyle" aria-label="Style du paragraphe" title="Style du paragraphe">
+          <option value="p">Paragraphe</option><option value="h2">Titre</option><option value="h3">Sous-titre</option><option value="lead">Chapeau</option><option value="quote">Citation</option>
+        </select>
+        <span class="tbk-grp">${tb('bold', 'bold', 'Gras (Ctrl+B)')}${tb('italic', 'italic', 'Italique (Ctrl+I)')}${tb('underline', 'underline', 'Souligné (Ctrl+U)')}${tb('clear', 'clear', 'Effacer la mise en forme')}</span>
+        <span class="tbk-grp">${tb('al-l', 'alignLeft', 'Aligner à gauche')}${tb('al-c', 'alignCenter', 'Centrer')}${tb('al-r', 'alignRight', 'Aligner à droite')}${tb('al-j', 'alignJustify', 'Justifier')}</span>
+        <span class="tbk-grp">${tb('list', 'list', 'Liste à puces')}${tb('olist', 'listOrdered', 'Liste numérotée')}${tb('br', 'br', 'Saut de ligne (Maj+Entrée)')}${tb('hr', 'hr', 'Séparateur')}${tb('img', 'image', 'Ajouter une image (galerie ou appareil photo)')}</span>
+        <span class="tbk-grp"><button type="button" class="tbk-tb tbk-tbl" data-ed="join" title="Recoller les lignes sélectionnées en un seul paragraphe (sans sélection : ce paragraphe et le suivant)" aria-label="Recoller les lignes">${tbIcon('join')}<span>Recoller</span></button></span>
+        <span class="tbk-grp">${tb('undo', 'undo', 'Annuler (Ctrl+Z)')}${tb('redo', 'redo', 'Rétablir (Ctrl+Y)')}</span>
+        <span class="tbk-grp tbk-view">
+          <button type="button" class="tbk-tb" data-ed="zoom-" title="Texte plus petit" aria-label="Texte plus petit"><b class="tbk-a sm">A</b></button><output class="tbk-fs" id="tbkFsOut" title="Taille du texte">${efs}</output><button type="button" class="tbk-tb" data-ed="zoom+" title="Texte plus grand" aria-label="Texte plus grand"><b class="tbk-a">A</b></button>
+          <label class="tbk-pw" title="Largeur du texte (ou glisse les bords de la page)">${tbIcon('width')}<input type="range" id="tbkPW" min="35" max="100" step="1" aria-label="Largeur du texte"><button type="button" class="tbk-tb tbk-tbl" data-ed="w-auto" title="Largeur confortable">Auto</button></label>
+          ${tb('full', 'full', 'Grand écran')}
+        </span>
+      </div>
+      <div class="tbk-desk" id="tbkDesk">
+        <div class="tbk-page" id="tbkPage">
+          <span class="tbk-grip l" data-grip="l" title="Glisse pour élargir ou rétrécir le texte (double-clic : largeur confortable)"></span><span class="tbk-grip r" data-grip="r" title="Glisse pour élargir ou rétrécir le texte (double-clic : largeur confortable)"></span>
+          <input type="text" class="tbk-title" id="tbkTitle" maxlength="120" placeholder="Titre (facultatif)" value="${escapeHtml(draft.title || '')}">
+          <div class="tbk-edwrap">
+            <div class="tbk-ed" id="tbkEd" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Ton texte" spellcheck="true" data-ph="Colle ici un article, un mail, un passage de livre… Les titres et les images passent aussi.">${draft.html || ''}</div>
+          </div>
+          <div class="tbk-imgbar" id="tbkImgBar" hidden>
+            <span class="tbk-imgbar-l">🖼 Image</span>
+            <input type="range" id="tbkImgW" min="15" max="100" step="1" value="100" aria-label="Taille de l'image"><output id="tbkImgWOut">100 %</output>
+            <span class="tbk-seg"><button type="button" data-ei="l" aria-label="À gauche">⬅</button><button type="button" data-ei="c" aria-label="Au centre">⬛</button><button type="button" data-ei="r" aria-label="À droite">➡</button></span>
+            <button type="button" class="tbk-ib" data-ei="del" aria-label="Retirer l'image">🗑</button>
           </div>
         </div>
-        <div class="tbk-imgbar" id="tbkImgBar" hidden>
-          <span class="tbk-imgbar-l">🖼 Image</span>
-          <input type="range" id="tbkImgW" min="15" max="100" step="1" value="100" aria-label="Taille de l'image"><output id="tbkImgWOut">100 %</output>
-          <span class="tbk-seg"><button type="button" data-ei="l" aria-label="À gauche">⬅</button><button type="button" data-ei="c" aria-label="Au centre">⬛</button><button type="button" data-ei="r" aria-label="À droite">➡</button></span>
-          <button type="button" class="tbk-ib" data-ei="del" aria-label="Retirer l'image">🗑</button>
+      </div>
+      <input type="file" id="tbkFile" accept="image/*" multiple hidden>
+      <div class="tbk-actions">
+        <div class="tbk-popt" id="tbkPasteOpt" hidden role="group" aria-label="Options de collage">
+          <span>📋 Collé :</span>
+          <button type="button" data-pm="simple">Simple</button>
+          <button type="button" data-pm="full" title="Garder le gras, l'italique et le souligné du texte copié">Avec le style</button>
+          <button type="button" data-pm="plain">Texte seul</button>
         </div>
-        <input type="file" id="tbkFile" accept="image/*" multiple hidden>
+        <div class="tbk-hint" id="tbkHint" hidden>✂️ Des phrases sont coupées par des retours à la ligne : touche « 🧹 Ajuster » (ou sélectionne des lignes, puis « Recoller »).</div>
         <div class="tbk-row">
           <button type="button" class="tbk-paste" id="tbkPaste">${tbIcon('paste')} Coller</button>
           <button type="button" class="tbk-paste tbk-fix" id="tbkFix" title="Recolle les lignes coupées au milieu des phrases">🧹 Ajuster</button>
           <span class="tbk-count" id="tbkCount"></span>
+          ${editing ? `<button type="button" class="tbk-cancel" id="tbkCancel">Annuler la modification</button>` : ''}
           <button type="button" class="tbk-open" id="tbkOpen" disabled>${editing ? 'Enregistrer et ouvrir' : 'Ouvrir sur la Tablette'}</button>
         </div>
-        <div class="tbk-hint" id="tbkHint" hidden>✂️ Des phrases sont coupées par des retours à la ligne : touche « 🧹 Ajuster » pour les recoller.</div>
-        ${editing ? `<button type="button" class="tbk-cancel" id="tbkCancel">Annuler la modification</button>` : ''}
       </div>
     </div>
     <div class="tbk-sec">Mes textes</div>
@@ -43073,6 +43181,32 @@ function renderTabletteHome(){
   const ed = document.getElementById('tbkEd'), ti = document.getElementById('tbkTitle'), openB = document.getElementById('tbkOpen'), cnt = document.getElementById('tbkCount');
   const fixB = document.getElementById('tbkFix'), hint = document.getElementById('tbkHint'), bar = document.getElementById('tbkImgBar'), file = document.getElementById('tbkFile');
   const tools = document.getElementById('tbkTools'), styleSel = document.getElementById('tbkStyle'), popt = document.getElementById('tbkPasteOpt');
+  const desk = document.getElementById('tbkDesk'), page = document.getElementById('tbkPage'), pwR = document.getElementById('tbkPW'), fsOut = document.getElementById('tbkFsOut');
+  document.body.classList.add('tbk-wide');                // 🖥️ la Tablette prend toute la largeur de l'écran
+  /* 🔠 taille du texte et ↔ largeur de la page (retenues) */
+  const setFs = (v) => { v = Math.max(13, Math.min(30, Math.round(v))); dev.style.setProperty('--efs', v + 'px'); fsOut.textContent = v; tbUi().edFs = v; tbSaveUi(); };
+  const deskW = () => { const cs = getComputedStyle(desk); return Math.max(1, desk.clientWidth - parseFloat(cs.paddingLeft || 0) - parseFloat(cs.paddingRight || 0)); };
+  const setPw = (pct, save) => {
+    if(pct) pct = Math.max(35, Math.min(100, Math.round(pct)));
+    dev.style.setProperty('--pw', pct ? pct + '%' : 'min(100%, 880px)');
+    dev.classList.toggle('pw-auto', !pct);
+    pwR.value = pct || Math.round(Math.min(1, 880 / deskW()) * 100);
+    if(save !== false){ tbUi().edW = pct || 0; tbSaveUi(); }
+  };
+  setPw(+tbUi().edW || 0, false);
+  pwR.addEventListener('input', () => setPw(+pwR.value));
+  page.querySelectorAll('[data-grip]').forEach(g => {
+    g.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      try{ g.setPointerCapture(e.pointerId); }catch(err){}
+      const r = desk.getBoundingClientRect(), cx = r.left + r.width / 2, W = deskW();
+      dev.classList.add('resizing');
+      const mv = (ev) => setPw(Math.abs(ev.clientX - cx) * 2 / W * 100);
+      const up = () => { g.removeEventListener('pointermove', mv); g.removeEventListener('pointerup', up); g.removeEventListener('pointercancel', up); dev.classList.remove('resizing'); };
+      g.addEventListener('pointermove', mv); g.addEventListener('pointerup', up); g.addEventListener('pointercancel', up);
+    });
+    g.addEventListener('dblclick', () => setPw(0));
+  });
   tbLoadImgs(root);
   try{ document.execCommand('defaultParagraphSeparator', false, 'p'); }catch(e){}
   try{ document.execCommand('styleWithCSS', false, false); }catch(e){}
@@ -43107,7 +43241,12 @@ function renderTabletteHome(){
   document.addEventListener('selectionchange', onSel);
   const onKey = (e) => { if(e.key === 'Escape' && dev.classList.contains('full')){ e.preventDefault(); setFull(false); } };
   document.addEventListener('keydown', onKey);
-  new MutationObserver((_, obs) => { if(!root.isConnected){ document.removeEventListener('selectionchange', onSel); document.removeEventListener('keydown', onKey); document.body.classList.remove('tbk-full-on'); obs.disconnect(); } }).observe(card, { childList:true });
+  const nav = document.querySelector('.navbar');
+  const topPx = () => { const n = nav && getComputedStyle(nav).position === 'sticky' ? nav.getBoundingClientRect().height + (parseFloat(getComputedStyle(nav).top) || 0) + 6 : 0; return Math.round(n); };
+  dev.style.setProperty('--tbk-top', topPx() + 'px');
+  const onScroll = () => tools.classList.toggle('stuck', !dev.classList.contains('full') && getComputedStyle(tools).position === 'sticky' && tools.getBoundingClientRect().top <= topPx() + 1 && dev.getBoundingClientRect().top < topPx());
+  window.addEventListener('scroll', onScroll, { passive:true });
+  new MutationObserver((_, obs) => { if(!root.isConnected){ document.removeEventListener('selectionchange', onSel); document.removeEventListener('keydown', onKey); window.removeEventListener('scroll', onScroll); document.body.classList.remove('tbk-full-on', 'tbk-wide'); obs.disconnect(); } }).observe(card, { childList:true });
   const blocks = () => tbDomToBlocks(ed, { editor:true });
   const sync = (keepCount) => {
     const b = blocks(), text = tbBlocksText(b), n = tbWordsCount(text), imgs = b.filter(x => x.t === 'img').length;
@@ -43216,7 +43355,13 @@ function renderTabletteHome(){
     doPaste({ files:[...(cd.files || [])], html:cd.getData('text/html'), text:cd.getData('text/plain') }, mode);
   });
   ed.addEventListener('drop', (e) => { const fs = [...(e.dataTransfer && e.dataTransfer.files || [])].filter(f => /^image\//.test(f.type)); if(fs.length){ e.preventDefault(); addImages(fs); } });
-  ed.addEventListener('input', () => { popt.hidden = true; keepSel(); sync(); });
+  const ensureP = () => {
+    if(ed.children.length || ed.textContent.trim()) return;
+    ed.innerHTML = '<p><br></p>';
+    if(document.activeElement === ed){ const rg = document.createRange(); rg.setStart(ed.firstChild, 0); rg.collapse(true); const ss = window.getSelection(); ss.removeAllRanges(); ss.addRange(rg); }
+  };
+  ed.addEventListener('focus', ensureP);
+  ed.addEventListener('input', () => { popt.hidden = true; ensureP(); keepSel(); sync(); });
   ed.addEventListener('keyup', keepSel); ed.addEventListener('pointerup', keepSel);
   styleSel.addEventListener('pointerdown', keepSel); styleSel.addEventListener('focus', keepSel);
   ti.addEventListener('input', () => sync());
@@ -43224,12 +43369,13 @@ function renderTabletteHome(){
     const k = e.key.toLowerCase(), mod = e.ctrlKey || e.metaKey;
     if(mod && e.shiftKey && k === 'v'){ plainNext = true; return; }          // Ctrl+Maj+V : coller le texte seul
     if(mod && !e.shiftKey && ['b', 'i', 'u'].includes(k)){ e.preventDefault(); document.execCommand({ b:'bold', i:'italic', u:'underline' }[k]); sync(); refresh(); }
-    if(mod && (k === 'y' || (e.shiftKey && k === 'z'))){ e.preventDefault(); document.execCommand('redo'); sync(); }
+    if(mod && (k === 'y' || (e.shiftKey && k === 'z'))){ e.preventDefault(); doRedo(); }
+    else if(mod && !e.shiftKey && k === 'z'){ e.preventDefault(); doUndo(); }
   });
   /* ⛶ plein écran : l'éditeur prend tout l'écran */
   const setFull = (on) => {
     dev.classList.toggle('full', on); document.body.classList.toggle('tbk-full-on', on);
-    const b = tools.querySelector('[data-ed="full"]'); if(b){ b.innerHTML = tbIcon(on ? 'exitFull' : 'full'); b.title = on ? 'Quitter le plein écran (Échap)' : 'Plein écran'; b.setAttribute('aria-label', b.title); b.classList.toggle('on', on); }
+    const b = tools.querySelector('[data-ed="full"]'); if(b){ b.innerHTML = tbIcon(on ? 'exitFull' : 'full'); b.title = on ? 'Quitter le grand écran (Échap)' : 'Grand écran'; b.setAttribute('aria-label', b.title); b.classList.toggle('on', on); }
     putSel();
   };
   /* 🖼 toucher une image dans l'éditeur : taille, position, retirer */
@@ -43254,6 +43400,72 @@ function renderTabletteHome(){
   });
   /* la barre d'outils */
   const exec = (c, v) => { try{ return document.execCommand(c, false, v); }catch(e){ return false; } };
+  /* ↩ annuler / rétablir : « Recoller » et « Ajuster » s'annulent d'un seul coup */
+  let group = null, regroup = null;
+  const same = (x, y) => String(x).replace(/&nbsp;|\u00a0/g, ' ') === String(y).replace(/&nbsp;|\u00a0/g, ' ');
+  const doUndo = () => {
+    if(group && same(ed.innerHTML, group.after)){
+      if(group.k){ for(let i = 0; i < group.k + 2 && !same(ed.innerHTML, group.before); i++) exec('undo'); }      // l'éditeur regroupe parfois plusieurs étapes : on s'arrête au texte d'avant
+      else { ed.innerHTML = group.before; tbLoadImgs(ed); }
+      regroup = Object.assign({}, group, { at:ed.innerHTML }); group = null;
+    } else exec('undo');
+    sync(); refresh();
+  };
+  const doRedo = () => {
+    if(regroup && same(ed.innerHTML, regroup.at)){
+      if(regroup.k){ for(let i = 0; i < regroup.k + 2 && !same(ed.innerHTML, regroup.after); i++) exec('redo'); }
+      else { ed.innerHTML = regroup.after; tbLoadImgs(ed); }
+      group = Object.assign({}, regroup, { after:ed.innerHTML }); regroup = null;
+    } else exec('redo');
+    sync(); refresh();
+  };
+  /* ⤵ Recoller : les lignes sélectionnées (ou ce paragraphe et le suivant) deviennent un seul paragraphe
+     (avec les commandes de l'éditeur, comme un retour arrière : la mise en forme reste propre et « Annuler » marche) */
+  const joinLines = () => {
+    putSel();
+    const s = window.getSelection(); if(!s.rangeCount) return 0;
+    const r = s.getRangeAt(0);
+    const top = (n, off) => { if(n === ed) n = ed.childNodes[Math.max(0, Math.min(off, ed.childNodes.length - 1))]; while(n && n.parentNode !== ed) n = n.parentNode; return n; };
+    let a = top(r.startContainer, r.startOffset);
+    if(a && (a.nodeType === 3 || !/^(P|DIV|H2|H3|H4|BLOCKQUOTE|UL|OL|HR|FIGURE)$/.test(a.tagName))){      // une ligne tapée directement dans la page : on en fait d'abord un paragraphe
+      exec('formatBlock', 'p'); return joinLines.again ? 0 : (joinLines.again = true, (() => { try{ return joinLines(); } finally{ joinLines.again = false; } })());
+    }
+    let z = r.collapsed ? a : top(r.endContainer, Math.max(0, r.endOffset - 1));
+    if(!a) return 0;
+    if(!z) z = a;
+    const isText = (n) => !!(n && n.nodeType === 1 && /^(P|DIV|H2|H3|H4|BLOCKQUOTE)$/.test(n.tagName) && !n.querySelector('img, hr') && n.textContent.trim());
+    const nodes = []; for(let n = a; n; n = n.nextSibling){ nodes.push(n); if(n === z) break; }
+    const brsOf = (el) => [...el.querySelectorAll('br')].filter(br => { let n = br.nextSibling; while(n && n.nodeType === 3 && !n.textContent.trim()) n = n.nextSibling; return !!n; });   // le <br> final d'un paragraphe n'est pas un saut de ligne
+    let txt = nodes.filter(isText);
+    if(txt.length < 2 && !(txt.length === 1 && brsOf(txt[0]).length)){
+      const nx = txt[0] && txt[0].nextElementSibling;
+      if(txt.length === 1 && isText(nx)) txt.push(nx); else return 0;
+    }
+    let n = 0, k = 0;
+    const before = ed.innerHTML;
+    const run = (c, v) => { if(exec(c, v)) k++; };
+    const at = (node, off) => { const rg = document.createRange(); rg.setStart(node, off); rg.collapse(true); s.removeAllRanges(); s.addRange(rg); };
+    // 1) les sauts de ligne ↵ à l'intérieur des paragraphes
+    txt.slice().reverse().forEach(el => brsOf(el).reverse().forEach(br => {
+      const prevT = (br.previousSibling && br.previousSibling.textContent) || '', nextT = (br.nextSibling && br.nextSibling.textContent) || '';
+      const rg = document.createRange(); rg.selectNode(br); s.removeAllRanges(); s.addRange(rg);
+      if(/\p{L}[-‐]$/u.test(prevT) && /^\p{Ll}/u.test(nextT)){ run('delete'); run('delete'); } else run('insertText', ' ');
+      n++;
+    }));
+    // 2) les paragraphes qui se suivent (de la fin vers le début)
+    for(let i = txt.length - 1; i >= 1; i--){
+      const el = txt[i], prev = txt[i - 1];
+      if(!el.isConnected || !prev.isConnected || el.previousElementSibling !== prev) continue;
+      const pt = prev.textContent, nt = el.textContent;
+      at(el, 0); run('delete');
+      if(/\p{L}[-‐]$/u.test(pt.replace(/\s+$/, '')) && /^\p{Ll}/u.test(nt.replace(/^\s+/, '')) && !/\s$/.test(pt)) run('delete');
+      else if(!/[\s ]$/.test(pt) && !/^[\s ]/.test(nt)) run('insertText', ' ');
+      n++;
+    }
+    if(n) group = { k, before, after:ed.innerHTML };
+    keepSel(); sync(true);
+    return n;
+  };
   tools.addEventListener('pointerdown', (e) => { if(e.target.closest('[data-ed]')) e.preventDefault(); });
   tools.addEventListener('mousedown', (e) => { if(e.target.closest('[data-ed]')) e.preventDefault(); });
   tools.addEventListener('click', (e) => {
@@ -43261,6 +43473,11 @@ function renderTabletteHome(){
     const cmd = b.dataset.ed;
     if(cmd === 'img'){ file.click(); return; }
     if(cmd === 'full'){ setFull(!dev.classList.contains('full')); return; }
+    if(cmd === 'zoom-' || cmd === 'zoom+'){ setFs((+tbUi().edFs || 18) + (cmd === 'zoom+' ? 1 : -1)); return; }
+    if(cmd === 'w-auto'){ setPw(0); return; }
+    if(cmd === 'undo'){ putSel(); doUndo(); return; }
+    if(cmd === 'redo'){ putSel(); doRedo(); return; }
+    if(cmd === 'join'){ const n = joinLines(); cnt.textContent = n ? `✓ ${n + 1} lignes recollées en un paragraphe` : 'Sélectionne les lignes à recoller'; refresh(); return; }
     putSel();
     if(cmd === 'list') exec('insertUnorderedList');
     else if(cmd === 'olist') exec('insertOrderedList');
@@ -43307,7 +43524,7 @@ function renderTabletteHome(){
   fixB.addEventListener('click', () => {
     let r = tbReflowBlocks(blocks());
     if(!r.joined) r = tbReflowBlocks(blocks(), { breaks:true });        // on le demande : les sauts de ligne aussi
-    if(r.changed){ ed.innerHTML = tbBlocksToEdHtml(r.blocks); tbLoadImgs(ed); }
+    if(r.changed){ const before = ed.innerHTML; ed.innerHTML = tbBlocksToEdHtml(r.blocks); tbLoadImgs(ed); group = { k:0, before, after:ed.innerHTML }; }
     sync(true);
     cnt.textContent = r.joined ? `✓ ${r.joined} retour${r.joined > 1 ? 's' : ''} à la ligne recollé${r.joined > 1 ? 's' : ''}` : '✓ Texte déjà bien ajusté';
   });
@@ -44081,6 +44298,7 @@ function tbReflow(text){
     let brk;
     if(BULLET.test(l)) brk = true;
     else if(/^[\p{Ll}0-9,;)\]]/u.test(l)) brk = false;                                    // la phrase continue
+    else if(curLines === 1 && /^\(.*\)$/.test(cur) && cur.length <= 80) brk = true;                     // une signature entre parenthèses
     else if(!ENDS.test(cur)) brk = curLines === 1 && cur.length <= (blankBefore ? 70 : 45) && /^[\p{Lu}0-9«"“]/u.test(cur) && !/[,;-]$/.test(cur) && (blankBefore || !useBlank);   // un titre seul
     else brk = useBlank ? blankBefore : true;
     if(brk){ paras.push(cur); cur = l; curLines = 1; }
