@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- 🏷️ Version de l'appli : augmentée automatiquement par publier-site.cmd à chaque publication -->
-<meta name="app-version" content="1.0.19" data-date="2026-10-17">
+<meta name="app-version" content="1.0.20" data-date="2026-10-17">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <title>VocabVISION — Vocabulaire Français ↔ Arabe</title>
 <script>
@@ -2020,6 +2020,50 @@
   .tbk-seg button.on{ background:#FFDE40; color:#1B1F27; border-color:transparent; }
   .tbk-th{ flex:none; width:52px; height:52px; border-radius:10px; overflow:hidden; background:var(--surface-sunken); margin-right:4px; }
   .tbk-th img{ width:100%; height:100%; object-fit:cover; display:block; }
+  /* ✍️ 1.0.20 : l'éditeur de la Tablette, comme un vrai traitement de texte */
+  .tb-body .tb-ol{ margin:0 0 .95em; padding-left:1.5em; }
+  .tb-body .tb-ol li{ margin:.2em 0; }
+  .tb-body .tb-ol li::marker{ color:var(--tb-acc); font-weight:800; }
+  .tbk-tools{ flex-wrap:wrap; overflow:visible; gap:6px 8px; padding:8px 0; margin:0; }
+  .tbk-grp{ display:inline-flex; align-items:center; gap:1px; padding:2px; border-radius:11px; background:rgba(90,97,112,.1); }
+  [data-theme="dark"] .tbk-grp{ background:rgba(255,255,255,.06); }
+  .tbk-tools .tbk-tb{ height:34px; min-width:36px; width:36px; padding:0; border:0; border-radius:9px; background:transparent; display:inline-flex; align-items:center; justify-content:center; color:inherit; }
+  .tbk-tools .tbk-tb:hover{ background:rgba(90,97,112,.16); }
+  .tbk-tools .tbk-tb.on{ background:#1B1F27; color:#FFDE40; }
+  [data-theme="dark"] .tbk-tools .tbk-tb.on{ background:#FFDE40; color:#1B1F27; }
+  .tbk-tools .tbk-tb:active{ background:#FFDE40; color:#1B1F27; }
+  .tbk-tools .tbk-tb:focus-visible{ outline:2px solid #7C3AED; outline-offset:1px; }
+  .tbk-style{ height:38px; min-width:132px; padding:0 30px 0 12px; border:1px solid rgba(90,97,112,.3); border-radius:11px; background:rgba(255,255,255,.6) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%235A6170' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 11px center; color:inherit; font:800 13.5px 'Nunito','Inter',sans-serif; cursor:pointer; -webkit-appearance:none; appearance:none; }
+  [data-theme="dark"] .tbk-style{ background-color:rgba(255,255,255,.06); }
+  .tbk-style option{ color:#1B1F27; background:#fff; }
+  .tbk-edwrap{ position:relative; }
+  .tbk-ed{ min-height:240px; padding:12px 4px; caret-color:#7C3AED; }
+  .tbk-ed ol{ margin:0 0 .7em; padding-left:1.6em; }
+  .tbk-ed li{ margin:.15em 0; }
+  .tbk-ed u{ text-decoration-thickness:1.5px; text-underline-offset:3px; }
+  .tbk-ed ::selection{ background:rgba(124,58,237,.25); }
+  .tbk-popt{ position:relative; scroll-margin:16px; width:fit-content; max-width:100%; box-sizing:border-box; margin:6px 0 0 auto; display:flex; align-items:center; flex-wrap:wrap; gap:4px; padding:5px 6px 5px 10px; border-radius:12px; background:#1B1F27; color:#fff; font:800 12px 'Nunito','Inter',sans-serif; box-shadow:0 8px 20px -8px rgba(15,23,42,.6); z-index:3; animation:tbkPop .18s ease-out; }
+  [data-theme="dark"] .tbk-popt{ background:#2A3142; }
+  .tbk-popt[hidden]{ display:none; }
+  .tbk-popt button{ height:28px; padding:0 10px; border:1px solid rgba(255,255,255,.22); border-radius:8px; background:transparent; color:inherit; font:inherit; cursor:pointer; }
+  .tbk-popt button.on{ background:#FFDE40; color:#1B1F27; border-color:transparent; }
+  @keyframes tbkPop{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:none; } }
+  .tbk-paste svg{ vertical-align:-3px; margin-right:2px; }
+  /* ⛶ plein écran */
+  body.tbk-full-on{ overflow:hidden; }
+  body.tbk-full-on #quizCard, body.tbk-full-on .tbk{ transform:none !important; animation:none !important; filter:none !important; contain:none !important; }
+  .tbk-device.full{ position:fixed; inset:0; z-index:9985; max-width:none; margin:0; padding:0; border-radius:0; display:flex; flex-direction:column; background:#EDF0EC; }
+  [data-theme="dark"] .tbk-device.full{ background:#10151E; }
+  .tbk-device.full .tbk-cam{ display:none; }
+  .tbk-device.full .tbk-screen{ flex:1; min-height:0; display:flex; flex-direction:column; border-radius:0; padding:max(10px, env(safe-area-inset-top)) max(16px, calc(50% - 400px)) max(10px, env(safe-area-inset-bottom)); overflow:hidden; }
+  .tbk-device.full .tbk-edwrap{ flex:1; min-height:0; display:flex; flex-direction:column; }
+  .tbk-device.full .tbk-ed{ flex:1; max-height:none; min-height:0; font-size:17.5px; padding:16px 4px 40px; }
+  .tbk-device.full .tbk-cancel{ display:none; }
+  @media (max-width:420px){
+    .tbk-tools{ gap:5px 6px; }
+    .tbk-tools .tbk-tb{ width:34px; min-width:34px; }
+    .tbk-style{ min-width:118px; }
+  }
   .tb-toast{ position:absolute; left:50%; bottom:calc(env(safe-area-inset-bottom, 0px) + 92px); z-index:8; transform:translate(-50%, 16px); opacity:0; pointer-events:none;
     max-width:calc(100% - 32px); width:max-content; padding:10px 16px; border-radius:14px; background:var(--tb-ink); color:var(--tb-paper); font-weight:800; font-size:13.5px; line-height:1.35; text-align:center; transition:opacity .25s, transform .25s; }
   .tb-toast.show{ opacity:1; transform:translate(-50%, 0); }
@@ -19428,6 +19472,9 @@ const COLOR_PRESETS = {
 /* ============ 🆕 NOUVEAUTÉS — pour que tout ce qui a été ajouté reste découvrable ============ */
 const WHATS_NEW_SECTIONS = [
   { icon:'🆕', title:'Nouveautés', items:[
+    { name:"✍️ La Tablette : un vrai éditeur de texte", desc:"Sous le titre, une barre d'outils complète qui tient sur l'écran (plus rien de caché) : style du paragraphe (Paragraphe, Titre, Sous-titre, Chapeau, Citation), Gras, Italique, Souligné, effacer la mise en forme, aligner à gauche / centrer / à droite / justifier, liste à puces ou numérotée, saut de ligne, séparateur, image, annuler / rétablir et ⛶ plein écran. Les boutons s'allument selon l'endroit où tu écris. Raccourcis : Ctrl+B, Ctrl+I, Ctrl+U, Ctrl+Z, Ctrl+Y." },
+    { name:'📋 Coller sans la mise en forme', desc:"Ce que tu colles garde les titres, les listes et les images, mais plus le gras ni le souligné de la page d'origine. Juste après un collage, choisis « Simple », « Avec le style » (gras, italique, souligné gardés) ou « Texte seul » (ton choix est retenu). Ctrl+Maj+V colle le texte seul." },
+    { name:'🧹 Ajuster, même les lignes collées', desc:"« Ajuster » recolle maintenant aussi les phrases coupées par des retours à la ligne dans un texte collé depuis une page web ou un PDF, dans l'éditeur comme dans la Tablette." },
     { name:"📰 La Tablette devient un vrai journal", desc:"En collant ton texte, une barre de mise en page : Titre, Sous-titre, Chapeau, Texte, Gras, Italique, Souligné, Citation, Liste, saut de ligne ↵, séparateur ✦ et 🖼 Image (galerie, appareil photo, ou image collée depuis le presse-papiers). Une page web collée garde ses titres et ses images. Dans la Tablette, touche une image : taille au curseur ou en glissant le rond violet, à gauche / au centre / à droite (le texte coule à côté), légende. « Aa » : la lettrine (grande initiale)." },
     { name:'🗣️ Une seule voix pour lire', desc:"Dans la Tablette, « Aa › Voix » : choisis la voix qui lit (toutes les voix françaises de ton appareil). Elle lit tout le texte, les mots touchés et « Je lis », sans changer de voix d'une phrase à l'autre." },
     { name:'🖍 La chasse aux mots, au doigt', desc:"Sur téléphone, toucher un mot marche même un peu à côté ou avec un appui un peu long. En chasse, la barre du bas a 💡 Indices, 🔎 Mots repérés (la liste des mots rares du texte, à taguer d'un coup), 🏷️ Carnet et ✓ Terminer." },
@@ -42484,7 +42531,8 @@ function tbBlocksOf(art){ return (art && Array.isArray(art.blocks) && art.blocks
 function tbTextToBlocks(text){ return String(text || '').replace(/\r/g, '').split(/\n+/).map(p => p.trim()).filter(Boolean).map(p => ({ t:'p', r:[{ x:p, s:'' }] })); }
 function tbBlockText(b){ return (b && b.r || []).map(r => r.x).join(''); }
 function tbBlocksText(blocks){ return (blocks || []).filter(b => b.r).map(b => tbBlockText(b).replace(/\s+/g, ' ').trim()).filter(Boolean).join('\n'); }
-function tbIsRich(blocks){ return (blocks || []).some(b => b.t !== 'p' || b.c || (b.r || []).some(r => r.s)); }
+function tbIsRich(blocks){ return (blocks || []).some(b => b.t !== 'p' || b.c || b.a || (b.r || []).some(r => r.s)); }
+function tbAlignCss(a){ return ({ c:'center', r:'right', j:'justify', l:'left' })[a] || ''; }
 function tbNormRuns(b){
   let text = ''; const st = [];
   (b.r || []).forEach(r => {
@@ -42556,21 +42604,23 @@ function tbBuild(art){
   let html = '', list = false, firstP = true;
   const drop = !!tbUi().drop;
   blocks.forEach((b, bi) => {
-    if(b.t === 'li' && !list){ html += '<ul class="tb-ul">'; list = true; }
-    if(b.t !== 'li' && list){ html += '</ul>'; list = false; }
+    const lt = b.t === 'li' ? 'ul' : (b.t === 'oli' ? 'ol' : '');
+    if(list && list !== lt){ html += `</${list}>`; list = false; }
+    if(lt && !list){ html += `<${lt} class="tb-${lt}">`; list = lt; }
     if(b.t === 'hr'){ html += '<div class="tb-hr" role="separator"><span aria-hidden="true">✦</span></div>'; return; }
     if(b.t === 'img'){ html += tbFigHtml(b, bi); return; }
     const { text, st } = tbNormRuns(b);
     if(!text) return;
     const inner = tbSentsHtml(text, st);
-    const tag = b.t === 'quote' ? 'blockquote' : b.t === 'li' ? 'li' : (b.t === 'h2' || b.t === 'h3') ? 'div' : 'p';
+    const tag = b.t === 'quote' ? 'blockquote' : (b.t === 'li' || b.t === 'oli') ? 'li' : (b.t === 'h2' || b.t === 'h3') ? 'div' : 'p';
     const cls = ({ h2:'tb-h2', h3:'tb-h3', lead:'tb-lead', quote:'tb-q' })[b.t] || '';
     const dc = (b.t === 'p' && firstP && !b.c && drop && text.length > 60) ? ' tb-drop' : '';
     if(b.t === 'p' || b.t === 'lead') firstP = false;
     const role = b.t === 'h2' ? ' role="heading" aria-level="2"' : b.t === 'h3' ? ' role="heading" aria-level="3"' : '';
-    html += `<${tag} class="${cls}${b.c ? ' cont' : ''}${dc}" data-b="${bi}"${role}>${inner}</${tag}>`;
+    const al = tbAlignCss(b.a);
+    html += `<${tag} class="${cls}${b.c ? ' cont' : ''}${dc}" data-b="${bi}"${role}${al ? ` style="text-align:${al}"` : ''}>${inner}</${tag}>`;
   });
-  if(list) html += '</ul>';
+  if(list) html += `</${list}>`;
   return html;
 }
 /* ---------- 🖼 les images : gardées sur l'appareil (IndexedDB), réduites pour ne pas tout remplir ---------- */
@@ -42665,7 +42715,7 @@ function tbDomToBlocks(root, opts){
     if(t === 'H3') return 'h3';
     if(/^H[4-6]$/.test(t)) return (opts.editor && t === 'H4') ? 'lead' : 'h3';
     if(t === 'BLOCKQUOTE') return 'quote';
-    if(t === 'LI') return 'li';
+    if(t === 'LI') return (el.parentElement && el.parentElement.tagName === 'OL') ? 'oli' : 'li';
     return null;
   };
   const styleOf = (el, s) => {
@@ -42680,38 +42730,45 @@ function tbDomToBlocks(root, opts){
     if(/font-weight\s*:\s*(normal|[1-4]00)/i.test(st)) x = x.replace(/b/g, '');
     return [...new Set(x.split(''))].sort().join('');
   };
-  const walk = (node, t, s) => {
+  const alOf = (el) => { if(!opts.editor) return ''; const v = ((el.style && el.style.textAlign) || el.getAttribute('align') || '').toLowerCase(); return v === 'center' ? 'c' : v === 'right' ? 'r' : v === 'justify' ? 'j' : ''; };
+  const walk = (node, t, s, a) => {
     for(const n of node.childNodes){
       if(n.nodeType === 3){
         const x = n.textContent;
         if(!x || (!cur && !x.trim())) continue;
-        if(!cur) cur = { t:t || 'p', r:[] };
+        if(!cur){ cur = { t:t || 'p', r:[] }; if(a) cur.a = a; }
         cur.r.push({ x, s });
         continue;
       }
       if(n.nodeType !== 1) continue;
       const tag = n.tagName;
       if(TB_SKIP_TAGS.test(tag) || (n.getAttribute && n.getAttribute('aria-hidden') === 'true' && !n.textContent.trim())) continue;
-      if(tag === 'BR'){ const tt = cur ? cur.t : (t || 'p'); flush(); cur = { t:tt, r:[], c:true }; continue; }
+      if(tag === 'BR'){
+        const tt = cur ? cur.t : (t || 'p');
+        flush();
+        cur = opts.brAsPara ? null : { t:tt, r:[], c:true };          // texte collé : chaque ligne devient un paragraphe (« Ajuster » les recolle)
+        if(cur && a) cur.a = a;
+        continue;
+      }
       if(tag === 'HR'){ flush(); blocks.push({ t:'hr' }); continue; }
       if(tag === 'IMG'){ const ib = tbImgBlockFrom(n); if(ib){ flush(); blocks.push(ib); } continue; }
       if(tag === 'FIGURE'){
         const im = n.querySelector('img'), cap = n.querySelector('figcaption');
         if(im){ const ib = tbImgBlockFrom(im); if(ib){ flush(); if(cap && cap.textContent.trim()) ib.cap = cap.textContent.replace(/\s+/g, ' ').trim().slice(0, 300); blocks.push(ib); } continue; }
       }
-      if(tag === 'TD' || tag === 'TH'){ walk(n, t, styleOf(n, s)); if(cur) cur.r.push({ x:'  ', s:'' }); continue; }
+      if(tag === 'TD' || tag === 'TH'){ walk(n, t, styleOf(n, s), a); if(cur) cur.r.push({ x:'  ', s:'' }); continue; }
       const bt = typeOf(n);
       if(bt || TB_BLOCK_TAGS.test(tag)){
         flush();
-        const inh = (t === 'quote' || t === 'li' || t === 'lead') ? t : null;
-        walk(n, bt || inh || (tag === 'FIGCAPTION' ? 'p' : (t && t !== 'li' ? t : 'p')), (bt === 'h2' || bt === 'h3') ? '' : styleOf(n, s));
+        const inh = (t === 'quote' || t === 'li' || t === 'oli' || t === 'lead') ? t : null;
+        walk(n, bt || inh || (tag === 'FIGCAPTION' ? 'p' : (t && t !== 'li' && t !== 'oli' ? t : 'p')), (bt === 'h2' || bt === 'h3') ? '' : styleOf(n, s), alOf(n) || a);
         flush();
         continue;
       }
-      walk(n, t, styleOf(n, s));
+      walk(n, t, styleOf(n, s), a);
     }
   };
-  walk(root, null, '');
+  walk(root, null, '', '');
   flush();
   // runs : on fusionne les morceaux voisins de même style, on enlève les espaces au bord
   blocks.forEach(b => {
@@ -42735,16 +42792,17 @@ function tbEdImgHtml(b){
 function tbBlocksToEdHtml(blocks){
   let h = '', list = false;
   (blocks || []).forEach((b, k) => {
-    if(b.t === 'li'){ if(!list){ h += '<ul>'; list = true; } h += `<li>${tbRunsHtml(b.r)}</li>`; return; }
-    if(list){ h += '</ul>'; list = false; }
+    const lt = b.t === 'li' ? 'ul' : (b.t === 'oli' ? 'ol' : '');
+    if(list && list !== lt){ h += `</${list}>`; list = false; }
+    if(lt){ if(!list){ h += `<${lt}>`; list = lt; } const la = tbAlignCss(b.a); h += `<li${la ? ` style="text-align:${la}"` : ''}>${tbRunsHtml(b.r)}</li>`; return; }
     if(b.t === 'hr'){ h += '<hr>'; return; }
     if(b.t === 'img'){ h += `<p>${tbEdImgHtml(b)}</p>`; return; }
     const tag = ({ h2:'h2', h3:'h3', lead:'h4', quote:'blockquote' })[b.t] || 'p';
-    const close = `</${tag}>`;
+    const close = `</${tag}>`, al = tbAlignCss(b.a);
     if(b.c && k > 0 && blocks[k - 1].t === b.t && h.endsWith(close)){ h = h.slice(0, -close.length) + '<br>' + tbRunsHtml(b.r) + close; return; }
-    h += `<${tag}>${tbRunsHtml(b.r)}${close}`;
+    h += `<${tag}${al ? ` style="text-align:${al}"` : ''}>${tbRunsHtml(b.r)}${close}`;
   });
-  if(list) h += '</ul>';
+  if(list) h += `</${list}>`;
   return h;
 }
 function tbTextToEdHtml(text){
@@ -42754,8 +42812,9 @@ function tbTextToEdHtml(text){
   return t.split('\n').map(l => l.trim()).filter(Boolean).map(l => `<p>${escapeHtml(l)}</p>`).join('');
 }
 /* 🧹 recoller les lignes coupées, aussi dans un texte mis en page */
-function tbReflowBlocks(blocks){
-  if(!tbIsRich(blocks)){
+function tbReflowBlocks(blocks, opts){
+  opts = opts || {};
+  if(!tbIsRich(blocks) && !opts.breaks){
     const r = tbReflow(tbBlocksText(blocks));
     return { blocks:tbTextToBlocks(r.text), joined:r.joined, changed:r.changed && r.joined > 0 };
   }
@@ -42764,7 +42823,7 @@ function tbReflowBlocks(blocks){
   (blocks || []).forEach(b0 => {
     const b = JSON.parse(JSON.stringify(b0));
     const prev = out[out.length - 1];
-    if(prev && prev.r && b.r && !b.c && prev.t === b.t && ['p', 'quote', 'lead'].includes(b.t)){      // un saut de ligne ↵ voulu (b.c) reste
+    if(prev && prev.r && b.r && (!b.c || opts.breaks) && prev.t === b.t && (prev.a || '') === (b.a || '') && ['p', 'quote', 'lead'].includes(b.t)){      // un saut de ligne ↵ voulu (b.c) reste, sauf si on demande d'ajuster
       const pt = tbBlockText(prev).replace(/\s+$/, ''), nt = tbBlockText(b).replace(/^\s+/, '');
       const hy = /\p{L}[-‐]$/u.test(pt) && /^\p{Ll}/u.test(nt);
       const titleLike = !prev.c && pt.length <= 45 && /^[\p{Lu}0-9«"“]/u.test(pt) && !/[,;:-]$/.test(pt) && out.length && out[out.length - 1] === prev && (out.length === 1 || !out[out.length - 2].r || ENDS.test(tbBlockText(out[out.length - 2]).trim()));
@@ -42899,6 +42958,31 @@ function tbHintSheet(){
   sh.classList.add('open'); sh.setAttribute('aria-hidden', 'false');
 }
 
+/* ✍️ 1.0.20 : les icônes de l'éditeur */
+var TB_ICO = {
+  bold:'<path d="M6 12h9a4 4 0 0 1 0 8H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h7a4 4 0 0 1 0 8"/>',
+  italic:'<path d="M19 4h-9M14 20H5M15 4 9 20"/>',
+  underline:'<path d="M6 4v6a6 6 0 0 0 12 0V4M4 20h16"/>',
+  clear:'<path d="M4 7V4h16v3M5 20h6M13 4 8 20M15 15l5 5M20 15l-5 5"/>',
+  alignLeft:'<path d="M21 6H3M15 12H3M17 18H3"/>',
+  alignCenter:'<path d="M21 6H3M17 12H7M19 18H5"/>',
+  alignRight:'<path d="M21 6H3M21 12H9M21 18H7"/>',
+  alignJustify:'<path d="M3 6h18M3 12h18M3 18h18"/>',
+  list:'<path d="M9 6h12M9 12h12M9 18h12M4 6h.01M4 12h.01M4 18h.01"/>',
+  listOrdered:'<path d="M10 6h11M10 12h11M10 18h11M4 6h1v4M4 10h2M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/>',
+  br:'<path d="M20 4v7a4 4 0 0 1-4 4H4"/><path d="m9 10-5 5 5 5"/>',
+  hr:'<path d="M3 12h4M10 12h4M17 12h4"/>',
+  image:'<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/>',
+  undo:'<path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>',
+  redo:'<path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/>',
+  full:'<path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/>',
+  exitFull:'<path d="M8 3v3a2 2 0 0 1-2 2H3M21 8h-3a2 2 0 0 1-2-2V3M3 16h3a2 2 0 0 1 2 2v3M16 21v-3a2 2 0 0 1 2-2h3"/>',
+  paste:'<rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>'
+};
+function tbIcon(n){ return `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${TB_ICO[n] || ''}</svg>`; }
+/* coller « simple » : la structure (titres, listes, images) sans le gras ni le souligné de la page d'origine */
+function tbBlocksPlainStyle(blocks){ return (blocks || []).map(b => b.r ? Object.assign({}, b, { r:b.r.map(x => ({ x:x.x, s:'' })) }) : b); }
+
 function tbWordsCount(text){ return (String(text || '').match(/[\p{L}\p{N}]+(?:['’-][\p{L}\p{N}]+)*/gu) || []).length; }
 function tbAutoTitle(text){
   const first = bqSplit(String(text || '').split(/\n+/).find(x => x.trim()) || '')[0] || 'Mon texte';
@@ -42914,6 +42998,7 @@ function renderTabletteHome(){
   currentBlock = null;
   isHomeScreen = false;
   tbClose(true);
+  document.body.classList.remove('tbk-full-on');
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromTabletteBtn" style="cursor:pointer;">← Retour</button>`;
   document.getElementById('progressFill').style.width = '0%';
   document.getElementById('footerNote').textContent = '';
@@ -42933,23 +43018,33 @@ function renderTabletteHome(){
       <button type="button" class="tbk-ib" data-tbk-del="${escapeHtml(a.id)}" aria-label="Supprimer « ${escapeHtml(a.title || '')} »">🗑</button>
     </div>`;
   };
-  const tool = (cmd, label, title, cls) => `<button type="button" class="tbk-tb ${cls || ''}" data-ed="${cmd}" title="${title}" aria-label="${title}">${label}</button>`;
+  const tb = (cmd, ico, title) => `<button type="button" class="tbk-tb" data-ed="${cmd}" title="${title}" aria-label="${title}" aria-pressed="false">${tbIcon(ico)}</button>`;
   card.innerHTML = `<div class="tbk" id="tbkRoot">
     <div class="cat-tag">📰 La Tablette</div>
     <div class="tbk-h">Colle un texte, lis‑le comme un pro</div>
     <div class="tbk-sub">Mets-le en page comme un journal (titres, images…) : les liaisons et les pauses s'affichent, chaque mot se touche pour l'entendre, et tu chasses les mots difficiles.</div>
-    <div class="tbk-device">
+    <div class="tbk-device" id="tbkDevice">
       <i class="tbk-cam" aria-hidden="true"></i>
       <div class="tbk-screen">
         <input type="text" class="tbk-title" id="tbkTitle" maxlength="120" placeholder="Titre (facultatif)" value="${escapeHtml(draft.title || '')}">
         <div class="tbk-tools" id="tbkTools" role="toolbar" aria-label="Mise en page">
-          ${tool('h2', 'Titre', 'Titre')}${tool('h3', 'Sous-titre', 'Sous-titre')}${tool('lead', 'Chapeau', "Chapeau : l'introduction en gras")}${tool('p', 'Texte', 'Texte normal')}
-          <span class="tbk-sep" aria-hidden="true"></span>
-          ${tool('bold', '<b>G</b>', 'Gras', 'sq')}${tool('italic', '<i>I</i>', 'Italique', 'sq')}${tool('underline', '<u>S</u>', 'Souligné', 'sq')}
-          <span class="tbk-sep" aria-hidden="true"></span>
-          ${tool('quote', '❝ Citation', 'Citation')}${tool('list', '• Liste', 'Liste à puces')}${tool('br', '↵', 'Saut de ligne', 'sq')}${tool('hr', '✦', 'Séparateur', 'sq')}${tool('img', '🖼 Image', 'Ajouter une image (galerie ou appareil photo)')}${tool('undo', '↶', 'Annuler', 'sq')}
+          <select class="tbk-style" id="tbkStyle" aria-label="Style du paragraphe" title="Style du paragraphe">
+            <option value="p">Paragraphe</option><option value="h2">Titre</option><option value="h3">Sous-titre</option><option value="lead">Chapeau</option><option value="quote">Citation</option>
+          </select>
+          <span class="tbk-grp">${tb('bold', 'bold', 'Gras (Ctrl+B)')}${tb('italic', 'italic', 'Italique (Ctrl+I)')}${tb('underline', 'underline', 'Souligné (Ctrl+U)')}${tb('clear', 'clear', 'Effacer la mise en forme')}</span>
+          <span class="tbk-grp">${tb('al-l', 'alignLeft', 'Aligner à gauche')}${tb('al-c', 'alignCenter', 'Centrer')}${tb('al-r', 'alignRight', 'Aligner à droite')}${tb('al-j', 'alignJustify', 'Justifier')}</span>
+          <span class="tbk-grp">${tb('list', 'list', 'Liste à puces')}${tb('olist', 'listOrdered', 'Liste numérotée')}${tb('br', 'br', 'Saut de ligne (Maj+Entrée)')}${tb('hr', 'hr', 'Séparateur')}${tb('img', 'image', 'Ajouter une image (galerie ou appareil photo)')}</span>
+          <span class="tbk-grp">${tb('undo', 'undo', 'Annuler (Ctrl+Z)')}${tb('redo', 'redo', 'Rétablir (Ctrl+Y)')}${tb('full', 'full', 'Plein écran')}</span>
         </div>
-        <div class="tbk-ed" id="tbkEd" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Ton texte" spellcheck="true" data-ph="Colle ici un article, un mail, un passage de livre… Les titres et les images passent aussi.">${draft.html || ''}</div>
+        <div class="tbk-edwrap">
+          <div class="tbk-ed" id="tbkEd" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Ton texte" spellcheck="true" data-ph="Colle ici un article, un mail, un passage de livre… Les titres et les images passent aussi.">${draft.html || ''}</div>
+          <div class="tbk-popt" id="tbkPasteOpt" hidden role="group" aria-label="Options de collage">
+            <span>📋 Collé :</span>
+            <button type="button" data-pm="simple">Simple</button>
+            <button type="button" data-pm="full" title="Garder le gras, l'italique et le souligné du texte copié">Avec le style</button>
+            <button type="button" data-pm="plain">Texte seul</button>
+          </div>
+        </div>
         <div class="tbk-imgbar" id="tbkImgBar" hidden>
           <span class="tbk-imgbar-l">🖼 Image</span>
           <input type="range" id="tbkImgW" min="15" max="100" step="1" value="100" aria-label="Taille de l'image"><output id="tbkImgWOut">100 %</output>
@@ -42958,7 +43053,7 @@ function renderTabletteHome(){
         </div>
         <input type="file" id="tbkFile" accept="image/*" multiple hidden>
         <div class="tbk-row">
-          <button type="button" class="tbk-paste" id="tbkPaste">📋 Coller</button>
+          <button type="button" class="tbk-paste" id="tbkPaste">${tbIcon('paste')} Coller</button>
           <button type="button" class="tbk-paste tbk-fix" id="tbkFix" title="Recolle les lignes coupées au milieu des phrases">🧹 Ajuster</button>
           <span class="tbk-count" id="tbkCount"></span>
           <button type="button" class="tbk-open" id="tbkOpen" disabled>${editing ? 'Enregistrer et ouvrir' : 'Ouvrir sur la Tablette'}</button>
@@ -42974,22 +43069,45 @@ function renderTabletteHome(){
       ${tbGet('sample') ? item(tbGet('sample')) : `<div class="tbk-item" data-tbk-open="sample" role="button" tabindex="0"><div class="tbk-main"><b>${escapeHtml(TB_SAMPLE.title)}</b><span class="tbk-meta"><span>Texte d'exemple</span><span>${tbWordsCount(TB_SAMPLE.text)} mots</span></span></div></div>`}
       ${typeof BOUQUINAGE_TEXTS !== 'undefined' && BOUQUINAGE_TEXTS.length ? `<div class="tbk-item" data-tbk-bq="1" role="button" tabindex="0"><div class="tbk-main"><b>🎲 Un texte du Bouquinage</b><span class="tbk-meta"><span>${BOUQUINAGE_TEXTS.length} textes de motivation</span></span></div></div>` : ''}
     </div></div>`;
-  const root = document.getElementById('tbkRoot');
+  const root = document.getElementById('tbkRoot'), dev = document.getElementById('tbkDevice');
   const ed = document.getElementById('tbkEd'), ti = document.getElementById('tbkTitle'), openB = document.getElementById('tbkOpen'), cnt = document.getElementById('tbkCount');
   const fixB = document.getElementById('tbkFix'), hint = document.getElementById('tbkHint'), bar = document.getElementById('tbkImgBar'), file = document.getElementById('tbkFile');
+  const tools = document.getElementById('tbkTools'), styleSel = document.getElementById('tbkStyle'), popt = document.getElementById('tbkPasteOpt');
   tbLoadImgs(root);
   try{ document.execCommand('defaultParagraphSeparator', false, 'p'); }catch(e){}
+  try{ document.execCommand('styleWithCSS', false, false); }catch(e){}
   /* la sélection dans l'éditeur (pour que les boutons agissent au bon endroit, même après un toucher ailleurs) */
   let range = null;
-  const keepSel = () => { const s = window.getSelection(); if(s && s.rangeCount && ed.contains(s.getRangeAt(0).commonAncestorContainer)) range = s.getRangeAt(0).cloneRange(); };
+  const inEd = () => { const s = window.getSelection(); return !!(s && s.rangeCount && ed.contains(s.getRangeAt(0).commonAncestorContainer)); };
+  const keepSel = () => { if(inEd()) range = window.getSelection().getRangeAt(0).cloneRange(); };
   const putSel = () => {
+    if(inEd()){ keepSel(); if(document.activeElement !== ed) ed.focus({ preventScroll:true }); if(inEd()) return; }   // le curseur est encore dans le texte : on le garde tel quel
     ed.focus({ preventScroll:true });
     const s = window.getSelection();
     if(range && ed.contains(range.commonAncestorContainer)){ s.removeAllRanges(); s.addRange(range); return; }
-    if(!s.rangeCount || !ed.contains(s.getRangeAt(0).commonAncestorContainer)){ const r = document.createRange(); r.selectNodeContents(ed); r.collapse(false); s.removeAllRanges(); s.addRange(r); }
+    if(!inEd()){ const r = document.createRange(); r.selectNodeContents(ed); r.collapse(false); s.removeAllRanges(); s.addRange(r); }
   };
-  document.addEventListener('selectionchange', keepSel);
-  new MutationObserver((_, obs) => { if(!root.isConnected){ document.removeEventListener('selectionchange', keepSel); obs.disconnect(); } }).observe(card, { childList:true });
+  const blockOfSel = () => { const s = window.getSelection(); let n = s && s.rangeCount ? s.getRangeAt(0).startContainer : null; while(n && n !== ed){ if(n.nodeType === 1 && /^(H2|H3|H4|P|BLOCKQUOTE|LI|DIV)$/.test(n.tagName)) return n; n = n.parentNode; } return null; };
+  /* l'état des boutons suit le curseur, comme dans un vrai traitement de texte */
+  const refresh = () => {
+    if(!inEd()) return;
+    const q = (c) => { try{ return document.queryCommandState(c); }catch(e){ return false; } };
+    const on = (cmd, v) => { const b = tools.querySelector(`[data-ed="${cmd}"]`); if(b){ b.classList.toggle('on', !!v); b.setAttribute('aria-pressed', String(!!v)); } };
+    on('bold', q('bold')); on('italic', q('italic')); on('underline', q('underline'));
+    on('list', q('insertUnorderedList')); on('olist', q('insertOrderedList'));
+    const blk = blockOfSel();
+    let ta = blk ? (blk.style.textAlign || getComputedStyle(blk).textAlign || '') : '';
+    ta = ta === 'center' ? 'c' : ta === 'right' ? 'r' : ta === 'justify' ? 'j' : 'l';
+    ['l', 'c', 'r', 'j'].forEach(x => on('al-' + x, ta === x));
+    let v = 'p';
+    if(blk){ const tg = blk.tagName; v = tg === 'H2' ? 'h2' : tg === 'H3' ? 'h3' : tg === 'H4' ? 'lead' : (tg === 'BLOCKQUOTE' || blk.closest('blockquote')) ? 'quote' : 'p'; }
+    if(styleSel.value !== v) styleSel.value = v;
+  };
+  const onSel = () => { keepSel(); refresh(); };
+  document.addEventListener('selectionchange', onSel);
+  const onKey = (e) => { if(e.key === 'Escape' && dev.classList.contains('full')){ e.preventDefault(); setFull(false); } };
+  document.addEventListener('keydown', onKey);
+  new MutationObserver((_, obs) => { if(!root.isConnected){ document.removeEventListener('selectionchange', onSel); document.removeEventListener('keydown', onKey); document.body.classList.remove('tbk-full-on'); obs.disconnect(); } }).observe(card, { childList:true });
   const blocks = () => tbDomToBlocks(ed, { editor:true });
   const sync = (keepCount) => {
     const b = blocks(), text = tbBlocksText(b), n = tbWordsCount(text), imgs = b.filter(x => x.t === 'img').length;
@@ -43007,49 +43125,113 @@ function renderTabletteHome(){
     if(!ok){ const s = window.getSelection(); const r = s.getRangeAt(0); r.deleteContents(); const frag = r.createContextualFragment(html); r.insertNode(frag); r.collapse(false); }
     tbLoadImgs(ed); keepSel(); sync();
   };
-  const addImages = async (files) => {
-    for(const f of files){
+  const addImages = async (files, cache) => {
+    for(let k = 0; k < files.length; k++){
+      const f = files[k];
       if(!/^image\//.test(f.type || '')) continue;
-      cnt.textContent = '🖼 J\'ajoute l\'image…';
-      const id = await tbImgAdd(f);
-      if(!id){ setStatus("⚠️ L'image n'a pas pu être gardée sur cet appareil.", 'err'); continue; }
+      let id = cache && cache[k];
+      if(!id){
+        cnt.textContent = '🖼 J\'ajoute l\'image…';
+        id = await tbImgAdd(f);
+        if(!id){ setStatus("⚠️ L'image n'a pas pu être gardée sur cet appareil.", 'err'); continue; }
+        if(cache) cache[k] = id;
+      }
       insertHtml(`<p>${tbEdImgHtml({ id, w:100, al:'c' })}</p><p><br></p>`);
     }
     sync();
   };
-  /* ce qu'on colle : une image, une page web, un document Word, un mail ou du texte simple */
-  const pasteData = async (d) => {
+  /* ce qu'on colle : une image, une page web, un document Word, un mail ou du texte simple
+     mode « simple » (par défaut) : titres, listes, images… mais sans le gras / souligné de la page d'origine
+     mode « full » : tout garder · mode « plain » : le texte seul */
+  const pasteData = async (d, mode) => {
     const files = (d.files || []).filter(f => /^image\//.test(f.type || ''));
+    d.ids = d.ids || [];
     const html = d.html || '';
     const htmlHasText = html && (new DOMParser().parseFromString(html, 'text/html').body.textContent || '').trim();
-    if(files.length && !htmlHasText){ await addImages(files); return true; }
-    if(html){
-      const doc = new DOMParser().parseFromString(html, 'text/html');
-      const bl = tbDomToBlocks(doc.body);
-      // les images collées en « data: » sont gardées sur l'appareil
-      for(const b of bl){
-        if(b.t === 'img' && b.src && /^data:image\//.test(b.src)){
-          try{ const blob = await (await fetch(b.src)).blob(); const id = await tbImgAdd(blob); if(id){ b.id = id; delete b.src; } }catch(e){}
+    if(files.length && !htmlHasText && !(mode === 'plain' && d.text)){ await addImages(files, d.ids); return true; }
+    if(mode !== 'plain' && html){
+      if(!d.blocks){
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        d.blocks = tbDomToBlocks(doc.body, { brAsPara:true });
+        for(const b of d.blocks){
+          if(b.t === 'img' && b.src && /^data:image\//.test(b.src)){
+            try{ const blob = await (await fetch(b.src)).blob(); const id = await tbImgAdd(blob); if(id){ b.id = id; delete b.src; } }catch(e){}
+          }
         }
       }
+      const bl = mode === 'full' ? d.blocks : tbBlocksPlainStyle(d.blocks);
       if(bl.length){ insertHtml(tbBlocksToEdHtml(bl)); return true; }
     }
-    if(d.text){ insertHtml(tbTextToEdHtml(d.text)); return true; }
-    if(files.length){ await addImages(files); return true; }
+    const text = d.text || (html ? new DOMParser().parseFromString(html, 'text/html').body.innerText || '' : '');
+    if(text && text.trim()){ insertHtml(tbTextToEdHtml(text)); return true; }
+    if(files.length){ await addImages(files, d.ids); return true; }
     return false;
   };
+  /* 📋 après un collage : « Simple / Avec gras, souligné… / Texte seul », comme dans un traitement de texte */
+  let last = null, poptT = 0;
+  /* le curseur (la fin de ce qu'on vient de coller) reste visible dans la zone de texte */
+  const caretIntoView = () => { try{
+    const s = window.getSelection(); if(!s.rangeCount || !inEd()) return;
+    const rg = s.getRangeAt(0); let r = rg.getClientRects()[0];
+    if(!r){ let n = rg.startContainer; if(n === ed) n = ed.childNodes[rg.startOffset - 1] || ed.childNodes[rg.startOffset]; if(n && n.nodeType === 3) n = n.parentElement; r = n && n.getBoundingClientRect ? n.getBoundingClientRect() : null; }
+    if(!r) return;
+    const er = ed.getBoundingClientRect();
+    if(r.bottom > er.bottom - 8) ed.scrollTop += r.bottom - er.bottom + 24; else if(r.top < er.top + 4) ed.scrollTop -= er.top - r.top + 24;
+  }catch(e){} };
+  const showPopt = (mode) => {
+    popt.querySelectorAll('[data-pm]').forEach(b => { b.classList.toggle('on', b.dataset.pm === mode); b.setAttribute('aria-pressed', String(b.dataset.pm === mode)); });
+    popt.hidden = false; clearTimeout(poptT); poptT = setTimeout(() => { popt.hidden = true; }, 15000);
+    const show = () => { caretIntoView(); try{ const r = popt.getBoundingClientRect(); if(!popt.hidden && (r.bottom > window.innerHeight - 8 || r.top < 0)) popt.scrollIntoView({ block:'nearest', behavior:'smooth' }); }catch(e){} };
+    show(); setTimeout(show, 450);          // et encore une fois quand les images collées ont pris leur place
+  };
+  const doPaste = async (d, mode) => {
+    putSel();
+    const s = window.getSelection(), r = s.getRangeAt(0);
+    r.deleteContents();
+    const mk = document.createElement('span'); mk.setAttribute('data-pmark', '1'); r.insertNode(mk);
+    const snap = ed.innerHTML;
+    const r2 = document.createRange(); r2.setStartAfter(mk); r2.collapse(true); mk.remove(); s.removeAllRanges(); s.addRange(r2); range = r2.cloneRange();
+    const done = await pasteData(d, mode);
+    if(done){ last = { d, snap, mode }; if(d.html || d.files && d.files.length) showPopt(mode); else caretIntoView(); }
+    sync();
+  };
+  const redoPaste = async (mode) => {
+    if(!last) return;
+    ed.innerHTML = last.snap;
+    const mk = ed.querySelector('[data-pmark]');
+    if(mk){ const r = document.createRange(); r.setStartAfter(mk); r.collapse(true); mk.remove(); const s = window.getSelection(); s.removeAllRanges(); s.addRange(r); range = r.cloneRange(); }
+    tbLoadImgs(ed);
+    await pasteData(last.d, mode);
+    last.mode = mode; tbUi().pasteMode = mode; tbSaveUi();
+    showPopt(mode); sync();
+  };
+  popt.addEventListener('pointerdown', (e) => e.preventDefault());
+  popt.addEventListener('click', (e) => { const b = e.target.closest('[data-pm]'); if(b) redoPaste(b.dataset.pm); });
+  let plainNext = false;
   ed.addEventListener('paste', (e) => {
     const cd = e.clipboardData; if(!cd) return;
     e.preventDefault();
     keepSel();
-    pasteData({ files:[...(cd.files || [])], html:cd.getData('text/html'), text:cd.getData('text/plain') });
+    const mode = plainNext ? 'plain' : (tbUi().pasteMode || 'simple'); plainNext = false;
+    doPaste({ files:[...(cd.files || [])], html:cd.getData('text/html'), text:cd.getData('text/plain') }, mode);
   });
   ed.addEventListener('drop', (e) => { const fs = [...(e.dataTransfer && e.dataTransfer.files || [])].filter(f => /^image\//.test(f.type)); if(fs.length){ e.preventDefault(); addImages(fs); } });
-  ed.addEventListener('input', () => sync());
+  ed.addEventListener('input', () => { popt.hidden = true; keepSel(); sync(); });
+  ed.addEventListener('keyup', keepSel); ed.addEventListener('pointerup', keepSel);
+  styleSel.addEventListener('pointerdown', keepSel); styleSel.addEventListener('focus', keepSel);
   ti.addEventListener('input', () => sync());
   ed.addEventListener('keydown', (e) => {
-    if((e.ctrlKey || e.metaKey) && !e.shiftKey && ['b', 'i', 'u'].includes(e.key.toLowerCase())){ e.preventDefault(); document.execCommand({ b:'bold', i:'italic', u:'underline' }[e.key.toLowerCase()]); sync(); }
+    const k = e.key.toLowerCase(), mod = e.ctrlKey || e.metaKey;
+    if(mod && e.shiftKey && k === 'v'){ plainNext = true; return; }          // Ctrl+Maj+V : coller le texte seul
+    if(mod && !e.shiftKey && ['b', 'i', 'u'].includes(k)){ e.preventDefault(); document.execCommand({ b:'bold', i:'italic', u:'underline' }[k]); sync(); refresh(); }
+    if(mod && (k === 'y' || (e.shiftKey && k === 'z'))){ e.preventDefault(); document.execCommand('redo'); sync(); }
   });
+  /* ⛶ plein écran : l'éditeur prend tout l'écran */
+  const setFull = (on) => {
+    dev.classList.toggle('full', on); document.body.classList.toggle('tbk-full-on', on);
+    const b = tools.querySelector('[data-ed="full"]'); if(b){ b.innerHTML = tbIcon(on ? 'exitFull' : 'full'); b.title = on ? 'Quitter le plein écran (Échap)' : 'Plein écran'; b.setAttribute('aria-label', b.title); b.classList.toggle('on', on); }
+    putSel();
+  };
   /* 🖼 toucher une image dans l'éditeur : taille, position, retirer */
   let selImg = null;
   const showBar = (img) => {
@@ -43070,34 +43252,61 @@ function renderTabletteHome(){
     selImg.dataset.al = b.dataset.ei; selImg.classList.remove('al-l', 'al-c', 'al-r'); selImg.classList.add('al-' + b.dataset.ei);
     showBar(selImg); sync();
   });
-  /* la barre de mise en page */
-  const blockOfSel = () => { const s = window.getSelection(); let n = s && s.rangeCount ? s.getRangeAt(0).startContainer : null; while(n && n !== ed){ if(n.nodeType === 1 && /^(H2|H3|H4|P|BLOCKQUOTE|LI)$/.test(n.tagName)) return n; n = n.parentNode; } return null; };
-  const tools = document.getElementById('tbkTools');
+  /* la barre d'outils */
+  const exec = (c, v) => { try{ return document.execCommand(c, false, v); }catch(e){ return false; } };
   tools.addEventListener('pointerdown', (e) => { if(e.target.closest('[data-ed]')) e.preventDefault(); });
   tools.addEventListener('mousedown', (e) => { if(e.target.closest('[data-ed]')) e.preventDefault(); });
   tools.addEventListener('click', (e) => {
     const b = e.target.closest('[data-ed]'); if(!b) return;
     const cmd = b.dataset.ed;
     if(cmd === 'img'){ file.click(); return; }
+    if(cmd === 'full'){ setFull(!dev.classList.contains('full')); return; }
     putSel();
-    const blk = blockOfSel(), cur = blk ? blk.tagName : '';
-    const fmt = (tag) => { try{ document.execCommand('formatBlock', false, (cur === tag.toUpperCase()) ? 'p' : tag); }catch(err){} };
-    if(cmd === 'h2') fmt('h2');
-    else if(cmd === 'h3') fmt('h3');
-    else if(cmd === 'lead') fmt('h4');
-    else if(cmd === 'p'){ try{ document.execCommand('formatBlock', false, 'p'); }catch(err){} }
-    else if(cmd === 'quote') fmt('blockquote');
-    else if(cmd === 'list') document.execCommand('insertUnorderedList');
-    else if(cmd === 'br'){ let ok = false; try{ ok = document.execCommand('insertLineBreak'); }catch(err){} if(!ok) document.execCommand('insertHTML', false, '<br>'); }
-    else if(cmd === 'hr') document.execCommand('insertHorizontalRule');
-    else if(cmd === 'undo') document.execCommand('undo');
-    else document.execCommand(cmd);
-    keepSel(); sync();
+    if(cmd === 'list') exec('insertUnorderedList');
+    else if(cmd === 'olist') exec('insertOrderedList');
+    else if(cmd === 'br'){ if(!exec('insertLineBreak')) exec('insertHTML', '<br>'); }
+    else if(cmd === 'hr') exec('insertHorizontalRule');
+    else if(cmd === 'clear'){ exec('removeFormat'); exec('unlink'); }
+    else if(cmd === 'al-l') exec('justifyLeft');
+    else if(cmd === 'al-c') exec('justifyCenter');
+    else if(cmd === 'al-r') exec('justifyRight');
+    else if(cmd === 'al-j') exec('justifyFull');
+    else exec(cmd);
+    keepSel(); sync(); refresh();
+  });
+  /* sortir le paragraphe courant d'une citation (sans toucher aux autres lignes de la citation) */
+  const inQuote = () => { const k = blockOfSel(); return k ? k.closest('blockquote') : null; };
+  const unquote = () => {
+    const s = window.getSelection(); if(!s.rangeCount) return;
+    const r0 = s.getRangeAt(0), sc = r0.startContainer, so = r0.startOffset;
+    const blk = blockOfSel(), q = blk && blk.closest('blockquote'); if(!q) return;
+    let moved;
+    if(blk === q){ moved = document.createElement('p'); if(q.style.textAlign) moved.style.textAlign = q.style.textAlign; while(q.firstChild) moved.appendChild(q.firstChild); q.replaceWith(moved); }
+    else {
+      let top = blk; while(top.parentNode !== q) top = top.parentNode;
+      const after = []; for(let n = top.nextSibling; n; n = n.nextSibling) after.push(n);
+      q.parentNode.insertBefore(top, q.nextSibling); moved = top;
+      if(after.length){ const q2 = document.createElement('blockquote'); after.forEach(x => q2.appendChild(x)); top.after(q2); }
+      if(!q.textContent.trim() && !q.querySelector('img')) q.remove();
+    }
+    try{ const r = document.createRange(); r.setStart(sc, Math.min(so, sc.nodeType === 3 ? sc.length : sc.childNodes.length)); r.collapse(true); s.removeAllRanges(); s.addRange(r); }
+    catch(e){ const r = document.createRange(); r.selectNodeContents(moved); r.collapse(false); s.removeAllRanges(); s.addRange(r); }
+  };
+  styleSel.addEventListener('change', () => {
+    putSel();
+    const v = styleSel.value;
+    if(v === 'quote'){ if(!inQuote()) exec('formatBlock', 'blockquote'); }
+    else {
+      if(inQuote()){ exec('formatBlock', 'p'); if(inQuote()) unquote(); }
+      exec('formatBlock', ({ p:'p', h2:'h2', h3:'h3', lead:'h4' })[v] || 'p');
+    }
+    keepSel(); sync(); refresh();
   });
   file.addEventListener('change', async () => { const fs = [...file.files]; file.value = ''; keepSel(); await addImages(fs); });
   sync();
   fixB.addEventListener('click', () => {
-    const r = tbReflowBlocks(blocks());
+    let r = tbReflowBlocks(blocks());
+    if(!r.joined) r = tbReflowBlocks(blocks(), { breaks:true });        // on le demande : les sauts de ligne aussi
     if(r.changed){ ed.innerHTML = tbBlocksToEdHtml(r.blocks); tbLoadImgs(ed); }
     sync(true);
     cnt.textContent = r.joined ? `✓ ${r.joined} retour${r.joined > 1 ? 's' : ''} à la ligne recollé${r.joined > 1 ? 's' : ''}` : '✓ Texte déjà bien ajusté';
@@ -43121,7 +43330,7 @@ function renderTabletteHome(){
       }catch(e){ d = null; }
     }
     if(!d){ try{ d = { text:await navigator.clipboard.readText(), html:'', files:[] }; }catch(e){ d = null; } }
-    if(d && (d.text || d.html || d.files.length)){ if(await pasteData(d)) return; }
+    if(d && (d.text || d.html || d.files.length)){ await doPaste(d, tbUi().pasteMode || 'simple'); return; }
     ed.focus();
     setStatus(d ? '📋 Le presse-papiers est vide : copie d\'abord un texte ou une image.' : '📋 Appuie longuement dans la zone de texte puis choisis « Coller ».', 'err');
   });
@@ -43145,6 +43354,7 @@ function renderTabletteHome(){
     }
     if(!tbPut(art)) setStatus("⚠️ Plus de place pour garder ce texte sur l'appareil : il s'ouvre quand même.", 'err');
     TB.edit = null; TB.draft = null; TB.mem = art; TB.edUsed = [];
+    document.body.classList.remove('tbk-full-on');
     renderTabletteReader(art.id);
   });
   const cancel = document.getElementById('tbkCancel');
@@ -43885,7 +44095,8 @@ function tbReflow(text){
 function tbNeedsReflow(text){ const r = tbReflow(text); return r.joined >= 1 && r.changed; }
 function tbReflowArt(){
   if(!TB.art) return;
-  const r = tbReflowBlocks(tbBlocksOf(TB.art));
+  let r = tbReflowBlocks(tbBlocksOf(TB.art));
+  if(!r.changed) r = tbReflowBlocks(tbBlocksOf(TB.art), { breaks:true });     // on le demande : les sauts de ligne ↵ aussi
   if(!r.changed){ tbToast('✓ Le texte est déjà bien ajusté'); return; }
   const a = tbAnchorGet();
   if(TB.art.textOrig == null){ TB.art.textOrig = TB.art.text; TB.art.blocksOrig = TB.art.blocks || null; }
