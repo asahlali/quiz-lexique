@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- 🏷️ Version de l'appli : augmentée automatiquement par publier-site.cmd à chaque publication -->
-<meta name="app-version" content="1.0.17" data-date="2026-10-16">
+<meta name="app-version" content="1.0.18" data-date="2026-10-16">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <title>VocabVISION — Vocabulaire Français ↔ Arabe</title>
 <script>
@@ -1922,6 +1922,30 @@
   .tb-cr .tb-in{ margin-top:6px; }
   .tb-cr-s{ margin-top:6px; font-family:'Literata',Georgia,serif; font-size:13.5px; line-height:1.45; color:var(--tb-ink2); }
   .tb-cr.done .tb-cr-s{ opacity:.7; }
+  /* 🎤 1.0.18 : « Je lis » repensé, 🎧 réécouter sa voix, 🧹 ajuster les lignes */
+  .tb-self-txt{ flex:1; min-width:0; display:flex; flex-direction:column; gap:1px; line-height:1.2; }
+  .tb-self-txt b{ font-size:11.5px; font-weight:800; color:var(--tb-ink2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .tb-self-txt span{ font-weight:800; font-size:13px; color:var(--tb-ink); overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+  .tb-mic.rec{ background:rgba(220,38,38,.14); }
+  .tb-check{ display:flex; align-items:center; gap:10px; padding:10px 2px 4px; font-weight:800; font-size:14px; cursor:pointer; color:var(--tb-ink); }
+  .tb-check input{ flex:none; width:20px; height:20px; accent-color:var(--tb-acc); }
+  .tb-sheet .tb-sh-act{ margin-top:12px; }
+  .tb-lastrec{ display:flex; align-items:center; gap:10px; margin-top:14px; padding:10px 12px; border-radius:14px; background:var(--tb-paper); border:1px solid var(--tb-rule); font-weight:800; font-size:14px; }
+  .tb-lastrec > span{ flex:1; min-width:0; }
+  .tb-lastrec small{ display:block; font-weight:700; font-size:12px; color:var(--tb-ink2); margin-top:2px; }
+  .tb-sh-in > .tb-link{ display:block; margin:12px auto 0; }
+  .tb-rp{ flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; padding:0 4px; }
+  .tb-rp-l{ font-size:12px; font-weight:800; color:var(--tb-ink2); white-space:nowrap; }
+  .tb-rp-t{ margin-left:6px; font-weight:800; color:var(--tb-ink); }
+  .tb-rp input{ width:100%; margin:0; height:22px; accent-color:var(--tb-acc); }
+  .tb-fixbar{ display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin:0 0 14px; padding:10px 12px; border-radius:14px; background:var(--tb-band); border:1px solid var(--tb-hit); font:700 13.5px/1.4 'Nunito','Inter',sans-serif; color:var(--tb-ink); }
+  .tb-fixbar > span{ flex:1 1 190px; }
+  .tb-fixbar{ position:relative; padding-right:44px; }
+  .tb-fixbar > .tb-ib{ position:absolute; top:6px; right:6px; }
+  .tbk-fix.hot{ background:#FFDE40; color:#1B1F27; border-color:transparent; }
+  .tbk-hint{ margin-top:8px; font-size:12.5px; font-weight:800; color:#B45309; line-height:1.4; }
+  [data-theme="dark"] .tbk-hint{ color:#FDBA74; }
+  .tbk-hint[hidden]{ display:none; }
   .tb-toast{ position:absolute; left:50%; bottom:calc(env(safe-area-inset-bottom, 0px) + 92px); z-index:8; transform:translate(-50%, 16px); opacity:0; pointer-events:none;
     max-width:calc(100% - 32px); width:max-content; padding:10px 16px; border-radius:14px; background:var(--tb-ink); color:var(--tb-paper); font-weight:800; font-size:13.5px; line-height:1.35; text-align:center; transition:opacity .25s, transform .25s; }
   .tb-toast.show{ opacity:1; transform:translate(-50%, 0); }
@@ -19328,6 +19352,8 @@ const COLOR_PRESETS = {
 /* ============ 🆕 NOUVEAUTÉS — pour que tout ce qui a été ajouté reste découvrable ============ */
 const WHATS_NEW_SECTIONS = [
   { icon:'🆕', title:'Nouveautés', items:[
+    { name:"🎤 Tablette : « Je lis » repensé + 🎧 réécouter ta voix", desc:"Le micro reste ouvert pendant toute ta lecture : tu peux respirer au milieu d'une phrase, ce que tu dis s'additionne et la phrase est validée dès que ses mots sont reconnus (les premiers mots de la suivante sont gardés). Après un silence, les mots qui manquent passent en orange. Coche « 🎙️ Garder aussi ma voix » (ou choisis « M'enregistrer ») : à la fin, « Ta lecture » te permet de te réécouter, phrase surlignée au fil de l'écoute, et de télécharger l'enregistrement." },
+    { name:'🧹 Ajuster le texte', desc:"Un texte copié d'un PDF ou d'un site arrive avec des retours à la ligne au milieu des phrases ? Touche « 🧹 Ajuster » (en collant le texte, ou dans la Tablette : bandeau en haut ou « Aa ») : les lignes sont recollées, chaque phrase va de la majuscule jusqu'au point. « ↩ Remettre comme avant » si besoin." },
     { name:"📰 La Tablette sur l'accueil + 📐 texte justifié", desc:"La Tablette a maintenant sa carte sur l'accueil (avec « ▶ Reprendre » ta lecture en cours) et sa place dans le menu ☰. Dans la Tablette, « Aa » : texte à gauche ou justifié, et la largeur de la colonne que tu veux (jusqu'à tout l'écran)." },
     { name:'🤫 Renard muet', desc:"À l'ouverture, touche « Faire taire le renard » (en haut à gauche) : il ne dira plus bonjour ni bravo à voix haute, et c'est retenu pour les prochaines fois. Pour le réentendre : menu ☰ › « Le renard parle ». Les voix des exercices et de la lecture restent." },
     { name:"📰 La Tablette", desc:"Colle n'importe quel texte (article, mail, passage de livre) : il s'ouvre en plein écran, bord à bord, avec les liaisons et les pauses. Touche un mot pour l'entendre et voir son sens (en arabe aussi). ▶ la voix te lit le texte, 🎤 « Je lis » : tu le lis à voix haute et les mots reconnus s'allument. 🔍 cherche un mot, choisis la phrase, 🖍 tague-le ; 🖍 Chasse : surligne les mots difficiles, ils filent dans ton carnet, puis ➕ dans tes mots, avec la phrase pour exemple. Zoom : A−/A+ ou pince l'écran avec deux doigts." },
@@ -42186,7 +42212,7 @@ function tbLoad(){ try{ const a = JSON.parse(localStorage.getItem(tbArtKey()) ||
 function tbSave(list){ try{ localStorage.setItem(tbArtKey(), JSON.stringify(list.slice(0, 40))); return true; }catch(e){ return false; } }
 function tbGet(id){ return tbLoad().find(a => a.id === id) || null; }
 function tbPut(art){ const L = tbLoad(); const i = L.findIndex(a => a.id === art.id); if(i >= 0) L[i] = art; else L.unshift(art); return tbSave(L); }
-function tbDel(id){ tbSave(tbLoad().filter(a => a.id !== id)); }
+function tbDel(id){ tbSave(tbLoad().filter(a => a.id !== id)); try{ tbRecDel(id); }catch(e){} }
 function tbUi(){
   if(!TB.ui){ let u = null; try{ u = JSON.parse(localStorage.getItem(nsKey('lexiqueQuiz::tabletteUi')) || 'null'); }catch(e){} TB.ui = Object.assign({ fs:19, lh:1.65, align:'left', w:0 }, u || {}); }
   return TB.ui;
@@ -42438,9 +42464,11 @@ function renderTabletteHome(){
         <textarea class="tbk-text" id="tbkText" rows="7" placeholder="Colle ici un article, un mail, un passage de livre…">${escapeHtml(draft.text || '')}</textarea>
         <div class="tbk-row">
           <button type="button" class="tbk-paste" id="tbkPaste">📋 Coller</button>
+          <button type="button" class="tbk-paste tbk-fix" id="tbkFix" title="Recolle les lignes coupées au milieu des phrases">🧹 Ajuster</button>
           <span class="tbk-count" id="tbkCount"></span>
           <button type="button" class="tbk-open" id="tbkOpen" disabled>${editing ? 'Enregistrer et ouvrir' : 'Ouvrir sur la Tablette'}</button>
         </div>
+        <div class="tbk-hint" id="tbkHint" hidden>✂️ Des phrases sont coupées par des retours à la ligne : touche « 🧹 Ajuster » pour les recoller.</div>
         ${editing ? `<button type="button" class="tbk-cancel" id="tbkCancel">Annuler la modification</button>` : ''}
       </div>
     </div>
@@ -42453,13 +42481,22 @@ function renderTabletteHome(){
     </div></div>`;
   const root = document.getElementById('tbkRoot');
   const ta = document.getElementById('tbkText'), ti = document.getElementById('tbkTitle'), openB = document.getElementById('tbkOpen'), cnt = document.getElementById('tbkCount');
-  const sync = () => {
+  const fixB = document.getElementById('tbkFix'), hint = document.getElementById('tbkHint');
+  const sync = (keepCount) => {
     const n = tbWordsCount(ta.value);
-    cnt.textContent = n ? `${n} mot${n > 1 ? 's' : ''}` : '';
+    if(keepCount !== true) cnt.textContent = n ? `${n} mot${n > 1 ? 's' : ''}` : '';
     openB.disabled = n < 1;
+    const need = ta.value.length < 80000 && tbNeedsReflow(ta.value);
+    fixB.classList.toggle('hot', need); hint.hidden = !need;
     if(!TB.edit) TB.draft = { title:ti.value, text:ta.value };
   };
   ta.addEventListener('input', sync); ti.addEventListener('input', sync); sync();
+  fixB.addEventListener('click', () => {
+    const r = tbReflow(ta.value);
+    if(r.changed) ta.value = r.text;
+    sync(true);
+    cnt.textContent = r.joined ? `✓ ${r.joined} retour${r.joined > 1 ? 's' : ''} à la ligne recollé${r.joined > 1 ? 's' : ''}` : '✓ Texte déjà bien ajusté';
+  });
   document.getElementById('backFromTabletteBtn').addEventListener('click', () => { TB.edit = null; renderBlockSelect(); });
   document.getElementById('tbkPaste').addEventListener('click', async () => {
     try{
@@ -42587,6 +42624,11 @@ function tbOpen(art){
   tbRender(false);
   tbDock();
   tbWire(el);
+  if(tbNeedsReflow(art.text)){
+    const body = document.getElementById('tbBody');
+    if(body) body.insertAdjacentHTML('beforebegin', `<div class="tb-fixbar" id="tbFixBar"><span>✂️ Des phrases sont coupées par des retours à la ligne.</span><button type="button" class="tb-btn hl sm" data-tb="fix-text">🧹 Ajuster le texte</button><button type="button" class="tb-ib sm" data-tb="fix-x" aria-label="Laisser comme ça">✕</button></div>`);
+  }
+  tbRecOf(art.id).then(() => { if(TB.art === art) tbEndHtml(); });
   const sc = document.getElementById('tbScroll');
   if(art.pos > 0 && !art.done){
     const s = el.querySelector(`.tb-s[data-s="${art.pos}"]`);
@@ -42596,7 +42638,7 @@ function tbOpen(art){
 }
 function tbClose(quiet){
   const el = document.getElementById('tbReader');
-  if(TB.mode){ tbStopModes(); }
+  if(TB.mode){ tbStopModes(true); }
   if(TB.art && el) tbSaveArtNow();
   if(el) el.remove();
   document.body.classList.remove('tb-open');
@@ -42636,6 +42678,7 @@ function tbEndHtml(){
     <div class="tb-end-b">
       ${n ? `<button type="button" class="tb-btn hl" data-tb="carnet">🏷️ Ouvrir le carnet</button>` : `<button type="button" class="tb-btn hl" data-tb="hunt">🖍 Chasser les mots difficiles</button>`}
       <button type="button" class="tb-btn" data-tb="self-0">🎤 Le lire à voix haute</button>
+      ${TB.lastRec && TB.art && TB.lastRec.id === TB.art.id ? `<button type="button" class="tb-btn" data-tb="rp-go">🎧 Réécouter ma lecture</button>` : ''}
       <button type="button" class="tb-btn" data-tb="top">↑ Revenir en haut</button>
     </div>`;
 }
@@ -42674,6 +42717,8 @@ function tbAaHtml(){
     <div class="tb-pop-row"><span class="tb-pop-l">Voix</span><button type="button" class="tb-chip" data-tb="rate-" aria-label="Voix plus lente">🐢</button><output class="tb-out" id="tbRate">${readingRate.toFixed(2)}×</output><button type="button" class="tb-chip" data-tb="rate+" aria-label="Voix plus rapide">🐇</button></div>
     <div class="tb-pop-row"><span class="tb-pop-l">Marques</span><div class="tb-seg"><button type="button" data-tb="marks-set" data-v="1" class="${dx ? 'on' : ''}">🫁 Affichées</button><button type="button" data-tb="marks-set" data-v="0" class="${dx ? '' : 'on'}">Masquées</button></div></div>
     ${dx ? dxLegendHtml() : ''}
+    <div class="tb-pop-row"><span class="tb-pop-l">Lignes</span><button type="button" class="tb-chip" data-tb="fix-text">🧹 Ajuster les retours à la ligne</button></div>
+    ${TB.art && TB.art.textOrig ? `<div class="tb-pop-hint">Texte ajusté. <button type="button" class="tb-link" data-tb="fix-undo">↩ Remettre comme avant</button></div>` : `<div class="tb-pop-hint">Recolle les lignes coupées : chaque phrase va de la majuscule jusqu'au point.</div>`}
     ${TB.art && TB.art.src === 'Collé' ? `<button type="button" class="tb-btn wide" data-tb="edit">✏️ Modifier le texte</button>` : ''}`;
 }
 function tbToggleAa(force){
@@ -42706,13 +42751,25 @@ function tbDock(){
     return;
   }
   if(TB.mode === 'self'){
+    const rec = TB.selfKind === 'rec';
     d.className = 'tb-dock pl self';
-    d.innerHTML = `<span class="tb-mic ${TB.selfPaused ? '' : 'on'}" aria-hidden="true">🎤</span>
-      <span class="tb-self-msg" id="tbSelfMsg">${escapeHtml(TB.selfMsg || 'Lis la phrase surlignée à voix haute')}</span>
-      ${TB.selfPaused ? `<button type="button" class="tb-pb main" data-tb="self-go" aria-label="Reprendre">🎤</button>` : ''}
+    d.innerHTML = `<span class="tb-mic ${TB.selfPaused ? '' : 'on'} ${TB.rec ? 'rec' : ''}" aria-hidden="true">${rec ? '🎙️' : '🎤'}</span>
+      <span class="tb-self-txt"><b id="tbSelfN"></b><span id="tbSelfMsg">${escapeHtml(TB.selfMsg || '')}</span></span>
       <button type="button" class="tb-pb" data-tb="self-hear" aria-label="Écouter la phrase d'abord">🔊</button>
-      <button type="button" class="tb-pb" data-tb="self-skip" aria-label="Passer à la phrase suivante">⏭</button>
+      ${TB.selfPaused ? `<button type="button" class="tb-pb main" data-tb="self-go" aria-label="Reprendre">${rec ? '🎙️' : '🎤'}</button>` : `<button type="button" class="tb-pb" data-tb="self-pause" aria-label="Pause">⏸</button>`}
+      <button type="button" class="tb-pb ${rec && !TB.selfPaused ? 'main' : ''}" data-tb="self-skip" aria-label="Phrase suivante">⏭</button>
       <button type="button" class="tb-pb" data-tb="self-stop" aria-label="Arrêter">✕</button>`;
+    tbSelfHead();
+    return;
+  }
+  if(TB.mode === 'replay'){
+    const P = TB.replay, playing = !!(P && !P.au.paused && !P.ended);
+    d.className = 'tb-dock pl replay';
+    d.innerHTML = `<button type="button" class="tb-pb main" data-tb="rp-toggle" aria-label="${playing ? 'Pause' : 'Écouter'}">${playing ? '⏸' : '▶'}</button>
+      <span class="tb-rp"><span class="tb-rp-l">🎧 Ma lecture <span class="tb-rp-t" id="tbRpT"></span></span><input type="range" id="tbRpBar" min="0" max="1000" value="0" aria-label="Avancer dans l'enregistrement"></span>
+      <button type="button" class="tb-pb" data-tb="rp-dl" aria-label="Télécharger l'enregistrement">⬇</button>
+      <button type="button" class="tb-pb" data-tb="rp-stop" aria-label="Fermer">✕</button>`;
+    tbReplayUi();
     return;
   }
   d.className = 'tb-dock';
@@ -42768,83 +42825,446 @@ function tbSpeak(i){
 function tbHush(){ TB.token++; clearTimeout(TB.gapT); try{ window.speechSynthesis.cancel(); }catch(e){} try{ ttsSpeaking = false; }catch(e){} }
 function tbPause(){ TB.playing = false; tbHush(); tbDock(); }
 function tbResume(){ TB.playing = true; tbDock(); tbSpeak(TB.cur); }
-function tbStopModes(){
+function tbStopModes(quiet){
   const was = TB.mode;
   TB.mode = ''; TB.playing = false; TB.selfPaused = false; TB.selfMsg = '';
+  clearInterval(TB.selfTick);
   tbHush();
+  tbSRStop();
   try{ vvHearStop(); }catch(e){}
+  if(was === 'replay') tbReplayStop();
   tbHl(-1);
-  if(was === 'self') document.querySelectorAll('#tbBody .tbw.ok, #tbBody .tbw.miss').forEach(e => e.classList.remove('ok', 'miss'));
+  if(was === 'self'){
+    document.querySelectorAll('#tbBody .tbw.ok, #tbBody .tbw.miss').forEach(e => e.classList.remove('ok', 'miss'));
+    if(TB.rec) tbRecFinish(!quiet);
+  }
   tbDock();
 }
-/* 🎤 « Je lis » : tu lis à voix haute, les mots reconnus s'allument */
-function tbSelfStart(from){
-  tbStopModes();
-  TB.mode = 'self'; TB.selfTry = 0; TB.selfSil = 0; TB.selfPaused = false; TB.selfScores = {};
+/* 🎤 « Je lis » (1.0.18) : une écoute continue, phrase après phrase
+   • le micro reste ouvert : plus de coupure à chaque respiration, plus de « bip » entre deux phrases ;
+   • ce que tu dis s'additionne : tu peux respirer au milieu d'une phrase, ou relire un mot, rien n'est perdu ;
+   • la phrase est validée dès que presque tous ses mots sont reconnus, et les premiers mots de la suivante, déjà dits, sont gardés ;
+   • après un silence, les mots qui manquent passent en orange ;
+   • 🎙️ ta voix peut être enregistrée, pour la réécouter ensuite avec la phrase surlignée au fil de l'écoute. */
+var TB_SR_OK = 0.75;
+function tbCanSR(){ return !!(window.SpeechRecognition || window.webkitSpeechRecognition); }
+function tbRecSupported(){ return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder); }
+/* la fiche de départ : le mode (les mots s'allument / m'enregistrer seulement), garder sa voix, d'où commencer */
+function tbSelfOpen(){
+  const sh = document.getElementById('tbSheet'); if(!sh) return;
+  tbStopModes(true);
+  TB.sheetK = -3;
+  const u = tbUi(), from = tbFirstVisibleSent(), canSR = tbCanSR(), canRec = tbRecSupported();
+  const mode = (!canSR || u.selfMode === 'rec') && canRec ? 'rec' : 'sr';
+  const how = mode === 'rec'
+    ? "Lis la phrase surlignée à voix haute, puis touche <b>⏭</b> pour passer à la suivante. Ta voix est enregistrée : tu pourras la réécouter, phrase par phrase."
+    : "Lis la phrase surlignée à voix haute : les mots s'allument en vert quand tu les dis, et on passe tout seul à la suivante. Tu peux respirer au milieu d'une phrase, rien n'est perdu.";
+  sh.innerHTML = `<div class="tb-sh-in">
+    <div class="tb-grab" aria-hidden="true"></div>
+    <div class="tb-sh-top"><div><div class="tb-sh-w">Lire à voix haute</div><div class="tb-sh-ipa">${TB.sents.length} phrase${TB.sents.length > 1 ? 's' : ''}</div></div><button type="button" class="tb-ib" data-tb="sheet-x" aria-label="Fermer">✕</button></div>
+    <div class="tb-info-l">${how}</div>
+    <div class="tb-pop-row"><span class="tb-pop-l">Mode</span><div class="tb-seg">
+      <button type="button" data-tb="self-mode" data-v="sr" class="${mode === 'sr' ? 'on' : ''}" ${canSR ? '' : 'disabled'}>🔤 Les mots s'allument</button>
+      <button type="button" data-tb="self-mode" data-v="rec" class="${mode === 'rec' ? 'on' : ''}" ${canRec ? '' : 'disabled'}>🎙️ M'enregistrer</button></div></div>
+    ${!canSR ? `<div class="tb-pop-hint">Ce navigateur ne sait pas reconnaître la voix : essaie Chrome (Android, ordinateur) ou Safari (iPhone).</div>` : ''}
+    ${mode === 'sr' && canRec ? `<label class="tb-check"><input type="checkbox" id="tbKeep" ${u.keepVoice ? 'checked' : ''}><span>🎙️ Garder aussi ma voix pour la réécouter</span></label>` : ''}
+    <div class="tb-sh-act">
+      <button type="button" class="tb-btn pri" data-tb="self-go-at" data-s="0">▶ Depuis le début</button>
+      ${from > 0 ? `<button type="button" class="tb-btn" data-tb="self-go-at" data-s="${from}">▶ Ici (phrase ${from + 1})</button>` : ''}
+    </div>
+    <div id="tbLastRec"></div>
+  </div>`;
+  sh.classList.add('open'); sh.setAttribute('aria-hidden', 'false');
+  tbLastRecFill();
+}
+async function tbSelfStart(from){
+  tbStopModes(true); tbCloseSheet();
+  if(TB.hunt) tbHuntToggle(false);
+  const u = tbUi(), canSR = tbCanSR(), canRec = tbRecSupported();
+  TB.selfKind = ((u.selfMode === 'rec' && canRec) || (!canSR && canRec)) ? 'rec' : 'sr';
+  if(TB.selfKind === 'sr' && !canSR){ tbToast("🎤 Ce navigateur ne sait pas reconnaître la voix : essaie Chrome ou Safari.", 3600); return; }
+  TB.mode = 'self'; TB.selfScores = {}; TB.selfPaused = false; TB.selfAcc = []; TB.selfRatio = 0; TB.selfStall = false; TB.selfLastHeard = Date.now(); TB.selfDone = false;
+  TB.selfStart = Date.now();
   tbDock();
-  tbSelfSent(from != null ? from : tbFirstVisibleSent(), false);
+  if(TB.selfKind === 'rec' || (u.keepVoice && canRec)){
+    tbSelfSay('🎙️ J\'ouvre le micro…');
+    const ok = await tbRecStart();
+    if(TB.mode !== 'self') { if(TB.rec) tbRecFinish(false); return; }
+    if(!ok){
+      if(TB.selfKind === 'rec'){ tbToast("🎙️ Le micro n'est pas disponible : autorise-le pour t'enregistrer.", 3600); tbStopModes(true); return; }
+      tbToast("🎙️ Ta voix ne peut pas être gardée ici : on lit sans l'enregistrer.", 3200);
+    }
+  }
+  tbSelfSent(Math.max(0, Math.min(from || 0, TB.sents.length - 1)));
+  if(TB.selfKind === 'sr') tbSRStart();
+  clearInterval(TB.selfTick); TB.selfTick = setInterval(tbSelfTickFn, 500);
 }
 function tbSelfSay(msg){ TB.selfMsg = msg; const m = document.getElementById('tbSelfMsg'); if(m) m.textContent = msg; }
-function tbSelfSent(i, keepMarks){
+function tbSelfHead(){
+  const n = document.getElementById('tbSelfN'); if(!n) return;
+  n.textContent = `Phrase ${Math.min(TB.cur + 1, TB.sents.length)} / ${TB.sents.length}` + (TB.rec ? ` · ● ${tbFmtT(tbRecNow())}` : '');
+}
+function tbSelfSent(i){
   if(TB.mode !== 'self') return;
   if(i >= TB.sents.length) return tbSelfDone();
-  if(i !== TB.cur) TB.selfTry = 0;
-  TB.cur = i; TB.selfPaused = false;
+  TB.cur = i; TB.selfRatio = 0; TB.selfStall = false; TB.selfLastHeard = Date.now();
   tbHl(i, true);
-  const spans = tbSentSpans(i);
-  if(!keepMarks) spans.forEach(sp => sp.classList.remove('ok', 'miss'));
-  tbDock();
-  tbSelfSay(`Phrase ${i + 1} / ${TB.sents.length} : lis-la à voix haute`);
-  const norms = spans.map(sp => sp.dataset.n || '');
-  const tok = ++TB.token;
-  const mark = (txt, final) => {
-    const hit = spAlign(norms, spTokens(txt));
-    spans.forEach((sp, j) => { if(hit[j]){ sp.classList.add('ok'); sp.classList.remove('miss'); } else if(final) sp.classList.add('miss'); });
-    return hit.filter(Boolean).length / Math.max(1, norms.filter(Boolean).length);
+  tbSentSpans(i).forEach(sp => sp.classList.remove('ok', 'miss'));
+  tbRecMark(i);
+  tbSelfHead();
+  tbSelfSay(TB.selfKind === 'rec' ? 'Lis la phrase, puis touche ⏭' : 'Lis la phrase surlignée');
+  if(TB.selfKind === 'sr' && tbSelfToks().length) tbSelfEval(false);   // les mots de cette phrase déjà dits (en lisant d'une traite)
+}
+/* aligner ce qui a été dit sur les mots de la phrase (comme spAlign, mais on retient le dernier morceau utilisé) */
+function tbAlign(norms, sp){
+  const used = new Array(sp.length).fill(false), hit = new Array(norms.length).fill(false);
+  let cur = 0, last = -1;
+  const take = (i, k, L) => { for(let q = k; q < k + L; q++) used[q] = true; hit[i] = true; last = Math.max(last, k + L - 1); };
+  norms.forEach((norm, i) => {
+    if(!norm) return;
+    for(const fuzzy of [false, true]){
+      for(let k = cur; k < Math.min(sp.length, cur + 5); k++){
+        if(used[k]) continue;
+        const L = spMatchAt(norm, sp, k, used, fuzzy);
+        if(L){ take(i, k, L); cur = k + L; return; }
+      }
+    }
+  });
+  norms.forEach((norm, i) => {
+    if(hit[i] || !norm) return;
+    for(const fuzzy of [false, true]){
+      for(let k = 0; k < sp.length; k++){
+        if(used[k]) continue;
+        const L = spMatchAt(norm, sp, k, used, fuzzy);
+        if(L){ take(i, k, L); return; }
+      }
+    }
+  });
+  return { hit, last };
+}
+/* ce que la reconnaissance a entendu pendant cette séance (Android répète parfois tout depuis le début : on dédoublonne) */
+function tbSessionToks(S){
+  if(!S) return [];
+  let out = [], prev = null;
+  S.res.forEach(r => {
+    if(!r) return;
+    const tk = spTokens(r.t);
+    if(prev && prev.length && tk.length >= prev.length && prev.every((x, j) => tk[j] === x)) out.splice(out.length - prev.length, prev.length);
+    out = out.concat(tk); prev = tk;
+  });
+  return out;
+}
+function tbSelfToks(){ const S = TB.sr; return (TB.selfAcc || []).concat(tbSessionToks(S).slice(S ? S.consumed : 0)); }
+function tbSelfEval(hadFinal){
+  if(TB.mode !== 'self' || TB.selfKind !== 'sr') return;
+  const i = TB.cur, spans = tbSentSpans(i), norms = spans.map(sp => sp.dataset.n || '');
+  const toks = tbSelfToks();
+  const { hit, last } = tbAlign(norms, toks);
+  spans.forEach((sp, j) => { if(hit[j]){ sp.classList.add('ok'); sp.classList.remove('miss'); } });
+  const n = norms.filter(Boolean).length || 1, got = hit.filter((h, j) => h && norms[j]).length, ratio = got / n;
+  if(got > Math.round(TB.selfRatio * n)) TB.selfStall = false;
+  TB.selfRatio = ratio;
+  let lastIdx = norms.length - 1; while(lastIdx > 0 && !norms[lastIdx]) lastIdx--;
+  if(ratio >= TB_SR_OK && (hadFinal || ratio >= 0.999 || (hit[lastIdx] && ratio >= 0.85))){
+    TB.selfScores[i] = ratio;
+    const S = TB.sr, accN = (TB.selfAcc || []).length;
+    if(last < accN) TB.selfAcc = TB.selfAcc.slice(last + 1);        // la suite (déjà dite) servira à la phrase suivante
+    else { if(S) S.consumed += (last + 1 - accN); TB.selfAcc = []; }
+    try{ playChime([660, 990], { type:'sine', noteDur:0.07, gap:0.02, volume:0.06 }); }catch(e){}
+    tbSelfSent(i + 1);
+    if(TB.mode === 'self' && TB.cur === i + 1) tbSelfSay(ratio >= 0.95 ? '✓ Parfait ! Phrase suivante' : `✓ Bien lu (${Math.round(ratio * 100)} %) : phrase suivante`);
+    return;
+  }
+  if(got) tbSelfSay(`Continue… ${got} / ${n} mots`);
+}
+/* le micro de la Tablette : reconnaissance continue, relancée toute seule si le navigateur la coupe */
+function tbSRStart(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR || TB.sr) return !!TB.sr;
+  try{ vvHearStop(); }catch(e){}
+  try{ stopRecognition(); }catch(e){}
+  let rec; try{ rec = new SR(); }catch(e){ tbSRFail('blocked'); return false; }
+  rec.lang = 'fr-FR'; rec.continuous = true; rec.interimResults = true; rec.maxAlternatives = 1;
+  const S = { rec, res:[], consumed:0, dead:false, err:'' };
+  TB.sr = S;
+  rec.onresult = (e) => {
+    if(S.dead || TB.sr !== S) return;
+    let fin = false;
+    for(let k = e.resultIndex; k < e.results.length; k++){
+      const r = e.results[k];
+      S.res[k] = { t:(r[0] && r[0].transcript) || '', f:!!r.isFinal };
+      if(r.isFinal) fin = true;
+    }
+    S.res.length = e.results.length;
+    TB.selfLastHeard = Date.now();
+    tbSelfEval(fin);
   };
-  vvHear({ lang:'fr-FR', continuous:true,
-    onInterim:(t) => { if(tok === TB.token && TB.mode === 'self') mark(t, false); },
-    onText:(t, alts) => {
-      if(tok !== TB.token || TB.mode !== 'self') return;
-      TB.selfSil = 0;
-      let best = t, bestN = -1;
-      (alts && alts.length ? alts : [t]).forEach(a => { const n = spAlign(norms, spTokens(a)).filter(Boolean).length; if(n > bestN){ bestN = n; best = a; } });
-      const ratio = mark(best, true);
-      TB.selfScores[i] = Math.max(TB.selfScores[i] || 0, ratio);
-      if(ratio >= 0.7){
-        try{ playChime([660, 990], { type:'sine', noteDur:0.07, gap:0.02, volume:0.06 }); }catch(e){}
-        tbSelfSay(ratio >= 0.95 ? '✓ Parfait !' : `✓ Bien lu (${Math.round(ratio * 100)} %)`);
-        setTimeout(() => { if(tok === TB.token && TB.mode === 'self') tbSelfSent(i + 1, false); }, 800);
-      } else if(TB.selfTry >= 2){
-        tbSelfSay('On passe à la suivante : relis plus tard les mots en orange.');
-        setTimeout(() => { if(tok === TB.token && TB.mode === 'self') tbSelfSent(i + 1, false); }, 1300);
-      } else {
-        TB.selfTry++;
-        tbSelfSay(`Presque (${Math.round(ratio * 100)} %) : relis les mots en orange`);
-        setTimeout(() => { if(tok === TB.token && TB.mode === 'self') tbSelfSent(i, true); }, 1200);
-      }
-    },
-    onFail:(r) => {
-      if(tok !== TB.token || TB.mode !== 'self') return;
-      if(r === 'silence'){
-        TB.selfSil++;
-        if(TB.selfSil <= 2){ setTimeout(() => { if(tok === TB.token && TB.mode === 'self') tbSelfSent(i, true); }, 250); }
-        else { TB.selfPaused = true; tbDock(); tbSelfSay("Je n'entends rien : touche 🎤 quand tu es prêt."); }
-        return;
-      }
-      tbToast(r === 'denied' ? '🎤 Autorise le micro pour lire à voix haute.' : "🎤 Le micro n'est pas disponible ici.", 3500);
-      tbStopModes();
-    } });
+  rec.onerror = (e) => { if(!S.dead && e.error !== 'no-speech' && e.error !== 'aborted') S.err = e.error; };
+  rec.onend = () => {
+    if(S.dead || TB.sr !== S) return;
+    TB.selfAcc = tbSelfToks();      // ce qui a été dit pour la phrase en cours est gardé
+    TB.sr = null;
+    if(S.err === 'not-allowed' || S.err === 'service-not-allowed') return tbSRFail('denied');
+    if(S.err === 'audio-capture') return tbSRFail('nomic');
+    if(S.err === 'network') return tbSRFail('network');
+    if(TB.mode === 'self' && TB.selfKind === 'sr' && !TB.selfPaused) setTimeout(() => { if(TB.mode === 'self' && TB.selfKind === 'sr' && !TB.selfPaused && !TB.sr) tbSRStart(); }, 180);
+  };
+  try{ rec.start(); }catch(e){ TB.sr = null; tbSRFail('blocked'); return false; }
+  return true;
+}
+function tbSRStop(){
+  const S = TB.sr; TB.sr = null;
+  if(!S) return;
+  S.dead = true;
+  try{ S.rec.onresult = null; S.rec.onend = null; S.rec.onerror = null; S.rec.abort(); }catch(e){}
+}
+function tbSRHold(){ if(TB.sr){ TB.selfAcc = tbSelfToks(); tbSRStop(); } }      // on garde ce qui a été dit, on coupe le micro
+function tbSRFail(reason){
+  if(TB.mode !== 'self') return;
+  if(TB.rec){        // le téléphone ne sait pas écouter et enregistrer en même temps : on garde l'enregistrement
+    TB.selfKind = 'rec'; tbDock(); tbSelfHead();
+    tbSelfSay('Je t\'enregistre : lis la phrase, puis touche ⏭');
+    tbToast(reason === 'nomic' ? "🎙️ Ton téléphone ne peut pas écouter et enregistrer en même temps : je garde ta voix, tu passes les phrases avec ⏭." : "🎤 La reconnaissance s'est arrêtée : je continue à t'enregistrer, passe les phrases avec ⏭.", 4800);
+    return;
+  }
+  tbToast(reason === 'denied' ? '🎤 Autorise le micro pour lire à voix haute.' : reason === 'network' ? '🎤 La reconnaissance de la voix a besoin d\'internet.' : "🎤 Le micro n'est pas disponible ici.", 3800);
+  tbStopModes(true);
+}
+function tbSelfTickFn(){
+  if(TB.mode !== 'self'){ clearInterval(TB.selfTick); return; }
+  tbRecLevel(); tbSelfHead();
+  if(TB.selfKind !== 'sr' || TB.selfPaused) return;
+  const idle = Date.now() - TB.selfLastHeard;
+  if(idle > 4500 && TB.selfRatio > 0 && TB.selfRatio < TB_SR_OK && !TB.selfStall){
+    TB.selfStall = true;
+    tbSentSpans(TB.cur).forEach(sp => { if(sp.dataset.n && !sp.classList.contains('ok')) sp.classList.add('miss'); });
+    tbSelfSay('Il manque les mots en orange : relis-les, ou ⏭ pour passer');
+  }
+  if(idle > 25000) tbSelfPause("Je n'entends plus rien : touche 🎤 quand tu es prêt");
+}
+function tbSelfPause(msg){
+  if(TB.mode !== 'self') return;
+  TB.selfPaused = true; tbSRHold(); tbRecPause();
+  tbDock(); tbSelfHead(); tbSelfSay(msg || 'En pause : touche 🎤 pour reprendre');
+}
+function tbSelfResume(){
+  if(TB.mode !== 'self') return;
+  TB.selfPaused = false; TB.selfLastHeard = Date.now(); TB.selfStall = false;
+  tbRecResume(); tbDock(); tbSelfHead();
+  tbSelfSay(TB.selfKind === 'rec' ? 'Lis la phrase, puis touche ⏭' : 'Je t\'écoute');
+  if(TB.selfKind === 'sr') tbSRStart();
+}
+/* 🔊 la voix dit un mot ou la phrase : on coupe le micro (et l'enregistrement) le temps qu'elle parle */
+function tbSelfSpeak(text, rate){
+  if(TB.mode !== 'self'){ speakNarrator(text, 'fr-FR', null, rate); return; }
+  const wasPaused = TB.selfPaused;
+  tbSRHold(); tbRecPause();
+  const tok = ++TB.token;
+  speakNarrator(text, 'fr-FR', () => {
+    if(tok !== TB.token || TB.mode !== 'self') return;
+    TB.selfLastHeard = Date.now();
+    if(!wasPaused && !TB.selfPaused){ tbRecResume(); if(TB.selfKind === 'sr') tbSRStart(); }
+  }, rate || readingRate);
+}
+function tbSelfSkip(){
+  if(TB.mode !== 'self') return;
+  if(TB.selfKind === 'sr'){ TB.selfScores[TB.cur] = TB.selfRatio || 0; const S = TB.sr; TB.selfAcc = []; if(S) S.consumed = tbSessionToks(S).length; }
+  else TB.selfScores[TB.cur] = null;
+  if(TB.selfPaused){ TB.selfPaused = false; tbRecResume(); if(TB.selfKind === 'sr') tbSRStart(); tbDock(); }
+  tbSelfSent(TB.cur + 1);
 }
 function tbSelfDone(){
-  const v = Object.values(TB.selfScores);
-  const avg = v.length ? Math.round(v.reduce((a, b) => a + b, 0) / v.length * 100) : 0;
-  tbStopModes();
-  TB.art.readAloud = Math.max(TB.art.readAloud || 0, avg); TB.art.done = true; TB.art.pct = 1; tbSaveArt();
+  if(TB.selfDone) return;
+  TB.selfDone = true;
+  const v = Object.values(TB.selfScores).filter(x => typeof x === 'number');
+  const avg = v.length ? Math.round(v.reduce((a, b) => a + b, 0) / v.length * 100) : null;
+  const hadRec = !!TB.rec;
+  TB.selfLastAvg = avg;
+  if(hadRec) tbRecFinish(true);       // « Ta lecture » s'ouvre dès que l'enregistrement est prêt
+  tbStopModes(true);
+  if(avg != null) TB.art.readAloud = Math.max(TB.art.readAloud || 0, avg);
+  TB.art.done = true; TB.art.pct = 1; tbSaveArt();
   try{ playCorrectSound(); }catch(e){}
-  try{ if(avg >= 80) launchConfetti(); }catch(e){}
-  tbToast(`🎉 Texte lu à voix haute en entier : ${avg} % des mots reconnus`, 4200);
+  try{ if(avg != null && avg >= 80) launchConfetti(); }catch(e){}
+  if(hadRec) return;          // la fiche « Ta lecture » s'ouvre quand l'enregistrement est prêt
+  tbToast(avg != null ? `🎉 Texte lu à voix haute en entier : ${avg} % des mots reconnus` : '🎉 Texte lu en entier', 4200);
 }
+/* ---------- 🎙️ ta voix : enregistrer, garder, réécouter ---------- */
+function tbFmtT(s){ s = Math.max(0, Math.round(s || 0)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
+async function tbRecStart(){
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({ audio:{ echoCancellation:true, noiseSuppression:true, autoGainControl:true } });
+    const types = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg;codecs=opus'];
+    let type = ''; try{ type = types.find(t => MediaRecorder.isTypeSupported(t)) || ''; }catch(e){}
+    const mr = type ? new MediaRecorder(stream, { mimeType:type }) : new MediaRecorder(stream);
+    const R = { stream, mr, chunks:[], type:mr.mimeType || type || 'audio/webm', t0:Date.now(), paused:0, pauseAt:0, marks:[], peak:0 };
+    mr.ondataavailable = (e) => { if(e.data && e.data.size) R.chunks.push(e.data); };
+    mr.start(1000);
+    try{
+      const ac = (typeof getAudioCtx === 'function') ? getAudioCtx() : null;
+      if(ac){ if(ac.state !== 'running') ac.resume(); const src = ac.createMediaStreamSource(stream), an = ac.createAnalyser(); an.fftSize = 1024; src.connect(an); R.src = src; R.an = an; R.buf = new Float32Array(an.fftSize); }
+    }catch(e){}
+    if(R.an) R.lvT = setInterval(() => { if(TB.rec === R) tbRecLevel(); }, 150);
+    TB.rec = R;
+    return true;
+  }catch(e){ console.warn('tablette : micro', e); return false; }
+}
+function tbRecNowOf(R){ return R ? (Date.now() - R.t0 - R.paused - (R.pauseAt ? Date.now() - R.pauseAt : 0)) / 1000 : 0; }
+function tbRecNow(){ return tbRecNowOf(TB.rec); }
+function tbRecMark(s){ const R = TB.rec; if(R) R.marks.push({ s, t:Math.max(0, tbRecNow() - 0.3) }); }
+function tbRecPause(){ const R = TB.rec; if(R && R.mr.state === 'recording'){ try{ R.mr.pause(); R.pauseAt = Date.now(); }catch(e){} } }
+function tbRecResume(){ const R = TB.rec; if(R && R.mr.state === 'paused'){ try{ R.mr.resume(); R.paused += Date.now() - (R.pauseAt || Date.now()); R.pauseAt = 0; }catch(e){} } }
+function tbRecLevel(){ const R = TB.rec; if(!R || !R.an || R.pauseAt) return; try{ R.an.getFloatTimeDomainData(R.buf); let m = 0; for(let k = 0; k < R.buf.length; k++){ const v = Math.abs(R.buf[k]); if(v > m) m = v; } if(m > R.peak) R.peak = m; }catch(e){} }
+function tbRecKey(id){ return nsKey('tbrec') + '|' + id; }
+function tbDb(){
+  if(TB.dbP) return TB.dbP;
+  TB.dbP = new Promise((res, rej) => {
+    try{ const r = indexedDB.open('vocabVisionTablette', 1); r.onupgradeneeded = () => { try{ r.result.createObjectStore('rec'); }catch(e){} }; r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }
+    catch(e){ rej(e); }
+  });
+  TB.dbP.catch(() => { TB.dbP = null; });
+  return TB.dbP;
+}
+async function tbRecPut(id, val){ try{ const db = await tbDb(); await new Promise((res, rej) => { const tx = db.transaction('rec', 'readwrite'); tx.objectStore('rec').put(val, tbRecKey(id)); tx.oncomplete = res; tx.onerror = () => rej(tx.error); tx.onabort = () => rej(tx.error); }); return true; }catch(e){ console.warn('tablette : enregistrement', e); return false; } }
+async function tbRecGet(id){ try{ const db = await tbDb(); return await new Promise((res) => { const tx = db.transaction('rec', 'readonly'); const q = tx.objectStore('rec').get(tbRecKey(id)); q.onsuccess = () => res(q.result || null); q.onerror = () => res(null); }); }catch(e){ return null; } }
+async function tbRecDel(id){ try{ const db = await tbDb(); const tx = db.transaction('rec', 'readwrite'); tx.objectStore('rec').delete(tbRecKey(id)); }catch(e){} if(TB.lastRec && TB.lastRec.id === id) TB.lastRec = null; }
+/* on arrête l'enregistrement : on le garde (un par texte), puis la fiche « Ta lecture » */
+function tbRecFinish(show){
+  const R = TB.rec; TB.rec = null;
+  if(!R) return;
+  const dur = tbRecNowOf(R), artId = TB.art && TB.art.id, title = TB.art && TB.art.title;
+  const v = Object.values(TB.selfScores || {}).filter(x => typeof x === 'number');
+  const score = v.length ? Math.round(v.reduce((a, b) => a + b, 0) / v.length * 100) : null;
+  clearInterval(R.lvT);
+  const done = () => {
+    try{ R.stream.getTracks().forEach(t => t.stop()); }catch(e){}
+    try{ R.src && R.src.disconnect(); }catch(e){}
+    if(!R.chunks.length || dur < 1.5 || !artId) return;
+    const rec = { id:artId, blob:new Blob(R.chunks, { type:R.type }), type:R.type, marks:R.marks, dur, at:Date.now(), title, score, silent:!!R.an && dur >= 4 && R.peak < 0.004 };
+    TB.lastRec = rec;
+    tbRecPut(artId, rec).then(() => { if(TB.art && TB.art.id === artId){ tbEndHtml(); if(show) tbRecSheet(rec); } });
+  };
+  try{ if(R.mr.state === 'inactive') done(); else { R.mr.onstop = done; R.mr.stop(); } }catch(e){ done(); }
+}
+async function tbRecOf(id){ if(TB.lastRec && TB.lastRec.id === id) return TB.lastRec; const r = await tbRecGet(id); if(r){ r.id = id; TB.lastRec = r; } return r; }
+function tbRecInfo(r){ return `${tbFmtT(r.dur)} · ${tbDateLabel(r.at)}${r.score != null ? ` · ${r.score} % des mots reconnus` : ''}`; }
+function tbRecSheet(r){
+  const sh = document.getElementById('tbSheet'); if(!sh || !r) return;
+  TB.sheetK = -4;
+  sh.innerHTML = `<div class="tb-sh-in">
+    <div class="tb-grab" aria-hidden="true"></div>
+    <div class="tb-sh-top"><div><div class="tb-sh-w">Ta lecture</div><div class="tb-sh-ipa">${escapeHtml(tbRecInfo(r))}</div></div><button type="button" class="tb-ib" data-tb="sheet-x" aria-label="Fermer">✕</button></div>
+    ${r.silent ? `<div class="tb-info-l">⚠️ L'enregistrement semble muet : ton téléphone ne laisse peut-être pas enregistrer pendant que la voix est reconnue. Choisis le mode « 🎙️ M'enregistrer » pour garder ta voix.</div>` : `<div class="tb-info-l">Réécoute-toi : la phrase lue s'allume au fil de l'écoute. Compare avec la voix de l'appli (▶ Écouter) pour les liaisons et les pauses.</div>`}
+    <div class="tb-sh-act"><button type="button" class="tb-btn pri" data-tb="rp-go">▶ Réécouter ma lecture</button><button type="button" class="tb-btn" data-tb="rp-dl">⬇ Télécharger</button></div>
+    <button type="button" class="tb-link" data-tb="rp-del">🗑 Effacer cet enregistrement</button>
+  </div>`;
+  sh.classList.add('open'); sh.setAttribute('aria-hidden', 'false');
+}
+async function tbLastRecFill(){
+  const box = document.getElementById('tbLastRec'); if(!box || !TB.art) return;
+  const r = await tbRecOf(TB.art.id);
+  if(!r || !document.getElementById('tbLastRec')) return;
+  box.innerHTML = `<div class="tb-lastrec"><span>🎧 Ta dernière lecture<small>${escapeHtml(tbRecInfo(r))}</small></span><button type="button" class="tb-btn sm" data-tb="rp-go">▶ Réécouter</button></div>`;
+}
+function tbRecFileName(r){ const ext = /mp4/.test(r.type) ? 'm4a' : /ogg/.test(r.type) ? 'ogg' : 'webm'; return 'ma-lecture-' + String(r.title || 'texte').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) + '.' + ext; }
+async function tbRecDownload(){
+  const r = TB.art && await tbRecOf(TB.art.id); if(!r) return;
+  const url = URL.createObjectURL(r.blob), a = document.createElement('a');
+  a.href = url; a.download = tbRecFileName(r); document.body.appendChild(a); a.click();
+  setTimeout(() => { a.remove(); URL.revokeObjectURL(url); }, 4000);
+}
+/* 🎧 réécouter sa voix : la phrase lue s'allume au fil de l'écoute ; toucher une phrase y saute */
+async function tbReplay(){
+  const r = TB.art && await tbRecOf(TB.art.id);
+  if(!r || !r.blob){ tbToast("Pas encore d'enregistrement pour ce texte : lis-le avec 🎤 Je lis."); return; }
+  tbStopModes(true); tbCloseSheet();
+  const url = URL.createObjectURL(r.blob), au = new Audio(url);
+  TB.replay = { au, url, rec:r, dur:r.dur || 0 };
+  TB.mode = 'replay'; tbDock();
+  au.addEventListener('timeupdate', tbReplayUi);
+  au.addEventListener('ended', () => { if(TB.replay && TB.replay.au === au){ TB.replay.ended = true; tbReplayUi(); tbDock(); } });
+  au.addEventListener('loadedmetadata', () => { if(TB.replay && isFinite(au.duration) && au.duration > 0) TB.replay.dur = au.duration; });
+  try{ await au.play(); }catch(e){ tbToast("Touche ▶ pour écouter."); }
+  tbDock();
+}
+function tbReplayUi(){
+  const P = TB.replay; if(!P) return;
+  const t = P.au.currentTime || 0, d = P.dur || 1;
+  const marks = (P.rec.marks || []).filter(m => m.t <= t + 0.05);
+  const m = marks[marks.length - 1];
+  if(m && m.s !== P.lastS){ P.lastS = m.s; tbHl(m.s, true); }
+  const bar = document.getElementById('tbRpBar'); if(bar && !P.drag) bar.value = String(Math.round(Math.min(1, t / d) * 1000));
+  const tt = document.getElementById('tbRpT'); if(tt) tt.textContent = `${tbFmtT(t)} / ${tbFmtT(d)}`;
+}
+function tbReplaySeekS(s){
+  const P = TB.replay; if(!P) return;
+  const m = (P.rec.marks || []).find(x => x.s === s);
+  if(!m){ tbToast("Cette phrase n'a pas été lue dans l'enregistrement."); return; }
+  try{ P.au.currentTime = m.t; if(P.au.paused) P.au.play(); }catch(e){}
+  P.ended = false; tbDock();
+}
+function tbReplayStop(){
+  const P = TB.replay; TB.replay = null;
+  if(!P) return;
+  try{ P.au.pause(); P.au.src = ''; }catch(e){}
+  setTimeout(() => { try{ URL.revokeObjectURL(P.url); }catch(e){} }, 500);
+}
+/* ---------- 🧹 ajuster le texte : une phrase va de la majuscule jusqu'au point ----------
+   Un texte copié d'un PDF, d'un site ou d'un mail arrive souvent avec des retours à la ligne au milieu
+   des phrases. On recolle les lignes : la phrase continue tant qu'elle ne se termine pas par . ! ? …
+   (ou quand la ligne suivante commence par une minuscule) ; les mots coupés par un tiret en fin de ligne
+   sont recollés. On garde les vrais paragraphes, les titres courts et les listes à puces. */
+function tbReflow(text){
+  let t = String(text || '').replace(/\r\n?/g, '\n').replace(/­/g, '').replace(/[ \t ]+$/gm, '').replace(/^[ \t ]+/gm, '');
+  let joined = 0, broken = 0;
+  t = t.replace(/(\p{L})[-‐]\n+(\p{Ll})/gu, (m, a, b) => { joined++; broken++; return a + b; });
+  const lines = t.split('\n');
+  const nonBlank = lines.filter(x => x.trim()).length, blanks = lines.length - nonBlank;
+  const useBlank = blanks > 0 && blanks < nonBlank * 0.45;          // de vraies lignes vides entre les paragraphes (et pas un texte « double interligne »)
+  const ENDS = /[.!?…:»"”]$/, BULLET = /^([-–—•·*▪►✓➤]|\d{1,2}[.)])\s/;
+  const paras = [];
+  let cur = '', curLines = 0, blankBefore = false;
+  lines.forEach(raw => {
+    const l = raw.trim().replace(/\s{2,}/g, ' ');
+    if(!l){ blankBefore = true; return; }
+    if(!cur){ cur = l; curLines = 1; blankBefore = false; return; }
+    let brk;
+    if(BULLET.test(l)) brk = true;
+    else if(/^[\p{Ll}0-9,;)\]]/u.test(l)) brk = false;                                    // la phrase continue
+    else if(!ENDS.test(cur)) brk = curLines === 1 && cur.length <= (blankBefore ? 70 : 45) && /^[\p{Lu}0-9«"“]/u.test(cur) && !/[,;-]$/.test(cur) && (blankBefore || !useBlank);   // un titre seul
+    else brk = useBlank ? blankBefore : true;
+    if(brk){ paras.push(cur); cur = l; curLines = 1; }
+    else { if(!ENDS.test(cur)) broken++; cur = cur + ' ' + l; curLines++; joined++; }
+    blankBefore = false;
+  });
+  if(cur) paras.push(cur);
+  const out = paras.join('\n');
+  return { text:out, joined:broken, lines:joined, changed:out !== String(text || '').replace(/\r\n?/g, '\n').trim() };
+}
+/* des phrases coupées en plein milieu par un retour à la ligne ? (une ligne par phrase, c'est très bien comme ça) */
+function tbNeedsReflow(text){ const r = tbReflow(text); return r.joined >= 1 && r.changed; }
+function tbReflowArt(){
+  if(!TB.art) return;
+  const r = tbReflow(TB.art.text);
+  if(!r.changed){ tbToast('✓ Le texte est déjà bien ajusté'); return; }
+  const a = tbAnchorGet();
+  if(!TB.art.textOrig) TB.art.textOrig = TB.art.text;
+  TB.art.text = r.text;
+  tbRender(false); if(a) tbAnchorSet(a);
+  tbSaveArtNow();
+  const b = document.getElementById('tbFixBar'); if(b) b.remove();
+  tbToast(r.joined ? `🧹 Texte ajusté : ${r.joined} retour${r.joined > 1 ? 's' : ''} à la ligne en trop retiré${r.joined > 1 ? 's' : ''}` : '🧹 Texte ajusté', 3000);
+  if(!document.getElementById('tbAa').hidden) tbToggleAa(true);
+}
+function tbReflowUndo(){
+  if(!TB.art || !TB.art.textOrig) return;
+  const a = tbAnchorGet();
+  TB.art.text = TB.art.textOrig; delete TB.art.textOrig;
+  tbRender(false); if(a) tbAnchorSet(a);
+  tbSaveArtNow(); tbToast('↩ Texte remis comme avant');
+  if(!document.getElementById('tbAa').hidden) tbToggleAa(true);
+}
+
 /* ---------- 🖍 tags (mots difficiles) ---------- */
 function tbTagAt(k){ const tk = TB.toks[k]; if(!tk) return -1; return (TB.art.tags || []).findIndex(g => g.s === tk.s && g.t === tk.t); }
 function tbRelocateTags(){
@@ -43191,7 +43611,8 @@ function tbWire(el){
     if(w && sc.contains(w)){
       const k = +w.dataset.k;
       if(TB.mode === 'play'){ TB.playing = true; tbDock(); tbSpeak(TB.toks[k].s); return; }
-      if(TB.mode === 'self'){ tbSay(TB.toks[k].form); return; }
+      if(TB.mode === 'self'){ tbSelfSpeak(TB.toks[k].form, Math.max(0.8, readingRate)); return; }
+      if(TB.mode === 'replay'){ tbReplaySeekS(TB.toks[k].s); return; }
       if(TB.hunt){ tbSay(TB.toks[k].form); tbToggleTag(k); return; }
       tbOpenSheet(k);
       return;
@@ -43202,10 +43623,12 @@ function tbWire(el){
   });
   el.addEventListener('input', (e) => {
     if(e.target.id === 'tbQ'){ clearTimeout(TB.qT); const v = e.target.value; TB.qT = setTimeout(() => tbSearch(v), 140); return; }
+    if(e.target.id === 'tbRpBar' && TB.replay){ const P = TB.replay; try{ P.au.currentTime = (+e.target.value / 1000) * (P.dur || 0); P.ended = false; }catch(err){} tbReplayUi(); return; }
     if(e.target.id === 'tbW'){ const a = tbAnchorGet(); tbUi().w = +e.target.value; tbApplyUi(); if(a) tbAnchorSet(a); clearTimeout(TB.wT); TB.wT = setTimeout(tbSaveUi, 300); return; }
     const f = e.target.dataset && e.target.dataset.cr;
     if(f){ const g = (TB.art.tags || [])[+e.target.dataset.i]; if(g){ g[f] = e.target.value; tbSaveArt(); } }
   });
+  el.addEventListener('change', (e) => { if(e.target.id === 'tbKeep'){ tbUi().keepVoice = !!e.target.checked; tbSaveUi(); } });
   document.getElementById('tbFind').addEventListener('submit', (e) => { e.preventDefault(); if(TB.hits.length) tbGoHit(TB.hitI + 1, true); else tbSearch(document.getElementById('tbQ').value); });
   el.addEventListener('keydown', (e) => {
     if(e.key === 'Enter' && e.target.matches && e.target.matches('[role="button"][data-tb]')){ e.preventDefault(); e.target.click(); }
@@ -43298,12 +43721,22 @@ function tbAction(id, btn, e){
     case 'pl-prev': TB.playing = true; tbDock(); tbSpeak(Math.max(0, TB.cur - 1)); return;
     case 'pl-next': TB.playing = true; tbDock(); tbSpeak(TB.cur + 1); return;
     case 'pl-stop': tbStopModes(); return;
-    case 'self': tbSelfStart(); return;
-    case 'self-0': tbSelfStart(0); return;
-    case 'self-go': TB.selfSil = 0; tbSelfSent(TB.cur, true); return;
-    case 'self-hear': { const i = TB.cur, tok = ++TB.token; try{ vvHearStop(); }catch(err){} tbSelfSay('Écoute bien, puis lis à ton tour…'); speakNarrator(dxOn() ? dxSpeakText(TB.sents[i]) : TB.sents[i], 'fr-FR', () => { if(tok === TB.token && TB.mode === 'self') tbSelfSent(i, false); }, readingRate); return; }
-    case 'self-skip': tbSelfSent(TB.cur + 1, false); return;
+    case 'self': case 'self-0': tbSelfOpen(); return;
+    case 'self-go-at': tbSelfStart(+btn.dataset.s || 0); return;
+    case 'self-mode': tbUi().selfMode = btn.dataset.v === 'rec' ? 'rec' : 'sr'; tbSaveUi(); tbSelfOpen(); return;
+    case 'self-go': tbSelfResume(); return;
+    case 'self-pause': tbSelfPause(); return;
+    case 'self-hear': { const s0 = TB.sents[TB.cur] || ''; tbSelfSay('Écoute bien, puis lis à ton tour…'); tbSelfSpeak(dxOn() ? dxSpeakText(s0) : s0, readingRate); return; }
+    case 'self-skip': tbSelfSkip(); return;
     case 'self-stop': tbStopModes(); return;
+    case 'rp-go': tbReplay(); return;
+    case 'rp-toggle': { const P = TB.replay; if(!P) return; if(P.au.paused || P.ended){ if(P.ended){ P.au.currentTime = 0; P.ended = false; P.lastS = -1; } P.au.play().catch(() => {}); } else P.au.pause(); setTimeout(tbDock, 30); return; }
+    case 'rp-stop': tbStopModes(true); return;
+    case 'rp-dl': tbRecDownload(); return;
+    case 'rp-del': { const id2 = TB.art.id; tbRecDel(id2).then(() => { tbCloseSheet(); tbEndHtml(); tbToast('🗑 Enregistrement effacé'); }); return; }
+    case 'fix-text': tbReflowArt(); return;
+    case 'fix-undo': tbReflowUndo(); return;
+    case 'fix-x': { const fb = document.getElementById('tbFixBar'); if(fb) fb.remove(); return; }
     case 'hunt': tbHuntToggle(); return;
     case 'hunt-on': tbCloseSheet(); tbHuntToggle(true); return;
     case 'hints': { TB.hintsOn = !TB.hintsOn; const n = tbPaintHints(TB.hintsOn); btn.classList.toggle('on', TB.hintsOn); if(TB.hintsOn) tbToast(n ? `💡 ${n} mots soulignés pourraient te poser problème` : "💡 Pas d'indice : tu connais déjà ces mots !"); return; }
