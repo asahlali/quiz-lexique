@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- 🏷️ Version de l'appli : augmentée automatiquement par publier-site.cmd à chaque publication -->
-<meta name="app-version" content="1.0.18" data-date="2026-10-16">
+<meta name="app-version" content="1.0.19" data-date="2026-10-17">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <title>VocabVISION — Vocabulaire Français ↔ Arabe</title>
 <script>
@@ -1946,6 +1946,80 @@
   .tbk-hint{ margin-top:8px; font-size:12.5px; font-weight:800; color:#B45309; line-height:1.4; }
   [data-theme="dark"] .tbk-hint{ color:#FDBA74; }
   .tbk-hint[hidden]{ display:none; }
+  /* 📰 1.0.19 : la Tablette « journal » — titres, chapeau, citations, listes, séparateurs, images */
+  .tb-body .tb-h2{ font-family:'Literata',Georgia,'Times New Roman',serif; font-weight:800; font-size:1.32em; line-height:1.22; letter-spacing:-.01em; margin:1.15em 0 .45em; clear:both; color:var(--tb-ink); text-wrap:balance; }
+  .tb-body .tb-h3{ font-family:'Literata',Georgia,serif; font-weight:700; font-style:italic; font-size:1.1em; line-height:1.3; margin:1.1em 0 .35em; clear:both; color:var(--tb-acc); }
+  .tb-body .tb-lead{ font-weight:700; font-size:1.07em; line-height:1.55; }
+  .tb-body .tb-q{ margin:1.1em 0; padding:.15em 0 .15em .9em; border-left:4px solid #FFDE40; font-style:italic; font-size:1.06em; color:var(--tb-ink); }
+  .tb-body .tb-ul{ margin:0 0 .95em; padding-left:1.25em; }
+  .tb-body .tb-ul li{ margin:.2em 0; }
+  .tb-body .tb-ul li::marker{ color:var(--tb-acc); }
+  .tb-body .cont{ margin-top:0; }
+  .tb-body > :has(+ .cont){ margin-bottom:0; }
+  .tb-body .tb-hr{ clear:both; display:flex; align-items:center; gap:.8em; margin:1.4em 0; color:var(--tb-ink2); font-size:.8em; }
+  .tb-body .tb-hr::before, .tb-body .tb-hr::after{ content:''; flex:1; height:1px; background:var(--tb-rule); }
+  .tb-body::after{ content:''; display:block; clear:both; }
+  .tb-st.st-b{ font-weight:700; }
+  .tb-st.st-i{ font-style:italic; }
+  .tb-st.st-u{ text-decoration:underline; text-decoration-thickness:.07em; text-underline-offset:.2em; }
+  .tb-drop::first-letter{ float:left; font-family:'Literata',Georgia,serif; font-size:3.25em; line-height:.84; font-weight:800; margin:.06em .1em 0 0; color:var(--tb-acc); }
+  .tb-fig{ position:relative; margin:.5em auto 1.1em; max-width:100%; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+  .tb-fig img{ display:block; width:100%; height:auto; min-height:40px; border-radius:6px; background:var(--tb-rule); user-select:none; -webkit-user-drag:none; }
+  .tb-fig.al-l{ float:left; margin:.3em 1em .6em 0; }
+  .tb-fig.al-r{ float:right; margin:.3em 0 .6em 1em; }
+  .tb-fig.al-c{ clear:both; }
+  .tb-fig figcaption{ margin-top:.45em; font:600 .7em/1.4 'Nunito','Inter',sans-serif; color:var(--tb-ink2); }
+  .tb-fig.sel{ outline:3px solid var(--tb-acc); outline-offset:3px; border-radius:8px; }
+  .tb-fig-h{ position:absolute; right:-14px; bottom:-14px; width:30px; height:30px; border-radius:50%; background:var(--tb-acc); border:3px solid var(--tb-card); box-shadow:0 2px 8px rgba(15,23,42,.35); touch-action:none; cursor:nwse-resize; z-index:2; }
+  .tb-fig.al-r .tb-fig-h{ right:auto; left:-14px; cursor:nesw-resize; }
+  .tb-fig.missing img{ display:none; }
+  .tb-fig.missing::before{ content:'🖼 Image absente de cet appareil'; display:block; padding:1em; border:1px dashed var(--tb-rule); border-radius:8px; color:var(--tb-ink2); font:700 .75em 'Nunito','Inter',sans-serif; }
+  .tb-hunt .tb-body{ -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; }
+  .tb-dock.hunt .tb-dk.on:last-child{ background:#FFDE40; color:#1B1F27; }
+  .tb-hrow{ display:flex; align-items:center; gap:10px; padding:10px 0; border-top:1px solid var(--tb-rule); }
+  .tb-hrow-t{ flex:1; min-width:0; cursor:pointer; }
+  .tb-hrow-t b{ display:block; font-family:'Literata',Georgia,serif; font-size:17px; }
+  .tb-hrow-t span{ display:block; font-family:'Literata',Georgia,serif; font-size:13.5px; line-height:1.45; color:var(--tb-ink2); }
+  .tb-hrow-t mark{ background:#FFDE40; color:#1B1F27; border-radius:.2em; padding:0 .1em; }
+  .tb-vlist{ display:flex; flex-direction:column; gap:6px; margin-top:12px; }
+  .tb-vrow{ display:flex; align-items:center; gap:10px; width:100%; text-align:left; border:1px solid var(--tb-rule); background:var(--tb-paper); color:var(--tb-ink); border-radius:14px; padding:10px 12px; font-weight:800; font-size:14.5px; cursor:pointer; }
+  .tb-vrow > span{ flex:1; min-width:0; }
+  .tb-vrow small{ display:block; margin-top:2px; font-weight:700; font-size:12px; color:var(--tb-ink2); }
+  .tb-vrow > i{ font-style:normal; color:var(--tb-acc); font-size:15px; }
+  .tb-vrow.on{ border-color:var(--tb-acc); box-shadow:0 0 0 2px var(--tb-hit); }
+  .tb-vchip{ max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  /* ✍️ l'éditeur */
+  .tbk-tools{ display:flex; align-items:center; gap:5px; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; padding:8px 0 6px; margin:0 -2px; border-bottom:1px solid rgba(90,97,112,.25); }
+  .tbk-tools::-webkit-scrollbar{ display:none; }
+  .tbk-tb{ flex:none; height:34px; min-width:34px; padding:0 10px; border:1px solid rgba(90,97,112,.3); border-radius:10px; background:rgba(255,255,255,.55); color:inherit; font:800 12.5px 'Nunito','Inter',sans-serif; cursor:pointer; white-space:nowrap; }
+  [data-theme="dark"] .tbk-tb{ background:rgba(255,255,255,.06); }
+  .tbk-tb.sq{ padding:0; width:34px; font-size:15px; }
+  .tbk-tb:active{ background:#FFDE40; color:#1B1F27; }
+  .tbk-sep{ flex:none; width:1px; height:22px; background:rgba(90,97,112,.3); margin:0 2px; }
+  .tbk-ed{ min-height:190px; max-height:62vh; overflow-y:auto; padding:10px 2px; outline:none; font:400 16px/1.6 'Literata',Georgia,serif; color:inherit; text-align:left; overflow-wrap:break-word; }
+  .tbk-ed.empty::before{ content:attr(data-ph); color:#7A8191; pointer-events:none; }
+  .tbk-ed h2{ font:800 1.3em/1.25 'Literata',Georgia,serif; margin:.6em 0 .3em; color:inherit; text-shadow:none; animation:none; }
+  .tbk-ed h3{ font:700 italic 1.1em/1.3 'Literata',Georgia,serif; margin:.6em 0 .25em; color:#6D28D9; }
+  [data-theme="dark"] .tbk-ed h3{ color:#B9A2FF; }
+  .tbk-ed h4{ font:700 1.05em/1.5 'Literata',Georgia,serif; margin:.4em 0; }
+  .tbk-ed p{ margin:0 0 .7em; }
+  .tbk-ed blockquote{ margin:.6em 0; padding-left:.8em; border-left:4px solid #FFDE40; font-style:italic; }
+  .tbk-ed ul{ margin:0 0 .7em; padding-left:1.3em; }
+  .tbk-ed hr{ border:0; height:1px; background:rgba(90,97,112,.4); margin:1em 15%; }
+  .tbk-ed img{ display:block; max-width:100%; height:auto; margin:.5em auto; border-radius:6px; cursor:pointer; }
+  .tbk-ed img.al-l{ float:left; margin:.2em .8em .4em 0; }
+  .tbk-ed img.al-r{ float:right; margin:.2em 0 .4em .8em; }
+  .tbk-ed img.sel{ outline:3px solid #7C3AED; outline-offset:2px; }
+  .tbk-ed::after{ content:''; display:block; clear:both; }
+  .tbk-imgbar{ display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin:6px 0; padding:8px 10px; border-radius:12px; background:rgba(124,58,237,.1); font:800 12.5px 'Nunito','Inter',sans-serif; }
+  .tbk-imgbar[hidden]{ display:none; }
+  .tbk-imgbar input[type=range]{ flex:1; min-width:110px; accent-color:#7C3AED; }
+  .tbk-imgbar output{ min-width:44px; }
+  .tbk-seg{ display:inline-flex; gap:2px; }
+  .tbk-seg button{ width:34px; height:30px; border:1px solid rgba(90,97,112,.3); background:transparent; border-radius:8px; cursor:pointer; color:inherit; }
+  .tbk-seg button.on{ background:#FFDE40; color:#1B1F27; border-color:transparent; }
+  .tbk-th{ flex:none; width:52px; height:52px; border-radius:10px; overflow:hidden; background:var(--surface-sunken); margin-right:4px; }
+  .tbk-th img{ width:100%; height:100%; object-fit:cover; display:block; }
   .tb-toast{ position:absolute; left:50%; bottom:calc(env(safe-area-inset-bottom, 0px) + 92px); z-index:8; transform:translate(-50%, 16px); opacity:0; pointer-events:none;
     max-width:calc(100% - 32px); width:max-content; padding:10px 16px; border-radius:14px; background:var(--tb-ink); color:var(--tb-paper); font-weight:800; font-size:13.5px; line-height:1.35; text-align:center; transition:opacity .25s, transform .25s; }
   .tb-toast.show{ opacity:1; transform:translate(-50%, 0); }
@@ -7968,6 +8042,7 @@ function updateMicButtonUI(){
 function speak(text, lang, onEnd, rateOverride){
   const slot = ttsNextSlot; ttsNextSlot = null; // capturé tout de suite (le vrai départ est différé)
   const forced = ttsForcePersona; ttsForcePersona = null;
+  const fvoice = (typeof ttsForceVoice !== 'undefined' && ttsForceVoice && ttsForceVoice.voice) ? ttsForceVoice : null; ttsForceVoice = null;   // 📰 1.0.19 : la voix choisie dans la Tablette
   try{ if(vvHearing) vvHearStop(); }catch(e){}   // jamais écouter pendant qu'il parle (il s'entendrait)
   if(!speechAvailable || !text){ if(onEnd) onEnd(); return; }
   try{
@@ -7988,8 +8063,9 @@ function speak(text, lang, onEnd, rateOverride){
         const persona = forced || ((slot !== null && slot !== undefined) ? personaForSlot(slot) : nextPersona(prefix));
         const pv = personaVoice(prefix, persona);
         if(pv.voice){ u.voice = pv.voice; u.lang = pv.voice.lang; }
-        u.rate = (rateOverride || voicePrefs.rate || 0.96) * pv.rate;
-        u.pitch = pv.pitch; // hauteur propre au personnage (indépendante de la vitesse choisie)
+        if(fvoice){ u.voice = fvoice.voice; u.lang = fvoice.voice.lang || u.lang; }
+        u.rate = (rateOverride || voicePrefs.rate || 0.96) * (fvoice ? 1 : pv.rate);
+        u.pitch = fvoice ? (fvoice.pitch || 1) : pv.pitch; // hauteur propre au personnage (indépendante de la vitesse choisie)
         let finished = false;
         const finish = () => { if(finished) return; finished = true; ttsSpeaking = false; ttsLastEndAt = Date.now(); updateMicButtonUI(); if(onEnd) onEnd(); };
         u.onend = finish;
@@ -19352,6 +19428,9 @@ const COLOR_PRESETS = {
 /* ============ 🆕 NOUVEAUTÉS — pour que tout ce qui a été ajouté reste découvrable ============ */
 const WHATS_NEW_SECTIONS = [
   { icon:'🆕', title:'Nouveautés', items:[
+    { name:"📰 La Tablette devient un vrai journal", desc:"En collant ton texte, une barre de mise en page : Titre, Sous-titre, Chapeau, Texte, Gras, Italique, Souligné, Citation, Liste, saut de ligne ↵, séparateur ✦ et 🖼 Image (galerie, appareil photo, ou image collée depuis le presse-papiers). Une page web collée garde ses titres et ses images. Dans la Tablette, touche une image : taille au curseur ou en glissant le rond violet, à gauche / au centre / à droite (le texte coule à côté), légende. « Aa » : la lettrine (grande initiale)." },
+    { name:'🗣️ Une seule voix pour lire', desc:"Dans la Tablette, « Aa › Voix » : choisis la voix qui lit (toutes les voix françaises de ton appareil). Elle lit tout le texte, les mots touchés et « Je lis », sans changer de voix d'une phrase à l'autre." },
+    { name:'🖍 La chasse aux mots, au doigt', desc:"Sur téléphone, toucher un mot marche même un peu à côté ou avec un appui un peu long. En chasse, la barre du bas a 💡 Indices, 🔎 Mots repérés (la liste des mots rares du texte, à taguer d'un coup), 🏷️ Carnet et ✓ Terminer." },
     { name:"🎤 Tablette : « Je lis » repensé + 🎧 réécouter ta voix", desc:"Le micro reste ouvert pendant toute ta lecture : tu peux respirer au milieu d'une phrase, ce que tu dis s'additionne et la phrase est validée dès que ses mots sont reconnus (les premiers mots de la suivante sont gardés). Après un silence, les mots qui manquent passent en orange. Coche « 🎙️ Garder aussi ma voix » (ou choisis « M'enregistrer ») : à la fin, « Ta lecture » te permet de te réécouter, phrase surlignée au fil de l'écoute, et de télécharger l'enregistrement." },
     { name:'🧹 Ajuster le texte', desc:"Un texte copié d'un PDF ou d'un site arrive avec des retours à la ligne au milieu des phrases ? Touche « 🧹 Ajuster » (en collant le texte, ou dans la Tablette : bandeau en haut ou « Aa ») : les lignes sont recollées, chaque phrase va de la majuscule jusqu'au point. « ↩ Remettre comme avant » si besoin." },
     { name:"📰 La Tablette sur l'accueil + 📐 texte justifié", desc:"La Tablette a maintenant sa carte sur l'accueil (avec « ▶ Reprendre » ta lecture en cours) et sa place dans le menu ☰. Dans la Tablette, « Aa » : texte à gauche ou justifié, et la largeur de la colonne que tu veux (jusqu'à tout l'écran)." },
@@ -42212,7 +42291,7 @@ function tbLoad(){ try{ const a = JSON.parse(localStorage.getItem(tbArtKey()) ||
 function tbSave(list){ try{ localStorage.setItem(tbArtKey(), JSON.stringify(list.slice(0, 40))); return true; }catch(e){ return false; } }
 function tbGet(id){ return tbLoad().find(a => a.id === id) || null; }
 function tbPut(art){ const L = tbLoad(); const i = L.findIndex(a => a.id === art.id); if(i >= 0) L[i] = art; else L.unshift(art); return tbSave(L); }
-function tbDel(id){ tbSave(tbLoad().filter(a => a.id !== id)); try{ tbRecDel(id); }catch(e){} }
+function tbDel(id){ const a = tbGet(id); tbSave(tbLoad().filter(x => x.id !== id)); try{ tbRecDel(id); }catch(e){} if(a) tbArtImgIds(a).forEach(i => { if(!tbLoad().some(x => tbArtImgIds(x).includes(i))) tbImgDel(i); }); }
 function tbUi(){
   if(!TB.ui){ let u = null; try{ u = JSON.parse(localStorage.getItem(nsKey('lexiqueQuiz::tabletteUi')) || 'null'); }catch(e){} TB.ui = Object.assign({ fs:19, lh:1.65, align:'left', w:0 }, u || {}); }
   return TB.ui;
@@ -42394,14 +42473,64 @@ async function tbLookup(form){
   return res;
 }
 
-/* ---------- le texte en phrases et en mots touchables ---------- */
-function tbBuild(art){
-  const paras = String(art.text || '').replace(/\r/g, '').split(/\n+/).map(p => p.trim()).filter(Boolean);
-  TB.sents = []; TB.toks = []; TB.sentToks = [];
-  const dx = (() => { try{ return dxOn(); }catch(e){ return false; } })();
-  return paras.map(p => '<p>' + bqSplit(p).map(sent => {
+/* ============ 📰 1.0.19 : LA TABLETTE « JOURNAL » ============
+   • le texte se met en page comme un journal : titre, sous-titre, chapeau, citation, liste, séparateur,
+     gras / italique / souligné, sauts de ligne, et des images (collées ou choisies), à la taille qu'on veut ;
+   • 🗣️ une seule voix lit tout le texte (celle que tu choisis), plus de changement de voix d'une phrase à l'autre ;
+   • 🖍 la chasse marche au doigt sur téléphone (toucher un mot, même à côté), et « 🔎 Mots repérés » les liste tous. */
+var ttsForceVoice = null;          // { voice, pitch } : la voix imposée pour la prochaine phrase (lue par speak())
+/* ---------- le texte en blocs : { t:'p'|'h2'|'h3'|'lead'|'quote'|'li'|'hr'|'img', r:[{ x:texte, s:'b'|'i'|'u'… }], c:suite de ligne } ---------- */
+function tbBlocksOf(art){ return (art && Array.isArray(art.blocks) && art.blocks.length) ? art.blocks : tbTextToBlocks(art && art.text); }
+function tbTextToBlocks(text){ return String(text || '').replace(/\r/g, '').split(/\n+/).map(p => p.trim()).filter(Boolean).map(p => ({ t:'p', r:[{ x:p, s:'' }] })); }
+function tbBlockText(b){ return (b && b.r || []).map(r => r.x).join(''); }
+function tbBlocksText(blocks){ return (blocks || []).filter(b => b.r).map(b => tbBlockText(b).replace(/\s+/g, ' ').trim()).filter(Boolean).join('\n'); }
+function tbIsRich(blocks){ return (blocks || []).some(b => b.t !== 'p' || b.c || (b.r || []).some(r => r.s)); }
+function tbNormRuns(b){
+  let text = ''; const st = [];
+  (b.r || []).forEach(r => {
+    const x = String(r.x || '').replace(/[\s\u00a0\u2028\u2029]+/g, ' ');
+    for(let k = 0; k < x.length; k++){ const ch = x[k]; if(ch === ' ' && (!text || text.endsWith(' '))) continue; text += ch; st.push(r.s || ''); }
+  });
+  while(text.endsWith(' ')){ text = text.slice(0, -1); st.pop(); }
+  return { text, st };
+}
+/* comme dxDecorate (liaisons et pauses), mais en gardant le gras / l'italique / le souligné du texte */
+function tbDecorate(text, wordFn, stOf, plain){
+  let an = null;
+  if(!plain){ try{ if(dxOn()) an = dxAnalyze(text); }catch(e){ an = null; } }
+  const parts = an ? an.parts : String(text).split(/(\s+)/);
+  let out = '', ti = 0, open = '';
+  const style = (st) => { if(st === open) return; if(open) out += '</span>'; if(st) out += `<span class="tb-st ${st.split('').map(c => 'st-' + c).join(' ')}">`; open = st; };
+  for(let pi = 0; pi < parts.length; pi++){
+    const p = parts[pi];
+    if(!p) continue;
+    if(/^\s+$/.test(p)){
+      if(an && ti > 0 && (an.gap[ti - 1] || an.pause[ti - 1])) continue;      // l'espace est remplacé par la marque
+      if(stOf && (stOf(ti) || '') !== open) style('');
+      out += ' '; continue;
+    }
+    const i = ti++;
+    style(stOf ? (stOf(i) || '') : '');
+    const innerHtml = an ? dxTokHtml(p, an.inner[i]) : escapeHtml(p);
+    out += wordFn(p, i, innerHtml);
+    if(stOf && an && (an.gap[i] || an.pause[i]) && (i + 1 >= an.toks.length || (stOf(i + 1) || '') !== open)) style('');   // la marque de pause n'est pas soulignée
+    if(an){
+      if(an.gap[i] && !an.pause[i]) out += dxMarkHtml(an.gap[i]);
+      else if(an.pause[i]) out += ' ' + dxPauseHtml(an.pause[i]) + (i < an.toks.length - 1 ? ' ' : '');
+    }
+  }
+  style('');
+  return out;
+}
+function tbSentsHtml(text, st){
+  let pos = 0;
+  return bqSplit(text).map(sent => {
+    let base = text.indexOf(sent, pos); if(base < 0) base = pos; pos = base + sent.length;
     const s = TB.sents.push(sent) - 1;
     TB.sentToks[s] = [];
+    const offs = []; let o = 0;
+    sent.split(/(\s+)/).forEach(p => { if(p && !/^\s+$/.test(p)){ const m = p.search(/[\p{L}\p{N}]/u); offs.push(o + Math.max(0, m)); } o += p.length; });
+    const stOf = (i) => st[base + (offs[i] || 0)] || '';
     const wrap = (raw, i, inner) => {
       const form = tbClean(raw);
       if(!form) return inner != null ? inner : escapeHtml(raw);
@@ -42415,12 +42544,361 @@ function tbBuild(art){
       return `<span ${at}>${inner}</span>`;
     };
     const before = TB.toks.length;
-    let html = null;
-    if(dx){ try{ html = dxDecorate(sent, (raw, i, inner) => wrap(raw, i, inner)); }catch(e){ html = null; TB.toks.length = before; TB.sentToks[s] = []; } }
-    if(html == null){ let i = 0; html = sent.split(/(\s+)/).map(x => /^\s+$/.test(x) ? ' ' : (x ? wrap(x, i++, null) : '')).join(''); }
+    let html;
+    try{ html = tbDecorate(sent, wrap, stOf); }
+    catch(e){ TB.toks.length = before; TB.sentToks[s] = []; html = tbDecorate(sent, wrap, stOf, true); }
     return `<span class="tb-s" data-s="${s}">${html}</span>`;
-  }).join(' ') + '</p>').join('');
+  }).join(' ');
 }
+function tbBuild(art){
+  const blocks = tbBlocksOf(art);
+  TB.sents = []; TB.toks = []; TB.sentToks = []; TB.blocks = blocks;
+  let html = '', list = false, firstP = true;
+  const drop = !!tbUi().drop;
+  blocks.forEach((b, bi) => {
+    if(b.t === 'li' && !list){ html += '<ul class="tb-ul">'; list = true; }
+    if(b.t !== 'li' && list){ html += '</ul>'; list = false; }
+    if(b.t === 'hr'){ html += '<div class="tb-hr" role="separator"><span aria-hidden="true">✦</span></div>'; return; }
+    if(b.t === 'img'){ html += tbFigHtml(b, bi); return; }
+    const { text, st } = tbNormRuns(b);
+    if(!text) return;
+    const inner = tbSentsHtml(text, st);
+    const tag = b.t === 'quote' ? 'blockquote' : b.t === 'li' ? 'li' : (b.t === 'h2' || b.t === 'h3') ? 'div' : 'p';
+    const cls = ({ h2:'tb-h2', h3:'tb-h3', lead:'tb-lead', quote:'tb-q' })[b.t] || '';
+    const dc = (b.t === 'p' && firstP && !b.c && drop && text.length > 60) ? ' tb-drop' : '';
+    if(b.t === 'p' || b.t === 'lead') firstP = false;
+    const role = b.t === 'h2' ? ' role="heading" aria-level="2"' : b.t === 'h3' ? ' role="heading" aria-level="3"' : '';
+    html += `<${tag} class="${cls}${b.c ? ' cont' : ''}${dc}" data-b="${bi}"${role}>${inner}</${tag}>`;
+  });
+  if(list) html += '</ul>';
+  return html;
+}
+/* ---------- 🖼 les images : gardées sur l'appareil (IndexedDB), réduites pour ne pas tout remplir ---------- */
+TB.imgUrl = TB.imgUrl || {};
+function tbImgKey(id){ return nsKey('tbimg') + '|' + id; }
+async function tbStore(store, mode, fn){
+  const db = await tbDb();
+  return await new Promise((res, rej) => {
+    const tx = db.transaction(store, mode), os = tx.objectStore(store);
+    let out; try{ out = fn(os); }catch(e){ rej(e); return; }
+    tx.oncomplete = () => res(out && 'result' in out ? out.result : out); tx.onerror = () => rej(tx.error); tx.onabort = () => rej(tx.error);
+  });
+}
+async function tbImgPut(id, blob){ try{ await tbStore('img', 'readwrite', os => { os.put(blob, tbImgKey(id)); }); return true; }catch(e){ console.warn('tablette : image', e); return false; } }
+async function tbImgGet(id){ try{ return await tbStore('img', 'readonly', os => os.get(tbImgKey(id))) || null; }catch(e){ return null; } }
+async function tbImgDel(id){ try{ await tbStore('img', 'readwrite', os => { os.delete(tbImgKey(id)); }); }catch(e){} if(TB.imgUrl[id]){ try{ URL.revokeObjectURL(TB.imgUrl[id]); }catch(e){} delete TB.imgUrl[id]; } }
+async function tbImgUrl(id){
+  if(!id) return '';
+  if(TB.imgUrl[id]) return TB.imgUrl[id];
+  const blob = await tbImgGet(id);
+  if(!blob) return '';
+  return (TB.imgUrl[id] = URL.createObjectURL(blob));
+}
+function tbLoadImgs(root){
+  (root || document).querySelectorAll('[data-img], [data-src]').forEach(async (el) => {
+    const img = el.tagName === 'IMG' ? el : el.querySelector('img');
+    if(!img || img.getAttribute('src')) return;
+    const u = el.dataset.img ? await tbImgUrl(el.dataset.img) : el.dataset.src;
+    if(u){ img.onerror = () => el.classList.add('missing'); img.setAttribute('src', u); } else el.classList.add('missing');
+  });
+}
+async function tbImgShrink(file){
+  const url = URL.createObjectURL(file);
+  try{
+    const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; });
+    let w = img.naturalWidth || 1, h = img.naturalHeight || 1;
+    const k = Math.min(1, 1400 / Math.max(w, h)); w = Math.max(1, Math.round(w * k)); h = Math.max(1, Math.round(h * k));
+    const keepPng = file.type === 'image/png' && w * h <= 700000;          // capture d'écran, schéma : on garde la netteté
+    if(k === 1 && file.size < 350000 && /^image\/(jpeg|png|webp)$/.test(file.type)) return file;
+    const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+    const cx = cv.getContext('2d');
+    if(!keepPng){ cx.fillStyle = '#fff'; cx.fillRect(0, 0, w, h); }
+    cx.drawImage(img, 0, 0, w, h);
+    const blob = await new Promise(res => cv.toBlob(res, keepPng ? 'image/png' : 'image/jpeg', 0.86));
+    return blob || file;
+  }catch(e){ return file; }
+  finally{ URL.revokeObjectURL(url); }
+}
+async function tbImgAdd(file){
+  const blob = await tbImgShrink(file);
+  const id = 'i' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  if(!(await tbImgPut(id, blob))) return null;
+  TB.imgUrl[id] = URL.createObjectURL(blob);
+  return id;
+}
+function tbArtImgIds(art){ return (tbBlocksOf(art) || []).filter(b => b.t === 'img' && b.id).map(b => b.id); }
+/* images gardées mais plus utilisées par aucun texte (brouillon abandonné, image retirée) : on fait le ménage */
+async function tbImgCleanup(){
+  try{
+    const used = new Set(); tbLoad().forEach(a => tbArtImgIds(a).forEach(id => used.add(id)));
+    (TB.edUsed || []).forEach(id => used.add(id));
+    const prefix = nsKey('tbimg') + '|';
+    const keys = await tbStore('img', 'readonly', os => os.getAllKeys());
+    (keys || []).forEach(k => { if(typeof k === 'string' && k.startsWith(prefix)){ const id = k.slice(prefix.length); const t = parseInt(id.slice(1, 9), 36); if(!used.has(id) && t && Date.now() - t > 6 * 3600000) tbImgDel(id); } });
+  }catch(e){}
+}
+function tbFigHtml(b, bi){
+  const w = Math.max(15, Math.min(100, Math.round(b.w || 100))), al = ['l', 'r'].includes(b.al) ? b.al : 'c';
+  return `<figure class="tb-fig al-${al}" style="width:${w}%" data-b="${bi}"${b.id ? ` data-img="${escapeHtml(b.id)}"` : ''}${b.src ? ` data-src="${escapeHtml(b.src)}"` : ''} role="button" tabindex="0" aria-label="Image${b.cap ? ' : ' + escapeHtml(b.cap) : ''}. Toucher pour la régler"><img alt="${escapeHtml(b.cap || '')}" draggable="false">${b.cap ? `<figcaption>${escapeHtml(b.cap)}</figcaption>` : ''}</figure>`;
+}
+/* ---------- ✍️ l'éditeur de la Tablette : ce qu'on colle (page web, Word, mail, image) devient des blocs propres ---------- */
+var TB_SKIP_TAGS = /^(SCRIPT|STYLE|NOSCRIPT|IFRAME|OBJECT|EMBED|SVG|CANVAS|VIDEO|AUDIO|BUTTON|INPUT|SELECT|TEXTAREA|HEAD|META|LINK|TITLE|TEMPLATE|NAV|FORM)$/;
+var TB_BLOCK_TAGS = /^(P|DIV|SECTION|ARTICLE|HEADER|FOOTER|MAIN|ASIDE|FIGURE|FIGCAPTION|H[1-6]|BLOCKQUOTE|LI|UL|OL|TABLE|TBODY|THEAD|TR|DL|DT|DD|PRE|CENTER|ADDRESS)$/;
+function tbImgBlockFrom(el){
+  const src = el.getAttribute('src') || '';
+  const pct = (/(\d+(?:\.\d+)?)%/.exec(el.style && el.style.width || '') || [])[1];
+  const b = { t:'img', w:Math.max(15, Math.min(100, +el.dataset.w || (pct ? +pct : 100))), al:['l', 'r'].includes(el.dataset.al) ? el.dataset.al : 'c' };
+  if(el.dataset.img) b.id = el.dataset.img;
+  else if(el.dataset.src) b.src = el.dataset.src;
+  else if(/^(https?:|data:image\/)/.test(src)) b.src = src;
+  if(el.dataset.cap) b.cap = el.dataset.cap;
+  return (b.id || b.src) ? b : null;
+}
+function tbDomToBlocks(root, opts){
+  opts = opts || {};
+  const blocks = [];
+  let cur = null;
+  const flush = () => { if(cur && tbBlockText(cur).trim()) blocks.push(cur); cur = null; };
+  const typeOf = (el) => {
+    const t = el.tagName;
+    if(t === 'H1' || t === 'H2') return 'h2';
+    if(t === 'H3') return 'h3';
+    if(/^H[4-6]$/.test(t)) return (opts.editor && t === 'H4') ? 'lead' : 'h3';
+    if(t === 'BLOCKQUOTE') return 'quote';
+    if(t === 'LI') return 'li';
+    return null;
+  };
+  const styleOf = (el, s) => {
+    let x = s;
+    const t = el.tagName, st = (el.getAttribute && el.getAttribute('style')) || '';
+    if(t === 'B' || t === 'STRONG') x += 'b';
+    if(t === 'I' || t === 'EM' || t === 'CITE') x += 'i';
+    if(t === 'U' || t === 'INS') x += 'u';
+    if(/font-weight\s*:\s*(bold|[6-9]00)/i.test(st)) x += 'b';
+    if(/font-style\s*:\s*italic/i.test(st)) x += 'i';
+    if(/text-decoration[^;]*underline/i.test(st)) x += 'u';
+    if(/font-weight\s*:\s*(normal|[1-4]00)/i.test(st)) x = x.replace(/b/g, '');
+    return [...new Set(x.split(''))].sort().join('');
+  };
+  const walk = (node, t, s) => {
+    for(const n of node.childNodes){
+      if(n.nodeType === 3){
+        const x = n.textContent;
+        if(!x || (!cur && !x.trim())) continue;
+        if(!cur) cur = { t:t || 'p', r:[] };
+        cur.r.push({ x, s });
+        continue;
+      }
+      if(n.nodeType !== 1) continue;
+      const tag = n.tagName;
+      if(TB_SKIP_TAGS.test(tag) || (n.getAttribute && n.getAttribute('aria-hidden') === 'true' && !n.textContent.trim())) continue;
+      if(tag === 'BR'){ const tt = cur ? cur.t : (t || 'p'); flush(); cur = { t:tt, r:[], c:true }; continue; }
+      if(tag === 'HR'){ flush(); blocks.push({ t:'hr' }); continue; }
+      if(tag === 'IMG'){ const ib = tbImgBlockFrom(n); if(ib){ flush(); blocks.push(ib); } continue; }
+      if(tag === 'FIGURE'){
+        const im = n.querySelector('img'), cap = n.querySelector('figcaption');
+        if(im){ const ib = tbImgBlockFrom(im); if(ib){ flush(); if(cap && cap.textContent.trim()) ib.cap = cap.textContent.replace(/\s+/g, ' ').trim().slice(0, 300); blocks.push(ib); } continue; }
+      }
+      if(tag === 'TD' || tag === 'TH'){ walk(n, t, styleOf(n, s)); if(cur) cur.r.push({ x:'  ', s:'' }); continue; }
+      const bt = typeOf(n);
+      if(bt || TB_BLOCK_TAGS.test(tag)){
+        flush();
+        const inh = (t === 'quote' || t === 'li' || t === 'lead') ? t : null;
+        walk(n, bt || inh || (tag === 'FIGCAPTION' ? 'p' : (t && t !== 'li' ? t : 'p')), (bt === 'h2' || bt === 'h3') ? '' : styleOf(n, s));
+        flush();
+        continue;
+      }
+      walk(n, t, styleOf(n, s));
+    }
+  };
+  walk(root, null, '');
+  flush();
+  // runs : on fusionne les morceaux voisins de même style, on enlève les espaces au bord
+  blocks.forEach(b => {
+    if(!b.r) return;
+    const r = [];
+    b.r.forEach(x => { const prev = r[r.length - 1]; if(prev && prev.s === x.s) prev.x += x.x; else r.push({ x:x.x, s:x.s }); });
+    if(r.length){ r[0].x = r[0].x.replace(/^[\s\u00a0]+/, ''); r[r.length - 1].x = r[r.length - 1].x.replace(/[\s\u00a0]+$/, ''); }
+    b.r = r.filter(x => x.x);
+    if(b.t === 'h2' || b.t === 'h3') b.r.forEach(x => { x.s = x.s.replace(/b/g, ''); });
+  });
+  // une ligne « titre » de deux mots en gras au milieu d'un texte collé reste un paragraphe : on ne devine rien de plus
+  return blocks.filter(b => b.t === 'hr' || b.t === 'img' || (b.r && b.r.length));
+}
+function tbRunsHtml(r){
+  return (r || []).map(x => { let t = escapeHtml(x.x); if(x.s.includes('u')) t = `<u>${t}</u>`; if(x.s.includes('i')) t = `<i>${t}</i>`; if(x.s.includes('b')) t = `<b>${t}</b>`; return t; }).join('');
+}
+function tbEdImgHtml(b){
+  const w = Math.max(15, Math.min(100, Math.round(b.w || 100))), al = ['l', 'r'].includes(b.al) ? b.al : 'c';
+  return `<img class="tbk-img al-${al}" contenteditable="false"${b.id ? ` data-img="${escapeHtml(b.id)}"` : ''}${b.src ? ` data-src="${escapeHtml(b.src)}"` : ''} data-w="${w}" data-al="${al}"${b.cap ? ` data-cap="${escapeHtml(b.cap)}"` : ''} style="width:${w}%" alt="${escapeHtml(b.cap || 'image')}">`;
+}
+function tbBlocksToEdHtml(blocks){
+  let h = '', list = false;
+  (blocks || []).forEach((b, k) => {
+    if(b.t === 'li'){ if(!list){ h += '<ul>'; list = true; } h += `<li>${tbRunsHtml(b.r)}</li>`; return; }
+    if(list){ h += '</ul>'; list = false; }
+    if(b.t === 'hr'){ h += '<hr>'; return; }
+    if(b.t === 'img'){ h += `<p>${tbEdImgHtml(b)}</p>`; return; }
+    const tag = ({ h2:'h2', h3:'h3', lead:'h4', quote:'blockquote' })[b.t] || 'p';
+    const close = `</${tag}>`;
+    if(b.c && k > 0 && blocks[k - 1].t === b.t && h.endsWith(close)){ h = h.slice(0, -close.length) + '<br>' + tbRunsHtml(b.r) + close; return; }
+    h += `<${tag}>${tbRunsHtml(b.r)}${close}`;
+  });
+  if(list) h += '</ul>';
+  return h;
+}
+function tbTextToEdHtml(text){
+  const t = String(text || '').replace(/\r\n?/g, '\n').trim();
+  if(!/\n/.test(t)) return escapeHtml(t);
+  // une ligne = un paragraphe (« 🧹 Ajuster » recolle ensuite les phrases coupées) ; les sauts de ligne ↵ ajoutés à la main restent
+  return t.split('\n').map(l => l.trim()).filter(Boolean).map(l => `<p>${escapeHtml(l)}</p>`).join('');
+}
+/* 🧹 recoller les lignes coupées, aussi dans un texte mis en page */
+function tbReflowBlocks(blocks){
+  if(!tbIsRich(blocks)){
+    const r = tbReflow(tbBlocksText(blocks));
+    return { blocks:tbTextToBlocks(r.text), joined:r.joined, changed:r.changed && r.joined > 0 };
+  }
+  const out = []; let joined = 0;
+  const ENDS = /[.!?…:»"”]$/;
+  (blocks || []).forEach(b0 => {
+    const b = JSON.parse(JSON.stringify(b0));
+    const prev = out[out.length - 1];
+    if(prev && prev.r && b.r && !b.c && prev.t === b.t && ['p', 'quote', 'lead'].includes(b.t)){      // un saut de ligne ↵ voulu (b.c) reste
+      const pt = tbBlockText(prev).replace(/\s+$/, ''), nt = tbBlockText(b).replace(/^\s+/, '');
+      const hy = /\p{L}[-‐]$/u.test(pt) && /^\p{Ll}/u.test(nt);
+      const titleLike = !prev.c && pt.length <= 45 && /^[\p{Lu}0-9«"“]/u.test(pt) && !/[,;:-]$/.test(pt) && out.length && out[out.length - 1] === prev && (out.length === 1 || !out[out.length - 2].r || ENDS.test(tbBlockText(out[out.length - 2]).trim()));
+      if(hy || /^[\p{Ll}0-9,;)\]]/u.test(nt) || (!ENDS.test(pt) && !titleLike)){
+        const last = prev.r[prev.r.length - 1];
+        last.x = last.x.replace(/\s+$/, '');
+        if(hy) last.x = last.x.replace(/[-‐]$/, ''); else prev.r.push({ x:' ', s:'' });
+        const first = b.r[0]; if(first) first.x = first.x.replace(/^\s+/, '');
+        prev.r = prev.r.concat(b.r);
+        joined++;
+        return;
+      }
+    }
+    out.push(b);
+  });
+  return { blocks:out, joined, changed:joined > 0 };
+}
+function tbNeedsReflowArt(art){ try{ return tbReflowBlocks(tbBlocksOf(art)).joined >= 1; }catch(e){ return false; } }
+/* ---------- 🗣️ une seule voix pour tout le texte ---------- */
+function tbVoices(){ try{ return (window.speechSynthesis.getVoices() || []).filter(v => /^fr([-_]|$)/i.test(v.lang || '')); }catch(e){ return []; } }
+function tbVoiceName(v){ return v ? String(v.name || '').replace(/^(Microsoft|Google|Apple)\s+/i, '').replace(/\s*-\s*(French|Français).*$/i, '').replace(/\s*\((French|Français)[^)]*\)/i, '').trim() || v.name : ''; }
+function tbVoice(){
+  const id = tbUi().voice, L = tbVoices();
+  if(id){ const v = L.find(x => x.voiceURI === id) || L.find(x => x.name === id); if(v) return { voice:v, pitch:1 }; }
+  if(!TB.pinVoice || !L.includes(TB.pinVoice.voice)){
+    try{ const pv = personaVoice('fr', narratorPersona()); TB.pinVoice = pv && pv.voice ? { voice:pv.voice, pitch:pv.pitch || 1 } : (L[0] ? { voice:L[0], pitch:1 } : null); }
+    catch(e){ TB.pinVoice = L[0] ? { voice:L[0], pitch:1 } : null; }
+  }
+  return TB.pinVoice;
+}
+function tbNarr(text, onEnd, rate){ const v = tbVoice(); if(v) ttsForceVoice = v; speakNarrator(text, 'fr-FR', onEnd, rate); }
+function tbNarrFr(text, lang, onEnd, rate){ tbNarr(text, onEnd, rate); }
+function tbVoiceSheet(){
+  const sh = document.getElementById('tbSheet'); if(!sh) return;
+  TB.sheetK = -6;
+  const u = tbUi(), L = tbVoices(), cur = tbVoice();
+  const row = (id, label, sub, on) => `<button type="button" class="tb-vrow ${on ? 'on' : ''}" data-tb="voice-set" data-v="${escapeHtml(id)}" aria-pressed="${on}"><span>${label}<small>${sub}</small></span><i aria-hidden="true">${on ? '✓' : '▶'}</i></button>`;
+  sh.innerHTML = `<div class="tb-sh-in">
+    <div class="tb-grab" aria-hidden="true"></div>
+    <div class="tb-sh-top"><div><div class="tb-sh-w">Voix de lecture</div><div class="tb-sh-ipa">Une seule voix lit tout le texte. Touche une voix pour l'écouter.</div></div><button type="button" class="tb-ib" data-tb="sheet-x" aria-label="Fermer">✕</button></div>
+    <div class="tb-vlist">
+      ${row('', '🦊 La voix du conteur', escapeHtml(cur && !u.voice ? tbVoiceName(cur.voice) + ' · réglage de l\'appli' : 'réglage de l\'appli (menu ☰ › Voix de lecture)'), !u.voice)}
+      ${L.map(v => row(v.voiceURI || v.name, '🔊 ' + escapeHtml(tbVoiceName(v)), escapeHtml(v.lang + (v.localService === false ? ' · en ligne' : '')), !!u.voice && (u.voice === v.voiceURI || u.voice === v.name))).join('')}
+    </div>
+    ${L.length ? '' : `<div class="tb-info-l">Les voix de ton appareil se chargent… Si rien n'apparaît, c'est la voix par défaut de l'appareil qui lit.</div>`}
+  </div>`;
+  sh.classList.add('open'); sh.setAttribute('aria-hidden', 'false');
+}
+try{ if(window.speechSynthesis) window.speechSynthesis.addEventListener('voiceschanged', () => { TB.pinVoice = null; if(TB.sheetK === -6) tbVoiceSheet(); }); }catch(e){}
+/* ---------- 🖼 régler une image dans la Tablette : taille (curseur ou poignée), position, légende ---------- */
+function tbImgSheet(bi){
+  const b = TB.art && TB.art.blocks && TB.art.blocks[bi]; if(!b || b.t !== 'img') return;
+  const sh = document.getElementById('tbSheet'); if(!sh) return;
+  TB.sheetK = -5; TB.imgSel = bi;
+  document.querySelectorAll('#tbBody .tb-fig.sel').forEach(f => { f.classList.remove('sel'); const h = f.querySelector('.tb-fig-h'); if(h) h.remove(); });
+  const fig = document.querySelector(`#tbBody .tb-fig[data-b="${bi}"]`);
+  if(fig){ fig.classList.add('sel'); fig.insertAdjacentHTML('beforeend', '<i class="tb-fig-h" aria-hidden="true"></i>'); fig.scrollIntoView({ block:'start', behavior:'smooth' }); }
+  const al = b.al || 'c';
+  sh.innerHTML = `<div class="tb-sh-in">
+    <div class="tb-grab" aria-hidden="true"></div>
+    <div class="tb-sh-top"><div><div class="tb-sh-w">Image</div><div class="tb-sh-ipa">Glisse le rond violet, ou le curseur, pour la taille.</div></div><button type="button" class="tb-ib" data-tb="sheet-x" aria-label="Fermer">✕</button></div>
+    <div class="tb-pop-row"><span class="tb-pop-l">Taille</span><input type="range" class="tb-range" id="tbImgW" min="15" max="100" step="1" value="${Math.round(b.w || 100)}" aria-label="Taille de l'image"><output class="tb-out" id="tbImgWOut">${Math.round(b.w || 100)} %</output></div>
+    <div class="tb-pop-row"><span class="tb-pop-l">Position</span><div class="tb-seg">
+      <button type="button" data-tb="img-al" data-v="l" class="${al === 'l' ? 'on' : ''}">⬅ À gauche</button>
+      <button type="button" data-tb="img-al" data-v="c" class="${al === 'c' ? 'on' : ''}">Au centre</button>
+      <button type="button" data-tb="img-al" data-v="r" class="${al === 'r' ? 'on' : ''}">À droite ➡</button></div></div>
+    <div class="tb-pop-hint">À gauche ou à droite, le texte coule à côté de l'image, comme dans un journal.</div>
+    <label class="tb-lbl">Légende<input class="tb-in" id="tbImgCap" maxlength="300" value="${escapeHtml(b.cap || '')}" placeholder="Ce que montre l'image (facultatif)"></label>
+    <button type="button" class="tb-link" data-tb="img-del">🗑 Retirer l'image du texte</button>
+  </div>`;
+  sh.classList.add('open'); sh.setAttribute('aria-hidden', 'false');
+}
+function tbImgUnsel(){ document.querySelectorAll('#tbBody .tb-fig.sel').forEach(f => { f.classList.remove('sel'); const h = f.querySelector('.tb-fig-h'); if(h) h.remove(); }); TB.imgSel = -1; }
+function tbImgSet(bi, patch){
+  const b = TB.art && TB.art.blocks && TB.art.blocks[bi]; if(!b) return;
+  Object.assign(b, patch);
+  if(patch.cap !== undefined && !patch.cap) delete b.cap;
+  const fig = document.querySelector(`#tbBody .tb-fig[data-b="${bi}"]`);
+  if(fig){
+    if(patch.w != null){ fig.style.width = Math.round(b.w) + '%'; const o = document.getElementById('tbImgWOut'); if(o) o.textContent = Math.round(b.w) + ' %'; const r = document.getElementById('tbImgW'); if(r && +r.value !== Math.round(b.w)) r.value = Math.round(b.w); }
+    if(patch.al){ fig.classList.remove('al-l', 'al-c', 'al-r'); fig.classList.add('al-' + b.al); }
+    if(patch.cap !== undefined){ let fc = fig.querySelector('figcaption'); if(b.cap){ if(!fc){ fc = document.createElement('figcaption'); fig.insertBefore(fc, fig.querySelector('.tb-fig-h')); } fc.textContent = b.cap; } else if(fc) fc.remove(); }
+  }
+  tbSaveArt();
+}
+async function tbImgRemove(bi){
+  const b = TB.art.blocks[bi]; if(!b) return;
+  TB.art.blocks.splice(bi, 1);
+  TB.art.text = tbBlocksText(TB.art.blocks);
+  tbCloseSheet(); tbRender(true); tbSaveArtNow();
+  if(b.id && !tbLoad().some(a => tbArtImgIds(a).includes(b.id))) tbImgDel(b.id);
+  tbToast("🗑 Image retirée");
+}
+/* ---------- 🖍 la chasse au doigt : toucher un mot (même à côté), « 🔎 Mots repérés » ---------- */
+function tbNearestWord(x, y){
+  let best = null, bd = 26 * 26;
+  for(const sp of TB.spans){
+    const r = sp.getBoundingClientRect();
+    if(r.bottom < y - 30 || r.top > y + 30) continue;
+    const dx = x < r.left ? r.left - x : (x > r.right ? x - r.right : 0), dy = y < r.top ? r.top - y : (y > r.bottom ? y - r.bottom : 0);
+    const d = dx * dx + dy * dy;
+    if(d < bd){ bd = d; best = sp; }
+  }
+  return best;
+}
+function tbTapWord(k){
+  const tk = TB.toks[k]; if(!tk) return;
+  if(TB.mode === 'play'){ TB.playing = true; tbDock(); tbSpeak(tk.s); return; }
+  if(TB.mode === 'self'){ tbSelfSpeak(tk.form, Math.max(0.8, readingRate)); return; }
+  if(TB.mode === 'replay'){ tbReplaySeekS(tk.s); return; }
+  if(TB.hunt){ tbSay(tk.form); tbToggleTag(k); return; }
+  tbOpenSheet(k);
+}
+function tbHintSheet(){
+  const sh = document.getElementById('tbSheet'); if(!sh) return;
+  TB.sheetK = -7;
+  TB.hintsOn = true; tbPaintHints(true); tbDock();
+  const ks = tbHintKeys();
+  const rows = ks.map(k => {
+    const tk = TB.toks[k], tagged = tbTagAt(k) >= 0, s = TB.sents[tk.s] || '';
+    const i = s.indexOf(tk.form), snip = i >= 0 ? escapeHtml(s.slice(Math.max(0, i - 50), i)).replace(/^/, i > 50 ? '…' : '') + `<mark>${escapeHtml(tk.form)}</mark>` + escapeHtml(s.slice(i + tk.form.length, i + tk.form.length + 60)) + (s.length > i + tk.form.length + 60 ? '…' : '') : escapeHtml(s.slice(0, 120));
+    return `<div class="tb-hrow"><div class="tb-hrow-t" data-tb="hint-go" data-k="${k}" role="button" tabindex="0"><b>${escapeHtml(tk.form)}</b><span>${snip}</span></div>
+      <button type="button" class="tb-btn hl sm" data-tb="hint-tag" data-k="${k}" ${tagged ? 'disabled' : ''}>${tagged ? '✓ Tagué' : '🖍 Taguer'}</button></div>`;
+  }).join('');
+  const left = ks.filter(k => tbTagAt(k) < 0).length;
+  sh.innerHTML = `<div class="tb-sh-in">
+    <div class="tb-grab" aria-hidden="true"></div>
+    <div class="tb-sh-top"><div><div class="tb-sh-w">Mots repérés</div><div class="tb-sh-ipa">${ks.length ? `${ks.length} mot${ks.length > 1 ? 's' : ''} rare${ks.length > 1 ? 's' : ''}, pas encore dans tes mots` : 'Aucun mot rare repéré'}</div></div><button type="button" class="tb-ib" data-tb="sheet-x" aria-label="Fermer">✕</button></div>
+    ${ks.length ? rows : `<div class="tb-info-l">Tous les mots longs de ce texte sont déjà dans ton lexique, ou très courants. Tu peux toujours toucher n'importe quel mot du texte pour le taguer.</div>`}
+    ${left > 1 ? `<button type="button" class="tb-btn hl wide" data-tb="hint-all">🖍 Tout taguer (${left})</button>` : ''}
+  </div>`;
+  sh.classList.add('open'); sh.setAttribute('aria-hidden', 'false');
+}
+
 function tbWordsCount(text){ return (String(text || '').match(/[\p{L}\p{N}]+(?:['’-][\p{L}\p{N}]+)*/gu) || []).length; }
 function tbAutoTitle(text){
   const first = bqSplit(String(text || '').split(/\n+/).find(x => x.trim()) || '')[0] || 'Mon texte';
@@ -42442,10 +42920,12 @@ function renderTabletteHome(){
   const card = document.getElementById('quizCard');
   const L = tbLoad().filter(a => a.id !== 'sample');
   const editing = TB.edit ? tbGet(TB.edit) : null;
-  const draft = editing ? { title:editing.title, text:editing.text } : (TB.draft || { title:'', text:'' });
+  const draft = editing ? { title:editing.title, html:tbBlocksToEdHtml(tbBlocksOf(editing)) } : (TB.draft || { title:'', html:'' });
   const item = (a) => {
     const n = tbWordsCount(a.text), tags = (a.tags || []).length, pct = Math.round(Math.min(1, a.pct || 0) * 100);
+    const img = tbArtImgIds(a)[0];
     return `<div class="tbk-item" data-tbk-open="${escapeHtml(a.id)}" role="button" tabindex="0">
+      ${img ? `<span class="tbk-th" data-img="${escapeHtml(img)}" aria-hidden="true"><img alt=""></span>` : ''}
       <div class="tbk-main"><b>${escapeHtml(a.title || 'Sans titre')}</b>
         <span class="tbk-meta"><span>${n} mots</span><span>≈ ${Math.max(1, Math.round(n / 170))} min</span>${tags ? `<span>🖍 ${tags} tagué${tags > 1 ? 's' : ''}</span>` : ''}${a.done ? '<span class="tbk-done">✓ lu</span>' : (pct > 2 ? `<span>lu à ${pct} %</span>` : '')}${a.src && a.src !== 'Collé' ? `<span>${escapeHtml(a.src)}</span>` : ''}</span>
         <span class="tbk-bar"><i style="width:${a.done ? 100 : pct}%;"></i></span></div>
@@ -42453,15 +42933,30 @@ function renderTabletteHome(){
       <button type="button" class="tbk-ib" data-tbk-del="${escapeHtml(a.id)}" aria-label="Supprimer « ${escapeHtml(a.title || '')} »">🗑</button>
     </div>`;
   };
+  const tool = (cmd, label, title, cls) => `<button type="button" class="tbk-tb ${cls || ''}" data-ed="${cmd}" title="${title}" aria-label="${title}">${label}</button>`;
   card.innerHTML = `<div class="tbk" id="tbkRoot">
     <div class="cat-tag">📰 La Tablette</div>
     <div class="tbk-h">Colle un texte, lis‑le comme un pro</div>
-    <div class="tbk-sub">Les liaisons et les pauses s'affichent, chaque mot se touche pour l'entendre, et tu chasses les mots difficiles pour les ajouter à tes mots.</div>
+    <div class="tbk-sub">Mets-le en page comme un journal (titres, images…) : les liaisons et les pauses s'affichent, chaque mot se touche pour l'entendre, et tu chasses les mots difficiles.</div>
     <div class="tbk-device">
       <i class="tbk-cam" aria-hidden="true"></i>
       <div class="tbk-screen">
         <input type="text" class="tbk-title" id="tbkTitle" maxlength="120" placeholder="Titre (facultatif)" value="${escapeHtml(draft.title || '')}">
-        <textarea class="tbk-text" id="tbkText" rows="7" placeholder="Colle ici un article, un mail, un passage de livre…">${escapeHtml(draft.text || '')}</textarea>
+        <div class="tbk-tools" id="tbkTools" role="toolbar" aria-label="Mise en page">
+          ${tool('h2', 'Titre', 'Titre')}${tool('h3', 'Sous-titre', 'Sous-titre')}${tool('lead', 'Chapeau', "Chapeau : l'introduction en gras")}${tool('p', 'Texte', 'Texte normal')}
+          <span class="tbk-sep" aria-hidden="true"></span>
+          ${tool('bold', '<b>G</b>', 'Gras', 'sq')}${tool('italic', '<i>I</i>', 'Italique', 'sq')}${tool('underline', '<u>S</u>', 'Souligné', 'sq')}
+          <span class="tbk-sep" aria-hidden="true"></span>
+          ${tool('quote', '❝ Citation', 'Citation')}${tool('list', '• Liste', 'Liste à puces')}${tool('br', '↵', 'Saut de ligne', 'sq')}${tool('hr', '✦', 'Séparateur', 'sq')}${tool('img', '🖼 Image', 'Ajouter une image (galerie ou appareil photo)')}${tool('undo', '↶', 'Annuler', 'sq')}
+        </div>
+        <div class="tbk-ed" id="tbkEd" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Ton texte" spellcheck="true" data-ph="Colle ici un article, un mail, un passage de livre… Les titres et les images passent aussi.">${draft.html || ''}</div>
+        <div class="tbk-imgbar" id="tbkImgBar" hidden>
+          <span class="tbk-imgbar-l">🖼 Image</span>
+          <input type="range" id="tbkImgW" min="15" max="100" step="1" value="100" aria-label="Taille de l'image"><output id="tbkImgWOut">100 %</output>
+          <span class="tbk-seg"><button type="button" data-ei="l" aria-label="À gauche">⬅</button><button type="button" data-ei="c" aria-label="Au centre">⬛</button><button type="button" data-ei="r" aria-label="À droite">➡</button></span>
+          <button type="button" class="tbk-ib" data-ei="del" aria-label="Retirer l'image">🗑</button>
+        </div>
+        <input type="file" id="tbkFile" accept="image/*" multiple hidden>
         <div class="tbk-row">
           <button type="button" class="tbk-paste" id="tbkPaste">📋 Coller</button>
           <button type="button" class="tbk-paste tbk-fix" id="tbkFix" title="Recolle les lignes coupées au milieu des phrases">🧹 Ajuster</button>
@@ -42480,41 +42975,176 @@ function renderTabletteHome(){
       ${typeof BOUQUINAGE_TEXTS !== 'undefined' && BOUQUINAGE_TEXTS.length ? `<div class="tbk-item" data-tbk-bq="1" role="button" tabindex="0"><div class="tbk-main"><b>🎲 Un texte du Bouquinage</b><span class="tbk-meta"><span>${BOUQUINAGE_TEXTS.length} textes de motivation</span></span></div></div>` : ''}
     </div></div>`;
   const root = document.getElementById('tbkRoot');
-  const ta = document.getElementById('tbkText'), ti = document.getElementById('tbkTitle'), openB = document.getElementById('tbkOpen'), cnt = document.getElementById('tbkCount');
-  const fixB = document.getElementById('tbkFix'), hint = document.getElementById('tbkHint');
-  const sync = (keepCount) => {
-    const n = tbWordsCount(ta.value);
-    if(keepCount !== true) cnt.textContent = n ? `${n} mot${n > 1 ? 's' : ''}` : '';
-    openB.disabled = n < 1;
-    const need = ta.value.length < 80000 && tbNeedsReflow(ta.value);
-    fixB.classList.toggle('hot', need); hint.hidden = !need;
-    if(!TB.edit) TB.draft = { title:ti.value, text:ta.value };
+  const ed = document.getElementById('tbkEd'), ti = document.getElementById('tbkTitle'), openB = document.getElementById('tbkOpen'), cnt = document.getElementById('tbkCount');
+  const fixB = document.getElementById('tbkFix'), hint = document.getElementById('tbkHint'), bar = document.getElementById('tbkImgBar'), file = document.getElementById('tbkFile');
+  tbLoadImgs(root);
+  try{ document.execCommand('defaultParagraphSeparator', false, 'p'); }catch(e){}
+  /* la sélection dans l'éditeur (pour que les boutons agissent au bon endroit, même après un toucher ailleurs) */
+  let range = null;
+  const keepSel = () => { const s = window.getSelection(); if(s && s.rangeCount && ed.contains(s.getRangeAt(0).commonAncestorContainer)) range = s.getRangeAt(0).cloneRange(); };
+  const putSel = () => {
+    ed.focus({ preventScroll:true });
+    const s = window.getSelection();
+    if(range && ed.contains(range.commonAncestorContainer)){ s.removeAllRanges(); s.addRange(range); return; }
+    if(!s.rangeCount || !ed.contains(s.getRangeAt(0).commonAncestorContainer)){ const r = document.createRange(); r.selectNodeContents(ed); r.collapse(false); s.removeAllRanges(); s.addRange(r); }
   };
-  ta.addEventListener('input', sync); ti.addEventListener('input', sync); sync();
+  document.addEventListener('selectionchange', keepSel);
+  new MutationObserver((_, obs) => { if(!root.isConnected){ document.removeEventListener('selectionchange', keepSel); obs.disconnect(); } }).observe(card, { childList:true });
+  const blocks = () => tbDomToBlocks(ed, { editor:true });
+  const sync = (keepCount) => {
+    const b = blocks(), text = tbBlocksText(b), n = tbWordsCount(text), imgs = b.filter(x => x.t === 'img').length;
+    if(keepCount !== true) cnt.textContent = n ? `${n} mot${n > 1 ? 's' : ''}${imgs ? ` · ${imgs} image${imgs > 1 ? 's' : ''}` : ''}` : (imgs ? `${imgs} image${imgs > 1 ? 's' : ''}` : '');
+    openB.disabled = n < 1;
+    const need = text.length < 80000 && tbReflowBlocks(b).joined >= 1;
+    fixB.classList.toggle('hot', need); hint.hidden = !need;
+    ed.classList.toggle('empty', !ed.textContent.trim() && !ed.querySelector('img, hr'));
+    TB.edUsed = b.filter(x => x.t === 'img' && x.id).map(x => x.id);
+    if(!TB.edit) TB.draft = { title:ti.value, html:ed.innerHTML };
+  };
+  const insertHtml = (html) => {
+    putSel();
+    let ok = false; try{ ok = document.execCommand('insertHTML', false, html); }catch(e){}
+    if(!ok){ const s = window.getSelection(); const r = s.getRangeAt(0); r.deleteContents(); const frag = r.createContextualFragment(html); r.insertNode(frag); r.collapse(false); }
+    tbLoadImgs(ed); keepSel(); sync();
+  };
+  const addImages = async (files) => {
+    for(const f of files){
+      if(!/^image\//.test(f.type || '')) continue;
+      cnt.textContent = '🖼 J\'ajoute l\'image…';
+      const id = await tbImgAdd(f);
+      if(!id){ setStatus("⚠️ L'image n'a pas pu être gardée sur cet appareil.", 'err'); continue; }
+      insertHtml(`<p>${tbEdImgHtml({ id, w:100, al:'c' })}</p><p><br></p>`);
+    }
+    sync();
+  };
+  /* ce qu'on colle : une image, une page web, un document Word, un mail ou du texte simple */
+  const pasteData = async (d) => {
+    const files = (d.files || []).filter(f => /^image\//.test(f.type || ''));
+    const html = d.html || '';
+    const htmlHasText = html && (new DOMParser().parseFromString(html, 'text/html').body.textContent || '').trim();
+    if(files.length && !htmlHasText){ await addImages(files); return true; }
+    if(html){
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+      const bl = tbDomToBlocks(doc.body);
+      // les images collées en « data: » sont gardées sur l'appareil
+      for(const b of bl){
+        if(b.t === 'img' && b.src && /^data:image\//.test(b.src)){
+          try{ const blob = await (await fetch(b.src)).blob(); const id = await tbImgAdd(blob); if(id){ b.id = id; delete b.src; } }catch(e){}
+        }
+      }
+      if(bl.length){ insertHtml(tbBlocksToEdHtml(bl)); return true; }
+    }
+    if(d.text){ insertHtml(tbTextToEdHtml(d.text)); return true; }
+    if(files.length){ await addImages(files); return true; }
+    return false;
+  };
+  ed.addEventListener('paste', (e) => {
+    const cd = e.clipboardData; if(!cd) return;
+    e.preventDefault();
+    keepSel();
+    pasteData({ files:[...(cd.files || [])], html:cd.getData('text/html'), text:cd.getData('text/plain') });
+  });
+  ed.addEventListener('drop', (e) => { const fs = [...(e.dataTransfer && e.dataTransfer.files || [])].filter(f => /^image\//.test(f.type)); if(fs.length){ e.preventDefault(); addImages(fs); } });
+  ed.addEventListener('input', () => sync());
+  ti.addEventListener('input', () => sync());
+  ed.addEventListener('keydown', (e) => {
+    if((e.ctrlKey || e.metaKey) && !e.shiftKey && ['b', 'i', 'u'].includes(e.key.toLowerCase())){ e.preventDefault(); document.execCommand({ b:'bold', i:'italic', u:'underline' }[e.key.toLowerCase()]); sync(); }
+  });
+  /* 🖼 toucher une image dans l'éditeur : taille, position, retirer */
+  let selImg = null;
+  const showBar = (img) => {
+    ed.querySelectorAll('img.sel').forEach(x => x.classList.remove('sel'));
+    selImg = img;
+    if(!img){ bar.hidden = true; return; }
+    img.classList.add('sel');
+    const w = +img.dataset.w || 100;
+    document.getElementById('tbkImgW').value = w; document.getElementById('tbkImgWOut').textContent = w + ' %';
+    bar.querySelectorAll('[data-ei]').forEach(b => b.classList.toggle('on', b.dataset.ei === (img.dataset.al || 'c')));
+    bar.hidden = false;
+  };
+  ed.addEventListener('click', (e) => { const img = e.target.closest && e.target.closest('img'); showBar(img && ed.contains(img) ? img : null); });
+  document.getElementById('tbkImgW').addEventListener('input', (e) => { if(!selImg) return; const w = +e.target.value; selImg.dataset.w = w; selImg.style.width = w + '%'; document.getElementById('tbkImgWOut').textContent = w + ' %'; sync(); });
+  bar.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-ei]'); if(!b || !selImg) return;
+    if(b.dataset.ei === 'del'){ const p = selImg.closest('p'); selImg.remove(); if(p && !p.textContent.trim() && !p.querySelector('img')) p.remove(); showBar(null); sync(); return; }
+    selImg.dataset.al = b.dataset.ei; selImg.classList.remove('al-l', 'al-c', 'al-r'); selImg.classList.add('al-' + b.dataset.ei);
+    showBar(selImg); sync();
+  });
+  /* la barre de mise en page */
+  const blockOfSel = () => { const s = window.getSelection(); let n = s && s.rangeCount ? s.getRangeAt(0).startContainer : null; while(n && n !== ed){ if(n.nodeType === 1 && /^(H2|H3|H4|P|BLOCKQUOTE|LI)$/.test(n.tagName)) return n; n = n.parentNode; } return null; };
+  const tools = document.getElementById('tbkTools');
+  tools.addEventListener('pointerdown', (e) => { if(e.target.closest('[data-ed]')) e.preventDefault(); });
+  tools.addEventListener('mousedown', (e) => { if(e.target.closest('[data-ed]')) e.preventDefault(); });
+  tools.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-ed]'); if(!b) return;
+    const cmd = b.dataset.ed;
+    if(cmd === 'img'){ file.click(); return; }
+    putSel();
+    const blk = blockOfSel(), cur = blk ? blk.tagName : '';
+    const fmt = (tag) => { try{ document.execCommand('formatBlock', false, (cur === tag.toUpperCase()) ? 'p' : tag); }catch(err){} };
+    if(cmd === 'h2') fmt('h2');
+    else if(cmd === 'h3') fmt('h3');
+    else if(cmd === 'lead') fmt('h4');
+    else if(cmd === 'p'){ try{ document.execCommand('formatBlock', false, 'p'); }catch(err){} }
+    else if(cmd === 'quote') fmt('blockquote');
+    else if(cmd === 'list') document.execCommand('insertUnorderedList');
+    else if(cmd === 'br'){ let ok = false; try{ ok = document.execCommand('insertLineBreak'); }catch(err){} if(!ok) document.execCommand('insertHTML', false, '<br>'); }
+    else if(cmd === 'hr') document.execCommand('insertHorizontalRule');
+    else if(cmd === 'undo') document.execCommand('undo');
+    else document.execCommand(cmd);
+    keepSel(); sync();
+  });
+  file.addEventListener('change', async () => { const fs = [...file.files]; file.value = ''; keepSel(); await addImages(fs); });
+  sync();
   fixB.addEventListener('click', () => {
-    const r = tbReflow(ta.value);
-    if(r.changed) ta.value = r.text;
+    const r = tbReflowBlocks(blocks());
+    if(r.changed){ ed.innerHTML = tbBlocksToEdHtml(r.blocks); tbLoadImgs(ed); }
     sync(true);
     cnt.textContent = r.joined ? `✓ ${r.joined} retour${r.joined > 1 ? 's' : ''} à la ligne recollé${r.joined > 1 ? 's' : ''}` : '✓ Texte déjà bien ajusté';
   });
   document.getElementById('backFromTabletteBtn').addEventListener('click', () => { TB.edit = null; renderBlockSelect(); });
   document.getElementById('tbkPaste').addEventListener('click', async () => {
-    try{
-      const t = await navigator.clipboard.readText();
-      if(t && t.trim()){ ta.value = (ta.value.trim() ? ta.value.replace(/\s+$/, '') + '\n\n' : '') + t.trim(); sync(); ta.focus(); return; }
-      setStatus('📋 Le presse-papiers est vide : copie d\'abord un texte.', 'err');
-    }catch(e){ ta.focus(); setStatus('📋 Appuie longuement dans la zone de texte puis choisis « Coller ».', 'err'); }
+    keepSel();
+    let d = null;
+    if(navigator.clipboard && navigator.clipboard.read){
+      try{
+        const items = await navigator.clipboard.read();
+        d = { html:'', text:'', files:[] };
+        for(const it of items){
+          for(const type of it.types){
+            const blob = await it.getType(type);
+            if(type === 'text/html' && !d.html) d.html = await blob.text();
+            else if(type === 'text/plain' && !d.text) d.text = await blob.text();
+            else if(/^image\//.test(type)) d.files.push(new File([blob], 'image.' + type.split('/')[1], { type }));
+          }
+        }
+      }catch(e){ d = null; }
+    }
+    if(!d){ try{ d = { text:await navigator.clipboard.readText(), html:'', files:[] }; }catch(e){ d = null; } }
+    if(d && (d.text || d.html || d.files.length)){ if(await pasteData(d)) return; }
+    ed.focus();
+    setStatus(d ? '📋 Le presse-papiers est vide : copie d\'abord un texte ou une image.' : '📋 Appuie longuement dans la zone de texte puis choisis « Coller ».', 'err');
   });
   openB.addEventListener('click', () => {
-    let text = ta.value.replace(/\r/g, '').replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+    let bl = blocks();
+    let text = tbBlocksText(bl);
     if(!text) return;
-    if(text.length > 60000){ text = text.slice(0, 60000); setStatus('✂️ Texte très long : on garde les 60 000 premiers caractères.', 'err'); }
-    const title = ti.value.trim() || tbAutoTitle(text);
+    if(text.length > 60000){ setStatus('✂️ Texte très long : on garde le début (60 000 caractères).', 'err'); let n = 0; bl = bl.filter(b => { n += tbBlockText(b).length; return n <= 60000; }); text = tbBlocksText(bl); }
+    const first = bl.find(b => b.r), title = ti.value.trim() || (first && first.t === 'h2' ? tbBlockText(first).trim().slice(0, 120) : tbAutoTitle(text));
+    if(!ti.value.trim() && first && first.t === 'h2') bl.splice(bl.indexOf(first), 1);      // le premier titre devient le titre du texte
+    const rich = tbIsRich(bl);
     let art;
-    if(editing){ art = Object.assign({}, editing, { title, text, pos:0, pct:0, done:false }); }
-    else art = { id:'t' + Date.now().toString(36), title, text, src:'Collé', at:Date.now(), pos:0, pct:0, tags:[] };
+    if(editing){
+      art = Object.assign({}, editing, { title, text, pos:0, pct:0, done:false });
+      if(rich) art.blocks = bl; else delete art.blocks;
+      delete art.textOrig; delete art.blocksOrig;
+      const keep = new Set(tbArtImgIds(art)); tbArtImgIds(editing).forEach(id => { if(!keep.has(id)) tbImgDel(id); });
+    } else {
+      art = { id:'t' + Date.now().toString(36), title, text, src:'Collé', at:Date.now(), pos:0, pct:0, tags:[] };
+      if(rich) art.blocks = bl;
+    }
     if(!tbPut(art)) setStatus("⚠️ Plus de place pour garder ce texte sur l'appareil : il s'ouvre quand même.", 'err');
-    TB.edit = null; TB.draft = null; TB.mem = art;
+    TB.edit = null; TB.draft = null; TB.mem = art; TB.edUsed = [];
     renderTabletteReader(art.id);
   });
   const cancel = document.getElementById('tbkCancel');
@@ -42527,15 +43157,16 @@ function renderTabletteHome(){
       else { del.classList.add('warn'); del.textContent = 'Supprimer ?'; setTimeout(() => { if(del.isConnected){ del.classList.remove('warn'); del.textContent = '🗑'; } }, 3500); }
       return;
     }
-    const ed = e.target.closest('[data-tbk-edit]');
-    if(ed){ e.stopPropagation(); TB.edit = ed.dataset.tbkEdit; renderTabletteHome(); const t = document.getElementById('tbkText'); if(t){ t.focus(); t.scrollIntoView({ block:'center' }); } return; }
+    const edb = e.target.closest('[data-tbk-edit]');
+    if(edb){ e.stopPropagation(); TB.edit = edb.dataset.tbkEdit; renderTabletteHome(); const t = document.getElementById('tbkEd'); if(t){ t.focus(); t.scrollIntoView({ block:'center' }); } return; }
     if(e.target.closest('[data-tbk-bq]')){ renderTabletteReader(tbFromBouquinage()); return; }
     const op = e.target.closest('[data-tbk-open]');
     if(op) renderTabletteReader(op.dataset.tbkOpen);
   });
   root.addEventListener('keydown', (e) => { if(e.key === 'Enter' && e.target.matches && e.target.matches('.tbk-item')) e.target.click(); });
-  setQuickNavTarget(() => document.getElementById(ta.value.trim() ? 'tbkOpen' : 'tbkText'));
+  setQuickNavTarget(() => document.getElementById(ed.textContent.trim() ? 'tbkOpen' : 'tbkEd'));
   startSectionReading('tablette');
+  setTimeout(tbImgCleanup, 3000);
 }
 /* 🏠 sur l'accueil : la Tablette toujours à portée de main (et la lecture en cours à reprendre) */
 function tbResumeArt(){
@@ -42603,10 +43234,7 @@ function tbOpen(art){
     </header>
     <div class="tb-res" id="tbRes" hidden></div>
     <div class="tb-pop" id="tbAa" hidden></div>
-    <div class="tb-hud" id="tbHud" hidden>
-      <span>🖍 Touche les mots difficiles</span><b id="tbHudN">0</b>
-      <button type="button" data-tb="hints">💡 Indices</button><button type="button" data-tb="hunt">Terminer</button>
-    </div>
+    <div class="tb-hud" id="tbHud" hidden><span>🖍 Touche les mots difficiles</span><b id="tbHudN">0</b></div>
     <main class="tb-scroll" id="tbScroll">
       <article class="tb-page" id="tbPage" lang="fr">
         <div class="tb-meta"><span>${escapeHtml(art.src && art.src !== 'Collé' ? art.src : 'Ajouté le ' + tbDateLabel(art.at))}</span><span>${n} mots</span><span>≈ ${Math.max(1, Math.round(n / 170))} min de lecture</span></div>
@@ -42624,7 +43252,7 @@ function tbOpen(art){
   tbRender(false);
   tbDock();
   tbWire(el);
-  if(tbNeedsReflow(art.text)){
+  if(tbNeedsReflowArt(art)){
     const body = document.getElementById('tbBody');
     if(body) body.insertAdjacentHTML('beforebegin', `<div class="tb-fixbar" id="tbFixBar"><span>✂️ Des phrases sont coupées par des retours à la ligne.</span><button type="button" class="tb-btn hl sm" data-tb="fix-text">🧹 Ajuster le texte</button><button type="button" class="tb-ib sm" data-tb="fix-x" aria-label="Laisser comme ça">✕</button></div>`);
   }
@@ -42651,6 +43279,7 @@ function tbRender(keep){
   if(!body) return;
   const anchor = keep ? tbAnchorGet() : null;
   body.innerHTML = tbBuild(TB.art);
+  tbLoadImgs(body);
   TB.spans = [...body.querySelectorAll('.tbw')];
   tbRelocateTags();
   tbPaintTags(); tbPaintHits(); if(TB.hintsOn) tbPaintHints(true);
@@ -42713,12 +43342,14 @@ function tbAaHtml(){
     <div class="tb-pop-row"><span class="tb-pop-l">Largeur</span><input type="range" class="tb-range" id="tbW" min="40" max="100" step="1" value="${u.w || 100}" aria-label="Largeur de la colonne de texte"><output class="tb-out" id="tbWOut"></output></div>
     <div class="tb-pop-hint">Glisse pour choisir la largeur du texte : 100 % = tout l'écran. <button type="button" class="tb-link" data-tb="w-auto">Remettre « Auto »</button></div>
     <div class="tb-pop-row"><span class="tb-pop-l">Interligne</span><div class="tb-seg">${lh(1.5, 'Serré')}${lh(1.65, 'Normal')}${lh(1.9, 'Aéré')}</div></div>
+    <div class="tb-pop-row"><span class="tb-pop-l">Lettrine</span><div class="tb-seg"><button type="button" data-tb="drop" data-v="1" class="${u.drop ? 'on' : ''}">𝐃 Grande initiale</button><button type="button" data-tb="drop" data-v="0" class="${u.drop ? '' : 'on'}">Non</button></div></div>
     <div class="tb-pop-row"><span class="tb-pop-l">Fond</span><div class="tb-seg"><button type="button" data-tb="theme" data-v="light" class="${dark ? '' : 'on'}">☀️ Jour</button><button type="button" data-tb="theme" data-v="dark" class="${dark ? 'on' : ''}">🌙 Nuit</button></div></div>
-    <div class="tb-pop-row"><span class="tb-pop-l">Voix</span><button type="button" class="tb-chip" data-tb="rate-" aria-label="Voix plus lente">🐢</button><output class="tb-out" id="tbRate">${readingRate.toFixed(2)}×</output><button type="button" class="tb-chip" data-tb="rate+" aria-label="Voix plus rapide">🐇</button></div>
+    <div class="tb-pop-row"><span class="tb-pop-l">Voix</span><button type="button" class="tb-chip tb-vchip" data-tb="voice">🗣️ ${escapeHtml((tbVoice() && !u.voice ? 'Conteur · ' : '') + (tbVoice() ? tbVoiceName(tbVoice().voice) : 'par défaut'))}</button></div>
+    <div class="tb-pop-row"><span class="tb-pop-l">Vitesse</span><button type="button" class="tb-chip" data-tb="rate-" aria-label="Voix plus lente">🐢</button><output class="tb-out" id="tbRate">${readingRate.toFixed(2)}×</output><button type="button" class="tb-chip" data-tb="rate+" aria-label="Voix plus rapide">🐇</button></div>
     <div class="tb-pop-row"><span class="tb-pop-l">Marques</span><div class="tb-seg"><button type="button" data-tb="marks-set" data-v="1" class="${dx ? 'on' : ''}">🫁 Affichées</button><button type="button" data-tb="marks-set" data-v="0" class="${dx ? '' : 'on'}">Masquées</button></div></div>
     ${dx ? dxLegendHtml() : ''}
     <div class="tb-pop-row"><span class="tb-pop-l">Lignes</span><button type="button" class="tb-chip" data-tb="fix-text">🧹 Ajuster les retours à la ligne</button></div>
-    ${TB.art && TB.art.textOrig ? `<div class="tb-pop-hint">Texte ajusté. <button type="button" class="tb-link" data-tb="fix-undo">↩ Remettre comme avant</button></div>` : `<div class="tb-pop-hint">Recolle les lignes coupées : chaque phrase va de la majuscule jusqu'au point.</div>`}
+    ${TB.art && TB.art.textOrig != null ? `<div class="tb-pop-hint">Texte ajusté. <button type="button" class="tb-link" data-tb="fix-undo">↩ Remettre comme avant</button></div>` : `<div class="tb-pop-hint">Recolle les lignes coupées : chaque phrase va de la majuscule jusqu'au point.</div>`}
     ${TB.art && TB.art.src === 'Collé' ? `<button type="button" class="tb-btn wide" data-tb="edit">✏️ Modifier le texte</button>` : ''}`;
 }
 function tbToggleAa(force){
@@ -42772,6 +43403,15 @@ function tbDock(){
     tbReplayUi();
     return;
   }
+  if(TB.hunt){
+    d.className = 'tb-dock hunt';
+    d.innerHTML = `
+      <button type="button" class="tb-dk ${TB.hintsOn ? 'on' : ''}" data-tb="hints" aria-pressed="${!!TB.hintsOn}"><span class="tb-dk-i">💡</span><span>Indices</span></button>
+      <button type="button" class="tb-dk" data-tb="hint-list"><span class="tb-dk-i">🔎</span><span>Mots repérés</span></button>
+      <button type="button" class="tb-dk" data-tb="carnet"><span class="tb-dk-i">🏷️<b class="tb-badge" id="tbBadge">${n || ''}</b></span><span>Carnet</span></button>
+      <button type="button" class="tb-dk on" data-tb="hunt"><span class="tb-dk-i">✓</span><span>Terminer</span></button>`;
+    return;
+  }
   d.className = 'tb-dock';
   d.innerHTML = `
     <button type="button" class="tb-dk" data-tb="listen"><span class="tb-dk-i">▶</span><span>Écouter</span></button>
@@ -42817,7 +43457,7 @@ function tbSpeak(i){
   TB.cur = i; tbHl(i, true);
   const n = document.getElementById('tbPlN'); if(n) n.textContent = `${i + 1} / ${TB.sents.length}`;
   const s = TB.sents[i];
-  speakNarrator(dxOn() ? dxSpeakText(s) : s, 'fr-FR', () => {
+  tbNarrFr(dxOn() ? dxSpeakText(s) : s, 'fr-FR', () => {
     if(tok !== TB.token || !TB.playing || !document.getElementById('tbReader')) return;
     TB.gapT = setTimeout(() => { if(tok === TB.token && TB.playing) tbSpeak(i + 1); }, 260);
   }, readingRate);
@@ -43056,11 +43696,11 @@ function tbSelfResume(){
 }
 /* 🔊 la voix dit un mot ou la phrase : on coupe le micro (et l'enregistrement) le temps qu'elle parle */
 function tbSelfSpeak(text, rate){
-  if(TB.mode !== 'self'){ speakNarrator(text, 'fr-FR', null, rate); return; }
+  if(TB.mode !== 'self'){ tbNarrFr(text, 'fr-FR', null, rate); return; }
   const wasPaused = TB.selfPaused;
   tbSRHold(); tbRecPause();
   const tok = ++TB.token;
-  speakNarrator(text, 'fr-FR', () => {
+  tbNarrFr(text, 'fr-FR', () => {
     if(tok !== TB.token || TB.mode !== 'self') return;
     TB.selfLastHeard = Date.now();
     if(!wasPaused && !TB.selfPaused){ tbRecResume(); if(TB.selfKind === 'sr') tbSRStart(); }
@@ -43119,7 +43759,7 @@ function tbRecKey(id){ return nsKey('tbrec') + '|' + id; }
 function tbDb(){
   if(TB.dbP) return TB.dbP;
   TB.dbP = new Promise((res, rej) => {
-    try{ const r = indexedDB.open('vocabVisionTablette', 1); r.onupgradeneeded = () => { try{ r.result.createObjectStore('rec'); }catch(e){} }; r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }
+    try{ const r = indexedDB.open('vocabVisionTablette', 2); r.onupgradeneeded = () => { const db = r.result; ['rec', 'img'].forEach(n => { try{ if(!db.objectStoreNames.contains(n)) db.createObjectStore(n); }catch(e){} }); }; r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }
     catch(e){ rej(e); }
   });
   TB.dbP.catch(() => { TB.dbP = null; });
@@ -43245,11 +43885,12 @@ function tbReflow(text){
 function tbNeedsReflow(text){ const r = tbReflow(text); return r.joined >= 1 && r.changed; }
 function tbReflowArt(){
   if(!TB.art) return;
-  const r = tbReflow(TB.art.text);
+  const r = tbReflowBlocks(tbBlocksOf(TB.art));
   if(!r.changed){ tbToast('✓ Le texte est déjà bien ajusté'); return; }
   const a = tbAnchorGet();
-  if(!TB.art.textOrig) TB.art.textOrig = TB.art.text;
-  TB.art.text = r.text;
+  if(TB.art.textOrig == null){ TB.art.textOrig = TB.art.text; TB.art.blocksOrig = TB.art.blocks || null; }
+  if(tbIsRich(r.blocks)) TB.art.blocks = r.blocks; else delete TB.art.blocks;
+  TB.art.text = tbBlocksText(r.blocks);
   tbRender(false); if(a) tbAnchorSet(a);
   tbSaveArtNow();
   const b = document.getElementById('tbFixBar'); if(b) b.remove();
@@ -43257,9 +43898,10 @@ function tbReflowArt(){
   if(!document.getElementById('tbAa').hidden) tbToggleAa(true);
 }
 function tbReflowUndo(){
-  if(!TB.art || !TB.art.textOrig) return;
+  if(!TB.art || TB.art.textOrig == null) return;
   const a = tbAnchorGet();
-  TB.art.text = TB.art.textOrig; delete TB.art.textOrig;
+  TB.art.text = TB.art.textOrig; if(TB.art.blocksOrig) TB.art.blocks = TB.art.blocksOrig; else delete TB.art.blocks;
+  delete TB.art.textOrig; delete TB.art.blocksOrig;
   tbRender(false); if(a) tbAnchorSet(a);
   tbSaveArtNow(); tbToast('↩ Texte remis comme avant');
   if(!document.getElementById('tbAa').hidden) tbToggleAa(true);
@@ -43347,7 +43989,7 @@ function tbHuntToggle(force){
   el.classList.toggle('tb-hunt', TB.hunt);
   document.getElementById('tbHud').hidden = !TB.hunt;
   if(!TB.hunt){ TB.hintsOn = false; tbPaintHints(false); }
-  if(TB.hunt){ tbCloseSheet(); tbPaintTags(); tbToast('🖍 Chasse ouverte : touche chaque mot qui te pose problème'); }
+  if(TB.hunt){ tbCloseSheet(); tbPaintTags(); tbToast('🖍 Chasse ouverte : touche chaque mot qui te pose problème (💡 pour des indices)'); }
   tbDock();
 }
 /* ---------- 🔍 chercher un mot ---------- */
@@ -43417,7 +44059,7 @@ function tbResults(){
   box.hidden = false;
 }
 /* ---------- la fiche d'un mot (on le touche) ---------- */
-function tbSay(text, slow){ speakNarrator(text, 'fr-FR', null, slow ? 0.6 : Math.max(0.8, readingRate)); }
+function tbSay(text, slow){ tbNarrFr(text, 'fr-FR', null, slow ? 0.6 : Math.max(0.8, readingRate)); }
 function tbCtxHtml(tk){
   const s = TB.sents[tk.s] || '';
   const mark = (raw, i, inner) => i === tk.t ? `<mark>${inner != null ? inner : escapeHtml(raw)}</mark>` : (inner != null ? inner : escapeHtml(raw));
@@ -43480,6 +44122,7 @@ function tbCloseSheet(){
   sh.classList.remove('open'); sh.setAttribute('aria-hidden', 'true');
   TB.sheetK = -1;
   TB.spans.forEach(sp => sp.classList.remove('sel'));
+  tbImgUnsel();
 }
 /* l'exemple pour l'appli : la phrase du texte, le mot remplacé par « ~ » */
 function tbExFor(g){
@@ -43607,16 +44250,15 @@ function tbWire(el){
     const a = e.target.closest('[data-tb]');
     if(a){ tbAction(a.dataset.tb, a, e); return; }
     if(Date.now() < TB.noTapUntil) return;
+    const fig = e.target.closest('.tb-fig');
+    if(fig && sc.contains(fig)){ if(!e.target.closest('.tb-fig-h')) tbImgSheet(+fig.dataset.b); return; }
     const w = e.target.closest('.tbw');
     if(w && sc.contains(w)){
-      const k = +w.dataset.k;
-      if(TB.mode === 'play'){ TB.playing = true; tbDock(); tbSpeak(TB.toks[k].s); return; }
-      if(TB.mode === 'self'){ tbSelfSpeak(TB.toks[k].form, Math.max(0.8, readingRate)); return; }
-      if(TB.mode === 'replay'){ tbReplaySeekS(TB.toks[k].s); return; }
-      if(TB.hunt){ tbSay(TB.toks[k].form); tbToggleTag(k); return; }
-      tbOpenSheet(k);
+      if(Date.now() - (TB.tapAt || 0) < 700) return;           // déjà pris par le toucher (pointerup)
+      tbTapWord(+w.dataset.k);
       return;
     }
+    if(Date.now() - (TB.tapAt || 0) < 700) return;
     if(e.target.closest('#tbSheet, #tbAa, #tbRes, .tb-top, .tb-dock, .tb-hud')) return;
     if(TB.sheetK !== -1) tbCloseSheet();
     const aa = document.getElementById('tbAa'); if(aa && !aa.hidden) tbToggleAa(false);
@@ -43625,6 +44267,8 @@ function tbWire(el){
     if(e.target.id === 'tbQ'){ clearTimeout(TB.qT); const v = e.target.value; TB.qT = setTimeout(() => tbSearch(v), 140); return; }
     if(e.target.id === 'tbRpBar' && TB.replay){ const P = TB.replay; try{ P.au.currentTime = (+e.target.value / 1000) * (P.dur || 0); P.ended = false; }catch(err){} tbReplayUi(); return; }
     if(e.target.id === 'tbW'){ const a = tbAnchorGet(); tbUi().w = +e.target.value; tbApplyUi(); if(a) tbAnchorSet(a); clearTimeout(TB.wT); TB.wT = setTimeout(tbSaveUi, 300); return; }
+    if(e.target.id === 'tbImgW' && TB.imgSel >= 0){ tbImgSet(TB.imgSel, { w:+e.target.value }); return; }
+    if(e.target.id === 'tbImgCap' && TB.imgSel >= 0){ tbImgSet(TB.imgSel, { cap:e.target.value.trim() }); return; }
     const f = e.target.dataset && e.target.dataset.cr;
     if(f){ const g = (TB.art.tags || [])[+e.target.dataset.i]; if(g){ g[f] = e.target.value; tbSaveArt(); } }
   });
@@ -43652,14 +44296,45 @@ function tbWire(el){
   // 🤏 pincer pour zoomer (deux doigts), Ctrl + molette sur ordinateur
   const pts = new Map(), dist = () => { const [a, b] = [...pts.values()]; return Math.hypot(a.x - b.x, a.y - b.y) || 1; };
   sc.addEventListener('pointerdown', (e) => {
+    // 🖼 la poignée d'une image : on la redimensionne au doigt
+    const hd = e.target.closest && e.target.closest('.tb-fig-h');
+    if(hd){
+      const fig = hd.closest('.tb-fig'), bi = +fig.dataset.b, page = document.getElementById('tbBody').getBoundingClientRect();
+      TB.imgDrag = { id:e.pointerId, bi, fig, page };
+      try{ hd.setPointerCapture(e.pointerId); }catch(err){}
+      e.preventDefault(); return;
+    }
     pts.set(e.pointerId, { x:e.clientX, y:e.clientY });
+    if(pts.size === 1) TB.tapStart = { x:e.clientX, y:e.clientY, t:Date.now(), id:e.pointerId, multi:false };
+    else if(TB.tapStart) TB.tapStart.multi = true;
     if(pts.size === 2){ TB.pinch = { d:dist(), fs:tbUi().fs }; el.classList.add('pinching'); }
   });
   sc.addEventListener('pointermove', (e) => {
+    const D = TB.imgDrag;
+    if(D && D.id === e.pointerId){
+      const r = D.fig.getBoundingClientRect(), al = (TB.art.blocks[D.bi] || {}).al || 'c';
+      let px = al === 'r' ? r.right - e.clientX : (al === 'c' ? (e.clientX - (D.page.left + D.page.width / 2)) * 2 : e.clientX - r.left);
+      const w = Math.max(15, Math.min(100, Math.round(px / D.page.width * 100)));
+      tbImgSet(D.bi, { w }); e.preventDefault(); return;
+    }
     if(!pts.has(e.pointerId)) return;
     pts.set(e.pointerId, { x:e.clientX, y:e.clientY });
     if(TB.pinch && pts.size === 2){ e.preventDefault(); tbSetFs(TB.pinch.fs * dist() / TB.pinch.d, false); }
   });
+  /* un toucher sur un mot : on le prend au relâcher du doigt (un appui un peu long compte aussi), même à côté du mot */
+  sc.addEventListener('pointerup', (e) => {
+    if(TB.imgDrag && TB.imgDrag.id === e.pointerId){ TB.imgDrag = null; TB.noTapUntil = Date.now() + 350; tbSaveArtNow(); return; }
+    const s0 = TB.tapStart; if(!s0 || s0.id !== e.pointerId) return;
+    TB.tapStart = null;
+    if(s0.multi || TB.pinch || Date.now() < TB.noTapUntil) return;
+    if(Math.hypot(e.clientX - s0.x, e.clientY - s0.y) > 12 || Date.now() - s0.t > 1200) return;
+    if(e.button > 0 || (e.target.closest && e.target.closest('[data-tb], .tb-fig, a, input, button, textarea, #tbSheet'))) return;
+    const w = e.target.closest('.tbw') || (e.target.closest('#tbBody') ? tbNearestWord(e.clientX, e.clientY) : null);
+    if(!w || !sc.contains(w)) return;
+    TB.tapAt = Date.now();
+    tbTapWord(+w.dataset.k);
+  });
+  sc.addEventListener('pointercancel', (e) => { if(TB.tapStart && TB.tapStart.id === e.pointerId) TB.tapStart = null; if(TB.imgDrag && TB.imgDrag.id === e.pointerId) TB.imgDrag = null; });
   const up = (e) => {
     pts.delete(e.pointerId);
     if(TB.pinch && pts.size < 2){ TB.pinch = null; TB.noTapUntil = Date.now() + 400; el.classList.remove('pinching'); tbSaveUi(); tbToast(`Taille du texte : ${Math.round(tbUi().fs / 19 * 100)} %`, 1200); }
@@ -43739,13 +44414,22 @@ function tbAction(id, btn, e){
     case 'fix-x': { const fb = document.getElementById('tbFixBar'); if(fb) fb.remove(); return; }
     case 'hunt': tbHuntToggle(); return;
     case 'hunt-on': tbCloseSheet(); tbHuntToggle(true); return;
-    case 'hints': { TB.hintsOn = !TB.hintsOn; const n = tbPaintHints(TB.hintsOn); btn.classList.toggle('on', TB.hintsOn); if(TB.hintsOn) tbToast(n ? `💡 ${n} mots soulignés pourraient te poser problème` : "💡 Pas d'indice : tu connais déjà ces mots !"); return; }
+    case 'hints': { TB.hintsOn = !TB.hintsOn; const n = tbPaintHints(TB.hintsOn); tbDock(); if(TB.hintsOn) tbToast(n ? `💡 ${n} mots soulignés pourraient te poser problème` : "💡 Pas d'indice : tu connais déjà ces mots !"); return; }
+    case 'hint-list': tbHintSheet(); return;
+    case 'hint-tag': { const k = +btn.dataset.k; if(tbTagAt(k) < 0) tbToggleTag(k, { noFly:true }); btn.disabled = true; btn.textContent = '✓ Tagué'; return; }
+    case 'hint-all': { const ks = tbHintKeys().filter(k => tbTagAt(k) < 0); ks.forEach(k => tbToggleTag(k, { noFly:true })); tbToast(`🖍 ${ks.length} mots ajoutés au carnet`); tbHintSheet(); return; }
+    case 'hint-go': { const k = +btn.dataset.k; tbCloseSheet(); const sp = TB.spans[k]; if(sp){ sp.scrollIntoView({ block:'center', behavior:'smooth' }); const s0 = sp.closest('.tb-s'); if(s0){ s0.classList.remove('flash'); void s0.offsetWidth; s0.classList.add('flash'); } } return; }
+    case 'voice': tbToggleAa(false); tbVoiceSheet(); return;
+    case 'voice-set': { tbUi().voice = btn.dataset.v || ''; if(!tbUi().voice) delete tbUi().voice; tbSaveUi(); TB.pinVoice = null; tbVoiceSheet(); tbHush(); tbNarr("Bonjour ! C'est moi qui vais te lire ce texte."); return; }
+    case 'drop': { tbUi().drop = btn.dataset.v === '1'; tbSaveUi(); tbRender(true); tbToggleAa(true); return; }
+    case 'img-al': { tbImgSet(TB.imgSel, { al:btn.dataset.v }); btn.parentNode.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === btn)); return; }
+    case 'img-del': tbImgRemove(TB.imgSel); return;
     case 'carnet': tbHuntToggle(false); tbOpenCarnet(); return;
     case 'top': document.getElementById('tbScroll').scrollTo({ top:0, behavior:'smooth' }); return;
     case 'sheet-x': tbCloseSheet(); return;
     case 'say': if(TB.toks[TB.sheetK]) tbSay(TB.toks[TB.sheetK].form); return;
     case 'slow': if(TB.toks[TB.sheetK]) tbSay(TB.toks[TB.sheetK].form, true); return;
-    case 'say-sent': { const tk = TB.toks[TB.sheetK]; if(tk){ const s = TB.sents[tk.s]; speakNarrator(dxOn() ? dxSpeakText(s) : s, 'fr-FR', null, readingRate); } return; }
+    case 'say-sent': { const tk = TB.toks[TB.sheetK]; if(tk){ const s = TB.sents[tk.s]; tbNarrFr(dxOn() ? dxSpeakText(s) : s, 'fr-FR', null, readingRate); } return; }
     case 'tag': { const k = TB.sheetK; const on = tbToggleTag(k, { noFly:true }); btn.textContent = on ? '✓ Tagué : retirer' : '🖍 Taguer ce mot'; if(on) tbToast('🖍 Ajouté à ton carnet, avec sa phrase'); const sp = TB.spans[k]; if(sp) sp.classList.add('sel'); return; }
     case 'add': tbAddForm(TB.sheetK); return;
     case 'add-go': tbAddFromForm(TB.sheetK); return;
