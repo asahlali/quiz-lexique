@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- 🏷️ Version de l'appli : augmentée automatiquement par publier-site.cmd à chaque publication -->
-<meta name="app-version" content="1.0.21" data-date="2026-10-17">
+<meta name="app-version" content="1.0.22" data-date="2026-10-17">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <title>VocabVISION — Vocabulaire Français ↔ Arabe</title>
 <script>
@@ -2123,6 +2123,44 @@
     .tbk-actions{ position:relative; bottom:auto; border-radius:0 0 14px 14px; padding:8px; }
     .tbk-studio.full{ margin:0; }
   }
+  /* ✎ 1.0.22 : la mise en forme à côté du curseur, et un menu au clic droit */
+  .tbk-bubble{ position:absolute; z-index:30; display:flex; align-items:center; flex-wrap:wrap; gap:4px; width:max-content; max-width:calc(100vw - 16px); box-sizing:border-box; padding:5px; border-radius:14px; background:#1B1F27; color:#F4F6FA; box-shadow:0 14px 30px -12px rgba(15,23,42,.6), 0 0 0 1px rgba(255,255,255,.06); animation:tbkPop .14s ease-out; }
+  [data-theme="dark"] .tbk-bubble{ background:#2A3142; }
+  .tbk-bubble[hidden]{ display:none; }
+  .tbk-bubble .tbk-grp{ background:rgba(255,255,255,.07); }
+  .tbk-bubble .tbk-tb{ width:32px; height:32px; padding:0; border:0; border-radius:9px; background:transparent; color:inherit; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; }
+  .tbk-bubble .tbk-tb:hover{ background:rgba(255,255,255,.13); }
+  .tbk-bubble .tbk-tb.on{ background:#FFDE40; color:#1B1F27; }
+  .tbk-bubble .tbk-style{ height:32px; width:122px; min-width:0; padding-left:10px; background-color:rgba(255,255,255,.08); color:inherit; border-color:rgba(255,255,255,.16); font-size:12.5px; }
+  .tbk-menu{ position:absolute; z-index:31; overscroll-behavior:contain; width:314px; max-width:calc(100vw - 16px); max-height:calc(100vh - 16px); overflow:auto; box-sizing:border-box; padding:6px; border-radius:14px; background:var(--bar, #fff); color:var(--text); border:1px solid var(--border, rgba(90,97,112,.25)); box-shadow:0 22px 44px -16px rgba(15,23,42,.5); font:700 13.5px 'Nunito','Inter',sans-serif; text-align:left; animation:tbkPop .12s ease-out; }
+  .tbk-menu[hidden]{ display:none; }
+  .tbk-menu > button{ display:flex; align-items:center; gap:10px; width:100%; padding:7px 10px; border:0; border-radius:9px; background:transparent; color:inherit; font:inherit; text-align:left; cursor:pointer; }
+  .tbk-menu > button:hover, .tbk-menu > button:focus-visible{ background:rgba(124,58,237,.12); outline:none; }
+  .tbk-menu > button svg{ flex:none; opacity:.85; }
+  .tbk-menu kbd{ margin-left:auto; font:700 11px 'Inter',sans-serif; opacity:.5; background:none; border:0; padding:0; }
+  .tbk-mi{ width:18px; text-align:center; font-size:14px; flex:none; }
+  .tbk-menu hr{ border:0; border-top:1px solid var(--border, rgba(90,97,112,.25)); margin:5px 4px; }
+  .tbk-mrow{ display:flex; flex-wrap:wrap; align-items:center; gap:2px; padding:3px 4px; }
+  .tbk-mrow .tbk-tb{ width:31px; height:31px; padding:0; border:0; border-radius:8px; background:transparent; color:inherit; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; }
+  .tbk-mrow .tbk-tb:hover{ background:rgba(124,58,237,.12); }
+  .tbk-mrow .tbk-tb.on{ background:#1B1F27; color:#FFDE40; }
+  [data-theme="dark"] .tbk-mrow .tbk-tb.on{ background:#FFDE40; color:#1B1F27; }
+  .tbk-msep{ width:1px; height:20px; background:var(--border, rgba(90,97,112,.3)); margin:0 4px; }
+  .tbk-mstyles{ gap:4px; padding:4px 6px 6px; }
+  .tbk-mstyles button{ padding:5px 9px; border:1px solid var(--border, rgba(90,97,112,.3)); border-radius:999px; background:transparent; color:inherit; font:800 12px 'Nunito','Inter',sans-serif; cursor:pointer; }
+  .tbk-mstyles button:hover{ border-color:#7C3AED; }
+  .tbk-mstyles button.on{ background:#FFDE40; color:#1B1F27; border-color:transparent; }
+  .tbk-sw{ margin-left:auto; width:34px; height:20px; border-radius:20px; background:rgba(90,97,112,.35); position:relative; flex:none; transition:background .15s; }
+  .tbk-sw::after{ content:''; position:absolute; top:2px; left:2px; width:16px; height:16px; border-radius:50%; background:#fff; box-shadow:0 1px 2px rgba(0,0,0,.25); transition:transform .15s; }
+  .tbk-menu [aria-checked="true"] .tbk-sw{ background:#7C3AED; }
+  .tbk-menu [aria-checked="true"] .tbk-sw::after{ transform:translateX(14px); }
+  @media (hover:none){ .tbk-menu kbd, .tbk-mfoot{ display:none; } }
+  .tbk-mfoot{ padding:6px 10px 4px; font:700 11.5px 'Nunito','Inter',sans-serif; color:var(--text-dim, #7A8191); }
+  /* barre du haut réduite : seulement l'affichage (taille, largeur, grand écran) */
+  .tbk-mhint, .tbk-only-min{ display:none !important; }
+  .tbk-studio.tools-min .tbk-tools > :not(.tbk-view):not(.tbk-mhint){ display:none !important; }
+  .tbk-studio.tools-min .tbk-mhint{ display:inline-flex !important; align-items:center; font:800 12.5px 'Nunito','Inter',sans-serif; color:var(--text-dim, #7A8191); padding:0 6px; }
+  .tbk-studio.tools-min .tbk-only-min{ display:inline-flex !important; }
   .tb-toast{ position:absolute; left:50%; bottom:calc(env(safe-area-inset-bottom, 0px) + 92px); z-index:8; transform:translate(-50%, 16px); opacity:0; pointer-events:none;
     max-width:calc(100% - 32px); width:max-content; padding:10px 16px; border-radius:14px; background:var(--tb-ink); color:var(--tb-paper); font-weight:800; font-size:13.5px; line-height:1.35; text-align:center; transition:opacity .25s, transform .25s; }
   .tb-toast.show{ opacity:1; transform:translate(-50%, 0); }
@@ -19531,6 +19569,8 @@ const COLOR_PRESETS = {
 /* ============ 🆕 NOUVEAUTÉS — pour que tout ce qui a été ajouté reste découvrable ============ */
 const WHATS_NEW_SECTIONS = [
   { icon:'🆕', title:'Nouveautés', items:[
+    { name:"✎ La mise en forme à côté du curseur", desc:"Dans l'éditeur de la Tablette, sélectionne du texte (ou clique dans une ligne) : une petite barre apparaît juste à côté avec le style (Titre, Sous-titre…), Gras, Italique, Souligné, effacer, les 4 alignements et « Recoller ». Elle disparaît dès que tu tapes. Au doigt, elle se place sous la sélection." },
+    { name:'🖱️ Le menu du clic droit', desc:"Clic droit dans le texte : Couper, Copier, Coller, Coller le texte seul, les styles, la mise en forme, les alignements, les listes, le saut de ligne, le séparateur, l'image, Recoller, Ajuster, Annuler / Rétablir. Maj + clic droit garde le menu du navigateur (corrections d'orthographe). Dans ce menu, tu peux aussi cacher la barre d'outils du haut ou la barre près du curseur." },
     { name:"🖥️ La Tablette en grand écran", desc:"L'éditeur prend toute la largeur de l'écran, comme un vrai traitement de texte : une page blanche au centre, la barre d'outils reste en haut quand tu descends dans le texte, et « Coller / Ajuster / Ouvrir » restent en bas. Règle la taille du texte (A / A) et la largeur de la page (curseur ↔, ou glisse les bords de la page ; « Auto » = largeur confortable). ⛶ Grand écran : la page occupe tout l'écran." },
     { name:'⤵ Recoller les lignes à la main', desc:"Sélectionne des lignes coupées et touche « Recoller » : elles deviennent un seul paragraphe (sans sélection : le paragraphe et le suivant). Annuler (Ctrl+Z) les remet." },
     { name:'🧹 Ajuster les textes de journal', desc:"« Ajuster » reconnaît maintenant les textes copiés depuis un journal, un PDF ou une liseuse (une ligne courte par paragraphe) : il recolle tout, en gardant les vraies fins de paragraphe, les titres et la signature. Le bandeau « phrases coupées » apparaît aussi dans la Tablette." },
@@ -43073,6 +43113,9 @@ var TB_ICO = {
   full:'<path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/>',
   exitFull:'<path d="M8 3v3a2 2 0 0 1-2 2H3M21 8h-3a2 2 0 0 1-2-2V3M3 16h3a2 2 0 0 1 2 2v3M16 21v-3a2 2 0 0 1 2-2h3"/>',
   paste:'<rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>',
+  more:'<circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/>',
+  cut:'<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.12 15.88M14.47 14.48 20 20M8.12 8.12 12 12"/>',
+  copy:'<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
   join:'<path d="M3 6h9a4 4 0 0 1 4 4v1"/><path d="M3 18h9a4 4 0 0 0 4-4v-1"/><path d="M16 12h5"/><path d="M18.5 9.5 21 12l-2.5 2.5"/>',
   width:'<path d="M3 12h18"/><path d="M6.5 8.5 3 12l3.5 3.5"/><path d="M17.5 8.5 21 12l-3.5 3.5"/><path d="M3 4v16M21 4v16" opacity=".45"/>'
 };
@@ -43117,21 +43160,22 @@ function renderTabletteHome(){
   };
   const tb = (cmd, ico, title) => `<button type="button" class="tbk-tb" data-ed="${cmd}" title="${title}" aria-label="${title}" aria-pressed="false">${tbIcon(ico)}</button>`;
   const u0 = tbUi(), efs = Math.max(13, Math.min(30, +u0.edFs || 18));
+  const STY = '<option value="p">Paragraphe</option><option value="h2">Titre</option><option value="h3">Sous-titre</option><option value="lead">Chapeau</option><option value="quote">Citation</option>';
   card.innerHTML = `<div class="tbk" id="tbkRoot">
     <div class="cat-tag">📰 La Tablette</div>
     <div class="tbk-h">Colle un texte, lis‑le comme un pro</div>
     <div class="tbk-sub">Mets-le en page comme un journal (titres, images…) : les liaisons et les pauses s'affichent, chaque mot se touche pour l'entendre, et tu chasses les mots difficiles.</div>
     <div class="tbk-studio" id="tbkDevice" style="--efs:${efs}px;">
       <div class="tbk-tools" id="tbkTools" role="toolbar" aria-label="Mise en page">
-        <select class="tbk-style" id="tbkStyle" aria-label="Style du paragraphe" title="Style du paragraphe">
-          <option value="p">Paragraphe</option><option value="h2">Titre</option><option value="h3">Sous-titre</option><option value="lead">Chapeau</option><option value="quote">Citation</option>
-        </select>
+        <select class="tbk-style" id="tbkStyle" data-style aria-label="Style du paragraphe" title="Style du paragraphe">${STY}</select>
         <span class="tbk-grp">${tb('bold', 'bold', 'Gras (Ctrl+B)')}${tb('italic', 'italic', 'Italique (Ctrl+I)')}${tb('underline', 'underline', 'Souligné (Ctrl+U)')}${tb('clear', 'clear', 'Effacer la mise en forme')}</span>
         <span class="tbk-grp">${tb('al-l', 'alignLeft', 'Aligner à gauche')}${tb('al-c', 'alignCenter', 'Centrer')}${tb('al-r', 'alignRight', 'Aligner à droite')}${tb('al-j', 'alignJustify', 'Justifier')}</span>
         <span class="tbk-grp">${tb('list', 'list', 'Liste à puces')}${tb('olist', 'listOrdered', 'Liste numérotée')}${tb('br', 'br', 'Saut de ligne (Maj+Entrée)')}${tb('hr', 'hr', 'Séparateur')}${tb('img', 'image', 'Ajouter une image (galerie ou appareil photo)')}</span>
         <span class="tbk-grp"><button type="button" class="tbk-tb tbk-tbl" data-ed="join" title="Recoller les lignes sélectionnées en un seul paragraphe (sans sélection : ce paragraphe et le suivant)" aria-label="Recoller les lignes">${tbIcon('join')}<span>Recoller</span></button></span>
         <span class="tbk-grp">${tb('undo', 'undo', 'Annuler (Ctrl+Z)')}${tb('redo', 'redo', 'Rétablir (Ctrl+Y)')}</span>
+        <span class="tbk-mhint">✎ Sélectionne du texte ou fais un clic droit : la mise en forme s'ouvre à côté.</span>
         <span class="tbk-grp tbk-view">
+          <button type="button" class="tbk-tb tbk-tbl tbk-only-min" data-ed="opt-top" title="Afficher toute la barre d'outils">${tbIcon('more')}<span>Outils</span></button>
           <button type="button" class="tbk-tb" data-ed="zoom-" title="Texte plus petit" aria-label="Texte plus petit"><b class="tbk-a sm">A</b></button><output class="tbk-fs" id="tbkFsOut" title="Taille du texte">${efs}</output><button type="button" class="tbk-tb" data-ed="zoom+" title="Texte plus grand" aria-label="Texte plus grand"><b class="tbk-a">A</b></button>
           <label class="tbk-pw" title="Largeur du texte (ou glisse les bords de la page)">${tbIcon('width')}<input type="range" id="tbkPW" min="35" max="100" step="1" aria-label="Largeur du texte"><button type="button" class="tbk-tb tbk-tbl" data-ed="w-auto" title="Largeur confortable">Auto</button></label>
           ${tb('full', 'full', 'Grand écran')}
@@ -43153,6 +43197,29 @@ function renderTabletteHome(){
         </div>
       </div>
       <input type="file" id="tbkFile" accept="image/*" multiple hidden>
+      <div class="tbk-bubble" id="tbkBubble" hidden role="toolbar" aria-label="Mise en forme rapide">
+        <select class="tbk-style" data-style aria-label="Style du paragraphe">${STY}</select>
+        <span class="tbk-grp">${tb('bold', 'bold', 'Gras (Ctrl+B)')}${tb('italic', 'italic', 'Italique (Ctrl+I)')}${tb('underline', 'underline', 'Souligné (Ctrl+U)')}${tb('clear', 'clear', 'Effacer la mise en forme')}</span>
+        <span class="tbk-grp">${tb('al-l', 'alignLeft', 'Aligner à gauche')}${tb('al-c', 'alignCenter', 'Centrer')}${tb('al-r', 'alignRight', 'Aligner à droite')}${tb('al-j', 'alignJustify', 'Justifier')}</span>
+        <span class="tbk-grp">${tb('join', 'join', 'Recoller les lignes')}${tb('menu', 'more', 'Plus d\'outils (clic droit)')}</span>
+      </div>
+      <div class="tbk-menu" id="tbkMenu" hidden role="menu" aria-label="Menu de mise en page">
+        <button type="button" role="menuitem" data-ed="cut">${tbIcon('cut')}<span>Couper</span><kbd>Ctrl+X</kbd></button>
+        <button type="button" role="menuitem" data-ed="copy">${tbIcon('copy')}<span>Copier</span><kbd>Ctrl+C</kbd></button>
+        <button type="button" role="menuitem" data-ed="paste">${tbIcon('paste')}<span>Coller</span><kbd>Ctrl+V</kbd></button>
+        <button type="button" role="menuitem" data-ed="paste-plain">${tbIcon('paste')}<span>Coller le texte seul</span><kbd>Ctrl+Maj+V</kbd></button>
+        <hr>
+        <div class="tbk-mrow tbk-mstyles" role="group" aria-label="Style">${[['p', 'Paragraphe'], ['h2', 'Titre'], ['h3', 'Sous-titre'], ['lead', 'Chapeau'], ['quote', 'Citation']].map(([v, l]) => `<button type="button" role="menuitemradio" data-ed="st-${v}">${l}</button>`).join('')}</div>
+        <div class="tbk-mrow" role="group" aria-label="Mise en forme">${tb('bold', 'bold', 'Gras (Ctrl+B)')}${tb('italic', 'italic', 'Italique (Ctrl+I)')}${tb('underline', 'underline', 'Souligné (Ctrl+U)')}${tb('clear', 'clear', 'Effacer la mise en forme')}<i class="tbk-msep"></i>${tb('al-l', 'alignLeft', 'Aligner à gauche')}${tb('al-c', 'alignCenter', 'Centrer')}${tb('al-r', 'alignRight', 'Aligner à droite')}${tb('al-j', 'alignJustify', 'Justifier')}</div>
+        <div class="tbk-mrow" role="group" aria-label="Insérer">${tb('list', 'list', 'Liste à puces')}${tb('olist', 'listOrdered', 'Liste numérotée')}${tb('br', 'br', 'Saut de ligne (Maj+Entrée)')}${tb('hr', 'hr', 'Séparateur')}${tb('img', 'image', 'Ajouter une image')}<i class="tbk-msep"></i>${tb('undo', 'undo', 'Annuler (Ctrl+Z)')}${tb('redo', 'redo', 'Rétablir (Ctrl+Y)')}</div>
+        <hr>
+        <button type="button" role="menuitem" data-ed="join">${tbIcon('join')}<span>Recoller les lignes</span></button>
+        <button type="button" role="menuitem" data-ed="fix"><b class="tbk-mi">🧹</b><span>Ajuster tout le texte</span></button>
+        <hr>
+        <button type="button" role="menuitemcheckbox" data-ed="opt-bubble" aria-checked="true"><b class="tbk-mi">✎</b><span>Barre près du curseur</span><i class="tbk-sw" aria-hidden="true"></i></button>
+        <button type="button" role="menuitemcheckbox" data-ed="opt-top" aria-checked="true"><b class="tbk-mi">▤</b><span>Barre d'outils en haut</span><i class="tbk-sw" aria-hidden="true"></i></button>
+        <div class="tbk-mfoot">Maj + clic droit : le menu du navigateur (orthographe…)</div>
+      </div>
       <div class="tbk-actions">
         <div class="tbk-popt" id="tbkPasteOpt" hidden role="group" aria-label="Options de collage">
           <span>📋 Collé :</span>
@@ -43226,7 +43293,7 @@ function renderTabletteHome(){
   const refresh = () => {
     if(!inEd()) return;
     const q = (c) => { try{ return document.queryCommandState(c); }catch(e){ return false; } };
-    const on = (cmd, v) => { const b = tools.querySelector(`[data-ed="${cmd}"]`); if(b){ b.classList.toggle('on', !!v); b.setAttribute('aria-pressed', String(!!v)); } };
+    const on = (cmd, v) => dev.querySelectorAll(`[data-ed="${cmd}"]`).forEach(b => { b.classList.toggle('on', !!v); b.setAttribute(b.getAttribute('role') === 'menuitemradio' ? 'aria-checked' : 'aria-pressed', String(!!v)); });
     on('bold', q('bold')); on('italic', q('italic')); on('underline', q('underline'));
     on('list', q('insertUnorderedList')); on('olist', q('insertOrderedList'));
     const blk = blockOfSel();
@@ -43235,18 +43302,25 @@ function renderTabletteHome(){
     ['l', 'c', 'r', 'j'].forEach(x => on('al-' + x, ta === x));
     let v = 'p';
     if(blk){ const tg = blk.tagName; v = tg === 'H2' ? 'h2' : tg === 'H3' ? 'h3' : tg === 'H4' ? 'lead' : (tg === 'BLOCKQUOTE' || blk.closest('blockquote')) ? 'quote' : 'p'; }
-    if(styleSel.value !== v) styleSel.value = v;
+    dev.querySelectorAll('select[data-style]').forEach(x => { if(x.value !== v) x.value = v; });
+    ['p', 'h2', 'h3', 'lead', 'quote'].forEach(x => on('st-' + x, v === x));
   };
-  const onSel = () => { keepSel(); refresh(); };
+  let schedB = () => {};
+  const onSel = () => { keepSel(); refresh(); if(inEd()) schedB(); };
   document.addEventListener('selectionchange', onSel);
-  const onKey = (e) => { if(e.key === 'Escape' && dev.classList.contains('full')){ e.preventDefault(); setFull(false); } };
+  const onKey = (e) => {
+    if(e.key !== 'Escape') return;
+    if(document.getElementById('tbkMenu') && !document.getElementById('tbkMenu').hidden){ e.preventDefault(); document.getElementById('tbkMenu').hidden = true; return; }
+    if(document.getElementById('tbkBubble') && !document.getElementById('tbkBubble').hidden){ e.preventDefault(); document.getElementById('tbkBubble').hidden = true; return; }
+    if(dev.classList.contains('full')){ e.preventDefault(); setFull(false); }
+  };
   document.addEventListener('keydown', onKey);
   const nav = document.querySelector('.navbar');
   const topPx = () => { const n = nav && getComputedStyle(nav).position === 'sticky' ? nav.getBoundingClientRect().height + (parseFloat(getComputedStyle(nav).top) || 0) + 6 : 0; return Math.round(n); };
   dev.style.setProperty('--tbk-top', topPx() + 'px');
   const onScroll = () => tools.classList.toggle('stuck', !dev.classList.contains('full') && getComputedStyle(tools).position === 'sticky' && tools.getBoundingClientRect().top <= topPx() + 1 && dev.getBoundingClientRect().top < topPx());
   window.addEventListener('scroll', onScroll, { passive:true });
-  new MutationObserver((_, obs) => { if(!root.isConnected){ document.removeEventListener('selectionchange', onSel); document.removeEventListener('keydown', onKey); window.removeEventListener('scroll', onScroll); document.body.classList.remove('tbk-full-on', 'tbk-wide'); obs.disconnect(); } }).observe(card, { childList:true });
+  new MutationObserver((_, obs) => { if(!root.isConnected){ document.removeEventListener('selectionchange', onSel); document.removeEventListener('keydown', onKey); window.removeEventListener('scroll', onScroll); try{ document.removeEventListener('pointerdown', onDown, true); window.removeEventListener('scroll', onMove); window.removeEventListener('resize', onMove); }catch(e){} document.body.classList.remove('tbk-full-on', 'tbk-wide'); obs.disconnect(); } }).observe(card, { childList:true });
   const blocks = () => tbDomToBlocks(ed, { editor:true });
   const sync = (keepCount) => {
     const b = blocks(), text = tbBlocksText(b), n = tbWordsCount(text), imgs = b.filter(x => x.t === 'img').length;
@@ -43363,7 +43437,6 @@ function renderTabletteHome(){
   ed.addEventListener('focus', ensureP);
   ed.addEventListener('input', () => { popt.hidden = true; ensureP(); keepSel(); sync(); });
   ed.addEventListener('keyup', keepSel); ed.addEventListener('pointerup', keepSel);
-  styleSel.addEventListener('pointerdown', keepSel); styleSel.addEventListener('focus', keepSel);
   ti.addEventListener('input', () => sync());
   ed.addEventListener('keydown', (e) => {
     const k = e.key.toLowerCase(), mod = e.ctrlKey || e.metaKey;
@@ -43466,19 +43539,23 @@ function renderTabletteHome(){
     keepSel(); sync(true);
     return n;
   };
-  tools.addEventListener('pointerdown', (e) => { if(e.target.closest('[data-ed]')) e.preventDefault(); });
-  tools.addEventListener('mousedown', (e) => { if(e.target.closest('[data-ed]')) e.preventDefault(); });
-  tools.addEventListener('click', (e) => {
-    const b = e.target.closest('[data-ed]'); if(!b) return;
-    const cmd = b.dataset.ed;
-    if(cmd === 'img'){ file.click(); return; }
+  const runCmd = (cmd) => {
+    if(cmd === 'menu'){ const r = bubble.getBoundingClientRect(); openMenu(r.right - 30, r.bottom + 6); return; }
+    if(cmd === 'opt-bubble'){ tbUi().bubble = tbUi().bubble === false; tbSaveUi(); applyOpts(); return; }
+    if(cmd === 'opt-top'){ tbUi().topBar = tbUi().topBar === false; tbSaveUi(); applyOpts(); if(!menu.hidden) requestAnimationFrame(() => openMenu(menuAt.x, menuAt.y)); return; }
+    closeMenu();
+    if(cmd === 'img'){ keepSel(); file.click(); return; }
     if(cmd === 'full'){ setFull(!dev.classList.contains('full')); return; }
     if(cmd === 'zoom-' || cmd === 'zoom+'){ setFs((+tbUi().edFs || 18) + (cmd === 'zoom+' ? 1 : -1)); return; }
     if(cmd === 'w-auto'){ setPw(0); return; }
     if(cmd === 'undo'){ putSel(); doUndo(); return; }
     if(cmd === 'redo'){ putSel(); doRedo(); return; }
-    if(cmd === 'join'){ const n = joinLines(); cnt.textContent = n ? `✓ ${n + 1} lignes recollées en un paragraphe` : 'Sélectionne les lignes à recoller'; refresh(); return; }
+    if(cmd === 'join'){ const n = joinLines(); cnt.textContent = n ? `✓ ${n + 1} lignes recollées en un paragraphe` : 'Sélectionne les lignes à recoller'; refresh(); schedBubble(); return; }
+    if(cmd === 'fix'){ fixB.click(); return; }
+    if(cmd === 'paste' || cmd === 'paste-plain'){ pasteClipboard(cmd === 'paste-plain' ? 'plain' : null); return; }
+    if(/^st-/.test(cmd)){ applyStyle(cmd.slice(3)); return; }
     putSel();
+    if(cmd === 'cut' || cmd === 'copy'){ if(!exec(cmd)) setStatus(`✂️ Utilise ${cmd === 'cut' ? 'Ctrl+X' : 'Ctrl+C'} : ton navigateur bloque ce bouton.`, 'err'); sync(); return; }
     if(cmd === 'list') exec('insertUnorderedList');
     else if(cmd === 'olist') exec('insertOrderedList');
     else if(cmd === 'br'){ if(!exec('insertLineBreak')) exec('insertHTML', '<br>'); }
@@ -43489,8 +43566,87 @@ function renderTabletteHome(){
     else if(cmd === 'al-r') exec('justifyRight');
     else if(cmd === 'al-j') exec('justifyFull');
     else exec(cmd);
-    keepSel(); sync(); refresh();
+    keepSel(); sync(); refresh(); schedBubble();
+  };
+  /* ✎ la barre près du curseur (quand on sélectionne du texte, ou juste après un clic dans le texte) */
+  const bubble = document.getElementById('tbkBubble'), menu = document.getElementById('tbkMenu');
+  let caretShow = false, lastPtr = 'mouse', bubT = 0;
+  const bubbleOn = () => tbUi().bubble !== false;
+  const hideBubble = () => { clearTimeout(bubT); bubble.hidden = true; };
+  const selRect = () => {
+    const s = window.getSelection(); if(!s.rangeCount) return null;
+    const rg = s.getRangeAt(0);
+    let r = rg.getBoundingClientRect();
+    if(!r || (!r.width && !r.height)){ const rs = rg.getClientRects(); r = rs.length ? rs[0] : null; }
+    if(!r || (!r.width && !r.height)){ const k = blockOfSel(); r = k ? k.getBoundingClientRect() : null; if(r) r = { left:r.left, right:r.left + 2, top:r.top, bottom:Math.min(r.bottom, r.top + 28) }; }
+    return r;
+  };
+  const placeBubble = () => {
+    if(!bubbleOn() || !inEd() || !menu.hidden || dev.classList.contains('resizing')){ bubble.hidden = true; return; }
+    const s = window.getSelection(), collapsed = s.getRangeAt(0).collapsed;
+    if(collapsed && !caretShow){ bubble.hidden = true; return; }
+    const r = selRect(); if(!r){ bubble.hidden = true; return; }
+    const vh = window.innerHeight, vw = window.innerWidth;
+    if(r.bottom < 0 || r.top > vh){ bubble.hidden = true; return; }
+    refresh();
+    bubble.hidden = false;
+    const sr = dev.getBoundingClientRect(), bw = bubble.offsetWidth, bh = bubble.offsetHeight;
+    const tr = tools.getBoundingClientRect(), safeTop = Math.max(8, getComputedStyle(tools).position === 'sticky' || dev.classList.contains('full') ? tr.bottom + 6 : 8);
+    let top = lastPtr === 'touch' ? r.bottom + 14 : r.top - bh - 10;          // au doigt : sous la sélection (le téléphone met son menu au-dessus)
+    if(top < safeTop) top = r.bottom + 10;
+    if(top + bh > vh - 8) top = Math.max(safeTop, r.top - bh - 10);
+    let left = (collapsed ? r.left : (r.left + r.right) / 2) - (collapsed ? 24 : bw / 2);
+    left = Math.max(8, Math.min(left, vw - bw - 8));
+    bubble.style.left = Math.round(left - sr.left) + 'px'; bubble.style.top = Math.round(top - sr.top) + 'px';
+  };
+  const schedBubble = () => { clearTimeout(bubT); bubT = setTimeout(placeBubble, 110); };
+  schedB = schedBubble;
+  /* ☰ le menu du clic droit */
+  let menuAt = { x:0, y:0 };
+  const openMenu = (x, y) => {
+    menuAt = { x, y };
+    hideBubble(); refresh(); applyOpts();
+    menu.hidden = false;
+    const sr = dev.getBoundingClientRect(), mw = menu.offsetWidth, mh = menu.offsetHeight, vw = window.innerWidth, vh = window.innerHeight;
+    let left = x + 2, top = y + 2;
+    if(left + mw > vw - 8) left = Math.max(8, x - mw - 2);
+    if(top + mh > vh - 8) top = Math.max(8, vh - mh - 8);
+    menu.style.left = Math.round(left - sr.left) + 'px'; menu.style.top = Math.round(top - sr.top) + 'px';
+  };
+  const closeMenu = () => { menu.hidden = true; };
+  const applyOpts = () => {
+    const u = tbUi();
+    dev.classList.toggle('tools-min', u.topBar === false);
+    menu.querySelector('[data-ed="opt-bubble"]').setAttribute('aria-checked', String(u.bubble !== false));
+    menu.querySelector('[data-ed="opt-top"]').setAttribute('aria-checked', String(u.topBar !== false));
+    if(u.bubble === false) hideBubble();
+  };
+  applyOpts();
+  page.addEventListener('contextmenu', (e) => {
+    if(e.shiftKey || lastPtr === 'touch' || e.target.closest('.tbk-title, .tbk-grip, .tbk-imgbar')) return;      // Maj + clic droit : le menu du navigateur
+    e.preventDefault();
+    if(!inEd()) putSel();
+    keepSel();
+    let x = e.clientX, y = e.clientY;
+    if(!x && !y){ const r = selRect(); if(r){ x = r.left; y = r.bottom; } }       // touche « menu » du clavier
+    openMenu(x, y);
   });
+  ed.addEventListener('pointerdown', (e) => { lastPtr = e.pointerType || 'mouse'; if(e.button === 0) closeMenu(); });
+  ed.addEventListener('pointerup', (e) => { if(e.button !== 0) return; if(e.target.closest && e.target.closest('img')){ caretShow = false; hideBubble(); return; } caretShow = bubbleOn(); schedBubble(); });
+  ed.addEventListener('keydown', (e) => { if(!['Shift', 'Control', 'Alt', 'Meta'].includes(e.key) && !(e.ctrlKey || e.metaKey)){ caretShow = false; hideBubble(); } });
+  const onDown = (e) => { if(!dev.contains(e.target) || (!ed.contains(e.target) && !bubble.contains(e.target) && !menu.contains(e.target))){ if(!menu.contains(e.target)) closeMenu(); if(!bubble.contains(e.target)){ caretShow = false; hideBubble(); } } };
+  document.addEventListener('pointerdown', onDown, true);
+  const onMove = () => { if(!bubble.hidden) requestAnimationFrame(placeBubble); };     // la page défile : le menu suit le texte, la barre se recale
+  window.addEventListener('scroll', onMove, { passive:true });
+  desk.addEventListener('scroll', () => { closeMenu(); onMove(); }, { passive:true });     // en grand écran, c'est la page qui défile : on ferme le menu
+  window.addEventListener('resize', onMove);
+  [tools, bubble, menu].forEach(el => {
+    el.addEventListener('pointerdown', (e) => { if(e.target.closest('[data-ed]')) e.preventDefault(); });
+    el.addEventListener('mousedown', (e) => { if(e.target.closest('[data-ed]')) e.preventDefault(); });
+    el.addEventListener('click', (e) => { const b = e.target.closest('[data-ed]'); if(b && el.contains(b)) runCmd(b.dataset.ed); });
+  });
+  bubble.addEventListener('keydown', (e) => { if(e.key === 'Escape'){ hideBubble(); putSel(); } });
+  menu.addEventListener('keydown', (e) => { if(e.key === 'Escape'){ e.stopPropagation(); closeMenu(); putSel(); } });
   /* sortir le paragraphe courant d'une citation (sans toucher aux autres lignes de la citation) */
   const inQuote = () => { const k = blockOfSel(); return k ? k.closest('blockquote') : null; };
   const unquote = () => {
@@ -43509,15 +43665,18 @@ function renderTabletteHome(){
     try{ const r = document.createRange(); r.setStart(sc, Math.min(so, sc.nodeType === 3 ? sc.length : sc.childNodes.length)); r.collapse(true); s.removeAllRanges(); s.addRange(r); }
     catch(e){ const r = document.createRange(); r.selectNodeContents(moved); r.collapse(false); s.removeAllRanges(); s.addRange(r); }
   };
-  styleSel.addEventListener('change', () => {
+  const applyStyle = (v) => {
     putSel();
-    const v = styleSel.value;
     if(v === 'quote'){ if(!inQuote()) exec('formatBlock', 'blockquote'); }
     else {
       if(inQuote()){ exec('formatBlock', 'p'); if(inQuote()) unquote(); }
       exec('formatBlock', ({ p:'p', h2:'h2', h3:'h3', lead:'h4' })[v] || 'p');
     }
-    keepSel(); sync(); refresh();
+    keepSel(); sync(); refresh(); schedBubble();
+  };
+  dev.querySelectorAll('select[data-style]').forEach(x => {
+    x.addEventListener('pointerdown', keepSel); x.addEventListener('focus', keepSel);
+    x.addEventListener('change', () => applyStyle(x.value));
   });
   file.addEventListener('change', async () => { const fs = [...file.files]; file.value = ''; keepSel(); await addImages(fs); });
   sync();
@@ -43529,7 +43688,7 @@ function renderTabletteHome(){
     cnt.textContent = r.joined ? `✓ ${r.joined} retour${r.joined > 1 ? 's' : ''} à la ligne recollé${r.joined > 1 ? 's' : ''}` : '✓ Texte déjà bien ajusté';
   });
   document.getElementById('backFromTabletteBtn').addEventListener('click', () => { TB.edit = null; renderBlockSelect(); });
-  document.getElementById('tbkPaste').addEventListener('click', async () => {
+  const pasteClipboard = async (force) => {
     keepSel();
     let d = null;
     if(navigator.clipboard && navigator.clipboard.read){
@@ -43547,10 +43706,11 @@ function renderTabletteHome(){
       }catch(e){ d = null; }
     }
     if(!d){ try{ d = { text:await navigator.clipboard.readText(), html:'', files:[] }; }catch(e){ d = null; } }
-    if(d && (d.text || d.html || d.files.length)){ await doPaste(d, tbUi().pasteMode || 'simple'); return; }
+    if(d && (d.text || d.html || d.files.length)){ await doPaste(d, force || tbUi().pasteMode || 'simple'); return; }
     ed.focus();
     setStatus(d ? '📋 Le presse-papiers est vide : copie d\'abord un texte ou une image.' : '📋 Appuie longuement dans la zone de texte puis choisis « Coller ».', 'err');
-  });
+  };
+  document.getElementById('tbkPaste').addEventListener('click', () => pasteClipboard());
   openB.addEventListener('click', () => {
     let bl = blocks();
     let text = tbBlocksText(bl);
