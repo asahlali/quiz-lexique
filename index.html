@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- 🏷️ Version de l'appli : augmentée automatiquement par publier-site.cmd à chaque publication -->
-<meta name="app-version" content="1.0.22" data-date="2026-10-17">
+<meta name="app-version" content="1.0.24" data-date="2026-10-17">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <title>VocabVISION — Vocabulaire Français ↔ Arabe</title>
 <script>
@@ -2161,6 +2161,47 @@
   .tbk-studio.tools-min .tbk-tools > :not(.tbk-view):not(.tbk-mhint){ display:none !important; }
   .tbk-studio.tools-min .tbk-mhint{ display:inline-flex !important; align-items:center; font:800 12.5px 'Nunito','Inter',sans-serif; color:var(--text-dim, #7A8191); padding:0 6px; }
   .tbk-studio.tools-min .tbk-only-min{ display:inline-flex !important; }
+  /* 🔎 1.0.23 : une expression de plusieurs mots, et la phrase d'exemple qu'on choisit */
+  .tb-pick{ display:flex; flex-wrap:wrap; gap:6px; margin:8px 0 2px; }
+  .tb-chip.sm{ padding:5px 10px; font-size:12.5px; }
+  .tb-chip:disabled{ opacity:.4; cursor:default; }
+  .tb-pick-h{ margin:-4px 0 12px; font-size:12px; font-weight:700; color:var(--tb-ink2); }
+  .tb-ctx .tb-cw{ cursor:pointer; border-radius:.25em; transition:background-color .12s; }
+  .tb-ctx .tb-cw:hover{ background:var(--tb-hit); }
+  .tb-ctx .tb-cw:focus-visible{ outline:2px solid var(--tb-acc); outline-offset:1px; }
+  .tb-ctx .tb-cw.on + .tb-cw.on mark, .tb-ctx .tb-cw.on mark{ border-radius:.15em; }
+  .tbw.tag.tag-x{ background-image:linear-gradient(102deg, transparent 0 .12em, var(--tb-hl) .3em 100%); box-shadow:.3em 0 0 var(--tb-hl); }
+  .tb-pickpill{ position:fixed; z-index:9990; display:inline-flex; align-items:center; gap:8px; max-width:calc(100vw - 16px); padding:8px 14px; border:0; border-radius:999px; background:#1B1F27; color:#fff; font:800 13.5px 'Nunito','Inter',sans-serif; box-shadow:0 12px 28px -10px rgba(15,23,42,.6); cursor:pointer; animation:tbkPop .14s ease-out; }
+  .tb-pickpill[hidden]{ display:none; }
+  .tb-pickpill b{ font-family:'Literata',Georgia,serif; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:52vw; }
+  .tb-pickpill span{ font-size:11.5px; opacity:.75; white-space:nowrap; }
+  .tb-lbl-h{ font-weight:700; opacity:.75; }
+  .tb-in.tb-ex{ font-family:'Literata',Georgia,serif; font-size:15px; line-height:1.5; }
+  .tb-exbar{ display:flex; flex-wrap:wrap; gap:6px; margin:-2px 0 10px; }
+  .tb-cr-l{ display:block; margin-top:6px; font-size:11.5px; font-weight:800; color:var(--tb-ink2); }
+  .tb-cr-l .tb-in{ margin-top:4px; font-size:13.5px; }
+  .tbk-menu small{ font-weight:700; opacity:.65; }
+  .tbk-sync{ margin-left:6px; font:800 11.5px 'Nunito','Inter',sans-serif; color:var(--text-dim, #7A8191); }
+  /* 🎨 1.0.24 : couleurs, surligneur, lignes continues */
+  .tbk-colors{ position:absolute; z-index:32; width:max-content; max-width:calc(100vw - 16px); box-sizing:border-box; padding:10px 12px 8px; border-radius:14px; background:var(--bar, #fff); color:var(--text); border:1px solid var(--border, rgba(90,97,112,.25)); box-shadow:0 22px 44px -16px rgba(15,23,42,.5); animation:tbkPop .12s ease-out; text-align:left; }
+  .tbk-colors[hidden]{ display:none; }
+  .tbk-cl{ font:800 11.5px 'Nunito','Inter',sans-serif; color:var(--text-dim, #7A8191); margin:0 2px 6px; }
+  .tbk-cl-h{ margin:2px 2px 0; font-weight:700; }
+  .tbk-swrow{ display:flex; flex-wrap:wrap; gap:7px; margin:0 0 10px; max-width:292px; }
+  .tbk-swatch{ position:relative; width:28px; height:28px; padding:0; border-radius:50%; border:2px solid var(--bar, #fff); box-shadow:0 0 0 1px rgba(90,97,112,.35); background:var(--c); cursor:pointer; display:inline-flex; align-items:center; justify-content:center; font:800 12px 'Nunito','Inter',sans-serif; color:var(--text-dim, #7A8191); transition:transform .12s; }
+  .tbk-swatch.hl{ border-radius:8px; }
+  .tbk-swatch.none{ background:transparent; }
+  .tbk-swatch.pick{ background:conic-gradient(#E5484D, #F07C1A, #C99A06, #2FA36B, #14A3B8, #3B82F6, #8B5CF6, #E54598, #E5484D); overflow:hidden; }
+  .tbk-swatch.pick input{ position:absolute; inset:-4px; width:calc(100% + 8px); height:calc(100% + 8px); opacity:0; cursor:pointer; border:0; padding:0; }
+  .tbk-swatch:hover{ transform:scale(1.12); }
+  .tbk-swatch:focus-visible{ outline:2px solid #7C3AED; outline-offset:2px; }
+  .tbk-ed font[color="#010203"]{ color:inherit; }
+  [data-theme="dark"] .tbk-ed span[style*="background-color"]:not([style*="transparent"]){ color:#1B1F27; }
+  .tbk-ed span[style*="background-color"]:not([style*="transparent"]){ border-radius:.15em; -webkit-box-decoration-break:clone; box-decoration-break:clone; }
+  .tb-body .tb-st[class*="hl-"]{ color:#1B1F27; border-radius:.15em; padding:0 .04em; -webkit-box-decoration-break:clone; box-decoration-break:clone; }
+  .tb-body .hl-y{ background-color:#FFF3A3; } .tb-body .hl-g{ background-color:#C8F7D0; } .tb-body .hl-b{ background-color:#CFE4FF; }
+  .tb-body .hl-p{ background-color:#FFD3EC; } .tb-body .hl-o{ background-color:#FFDDB8; } .tb-body .hl-v{ background-color:#E3D7FF; }
+  #tbkFlow svg{ vertical-align:-3px; margin-right:2px; }
   .tb-toast{ position:absolute; left:50%; bottom:calc(env(safe-area-inset-bottom, 0px) + 92px); z-index:8; transform:translate(-50%, 16px); opacity:0; pointer-events:none;
     max-width:calc(100% - 32px); width:max-content; padding:10px 16px; border-radius:14px; background:var(--tb-ink); color:var(--tb-paper); font-weight:800; font-size:13.5px; line-height:1.35; text-align:center; transition:opacity .25s, transform .25s; }
   .tb-toast.show{ opacity:1; transform:translate(-50%, 0); }
@@ -18947,6 +18988,19 @@ function mergeRemoteData(remote){
       });
       if(m){ saveBlockTitles(); changed = true; }
 
+    } else if(/^lexiqueQuiz::tb(Doc|Meta)::/.test(baseKey)){
+      // 📰 textes de la Tablette : morceau par morceau, la version la plus récente gagne
+      const ro = safeParse(rv, null), lo = safeParse(lv, null);
+      const st = (o) => (o && (o.upd || o.mupd)) || 0;
+      if(ro && (!lo || st(ro) > st(lo))){ putL(key, rv); changed = true; }
+
+    } else if(baseKey === 'lexiqueQuiz::tbGone'){
+      // 🗑 textes supprimés : on garde toutes les traces (union)
+      const ro = safeParse(rv, {}) || {}, lo = safeParse(lv, {}) || {};
+      let m = false;
+      Object.keys(ro).forEach(id => { if((+ro[id] || 0) > (+lo[id] || 0)){ lo[id] = ro[id]; m = true; } });
+      if(m){ putL(key, JSON.stringify(lo)); changed = true; }
+
     } else if(rv.includes('finishedAt')){
       // résultat de bloc : on garde le plus récent
       const remoteRes = safeParse(rv, null);
@@ -18966,6 +19020,7 @@ function mergeRemoteData(remote){
     }
   }
   syncSaveBase();
+  if(changed){ try{ tbSyncIn(); }catch(e){ console.warn('tablette : synchro', e); } }
 
   if(changed){
     quizTimerSeconds = loadTimerSetting();
@@ -18999,7 +19054,7 @@ let cloudPushPending = false;
 var SYNC_BASE_KEY = 'vocabVision.syncBase';   // ce que contient le cloud (empreintes) — propre à cet appareil, jamais envoyé
 var syncBase = null;
 var syncState = { running:false, again:false, timer:0, due:0, merging:false, lastPull:0, lastOk:0, errAt:0, lastLb:0 };
-var SYNC_LAZY = /::(conjResume|bouqResume|audioLibPos|inProgressSession|comboStreak|homeSectionsCollapsed|questsCollapsed|filterRowCollapsed|dictView)(::|$)/;
+var SYNC_LAZY = /::(tbMeta|conjResume|bouqResume|audioLibPos|inProgressSession|comboStreak|homeSectionsCollapsed|questsCollapsed|filterRowCollapsed|dictView)(::|$)/;
 function syncHash(s){
   s = String(s == null ? '' : s);
   let h = 0x811c9dc5;
@@ -19569,6 +19624,12 @@ const COLOR_PRESETS = {
 /* ============ 🆕 NOUVEAUTÉS — pour que tout ce qui a été ajouté reste découvrable ============ */
 const WHATS_NEW_SECTIONS = [
   { icon:'🆕', title:'Nouveautés', items:[
+    { name:"🎨 Des mots en couleur", desc:"Dans l'éditeur de la Tablette, sélectionne un mot puis le bouton « A » coloré (barre du haut, barre près du curseur ou clic droit) : 9 couleurs de texte, « Autre couleur… » pour la tienne, et 6 couleurs de surligneur. Chaque mot peut avoir sa couleur. Les couleurs se retrouvent dans la Tablette, et restent lisibles en mode sombre." },
+    { name:'⟿ Lignes continues', desc:"Nouveau bouton à côté d'« Ajuster » : la sélection devient un seul paragraphe ; sans sélection, tous les retours à la ligne au milieu des phrases disparaissent (même les tiens), et le texte revient à la ligne tout seul selon la largeur de l'écran. Aussi dans la Tablette : « Aa › Lignes continues » (avec « ↩ Remettre comme avant »)." },
+    { name:"🔎 Des expressions de plusieurs mots", desc:"Dans la Tablette, touche « tandis » : dans sa fiche, « ＋ mot après » (ou touche « que » dans la phrase) donne « tandis que ». Tu peux aussi sélectionner plusieurs mots dans le texte (à la souris, ou appui long au doigt) puis toucher « 🔎 Traduire · Taguer ». La traduction, la prononciation, le tag et l'ajout à tes mots se font pour toute l'expression." },
+    { name:"✍️ La phrase d'exemple, comme tu veux", desc:"En ajoutant un mot (fiche ou carnet), la phrase d'exemple se modifie : raccourcis-la, ou prends la phrase d'avant / d'après. Le mot doit juste rester dedans. Dans le carnet, « ✏️ » rouvre le mot pour prendre plus ou moins de mots." },
+    { name:'☁️ La Tablette sur tous tes appareils', desc:"Tes textes de la Tablette se synchronisent maintenant entre ton PC et ton téléphone (comme le reste de l'appli) : le texte, sa mise en page, où tu en es et tes mots tagués. Un texte supprimé disparaît aussi de l'autre appareil. Les images et l'enregistrement de ta voix restent sur l'appareil où tu les as faits." },
+    { name:'🧹 Ajuster une partie seulement', desc:"Sélectionne une partie du texte puis « 🧹 Ajuster » (bouton, barre près du curseur ou clic droit) : seule cette partie est recollée. Et Ajuster ne touche plus à tes lignes : tes sauts de ligne ↵ et les lignes que tu as commencées avec Entrée restent. Pour recoller des lignes à toi, sélectionne-les et touche « Recoller »." },
     { name:"✎ La mise en forme à côté du curseur", desc:"Dans l'éditeur de la Tablette, sélectionne du texte (ou clique dans une ligne) : une petite barre apparaît juste à côté avec le style (Titre, Sous-titre…), Gras, Italique, Souligné, effacer, les 4 alignements et « Recoller ». Elle disparaît dès que tu tapes. Au doigt, elle se place sous la sélection." },
     { name:'🖱️ Le menu du clic droit', desc:"Clic droit dans le texte : Couper, Copier, Coller, Coller le texte seul, les styles, la mise en forme, les alignements, les listes, le saut de ligne, le séparateur, l'image, Recoller, Ajuster, Annuler / Rétablir. Maj + clic droit garde le menu du navigateur (corrections d'orthographe). Dans ce menu, tu peux aussi cacher la barre d'outils du haut ou la barre près du curseur." },
     { name:"🖥️ La Tablette en grand écran", desc:"L'éditeur prend toute la largeur de l'écran, comme un vrai traitement de texte : une page blanche au centre, la barre d'outils reste en haut quand tu descends dans le texte, et « Coller / Ajuster / Ouvrir » restent en bas. Règle la taille du texte (A / A) et la largeur de la page (curseur ↔, ou glisse les bords de la page ; « Auto » = largeur confortable). ⛶ Grand écran : la page occupe tout l'écran." },
@@ -42435,12 +42496,137 @@ document.addEventListener('click', (e) => {
 var TB = { art:null, sents:[], toks:[], sentToks:[], spans:[], mode:'', playing:false, cur:0, token:0, gapT:0, hunt:false, hintsOn:false,
   q:'', hits:[], hitI:-1, sheetK:-1, idx:null, idxN:-1, known:null, ui:null, dict:null, pts:null, pinch:null, noTapUntil:0,
   lastY:0, saveT:0, scrollT:0, selfTry:0, selfSil:0, selfScores:{}, edit:null, draft:null, look:{} };
-function tbArtKey(){ return nsKey('vocabVision.tablette'); }     // (hors synchro : les textes peuvent être longs)
-function tbLoad(){ try{ const a = JSON.parse(localStorage.getItem(tbArtKey()) || '[]'); return Array.isArray(a) ? a.filter(x => x && x.id) : []; }catch(e){ return []; } }
-function tbSave(list){ try{ localStorage.setItem(tbArtKey(), JSON.stringify(list.slice(0, 40))); return true; }catch(e){ return false; } }
-function tbGet(id){ return tbLoad().find(a => a.id === id) || null; }
-function tbPut(art){ const L = tbLoad(); const i = L.findIndex(a => a.id === art.id); if(i >= 0) L[i] = art; else L.unshift(art); return tbSave(L); }
-function tbDel(id){ const a = tbGet(id); tbSave(tbLoad().filter(x => x.id !== id)); try{ tbRecDel(id); }catch(e){} if(a) tbArtImgIds(a).forEach(i => { if(!tbLoad().some(x => tbArtImgIds(x).includes(i))) tbImgDel(i); }); }
+/* ☁️ 1.0.23 : les textes de la Tablette passent par la synchro (PC ↔ téléphone).
+   Un texte = « lexiqueQuiz::tbDoc::id » (le contenu, en morceaux de 30 000 caractères pour le Google Sheet)
+   + « lexiqueQuiz::tbMeta::id » (où tu en es, tes mots tagués). Un texte supprimé laisse une trace (« tbGone »)
+   pour que l'autre appareil le supprime aussi. Les images et l'enregistrement de ta voix restent sur l'appareil. */
+var TB_DOC = 'lexiqueQuiz::tbDoc::', TB_META = 'lexiqueQuiz::tbMeta::', TB_GONE = 'lexiqueQuiz::tbGone', TB_PART = 30000, TB_MAX = 40;
+var TB_DOC_FIELDS = ['title', 'text', 'blocks', 'src', 'at'], TB_LOCAL_FIELDS = ['textOrig', 'blocksOrig', '_du', '_dh'];
+function tbArtKey(){ return nsKey('vocabVision.tablette'); }          // l'ancien rangement (avant 1.0.23) : repris automatiquement
+function tbUserSuf(){ return '::u:' + getCurrentUserId(); }
+function tbSKey(pre, id, part){ return pre + id + (part ? '~' + part : '') + tbUserSuf(); }
+function tbOrigKey(id){ return 'vocabVision.tbOrig::' + id + tbUserSuf(); }
+function tbCanon(o){ const out = {}; Object.keys(o).sort().forEach(k => { if(o[k] !== undefined) out[k] = o[k]; }); return JSON.stringify(out); }
+function tbGoneLoad(){ try{ return JSON.parse(localStorage.getItem(nsKey(TB_GONE)) || '{}') || {}; }catch(e){ return {}; } }
+function tbStoreIds(){
+  const suf = tbUserSuf(), ids = new Set();
+  try{
+    for(let i = 0; i < localStorage.length; i++){
+      const k = localStorage.key(i);
+      if(!k || !k.endsWith(suf)) continue;
+      const pre = k.startsWith(TB_DOC) ? TB_DOC : (k.startsWith(TB_META) ? TB_META : '');
+      if(!pre) continue;
+      const id = k.slice(pre.length, k.length - suf.length).replace(/~\d+$/, '');
+      if(id) ids.add(id);
+    }
+  }catch(e){}
+  return [...ids];
+}
+function tbReadDoc(id){
+  try{
+    const h = JSON.parse(localStorage.getItem(tbSKey(TB_DOC, id)) || 'null');
+    if(!h || typeof h.d !== 'string') return null;
+    let str = h.d;
+    for(let i = 1; i < (h.n || 1); i++){
+      const q = JSON.parse(localStorage.getItem(tbSKey(TB_DOC, id, i)) || 'null');
+      if(!q || q.upd !== h.upd || typeof q.d !== 'string') return null;          // un morceau pas encore arrivé
+      str += q.d;
+    }
+    const doc = JSON.parse(str);
+    Object.defineProperty(doc, '_str', { value:str });
+    doc.upd = h.upd; doc.n = h.n || 1;
+    return doc;
+  }catch(e){ return null; }
+}
+function tbReadMeta(id){ try{ return JSON.parse(localStorage.getItem(tbSKey(TB_META, id)) || 'null'); }catch(e){ return null; } }
+function tbGoneHides(id, doc){ const g = tbGoneLoad()[id]; return !!g && (!doc || (doc.upd || 0) <= g); }
+function tbAssemble(id, doc, meta){
+  const a = Object.assign({}, meta || {});
+  TB_DOC_FIELDS.forEach(f => { if(doc[f] != null) a[f] = doc[f]; });
+  a.id = id; delete a.mupd;
+  if(a.text == null && a.blocks) a.text = tbBlocksText(a.blocks);
+  if(!Array.isArray(a.tags)) a.tags = [];
+  try{ const o = JSON.parse(localStorage.getItem(tbOrigKey(id)) || 'null'); if(o){ a.textOrig = o.textOrig; if(o.blocksOrig) a.blocksOrig = o.blocksOrig; } }catch(e){}
+  a._du = doc.upd; a._dh = syncHash(doc._str || '');
+  return a;
+}
+function tbLegacy(){ try{ const a = JSON.parse(localStorage.getItem(tbArtKey()) || 'null'); return Array.isArray(a) ? a.filter(x => x && x.id) : null; }catch(e){ return null; } }
+function tbMigrate(){
+  const old = tbLegacy(); if(!old) return;
+  let ok = true;
+  old.slice(0, TB_MAX).forEach(a => { if(!tbReadDoc(a.id) && !tbWriteArt(a)) ok = false; });
+  if(ok){ try{ localStorage.removeItem(tbArtKey()); }catch(e){} }
+}
+function tbLoad(){
+  tbMigrate();
+  const out = new Map();
+  (tbLegacy() || []).forEach(a => out.set(a.id, a));            // (pas encore repris faute de place)
+  tbStoreIds().forEach(id => { const d = tbReadDoc(id); if(d && !tbGoneHides(id, d)) out.set(id, tbAssemble(id, d, tbReadMeta(id))); });
+  return [...out.values()].sort((x, y) => (y.at || 0) - (x.at || 0));
+}
+function tbWriteArt(a){
+  if(!a || !a.id) return true;
+  const id = a.id, doc = {};
+  TB_DOC_FIELDS.forEach(f => { if(a[f] != null) doc[f] = a[f]; });
+  if(Array.isArray(doc.blocks) && doc.blocks.length) delete doc.text; else delete doc.blocks;    // le texte se recalcule depuis la mise en page
+  const meta = {};
+  Object.keys(a).forEach(f => { if(f !== 'id' && !TB_DOC_FIELDS.includes(f) && !TB_LOCAL_FIELDS.includes(f) && a[f] !== undefined) meta[f] = a[f]; });
+  try{
+    const str = tbCanon(doc), h = syncHash(str), cur = tbReadDoc(id);
+    const stale = cur && a._du != null && (cur.upd || 0) > a._du && a._dh === h;      // texte pas modifié ici, mais l'autre appareil l'a changé : on garde le sien
+    if(!stale && (!cur || cur._str !== str)){
+      const upd = Math.max(Date.now(), cur ? (cur.upd || 0) + 1 : 0), n = Math.max(1, Math.ceil(str.length / TB_PART));
+      for(let i = n - 1; i >= 0; i--){ const d = str.slice(i * TB_PART, (i + 1) * TB_PART); localStorage.setItem(tbSKey(TB_DOC, id, i), JSON.stringify(i ? { upd, i, d } : { upd, n, d })); }
+      const extra = []; for(let i = n; i < ((cur && cur.n) || 1); i++){ extra.push(tbSKey(TB_DOC, id, i)); localStorage.removeItem(tbSKey(TB_DOC, id, i)); }
+      if(extra.length) try{ cloudDeleteKeys(extra); }catch(e){}
+      a._du = upd; a._dh = h;
+    }
+    const mcur = tbReadMeta(id), mstr = tbCanon(meta);
+    if(!mcur || tbCanon(Object.assign({}, mcur, { mupd:undefined })) !== mstr){ meta.mupd = Date.now(); localStorage.setItem(tbSKey(TB_META, id), tbCanon(meta)); }
+    if(a.textOrig != null) localStorage.setItem(tbOrigKey(id), JSON.stringify({ textOrig:a.textOrig, blocksOrig:a.blocksOrig || null }));
+    else localStorage.removeItem(tbOrigKey(id));
+    return true;
+  }catch(e){ console.warn('tablette : rangement', e); return false; }
+}
+function tbDropKeys(id, cloud){
+  const keys = [];
+  try{
+    const h = JSON.parse(localStorage.getItem(tbSKey(TB_DOC, id)) || 'null'), n = (h && h.n) || 1;
+    for(let i = 0; i < Math.max(n, 4); i++){ const k = tbSKey(TB_DOC, id, i); if(localStorage.getItem(k) != null){ keys.push(k); localStorage.removeItem(k); } }
+    const mk = tbSKey(TB_META, id); if(localStorage.getItem(mk) != null){ keys.push(mk); localStorage.removeItem(mk); }
+    localStorage.removeItem(tbOrigKey(id));
+  }catch(e){}
+  if(cloud && keys.length) try{ cloudDeleteKeys(keys); }catch(e){}
+}
+function tbRemoveArt(id){
+  tbDropKeys(id, true);
+  try{
+    const g = tbGoneLoad(); g[id] = Date.now();
+    const ks = Object.keys(g); if(ks.length > 200) ks.sort((x, y) => g[x] - g[y]).slice(0, ks.length - 200).forEach(x => delete g[x]);
+    localStorage.setItem(nsKey(TB_GONE), JSON.stringify(g));
+  }catch(e){}
+  const old = tbLegacy(); if(old) try{ localStorage.setItem(tbArtKey(), JSON.stringify(old.filter(x => x.id !== id))); }catch(e){}
+}
+function tbSave(list){ let ok = true; (list || []).filter(a => a && a.id).slice(0, TB_MAX).forEach(a => { if(!tbWriteArt(a)) ok = false; }); return ok; }
+function tbGet(id){
+  tbMigrate();
+  const d = tbReadDoc(id);
+  if(d && !tbGoneHides(id, d)) return tbAssemble(id, d, tbReadMeta(id));
+  return (tbLegacy() || []).find(a => a.id === id) || null;
+}
+function tbPut(art){
+  const ok = tbWriteArt(art);
+  if(ok && tbStoreIds().length > TB_MAX){ const L = tbLoad(); L.slice(TB_MAX).forEach(x => { if(x.id !== art.id) tbRemoveArt(x.id); }); }   // on garde les 40 derniers
+  return ok;
+}
+function tbDel(id){ const a = tbGet(id); tbRemoveArt(id); try{ tbRecDel(id); }catch(e){} if(a) tbArtImgIds(a).forEach(i => { if(!tbLoad().some(x => tbArtImgIds(x).includes(i))) tbImgDel(i); }); }
+/* les textes de l'autre appareil viennent d'arriver : on range, et on rafraîchit la liste si on la regarde */
+function tbSyncIn(){
+  const gone = tbGoneLoad();
+  Object.keys(gone).forEach(id => { const d = tbReadDoc(id); if(d ? (d.upd || 0) <= gone[id] : localStorage.getItem(tbSKey(TB_META, id)) != null) tbDropKeys(id, false); });
+  TB.idx = null;
+  try{ if(typeof TB.homeList === 'function' && document.getElementById('tbkRoot')) TB.homeList(); }catch(e){}
+}
 function tbUi(){
   if(!TB.ui){ let u = null; try{ u = JSON.parse(localStorage.getItem(nsKey('lexiqueQuiz::tabletteUi')) || 'null'); }catch(e){} TB.ui = Object.assign({ fs:19, lh:1.65, align:'left', w:0 }, u || {}); }
   return TB.ui;
@@ -42633,13 +42819,40 @@ function tbBlocksOf(art){ return (art && Array.isArray(art.blocks) && art.blocks
 function tbTextToBlocks(text){ return String(text || '').replace(/\r/g, '').split(/\n+/).map(p => p.trim()).filter(Boolean).map(p => ({ t:'p', r:[{ x:p, s:'' }] })); }
 function tbBlockText(b){ return (b && b.r || []).map(r => r.x).join(''); }
 function tbBlocksText(blocks){ return (blocks || []).filter(b => b.r).map(b => tbBlockText(b).replace(/\s+/g, ' ').trim()).filter(Boolean).join('\n'); }
-function tbIsRich(blocks){ return (blocks || []).some(b => b.t !== 'p' || b.c || b.a || (b.r || []).some(r => r.s)); }
+function tbIsRich(blocks){ return (blocks || []).some(b => b.t !== 'p' || b.c || b.a || b.k || (b.r || []).some(r => r.s || r.c || r.h)); }
+/* 🎨 1.0.24 : des mots en couleur (texte) et surlignés (fond), lisibles en clair comme en sombre */
+var TB_COLORS = [['#E5484D', 'Rouge'], ['#F07C1A', 'Orange'], ['#C99A06', 'Moutarde'], ['#2FA36B', 'Vert'], ['#14A3B8', 'Turquoise'], ['#3B82F6', 'Bleu'], ['#8B5CF6', 'Violet'], ['#E54598', 'Rose'], ['#A0662D', 'Marron']];
+var TB_HL = { y:['#FFF3A3', 'Jaune'], g:['#C8F7D0', 'Vert'], b:['#CFE4FF', 'Bleu'], p:['#FFD3EC', 'Rose'], o:['#FFDDB8', 'Orange'], v:['#E3D7FF', 'Violet'] };
+var TB_NOCOLOR = '#010203';               // « couleur automatique » dans l'éditeur (le texte reprend sa couleur normale)
+function tbHex(v){
+  try{
+    const cx = tbHex.cx || (tbHex.cx = document.createElement('canvas').getContext('2d'));
+    cx.fillStyle = '#000'; cx.fillStyle = String(v || '').trim();
+    const f = String(cx.fillStyle);
+    if(f[0] === '#') return f.toLowerCase();
+    const m = f.match(/rgba?\(\s*(\d+)[,\s]+(\d+)[,\s]+(\d+)(?:[,\s/]+([\d.]+))?/);
+    if(!m) return '';
+    if(m[4] != null && +m[4] < 0.15) return 'transparent';
+    return '#' + [m[1], m[2], m[3]].map(x => (+x).toString(16).padStart(2, '0')).join('');
+  }catch(e){ return ''; }
+}
+function tbRgb(hx){ const n = parseInt(String(hx).slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
+function tbColorful(hx){ if(!/^#[0-9a-f]{6}$/.test(hx)) return false; const [r, g, b] = tbRgb(hx); const mx = Math.max(r, g, b), mn = Math.min(r, g, b); return mx - mn >= 40 && (0.2126 * r + 0.7152 * g + 0.0722 * b) < 205; }
+function tbHlName(hx){
+  if(!/^#[0-9a-f]{6}$/.test(hx)) return '';
+  const [r, g, b] = tbRgb(hx), mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+  if(mx - mn < 18 || mx < 150) return '';                       // blanc, gris, ou fond foncé de la page d'origine : pas un surlignage
+  let best = '', bd = 1e9;
+  Object.keys(TB_HL).forEach(k => { const [R, G, B] = tbRgb(TB_HL[k][0]); const d = (R - r) ** 2 + (G - g) ** 2 + (B - b) ** 2; if(d < bd){ bd = d; best = k; } });
+  return best;
+}
 function tbAlignCss(a){ return ({ c:'center', r:'right', j:'justify', l:'left' })[a] || ''; }
 function tbNormRuns(b){
   let text = ''; const st = [];
   (b.r || []).forEach(r => {
     const x = String(r.x || '').replace(/[\s\u00a0\u2028\u2029]+/g, ' ');
-    for(let k = 0; k < x.length; k++){ const ch = x[k]; if(ch === ' ' && (!text || text.endsWith(' '))) continue; text += ch; st.push(r.s || ''); }
+    const key = (r.s || '') + (r.c ? '|c' + r.c.slice(1) : '') + (r.h ? '|h' + r.h : '');
+    for(let k = 0; k < x.length; k++){ const ch = x[k]; if(ch === ' ' && (!text || text.endsWith(' '))) continue; text += ch; st.push(key); }
   });
   while(text.endsWith(' ')){ text = text.slice(0, -1); st.pop(); }
   return { text, st };
@@ -42650,7 +42863,17 @@ function tbDecorate(text, wordFn, stOf, plain){
   if(!plain){ try{ if(dxOn()) an = dxAnalyze(text); }catch(e){ an = null; } }
   const parts = an ? an.parts : String(text).split(/(\s+)/);
   let out = '', ti = 0, open = '';
-  const style = (st) => { if(st === open) return; if(open) out += '</span>'; if(st) out += `<span class="tb-st ${st.split('').map(c => 'st-' + c).join(' ')}">`; open = st; };
+  const style = (st) => {
+    if(st === open) return;
+    if(open) out += '</span>';
+    if(st){
+      const [L, ...ex] = st.split('|');
+      const cls = L.split('').filter(Boolean).map(c => 'st-' + c), css = [];
+      ex.forEach(x => { if(x[0] === 'c' && /^[0-9a-f]{6}$/.test(x.slice(1))) css.push('color:#' + x.slice(1)); else if(x[0] === 'h' && TB_HL[x.slice(1)]) cls.push('hl-' + x.slice(1)); });
+      out += `<span class="tb-st ${cls.join(' ')}"${css.length ? ` style="${css.join(';')}"` : ''}>`;
+    }
+    open = st;
+  };
   for(let pi = 0; pi < parts.length; pi++){
     const p = parts[pi];
     if(!p) continue;
@@ -42832,14 +43055,26 @@ function tbDomToBlocks(root, opts){
     if(/font-weight\s*:\s*(normal|[1-4]00)/i.test(st)) x = x.replace(/b/g, '');
     return [...new Set(x.split(''))].sort().join('');
   };
+  const colOf = (el, col) => {
+    let c = col.c, h = col.h;
+    const fc = el.tagName === 'FONT' ? el.getAttribute('color') : '', sc = el.style ? el.style.color : '', bg = el.style ? (el.style.backgroundColor || '') : '';
+    const v = fc || sc;
+    if(v){ const hx = tbHex(v); if(hx === TB_NOCOLOR || !tbColorful(hx)) c = ''; else c = hx; }
+    if(bg){ const hx = tbHex(bg); h = hx === 'transparent' ? '' : tbHlName(hx); }
+    return (c === col.c && h === col.h) ? col : { c, h };
+  };
+  const NOCOL = { c:'', h:'' };
+  const kOf = (el) => !!(opts.editor && el.getAttribute && el.getAttribute('data-k') === '1');
   const alOf = (el) => { if(!opts.editor) return ''; const v = ((el.style && el.style.textAlign) || el.getAttribute('align') || '').toLowerCase(); return v === 'center' ? 'c' : v === 'right' ? 'r' : v === 'justify' ? 'j' : ''; };
-  const walk = (node, t, s, a) => {
+  const walk = (node, t, s, a, k, col) => {
+    col = col || NOCOL;
     for(const n of node.childNodes){
       if(n.nodeType === 3){
         const x = n.textContent.replace(TB_INVIS, '');
         if(!x || (!cur && !x.trim())) continue;
-        if(!cur){ cur = { t:t || 'p', r:[] }; if(a) cur.a = a; }
-        cur.r.push({ x, s });
+        if(!cur){ cur = { t:t || 'p', r:[] }; if(a) cur.a = a; if(k) cur.k = true; }
+        const run = { x, s }; if(col.c) run.c = col.c; if(col.h) run.h = col.h;
+        cur.r.push(run);
         continue;
       }
       if(n.nodeType !== 1) continue;
@@ -42858,25 +43093,25 @@ function tbDomToBlocks(root, opts){
         const im = n.querySelector('img'), cap = n.querySelector('figcaption');
         if(im){ const ib = tbImgBlockFrom(im); if(ib){ flush(); if(cap && cap.textContent.trim()) ib.cap = cap.textContent.replace(/\s+/g, ' ').trim().slice(0, 300); blocks.push(ib); } continue; }
       }
-      if(tag === 'TD' || tag === 'TH'){ walk(n, t, styleOf(n, s), a); if(cur) cur.r.push({ x:'  ', s:'' }); continue; }
+      if(tag === 'TD' || tag === 'TH'){ walk(n, t, styleOf(n, s), a, k, colOf(n, col)); if(cur) cur.r.push({ x:'  ', s:'' }); continue; }
       const bt = typeOf(n);
       if(bt || TB_BLOCK_TAGS.test(tag)){
         flush();
         const inh = (t === 'quote' || t === 'li' || t === 'oli' || t === 'lead') ? t : null;
-        walk(n, bt || inh || (tag === 'FIGCAPTION' ? 'p' : (t && t !== 'li' && t !== 'oli' ? t : 'p')), (bt === 'h2' || bt === 'h3') ? '' : styleOf(n, s), alOf(n) || a);
+        walk(n, bt || inh || (tag === 'FIGCAPTION' ? 'p' : (t && t !== 'li' && t !== 'oli' ? t : 'p')), (bt === 'h2' || bt === 'h3') ? '' : styleOf(n, s), alOf(n) || a, kOf(n) || k, colOf(n, col));
         flush();
         continue;
       }
-      walk(n, t, styleOf(n, s), a);
+      walk(n, t, styleOf(n, s), a, k, colOf(n, col));
     }
   };
-  walk(root, null, '', '');
+  walk(root, null, '', '', false);
   flush();
   // runs : on fusionne les morceaux voisins de même style, on enlève les espaces au bord
   blocks.forEach(b => {
     if(!b.r) return;
     const r = [];
-    b.r.forEach(x => { const prev = r[r.length - 1]; if(prev && prev.s === x.s) prev.x += x.x; else r.push({ x:x.x, s:x.s }); });
+    b.r.forEach(x => { const prev = r[r.length - 1]; if(prev && prev.s === x.s && (prev.c || '') === (x.c || '') && (prev.h || '') === (x.h || '')) prev.x += x.x; else { const y = { x:x.x, s:x.s }; if(x.c) y.c = x.c; if(x.h) y.h = x.h; r.push(y); } });
     if(r.length){ r[0].x = r[0].x.replace(/^[\s\u00a0]+/, ''); r[r.length - 1].x = r[r.length - 1].x.replace(/[\s\u00a0]+$/, ''); }
     b.r = r.filter(x => x.x);
     if(b.t === 'h2' || b.t === 'h3') b.r.forEach(x => { x.s = x.s.replace(/b/g, ''); });
@@ -42885,7 +43120,13 @@ function tbDomToBlocks(root, opts){
   return blocks.filter(b => b.t === 'hr' || b.t === 'img' || (b.r && b.r.length));
 }
 function tbRunsHtml(r){
-  return (r || []).map(x => { let t = escapeHtml(x.x); if(x.s.includes('u')) t = `<u>${t}</u>`; if(x.s.includes('i')) t = `<i>${t}</i>`; if(x.s.includes('b')) t = `<b>${t}</b>`; return t; }).join('');
+  return (r || []).map(x => {
+    let t = escapeHtml(x.x); const st = x.s || '';
+    if(st.includes('u')) t = `<u>${t}</u>`; if(st.includes('i')) t = `<i>${t}</i>`; if(st.includes('b')) t = `<b>${t}</b>`;
+    if(x.h && TB_HL[x.h]) t = `<span style="background-color:${TB_HL[x.h][0]}">${t}</span>`;
+    if(x.c && /^#[0-9a-f]{6}$/i.test(x.c)) t = `<font color="${x.c}">${t}</font>`;
+    return t;
+  }).join('');
 }
 function tbEdImgHtml(b){
   const w = Math.max(15, Math.min(100, Math.round(b.w || 100))), al = ['l', 'r'].includes(b.al) ? b.al : 'c';
@@ -42902,7 +43143,7 @@ function tbBlocksToEdHtml(blocks){
     const tag = ({ h2:'h2', h3:'h3', lead:'h4', quote:'blockquote' })[b.t] || 'p';
     const close = `</${tag}>`, al = tbAlignCss(b.a);
     if(b.c && k > 0 && blocks[k - 1].t === b.t && h.endsWith(close)){ h = h.slice(0, -close.length) + '<br>' + tbRunsHtml(b.r) + close; return; }
-    h += `<${tag}${al ? ` style="text-align:${al}"` : ''}>${tbRunsHtml(b.r)}${close}`;
+    h += `<${tag}${al ? ` style="text-align:${al}"` : ''}${b.k ? ' data-k="1"' : ''}>${tbRunsHtml(b.r)}${close}`;
   });
   if(list) h += `</${list}>`;
   return h;
@@ -42927,7 +43168,7 @@ function tbReflowBlocks(blocks, opts){
   const lines = blocks.filter(b => b.r && TXT.includes(b.t)).map(clean).filter(Boolean);
   const sorted = lines.map(x => x.length).sort((x, y) => x - y), med = sorted.length ? sorted[sorted.length >> 1] : 0;
   const open = lines.filter(x => !ENDS.test(x)).length;
-  const column = lines.length >= 4 && med <= 75 && open >= lines.length * 0.5;
+  const column = !opts.flow && lines.length >= 4 && med <= 75 && open >= lines.length * 0.5;     // ⟿ lignes continues : on coupe seulement après une phrase finie
   if(!tbIsRich(blocks) && !opts.breaks){        // texte simple : la règle « texte » (lignes vides, puces, titres)
     const r = tbReflow(tbBlocksText(blocks));
     return { blocks:tbTextToBlocks(r.text), joined:r.joined, changed:r.changed && r.joined > 0, column:false };
@@ -42938,7 +43179,7 @@ function tbReflowBlocks(blocks, opts){
     if(b.r) b.r.forEach(x => { x.x = x.x.replace(TB_INVIS, ''); });
     const prev = out[out.length - 1];
     const loose = opts.breaks || column;
-    if(prev && prev.r && b.r && prev.t === b.t && TXT.includes(b.t) && (!b.c || loose) && ((prev.a || '') === (b.a || '') || loose)){
+    if(prev && prev.r && b.r && prev.t === b.t && TXT.includes(b.t) && (!b.c || opts.breaks) && (!b.k || opts.breaks) && ((prev.a || '') === (b.a || '') || loose)){
       const pt = clean(prev), nt = clean(b);
       if(!nt){ return; }
       const hy = /\p{L}[-‐]$/u.test(pt) && /^\p{Ll}/u.test(nt);
@@ -43113,15 +43354,18 @@ var TB_ICO = {
   full:'<path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/>',
   exitFull:'<path d="M8 3v3a2 2 0 0 1-2 2H3M21 8h-3a2 2 0 0 1-2-2V3M3 16h3a2 2 0 0 1 2 2v3M16 21v-3a2 2 0 0 1 2-2h3"/>',
   paste:'<rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>',
+  textColor:'<path d="M6 16 11 4h2l5 12"/><path d="M8.2 11h7.6"/><rect x="4" y="18.5" width="16" height="3" rx="1" style="fill:var(--tbk-fc, #E5484D);stroke:none"/>',
+  flow:'<path d="M3 6h14a3 3 0 0 1 0 6H7a3 3 0 0 0 0 6h14"/><path d="m18 15 3 3-3 3"/>',
   more:'<circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/>',
   cut:'<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.12 15.88M14.47 14.48 20 20M8.12 8.12 12 12"/>',
+  broom:'<path d="M14.5 3.5 20 9"/><path d="M17 6.5 11 12.5"/><path d="M11 12.5c-2.6-1-5.6.4-6.6 3L3 21l5.5-1.4c2.6-1 4-4 3-6.6"/><path d="M6.5 17.5 8 16"/>',
   copy:'<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
   join:'<path d="M3 6h9a4 4 0 0 1 4 4v1"/><path d="M3 18h9a4 4 0 0 0 4-4v-1"/><path d="M16 12h5"/><path d="M18.5 9.5 21 12l-2.5 2.5"/>',
   width:'<path d="M3 12h18"/><path d="M6.5 8.5 3 12l3.5 3.5"/><path d="M17.5 8.5 21 12l-3.5 3.5"/><path d="M3 4v16M21 4v16" opacity=".45"/>'
 };
 function tbIcon(n){ return `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${TB_ICO[n] || ''}</svg>`; }
 /* coller « simple » : la structure (titres, listes, images) sans le gras ni le souligné de la page d'origine */
-function tbBlocksPlainStyle(blocks){ return (blocks || []).map(b => b.r ? Object.assign({}, b, { r:b.r.map(x => ({ x:x.x, s:'' })) }) : b); }
+function tbBlocksPlainStyle(blocks){ return (blocks || []).map(b => b.r ? Object.assign({}, b, { r:b.r.map(x => ({ x:x.x, s:'' })) }) : b); }      // (sans gras ni couleurs)
 
 function tbWordsCount(text){ return (String(text || '').match(/[\p{L}\p{N}]+(?:['’-][\p{L}\p{N}]+)*/gu) || []).length; }
 function tbAutoTitle(text){
@@ -43168,10 +43412,10 @@ function renderTabletteHome(){
     <div class="tbk-studio" id="tbkDevice" style="--efs:${efs}px;">
       <div class="tbk-tools" id="tbkTools" role="toolbar" aria-label="Mise en page">
         <select class="tbk-style" id="tbkStyle" data-style aria-label="Style du paragraphe" title="Style du paragraphe">${STY}</select>
-        <span class="tbk-grp">${tb('bold', 'bold', 'Gras (Ctrl+B)')}${tb('italic', 'italic', 'Italique (Ctrl+I)')}${tb('underline', 'underline', 'Souligné (Ctrl+U)')}${tb('clear', 'clear', 'Effacer la mise en forme')}</span>
+        <span class="tbk-grp">${tb('bold', 'bold', 'Gras (Ctrl+B)')}${tb('italic', 'italic', 'Italique (Ctrl+I)')}${tb('underline', 'underline', 'Souligné (Ctrl+U)')}${tb('colors', 'textColor', 'Couleur du texte et surligneur')}${tb('clear', 'clear', 'Effacer la mise en forme')}</span>
         <span class="tbk-grp">${tb('al-l', 'alignLeft', 'Aligner à gauche')}${tb('al-c', 'alignCenter', 'Centrer')}${tb('al-r', 'alignRight', 'Aligner à droite')}${tb('al-j', 'alignJustify', 'Justifier')}</span>
         <span class="tbk-grp">${tb('list', 'list', 'Liste à puces')}${tb('olist', 'listOrdered', 'Liste numérotée')}${tb('br', 'br', 'Saut de ligne (Maj+Entrée)')}${tb('hr', 'hr', 'Séparateur')}${tb('img', 'image', 'Ajouter une image (galerie ou appareil photo)')}</span>
-        <span class="tbk-grp"><button type="button" class="tbk-tb tbk-tbl" data-ed="join" title="Recoller les lignes sélectionnées en un seul paragraphe (sans sélection : ce paragraphe et le suivant)" aria-label="Recoller les lignes">${tbIcon('join')}<span>Recoller</span></button></span>
+        <span class="tbk-grp"><button type="button" class="tbk-tb tbk-tbl" data-ed="join" title="Recoller les lignes sélectionnées en un seul paragraphe (sans sélection : ce paragraphe et le suivant)" aria-label="Recoller les lignes">${tbIcon('join')}<span>Recoller</span></button>${tb('flow', 'flow', 'Lignes continues : plus de retour à la ligne au milieu des phrases (même les tiens), le texte suit la largeur de l\'écran')}</span>
         <span class="tbk-grp">${tb('undo', 'undo', 'Annuler (Ctrl+Z)')}${tb('redo', 'redo', 'Rétablir (Ctrl+Y)')}</span>
         <span class="tbk-mhint">✎ Sélectionne du texte ou fais un clic droit : la mise en forme s'ouvre à côté.</span>
         <span class="tbk-grp tbk-view">
@@ -43199,9 +43443,9 @@ function renderTabletteHome(){
       <input type="file" id="tbkFile" accept="image/*" multiple hidden>
       <div class="tbk-bubble" id="tbkBubble" hidden role="toolbar" aria-label="Mise en forme rapide">
         <select class="tbk-style" data-style aria-label="Style du paragraphe">${STY}</select>
-        <span class="tbk-grp">${tb('bold', 'bold', 'Gras (Ctrl+B)')}${tb('italic', 'italic', 'Italique (Ctrl+I)')}${tb('underline', 'underline', 'Souligné (Ctrl+U)')}${tb('clear', 'clear', 'Effacer la mise en forme')}</span>
+        <span class="tbk-grp">${tb('bold', 'bold', 'Gras (Ctrl+B)')}${tb('italic', 'italic', 'Italique (Ctrl+I)')}${tb('underline', 'underline', 'Souligné (Ctrl+U)')}${tb('colors', 'textColor', 'Couleur du texte et surligneur')}${tb('clear', 'clear', 'Effacer la mise en forme')}</span>
         <span class="tbk-grp">${tb('al-l', 'alignLeft', 'Aligner à gauche')}${tb('al-c', 'alignCenter', 'Centrer')}${tb('al-r', 'alignRight', 'Aligner à droite')}${tb('al-j', 'alignJustify', 'Justifier')}</span>
-        <span class="tbk-grp">${tb('join', 'join', 'Recoller les lignes')}${tb('menu', 'more', 'Plus d\'outils (clic droit)')}</span>
+        <span class="tbk-grp">${tb('join', 'join', 'Recoller les lignes')}${tb('fix', 'broom', 'Ajuster la sélection (recoller les phrases coupées)')}${tb('menu', 'more', 'Plus d\'outils (clic droit)')}</span>
       </div>
       <div class="tbk-menu" id="tbkMenu" hidden role="menu" aria-label="Menu de mise en page">
         <button type="button" role="menuitem" data-ed="cut">${tbIcon('cut')}<span>Couper</span><kbd>Ctrl+X</kbd></button>
@@ -43214,11 +43458,20 @@ function renderTabletteHome(){
         <div class="tbk-mrow" role="group" aria-label="Insérer">${tb('list', 'list', 'Liste à puces')}${tb('olist', 'listOrdered', 'Liste numérotée')}${tb('br', 'br', 'Saut de ligne (Maj+Entrée)')}${tb('hr', 'hr', 'Séparateur')}${tb('img', 'image', 'Ajouter une image')}<i class="tbk-msep"></i>${tb('undo', 'undo', 'Annuler (Ctrl+Z)')}${tb('redo', 'redo', 'Rétablir (Ctrl+Y)')}</div>
         <hr>
         <button type="button" role="menuitem" data-ed="join">${tbIcon('join')}<span>Recoller les lignes</span></button>
-        <button type="button" role="menuitem" data-ed="fix"><b class="tbk-mi">🧹</b><span>Ajuster tout le texte</span></button>
+        <button type="button" role="menuitem" data-ed="fix"><b class="tbk-mi">🧹</b><span>Ajuster <small>(la sélection, sinon tout)</small></span></button>
+        <button type="button" role="menuitem" data-ed="flow">${tbIcon('flow')}<span>Lignes continues <small>(une seule ligne par paragraphe)</small></span></button>
+        <button type="button" role="menuitem" data-ed="colors"><b class="tbk-mi">🎨</b><span>Couleurs et surligneur…</span></button>
         <hr>
         <button type="button" role="menuitemcheckbox" data-ed="opt-bubble" aria-checked="true"><b class="tbk-mi">✎</b><span>Barre près du curseur</span><i class="tbk-sw" aria-hidden="true"></i></button>
         <button type="button" role="menuitemcheckbox" data-ed="opt-top" aria-checked="true"><b class="tbk-mi">▤</b><span>Barre d'outils en haut</span><i class="tbk-sw" aria-hidden="true"></i></button>
         <div class="tbk-mfoot">Maj + clic droit : le menu du navigateur (orthographe…)</div>
+      </div>
+      <div class="tbk-colors" id="tbkColors" hidden role="dialog" aria-label="Couleurs">
+        <div class="tbk-cl">Couleur du texte</div>
+        <div class="tbk-swrow">${TB_COLORS.map(([c, n]) => `<button type="button" class="tbk-swatch" data-ed="fc-${c}" style="--c:${c}" title="${n}" aria-label="Texte en ${n.toLowerCase()}"></button>`).join('')}<label class="tbk-swatch pick" title="Autre couleur…"><input type="color" id="tbkFcPick" value="#e5484d" aria-label="Autre couleur"></label><button type="button" class="tbk-swatch none" data-ed="fc-none" title="Couleur normale" aria-label="Couleur normale">✕</button></div>
+        <div class="tbk-cl">Surligner</div>
+        <div class="tbk-swrow">${Object.keys(TB_HL).map(k => `<button type="button" class="tbk-swatch hl" data-ed="hl-${k}" style="--c:${TB_HL[k][0]}" title="${TB_HL[k][1]}" aria-label="Surligner en ${TB_HL[k][1].toLowerCase()}"></button>`).join('')}<button type="button" class="tbk-swatch hl none" data-ed="hl-none" title="Sans surlignage" aria-label="Sans surlignage">✕</button></div>
+        <div class="tbk-cl tbk-cl-h">Sélectionne d'abord les mots à colorer.</div>
       </div>
       <div class="tbk-actions">
         <div class="tbk-popt" id="tbkPasteOpt" hidden role="group" aria-label="Options de collage">
@@ -43230,15 +43483,16 @@ function renderTabletteHome(){
         <div class="tbk-hint" id="tbkHint" hidden>✂️ Des phrases sont coupées par des retours à la ligne : touche « 🧹 Ajuster » (ou sélectionne des lignes, puis « Recoller »).</div>
         <div class="tbk-row">
           <button type="button" class="tbk-paste" id="tbkPaste">${tbIcon('paste')} Coller</button>
-          <button type="button" class="tbk-paste tbk-fix" id="tbkFix" title="Recolle les lignes coupées au milieu des phrases">🧹 Ajuster</button>
+          <button type="button" class="tbk-paste tbk-fix" id="tbkFix" title="Recolle les phrases coupées : seulement la partie sélectionnée, sinon tout le texte. Tes sauts de ligne restent.">🧹 Ajuster</button>
+          <button type="button" class="tbk-paste" id="tbkFlow" title="Lignes continues : la sélection devient un seul paragraphe ; sans sélection, plus aucun retour à la ligne au milieu des phrases (même les tiens). Le texte suit alors la largeur de l'écran.">${tbIcon('flow')} Lignes continues</button>
           <span class="tbk-count" id="tbkCount"></span>
           ${editing ? `<button type="button" class="tbk-cancel" id="tbkCancel">Annuler la modification</button>` : ''}
           <button type="button" class="tbk-open" id="tbkOpen" disabled>${editing ? 'Enregistrer et ouvrir' : 'Ouvrir sur la Tablette'}</button>
         </div>
       </div>
     </div>
-    <div class="tbk-sec">Mes textes</div>
-    <div class="tbk-list">${L.length ? L.map(item).join('') : `<div class="tbk-empty">Aucun texte pour l'instant : colle ton premier article ci-dessus, ou essaie un texte ci-dessous.</div>`}</div>
+    <div class="tbk-sec">Mes textes <span class="tbk-sync" id="tbkSync">${getSyncUrl() ? '☁️ sur tous tes appareils' : ''}</span></div>
+    <div class="tbk-list" id="tbkMine">${L.length ? L.map(item).join('') : `<div class="tbk-empty">Aucun texte pour l'instant : colle ton premier article ci-dessus, ou essaie un texte ci-dessous.</div>`}</div>
     <div class="tbk-sec">Pour essayer</div>
     <div class="tbk-list">
       ${tbGet('sample') ? item(tbGet('sample')) : `<div class="tbk-item" data-tbk-open="sample" role="button" tabindex="0"><div class="tbk-main"><b>${escapeHtml(TB_SAMPLE.title)}</b><span class="tbk-meta"><span>Texte d'exemple</span><span>${tbWordsCount(TB_SAMPLE.text)} mots</span></span></div></div>`}
@@ -43310,6 +43564,7 @@ function renderTabletteHome(){
   document.addEventListener('selectionchange', onSel);
   const onKey = (e) => {
     if(e.key !== 'Escape') return;
+    if(document.getElementById('tbkColors') && !document.getElementById('tbkColors').hidden){ e.preventDefault(); document.getElementById('tbkColors').hidden = true; return; }
     if(document.getElementById('tbkMenu') && !document.getElementById('tbkMenu').hidden){ e.preventDefault(); document.getElementById('tbkMenu').hidden = true; return; }
     if(document.getElementById('tbkBubble') && !document.getElementById('tbkBubble').hidden){ e.preventDefault(); document.getElementById('tbkBubble').hidden = true; return; }
     if(dev.classList.contains('full')){ e.preventDefault(); setFull(false); }
@@ -43435,7 +43690,10 @@ function renderTabletteHome(){
     if(document.activeElement === ed){ const rg = document.createRange(); rg.setStart(ed.firstChild, 0); rg.collapse(true); const ss = window.getSelection(); ss.removeAllRanges(); ss.addRange(rg); }
   };
   ed.addEventListener('focus', ensureP);
-  ed.addEventListener('input', () => { popt.hidden = true; ensureP(); keepSel(); sync(); });
+  ed.addEventListener('input', (e) => {
+    if(e.inputType === 'insertParagraph'){ const k = blockOfSel(); if(k && k.parentNode === ed && /^(P|H2|H3|H4|DIV|BLOCKQUOTE)$/.test(k.tagName) && k.previousElementSibling) k.setAttribute('data-k', '1'); }
+    popt.hidden = true; ensureP(); keepSel(); sync();
+  });
   ed.addEventListener('keyup', keepSel); ed.addEventListener('pointerup', keepSel);
   ti.addEventListener('input', () => sync());
   ed.addEventListener('keydown', (e) => {
@@ -43494,14 +43752,14 @@ function renderTabletteHome(){
   };
   /* ⤵ Recoller : les lignes sélectionnées (ou ce paragraphe et le suivant) deviennent un seul paragraphe
      (avec les commandes de l'éditeur, comme un retour arrière : la mise en forme reste propre et « Annuler » marche) */
-  const joinLines = () => {
+  const joinLines = (o) => {
     putSel();
     const s = window.getSelection(); if(!s.rangeCount) return 0;
     const r = s.getRangeAt(0);
     const top = (n, off) => { if(n === ed) n = ed.childNodes[Math.max(0, Math.min(off, ed.childNodes.length - 1))]; while(n && n.parentNode !== ed) n = n.parentNode; return n; };
     let a = top(r.startContainer, r.startOffset);
     if(a && (a.nodeType === 3 || !/^(P|DIV|H2|H3|H4|BLOCKQUOTE|UL|OL|HR|FIGURE)$/.test(a.tagName))){      // une ligne tapée directement dans la page : on en fait d'abord un paragraphe
-      exec('formatBlock', 'p'); return joinLines.again ? 0 : (joinLines.again = true, (() => { try{ return joinLines(); } finally{ joinLines.again = false; } })());
+      exec('formatBlock', 'p'); return joinLines.again ? 0 : (joinLines.again = true, (() => { try{ return joinLines(o); } finally{ joinLines.again = false; } })());
     }
     let z = r.collapsed ? a : top(r.endContainer, Math.max(0, r.endOffset - 1));
     if(!a) return 0;
@@ -43512,7 +43770,7 @@ function renderTabletteHome(){
     let txt = nodes.filter(isText);
     if(txt.length < 2 && !(txt.length === 1 && brsOf(txt[0]).length)){
       const nx = txt[0] && txt[0].nextElementSibling;
-      if(txt.length === 1 && isText(nx)) txt.push(nx); else return 0;
+      if(txt.length === 1 && isText(nx) && !(o && o.noNext)) txt.push(nx); else return 0;
     }
     let n = 0, k = 0;
     const before = ed.innerHTML;
@@ -43539,7 +43797,9 @@ function renderTabletteHome(){
     keepSel(); sync(true);
     return n;
   };
-  const runCmd = (cmd) => {
+  const runCmd = (cmd, btn) => {
+    if(cmd === 'colors'){ toggleColors(btn); return; }
+    if(/^(fc|hl)-/.test(cmd)){ applyColor(cmd); return; }
     if(cmd === 'menu'){ const r = bubble.getBoundingClientRect(); openMenu(r.right - 30, r.bottom + 6); return; }
     if(cmd === 'opt-bubble'){ tbUi().bubble = tbUi().bubble === false; tbSaveUi(); applyOpts(); return; }
     if(cmd === 'opt-top'){ tbUi().topBar = tbUi().topBar === false; tbSaveUi(); applyOpts(); if(!menu.hidden) requestAnimationFrame(() => openMenu(menuAt.x, menuAt.y)); return; }
@@ -43551,7 +43811,8 @@ function renderTabletteHome(){
     if(cmd === 'undo'){ putSel(); doUndo(); return; }
     if(cmd === 'redo'){ putSel(); doRedo(); return; }
     if(cmd === 'join'){ const n = joinLines(); cnt.textContent = n ? `✓ ${n + 1} lignes recollées en un paragraphe` : 'Sélectionne les lignes à recoller'; refresh(); schedBubble(); return; }
-    if(cmd === 'fix'){ fixB.click(); return; }
+    if(cmd === 'fix'){ fixText(); return; }
+    if(cmd === 'flow'){ flowText(); return; }
     if(cmd === 'paste' || cmd === 'paste-plain'){ pasteClipboard(cmd === 'paste-plain' ? 'plain' : null); return; }
     if(/^st-/.test(cmd)){ applyStyle(cmd.slice(3)); return; }
     putSel();
@@ -43601,6 +43862,34 @@ function renderTabletteHome(){
   };
   const schedBubble = () => { clearTimeout(bubT); bubT = setTimeout(placeBubble, 110); };
   schedB = schedBubble;
+  /* 🎨 la palette : couleur du texte et surligneur */
+  const colors = document.getElementById('tbkColors'), fcPick = document.getElementById('tbkFcPick');
+  const setFcBar = (c) => dev.style.setProperty('--tbk-fc', c || '#E5484D');
+  setFcBar(tbUi().lastFc);
+  const closeColors = () => { colors.hidden = true; };
+  const toggleColors = (btn) => {
+    if(!colors.hidden){ closeColors(); return; }
+    const r = btn && btn.getBoundingClientRect ? btn.getBoundingClientRect() : (selRect() || { left:20, bottom:120 });
+    keepSel(); closeMenu(); hideBubble();
+    colors.hidden = false;
+    const sr = dev.getBoundingClientRect(), w = colors.offsetWidth, h = colors.offsetHeight;
+    let left = Math.max(8, Math.min(r.left, window.innerWidth - w - 8)), top = r.bottom + 6;
+    if(top + h > window.innerHeight - 8) top = Math.max(8, r.top - h - 6);
+    colors.style.left = Math.round(left - sr.left) + 'px'; colors.style.top = Math.round(top - sr.top) + 'px';
+  };
+  const applyColor = (cmd, value) => {
+    putSel();
+    try{ document.execCommand('styleWithCSS', false, false); }catch(e){}
+    const [kind, v0] = [cmd.slice(0, 2), value || cmd.slice(3)];
+    if(kind === 'fc'){
+      exec('foreColor', v0 === 'none' ? TB_NOCOLOR : v0);
+      if(v0 !== 'none'){ tbUi().lastFc = v0; tbSaveUi(); setFcBar(v0); }
+    } else exec('hiliteColor', v0 === 'none' ? 'transparent' : (TB_HL[v0] || TB_HL.y)[0]);
+    if(!value) closeColors();
+    keepSel(); sync(); refresh(); schedBubble();
+  };
+  fcPick.addEventListener('input', () => applyColor('fc-x', fcPick.value));
+  fcPick.addEventListener('change', () => closeColors());
   /* ☰ le menu du clic droit */
   let menuAt = { x:0, y:0 };
   const openMenu = (x, y) => {
@@ -43634,16 +43923,18 @@ function renderTabletteHome(){
   ed.addEventListener('pointerdown', (e) => { lastPtr = e.pointerType || 'mouse'; if(e.button === 0) closeMenu(); });
   ed.addEventListener('pointerup', (e) => { if(e.button !== 0) return; if(e.target.closest && e.target.closest('img')){ caretShow = false; hideBubble(); return; } caretShow = bubbleOn(); schedBubble(); });
   ed.addEventListener('keydown', (e) => { if(!['Shift', 'Control', 'Alt', 'Meta'].includes(e.key) && !(e.ctrlKey || e.metaKey)){ caretShow = false; hideBubble(); } });
-  const onDown = (e) => { if(!dev.contains(e.target) || (!ed.contains(e.target) && !bubble.contains(e.target) && !menu.contains(e.target))){ if(!menu.contains(e.target)) closeMenu(); if(!bubble.contains(e.target)){ caretShow = false; hideBubble(); } } };
+  const onDown = (e) => {
+    if(!colors.hidden && !colors.contains(e.target) && !(e.target.closest && e.target.closest('[data-ed="colors"]'))) colors.hidden = true;
+    if(!dev.contains(e.target) || (!ed.contains(e.target) && !bubble.contains(e.target) && !menu.contains(e.target) && !colors.contains(e.target))){ if(!menu.contains(e.target)) closeMenu(); if(!bubble.contains(e.target)){ caretShow = false; hideBubble(); } } };
   document.addEventListener('pointerdown', onDown, true);
   const onMove = () => { if(!bubble.hidden) requestAnimationFrame(placeBubble); };     // la page défile : le menu suit le texte, la barre se recale
   window.addEventListener('scroll', onMove, { passive:true });
   desk.addEventListener('scroll', () => { closeMenu(); onMove(); }, { passive:true });     // en grand écran, c'est la page qui défile : on ferme le menu
   window.addEventListener('resize', onMove);
-  [tools, bubble, menu].forEach(el => {
+  [tools, bubble, menu, colors].forEach(el => {
     el.addEventListener('pointerdown', (e) => { if(e.target.closest('[data-ed]')) e.preventDefault(); });
     el.addEventListener('mousedown', (e) => { if(e.target.closest('[data-ed]')) e.preventDefault(); });
-    el.addEventListener('click', (e) => { const b = e.target.closest('[data-ed]'); if(b && el.contains(b)) runCmd(b.dataset.ed); });
+    el.addEventListener('click', (e) => { const b = e.target.closest('[data-ed]'); if(b && el.contains(b)) runCmd(b.dataset.ed, b); });
   });
   bubble.addEventListener('keydown', (e) => { if(e.key === 'Escape'){ hideBubble(); putSel(); } });
   menu.addEventListener('keydown', (e) => { if(e.key === 'Escape'){ e.stopPropagation(); closeMenu(); putSel(); } });
@@ -43680,13 +43971,53 @@ function renderTabletteHome(){
   });
   file.addEventListener('change', async () => { const fs = [...file.files]; file.value = ''; keepSel(); await addImages(fs); });
   sync();
-  fixB.addEventListener('click', () => {
-    let r = tbReflowBlocks(blocks());
-    if(!r.joined) r = tbReflowBlocks(blocks(), { breaks:true });        // on le demande : les sauts de ligne aussi
+  const plural = (n, w) => `${n} ${w}${n > 1 ? 's' : ''}`;
+  const fixText = () => {
+    const s = window.getSelection();
+    if(inEd() && s.rangeCount && !s.getRangeAt(0).collapsed){            // une partie sélectionnée : on n'ajuste qu'elle
+      const r = s.getRangeAt(0);
+      const top = (n, off) => { if(n === ed) n = ed.childNodes[Math.max(0, Math.min(off, ed.childNodes.length - 1))]; while(n && n.parentNode !== ed) n = n.parentNode; return n; };
+      const a = top(r.startContainer, r.startOffset), z = top(r.endContainer, Math.max(0, r.endOffset - 1)) || a;
+      if(!a) return;
+      const nodes = []; for(let n = a; n; n = n.nextSibling){ nodes.push(n); if(n === z) break; }
+      const tmp = document.createElement('div'); nodes.forEach(n => tmp.appendChild(n.cloneNode(true)));
+      const rr = tbReflowBlocks(tbDomToBlocks(tmp, { editor:true }));
+      if(!rr.joined){ cnt.textContent = '✓ Cette partie est déjà bien ajustée'; return; }
+      const before = ed.innerHTML;
+      const rg = document.createRange(); rg.setStartBefore(nodes[0]); rg.setEndAfter(nodes[nodes.length - 1]);
+      rg.deleteContents();
+      const frag = rg.createContextualFragment(tbBlocksToEdHtml(rr.blocks)), first = frag.firstChild, last = frag.lastChild;
+      rg.insertNode(frag);
+      try{ const sel = document.createRange(); sel.setStartBefore(first); sel.setEndAfter(last); s.removeAllRanges(); s.addRange(sel); }catch(e){}
+      tbLoadImgs(ed); group = { k:0, before, after:ed.innerHTML };
+      sync(true); keepSel(); schedBubble();
+      cnt.textContent = `✓ ${plural(rr.joined, 'retour')} à la ligne recollé${rr.joined > 1 ? 's' : ''} dans la sélection`;
+      return;
+    }
+    const r = tbReflowBlocks(blocks());
     if(r.changed){ const before = ed.innerHTML; ed.innerHTML = tbBlocksToEdHtml(r.blocks); tbLoadImgs(ed); group = { k:0, before, after:ed.innerHTML }; }
     sync(true);
-    cnt.textContent = r.joined ? `✓ ${r.joined} retour${r.joined > 1 ? 's' : ''} à la ligne recollé${r.joined > 1 ? 's' : ''}` : '✓ Texte déjà bien ajusté';
-  });
+    cnt.textContent = r.joined ? `✓ ${plural(r.joined, 'retour')} à la ligne recollé${r.joined > 1 ? 's' : ''} (tes sauts de ligne sont gardés)` : '✓ Texte déjà bien ajusté';
+  };
+  /* ⟿ lignes continues : une sélection → un seul paragraphe ; sinon tout le texte, sans retour à la ligne au milieu des phrases (même les tiens) */
+  const flowText = () => {
+    const s = window.getSelection();
+    if(inEd() && s.rangeCount && !s.getRangeAt(0).collapsed){
+      const n = joinLines({ noNext:true });
+      cnt.textContent = n ? `✓ ${n + 1} lignes → un seul paragraphe` : '✓ Déjà sur une seule ligne';
+      return;
+    }
+    const r = tbReflowBlocks(blocks(), { breaks:true, flow:true });
+    if(r.changed){ const before = ed.innerHTML; ed.innerHTML = tbBlocksToEdHtml(r.blocks); tbLoadImgs(ed); group = { k:0, before, after:ed.innerHTML }; }
+    sync(true);
+    cnt.textContent = r.joined ? `✓ ${plural(r.joined, 'retour')} à la ligne retiré${r.joined > 1 ? 's' : ''} : le texte suit la largeur de l'écran` : '✓ Le texte est déjà en lignes continues';
+  };
+  const flowB = document.getElementById('tbkFlow');
+  flowB.addEventListener('pointerdown', (e) => e.preventDefault()); flowB.addEventListener('mousedown', (e) => e.preventDefault());
+  flowB.addEventListener('click', flowText);
+  fixB.addEventListener('pointerdown', (e) => e.preventDefault());
+  fixB.addEventListener('mousedown', (e) => e.preventDefault());
+  fixB.addEventListener('click', fixText);
   document.getElementById('backFromTabletteBtn').addEventListener('click', () => { TB.edit = null; renderBlockSelect(); });
   const pasteClipboard = async (force) => {
     keepSel();
@@ -43754,6 +44085,13 @@ function renderTabletteHome(){
   setQuickNavTarget(() => document.getElementById(ed.textContent.trim() ? 'tbkOpen' : 'tbkEd'));
   startSectionReading('tablette');
   setTimeout(tbImgCleanup, 3000);
+  TB.homeList = () => {
+    const box = document.getElementById('tbkMine'); if(!box) return;
+    const L2 = tbLoad().filter(a => a.id !== 'sample');
+    box.innerHTML = L2.length ? L2.map(item).join('') : `<div class="tbk-empty">Aucun texte pour l'instant : colle ton premier article ci-dessus, ou essaie un texte ci-dessous.</div>`;
+    tbLoadImgs(box);
+  };
+  try{ if(getSyncUrl() && Date.now() - (syncState.lastPull || 0) > 15000) syncSoon(400); }catch(e){}     // ☁️ les textes ajoutés sur ton autre appareil
 }
 /* 🏠 sur l'accueil : la Tablette toujours à portée de main (et la lecture en cours à reprendre) */
 function tbResumeArt(){
@@ -43935,7 +44273,7 @@ function tbAaHtml(){
     <div class="tb-pop-row"><span class="tb-pop-l">Vitesse</span><button type="button" class="tb-chip" data-tb="rate-" aria-label="Voix plus lente">🐢</button><output class="tb-out" id="tbRate">${readingRate.toFixed(2)}×</output><button type="button" class="tb-chip" data-tb="rate+" aria-label="Voix plus rapide">🐇</button></div>
     <div class="tb-pop-row"><span class="tb-pop-l">Marques</span><div class="tb-seg"><button type="button" data-tb="marks-set" data-v="1" class="${dx ? 'on' : ''}">🫁 Affichées</button><button type="button" data-tb="marks-set" data-v="0" class="${dx ? '' : 'on'}">Masquées</button></div></div>
     ${dx ? dxLegendHtml() : ''}
-    <div class="tb-pop-row"><span class="tb-pop-l">Lignes</span><button type="button" class="tb-chip" data-tb="fix-text">🧹 Ajuster les retours à la ligne</button></div>
+    <div class="tb-pop-row"><span class="tb-pop-l">Lignes</span><button type="button" class="tb-chip" data-tb="fix-text">🧹 Ajuster</button><button type="button" class="tb-chip" data-tb="fix-flow" title="Plus aucun retour à la ligne au milieu des phrases : chaque paragraphe sur une seule ligne, qui suit la largeur de l'écran">⟿ Lignes continues</button></div>
     ${TB.art && TB.art.textOrig != null ? `<div class="tb-pop-hint">Texte ajusté. <button type="button" class="tb-link" data-tb="fix-undo">↩ Remettre comme avant</button></div>` : `<div class="tb-pop-hint">Recolle les lignes coupées : chaque phrase va de la majuscule jusqu'au point.</div>`}
     ${TB.art && TB.art.src === 'Collé' ? `<button type="button" class="tb-btn wide" data-tb="edit">✏️ Modifier le texte</button>` : ''}`;
 }
@@ -44471,11 +44809,11 @@ function tbReflow(text){
 }
 /* des phrases coupées en plein milieu par un retour à la ligne ? (une ligne par phrase, c'est très bien comme ça) */
 function tbNeedsReflow(text){ const r = tbReflow(text); return r.joined >= 1 && r.changed; }
-function tbReflowArt(){
+function tbReflowArt(flow){
   if(!TB.art) return;
-  let r = tbReflowBlocks(tbBlocksOf(TB.art));
-  if(!r.changed) r = tbReflowBlocks(tbBlocksOf(TB.art), { breaks:true });     // on le demande : les sauts de ligne ↵ aussi
-  if(!r.changed){ tbToast('✓ Le texte est déjà bien ajusté'); return; }
+  flow = flow === true;
+  const r = tbReflowBlocks(tbBlocksOf(TB.art), flow ? { breaks:true, flow:true } : undefined);     // Ajuster : tes sauts de ligne restent · ⟿ lignes continues : plus aucun
+  if(!r.changed){ tbToast(flow ? '✓ Le texte est déjà en lignes continues' : '✓ Le texte est déjà bien ajusté'); return; }
   const a = tbAnchorGet();
   if(TB.art.textOrig == null){ TB.art.textOrig = TB.art.text; TB.art.blocksOrig = TB.art.blocks || null; }
   if(tbIsRich(r.blocks)) TB.art.blocks = r.blocks; else delete TB.art.blocks;
@@ -44483,7 +44821,7 @@ function tbReflowArt(){
   tbRender(false); if(a) tbAnchorSet(a);
   tbSaveArtNow();
   const b = document.getElementById('tbFixBar'); if(b) b.remove();
-  tbToast(r.joined ? `🧹 Texte ajusté : ${r.joined} retour${r.joined > 1 ? 's' : ''} à la ligne en trop retiré${r.joined > 1 ? 's' : ''}` : '🧹 Texte ajusté', 3000);
+  tbToast(flow ? `⟿ Lignes continues : ${r.joined} retour${r.joined > 1 ? 's' : ''} à la ligne retiré${r.joined > 1 ? 's' : ''}, le texte suit la largeur de l'écran` : (r.joined ? `🧹 Texte ajusté : ${r.joined} retour${r.joined > 1 ? 's' : ''} à la ligne en trop retiré${r.joined > 1 ? 's' : ''}` : '🧹 Texte ajusté'), 3000);
   if(!document.getElementById('tbAa').hidden) tbToggleAa(true);
 }
 function tbReflowUndo(){
@@ -44497,20 +44835,32 @@ function tbReflowUndo(){
 }
 
 /* ---------- 🖍 tags (mots difficiles) ---------- */
-function tbTagAt(k){ const tk = TB.toks[k]; if(!tk) return -1; return (TB.art.tags || []).findIndex(g => g.s === tk.s && g.t === tk.t); }
+function tbTagAt(k){ const tk = TB.toks[k]; if(!tk) return -1; return (TB.art.tags || []).findIndex(g => g.s === tk.s && tk.t >= g.t && tk.t <= (g.t2 == null ? g.t : g.t2)); }
 function tbRelocateTags(){
   (TB.art.tags || []).forEach(g => {
-    const tk = TB.toks.find(x => x.s === g.s && x.t === g.t);
-    if(tk && dxFold(tk.form) === dxFold(g.w)) return;
-    const k = TB.toks.findIndex(x => dxFold(x.form) === dxFold(g.w));
-    if(k >= 0){ g.s = TB.toks[k].s; g.t = TB.toks[k].t; g.sent = TB.sents[g.s]; } else { g.s = -1; g.t = -1; }
+    const n = g.n || 1;
+    const here = tbTagToks(g);
+    if(here.length && dxFold(n > 1 ? tbPickText(here[0], here[here.length - 1]) : TB.toks[here[0]].form) === dxFold(g.w)) return;
+    let found = false;
+    for(let s = 0; s < TB.sentToks.length && !found; s++){
+      const L = TB.sentToks[s] || [];
+      for(let a = 0; a + n - 1 < L.length; a++){
+        const txt = n > 1 ? tbPickText(L[a], L[a + n - 1]) : TB.toks[L[a]].form;
+        if(dxFold(txt) === dxFold(g.w)){ g.s = s; g.t = TB.toks[L[a]].t; if(n > 1) g.t2 = TB.toks[L[a + n - 1]].t; g.sent = TB.sents[s]; found = true; break; }
+      }
+    }
+    if(!found){ g.s = -1; g.t = -1; delete g.t2; }
   });
 }
 function tbPaintTags(fresh){
-  TB.spans.forEach(sp => sp.classList.remove('tag'));
+  TB.spans.forEach(sp => sp.classList.remove('tag', 'tag-x'));
   (TB.art.tags || []).forEach(g => {
-    const k = TB.toks.findIndex(x => x.s === g.s && x.t === g.t);
-    if(k >= 0 && TB.spans[k]){ TB.spans[k].classList.add('tag'); if(fresh === k){ TB.spans[k].classList.add('new'); setTimeout(() => TB.spans[k] && TB.spans[k].classList.remove('new'), 600); } }
+    const ks = tbTagToks(g);
+    ks.forEach((k, i) => {
+      const sp = TB.spans[k]; if(!sp) return;
+      sp.classList.add('tag'); if(ks.length > 1 && i < ks.length - 1) sp.classList.add('tag-x');
+      if(fresh === k){ sp.classList.add('new'); setTimeout(() => sp && sp.classList.remove('new'), 600); }
+    });
   });
   const n = (TB.art.tags || []).length;
   const b = document.getElementById('tbBadge'); if(b) b.textContent = n || '';
@@ -44518,16 +44868,22 @@ function tbPaintTags(fresh){
 }
 function tbToggleTag(k, opts){
   const tk = TB.toks[k]; if(!tk) return false;
+  const k2 = (opts && opts.k2 != null) ? opts.k2 : k, multi = k2 !== k;
   const tags = TB.art.tags || (TB.art.tags = []);
-  const i = tbTagAt(k);
+  const i = multi ? tbTagIdx(k, k2) : tbTagAt(k);
   if(i >= 0){ tags.splice(i, 1); tbPaintTags(); tbSaveArt(); tbEndHtml(); return false; }
-  const lemma = tbLemmaOf(tk), e = tbEntry(tk.form);
+  const ks = tbPickToks(k, k2), kz = ks[ks.length - 1];
+  const form = multi ? tbPickText(k, kz) : tk.form;
+  const lemma = multi ? tbPickLemma(form, tk) : tbLemmaOf(tk), e = multi ? null : tbEntry(tk.form);
   const j = tags.findIndex(g => dxFold(g.lemma) === dxFold(lemma));
   if(j >= 0) tags.splice(j, 1);                        // même mot : on garde la phrase choisie maintenant
-  tags.push({ s:tk.s, t:tk.t, w:tk.form, lemma, sent:TB.sents[tk.s], ar:(e && e.ar) || '', def:(e && e.def) || '', at:Date.now() });
+  if(multi) for(let x = tags.length - 1; x >= 0; x--){ const g = tags[x]; if(g.s === tk.s && g.t >= tk.t && (g.t2 == null ? g.t : g.t2) <= TB.toks[kz].t) tags.splice(x, 1); }   // « tandis » seul → « tandis que »
+  const tag = { s:tk.s, t:tk.t, w:form, lemma, sent:TB.sents[tk.s], ar:(e && e.ar) || '', def:(e && e.def) || '', at:Date.now() };
+  if(multi){ tag.t2 = TB.toks[kz].t; tag.n = ks.length; }
+  tags.push(tag);
   tbPaintTags(k); tbSaveArt(); tbEndHtml();
   try{ playChime([523, 784], { type:'triangle', noteDur:0.05, gap:0.015, volume:0.07 }); }catch(e){}
-  if(!(opts && opts.noFly)) tbFly(TB.spans[k], tk.form);
+  if(!(opts && opts.noFly)) tbFly(TB.spans[k], form);
   if(tags.length === 5 && !TB.art.cheer5){
     TB.art.cheer5 = true;
     setTimeout(() => { try{ launchConfetti(); playCorrectSound(); }catch(e){} tbToast('🎯 5 mots chassés ! Ouvre ton carnet pour les ajouter à tes mots.', 3600); }, 650);
@@ -44649,9 +45005,16 @@ function tbResults(){
 }
 /* ---------- la fiche d'un mot (on le touche) ---------- */
 function tbSay(text, slow){ tbNarrFr(text, 'fr-FR', null, slow ? 0.6 : Math.max(0.8, readingRate)); }
-function tbCtxHtml(tk){
+function tbCtxHtml(tk, kz){
   const s = TB.sents[tk.s] || '';
-  const mark = (raw, i, inner) => i === tk.t ? `<mark>${inner != null ? inner : escapeHtml(raw)}</mark>` : (inner != null ? inner : escapeHtml(raw));
+  const L = TB.sentToks[tk.s] || [], byT = new Map(L.map(k => [TB.toks[k].t, k]));
+  const t1 = tk.t, t2 = (kz != null && TB.toks[kz]) ? TB.toks[kz].t : tk.t;
+  const mark = (raw, i, inner) => {
+    const h = inner != null ? inner : escapeHtml(raw), k = byT.get(i);
+    if(k == null) return h;
+    const on = i >= t1 && i <= t2;
+    return `<span class="tb-cw${on ? ' on' : ''}" data-tb="pick" data-k="${k}" role="button" tabindex="0">${on ? `<mark>${h}</mark>` : h}</span>`;
+  };
   if(dxOn()){ try{ return dxDecorate(s, mark); }catch(e){} }
   let i = 0; return s.split(/(\s+)/).map(x => /^\s+$/.test(x) ? ' ' : (x ? mark(x, i++, null) : '')).join('');
 }
@@ -44663,29 +45026,127 @@ function tbInfoHtml(r, tk){
     ${defs.length ? `<ol class="tb-defs">${defs.slice(0, 2).map(d => `<li>${escapeHtml(d)}</li>`).join('')}</ol>` : ''}
     <div class="tb-src">${r.src === 'lexique' ? '✓ Dans ton lexique' : (r.src ? 'Source : ' + escapeHtml(r.src) : '')}${r.pos ? ` <span>(${escapeHtml(r.pos)})</span>` : ''}</div>`;
 }
-function tbOpenSheet(k){
+/* ---------- 🔎 1.0.23 : une expression de plusieurs mots (« tandis que »), choisie dans la phrase ---------- */
+function tbPickToks(k1, k2){
+  const tk = TB.toks[k1]; if(!tk) return [];
+  const L = TB.sentToks[tk.s] || [], a = L.indexOf(k1), b = L.indexOf(k2 == null ? k1 : k2);
+  if(a < 0) return [k1];
+  return L.slice(a, (b < a ? a : b) + 1);
+}
+function tbPickText(k1, k2){
+  const ks = tbPickToks(k1, k2);
+  return ks.map((k, i) => { const tk = TB.toks[k]; return i ? String(tk.raw || tk.form).replace(/[’ʼ‘`´]/g, "'").replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, '') : tk.form; })
+    .filter(Boolean).join(' ');
+}
+function tbPickLemma(form, tk){
+  const f = String(form || '');
+  if(!/\s/.test(f) && tk) return tbLemmaOf(tk);
+  return (/^\p{Lu}\p{Ll}/u.test(f) && tk && (TB.sentToks[tk.s] || [])[0] === TB.toks.indexOf(tk)) ? f.charAt(0).toLowerCase() + f.slice(1) : f;
+}
+function tbPickSet(i, j){
+  const P = TB.pick; if(!P) return;
+  const all = TB.sentToks[TB.toks[P.k1].s] || [];
+  i = Math.max(0, Math.min(i, all.length - 1)); j = Math.max(i, Math.min(j, all.length - 1));
+  if(j - i > 7){ tbToast('Une expression : 8 mots au plus'); return; }
+  TB.pickKeep = true;
+  tbOpenSheet(all[i], all[j]);
+}
+function tbPickTap(k){
+  const P = TB.pick; if(!P) return;
+  const all = TB.sentToks[TB.toks[P.k1].s] || [], i = all.indexOf(k), a = all.indexOf(P.k1), b = all.indexOf(P.k2);
+  if(i < 0) return;
+  if(i < a) tbPickSet(i, b);                    // un mot avant : on agrandit jusqu'à lui
+  else if(i > b) tbPickSet(a, i);               // un mot après : pareil
+  else if(a === b) return;
+  else if(i === a) tbPickSet(a + 1, b);         // le premier mot : on le retire
+  else if(i === b) tbPickSet(a, b - 1);         // le dernier : pareil
+  else tbPickSet(i, i);                         // un mot au milieu : on repart de lui
+}
+function tbTagIdx(k1, k2){
+  const a = TB.toks[k1], b = TB.toks[k2 == null ? k1 : k2]; if(!a || !b) return -1;
+  return (TB.art.tags || []).findIndex(g => g.s === a.s && g.t === a.t && (g.t2 == null ? g.t : g.t2) === b.t);
+}
+function tbTagToks(g){
+  const L = TB.sentToks[g.s] || [];
+  return L.filter(k => { const t = TB.toks[k].t; return t >= g.t && t <= (g.t2 == null ? g.t : g.t2); });
+}
+/* ✍️ la phrase d'exemple : on la raccourcit ou on l'allonge (phrase d'avant, phrase d'après) */
+function tbExGrow(id, dir){
+  const ta = document.getElementById(id); if(!ta) return;
+  const S = TB.exSpan || (TB.exSpan = { a:0, b:0 });
+  if(dir === 'reset'){ S.a = S.b = S.s; ta.value = TB.sents[S.s] || ''; ta.focus(); return; }
+  if(dir < 0 && S.a > 0){ S.a--; ta.value = (TB.sents[S.a] || '') + ' ' + ta.value.trim(); }
+  else if(dir > 0 && S.b < TB.sents.length - 1){ S.b++; ta.value = ta.value.trim() + ' ' + (TB.sents[S.b] || ''); }
+  ta.focus();
+}
+/* 🔎 sélectionner plusieurs mots dans le texte (à la souris, ou en appuyant longuement au doigt) */
+function tbSelPick(){
+  const pill = document.getElementById('tbPickPill');
+  const body = document.getElementById('tbBody');
+  const s = window.getSelection();
+  const off = () => { if(pill) pill.hidden = true; TB.selPick = null; };
+  if(!body || !s || !s.rangeCount || s.isCollapsed || TB.hunt || TB.mode){ off(); return; }
+  const r = s.getRangeAt(0);
+  if(!body.contains(r.commonAncestorContainer)){ off(); return; }
+  const ks = TB.spans.map((sp, k) => (sp && r.intersectsNode(sp) ? k : -1)).filter(k => k >= 0);
+  if(!ks.length){ off(); return; }
+  const s0 = TB.toks[ks[0]].s, inS = ks.filter(k => TB.toks[k].s === s0);
+  const k1 = inS[0], k2 = inS[Math.min(inS.length - 1, 7)];
+  TB.selPick = { k1, k2 };
+  let el = pill;
+  if(!el){
+    el = document.createElement('button'); el.type = 'button'; el.id = 'tbPickPill'; el.className = 'tb-pickpill';
+    el.addEventListener('pointerdown', (e) => e.preventDefault());
+    el.addEventListener('click', (e) => { e.stopPropagation(); const P = TB.selPick; if(!P) return; try{ window.getSelection().removeAllRanges(); }catch(err){} el.hidden = true; TB.pickKeep = false; tbOpenSheet(P.k1, P.k2); });
+    document.getElementById('tbReader').appendChild(el);
+  }
+  el.innerHTML = `🔎 <b>${escapeHtml(tbPickText(k1, k2))}</b><span>Traduire · Taguer</span>`;
+  el.hidden = false;
+  const rr = r.getBoundingClientRect(), w = el.offsetWidth, h = el.offsetHeight;
+  let top = TB.selTouch ? rr.bottom + 12 : rr.top - h - 10;
+  if(top < 60) top = rr.bottom + 12;
+  if(top + h > window.innerHeight - 90) top = Math.max(60, rr.top - h - 10);
+  el.style.left = Math.round(Math.max(8, Math.min(window.innerWidth - w - 8, (rr.left + rr.right) / 2 - w / 2))) + 'px';
+  el.style.top = Math.round(top) + 'px';
+}
+document.addEventListener('selectionchange', () => { if(!document.getElementById('tbReader')) return; clearTimeout(TB.selT); TB.selT = setTimeout(tbSelPick, 260); });
+document.addEventListener('pointerdown', (e) => { if(document.getElementById('tbReader')) TB.selTouch = e.pointerType === 'touch'; }, true);
+
+function tbOpenSheet(k, k2){
   const tk = TB.toks[k]; if(!tk) return;
   const sh = document.getElementById('tbSheet'); if(!sh) return;
-  TB.sheetK = k;
+  const ks = tbPickToks(k, k2 == null ? k : k2), kz = ks[ks.length - 1], multi = ks.length > 1;
+  const all = TB.sentToks[tk.s] || [], ia = all.indexOf(k), ib = all.indexOf(kz);
+  TB.sheetK = k; TB.pick = { k1:k, k2:kz };
+  const pp = document.getElementById('tbPickPill'); if(pp) pp.hidden = true;
+  try{ const ss = window.getSelection(), bd = document.getElementById('tbBody'); if(ss && !ss.isCollapsed && bd && bd.contains(ss.anchorNode)) ss.removeAllRanges(); }catch(err){}
   TB.spans.forEach(sp => sp.classList.remove('sel'));
-  if(TB.spans[k]) TB.spans[k].classList.add('sel');
-  const lemma0 = tbLemmaOf(tk), tagged = tbTagAt(k) >= 0;
-  const e = tbEntry(tk.form);
-  const looked = TB.look[dxFold(tk.form)];
+  ks.forEach(x => { if(TB.spans[x]) TB.spans[x].classList.add('sel'); });
+  const form = multi ? tbPickText(k, kz) : tk.form;
+  const lemma0 = multi ? tbPickLemma(form, tk) : tbLemmaOf(tk), tagged = (multi ? tbTagIdx(k, kz) : tbTagIdx(k, k)) >= 0;
+  const e = multi ? null : tbEntry(tk.form);
+  const looked = TB.look[dxFold(form)];
   const lemma = (looked && looked.lemma) || lemma0, known = tbIsKnown(lemma) || tbIsKnown(lemma0);
   const cached = looked || (known && e ? { lemma:e.fr, ar:[e.ar], defs:[e.def], src:'lexique' } : null);
   let rules = '';
   try{ if(dxOn()) rules = dxRulesHtml(TB.sents[tk.s]); }catch(err){}
+  const tagLbl = (on) => on ? '✓ Tagué : retirer' : (multi ? '🖍 Taguer l\'expression' : '🖍 Taguer ce mot');
   sh.innerHTML = `<div class="tb-sh-in">
     <div class="tb-grab" aria-hidden="true"></div>
-    <div class="tb-sh-top"><div><div class="tb-sh-w" lang="fr">${escapeHtml(tk.form)}</div><div class="tb-sh-ipa" id="tbIpa">${cached && cached.ipa && dxFold(cached.ipaOf || '') === dxFold(tk.form) ? '/' + escapeHtml(cached.ipa) + '/' : ''}</div></div>
+    <div class="tb-sh-top"><div><div class="tb-sh-w" lang="fr">${escapeHtml(form)}</div><div class="tb-sh-ipa" id="tbIpa">${cached && cached.ipa && dxFold(cached.ipaOf || '') === dxFold(form) ? '/' + escapeHtml(cached.ipa) + '/' : ''}</div></div>
       <button type="button" class="tb-ib" data-tb="sheet-x" aria-label="Fermer">✕</button></div>
-    <div class="tb-sh-lemma" id="tbLemma">${dxFold(lemma) !== dxFold(tk.form) ? `forme de <b>${escapeHtml(lemma)}</b>` : ''}</div>
+    <div class="tb-sh-lemma" id="tbLemma">${dxFold(lemma) !== dxFold(form) ? `forme de <b>${escapeHtml(lemma)}</b>` : ''}</div>
+    <div class="tb-pick" role="group" aria-label="Choisir les mots">
+      <button type="button" class="tb-chip sm" data-tb="pick-l" ${ia <= 0 ? 'disabled' : ''}>＋ mot avant</button>
+      ${multi ? `<button type="button" class="tb-chip sm" data-tb="pick-l-">− 1er mot</button><button type="button" class="tb-chip sm" data-tb="pick-r-">− dernier</button>` : ''}
+      <button type="button" class="tb-chip sm" data-tb="pick-r" ${ib < 0 || ib >= all.length - 1 ? 'disabled' : ''}>＋ mot après</button>
+    </div>
     <div class="tb-sh-say"><button type="button" class="tb-chip" data-tb="say">🔊 Écouter</button><button type="button" class="tb-chip" data-tb="slow">🐢 Lentement</button><button type="button" class="tb-chip" data-tb="say-sent">🗣️ La phrase</button></div>
     <div class="tb-info" id="tbInfo">${tbInfoHtml(cached, tk)}</div>
-    <blockquote class="tb-ctx" lang="fr">${tbCtxHtml(tk)}</blockquote>
+    <blockquote class="tb-ctx" lang="fr">${tbCtxHtml(tk, kz)}</blockquote>
+    <div class="tb-pick-h">👆 Touche les mots de la phrase pour en prendre plus ou moins (ex. « tandis » → « tandis que »).</div>
     <div class="tb-sh-act">
-      <button type="button" class="tb-btn hl" data-tb="tag" id="tbTagBtn">${tagged ? '✓ Tagué : retirer' : '🖍 Taguer ce mot'}</button>
+      <button type="button" class="tb-btn hl" data-tb="tag" id="tbTagBtn">${tagLbl(tagged)}</button>
       <button type="button" class="tb-btn" data-tb="add" ${known ? 'disabled' : ''}>${known ? '✓ Déjà dans tes mots' : '➕ Ajouter à mes mots'}</button>
     </div>
     <div class="tb-addf" id="tbAddF" hidden></div>
@@ -44693,12 +45154,13 @@ function tbOpenSheet(k){
   </div>`;
   sh.classList.add('open'); sh.setAttribute('aria-hidden', 'false');
   try{ conjBindSheetPeeks(sh); }catch(err){}
-  tbSay(tk.form);
+  tbSay(form);
+  TB.pickKeep = false;
   if(!cached || (!known && !(cached.defs && cached.defs.length))){
-    const fk = dxFold(tk.form);
-    tbLookup(tk.form).then(r => {
+    const fk = dxFold(form);
+    tbLookup(form).then(r => {
       if(r) TB.look[fk] = r;
-      if(TB.sheetK !== k) return;
+      if(TB.sheetK !== k || !TB.pick || TB.pick.k2 !== kz) return;
       const info = document.getElementById('tbInfo'); if(info) info.innerHTML = tbInfoHtml(r || { ar:[], defs:[] }, tk);
       if(r && r.ipa && (!r.ipaOf || dxFold(r.ipaOf) === fk)){ const ip = document.getElementById('tbIpa'); if(ip) ip.textContent = '/' + r.ipa + '/'; }
       if(r && r.lemma && dxFold(r.lemma) !== fk){ const lm = document.getElementById('tbLemma'); if(lm) lm.innerHTML = `forme de <b>${escapeHtml(r.lemma)}</b>`; }
@@ -44709,27 +45171,31 @@ function tbOpenSheet(k){
 function tbCloseSheet(){
   const sh = document.getElementById('tbSheet'); if(!sh) return;
   sh.classList.remove('open'); sh.setAttribute('aria-hidden', 'true');
-  TB.sheetK = -1;
+  TB.sheetK = -1; TB.pick = null;
   TB.spans.forEach(sp => sp.classList.remove('sel'));
   tbImgUnsel();
 }
 /* l'exemple pour l'appli : la phrase du texte, le mot remplacé par « ~ » */
 function tbExFor(g){
   let s = String(g.sent || '').trim();
-  const esc = String(g.w || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const re = new RegExp('(^|[^\\p{L}\\p{N}])(' + esc + ')(?![\\p{L}\\p{N}])', 'iu');
-  const m = s.match(re);
-  if(!esc || !m) return { ex:'~' };
+  const pat = (w) => String(w || '').trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '[\\s\\u00a0]+').replace(/'/g, "['’ʼ]");
+  let m = null;
+  for(const w of [g.w, g.lemma]){
+    const esc = pat(w); if(!esc) continue;
+    m = s.match(new RegExp('(^|[^\\p{L}\\p{N}])(' + esc + ')(?![\\p{L}\\p{N}])', 'iu'));
+    if(m) break;
+  }
+  if(!m) return { ex:'~', missing:true };
   const at = m.index + m[1].length, form = m[2];
   let ex = s.slice(0, at) + '~' + s.slice(at + form.length);
-  if(ex.length > 200){
+  if(ex.length > 260){
     const p = ex.indexOf('~');
-    let a = Math.max(0, p - 90), b = Math.min(ex.length, p + 100);
+    let a = Math.max(0, p - 120), b = Math.min(ex.length, p + 130);
     while(a > 0 && !/\s/.test(ex[a - 1])) a--;
     while(b < ex.length && !/\s/.test(ex[b])) b++;
     ex = (a > 0 ? '… ' : '') + ex.slice(a, b).trim() + (b < ex.length ? ' …' : '');
   }
-  return form === g.lemma ? { ex } : { ex, exForm:form };
+  return dxFold(form) === dxFold(g.lemma) ? { ex } : { ex, exForm:form };
 }
 function tbAddWords(items){
   const words = items.map(x => { const w = { fr:x.fr, ar:x.ar || '', def:x.def, ex:x.ex || '~', cat:'Tablette' }; if(x.exForm) w.exForm = x.exForm; return w; });
@@ -44741,11 +45207,16 @@ function tbAddWords(items){
 }
 function tbAddForm(k){
   const tk = TB.toks[k], box = document.getElementById('tbAddF'); if(!tk || !box) return;
-  const r = TB.look[dxFold(tk.form)] || {};
-  const lemma = r.lemma || tbLemmaOf(tk);
-  box.innerHTML = `<label class="tb-lbl">Mot<input class="tb-in" id="tbAfFr" value="${escapeHtml(lemma)}"></label>
+  const P = TB.pick && TB.pick.k1 === k ? TB.pick : { k1:k, k2:k }, multi = P.k2 !== P.k1;
+  const form = multi ? tbPickText(P.k1, P.k2) : tk.form;
+  const r = TB.look[dxFold(form)] || {};
+  const lemma = r.lemma || (multi ? tbPickLemma(form, tk) : tbLemmaOf(tk));
+  TB.exSpan = { s:tk.s, a:tk.s, b:tk.s };
+  box.innerHTML = `<label class="tb-lbl">${multi ? 'Expression' : 'Mot'}<input class="tb-in" id="tbAfFr" value="${escapeHtml(lemma)}"></label>
     <label class="tb-lbl">En arabe<input class="tb-in ar" id="tbAfAr" dir="rtl" lang="ar" value="${escapeHtml((r.ar || [])[0] || '')}" placeholder="الترجمة"></label>
-    <label class="tb-lbl">Définition<textarea class="tb-in" id="tbAfDef" rows="2" placeholder="Le sens du mot, avec tes mots">${escapeHtml((r.defs || [])[0] || '')}</textarea></label>
+    <label class="tb-lbl">Définition<textarea class="tb-in" id="tbAfDef" rows="2" placeholder="Le sens, avec tes mots">${escapeHtml((r.defs || [])[0] || '')}</textarea></label>
+    <label class="tb-lbl">Phrase d'exemple <span class="tb-lbl-h">(raccourcis-la ou allonge-la comme tu veux)</span><textarea class="tb-in tb-ex" id="tbAfEx" rows="3">${escapeHtml(TB.sents[tk.s] || '')}</textarea></label>
+    <div class="tb-exbar"><button type="button" class="tb-chip sm" data-tb="ex-prev" data-ex="tbAfEx" ${tk.s > 0 ? '' : 'disabled'}>＋ phrase d'avant</button><button type="button" class="tb-chip sm" data-tb="ex-next" data-ex="tbAfEx" ${tk.s < TB.sents.length - 1 ? '' : 'disabled'}>＋ phrase d'après</button><button type="button" class="tb-chip sm" data-tb="ex-reset" data-ex="tbAfEx">↺ La phrase du texte</button></div>
     <button type="button" class="tb-btn pri wide" data-tb="add-go">➕ Ajouter à mes mots</button>`;
   box.hidden = false;
   box.scrollIntoView({ block:'nearest', behavior:'smooth' });
@@ -44753,17 +45224,22 @@ function tbAddForm(k){
 }
 function tbAddFromForm(k){
   const tk = TB.toks[k]; if(!tk) return;
+  const P = TB.pick && TB.pick.k1 === k ? TB.pick : { k1:k, k2:k }, multi = P.k2 !== P.k1;
+  const form = multi ? tbPickText(P.k1, P.k2) : tk.form;
   const fr = (document.getElementById('tbAfFr').value || '').trim(), ar = (document.getElementById('tbAfAr').value || '').trim(), def = (document.getElementById('tbAfDef').value || '').trim();
+  const exEl = document.getElementById('tbAfEx'), sent = ((exEl && exEl.value) || '').replace(/\s+/g, ' ').trim() || TB.sents[tk.s];
   if(!fr) return;
-  if(!def){ tbToast('Écris une petite définition (le sens du mot).'); document.getElementById('tbAfDef').focus(); return; }
-  const g = { w:tk.form, lemma:fr, sent:TB.sents[tk.s] };
+  if(!def){ tbToast('Écris une petite définition (le sens).'); document.getElementById('tbAfDef').focus(); return; }
+  const g = { w:form, lemma:fr, sent };
   const ex = tbExFor(g);
+  if(ex.missing){ tbToast(`Garde « ${form} » dans la phrase d'exemple.`, 3000); if(exEl) exEl.focus(); return; }
   const n = tbAddWords([{ fr, ar, def, ex:ex.ex, exForm:ex.exForm }]);
   const tag = (TB.art.tags || []).find(x => dxFold(x.lemma) === dxFold(fr) || (x.s === tk.s && x.t === tk.t));
-  if(tag){ tag.added = true; tag.lemma = fr; tag.ar = ar; tag.def = def; tbSaveArt(); }
+  if(tag){ tag.added = true; tag.lemma = fr; tag.ar = ar; tag.def = def; tag.sent = sent; tbSaveArt(); }
   if(n){ try{ playCorrectSound(); }catch(e){} tbToast(`➕ « ${fr} » ajouté à tes mots (bloc ${Math.floor((WORDS.length - 1) / 30) + 1})`, 3200); }
   else tbToast(`« ${fr} » est déjà dans tes mots.`);
-  tbOpenSheet(k);
+  TB.pickKeep = true;
+  tbOpenSheet(P.k1, P.k2);
 }
 /* ---------- 🏷️ le carnet : les mots tagués → tes mots ---------- */
 function tbOpenCarnet(){
@@ -44775,12 +45251,12 @@ function tbOpenCarnet(){
     return `<div class="tb-cr ${known ? 'done' : ''}" data-i="${i}">
       <div class="tb-cr-h"><b class="tb-cr-w">${escapeHtml(g.lemma)}</b>${dxFold(g.lemma) !== dxFold(g.w) ? `<span class="tb-cr-f">(${escapeHtml(g.w)})</span>` : ''}
         <button type="button" class="tb-ib sm" data-tb="cr-say" data-i="${i}" aria-label="Écouter ${escapeHtml(g.lemma)}">🔊</button>
-        ${g.s >= 0 ? `<button type="button" class="tb-ib sm" data-tb="cr-go" data-i="${i}" aria-label="Voir dans le texte">↗</button>` : ''}
+        ${g.s >= 0 ? `<button type="button" class="tb-ib sm" data-tb="cr-go" data-i="${i}" aria-label="Voir dans le texte">↗</button><button type="button" class="tb-ib sm" data-tb="cr-pick" data-i="${i}" aria-label="Choisir plus ou moins de mots">✏️</button>` : ''}
         <span class="tb-cr-st">${known ? '✓ dans tes mots' : (g.look === 'busy' ? '🔎…' : '')}</span>
         <button type="button" class="tb-ib sm" data-tb="cr-del" data-i="${i}" aria-label="Retirer du carnet">✕</button></div>
       ${known ? '' : `<input class="tb-in ar" dir="rtl" lang="ar" data-cr="ar" data-i="${i}" value="${escapeHtml(g.ar || '')}" placeholder="الترجمة بالعربية">
       <textarea class="tb-in" data-cr="def" data-i="${i}" rows="2" placeholder="Définition (obligatoire)">${escapeHtml(g.def || '')}</textarea>`}
-      <div class="tb-cr-s">${escapeHtml(String(g.sent || '').length > 160 ? String(g.sent).slice(0, 157) + '…' : (g.sent || ''))}</div>
+      ${known ? `<div class="tb-cr-s">${escapeHtml(String(g.sent || '').length > 160 ? String(g.sent).slice(0, 157) + '…' : (g.sent || ''))}</div>` : `<label class="tb-cr-l">Phrase d'exemple<textarea class="tb-in tb-ex" data-cr="sent" data-i="${i}" rows="2" aria-label="Phrase d'exemple de ${escapeHtml(g.lemma)}">${escapeHtml(g.sent || '')}</textarea></label>`}
     </div>`;
   }).join('');
   const todo = tags.filter(g => !(g.added || tbIsKnown(g.lemma)));
@@ -44823,13 +45299,15 @@ function tbCarnetAdd(){
   const todo = tags.filter(g => !(g.added || tbIsKnown(g.lemma)));
   const ready = todo.filter(g => String(g.def || '').trim());
   if(!ready.length){ tbToast('Écris au moins une définition pour ajouter un mot.'); const d = document.querySelector('#tbSheet [data-cr="def"]'); if(d) d.focus(); return; }
-  const items = ready.map(g => { const ex = tbExFor(g); return { fr:g.lemma, ar:g.ar, def:String(g.def).trim(), ex:ex.ex, exForm:ex.exForm }; });
-  const n = tbAddWords(items);
-  ready.forEach(g => { g.added = true; });
+  const bad = [], items = [];
+  ready.forEach(g => { const ex = tbExFor(g); if(ex.missing && String(g.sent || '').trim()){ bad.push(g); return; } items.push({ g, it:{ fr:g.lemma, ar:g.ar, def:String(g.def).trim(), ex:ex.ex, exForm:ex.exForm } }); });
+  if(!items.length){ tbToast(`Garde « ${bad[0].w} » dans sa phrase d'exemple.`, 3200); return; }
+  const n = tbAddWords(items.map(x => x.it));
+  items.forEach(x => { x.g.added = true; });
   tbSaveArt();
-  const left = todo.length - ready.length;
+  const left = todo.length - items.length;
   try{ playCorrectSound(); if(n >= 3) launchConfetti(); }catch(e){}
-  tbToast(`➕ ${n} mot${n > 1 ? 's' : ''} ajouté${n > 1 ? 's' : ''} à tes mots${left ? ` · ${left} sans définition attend${left > 1 ? 'ent' : ''}` : ''}`, 3800);
+  tbToast(`➕ ${n} mot${n > 1 ? 's' : ''} ajouté${n > 1 ? 's' : ''} à tes mots${left ? ` · ${left} attend${left > 1 ? 'ent' : ''} (définition, ou le mot absent de sa phrase)` : ''}`, 3800);
   tbOpenCarnet();
 }
 /* ---------- les gestes : toucher, pincer, défiler, clavier ---------- */
@@ -44999,6 +45477,7 @@ function tbAction(id, btn, e){
     case 'rp-dl': tbRecDownload(); return;
     case 'rp-del': { const id2 = TB.art.id; tbRecDel(id2).then(() => { tbCloseSheet(); tbEndHtml(); tbToast('🗑 Enregistrement effacé'); }); return; }
     case 'fix-text': tbReflowArt(); return;
+    case 'fix-flow': tbReflowArt(true); return;
     case 'fix-undo': tbReflowUndo(); return;
     case 'fix-x': { const fb = document.getElementById('tbFixBar'); if(fb) fb.remove(); return; }
     case 'hunt': tbHuntToggle(); return;
@@ -45016,10 +45495,21 @@ function tbAction(id, btn, e){
     case 'carnet': tbHuntToggle(false); tbOpenCarnet(); return;
     case 'top': document.getElementById('tbScroll').scrollTo({ top:0, behavior:'smooth' }); return;
     case 'sheet-x': tbCloseSheet(); return;
-    case 'say': if(TB.toks[TB.sheetK]) tbSay(TB.toks[TB.sheetK].form); return;
-    case 'slow': if(TB.toks[TB.sheetK]) tbSay(TB.toks[TB.sheetK].form, true); return;
+    case 'say': if(TB.pick && TB.toks[TB.pick.k1]) tbSay(tbPickText(TB.pick.k1, TB.pick.k2)); else if(TB.toks[TB.sheetK]) tbSay(TB.toks[TB.sheetK].form); return;
+    case 'slow': if(TB.pick && TB.toks[TB.pick.k1]) tbSay(tbPickText(TB.pick.k1, TB.pick.k2), true); else if(TB.toks[TB.sheetK]) tbSay(TB.toks[TB.sheetK].form, true); return;
+    case 'pick': tbPickTap(+btn.dataset.k); return;
+    case 'pick-l': case 'pick-r': case 'pick-l-': case 'pick-r-': {
+      const P = TB.pick; if(!P) return;
+      const all = TB.sentToks[TB.toks[P.k1].s] || [], a = all.indexOf(P.k1), b = all.indexOf(P.k2);
+      if(id === 'pick-l') tbPickSet(a - 1, b); else if(id === 'pick-r') tbPickSet(a, b + 1); else if(id === 'pick-l-') tbPickSet(Math.min(a + 1, b), b); else tbPickSet(a, Math.max(a, b - 1));
+      return;
+    }
+    case 'ex-prev': tbExGrow(btn.dataset.ex, -1); return;
+    case 'ex-next': tbExGrow(btn.dataset.ex, 1); return;
+    case 'ex-reset': tbExGrow(btn.dataset.ex, 'reset'); return;
+    case 'cr-pick': { const g = TB.art.tags[+btn.dataset.i]; if(!g) return; const ks = tbTagToks(g); if(ks.length){ TB.pickKeep = false; tbOpenSheet(ks[0], ks[ks.length - 1]); } return; }
     case 'say-sent': { const tk = TB.toks[TB.sheetK]; if(tk){ const s = TB.sents[tk.s]; tbNarrFr(dxOn() ? dxSpeakText(s) : s, 'fr-FR', null, readingRate); } return; }
-    case 'tag': { const k = TB.sheetK; const on = tbToggleTag(k, { noFly:true }); btn.textContent = on ? '✓ Tagué : retirer' : '🖍 Taguer ce mot'; if(on) tbToast('🖍 Ajouté à ton carnet, avec sa phrase'); const sp = TB.spans[k]; if(sp) sp.classList.add('sel'); return; }
+    case 'tag': { const P = TB.pick || { k1:TB.sheetK, k2:TB.sheetK }; const multi = P.k2 !== P.k1; const on = tbToggleTag(P.k1, { noFly:true, k2:P.k2 }); btn.textContent = on ? '✓ Tagué : retirer' : (multi ? '🖍 Taguer l\'expression' : '🖍 Taguer ce mot'); if(on) tbToast(multi ? '🖍 L\'expression est dans ton carnet, avec sa phrase' : '🖍 Ajouté à ton carnet, avec sa phrase'); tbPickToks(P.k1, P.k2).forEach(x => { if(TB.spans[x]) TB.spans[x].classList.add('sel'); }); return; }
     case 'add': tbAddForm(TB.sheetK); return;
     case 'add-go': tbAddFromForm(TB.sheetK); return;
     case 'cr-say': { const g = TB.art.tags[+btn.dataset.i]; if(g) tbSay(g.lemma); return; }
