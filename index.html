@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- 🏷️ Version de l'appli : augmentée automatiquement par publier-site.cmd à chaque publication -->
-<meta name="app-version" content="1.0.24" data-date="2026-10-17">
+<meta name="app-version" content="1.0.25" data-date="2026-10-18">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <title>VocabVISION — Vocabulaire Français ↔ Arabe</title>
 <script>
@@ -2202,6 +2202,30 @@
   .tb-body .hl-y{ background-color:#FFF3A3; } .tb-body .hl-g{ background-color:#C8F7D0; } .tb-body .hl-b{ background-color:#CFE4FF; }
   .tb-body .hl-p{ background-color:#FFD3EC; } .tb-body .hl-o{ background-color:#FFDDB8; } .tb-body .hl-v{ background-color:#E3D7FF; }
   #tbkFlow svg{ vertical-align:-3px; margin-right:2px; }
+  /* 🔠 1.0.25 : tailles du texte, 🖌 reproduire le style, 🖼 réglages de l'image à côté de la souris */
+  .tbk-fsize{ min-width:0 !important; width:112px; }
+  .tbk-tb .tbk-pm{ font-style:normal; font-weight:900; font-size:11px; line-height:1; margin:-8px 0 0 1px; }
+  .tbk-ed font[size="1"]{ font-size:.65em; } .tbk-ed font[size="2"]{ font-size:.82em; } .tbk-ed font[size="3"]{ font-size:1em; }
+  .tbk-ed font[size="4"]{ font-size:1.22em; } .tbk-ed font[size="5"]{ font-size:1.5em; } .tbk-ed font[size="6"]{ font-size:1.9em; } .tbk-ed font[size="7"]{ font-size:2.4em; }
+  .tb-body .fz-1{ font-size:.65em; } .tb-body .fz-2{ font-size:.82em; } .tb-body .fz-4{ font-size:1.22em; }
+  .tb-body .fz-5{ font-size:1.5em; } .tb-body .fz-6{ font-size:1.9em; } .tb-body .fz-7{ font-size:2.4em; }
+  .tbk-studio.painting .tbk-ed{ cursor:copy; }
+  .tbk-studio.painting .tbk-ed ::selection{ background:rgba(255,222,64,.55); }
+  .tbk-imgbar.tbk-float{ position:absolute; z-index:29; width:max-content; max-width:calc(100vw - 16px); box-sizing:border-box; margin:0; padding:6px 8px; gap:6px; border-radius:14px; background:var(--bar, #fff); color:var(--text); border:1px solid var(--border, rgba(90,97,112,.25)); box-shadow:0 18px 36px -14px rgba(15,23,42,.5); animation:tbkPop .12s ease-out; }
+  .tbk-imgbar.tbk-float[hidden]{ display:none; }
+  .tbk-imgbar.tbk-float input[type=range]{ width:120px; min-width:0; flex:none; }
+  .tbk-imgbar.tbk-float .tbk-seg button{ display:inline-flex; align-items:center; justify-content:center; }
+  .tbk-imgbar.tbk-float .tbk-ib.sm{ width:28px; height:28px; font-weight:900; }
+  @media (max-width:640px){
+    .tbk-tools > .tbk-fsize{ order:1; width:96px; }
+    .tbk-tools > .tbk-view{ order:2; }
+    .tbk-studio .tbk-tools > .tbk-style{ min-width:0; width:104px; padding:0 22px 0 8px; font-size:12.5px; background-position:right 8px center; }
+    .tbk-studio .tbk-tools > .tbk-fsize{ width:96px; }
+  }
+  /* ✅ 1.0.25 : « Marquer comme faite / lu » aussi en haut de la fiche */
+  .done-top-row{ display:flex; justify-content:center; margin:10px 0 2px; }
+  .done-top-btn{ font-weight:800 !important; }
+  .done-top-btn.on{ background:rgba(34,197,94,.12) !important; border-color:rgba(34,197,94,.55) !important; color:#16A34A !important; }
   .tb-toast{ position:absolute; left:50%; bottom:calc(env(safe-area-inset-bottom, 0px) + 92px); z-index:8; transform:translate(-50%, 16px); opacity:0; pointer-events:none;
     max-width:calc(100% - 32px); width:max-content; padding:10px 16px; border-radius:14px; background:var(--tb-ink); color:var(--tb-paper); font-weight:800; font-size:13.5px; line-height:1.35; text-align:center; transition:opacity .25s, transform .25s; }
   .tb-toast.show{ opacity:1; transform:translate(-50%, 0); }
@@ -5114,12 +5138,37 @@ function recordWordStat(fr, isCorrect){
   wordStats[key].due = Date.now() + SRS_INTERVALS_DAYS[wordStats[key].box] * 86400000;
   saveWordStats();
 }
-/* Mots "dus" aujourd'hui : jamais vus, ou dont la date de prochaine révision est passée. */
+/* 🧭 1.0.25 : les mots « rencontrés » = ceux des blocs déjà commencés (+ le bloc suivant) et ceux déjà travaillés.
+   Blitz, Swipe, Flashcards, Association, le défi du jour et les révisions piochent là-dedans : avant, ils prenaient
+   tout le lexique, et les mots des nouveaux blocs étaient déjà « maîtrisés » quand on y arrivait. */
+function metWordSet(min){
+  try{
+    min = min || 40;
+    const set = new Set();
+    let far = -1;
+    (blockResults || []).forEach((pm, i) => { if(pm && GAME_MODES.some(m => pm[m])) far = i; });
+    const B = BLOCKS || [];
+    for(let i = 0; i <= Math.min(far + 1, B.length - 1); i++) (B[i] || []).forEach(w => set.add(w.fr));
+    Object.keys(wordStats || {}).forEach(k => { const st = wordStats[k]; if(st && ((st.correct || 0) + (st.wrong || 0)) > 0) set.add(k); });
+    const has = (w) => set.has(w.fr) || set.has(String(w.fr).toLowerCase());
+    let n = WORDS.filter(has).length;
+    for(let i = 0; n < min && i < B.length; i++) (B[i] || []).forEach(w => { if(!has(w)){ set.add(w.fr); n++; } });
+    return { has };
+  }catch(e){ return null; }
+}
+function metWords(min){
+  const m = metWordSet(min);
+  if(!m) return WORDS.slice();
+  const out = WORDS.filter(m.has);
+  return out.length >= Math.min(min || 40, WORDS.length) ? out : WORDS.slice();
+}
+/* Mots "dus" aujourd'hui : déjà rencontrés et jamais révisés, ou dont la date de prochaine révision est passée. */
 function getSRSDueWords(){
-  const now = Date.now();
+  const now = Date.now(), m = metWordSet();
   return WORDS.filter(w => {
     const s = wordStats[w.fr.toLowerCase()];
-    return !s || !s.due || s.due <= now;
+    if(!s) return !m || m.has(w);
+    return !s.due || s.due <= now;
   });
 }
 function getSRSDueCount(){ return getSRSDueWords().length; }
@@ -5556,7 +5605,7 @@ let activeFilterCat = null; // null = toutes catégories
    ensuite via "Ajouter un verbe" (au présent). Simplification assumée pour le passé composé
    des verbes avec "être" : accord au masculin uniquement (le genre n'est pas demandé). */
 const PRONOUNS = ['je', 'tu', 'il', 'nous', 'vous', 'ils'];
-const TENSE_LABELS = { present:'Présent', futur:'Futur simple', imparfait:'Imparfait', passeCompose:'Passé composé', subjonctif:'Subjonctif', conditionnel:'Conditionnel' };
+const TENSE_LABELS = { present:'Présent', futur:'Futur simple', imparfait:'Imparfait', passeCompose:'Passé composé', subjonctif:'Subjonctif présent', conditionnel:'Conditionnel' };
 const DEFAULT_VERBS = [
   { inf:'être', ar:'يكون', groupe:'irrégulier', ctx:'content', level:'debutant', tenses:{
     present:['suis','es','est','sommes','êtes','sont'],
@@ -7419,7 +7468,7 @@ const DEFAULT_VERBS = [
     conditionnel:['délivrerais','délivrerais','délivrerait','délivrerions','délivreriez','délivreraient'],
     imperatif:['délivre','délivrons','délivrez'],passeCompose:['ai délivré','as délivré','a délivré','avons délivré','avez délivré','ont délivré'] } },
   { inf:'déléguer', ar:'يفوض', groupe:'1er groupe (-er)', level:'debutant', tenses:{
-    present:['délégue','délégues','délégue','déléguons','déléguez','déléguent'],
+    present:['délègue','délègues','délègue','déléguons','déléguez','délèguent'],
     futur:['déléguerai','délégueras','déléguera','déléguerons','déléguerez','délégueront'],
     imparfait:['déléguais','déléguais','déléguait','déléguions','déléguiez','déléguaient'],
     conditionnel:['déléguerais','déléguerais','déléguerait','déléguerions','délégueriez','délégueraient'],
@@ -7557,7 +7606,72 @@ function loadCustomVerbs(){
 }
 function saveCustomVerbs(){ try{ localStorage.setItem(nsKey(VERBS_KEY), JSON.stringify(customVerbs)); cloudAutoPush(); }catch(e){} }
 let customVerbs = loadCustomVerbs();
-function getAllVerbs(){ return DEFAULT_VERBS.concat(customVerbs); }
+/* 🤞 1.0.25 : le SUBJONCTIF PRÉSENT, fabriqué à partir des formes sûres du verbe :
+   que je/tu/il/ils = radical de « ils » au présent + -e, -es, -e, -ent ; que nous/vous = comme l'imparfait.
+   Les irréguliers sont écrits à part. Si une forme n'est pas sûre, le verbe n'a pas de subjonctif (jamais de faute). */
+const CONJ_SUBJ_IRR = { 'être':['sois', 'sois', 'soit', 'soyons', 'soyez', 'soient'], 'avoir':['aie', 'aies', 'ait', 'ayons', 'ayez', 'aient'] };
+const CONJ_SUBJ_STEM = { faire:['fass', 'fass'], pouvoir:['puiss', 'puiss'], savoir:['sach', 'sach'], aller:['aill', 'all'], vouloir:['veuill', 'voul'], valoir:['vaill', 'val'] };
+function conjSubjForms(v){
+  const T = v.tenses || {}, pres = T.present;
+  if(!Array.isArray(pres) || pres.length < 6) return null;
+  const refl = /^(se |s')/i.test(v.inf || '');
+  const inf = String(v.inf || '').replace(/^(se |s')/i, '').toLowerCase();
+  const bare = (f) => String(f || '').trim().replace(/^(m'|t'|s'|me |te |se |nous |vous )/, '');
+  const okW = (f) => /^[a-zàâäéèêëîïôöùûüÿçœæ-]+$/i.test(f);
+  let forms = null;
+  if(CONJ_SUBJ_IRR[inf]) forms = CONJ_SUBJ_IRR[inf].slice();
+  else {
+    const k = Object.keys(CONJ_SUBJ_STEM).find(k => inf === k || (inf.endsWith(k) && (k === 'faire' || (k === 'valoir' && inf !== 'prévaloir'))));
+    if(k){
+      const pre = inf.slice(0, inf.length - k.length), a = pre + CONJ_SUBJ_STEM[k][0], b = pre + CONJ_SUBJ_STEM[k][1];
+      forms = [a + 'e', a + 'es', a + 'e', b + 'ions', b + 'iez', a + 'ent'];
+    } else {
+      const ils = bare(pres[5]);
+      if(!okW(ils) || !ils.endsWith('ent') || ils.length < 4) return null;
+      const st = ils.slice(0, -3);
+      let n = '', w = '';
+      const imp = T.imparfait;
+      if(Array.isArray(imp) && imp.length >= 6 && bare(imp[3]).endsWith('ions') && bare(imp[4]).endsWith('iez')){ n = bare(imp[3]); w = bare(imp[4]); }
+      else {
+        const pn = bare(pres[3]);
+        if(!okW(pn) || !pn.endsWith('ons')) return null;
+        let ns = pn.slice(0, -3);
+        if(/ge$/.test(ns)) ns = ns.slice(0, -1); else if(/ç$/.test(ns)) ns = ns.slice(0, -1) + 'c';
+        n = ns + 'ions'; w = ns + 'iez';
+      }
+      if(!okW(n) || !okW(w)) return null;
+      forms = [st + 'e', st + 'es', st + 'e', n, w, st + 'ent'];
+    }
+  }
+  if(refl){
+    const P = ['me', 'te', 'se', 'nous', 'vous', 'se'];
+    forms = forms.map((f, i) => {
+      if(i === 3 || i === 4) return P[i] + ' ' + f;
+      const el = /^[mts]'/.test(String(pres[i] || '')) || (!/^(me|te|se) /.test(String(pres[i] || '')) && /^[aeiouyàâäéèêëîïôöùûüœæ]/i.test(f));
+      return el ? P[i][0] + "'" + f : P[i] + ' ' + f;
+    });
+  }
+  return forms;
+}
+function conjAddSubj(v){
+  if(!v || !v.tenses || v.tenses.subjonctif) return v;
+  let forms = null; try{ forms = conjSubjForms(v); }catch(e){ forms = null; }
+  if(!forms) return v;
+  const out = {}; let put = false;
+  Object.keys(v.tenses).forEach(k => {
+    if(!put && k === 'imperatif' && !v.tenses.conditionnel){ out.subjonctif = forms; put = true; }
+    out[k] = v.tenses[k];
+    if(k === 'conditionnel'){ out.subjonctif = forms; put = true; }
+  });
+  if(!put) out.subjonctif = forms;
+  v.tenses = out;
+  return v;
+}
+function getAllVerbs(){
+  if(!getAllVerbs.subj){ getAllVerbs.subj = true; DEFAULT_VERBS.forEach(conjAddSubj); }
+  customVerbs.forEach(conjAddSubj);
+  return DEFAULT_VERBS.concat(customVerbs);
+}
 
 
 function loadCustomWords(){
@@ -10242,7 +10356,7 @@ function renderBlitzIntro(){
 }
 
 function startBlitz(){
-  const pool = shuffle(WORDS.slice());
+  const pool = shuffle(metWords());
   blitzState = { pool, idx: 0, score: 0, combo: 0, bestCombo: 0, timeLeft: 60, answered: false };
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="blitzExitBtn" style="cursor:pointer;">← Quitter le Blitz</button>`;
   document.getElementById('blitzExitBtn') && document.getElementById('blitzExitBtn').addEventListener('click', () => { stopBlitz(); renderBlockSelect(); });
@@ -10264,7 +10378,7 @@ function updateBlitzTimerUI(){
 
 function renderBlitzCard(){
   if(!blitzState) return;
-  if(blitzState.idx >= blitzState.pool.length){ blitzState.pool = blitzState.pool.concat(shuffle(WORDS.slice())); }
+  if(blitzState.idx >= blitzState.pool.length){ blitzState.pool = blitzState.pool.concat(shuffle(metWords())); }
   const word = blitzState.pool[blitzState.idx];
   blitzState.answered = false;
   const options = makeOptions(word);
@@ -10370,7 +10484,7 @@ function renderSwipeIntro(){
 }
 
 function startSwipe(){
-  const pool = shuffle(WORDS.slice()).slice(0, SWIPE_SESSION_SIZE);
+  const pool = shuffle(metWords()).slice(0, SWIPE_SESSION_SIZE);
   const cards = pool.map(w => {
     const isTrue = Math.random() < 0.5;
     let shownAr = w.ar;
@@ -10517,7 +10631,7 @@ function renderFlashcardsIntro(){
 }
 
 function startFlashcards(){
-  const pool = shuffle(WORDS.slice()).slice(0, FLASHCARD_SESSION_SIZE);
+  const pool = shuffle(metWords()).slice(0, FLASHCARD_SESSION_SIZE);
   flashState = { pool, idx: 0, known: 0, review: 0, flipped: false, startTime: Date.now() };
   totalHiddenMs = 0; hiddenSince = document.hidden ? Date.now() : null; totalIdleMs = 0; lastInteractionAt = Date.now();
   document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="flashExitBtn" style="cursor:pointer;">← Quitter</button>`;
@@ -10620,7 +10734,7 @@ function seedFromString(str){
 }
 function getDailyChallengeWords(){
   const rng = seededRng(seedFromString(todayKey()));
-  const arr = WORDS.slice();
+  const arr = metWords(Math.max(40, DAILY_CHALLENGE_SIZE * 2));
   for(let i=arr.length-1;i>0;i--){
     const j = Math.floor(rng() * (i+1));
     const tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
@@ -10818,7 +10932,7 @@ function renderAssociationIntro(){
 
 function startAssociation(){
   assocState = {
-    queue: shuffle(WORDS.slice()), queueIdx: 0, visible: [], selected: null,
+    queue: shuffle(metWords()), queueIdx: 0, visible: [], selected: null,
     matched: 0, wrongIds: new Set(), timeLeft: ASSOC_DURATION, startTime: Date.now(),
   };
   totalHiddenMs = 0; hiddenSince = document.hidden ? Date.now() : null; totalIdleMs = 0; lastInteractionAt = Date.now();
@@ -10835,7 +10949,7 @@ function startAssociation(){
 }
 
 function addNextPairToAssoc(){
-  if(assocState.queueIdx >= assocState.queue.length){ assocState.queue = assocState.queue.concat(shuffle(WORDS.slice())); }
+  if(assocState.queueIdx >= assocState.queue.length){ assocState.queue = assocState.queue.concat(shuffle(metWords())); }
   const w = assocState.queue[assocState.queueIdx++];
   assocState.visible.push(w);
 }
@@ -13160,7 +13274,7 @@ function readVerbTableAloud(verb, tense){
   let i = 0;
   const playNext = () => {
     if(myToken !== verbReadAllToken || i >= forms.length) return;
-    const text = tense === 'imperatif' ? forms[i] : conjWithPronoun(i, forms[i], verb.inf);
+    const text = tense === 'imperatif' ? forms[i] : conjWithPronoun(i, forms[i], verb.inf, tense);
     highlightVerbRow(i);
     speak(text, 'fr-FR', () => {
       if(myToken !== verbReadAllToken) return;
@@ -13188,7 +13302,7 @@ function renderVerbTable(verb, pool, tense){
   tense = availableTenses.includes(tense) ? tense : availableTenses[0];
   const forms = verb.tenses[tense];
   const isImperatif = tense === 'imperatif';
-  const rowLabels = isImperatif ? ['(tu)', '(nous)', '(vous)'] : PRONOUNS.map((p, i) => conjPronounLabel(i, forms[i], verb.inf));
+  const rowLabels = isImperatif ? ['(tu)', '(nous)', '(vous)'] : PRONOUNS.map((p, i) => conjPronounLabel(i, forms[i], verb.inf, tense));
 
   const card = document.getElementById('quizCard');
   card.innerHTML = `
@@ -13196,7 +13310,7 @@ function renderVerbTable(verb, pool, tense){
     <div class="word-fr" style="font-size:clamp(26px,5vw,34px);">${escapeHtml(verb.inf)}</div>
     <div class="arabic-word" style="font-size:22px;margin-bottom:10px;">${escapeHtml(verb.ar)}</div>
     <div class="mode-row" id="tenseTabRow" style="justify-content:center;margin-bottom:10px;">
-      ${availableTenses.map(t => `<button class="mode-chip ${t===tense?'active':''}" data-tense="${t}">${TENSE_LABELS[t]}</button>`).join('')}
+      ${availableTenses.map(t => `<button class="mode-chip ${t===tense?'active':''}" data-tense="${t}">${TENSE_LABELS[t] || (t === 'imperatif' ? 'Impératif' : t)}</button>`).join('')}
     </div>
     <button class="restart-btn" id="readAllVerbBtn" style="display:flex;align-items:center;gap:8px;margin:0 auto 12px;background:linear-gradient(135deg,#6366F1,#4F46E5);border-color:#3730A3;">🔊 Tout écouter</button>
     <div class="search-results" id="verbTableRows" style="max-height:420px;">
@@ -13204,7 +13318,7 @@ function renderVerbTable(verb, pool, tense){
         <div class="result-card" style="display:flex;align-items:center;justify-content:space-between;padding:12px 18px;">
           <span style="font-weight:700;color:var(--text-dim);">${p}</span>
           <span style="font-weight:800;font-size:17px;color:var(--text);">${escapeHtml(forms[i])}</span>
-          <button class="speak-btn small" data-speak-fr="${escapeHtml(isImperatif ? forms[i] : conjWithPronoun(i, forms[i], verb.inf))}" title="Écouter">${SPEAK_SVG_SMALL}</button>
+          <button class="speak-btn small" data-speak-fr="${escapeHtml(isImperatif ? forms[i] : conjWithPronoun(i, forms[i], verb.inf, tense))}" title="Écouter">${SPEAK_SVG_SMALL}</button>
         </div>
       `).join('')}
     </div>
@@ -13231,7 +13345,7 @@ function renderVerbTable(verb, pool, tense){
 }
 
 let conjQuizState = null; // { queue:[{ verb, tense, pronounIdx, sentence, ctx, marker }], idx, score, tenses, mode }
-const TENSE_TIME_MARKERS = { present:"D'habitude,", futur:'Demain,', imparfait:'Avant,', passeCompose:'Hier,', conditionnel:"Dans l'idéal," };
+const TENSE_TIME_MARKERS = { present:"D'habitude,", futur:'Demain,', imparfait:'Avant,', passeCompose:'Hier,', conditionnel:"Dans l'idéal,", subjonctif:'Il faut' };
 /* 🕰️ Le petit mot en tête de phrase annonce le temps (tiré au hasard à chaque question) */
 const CONJ_MARKERS = {
   present:['En ce moment,', 'Maintenant,', 'Actuellement,', 'Ces jours-ci,'],
@@ -13239,9 +13353,10 @@ const CONJ_MARKERS = {
   imparfait:['Autrefois,', "À l'époque,", 'Dans les années 90,', "Quand j'étais petit,", 'Avant, tous les jours,'],
   passeCompose:['Hier,', 'Hier soir,', 'La semaine dernière,', "L'an dernier,", 'Il y a deux jours,'],
   conditionnel:["Dans l'idéal,", 'Avec plus de temps,', "Si c'était possible,", "Si j'étais riche,", 'Sans ce problème,'],
+  subjonctif:['Il faut', 'Il est important', 'Il vaut mieux', 'Il est possible', 'Il est temps'],   // sans virgule : « Il faut que je… »
 };
-const CONJ_TENSES = ['present', 'futur', 'imparfait', 'passeCompose', 'conditionnel'];
-const TENSE_AU = { present:'au présent', futur:'au futur simple', imparfait:"à l'imparfait", passeCompose:'au passé composé', conditionnel:'au conditionnel', imperatif:"à l'impératif" };
+const CONJ_TENSES = ['present', 'futur', 'imparfait', 'passeCompose', 'conditionnel', 'subjonctif'];
+const TENSE_AU = { present:'au présent', futur:'au futur simple', imparfait:"à l'imparfait", passeCompose:'au passé composé', conditionnel:'au conditionnel', subjonctif:'au subjonctif présent', imperatif:"à l'impératif" };
 /* 📝 Une phrase pour CHAQUE verbe : « Demain, nous ___ le bus. » — compléments écrits pour marcher avec
    toutes les personnes et tous les temps. */
 const CONJ_PHRASES = { "être": "en retard", "avoir": "un chat", "aller": "à l'école", "faire": "les courses", "dire": "la vérité", "pouvoir": "venir à la fête", "vouloir": "partir en vacances", "devoir": "travailler dur", "prendre": "le bus", "venir": "à la fête", "savoir": "la réponse", "voir": "un film", "mettre": "la table", "croire": "cette histoire", "partir": "en voyage", "sortir": "avec des amis", "connaître": "cette ville", "boire": "de l'eau", "écrire": "une lettre", "lire": "un roman", "parler": "français", "aimer": "le chocolat", "manger": "une pomme", "donner": "un cadeau à Sara", "finir": "le travail", "choisir": "une couleur", "vendre": "la voiture", "attendre": "le bus", "courir": "dans le parc", "comprendre": "la leçon", "ouvrir": "la porte", "tenir": "la porte", "vivre": "à Paris", "entendre": "un bruit", "rire": "aux éclats", "suivre": "les conseils du médecin", "mourir": "de rire", "naître": "en France", "offrir": "des fleurs", "souffrir": "en silence", "plaire": "à tout le monde", "apprendre": "le français", "chercher": "une solution", "trouver": "les clés", "demander": "de l'aide", "penser": "à l'avenir", "travailler": "beaucoup", "habiter": "à Casablanca", "arriver": "à l'heure", "rester": "à la maison", "tomber": "dans l'escalier", "acheter": "du pain", "appeler": "le médecin", "commencer": "le cours", "devenir": "architecte", "aider": "les voisins", "jouer": "au foot", "regarder": "la télévision", "écouter": "de la musique", "oublier": "le code", "recevoir": "un colis", "descendre": "à la cave", "monter": "au grenier", "envoyer": "un message", "résoudre": "ce problème", "considérer": "la question", "permettre": "cette sortie", "réussir": "l'examen", "refuser": "l'offre", "accepter": "l'offre", "proposer": "une solution", "expliquer": "la situation", "exister": "sans internet", "continuer": "les études", "décider": "de partir", "développer": "une application", "exiger": "des excuses", "montrer": "le chemin", "paraître": "fatigué", "ajouter": "du sel", "remarquer": "un détail", "éviter": "les erreurs", "garder": "un secret", "quitter": "la maison", "changer": "de travail", "préparer": "le dîner", "indiquer": "la direction", "raconter": "une histoire", "décrire": "la situation", "abonder": "dans ce sens", "aborder": "un sujet délicat", "aboutir": "à un accord", "abréger": "le discours", "absorber": "beaucoup d'eau", "s'abstenir": "de commenter", "accabler": "l'équipe de reproches", "acclamer": "le champion", "accommoder": "les restes", "accompagner": "les enfants à la gare", "accomplir": "une mission difficile", "accorder": "un délai", "accroître": "les revenus", "accueillir": "les nouveaux employés", "accumuler": "de l'expérience", "accuser": "le voisin", "accéder": "au poste de directeur", "accélérer": "le processus", "acheminer": "le courrier", "acquitter": "la facture", "acquérir": "de nouvelles compétences", "activer": "le compte", "actualiser": "le document", "adapter": "la stratégie", "adhérer": "à cette association", "admettre": "l'erreur", "administrer": "une entreprise", "adopter": "une nouvelle méthode", "adorer": "jouer dehors", "adresser": "une demande au service", "affaiblir": "l'adversaire", "affecter": "toute l'équipe", "affirmer": "le contraire", "affronter": "la difficulté", "agir": "rapidement", "agrandir": "la maison", "ajourner": "la réunion", "ajuster": "les paramètres", "aligner": "les chaises", "alimenter": "la discussion", "allonger": "les pauses", "allouer": "un budget au projet", "alléger": "les démarches", "altérer": "le goût", "amorcer": "le dialogue", "amplifier": "le son", "améliorer": "la qualité", "aménager": "les bureaux", "analyser": "les résultats", "anticiper": "les risques", "apaiser": "les tensions", "apercevoir": "un ami dans la foule", "appliquer": "cette procédure", "apporter": "les documents", "approcher": "de la ville", "approuver": "la proposition", "apprécier": "ce geste", "argumenter": "avec calme", "arranger": "les fleurs", "articuler": "chaque mot", "aspirer": "à une vie calme", "assigner": "une tâche", "associer": "les deux idées", "assumer": "les décisions", "assurer": "la voiture", "atteindre": "les objectifs", "attester": "les faits", "attribuer": "un prix", "atténuer": "les conséquences", "augmenter": "les prix", "authentifier": "le document", "autoriser": "cette dépense", "avancer": "vite", "avertir": "les voisins", "avouer": "la vérité", "bafouer": "les règles", "bannir": "le sucre", "berner": "les collègues", "bloquer": "le passage", "blâmer": "les autres", "bouleverser": "les habitudes", "braver": "le froid", "breveter": "cette invention", "briller": "en mathématiques", "brosser": "les chaussures", "brusquer": "les enfants", "bâtir": "une maison", "bénéficier": "d'une réduction", "cacher": "la vérité", "cadencer": "le travail", "calculer": "le coût total", "canaliser": "cette énergie", "captiver": "le public", "caractériser": "la situation", "causer": "un retard", "cerner": "le problème", "certifier": "l'exactitude des faits", "cesser": "de fumer", "challenger": "l'équipe", "charger": "la voiture", "chasser": "les mouches", "circonscrire": "l'incendie", "circuler": "à vélo", "clarifier": "la demande", "classer": "les dossiers", "clôturer": "le projet", "coexister": "en paix", "collaborer": "avec d'autres équipes", "collecter": "les informations", "combattre": "la fraude", "combiner": "ces méthodes", "commander": "une pizza", "commenter": "le match", "commercialiser": "ce produit", "communiquer": "par e-mail", "commémorer": "cet événement", "comparer": "les prix", "compenser": "les pertes", "compiler": "les données", "compliquer": "les choses", "compléter": "le formulaire", "composer": "un numéro", "compromettre": "le projet", "concentrer": "les efforts sur l'essentiel", "concevoir": "une application", "conclure": "un accord", "concrétiser": "cette idée", "condamner": "la violence", "conduire": "prudemment", "confier": "un secret à Sara", "confirmer": "le rendez-vous", "confondre": "les deux jumeaux", "confronter": "les opinions", "conférer": "de nouveaux droits", "congeler": "les aliments", "conquérir": "de nouveaux marchés", "consacrer": "du temps à la famille", "conserver": "les preuves", "consigner": "cet incident", "consommer": "peu d'énergie", "constater": "une amélioration", "constituer": "une équipe", "construire": "un nouvel hôpital", "consulter": "un spécialiste", "contaminer": "l'eau", "contempler": "le paysage", "contester": "cette décision", "contracter": "un prêt", "contredire": "le professeur", "contribuer": "au projet", "convaincre": "le client", "convenir": "d'un rendez-vous", "convertir": "le fichier en PDF", "coopérer": "avec la police", "coordonner": "les équipes", "corriger": "les copies", "corroborer": "cette version", "corrompre": "un fonctionnaire", "couvrir": "les livres", "craindre": "l'orage", "critiquer": "le film", "croiser": "un voisin", "croître": "rapidement", "créer": "une entreprise", "cueillir": "des pommes", "culminer": "en tête du classement", "cultiver": "des légumes", "cumuler": "plusieurs fonctions", "céder": "la place", "célébrer": "la victoire", "côtoyer": "des chercheurs", "demeurer": "à la campagne", "desservir": "la table", "destiner": "ce cadeau à Sara", "devancer": "la concurrence", "diagnostiquer": "la panne", "dialoguer": "avec les voisins", "dicter": "une lettre", "diffuser": "l'information", "différencier": "les deux concepts", "digérer": "la nouvelle", "diluer": "le sirop", "diminuer": "les dépenses", "diriger": "une équipe", "discerner": "la vérité", "discuter": "calmement", "disperser": "la foule", "disposer": "de peu de temps", "dissimuler": "la colère", "distinguer": "les deux modèles", "distraire": "les enfants", "distribuer": "les documents", "diversifier": "les activités", "divulguer": "ces informations", "dominer": "le match", "doter": "l'école d'ordinateurs", "doubler": "le chiffre d'affaires", "dresser": "un bilan", "durcir": "les contrôles", "débattre": "de cette proposition", "débloquer": "la situation", "déborder": "d'énergie", "déceler": "une anomalie", "décentraliser": "certains services", "décevoir": "les clients", "déchiffrer": "le message", "déclencher": "une alerte", "décliner": "l'invitation", "décomposer": "le problème", "découvrir": "une nouvelle méthode", "décrypter": "le rapport", "déduire": "les frais", "défendre": "cette idée", "défier": "les concurrents", "définir": "les objectifs", "déformer": "les propos", "dégager": "la route", "dégrader": "le matériel", "délaisser": "le jardin", "délibérer": "longuement", "délivrer": "un certificat", "déléguer": "cette tâche", "démentir": "la rumeur", "démontrer": "le théorème", "dénoncer": "une fraude", "dépendre": "du budget", "dépenser": "trop d'argent", "déplacer": "la réunion", "déployer": "une nouvelle solution", "déposer": "une plainte", "déprécier": "le travail des autres", "déranger": "les voisins", "dériver": "vers le large", "désamorcer": "le conflit", "désapprouver": "cette décision", "désigner": "un responsable", "désirer": "un café", "désobéir": "aux règles", "désorienter": "les visiteurs", "détailler": "la proposition", "détecter": "une anomalie", "détenir": "plusieurs brevets", "déterminer": "les priorités" };
@@ -13254,15 +13369,20 @@ function conjElides(form, inf){
   if(/^h/i.test(f)) return !CONJ_H_ASPIRE.includes(String(inf || '').replace(/^(se |s')/i, '').toLowerCase());
   return false;
 }
-function conjPronounLabel(pi, form, inf){ return pi === 0 && conjElides(form, inf) ? "j'" : PRONOUNS[pi]; }
-function conjWithPronoun(pi, form, inf){ const p = conjPronounLabel(pi, form, inf); return p.endsWith("'") ? p + form : p + ' ' + form; }
+/* au subjonctif, le pronom vient avec « que » : que je, que j', qu'il, que nous, qu'ils */
+function conjPronounLabel(pi, form, inf, tense){
+  const p = pi === 0 && conjElides(form, inf) ? "j'" : PRONOUNS[pi];
+  if(tense !== 'subjonctif') return p;
+  return (pi === 2 || pi === 5) ? "qu'" + p : 'que ' + p;
+}
+function conjWithPronoun(pi, form, inf, tense){ const p = conjPronounLabel(pi, form, inf, tense); return p.endsWith("'") ? p + form : p + ' ' + form; }
 /* Comparaison tolérante : accents, apostrophes typographiques, espaces, et pronom tapé ou non (« nous mangeons » = « mangeons ») */
 function conjNormText(s){ return normalizeForSearch(String(s || '')).replace(/[’`´ʼ]/g, "'").replace(/\s*'\s*/g, "'").replace(/\s+/g, ' ').trim(); }
 function conjAnswerMatches(typed, form){
   const t = conjNormText(typed), f = conjNormText(form);
   if(!t) return false;
   if(t === f) return true;
-  const stripped = t.replace(/^(j'|je |tu |il |elle |on |nous |vous |ils |elles )/, '');
+  const stripped = t.replace(/^(que |qu')/, '').replace(/^(j'|je |tu |il |elle |on |nous |vous |ils |elles )/, '');
   return stripped === f;
 }
 
@@ -13312,6 +13432,11 @@ const CONJ_CLUES = {
   "Si c'était possible,":"« Si + imparfait » (si c'était…) : la suite se met au conditionnel.",
   "Si j'étais riche,":"« Si + imparfait » (si j'étais…) : la suite se met au conditionnel.",
   'Sans ce problème,':"« Sans ce problème » : une situation imaginée → hypothèse.",
+  'Il faut':"« Il faut que » : une obligation, une nécessité → toujours le subjonctif.",
+  'Il est important':"« Il est important que » : un jugement, ce qui est souhaitable → subjonctif.",
+  'Il vaut mieux':"« Il vaut mieux que » : un conseil → subjonctif.",
+  'Il est possible':"« Il est possible que » : ce n'est pas sûr, c'est une possibilité → subjonctif.",
+  'Il est temps':"« Il est temps que » : ce qui doit se faire maintenant → subjonctif.",
 };
 const CONJ_TENSE_INFO = {
   present:{ use:"Le présent : ce qui se passe maintenant, une habitude d'aujourd'hui ou une vérité générale.",
@@ -13329,10 +13454,14 @@ const CONJ_TENSE_INFO = {
   conditionnel:{ use:"Le conditionnel : une hypothèse, un souhait, un conseil poli — ce qui arriverait si…",
     not:[['futur', "Pas le futur (-rai) : l'action n'est pas sûre, elle dépend d'une condition ou d'un souhait."]],
     sheets:['b1-conditionnel', 'atelier-conditionnel-b2'] },
+  subjonctif:{ use:"Le subjonctif présent : après « que », quand on exprime une obligation, un souhait, un doute ou un sentiment (il faut que, je veux que, bien que…).",
+    not:[['present', "Pas l'indicatif présent : on ne constate pas un fait réel, on dit ce qui doit (ou pourrait) se faire."]],
+    sheets:['b1-subjonctif', 'atelier-subjonctif-formation', 'conjt-subjonctif-irreguliers', 'conjt-subjonctif-nous-vous', 'atelier-il-faut-que', 'atelier-avoir-etre-subjonctif'] },
 };
 const CONJ_ENDINGS = {
   present1:['e', 'es', 'e', 'ons', 'ez', 'ent'], present2:['is', 'is', 'it', 'issons', 'issez', 'issent'], present3:['s', 's', 't', 'ons', 'ez', 'ent'],
   futur:['ai', 'as', 'a', 'ons', 'ez', 'ont'], imparfait:['ais', 'ais', 'ait', 'ions', 'iez', 'aient'], conditionnel:['ais', 'ais', 'ait', 'ions', 'iez', 'aient'],
+  subjonctif:['e', 'es', 'e', 'ions', 'iez', 'ent'],
 };
 const CONJ_AVOIR_PRES = ['ai', 'as', 'a', 'avons', 'avez', 'ont'];
 function conjGroup(v){ const g = String(v.groupe || ''); return /^1er/.test(g) ? 1 : (/^2e/.test(g) ? 2 : 3); }
@@ -13402,13 +13531,23 @@ function conjFormationHtml(ch, full){
     else out.push(`Ce verbe se conjugue avec ${b('avoir')} (comme la plupart des verbes).`);
     if(full) out.push(`Ici : ${b(pc.aux)} + participe ${b(pc.pp)}.`);
     else out.push(`Participes : -er → -é, -ir → -i, -re → -u… (attention aux irréguliers : pris, fait, mis, vu…).`);
+  } else if(ch.tense === 'subjonctif'){
+    const irr = CONJ_SUBJ_IRR[inf] || Object.keys(CONJ_SUBJ_STEM).some(k => inf === k || (inf.endsWith(k) && (k === 'faire' || (k === 'valoir' && inf !== 'prévaloir'))));
+    if(CONJ_SUBJ_IRR[inf]) out.push(`${b(inf)} est irrégulier au subjonctif : que je ${b(inf === 'être' ? 'sois' : 'aie')}… (à apprendre par cœur).`);
+    else {
+      out.push(`Subjonctif présent : ${b('que + radical de « ils » au présent + -e, -es, -e, -ions, -iez, -ent')}. Avec « ${p} » : ${b('-' + CONJ_ENDINGS.subjonctif[pi])}.`);
+      if(pi === 3 || pi === 4) out.push(`Avec nous et vous, c'est ${b('la même forme qu’à l’imparfait')} (que nous parlions, que vous preniez).`);
+      if(irr) out.push(full ? `⚠️ Radical irrégulier au subjonctif : ${b(conjWithPronoun(0, v.tenses.subjonctif[0], v.inf, 'subjonctif'))}.` : `⚠️ Ce verbe a un radical irrégulier au subjonctif.`);
+      else if(full && v.tenses.present && v.tenses.present[5]) out.push(`ils ${escapeHtml(conjBare(v.tenses.present[5]))} → radical ${b(conjStem(v.tenses.present[5], 'ent') + '-')}`);
+    }
+    out.push(`Le subjonctif vient après ${b('que')} : il faut que, je veux que, bien que, pour que, avant que…`);
   }
   return out.map(x => `<div>• ${x}</div>`).join('');
 }
 /* ✏️ Le début du mot (3e indice) */
 function conjStartHint(ch){
   const form = ch.verb.tenses[ch.tense][ch.pronounIdx];
-  const pl = conjPronounLabel(ch.pronounIdx, form, ch.verb.inf);
+  const pl = conjPronounLabel(ch.pronounIdx, form, ch.verb.inf, ch.tense);
   const pre = pl.endsWith("'") ? pl : pl + ' ';
   if(ch.tense === 'passeCompose'){
     const words = String(form).split(' '), pp = words.pop();
@@ -13483,6 +13622,7 @@ function renderConjRules(){
     imparfait:"Radical de « nous » au présent + -ais, -ais, -ait, -ions, -iez, -aient (nous prenons → je prenais). Seule exception : être → j'étais.",
     passeCompose:"Avoir ou être au présent + participe passé (j'ai mangé, je suis parti). Être : verbes de mouvement / changement d'état (aller, venir, partir, arriver, naître, mourir…) et pronominaux — le participe s'accorde.",
     conditionnel:"Radical du futur + terminaisons de l'imparfait : -ais, -ais, -ait, -ions, -iez, -aient (je serais, j'irais, nous prendrions).",
+    subjonctif:"Que + radical de « ils » au présent + -e, -es, -e, -ions, -iez, -ent (ils prennent → que je prenne) ; nous et vous comme à l'imparfait (que nous prenions). Irréguliers : être (que je sois), avoir (que j'aie), aller (que j'aille), faire (que je fasse), pouvoir (que je puisse), savoir (que je sache), vouloir (que je veuille).",
   };
   const markersOf = (t) => (CONJ_MARKERS[t] || []).map(m => `<span class="cr-kw">${escapeHtml(m.replace(/,$/, ''))}</span>`).join('');
   const card = document.getElementById('quizCard');
@@ -13526,6 +13666,8 @@ function conjSetupLoad(){
       const out = Object.assign(conjSetupDefault(), c);
       out.tenses = (Array.isArray(out.tenses) ? out.tenses : []).filter(t => CONJ_TENSES.includes(t));
       if(!out.tenses.length) out.tenses = CONJ_TENSES.slice();
+      // 🤞 1.0.25 : ceux qui avaient choisi « tous les temps » reçoivent aussi le subjonctif
+      if(!out.subj1025){ if(out.tenses.length === 5 && !out.tenses.includes('subjonctif')) out.tenses.push('subjonctif'); out.subj1025 = 1; }
       return out;
     }
   }catch(e){}
@@ -13572,7 +13714,7 @@ function renderConjPracticeSetup(){
     const t = ts[Math.floor(Math.random() * ts.length)];
     const pi = Math.floor(Math.random() * 6);
     const m = CONJ_MARKERS[t][Math.floor(Math.random() * CONJ_MARKERS[t].length)];
-    const pl = conjPronounLabel(pi, v.tenses[t][pi], v.inf);
+    const pl = conjPronounLabel(pi, v.tenses[t][pi], v.inf, t);
     example = `<div class="cs-example">Exemple : <b>${escapeHtml(m)} ${escapeHtml(pl)}${pl.endsWith("'") ? '' : ' '}___ ${escapeHtml(resolveVerbContext(v))}.</b> <span>(${escapeHtml(v.inf)} · ${TENSE_LABELS[t]})</span></div>`;
   }
   const fmtLabel = { phrase:'en phrases', pronom:'pronom + verbe', mix:'phrases et pronoms mélangés' }[c.format] || 'en phrases';
@@ -13679,6 +13821,7 @@ const TENSE_STYLE = {
   imparfait:    { emoji:'🕰️', grad:'linear-gradient(135deg,#F97316,#EA580C)' },
   passeCompose: { emoji:'📜', grad:'linear-gradient(135deg,#8B5CF6,#7C3AED)' },
   conditionnel: { emoji:'🌈', grad:'linear-gradient(135deg,#EC4899,#DB2777)' },
+  subjonctif:   { emoji:'🤞', grad:'linear-gradient(135deg,#14B8A6,#0D9488)' },
   imperatif:    { emoji:'❗', grad:'linear-gradient(135deg,#EF4444,#DC2626)' },
 };
 
@@ -13688,7 +13831,7 @@ function renderConjugationQuizCard(){
   document.body.classList.add('quiz-active');
   const ch = st.queue[st.idx];
   const form = ch.verb.tenses[ch.tense][ch.pronounIdx];
-  const pl = conjPronounLabel(ch.pronounIdx, form, ch.verb.inf);
+  const pl = conjPronounLabel(ch.pronounIdx, form, ch.verb.inf, ch.tense);
   const gap = pl.endsWith("'") ? pl + '___' : pl + ' ___';
   const tStyle = TENSE_STYLE[ch.tense] || TENSE_STYLE.present;
 
@@ -13713,7 +13856,7 @@ function renderConjugationQuizCard(){
   ch.hints = 0;
   const verbLine = `<b style="color:var(--purple);">${escapeHtml(ch.verb.inf)}</b> (${escapeHtml(ch.verb.ar || '')})`;
   const sentenceHtml = ch.sentence
-    ? `<div class="word-fr" style="font-size:clamp(20px,4.2vw,27px);line-height:1.5;"><span class="cq-sentence"><span class="cq-marker">${escapeHtml(ch.marker.replace(/,$/, ''))}</span>, ${escapeHtml(gap)} ${escapeHtml(ch.ctx)}.</span></div>
+    ? `<div class="word-fr" style="font-size:clamp(20px,4.2vw,27px);line-height:1.5;"><span class="cq-sentence"><span class="cq-marker">${escapeHtml(ch.marker.replace(/,$/, ''))}</span>${/,$/.test(ch.marker) ? ',' : ''} ${escapeHtml(gap)} ${escapeHtml(ch.ctx)}.</span></div>
        <div class="question-line" style="margin-top:6px;">verbe : ${verbLine} · ${hideT ? '<b>quel temps ? 🕵️ (regarde le début de la phrase)</b>' : `<b>${TENSE_LABELS[ch.tense]}</b>`}</div>`
     : `<div class="question-line">Conjugue ${verbLine} <b>${TENSE_AU[ch.tense] || ''}</b> :</div>
        <div class="word-fr" style="font-size:clamp(26px,5.5vw,36px);">${escapeHtml(gap)}</div>`;
@@ -13791,8 +13934,8 @@ function validateConjugationAnswer(){
   else { playWrongSound(); reactMascot('ko'); vibrate([40,40,40]); }
 
   // ce qu'on affiche et ce qu'on entend : « j'ai mangé », ou la phrase entière
-  const pl = conjPronounLabel(ch.pronounIdx, correctForm, ch.verb.inf);
-  const withPron = conjWithPronoun(ch.pronounIdx, correctForm, ch.verb.inf);
+  const pl = conjPronounLabel(ch.pronounIdx, correctForm, ch.verb.inf, ch.tense);
+  const withPron = conjWithPronoun(ch.pronounIdx, correctForm, ch.verb.inf, ch.tense);
   const spoken = ch.sentence ? `${ch.marker} ${withPron} ${ch.ctx}.` : withPron;
   const shown = `${escapeHtml(pl)}${pl.endsWith("'") ? '' : ' '}<b>${escapeHtml(correctForm)}</b>`;
   const fullSentence = ch.sentence ? `${escapeHtml(ch.marker)} ${shown} ${escapeHtml(ch.ctx)}.` : shown;
@@ -13945,7 +14088,7 @@ function renderConjListenCard(){
   document.body.classList.add('quiz-active');
   const ch = st.queue[st.idx];
   const form = ch.verb.tenses[ch.tense][ch.pronounIdx];
-  const fullText = conjWithPronoun(ch.pronounIdx, form, ch.verb.inf);
+  const fullText = conjWithPronoun(ch.pronounIdx, form, ch.verb.inf, ch.tense);
 
   document.getElementById('scoreboard').innerHTML = `
     <div class="chip">✅ <b>${st.score.correct}</b>/${st.score.total}</div>
@@ -13980,7 +14123,7 @@ function validateConjListenAnswer(correctText){
   const input = document.getElementById('conjListenInput');
   const btn = document.getElementById('conjListenValidateBtn');
   if(input.disabled) return;
-  const isCorrect = conjNormText(input.value) === conjNormText(correctText);
+  const isCorrect = conjNormText(input.value) === conjNormText(correctText) || (/^qu(e |')/.test(conjNormText(correctText)) && conjNormText(input.value) === conjNormText(correctText).replace(/^qu(e |')/, ''));   // subjonctif : « que » facultatif
   input.disabled = true; btn.disabled = true;
   st.score.total++;
   if(isCorrect){ st.score.correct++; }
@@ -15463,6 +15606,11 @@ function refreshSheetValidateUi(sheetId){
   if(btn){
     btn.textContent = done ? '↩️ Dévalider (ouverte par erreur)' : '✅ Marquer comme faite';
     btn.classList.toggle('active', !done);
+  }
+  const top = document.getElementById('sheetValidateTopBtn');   // ✅ 1.0.25 : le même bouton en haut, sans descendre jusqu'à la fin
+  if(top){
+    top.textContent = done ? '✅ Faite · annuler' : '✅ Marquer comme faite';
+    top.classList.toggle('active', !done); top.classList.toggle('on', done);
   }
 }
 function isSheetPassed(sheetId){
@@ -18988,6 +19136,11 @@ function mergeRemoteData(remote){
       });
       if(m){ saveBlockTitles(); changed = true; }
 
+    } else if(/^lexiqueQuiz::tbImg::/.test(baseKey)){
+      // 🖼 un morceau d'image de la Tablette : si l'appareil est plein, on le reprendra au prochain tour
+      let ok = true; try{ localStorage.setItem(key, rv); }catch(e){ ok = false; }
+      if(ok) changed = true; else delete base[key];
+
     } else if(/^lexiqueQuiz::tb(Doc|Meta)::/.test(baseKey)){
       // 📰 textes de la Tablette : morceau par morceau, la version la plus récente gagne
       const ro = safeParse(rv, null), lo = safeParse(lv, null);
@@ -19109,6 +19262,7 @@ async function syncPushDirty(){
   const base = syncLoadBase();
   keys.forEach(k => { base[k] = syncHash(d[k]); });
   syncSaveBase();
+  try{ if(typeof tbImgPrune === 'function') tbImgPrune(); }catch(e){}   // 🖼 images envoyées : la copie en texte n'est plus utile ici
   try{ localStorage.setItem(LAST_SYNC_KEY, String(Date.now())); }catch(e){}
   return keys.length;
 }
@@ -19624,6 +19778,13 @@ const COLOR_PRESETS = {
 /* ============ 🆕 NOUVEAUTÉS — pour que tout ce qui a été ajouté reste découvrable ============ */
 const WHATS_NEW_SECTIONS = [
   { icon:'🆕', title:'Nouveautés', items:[
+    { name:'🖼 Les images de la Tablette sur le téléphone', desc:"Les images que tu mets dans un texte de la Tablette partent maintenant avec la synchro (réduites pour être légères) : tu les retrouves sur ton autre appareil." },
+    { name:'🖌 Reproduire le style', desc:"Dans l'éditeur de la Tablette : place-toi sur un mot mis en forme, touche le pinceau 🖌, puis sélectionne (ou touche) le texte à mettre pareil : gras, couleur, surligneur et taille sont recopiés. Double-clic sur le pinceau = le garder pour plusieurs endroits (Échap pour arrêter)." },
+    { name:'🔠 Texte plus petit ou plus grand', desc:"Nouveau menu « Taille » (barre du haut, barre près du curseur, clic droit) : de « Très petit » à « Géant », pour la partie sélectionnée seulement. Les tailles se voient aussi dans la Tablette." },
+    { name:"🖼 Les réglages de l'image à côté de la souris", desc:"Clique sur une image dans l'éditeur : ses réglages (taille, à gauche / au centre / à droite, supprimer) s'ouvrent juste à côté, plus besoin de les chercher en bas." },
+    { name:'🤞 Le subjonctif présent en Conjugaison', desc:"Nouveau temps dans les tableaux et les exercices : « Il faut que je ___ en retard. » → que je sois. Formation, mots-indices et fiches dans « Règles & indices »." },
+    { name:'🧭 Les nouveaux blocs restent nouveaux', desc:"Blitz, Swipe, Flashcards, Association, le défi du jour et les révisions ne piochent plus que dans les blocs que tu as commencés (et le suivant) : les mots des blocs pas encore ouverts ne sont plus « déjà maîtrisés » quand tu y arrives." },
+    { name:'✅ Fiche terminée sans descendre', desc:"Le bouton « Marquer comme faite » (fiches) et « Marquer comme lu » (Bouquinage) est aussi tout en haut, sous le titre." },
     { name:"🎨 Des mots en couleur", desc:"Dans l'éditeur de la Tablette, sélectionne un mot puis le bouton « A » coloré (barre du haut, barre près du curseur ou clic droit) : 9 couleurs de texte, « Autre couleur… » pour la tienne, et 6 couleurs de surligneur. Chaque mot peut avoir sa couleur. Les couleurs se retrouvent dans la Tablette, et restent lisibles en mode sombre." },
     { name:'⟿ Lignes continues', desc:"Nouveau bouton à côté d'« Ajuster » : la sélection devient un seul paragraphe ; sans sélection, tous les retours à la ligne au milieu des phrases disparaissent (même les tiens), et le texte revient à la ligne tout seul selon la largeur de l'écran. Aussi dans la Tablette : « Aa › Lignes continues » (avec « ↩ Remettre comme avant »)." },
     { name:"🔎 Des expressions de plusieurs mots", desc:"Dans la Tablette, touche « tandis » : dans sa fiche, « ＋ mot après » (ou touche « que » dans la phrase) donne « tandis que ». Tu peux aussi sélectionner plusieurs mots dans le texte (à la souris, ou appui long au doigt) puis toucher « 🔎 Traduire · Taguer ». La traduction, la prononciation, le tag et l'ajout à tes mots se font pour toute l'expression." },
@@ -34059,6 +34220,7 @@ function renderPracticalSheetDetail(id){
     <div class="cat-tag">${sheet.icon} ${escapeHtml(sheet.category)}<span id="sheetValidatedTag">${isSheetPassed(sheet.id) ? ' · ✅ Validée' : ''}</span></div>
     <div class="word-fr" style="font-size:clamp(19px,4vw,25px);">${escapeHtml(sheet.title)}</div>
     <div class="word-def" style="margin-top:6px;">${escapeHtml(sheet.intro)}</div>
+    <div class="done-top-row"><button type="button" class="mode-chip done-top-btn" id="sheetValidateTopBtn"></button></div>
     ${buildReadingToolbarHtml()}
     ${bodyHtml}
     ${sheet.note ? `<div style="margin-top:16px;text-align:left;font-size:12.5px;color:var(--text-dim);background:rgba(80,70,229,0.06);border:1px solid rgba(80,70,229,0.18);border-radius:12px;padding:12px 16px;">💡 ${escapeHtml(sheet.note)}</div>` : ''}
@@ -34072,7 +34234,7 @@ function renderPracticalSheetDetail(id){
   `;
   refreshSheetValidateUi(sheet.id);
   setQuickNavTarget(() => isSheetPassed(sheet.id) ? document.getElementById('nextSheetBtn') : document.getElementById('sheetValidateToggleBtn'));
-  document.getElementById('sheetValidateToggleBtn').addEventListener('click', () => {
+  const sheetToggleDone = () => {
     if(isSheetPassed(sheet.id)){
       unmarkSheetPassed(sheet.id);
       window.__sheetManuallyUnvalidated = sheet.id; // pas de re-validation automatique pendant cette visite
@@ -34086,7 +34248,8 @@ function renderPracticalSheetDetail(id){
     }
     refreshSheetValidateUi(sheet.id);
     if(typeof cloudAutoPush === 'function') cloudAutoPush();
-  });
+  };
+  ['sheetValidateToggleBtn', 'sheetValidateTopBtn'].forEach(id => { const b = document.getElementById(id); if(b) b.addEventListener('click', sheetToggleDone); });
   document.getElementById('backFromSheetDetailBtn').addEventListener('click', homeFn);
   wireReadingToolbar(() => {
     let fullText = '';
@@ -34561,6 +34724,7 @@ function renderBouquinageDetail(idx, opts){
   card.innerHTML = `
     <div class="cat-tag">📖 Bouquinage${read ? ' · ✅ Lu' : ''}</div>
     <div class="word-fr" style="font-size:clamp(19px,4vw,24px);">${escapeHtml(t.title)}</div>
+    <div class="done-top-row"><button type="button" class="mode-chip done-top-btn ${read ? 'on' : 'active'}" id="markReadTopBtn">${read ? '✅ Lu · annuler' : '☐ Marquer comme lu'}</button></div>
     ${bqCoachHtml(idx)}
     ${buildReadingToolbarHtml()}
     <div class="bq-dx">${dxChipHtml('bqDxChip')}${dxOn() ? dxLegendHtml() : ''}</div>
@@ -34578,10 +34742,11 @@ function renderBouquinageDetail(idx, opts){
   `;
   document.getElementById('backFromBouquinageDetailBtn').addEventListener('click', renderBouquinageHome);
   wireReadingToolbar(() => openReadingFullscreen(t.title, t.body + (t.quote ? '\n\n« ' + t.quote + ' »' : ''), 'fr-FR'));
-  document.getElementById('markReadBtn').addEventListener('click', () => {
+  const bqToggleRead = () => {
     if(isBouquinageRead(idx)){ unmarkBouquinageRead(idx); } else { markBouquinageRead(idx); playCorrectSound(); bqSaveResume(idx, 0, true); }
     renderBouquinageDetail(idx);
-  });
+  };
+  ['markReadBtn', 'markReadTopBtn'].forEach(id => { const b = document.getElementById(id); if(b) b.addEventListener('click', bqToggleRead); });
   if(idx > 0){ document.getElementById('bouquinagePrevBtn').addEventListener('click', () => renderBouquinageDetail(idx - 1)); }
   if(idx < BOUQUINAGE_TEXTS.length - 1){ document.getElementById('bouquinageNextBtn').addEventListener('click', () => renderBouquinageDetail(idx + 1)); }
   document.getElementById('bouquinageRandomDetailBtn').addEventListener('click', () => renderBouquinageDetail(Math.floor(Math.random() * BOUQUINAGE_TEXTS.length)));
@@ -38942,7 +39107,7 @@ const VA_DEST = [
 ];
 const VA_EX = ['exercice', 'exercices', 'exo', 'exos', 'entrainer', 'entraine', 'entrainement', 'pratiquer', 'pratique', 'tester', 'teste', 'interroger', 'interroge', 'quiz', 'faire des', 'commencer', 'tamarin', 'تمارين', 'تمرين', 'تدرب'];
 const VA_RULES = ['regle', 'regles', 'indice', 'indices', 'cours', 'explication', 'expliquer', 'explique', 'comprendre', 'قاعده', 'شرح'];
-const VA_TENSE_WORDS = [['passe compose', 'passeCompose'], ['present', 'present'], ['futur', 'futur'], ['imparfait', 'imparfait'], ['conditionnel', 'conditionnel'], ['passe', 'passeCompose']];
+const VA_TENSE_WORDS = [['subjonctif', 'subjonctif'], ['passe compose', 'passeCompose'], ['present', 'present'], ['futur', 'futur'], ['imparfait', 'imparfait'], ['conditionnel', 'conditionnel'], ['passe', 'passeCompose']];
 const VA_CHIPS = [
   ['bouquinage', "Lire (là où j'en étais)"], ['tablette', 'La Tablette'], ['do:stream', 'Écouter mes audios'], ['do:search', 'Chercher un mot'], ['conjugaison', 'Conjugaison'],
   ['ex:conjugaison', 'Exercices de conjugaison'], ['grammaire', 'Grammaire'], ['orthographe', 'Orthographe'], ['ex:vocabulaire', 'Quiz de vocabulaire'],
@@ -40279,10 +40444,10 @@ function vsConjStart(tenses){
 }
 function vsConjPrompt(st, ch, first){
   const form = ch.verb.tenses[ch.tense][ch.pronounIdx];
-  const pl = conjPronounLabel(ch.pronounIdx, form, ch.verb.inf);
-  const pron = pl === "j'" ? 'je' : pl;
+  const pl = conjPronounLabel(ch.pronounIdx, form, ch.verb.inf, ch.tense);
+  const pron = pl.replace(/j'$/, 'je');
   const hideT = !!(st.guess && ch.sentence);
-  const q = ch.sentence ? `${ch.marker.replace(/,$/, '')}, ${pron}, blanc, ${ch.ctx}.` : `${pron}, blanc.`;
+  const q = ch.sentence ? `${ch.marker.replace(/,$/, '')}${/,$/.test(ch.marker) ? ',' : ''} ${pron}, blanc, ${ch.ctx}.` : `${pron}, blanc.`;
   return `${ch.retry ? "À refaire : tu t'étais trompé sur celle-ci. " : ''}Question ${st.idx + 1} sur ${st.queue.length}. ${q} Le verbe ${ch.verb.inf}, ${hideT ? 'à toi de trouver le temps' : TENSE_AU[ch.tense]}.`
     + (first ? ' Dis toute la réponse, par exemple « je mange ». Tu peux aussi dire « répète », « un indice », ou « je ne sais pas ».' : '');
 }
@@ -40325,7 +40490,7 @@ function vsConjAnswer(st, ch, text, alts, t){
   const myIdx = st.idx;
   validateConjugationAnswer();
   if(ok && phon){ const rv = document.getElementById('conjReveal'); if(rv) rv.insertAdjacentHTML('beforeend', `<div class="conj-oral">🗣️ Bien dit ! À l'écrit, ça s'écrit : <b>${escapeHtml(correct)}</b></div>`); }
-  const withPron = conjWithPronoun(ch.pronounIdx, correct, ch.verb.inf);
+  const withPron = conjWithPronoun(ch.pronounIdx, correct, ch.verb.inf, ch.tense);
   const full = ch.sentence ? `${ch.marker} ${withPron} ${ch.ctx}.` : withPron + '.';
   const msg = ok ? `${['Bravo !', 'Très bien !', 'Exact !', 'Parfait !'][Math.floor(Math.random() * 4)]} ${full}` + (phon && conjNormText(correct).length > 3 ? ` Ça s'écrit : ${vsSpell(correct)}.` : '')
                  : `${skip ? "Ce n'est pas grave." : 'Pas tout à fait.'} La bonne réponse : ${full} Ça s'écrit : ${vsSpell(correct)}.`;
@@ -42585,6 +42750,7 @@ function tbWriteArt(a){
     if(!mcur || tbCanon(Object.assign({}, mcur, { mupd:undefined })) !== mstr){ meta.mupd = Date.now(); localStorage.setItem(tbSKey(TB_META, id), tbCanon(meta)); }
     if(a.textOrig != null) localStorage.setItem(tbOrigKey(id), JSON.stringify({ textOrig:a.textOrig, blocksOrig:a.blocksOrig || null }));
     else localStorage.removeItem(tbOrigKey(id));
+    try{ const ims = tbArtImgIds(a); if(ims.length) tbImgSyncOut(ims); }catch(e){}       // ☁️ ses images partent aussi
     return true;
   }catch(e){ console.warn('tablette : rangement', e); return false; }
 }
@@ -42626,7 +42792,10 @@ function tbSyncIn(){
   Object.keys(gone).forEach(id => { const d = tbReadDoc(id); if(d ? (d.upd || 0) <= gone[id] : localStorage.getItem(tbSKey(TB_META, id)) != null) tbDropKeys(id, false); });
   TB.idx = null;
   try{ if(typeof TB.homeList === 'function' && document.getElementById('tbkRoot')) TB.homeList(); }catch(e){}
+  try{ tbImgImportAll(); }catch(e){}            // ☁️ les images de l'autre appareil
 }
+/* les images des textes déjà gardés (avant 1.0.25) partent aussi, une fois */
+setTimeout(() => { try{ const ids = []; tbLoad().forEach(a => tbArtImgIds(a).forEach(i => ids.push(i))); if(ids.length) tbImgSyncOut(ids); }catch(e){} }, 6000);
 function tbUi(){
   if(!TB.ui){ let u = null; try{ u = JSON.parse(localStorage.getItem(nsKey('lexiqueQuiz::tabletteUi')) || 'null'); }catch(e){} TB.ui = Object.assign({ fs:19, lh:1.65, align:'left', w:0 }, u || {}); }
   return TB.ui;
@@ -42819,11 +42988,13 @@ function tbBlocksOf(art){ return (art && Array.isArray(art.blocks) && art.blocks
 function tbTextToBlocks(text){ return String(text || '').replace(/\r/g, '').split(/\n+/).map(p => p.trim()).filter(Boolean).map(p => ({ t:'p', r:[{ x:p, s:'' }] })); }
 function tbBlockText(b){ return (b && b.r || []).map(r => r.x).join(''); }
 function tbBlocksText(blocks){ return (blocks || []).filter(b => b.r).map(b => tbBlockText(b).replace(/\s+/g, ' ').trim()).filter(Boolean).join('\n'); }
-function tbIsRich(blocks){ return (blocks || []).some(b => b.t !== 'p' || b.c || b.a || b.k || (b.r || []).some(r => r.s || r.c || r.h)); }
+function tbIsRich(blocks){ return (blocks || []).some(b => b.t !== 'p' || b.c || b.a || b.k || (b.r || []).some(r => r.s || r.c || r.h || r.z)); }
 /* 🎨 1.0.24 : des mots en couleur (texte) et surlignés (fond), lisibles en clair comme en sombre */
 var TB_COLORS = [['#E5484D', 'Rouge'], ['#F07C1A', 'Orange'], ['#C99A06', 'Moutarde'], ['#2FA36B', 'Vert'], ['#14A3B8', 'Turquoise'], ['#3B82F6', 'Bleu'], ['#8B5CF6', 'Violet'], ['#E54598', 'Rose'], ['#A0662D', 'Marron']];
 var TB_HL = { y:['#FFF3A3', 'Jaune'], g:['#C8F7D0', 'Vert'], b:['#CFE4FF', 'Bleu'], p:['#FFD3EC', 'Rose'], o:['#FFDDB8', 'Orange'], v:['#E3D7FF', 'Violet'] };
-var TB_NOCOLOR = '#010203';               // « couleur automatique » dans l'éditeur (le texte reprend sa couleur normale)
+var TB_NOCOLOR = '#010203';
+/* 🔠 tailles du texte (comme <font size> de l'éditeur, 3 = normal) */
+var TB_SIZES = [[1, 'Très petit', .65], [2, 'Petit', .82], [3, 'Normal', 1], [4, 'Grand', 1.22], [5, 'Très grand', 1.5], [6, 'Énorme', 1.9], [7, 'Géant', 2.4]];               // « couleur automatique » dans l'éditeur (le texte reprend sa couleur normale)
 function tbHex(v){
   try{
     const cx = tbHex.cx || (tbHex.cx = document.createElement('canvas').getContext('2d'));
@@ -42851,7 +43022,7 @@ function tbNormRuns(b){
   let text = ''; const st = [];
   (b.r || []).forEach(r => {
     const x = String(r.x || '').replace(/[\s\u00a0\u2028\u2029]+/g, ' ');
-    const key = (r.s || '') + (r.c ? '|c' + r.c.slice(1) : '') + (r.h ? '|h' + r.h : '');
+    const key = (r.s || '') + (r.c ? '|c' + r.c.slice(1) : '') + (r.h ? '|h' + r.h : '') + (r.z ? '|z' + r.z : '');
     for(let k = 0; k < x.length; k++){ const ch = x[k]; if(ch === ' ' && (!text || text.endsWith(' '))) continue; text += ch; st.push(key); }
   });
   while(text.endsWith(' ')){ text = text.slice(0, -1); st.pop(); }
@@ -42869,7 +43040,7 @@ function tbDecorate(text, wordFn, stOf, plain){
     if(st){
       const [L, ...ex] = st.split('|');
       const cls = L.split('').filter(Boolean).map(c => 'st-' + c), css = [];
-      ex.forEach(x => { if(x[0] === 'c' && /^[0-9a-f]{6}$/.test(x.slice(1))) css.push('color:#' + x.slice(1)); else if(x[0] === 'h' && TB_HL[x.slice(1)]) cls.push('hl-' + x.slice(1)); });
+      ex.forEach(x => { if(x[0] === 'c' && /^[0-9a-f]{6}$/.test(x.slice(1))) css.push('color:#' + x.slice(1)); else if(x[0] === 'h' && TB_HL[x.slice(1)]) cls.push('hl-' + x.slice(1)); else if(x[0] === 'z' && /^[1-7]$/.test(x.slice(1))) cls.push('fz-' + x.slice(1)); });
       out += `<span class="tb-st ${cls.join(' ')}"${css.length ? ` style="${css.join(';')}"` : ''}>`;
     }
     open = st;
@@ -42961,11 +43132,12 @@ async function tbStore(store, mode, fn){
 }
 async function tbImgPut(id, blob){ try{ await tbStore('img', 'readwrite', os => { os.put(blob, tbImgKey(id)); }); return true; }catch(e){ console.warn('tablette : image', e); return false; } }
 async function tbImgGet(id){ try{ return await tbStore('img', 'readonly', os => os.get(tbImgKey(id))) || null; }catch(e){ return null; } }
-async function tbImgDel(id){ try{ await tbStore('img', 'readwrite', os => { os.delete(tbImgKey(id)); }); }catch(e){} if(TB.imgUrl[id]){ try{ URL.revokeObjectURL(TB.imgUrl[id]); }catch(e){} delete TB.imgUrl[id]; } }
+async function tbImgDel(id){ try{ tbImgSyncDrop(id); }catch(e){} try{ await tbStore('img', 'readwrite', os => { os.delete(tbImgKey(id)); }); }catch(e){} if(TB.imgUrl[id]){ try{ URL.revokeObjectURL(TB.imgUrl[id]); }catch(e){} delete TB.imgUrl[id]; } }
 async function tbImgUrl(id){
   if(!id) return '';
   if(TB.imgUrl[id]) return TB.imgUrl[id];
-  const blob = await tbImgGet(id);
+  let blob = await tbImgGet(id);
+  if(!blob) blob = await tbImgFromSync(id);            // ☁️ arrivée de l'autre appareil
   if(!blob) return '';
   return (TB.imgUrl[id] = URL.createObjectURL(blob));
 }
@@ -43000,6 +43172,102 @@ async function tbImgAdd(file){
   if(!(await tbImgPut(id, blob))) return null;
   TB.imgUrl[id] = URL.createObjectURL(blob);
   return id;
+}
+/* ☁️ 1.0.25 : les images passent aussi par la synchro (PC ↔ téléphone) : réduites (1100 px), en morceaux de
+   30 000 caractères (« lexiqueQuiz::tbImg::id~n ») ; une fois envoyées (ou reçues et rangées), la copie locale
+   en texte est enlevée pour ne pas remplir l'appareil. */
+var TB_IMG = 'lexiqueQuiz::tbImg::';
+function tbImgSKey(id, i){ return TB_IMG + id + (i ? '~' + i : '') + '::u:' + getCurrentUserId(); }
+function tbImgSentKey(){ return 'vocabVision.tbImgSent::u:' + getCurrentUserId(); }
+function tbImgSent(){ try{ return JSON.parse(localStorage.getItem(tbImgSentKey()) || '{}') || {}; }catch(e){ return {}; } }
+function tbImgSentSet(id, n){ try{ const m = tbImgSent(); if(n) m[id] = n; else delete m[id]; localStorage.setItem(tbImgSentKey(), JSON.stringify(m)); }catch(e){} }
+async function tbImgForSync(blob){
+  let url = '';
+  try{
+    url = URL.createObjectURL(blob);
+    const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; });
+    let w = img.naturalWidth || 1, h = img.naturalHeight || 1;
+    const k = Math.min(1, 1100 / Math.max(w, h)); w = Math.max(1, Math.round(w * k)); h = Math.max(1, Math.round(h * k));
+    const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+    const cx = cv.getContext('2d'); cx.fillStyle = '#fff'; cx.fillRect(0, 0, w, h); cx.drawImage(img, 0, 0, w, h);
+    let out = await new Promise(res => cv.toBlob(res, 'image/webp', 0.72));
+    if(!out || out.type !== 'image/webp') out = await new Promise(res => cv.toBlob(res, 'image/jpeg', 0.74));
+    return (out && out.size && out.size < blob.size) ? out : blob;
+  }catch(e){ return blob; }
+  finally{ if(url) URL.revokeObjectURL(url); }
+}
+function tbB64Of(blob){ return new Promise((res) => { const r = new FileReader(); r.onload = () => res(String(r.result || '').replace(/^data:[^,]*,/, '')); r.onerror = () => res(''); r.readAsDataURL(blob); }); }
+async function tbImgSyncOut(ids){
+  TB.imgOut = TB.imgOut || new Set();
+  const sent = tbImgSent();
+  for(const id of [...new Set(ids || [])]){
+    if(!id || sent[id] || TB.imgOut.has(id)) continue;
+    try{ if(localStorage.getItem(tbImgSKey(id)) != null) continue; }catch(e){ continue; }
+    TB.imgOut.add(id);
+    try{
+      const blob = await tbImgGet(id); if(!blob) continue;
+      const small = await tbImgForSync(blob), b64 = await tbB64Of(small);
+      if(!b64) continue;
+      const n = Math.max(1, Math.ceil(b64.length / TB_PART)), done = [];
+      try{
+        for(let i = n - 1; i >= 0; i--){ const k = tbImgSKey(id, i), d = b64.slice(i * TB_PART, (i + 1) * TB_PART); localStorage.setItem(k, JSON.stringify(i ? { i, d } : { n, t:small.type || 'image/jpeg', d })); done.push(k); }
+      }catch(e){
+        done.forEach(k => { try{ localStorage.removeItem(k); }catch(err){} });
+        if(!TB.imgFullSaid){ TB.imgFullSaid = true; try{ setStatus("⚠️ Plus de place sur cet appareil pour envoyer une image de la Tablette à ton autre appareil.", 'err'); }catch(err){} }
+      }
+    }finally{ TB.imgOut.delete(id); }
+  }
+}
+function tbImgSyncParts(id){
+  try{
+    const h = JSON.parse(localStorage.getItem(tbImgSKey(id)) || 'null'); if(!h || !h.n) return null;
+    const parts = [h.d];
+    for(let i = 1; i < h.n; i++){ const q = JSON.parse(localStorage.getItem(tbImgSKey(id, i)) || 'null'); if(!q || typeof q.d !== 'string') return null; parts.push(q.d); }
+    return { n:h.n, t:h.t || 'image/jpeg', b64:parts.join('') };
+  }catch(e){ return null; }
+}
+async function tbImgFromSync(id){
+  const P = tbImgSyncParts(id); if(!P) return null;
+  try{
+    const bin = atob(P.b64), arr = new Uint8Array(bin.length);
+    for(let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+    const blob = new Blob([arr], { type:P.t });
+    if(await tbImgPut(id, blob)){ tbImgSentSet(id, P.n); setTimeout(tbImgPrune, 0); }
+    return blob;
+  }catch(e){ return null; }
+}
+/* la copie en texte d'une image, une fois partie au Google Sheet (ou rangée ici), n'est plus utile sur l'appareil */
+async function tbImgPrune(){
+  try{
+    const suf = '::u:' + getCurrentUserId(), base = (typeof syncLoadBase === 'function') ? syncLoadBase() : {};
+    const ids = new Set();
+    for(let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); if(k && k.startsWith(TB_IMG) && k.endsWith(suf)) ids.add(k.slice(TB_IMG.length, k.length - suf.length).replace(/~\d+$/, '')); }
+    for(const id of ids){
+      const h = JSON.parse(localStorage.getItem(tbImgSKey(id)) || 'null'); if(!h || !h.n) continue;
+      const keys = []; for(let i = 0; i < h.n; i++) keys.push(tbImgSKey(id, i));
+      const pushed = keys.every(k => { const v = localStorage.getItem(k); return v != null && base[k] === syncHash(v); });
+      if(!pushed || !(await tbImgGet(id))) continue;
+      tbImgSentSet(id, h.n);
+      keys.forEach(k => { try{ localStorage.removeItem(k); }catch(e){} });
+    }
+  }catch(e){}
+}
+function tbImgSyncDrop(id){
+  const n = Math.max(tbImgSent()[id] || 0, (() => { try{ const h = JSON.parse(localStorage.getItem(tbImgSKey(id)) || 'null'); return (h && h.n) || 0; }catch(e){ return 0; } })(), 1);
+  const keys = []; for(let i = 0; i < n; i++){ const k = tbImgSKey(id, i); keys.push(k); try{ localStorage.removeItem(k); }catch(e){} }
+  tbImgSentSet(id, 0);
+  try{ cloudDeleteKeys(keys); }catch(e){}
+}
+/* après une synchro : les images reçues sont rangées, et celles qui manquaient à l'écran s'affichent */
+async function tbImgImportAll(){
+  try{
+    const suf = '::u:' + getCurrentUserId(), ids = new Set();
+    for(let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); if(k && k.startsWith(TB_IMG) && k.endsWith(suf) && !/~\d+::u:/.test(k)) ids.add(k.slice(TB_IMG.length, k.length - suf.length)); }
+    for(const id of ids){ if(!(await tbImgGet(id))) await tbImgFromSync(id); }
+    document.querySelectorAll('.missing[data-img]').forEach(el => { el.classList.remove('missing'); const im = el.tagName === 'IMG' ? el : el.querySelector('img'); if(im) im.removeAttribute('src'); });
+    tbLoadImgs(document);
+    tbImgPrune();
+  }catch(e){}
 }
 function tbArtImgIds(art){ return (tbBlocksOf(art) || []).filter(b => b.t === 'img' && b.id).map(b => b.id); }
 /* images gardées mais plus utilisées par aucun texte (brouillon abandonné, image retirée) : on fait le ménage */
@@ -43056,14 +43324,15 @@ function tbDomToBlocks(root, opts){
     return [...new Set(x.split(''))].sort().join('');
   };
   const colOf = (el, col) => {
-    let c = col.c, h = col.h;
+    let c = col.c, h = col.h, z = col.z || 0;
+    if(el.tagName === 'FONT' && el.getAttribute('size')){ const n = parseInt(el.getAttribute('size'), 10); if(n >= 1 && n <= 7) z = n === 3 ? 0 : n; }
     const fc = el.tagName === 'FONT' ? el.getAttribute('color') : '', sc = el.style ? el.style.color : '', bg = el.style ? (el.style.backgroundColor || '') : '';
     const v = fc || sc;
     if(v){ const hx = tbHex(v); if(hx === TB_NOCOLOR || !tbColorful(hx)) c = ''; else c = hx; }
     if(bg){ const hx = tbHex(bg); h = hx === 'transparent' ? '' : tbHlName(hx); }
-    return (c === col.c && h === col.h) ? col : { c, h };
+    return (c === col.c && h === col.h && z === (col.z || 0)) ? col : { c, h, z };
   };
-  const NOCOL = { c:'', h:'' };
+  const NOCOL = { c:'', h:'', z:0 };
   const kOf = (el) => !!(opts.editor && el.getAttribute && el.getAttribute('data-k') === '1');
   const alOf = (el) => { if(!opts.editor) return ''; const v = ((el.style && el.style.textAlign) || el.getAttribute('align') || '').toLowerCase(); return v === 'center' ? 'c' : v === 'right' ? 'r' : v === 'justify' ? 'j' : ''; };
   const walk = (node, t, s, a, k, col) => {
@@ -43073,7 +43342,7 @@ function tbDomToBlocks(root, opts){
         const x = n.textContent.replace(TB_INVIS, '');
         if(!x || (!cur && !x.trim())) continue;
         if(!cur){ cur = { t:t || 'p', r:[] }; if(a) cur.a = a; if(k) cur.k = true; }
-        const run = { x, s }; if(col.c) run.c = col.c; if(col.h) run.h = col.h;
+        const run = { x, s }; if(col.c) run.c = col.c; if(col.h) run.h = col.h; if(col.z) run.z = col.z;
         cur.r.push(run);
         continue;
       }
@@ -43111,7 +43380,7 @@ function tbDomToBlocks(root, opts){
   blocks.forEach(b => {
     if(!b.r) return;
     const r = [];
-    b.r.forEach(x => { const prev = r[r.length - 1]; if(prev && prev.s === x.s && (prev.c || '') === (x.c || '') && (prev.h || '') === (x.h || '')) prev.x += x.x; else { const y = { x:x.x, s:x.s }; if(x.c) y.c = x.c; if(x.h) y.h = x.h; r.push(y); } });
+    b.r.forEach(x => { const prev = r[r.length - 1]; if(prev && prev.s === x.s && (prev.c || '') === (x.c || '') && (prev.h || '') === (x.h || '') && (prev.z || 0) === (x.z || 0)) prev.x += x.x; else { const y = { x:x.x, s:x.s }; if(x.c) y.c = x.c; if(x.h) y.h = x.h; if(x.z) y.z = x.z; r.push(y); } });
     if(r.length){ r[0].x = r[0].x.replace(/^[\s\u00a0]+/, ''); r[r.length - 1].x = r[r.length - 1].x.replace(/[\s\u00a0]+$/, ''); }
     b.r = r.filter(x => x.x);
     if(b.t === 'h2' || b.t === 'h3') b.r.forEach(x => { x.s = x.s.replace(/b/g, ''); });
@@ -43125,6 +43394,7 @@ function tbRunsHtml(r){
     if(st.includes('u')) t = `<u>${t}</u>`; if(st.includes('i')) t = `<i>${t}</i>`; if(st.includes('b')) t = `<b>${t}</b>`;
     if(x.h && TB_HL[x.h]) t = `<span style="background-color:${TB_HL[x.h][0]}">${t}</span>`;
     if(x.c && /^#[0-9a-f]{6}$/i.test(x.c)) t = `<font color="${x.c}">${t}</font>`;
+    if(x.z && x.z !== 3 && x.z >= 1 && x.z <= 7) t = `<font size="${x.z}">${t}</font>`;
     return t;
   }).join('');
 }
@@ -43355,6 +43625,7 @@ var TB_ICO = {
   exitFull:'<path d="M8 3v3a2 2 0 0 1-2 2H3M21 8h-3a2 2 0 0 1-2-2V3M3 16h3a2 2 0 0 1 2 2v3M16 21v-3a2 2 0 0 1 2-2h3"/>',
   paste:'<rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>',
   textColor:'<path d="M6 16 11 4h2l5 12"/><path d="M8.2 11h7.6"/><rect x="4" y="18.5" width="16" height="3" rx="1" style="fill:var(--tbk-fc, #E5484D);stroke:none"/>',
+  brush:'<path d="M9.06 11.9 17.5 3.46a2.12 2.12 0 0 1 3 3L12.1 14.94"/><path d="M7.07 14.94c-1.66 0-3 1.35-3 3.02 0 1.33-2.5 1.52-2 2.02 1.08 1.1 2.49 2.02 4 2.02 2.2 0 4-1.8 4-4.04a3.01 3.01 0 0 0-3-3.02z"/>',
   flow:'<path d="M3 6h14a3 3 0 0 1 0 6H7a3 3 0 0 0 0 6h14"/><path d="m18 15 3 3-3 3"/>',
   more:'<circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/>',
   cut:'<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.12 15.88M14.47 14.48 20 20M8.12 8.12 12 12"/>',
@@ -43404,6 +43675,7 @@ function renderTabletteHome(){
   };
   const tb = (cmd, ico, title) => `<button type="button" class="tbk-tb" data-ed="${cmd}" title="${title}" aria-label="${title}" aria-pressed="false">${tbIcon(ico)}</button>`;
   const u0 = tbUi(), efs = Math.max(13, Math.min(30, +u0.edFs || 18));
+  const FSZ = TB_SIZES.map(([v, l]) => `<option value="${v}"${v === 3 ? ' selected' : ''}>${l}</option>`).join('');
   const STY = '<option value="p">Paragraphe</option><option value="h2">Titre</option><option value="h3">Sous-titre</option><option value="lead">Chapeau</option><option value="quote">Citation</option>';
   card.innerHTML = `<div class="tbk" id="tbkRoot">
     <div class="cat-tag">📰 La Tablette</div>
@@ -43412,7 +43684,8 @@ function renderTabletteHome(){
     <div class="tbk-studio" id="tbkDevice" style="--efs:${efs}px;">
       <div class="tbk-tools" id="tbkTools" role="toolbar" aria-label="Mise en page">
         <select class="tbk-style" id="tbkStyle" data-style aria-label="Style du paragraphe" title="Style du paragraphe">${STY}</select>
-        <span class="tbk-grp">${tb('bold', 'bold', 'Gras (Ctrl+B)')}${tb('italic', 'italic', 'Italique (Ctrl+I)')}${tb('underline', 'underline', 'Souligné (Ctrl+U)')}${tb('colors', 'textColor', 'Couleur du texte et surligneur')}${tb('clear', 'clear', 'Effacer la mise en forme')}</span>
+        <select class="tbk-style tbk-fsize" data-fsize aria-label="Taille du texte sélectionné" title="Taille du texte sélectionné (plus petit, plus grand)">${FSZ}</select>
+        <span class="tbk-grp">${tb('bold', 'bold', 'Gras (Ctrl+B)')}${tb('italic', 'italic', 'Italique (Ctrl+I)')}${tb('underline', 'underline', 'Souligné (Ctrl+U)')}${tb('colors', 'textColor', 'Couleur du texte et surligneur')}${tb('paint', 'brush', 'Reproduire le style : touche-le, puis sélectionne le texte à mettre pareil (double-clic : plusieurs fois)')}${tb('clear', 'clear', 'Effacer la mise en forme')}</span>
         <span class="tbk-grp">${tb('al-l', 'alignLeft', 'Aligner à gauche')}${tb('al-c', 'alignCenter', 'Centrer')}${tb('al-r', 'alignRight', 'Aligner à droite')}${tb('al-j', 'alignJustify', 'Justifier')}</span>
         <span class="tbk-grp">${tb('list', 'list', 'Liste à puces')}${tb('olist', 'listOrdered', 'Liste numérotée')}${tb('br', 'br', 'Saut de ligne (Maj+Entrée)')}${tb('hr', 'hr', 'Séparateur')}${tb('img', 'image', 'Ajouter une image (galerie ou appareil photo)')}</span>
         <span class="tbk-grp"><button type="button" class="tbk-tb tbk-tbl" data-ed="join" title="Recoller les lignes sélectionnées en un seul paragraphe (sans sélection : ce paragraphe et le suivant)" aria-label="Recoller les lignes">${tbIcon('join')}<span>Recoller</span></button>${tb('flow', 'flow', 'Lignes continues : plus de retour à la ligne au milieu des phrases (même les tiens), le texte suit la largeur de l\'écran')}</span>
@@ -43432,18 +43705,22 @@ function renderTabletteHome(){
           <div class="tbk-edwrap">
             <div class="tbk-ed" id="tbkEd" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Ton texte" spellcheck="true" data-ph="Colle ici un article, un mail, un passage de livre… Les titres et les images passent aussi.">${draft.html || ''}</div>
           </div>
-          <div class="tbk-imgbar" id="tbkImgBar" hidden>
-            <span class="tbk-imgbar-l">🖼 Image</span>
-            <input type="range" id="tbkImgW" min="15" max="100" step="1" value="100" aria-label="Taille de l'image"><output id="tbkImgWOut">100 %</output>
-            <span class="tbk-seg"><button type="button" data-ei="l" aria-label="À gauche">⬅</button><button type="button" data-ei="c" aria-label="Au centre">⬛</button><button type="button" data-ei="r" aria-label="À droite">➡</button></span>
-            <button type="button" class="tbk-ib" data-ei="del" aria-label="Retirer l'image">🗑</button>
-          </div>
         </div>
       </div>
       <input type="file" id="tbkFile" accept="image/*" multiple hidden>
+      <div class="tbk-imgbar tbk-float" id="tbkImgBar" hidden role="toolbar" aria-label="Réglages de l'image">
+        <span class="tbk-imgbar-l">🖼 Taille</span>
+        <button type="button" class="tbk-ib sm" data-ei="w-" aria-label="Plus petite">−</button>
+        <input type="range" id="tbkImgW" min="15" max="100" step="1" value="100" aria-label="Taille de l'image"><output id="tbkImgWOut">100 %</output>
+        <button type="button" class="tbk-ib sm" data-ei="w+" aria-label="Plus grande">+</button>
+        <span class="tbk-seg" role="group" aria-label="Position"><button type="button" data-ei="l" title="À gauche (le texte à droite)" aria-label="À gauche">${tbIcon('alignLeft')}</button><button type="button" data-ei="c" title="Au centre" aria-label="Au centre">${tbIcon('alignCenter')}</button><button type="button" data-ei="r" title="À droite (le texte à gauche)" aria-label="À droite">${tbIcon('alignRight')}</button></span>
+        <button type="button" class="tbk-ib" data-ei="del" title="Retirer l'image" aria-label="Retirer l'image">🗑</button>
+        <button type="button" class="tbk-ib" data-ei="x" title="Fermer" aria-label="Fermer">✕</button>
+      </div>
       <div class="tbk-bubble" id="tbkBubble" hidden role="toolbar" aria-label="Mise en forme rapide">
         <select class="tbk-style" data-style aria-label="Style du paragraphe">${STY}</select>
-        <span class="tbk-grp">${tb('bold', 'bold', 'Gras (Ctrl+B)')}${tb('italic', 'italic', 'Italique (Ctrl+I)')}${tb('underline', 'underline', 'Souligné (Ctrl+U)')}${tb('colors', 'textColor', 'Couleur du texte et surligneur')}${tb('clear', 'clear', 'Effacer la mise en forme')}</span>
+        <span class="tbk-grp"><button type="button" class="tbk-tb" data-ed="fz-dn" title="Texte sélectionné plus petit" aria-label="Texte sélectionné plus petit"><b class="tbk-a sm">A</b><i class="tbk-pm">−</i></button><button type="button" class="tbk-tb" data-ed="fz-up" title="Texte sélectionné plus grand" aria-label="Texte sélectionné plus grand"><b class="tbk-a">A</b><i class="tbk-pm">+</i></button></span>
+        <span class="tbk-grp">${tb('bold', 'bold', 'Gras (Ctrl+B)')}${tb('italic', 'italic', 'Italique (Ctrl+I)')}${tb('underline', 'underline', 'Souligné (Ctrl+U)')}${tb('colors', 'textColor', 'Couleur du texte et surligneur')}${tb('paint', 'brush', 'Reproduire le style')}${tb('clear', 'clear', 'Effacer la mise en forme')}</span>
         <span class="tbk-grp">${tb('al-l', 'alignLeft', 'Aligner à gauche')}${tb('al-c', 'alignCenter', 'Centrer')}${tb('al-r', 'alignRight', 'Aligner à droite')}${tb('al-j', 'alignJustify', 'Justifier')}</span>
         <span class="tbk-grp">${tb('join', 'join', 'Recoller les lignes')}${tb('fix', 'broom', 'Ajuster la sélection (recoller les phrases coupées)')}${tb('menu', 'more', 'Plus d\'outils (clic droit)')}</span>
       </div>
@@ -43454,6 +43731,7 @@ function renderTabletteHome(){
         <button type="button" role="menuitem" data-ed="paste-plain">${tbIcon('paste')}<span>Coller le texte seul</span><kbd>Ctrl+Maj+V</kbd></button>
         <hr>
         <div class="tbk-mrow tbk-mstyles" role="group" aria-label="Style">${[['p', 'Paragraphe'], ['h2', 'Titre'], ['h3', 'Sous-titre'], ['lead', 'Chapeau'], ['quote', 'Citation']].map(([v, l]) => `<button type="button" role="menuitemradio" data-ed="st-${v}">${l}</button>`).join('')}</div>
+        <div class="tbk-mrow tbk-mstyles" role="group" aria-label="Taille">${[[2, 'Petit'], [3, 'Normal'], [4, 'Grand'], [5, 'Très grand'], [6, 'Énorme']].map(([v, l]) => `<button type="button" role="menuitemradio" data-ed="fz-${v}">${l}</button>`).join('')}</div>
         <div class="tbk-mrow" role="group" aria-label="Mise en forme">${tb('bold', 'bold', 'Gras (Ctrl+B)')}${tb('italic', 'italic', 'Italique (Ctrl+I)')}${tb('underline', 'underline', 'Souligné (Ctrl+U)')}${tb('clear', 'clear', 'Effacer la mise en forme')}<i class="tbk-msep"></i>${tb('al-l', 'alignLeft', 'Aligner à gauche')}${tb('al-c', 'alignCenter', 'Centrer')}${tb('al-r', 'alignRight', 'Aligner à droite')}${tb('al-j', 'alignJustify', 'Justifier')}</div>
         <div class="tbk-mrow" role="group" aria-label="Insérer">${tb('list', 'list', 'Liste à puces')}${tb('olist', 'listOrdered', 'Liste numérotée')}${tb('br', 'br', 'Saut de ligne (Maj+Entrée)')}${tb('hr', 'hr', 'Séparateur')}${tb('img', 'image', 'Ajouter une image')}<i class="tbk-msep"></i>${tb('undo', 'undo', 'Annuler (Ctrl+Z)')}${tb('redo', 'redo', 'Rétablir (Ctrl+Y)')}</div>
         <hr>
@@ -43461,6 +43739,7 @@ function renderTabletteHome(){
         <button type="button" role="menuitem" data-ed="fix"><b class="tbk-mi">🧹</b><span>Ajuster <small>(la sélection, sinon tout)</small></span></button>
         <button type="button" role="menuitem" data-ed="flow">${tbIcon('flow')}<span>Lignes continues <small>(une seule ligne par paragraphe)</small></span></button>
         <button type="button" role="menuitem" data-ed="colors"><b class="tbk-mi">🎨</b><span>Couleurs et surligneur…</span></button>
+        <button type="button" role="menuitem" data-ed="paint">${tbIcon('brush')}<span>Reproduire le style</span></button>
         <hr>
         <button type="button" role="menuitemcheckbox" data-ed="opt-bubble" aria-checked="true"><b class="tbk-mi">✎</b><span>Barre près du curseur</span><i class="tbk-sw" aria-hidden="true"></i></button>
         <button type="button" role="menuitemcheckbox" data-ed="opt-top" aria-checked="true"><b class="tbk-mi">▤</b><span>Barre d'outils en haut</span><i class="tbk-sw" aria-hidden="true"></i></button>
@@ -43544,6 +43823,16 @@ function renderTabletteHome(){
   };
   const blockOfSel = () => { const s = window.getSelection(); let n = s && s.rangeCount ? s.getRangeAt(0).startContainer : null; while(n && n !== ed){ if(n.nodeType === 1 && /^(H2|H3|H4|P|BLOCKQUOTE|LI|DIV)$/.test(n.tagName)) return n; n = n.parentNode; } return null; };
   /* l'état des boutons suit le curseur, comme dans un vrai traitement de texte */
+  let paint = null;            // 🖌 le style copié (reproduire le style)
+  const sizeHere = () => {     // 🔠 la taille posée sur le texte où est le curseur (pas celle calculée par le navigateur)
+    try{
+      const s = window.getSelection(); let n = s.rangeCount ? s.getRangeAt(0).startContainer : null;
+      if(n && n.nodeType === 3) n = n.parentNode;
+      const f = n && ed.contains(n) ? n.closest('font[size]') : null;
+      if(f && ed.contains(f)) return parseInt(f.getAttribute('size'), 10) || 3;
+    }catch(e){}
+    return 3;
+  };
   const refresh = () => {
     if(!inEd()) return;
     const q = (c) => { try{ return document.queryCommandState(c); }catch(e){ return false; } };
@@ -43557,6 +43846,10 @@ function renderTabletteHome(){
     let v = 'p';
     if(blk){ const tg = blk.tagName; v = tg === 'H2' ? 'h2' : tg === 'H3' ? 'h3' : tg === 'H4' ? 'lead' : (tg === 'BLOCKQUOTE' || blk.closest('blockquote')) ? 'quote' : 'p'; }
     dev.querySelectorAll('select[data-style]').forEach(x => { if(x.value !== v) x.value = v; });
+    const fz = sizeHere();
+    dev.querySelectorAll('select[data-fsize]').forEach(x => { if(+x.value !== fz) x.value = String(fz); });
+    [1, 2, 3, 4, 5, 6, 7].forEach(z => on('fz-' + z, z === fz));
+    on('paint', !!paint);
     ['p', 'h2', 'h3', 'lead', 'quote'].forEach(x => on('st-' + x, v === x));
   };
   let schedB = () => {};
@@ -43564,6 +43857,8 @@ function renderTabletteHome(){
   document.addEventListener('selectionchange', onSel);
   const onKey = (e) => {
     if(e.key !== 'Escape') return;
+    if(dev.classList.contains('painting')){ e.preventDefault(); dev.querySelector('[data-ed="paint"]').click(); return; }
+    if(document.getElementById('tbkImgBar') && !document.getElementById('tbkImgBar').hidden){ e.preventDefault(); document.getElementById('tbkImgBar').hidden = true; return; }
     if(document.getElementById('tbkColors') && !document.getElementById('tbkColors').hidden){ e.preventDefault(); document.getElementById('tbkColors').hidden = true; return; }
     if(document.getElementById('tbkMenu') && !document.getElementById('tbkMenu').hidden){ e.preventDefault(); document.getElementById('tbkMenu').hidden = true; return; }
     if(document.getElementById('tbkBubble') && !document.getElementById('tbkBubble').hidden){ e.preventDefault(); document.getElementById('tbkBubble').hidden = true; return; }
@@ -43711,24 +44006,43 @@ function renderTabletteHome(){
   };
   /* 🖼 toucher une image dans l'éditeur : taille, position, retirer */
   let selImg = null;
-  const showBar = (img) => {
+  let barAt = null;
+  const placeBar = () => {
+    if(bar.hidden || !selImg) return;
+    const sr = dev.getBoundingClientRect(), ir = selImg.getBoundingClientRect(), bw = bar.offsetWidth, bh = bar.offsetHeight;
+    // à côté de la souris (là où on a touché l'image), sinon juste au-dessus de l'image
+    let x = barAt ? barAt.x - bw / 2 : ir.left + ir.width / 2 - bw / 2, y = barAt ? barAt.y + 14 : ir.top - bh - 8;
+    if(y + bh > window.innerHeight - 8) y = (barAt ? barAt.y : ir.top) - bh - 14;
+    if(y < 8) y = Math.min(window.innerHeight - bh - 8, ir.top + 8);
+    x = Math.max(8, Math.min(x, window.innerWidth - bw - 8));
+    bar.style.left = Math.round(x - sr.left) + 'px'; bar.style.top = Math.round(y - sr.top) + 'px';
+  };
+  const showBar = (img, ev) => {
     ed.querySelectorAll('img.sel').forEach(x => x.classList.remove('sel'));
     selImg = img;
-    if(!img){ bar.hidden = true; return; }
+    if(!img){ bar.hidden = true; barAt = null; return; }
     img.classList.add('sel');
     const w = +img.dataset.w || 100;
     document.getElementById('tbkImgW').value = w; document.getElementById('tbkImgWOut').textContent = w + ' %';
-    bar.querySelectorAll('[data-ei]').forEach(b => b.classList.toggle('on', b.dataset.ei === (img.dataset.al || 'c')));
+    bar.querySelectorAll('[data-ei="l"],[data-ei="c"],[data-ei="r"]').forEach(b => b.classList.toggle('on', b.dataset.ei === (img.dataset.al || 'c')));
+    if(ev && ev.clientX != null) barAt = { x:ev.clientX, y:ev.clientY };
     bar.hidden = false;
+    placeBar();
   };
-  ed.addEventListener('click', (e) => { const img = e.target.closest && e.target.closest('img'); showBar(img && ed.contains(img) ? img : null); });
-  document.getElementById('tbkImgW').addEventListener('input', (e) => { if(!selImg) return; const w = +e.target.value; selImg.dataset.w = w; selImg.style.width = w + '%'; document.getElementById('tbkImgWOut').textContent = w + ' %'; sync(); });
+  ed.addEventListener('click', (e) => { const img = e.target.closest && e.target.closest('img'); showBar(img && ed.contains(img) ? img : null, e); });
+  const setImgW = (w) => { if(!selImg) return; w = Math.max(15, Math.min(100, Math.round(w))); selImg.dataset.w = w; selImg.style.width = w + '%'; document.getElementById('tbkImgW').value = w; document.getElementById('tbkImgWOut').textContent = w + ' %'; sync(); requestAnimationFrame(placeBar); };
+  document.getElementById('tbkImgW').addEventListener('input', (e) => setImgW(+e.target.value));
+  bar.addEventListener('pointerdown', (e) => { if(e.target.closest('button')) e.preventDefault(); });
   bar.addEventListener('click', (e) => {
-    const b = e.target.closest('[data-ei]'); if(!b || !selImg) return;
+    const b = e.target.closest('[data-ei]'); if(!b) return;
+    if(b.dataset.ei === 'x'){ showBar(null); return; }
+    if(!selImg) return;
+    if(b.dataset.ei === 'w-' || b.dataset.ei === 'w+'){ setImgW((+selImg.dataset.w || 100) + (b.dataset.ei === 'w+' ? 10 : -10)); return; }
     if(b.dataset.ei === 'del'){ const p = selImg.closest('p'); selImg.remove(); if(p && !p.textContent.trim() && !p.querySelector('img')) p.remove(); showBar(null); sync(); return; }
     selImg.dataset.al = b.dataset.ei; selImg.classList.remove('al-l', 'al-c', 'al-r'); selImg.classList.add('al-' + b.dataset.ei);
     showBar(selImg); sync();
   });
+  window.addEventListener('scroll', () => { if(!bar.hidden){ barAt = null; placeBar(); } }, { passive:true });
   /* la barre d'outils */
   const exec = (c, v) => { try{ return document.execCommand(c, false, v); }catch(e){ return false; } };
   /* ↩ annuler / rétablir : « Recoller » et « Ajuster » s'annulent d'un seul coup */
@@ -43800,6 +44114,9 @@ function renderTabletteHome(){
   const runCmd = (cmd, btn) => {
     if(cmd === 'colors'){ toggleColors(btn); return; }
     if(/^(fc|hl)-/.test(cmd)){ applyColor(cmd); return; }
+    if(cmd === 'paint'){ closeMenu(); togglePaint(false); return; }
+    if(/^fz-[1-7]$/.test(cmd)){ closeMenu(); applySize(+cmd.slice(3)); return; }
+    if(cmd === 'fz-dn' || cmd === 'fz-up'){ putSel(); applySize(sizeHere() + (cmd === 'fz-up' ? 1 : -1)); return; }
     if(cmd === 'menu'){ const r = bubble.getBoundingClientRect(); openMenu(r.right - 30, r.bottom + 6); return; }
     if(cmd === 'opt-bubble'){ tbUi().bubble = tbUi().bubble === false; tbSaveUi(); applyOpts(); return; }
     if(cmd === 'opt-top'){ tbUi().topBar = tbUi().topBar === false; tbSaveUi(); applyOpts(); if(!menu.hidden) requestAnimationFrame(() => openMenu(menuAt.x, menuAt.y)); return; }
@@ -43889,6 +44206,64 @@ function renderTabletteHome(){
     keepSel(); sync(); refresh(); schedBubble();
   };
   fcPick.addEventListener('input', () => applyColor('fc-x', fcPick.value));
+  /* 🔠 la taille du texte sélectionné */
+  const applySize = (v) => {
+    v = Math.max(1, Math.min(7, Math.round(+v) || 3));
+    putSel();
+    try{ document.execCommand('styleWithCSS', false, false); }catch(e){}
+    exec('fontSize', String(v));
+    keepSel(); sync(); refresh(); schedBubble();
+  };
+  dev.querySelectorAll('select[data-fsize]').forEach(x => {
+    x.addEventListener('pointerdown', keepSel); x.addEventListener('focus', keepSel);
+    x.addEventListener('change', () => applySize(+x.value));
+  });
+  /* 🖌 reproduire le style : on prend celui du texte où est le curseur, puis on le pose sur le texte qu'on sélectionne */
+  const fmtHere = () => {
+    const s = window.getSelection(); if(!s.rangeCount) return null;
+    let n = s.getRangeAt(0).startContainer; if(n.nodeType === 3) n = n.parentNode;
+    if(!ed.contains(n)) return null;
+    const q = (c) => { try{ return document.queryCommandState(c); }catch(e){ return false; } };
+    const f = { b:q('bold'), i:q('italic'), u:q('underline'), c:'', h:'', z:0 };
+    for(let x = n; x && x !== ed; x = x.parentNode){
+      if(x.nodeType !== 1) continue;
+      if(!f.c && x.tagName === 'FONT' && x.getAttribute('color')){ const hx = tbHex(x.getAttribute('color')); if(hx !== TB_NOCOLOR && tbColorful(hx)) f.c = hx; }
+      if(!f.z && x.tagName === 'FONT' && x.getAttribute('size')){ const z = parseInt(x.getAttribute('size'), 10); if(z && z !== 3) f.z = z; }
+      if(!f.h && x.style && x.style.backgroundColor){ const hx = tbHex(x.style.backgroundColor); if(hx !== 'transparent') f.h = tbHlName(hx); }
+    }
+    return f;
+  };
+  const togglePaint = (sticky) => {
+    if(paint && !sticky){ paint = null; dev.classList.remove('painting'); cnt.textContent = ''; refresh(); return; }
+    const f = fmtHere();
+    if(!f){ cnt.textContent = '🖌 Mets d\'abord le curseur dans le texte dont tu veux le style'; return; }
+    paint = { f, sticky:!!sticky };
+    dev.classList.add('painting');
+    cnt.textContent = sticky ? '🖌 Style copié : sélectionne les textes à mettre pareil (Échap pour arrêter)' : '🖌 Style copié : sélectionne le texte à mettre pareil';
+    refresh(); hideBubble();
+  };
+  const applyPaint = () => {
+    if(!paint) return;
+    const s = window.getSelection(); if(!s.rangeCount || !inEd()) return;
+    const r0 = s.getRangeAt(0);
+    if(r0.collapsed && r0.startContainer.nodeType === 3){   // un simple clic : le mot touché
+      const n = r0.startContainer, t = n.textContent, W = /[\p{L}\p{N}’'-]/u;
+      let a = r0.startOffset, z = a;
+      while(a > 0 && W.test(t[a - 1])) a--;
+      while(z < t.length && W.test(t[z])) z++;
+      if(z > a){ const r = document.createRange(); r.setStart(n, a); r.setEnd(n, z); s.removeAllRanges(); s.addRange(r); }
+    }
+    if(s.getRangeAt(0).collapsed) return;
+    const f = paint.f;
+    try{ document.execCommand('styleWithCSS', false, false); }catch(e){}
+    exec('removeFormat');
+    if(f.b) exec('bold'); if(f.i) exec('italic'); if(f.u) exec('underline');
+    if(f.c) exec('foreColor', f.c);
+    if(f.h && TB_HL[f.h]) exec('hiliteColor', TB_HL[f.h][0]);
+    if(f.z) exec('fontSize', String(f.z));
+    if(!paint.sticky){ paint = null; dev.classList.remove('painting'); cnt.textContent = '✓ Style reproduit'; }
+    keepSel(); sync(); refresh();
+  };
   fcPick.addEventListener('change', () => closeColors());
   /* ☰ le menu du clic droit */
   let menuAt = { x:0, y:0 };
@@ -43921,16 +44296,23 @@ function renderTabletteHome(){
     openMenu(x, y);
   });
   ed.addEventListener('pointerdown', (e) => { lastPtr = e.pointerType || 'mouse'; if(e.button === 0) closeMenu(); });
-  ed.addEventListener('pointerup', (e) => { if(e.button !== 0) return; if(e.target.closest && e.target.closest('img')){ caretShow = false; hideBubble(); return; } caretShow = bubbleOn(); schedBubble(); });
+  ed.addEventListener('pointerup', (e) => {
+    if(e.button !== 0) return;
+    if(e.target.closest && e.target.closest('img')){ caretShow = false; hideBubble(); return; }
+    if(paint){ setTimeout(applyPaint, 0); return; }
+    caretShow = bubbleOn(); schedBubble();
+  });
   ed.addEventListener('keydown', (e) => { if(!['Shift', 'Control', 'Alt', 'Meta'].includes(e.key) && !(e.ctrlKey || e.metaKey)){ caretShow = false; hideBubble(); } });
   const onDown = (e) => {
     if(!colors.hidden && !colors.contains(e.target) && !(e.target.closest && e.target.closest('[data-ed="colors"]'))) colors.hidden = true;
+    if(!bar.hidden && !bar.contains(e.target) && !ed.contains(e.target)){ bar.hidden = true; ed.querySelectorAll('img.sel').forEach(x => x.classList.remove('sel')); }
     if(!dev.contains(e.target) || (!ed.contains(e.target) && !bubble.contains(e.target) && !menu.contains(e.target) && !colors.contains(e.target))){ if(!menu.contains(e.target)) closeMenu(); if(!bubble.contains(e.target)){ caretShow = false; hideBubble(); } } };
   document.addEventListener('pointerdown', onDown, true);
   const onMove = () => { if(!bubble.hidden) requestAnimationFrame(placeBubble); };     // la page défile : le menu suit le texte, la barre se recale
   window.addEventListener('scroll', onMove, { passive:true });
   desk.addEventListener('scroll', () => { closeMenu(); onMove(); }, { passive:true });     // en grand écran, c'est la page qui défile : on ferme le menu
   window.addEventListener('resize', onMove);
+  dev.querySelectorAll('[data-ed="paint"]').forEach(b => b.addEventListener('dblclick', (e) => { e.preventDefault(); paint = null; togglePaint(true); }));
   [tools, bubble, menu, colors].forEach(el => {
     el.addEventListener('pointerdown', (e) => { if(e.target.closest('[data-ed]')) e.preventDefault(); });
     el.addEventListener('mousedown', (e) => { if(e.target.closest('[data-ed]')) e.preventDefault(); });
