@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- 🏷️ Version de l'appli : augmentée automatiquement par publier-site.cmd à chaque publication -->
-<meta name="app-version" content="1.0.25" data-date="2026-10-18">
+<meta name="app-version" content="1.0.26" data-date="2026-10-20">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <title>VocabVISION — Vocabulaire Français ↔ Arabe</title>
 <script>
@@ -1678,6 +1678,29 @@
   .repeat-sentence:has(.dx-m), .cq-rep-s:has(.dx-m){ line-height:2.05; }
   html[data-theme="dark"] .repeat-sentence{ background:var(--surface-sunken, #1B1F2A); }   /* thème sombre : la phrase restait claire sur fond clair */
   .rw .dx-hy i, .rw.spoken .dx-hy::after{ text-shadow:none; }
+  /* 🎤 1.0.26 : Répétition — la phrase reste en haut, le micro juste dessous, et un petit micro à côté de la phrase */
+  .rep-sent-wrap{ position:relative; }
+  .rep-sent-wrap .repeat-sentence{ padding-right:54px; padding-left:54px; }
+  .repeat-sentence.long{ font-size:clamp(17px, 4vw, 23px); line-height:1.45; padding-top:16px; padding-bottom:16px; }
+  .rep-mini-mic{ position:absolute; top:8px; right:8px; width:42px; height:42px; border-radius:50%; border:0; cursor:pointer; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,var(--purple),var(--pink)); box-shadow:0 6px 14px -6px rgba(79,70,229,.7); }
+  .rep-mini-mic svg{ width:21px; height:21px; }
+  .rep-mini-mic.listening{ background:linear-gradient(135deg,#22C55E,#16A34A); animation:repMiniPulse 1.1s ease-in-out infinite; }
+  .rep-mini-mic.disabled{ opacity:.35; pointer-events:none; }
+  @keyframes repMiniPulse{ 0%,100%{ box-shadow:0 0 0 0 rgba(34,197,94,.55); } 50%{ box-shadow:0 0 0 9px rgba(34,197,94,0); } }
+  .rep-mic{ margin:6px 0 8px; gap:6px; }
+  .rep-mic-row{ display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:10px; }
+  .mic-btn.rep-mic-btn{ width:auto; height:60px; min-width:190px; padding:0 22px 0 10px; border-radius:999px; gap:10px; justify-content:flex-start; }
+  .rep-mic-btn .rep-mic-ic{ width:44px; height:44px; border-radius:50%; background:rgba(255,255,255,.22); display:flex; align-items:center; justify-content:center; flex:none; }
+  .rep-mic-btn .rep-mic-ic svg{ width:26px; height:26px; }
+  .rep-mic-btn .rep-mic-lbl{ color:#fff; font:900 17px 'Nunito','Inter',sans-serif; white-space:nowrap; }
+  .rep-mic-btn .rep-mic-lbl::after{ content:'Appuie et parle'; }
+  .rep-mic-btn.listening{ background:linear-gradient(135deg,#22C55E,#16A34A); }
+  .rep-mic-btn.listening .rep-mic-lbl::after{ content:'J\2019 écoute… parle !'; }
+  .rep-mic-btn.listening::after{ border-radius:999px; }
+  .rep-mic-btn.disabled .rep-mic-lbl::after{ content:'C\2019 est fait'; }
+  .rep-mic-row .rep-hear{ margin:0; height:46px; padding:0 16px; }
+  #quizCard.rep-done .rep-mic-row, #quizCard.rep-done .speak-actions, #quizCard.rep-done .kbd-hint{ display:none; }
+  #quizCard.rep-done .rep-mini-mic{ display:none; }
   .rep-tools{ display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:4px 10px; }
   .rep-tools .rep-show{ margin:10px 0 6px; }
   .dx-chip{ font-weight:800; }
@@ -2226,6 +2249,44 @@
   .done-top-row{ display:flex; justify-content:center; margin:10px 0 2px; }
   .done-top-btn{ font-weight:800 !important; }
   .done-top-btn.on{ background:rgba(34,197,94,.12) !important; border-color:rgba(34,197,94,.55) !important; color:#16A34A !important; }
+  /* 📇 1.0.26 : la fiche d'un mot en fenêtre, 🔖 le marque-page de la Tablette, 🎤 le micro de la Répétition */
+  .wcp-ov{ position:fixed; inset:0; z-index:10050; display:flex; align-items:flex-end; justify-content:center; background:rgba(15,10,40,.45); -webkit-backdrop-filter:blur(3px); backdrop-filter:blur(3px); opacity:0; transition:opacity .16s; padding:10px; }
+  .wcp-ov.show{ opacity:1; }
+  @media (min-width:640px){ .wcp-ov{ align-items:center; } }
+  .wcp{ width:min(100%, 460px); max-height:calc(100dvh - 20px); overflow-y:auto; background:var(--surface, #fff); color:var(--text); border-radius:24px; padding:16px 18px 18px; box-shadow:0 24px 60px -20px rgba(0,0,0,.55); transform:translateY(14px); transition:transform .18s; text-align:left; font-family:'Nunito','Inter',sans-serif; }
+  .wcp-ov.show .wcp{ transform:none; }
+  .wcp-note{ display:inline-block; font-size:12.5px; font-weight:800; color:#16A34A; background:rgba(34,197,94,.12); border-radius:999px; padding:4px 10px; margin-bottom:8px; }
+  .wcp-head{ display:flex; align-items:flex-start; gap:8px; }
+  .wcp-fr{ flex:1; font-size:clamp(24px, 6vw, 30px); font-weight:900; line-height:1.15; color:var(--ink, var(--text)); overflow-wrap:anywhere; }
+  .wcp-x{ flex:none; width:38px; height:38px; border-radius:50%; border:1px solid var(--border); background:var(--surface-sunken); color:var(--text); font-size:17px; cursor:pointer; }
+  .wcp-meta{ display:flex; flex-wrap:wrap; align-items:center; gap:6px 10px; margin:6px 0 10px; font-size:12.5px; font-weight:700; color:var(--text-dim); }
+  .wcp-ar{ font-family:'Amiri','Noto Naskh Arabic','Scheherazade New',serif; font-size:clamp(26px, 7vw, 34px); line-height:1.5; color:var(--purple); text-align:right; margin:2px 0 6px; }
+  .wcp-def{ font-size:15px; line-height:1.5; margin:0 0 10px; }
+  .wcp-ex{ background:var(--surface-sunken); border:1px solid var(--border); border-radius:14px; padding:10px 12px; font-size:15.5px; line-height:1.55; font-style:italic; }
+  .wcp-ex mark{ background:rgba(250,204,21,.45); color:inherit; border-radius:4px; padding:0 2px; font-style:normal; font-weight:800; }
+  .wcp-exar{ margin-top:6px; font-family:'Amiri','Noto Naskh Arabic',serif; font-size:19px; line-height:1.6; color:var(--text); text-align:right; font-style:normal; }
+  .wcp-exar.busy{ color:var(--text-dim); font-size:14px; font-family:inherit; text-align:left; }
+  .wcp-exar:empty{ display:none; }
+  .wcp-b{ display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
+  .wcp-b button{ flex:1 1 auto; min-height:42px; border-radius:12px; border:1px solid var(--border); background:var(--surface-sunken); color:var(--text); font:800 14px 'Nunito','Inter',sans-serif; cursor:pointer; padding:0 12px; }
+  .wcp-b button.pri{ background:linear-gradient(135deg,#6366F1,#4F46E5); color:#fff; border-color:transparent; }
+  .wcp-see{ margin-left:6px; padding:4px 10px; border-radius:999px; border:1px solid rgba(79,70,229,.4); background:rgba(79,70,229,.08); color:var(--purple); font-weight:800; cursor:pointer; }
+  .tb-res-lex{ display:flex; flex-wrap:wrap; align-items:center; gap:8px 10px; justify-content:space-between; margin:0 0 8px; padding:9px 11px; border-radius:12px; background:rgba(34,197,94,.1); border:1px solid rgba(34,197,94,.35); font-size:13.5px; }
+  .tb-dup{ display:flex; flex-wrap:wrap; align-items:center; gap:8px 10px; padding:10px 12px; border-radius:12px; background:rgba(34,197,94,.1); border:1px solid rgba(34,197,94,.35); font-weight:700; }
+  .tb-btn.see{ border-color:rgba(34,197,94,.5); color:#15803D; }
+  [data-theme="dark"] .tb-btn.see{ color:#4ADE80; }
+  .tb-scroll{ overflow-anchor:none; }
+  .tb-mk-btn.on{ color:#E5484D; }
+  .tb-mkpop .tb-mk-t{ font:900 15px 'Nunito','Inter',sans-serif; margin:2px 0 8px; }
+  .tb-mk-s{ font-family:'Literata',Georgia,serif; font-size:14px; line-height:1.45; padding:8px 10px; border-radius:12px; background:var(--tb-paper); border:1px solid var(--tb-rule); }
+  .tb-mk-s span{ display:block; margin-top:4px; font:700 11.5px 'Nunito','Inter',sans-serif; color:var(--tb-ink2); }
+  .tb-mk-s.none{ font-family:'Nunito','Inter',sans-serif; color:var(--tb-ink2); }
+  .tb-mk-b{ display:flex; flex-wrap:wrap; gap:6px; margin:10px 0 6px; }
+  .tb-mkpop .tb-pop-hint{ margin:4px 0 0; }
+  .tb-mk{ display:inline-flex; align-items:center; justify-content:center; vertical-align:.05em; width:1.7em; height:1.7em; margin:0 .3em 0 0; padding:0; border:0; border-radius:50%; background:#FDE2E3; color:#E5484D; font-size:.8em; line-height:1; cursor:pointer; box-shadow:0 2px 6px -2px rgba(229,72,77,.6); }
+  .tb-s.marked{ background-image:linear-gradient(transparent 62%, rgba(229,72,77,.18) 62%); }
+  .tb-mkgo{ position:absolute; left:50%; top:calc(env(safe-area-inset-top, 0px) + 62px); transform:translateX(-50%); z-index:6; border:0; border-radius:999px; padding:9px 16px; background:#E5484D; color:#fff; font:800 14px 'Nunito','Inter',sans-serif; box-shadow:0 10px 24px -10px rgba(229,72,77,.8); cursor:pointer; transition:opacity .35s, transform .35s; }
+  .tb-mkgo.out{ opacity:0; transform:translate(-50%, -10px); }
   .tb-toast{ position:absolute; left:50%; bottom:calc(env(safe-area-inset-bottom, 0px) + 92px); z-index:8; transform:translate(-50%, 16px); opacity:0; pointer-events:none;
     max-width:calc(100% - 32px); width:max-content; padding:10px 16px; border-radius:14px; background:var(--tb-ink); color:var(--tb-paper); font-weight:800; font-size:13.5px; line-height:1.35; text-align:center; transition:opacity .25s, transform .25s; }
   .tb-toast.show{ opacity:1; transform:translate(-50%, 0); }
@@ -9493,11 +9554,23 @@ function renderAddWordsScreen(){
       statusEl.textContent = `✓ "${fr}" ajouté à la fin du lexique !`;
       statusEl.className = 'csv-status ok';
     } else {
-      statusEl.textContent = `⚠️ "${fr}" existe déjà dans le lexique, non ajouté.`;
+      const ew = findLexWord(fr);
+      statusEl.innerHTML = `⚠️ « ${escapeHtml(fr)} » existe déjà dans le lexique, non ajouté.` + (ew ? ` Tu veux le voir ?<button type="button" class="wcp-see" id="awSeeBtn">👁 Voir sa fiche</button>` : '');
       statusEl.className = 'csv-status err';
+      if(ew) document.getElementById('awSeeBtn').addEventListener('click', () => wordCardPopup(ew, { note:'📇 Ce mot est déjà dans ton lexique' }));
     }
     document.getElementById('awFr').focus();
   });
+  // 📇 1.0.26 : dès qu'on tape un mot déjà là, on le dit (et on propose de le voir)
+  (() => {
+    const fi = document.getElementById('awFr'), st = document.getElementById('awOneStatus'); let t = 0;
+    if(!fi || !st) return;
+    fi.addEventListener('input', () => { clearTimeout(t); t = setTimeout(() => {
+      const ew = findLexWord(fi.value);
+      if(ew){ st.innerHTML = `📇 « ${escapeHtml(ew.fr)} » est déjà dans ton lexique. Tu veux le voir ?<button type="button" class="wcp-see" id="awSeeBtn">👁 Voir sa fiche</button>`; st.className = 'csv-status'; document.getElementById('awSeeBtn').addEventListener('click', () => wordCardPopup(ew, { note:'📇 Ce mot est déjà dans ton lexique' })); st.dataset.dup = '1'; }
+      else if(st.dataset.dup){ st.textContent = ''; st.className = 'csv-status'; delete st.dataset.dup; }
+    }, 250); });
+  })();
 
   document.getElementById('awBulkAddBtn').addEventListener('click', () => {
     addVocabBulkWords(document.getElementById('awBulkText').value);
@@ -15040,6 +15113,77 @@ function buildWordCardHtml(w){
     </div>`;
 }
 
+/* 📇 1.0.26 : la fiche complète d'un mot de ton lexique, en fenêtre (au-dessus de tout, même de la Tablette) :
+   le mot, l'arabe, la définition, la phrase d'exemple (et sa traduction en arabe quand on est en ligne). */
+const WCP_AR_KEY = 'vocabVision.exAr';
+function wcpArCache(){ try{ return JSON.parse(localStorage.getItem(WCP_AR_KEY) || '{}') || {}; }catch(e){ return {}; } }
+function findLexWord(q){
+  const f = normalizeForSearch(String(q || '').trim());
+  if(!f) return null;
+  return WORDS.find(w => normalizeForSearch(w.fr) === f) || null;
+}
+function wordCardPopup(w, opts){
+  opts = opts || {};
+  if(!w) return null;
+  document.querySelectorAll('.wcp-ov').forEach(x => x.remove());
+  const i = WORDS.indexOf(w), blk = i >= 0 ? Math.floor(i / BLOCK_SIZE) + 1 : 0;
+  const full = exFull(w) || '', form = exFullForm(w) || w.fr;
+  let exHtml = escapeHtml(full);
+  if(full){
+    const at = full.toLowerCase().indexOf(String(form).toLowerCase());
+    if(at >= 0) exHtml = escapeHtml(full.slice(0, at)) + '<mark>' + escapeHtml(full.slice(at, at + form.length)) + '</mark>' + escapeHtml(full.slice(at + form.length));
+  }
+  const ov = document.createElement('div');
+  ov.className = 'wcp-ov';
+  ov.innerHTML = `<div class="wcp" role="dialog" aria-modal="true" aria-label="Fiche du mot ${escapeHtml(w.fr)}">
+    ${opts.note ? `<div class="wcp-note">${escapeHtml(opts.note)}</div>` : ''}
+    <div class="wcp-head"><div class="wcp-fr" lang="fr">${escapeHtml(w.fr)}</div><button type="button" class="wcp-x" data-wcp="x" aria-label="Fermer">✕</button></div>
+    <div class="wcp-meta"><span>${escapeHtml(w.cat || '')}</span>${blk ? `<span>· Bloc ${blk}</span>` : ''}<span>${getWordBadge(w.fr)}</span></div>
+    ${w.ar ? `<div class="wcp-ar" dir="rtl" lang="ar">${escapeHtml(w.ar)}</div>` : ''}
+    ${w.def ? `<div class="wcp-def">${escapeHtml(w.def)}</div>` : ''}
+    ${full ? `<div class="wcp-ex" lang="fr">${exHtml}<div class="wcp-exar" dir="rtl" lang="ar" id="wcpExAr"></div></div>` : ''}
+    <div class="wcp-b">
+      <button type="button" class="pri" data-wcp="say">🔊 Le mot</button>
+      ${w.ar ? `<button type="button" data-wcp="ar">🔊 En arabe</button>` : ''}
+      ${full ? `<button type="button" data-wcp="ex">🗣️ La phrase</button>` : ''}
+      <button type="button" data-wcp="x">Fermer</button>
+    </div>
+  </div>`;
+  document.body.appendChild(ov);
+  requestAnimationFrame(() => ov.classList.add('show'));
+  const close = () => { document.removeEventListener('keydown', onKey, true); ov.remove(); if(opts.onClose) try{ opts.onClose(); }catch(e){} };
+  const onKey = (e) => { if(e.key === 'Escape'){ e.preventDefault(); e.stopPropagation(); close(); } };
+  document.addEventListener('keydown', onKey, true);
+  ov.addEventListener('click', (e) => {
+    if(e.target === ov){ close(); return; }
+    const b = e.target.closest('[data-wcp]'); if(!b) return;
+    const a = b.dataset.wcp;
+    if(a === 'x') close();
+    else if(a === 'say') speak(w.fr, 'fr-FR');
+    else if(a === 'ar') speak(w.ar, 'ar-SA');
+    else if(a === 'ex') speak(full, 'fr-FR');
+  });
+  setTimeout(() => { const x = ov.querySelector('.wcp-b .pri'); if(x) try{ x.focus({ preventScroll:true }); }catch(e){} }, 60);
+  // 🌐 la phrase en arabe (traduction automatique, gardée sur l'appareil)
+  const box = ov.querySelector('#wcpExAr');
+  if(box && full){
+    const C = wcpArCache(), k = full;
+    if(C[k]) box.textContent = C[k];
+    else if(navigator.onLine !== false && typeof tbFetchJson === 'function'){
+      box.classList.add('busy'); box.setAttribute('dir', 'ltr'); box.textContent = '🌐 Traduction de la phrase en arabe…';
+      tbFetchJson('https://api.mymemory.translated.net/get?langpair=fr|ar&q=' + encodeURIComponent(full.slice(0, 480)), 7000).then(j => {
+        const t = j && j.responseData && j.responseData.translatedText ? String(j.responseData.translatedText).trim() : '';
+        if(!box.isConnected) return;
+        box.classList.remove('busy'); box.setAttribute('dir', 'rtl');
+        if(t && /[؀-ۿ]/.test(t) && !/MYMEMORY|QUERY LENGTH/i.test(t)){
+          box.textContent = t;
+          try{ const C2 = wcpArCache(); C2[k] = t; const ks = Object.keys(C2); if(ks.length > 400) delete C2[ks[0]]; localStorage.setItem(WCP_AR_KEY, JSON.stringify(C2)); }catch(e){}
+        } else box.textContent = '';
+      }).catch(() => { if(box.isConnected){ box.classList.remove('busy'); box.textContent = ''; } });
+    }
+  }
+  return ov;
+}
 function buildWordRowHtml(w){
   return `
     <div class="dict-row">
@@ -17093,34 +17237,36 @@ function renderRepeatCard(){
   let showLongPref = false; try{ showLongPref = localStorage.getItem(nsKey('lexiqueQuiz::repeatShowLong')) === '1'; }catch(e){}
   const hidden = Math.random() < 0.5 && !(isLong && showLongPref);
   window.__repeatHidden = hidden;
+  card.classList.remove('rep-done');
 
   card.innerHTML = `
     <div class="cat-tag">${escapeHtml(word.cat)} · 🗣️ Répétition</div>
     <div class="question-line" id="repeatLine" style="text-align:center;margin-bottom:8px;">
       ${hidden ? '👂 Écoute la phrase, puis répète-la au micro' : '📖 Lis la phrase à voix haute au micro'}
     </div>
-    <div class="repeat-sentence ${hidden ? 'hidden' : ''}" id="repeatSentence">
-      ${buildRepeatWords(sentence, hidden)}
+    <div class="rep-sent-wrap">
+      <div class="repeat-sentence ${hidden ? 'hidden' : ''} ${isLong ? 'long' : ''}" id="repeatSentence">
+        ${buildRepeatWords(sentence, hidden)}
+      </div>
+      <button type="button" class="rep-mini-mic" id="repMiniMic" aria-label="Parler (micro)" title="Parler"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/></svg></button>
     </div>
-    <div class="rep-tools"><label class="rep-show ${isLong ? 'long' : ''}" for="repShowChk"><input type="checkbox" id="repShowChk" ${hidden ? '' : 'checked'}><span>👁 Voir la phrase pour la lire à voix haute</span>${isLong ? '<span class="rep-long">phrase longue</span>' : ''}</label>${dxChipHtml('dxRepChip')}</div>
-    <div class="dx-panel" id="dxRepPanel" hidden></div>
-    <button class="speak-ar-btn" id="hearSentenceBtn">🔊 ${hidden ? 'Réécouter' : 'Écouter'} la phrase</button>
-    <div class="mic-zone">
-      <button class="mic-btn" id="micBtn" aria-label="Parler">
-        <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/>
-        </svg>
-      </button>
-      <div class="mic-hint" id="micHint">Appuie et répète la phrase</div>
+    <div class="mic-zone rep-mic">
+      <div class="rep-mic-row">
+        <button class="mic-btn rep-mic-btn" id="micBtn" aria-label="Parler"><span class="rep-mic-ic"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/></svg></span><span class="rep-mic-lbl"></span></button>
+        <button class="speak-ar-btn rep-hear" id="hearSentenceBtn">🔊 ${hidden ? 'Réécouter' : 'Écouter'}</button>
+      </div>
+      <div class="mic-hint" id="micHint">Touche le micro (ou le petit 🎤 à côté de la phrase), puis parle</div>
       <div class="mic-transcript" id="micTranscript"></div>
     </div>
+    <div class="reveal" id="revealWrap"></div>
+    <div class="rep-tools"><label class="rep-show ${isLong ? 'long' : ''}" for="repShowChk"><input type="checkbox" id="repShowChk" ${hidden ? '' : 'checked'}><span>👁 Voir la phrase pour la lire à voix haute</span>${isLong ? '<span class="rep-long">phrase longue</span>' : ''}</label>${dxChipHtml('dxRepChip')}</div>
+    <div class="dx-panel" id="dxRepPanel" hidden></div>
     <div class="speak-actions">
       <button class="mode-chip ${repeatContinuous ? 'active' : ''}" id="repeatContBtn">${repeatContinuous ? '🎙️ Micro continu : ON' : '🎙️ Activer micro continu'}</button>
       <button class="mode-chip" id="revealRepeatBtn">🏳️ Voir la réponse</button>
       <button class="mode-chip" id="skipRepeatBtn">⏭ Passer</button>
     </div>
     <div class="kbd-hint">⌨️ Espace = micro (ou suivant une fois la réponse révélée) · Entrée = suivant</div>
-    <div class="reveal" id="revealWrap"></div>
   `;
 
   const playSentence = (onDone) => { mascotTalk(); speak(dxOn() ? dxSpeakText(sentence) : sentence, 'fr-FR', onDone); };   // 🫁 la voix marque aussi les pauses de sens
@@ -17131,11 +17277,18 @@ function renderRepeatCard(){
     el.classList.toggle('hidden', !on && !answered);
     dxRepRedraw();   // les mots déjà dits restent surlignés (+ 🫁 liaisons & pauses quand la phrase est visible)
     const ql = document.getElementById('repeatLine'); if(ql) ql.textContent = on ? '📖 Lis la phrase à voix haute au micro' : '👂 Écoute la phrase, puis répète-la au micro';
-    const hb = document.getElementById('hearSentenceBtn'); if(hb) hb.textContent = on ? '🔊 Écouter la phrase' : '🔊 Réécouter la phrase';
+    const hb = document.getElementById('hearSentenceBtn'); if(hb) hb.textContent = on ? '🔊 Écouter' : '🔊 Réécouter';
     if(isLong){ try{ localStorage.setItem(nsKey('lexiqueQuiz::repeatShowLong'), on ? '1' : '0'); }catch(err){} }   // retenu pour les prochaines phrases longues
   });
   document.getElementById('hearSentenceBtn').addEventListener('click', () => playSentence());
   document.getElementById('micBtn').addEventListener('click', () => startRepeatRecognition(sentence));
+  // 🎤 le petit micro à côté de la phrase fait pareil, et s'allume avec le grand
+  const miniMic = document.getElementById('repMiniMic'), bigMic = document.getElementById('micBtn');
+  miniMic.addEventListener('click', () => startRepeatRecognition(sentence));
+  new MutationObserver(() => { miniMic.classList.toggle('listening', bigMic.classList.contains('listening')); miniMic.classList.toggle('disabled', bigMic.classList.contains('disabled')); }).observe(bigMic, { attributes:true, attributeFilter:['class'] });
+  // ⬆️ la phrase tout en haut de l'écran (une phrase longue ne te fait plus descendre)
+  card.classList.remove('rep-done');
+  repFocusTop(false);
   document.getElementById('revealRepeatBtn').addEventListener('click', () => handleRepeatResult(0, { revealed:true }));
   document.getElementById('skipRepeatBtn').addEventListener('click', () => handleRepeatResult(0, { skipped:true }));
   document.getElementById('repeatContBtn').addEventListener('click', () => {
@@ -17349,7 +17502,17 @@ function handleRepeatResult(similarity, info){
   `;
   document.getElementById('repSpeakBtn').addEventListener('click', () => { mascotTalk(); speak(sentence, 'fr-FR'); });
   attachAutoAdvance('nextBtn', () => { renderCard(); });
-  focusReveal(revealWrap);
+  const qc = document.getElementById('quizCard'); if(qc) qc.classList.add('rep-done');
+  repFocusTop(true);   // 1.0.26 : la phrase (avec ce qui est bien dit / manqué) reste en haut, la réponse juste dessous
+}
+/* ⬆️ Répétition : la consigne et la phrase en haut de l'écran */
+function repFocusTop(after){
+  requestAnimationFrame(() => {
+    const el = document.getElementById('repeatLine') || document.getElementById('repeatSentence'); if(!el) return;
+    const r = el.getBoundingClientRect();
+    if(r.top < 0 || r.top > window.innerHeight * 0.3) window.scrollTo({ top:Math.max(0, window.scrollY + r.top - 12), behavior:after ? 'smooth' : 'auto' });
+    if(after){ const nb = document.getElementById('nextBtn'); if(nb){ try{ nb.focus({ preventScroll:true }); }catch(e){} } }
+  });
 }
 
 /* ============ 🎧 DICTÉE — écoute la phrase, reconstruis-la (aucun texte visible avant) ============ */
@@ -17374,7 +17537,7 @@ function renderListenOrderCard(){
   ordInit();   // 🃏 3 jokers, ⭐⭐⭐
 
   const card = document.getElementById('quizCard');
-  const micSection = speechRecoAvailable ? `
+  const micSection = false ? `   /* 1.0.26 : plus de micro dans la Dictée */
     <div class="mic-zone" style="margin:6px 0 14px;">
       <button class="mic-btn" id="orderMicBtn" aria-label="Parler">
         <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -19778,6 +19941,11 @@ const COLOR_PRESETS = {
 /* ============ 🆕 NOUVEAUTÉS — pour que tout ce qui a été ajouté reste découvrable ============ */
 const WHATS_NEW_SECTIONS = [
   { icon:'🆕', title:'Nouveautés', items:[
+    { name:'📇 Un mot déjà dans tes mots ? Tu peux le voir', desc:"Dans la Tablette, cherche un mot (🔍) ou touche-le : s'il est déjà dans tes mots, on te le dit et « 👁 Voir sa fiche » ouvre sa carte : le mot, l'arabe, la définition, la phrase d'exemple et sa traduction en arabe (quand tu es en ligne). Pareil dans « Ajouter un mot »." },
+    { name:'📖 Toutes les définitions, en une', desc:"En ajoutant un mot depuis la Tablette, la définition reprend tous les sens trouvés : « 1. … 2. … 3. … ». Une fois le mot ajouté, la fiche se range toute seule." },
+    { name:'🔖 Marque-page dans la Tablette', desc:"Le bouton 🔖 en haut : « Marquer ici » (la phrase en haut de l'écran), « Y aller », « Retirer ». Ou touche un mot puis « 🔖 Marque-page ici ». Il se retrouve sur tous tes appareils. Et en rouvrant un texte, tu reviens exactement où tu lisais, même quand les images arrivent après." },
+    { name:'🗣️ Répétition : la phrase reste en haut', desc:"Même avec une longue phrase, l'écran ne descend plus : la phrase est en haut, le micro juste dessous (« Appuie et parle », il devient vert quand il t'écoute), plus un petit 🎤 à côté de la phrase. La réponse s'affiche juste sous le micro." },
+    { name:'🎧 Dictée sans micro', desc:"Dans la Dictée, plus de micro en bas : tu écoutes et tu remets les mots dans l'ordre." },
     { name:'🖼 Les images de la Tablette sur le téléphone', desc:"Les images que tu mets dans un texte de la Tablette partent maintenant avec la synchro (réduites pour être légères) : tu les retrouves sur ton autre appareil." },
     { name:'🖌 Reproduire le style', desc:"Dans l'éditeur de la Tablette : place-toi sur un mot mis en forme, touche le pinceau 🖌, puis sélectionne (ou touche) le texte à mettre pareil : gras, couleur, surligneur et taille sont recopiés. Double-clic sur le pinceau = le garder pour plusieurs endroits (Échap pour arrêter)." },
     { name:'🔠 Texte plus petit ou plus grand', desc:"Nouveau menu « Taille » (barre du haut, barre près du curseur, clic droit) : de « Très petit » à « Géant », pour la partie sélectionnée seulement. Les tailles se voient aussi dans la Tablette." },
@@ -42928,7 +43096,7 @@ function tbParseWikt(wt){
     if(!lines.length) continue;
     if(flex){ if(!out.lemma){ const L = lines[0].match(/\[\[([^\]|#]+)/); if(L) out.lemma = L[1].trim(); } continue; }
     if(!out.pos) out.pos = pos;
-    lines.forEach(l => { const c = tbWikiClean(l); if(c && c.length > 2 && out.defs.length < 3) out.defs.push(c.length > 220 ? c.slice(0, 217) + '…' : c); });
+    lines.forEach(l => { const c = tbWikiClean(l); if(c && c.length > 2 && out.defs.length < 4) out.defs.push(c.length > 220 ? c.slice(0, 217) + '…' : c); });
     if(out.defs.length) break;
   }
   const tr = /\{\{trad[+-]?\|ar\|([^|}]+)/g;
@@ -43146,7 +43314,7 @@ function tbLoadImgs(root){
     const img = el.tagName === 'IMG' ? el : el.querySelector('img');
     if(!img || img.getAttribute('src')) return;
     const u = el.dataset.img ? await tbImgUrl(el.dataset.img) : el.dataset.src;
-    if(u){ img.onerror = () => el.classList.add('missing'); img.setAttribute('src', u); } else el.classList.add('missing');
+    if(u){ img.onerror = () => el.classList.add('missing'); if(img.closest('#tbScroll')) img.dataset.h0 = Math.round(img.getBoundingClientRect().height); img.setAttribute('src', u); } else el.classList.add('missing');
   });
 }
 async function tbImgShrink(file){
@@ -44529,6 +44697,7 @@ function tbOpen(art){
       <button type="button" class="tb-ib" data-tb="close" aria-label="Fermer la Tablette">${proIcon('chevronLeft', 22) || '‹'}</button>
       <div class="tb-brand">La Tablette</div>
       <button type="button" class="tb-ib" data-tb="search" aria-label="Chercher un mot">${proIcon('search', 20) || '🔍'}</button>
+      <button type="button" class="tb-ib tb-mk-btn" data-tb="mark" aria-label="Marque-page" aria-expanded="false">${proIcon('bookmark', 20) || '🔖'}</button>
       <button type="button" class="tb-ib tb-aa" data-tb="aa" aria-label="Taille du texte et affichage" aria-expanded="false">Aa</button>
       <form class="tb-find" id="tbFind" hidden>
         <input id="tbQ" type="search" placeholder="Chercher un mot…" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" aria-label="Mot à chercher dans le texte">
@@ -44541,6 +44710,7 @@ function tbOpen(art){
     </header>
     <div class="tb-res" id="tbRes" hidden></div>
     <div class="tb-pop" id="tbAa" hidden></div>
+    <div class="tb-pop tb-mkpop" id="tbMk" hidden role="dialog" aria-label="Marque-page"></div>
     <div class="tb-hud" id="tbHud" hidden><span>🖍 Touche les mots difficiles</span><b id="tbHudN">0</b></div>
     <main class="tb-scroll" id="tbScroll">
       <article class="tb-page" id="tbPage" lang="fr">
@@ -44565,10 +44735,18 @@ function tbOpen(art){
   }
   tbRecOf(art.id).then(() => { if(TB.art === art) tbEndHtml(); });
   const sc = document.getElementById('tbScroll');
-  if(art.pos > 0 && !art.done){
+  TB.restoreA = null;
+  if(art.pos > 0 || art.posOff){
     const s = el.querySelector(`.tb-s[data-s="${art.pos}"]`);
-    if(s){ s.insertAdjacentHTML('beforebegin', '<span class="tb-pin">📍 Tu t\'étais arrêté ici</span>'); requestAnimationFrame(() => { sc.scrollTop = Math.max(0, s.offsetTop - 90); }); }
+    if(s){
+      if(!art.done) s.insertAdjacentHTML('beforebegin', '<span class="tb-pin">📍 Tu t\'étais arrêté ici</span>');
+      const a = { s:art.pos, off:typeof art.posOff === 'number' ? art.posOff : 26 };
+      TB.restoreA = a;                               // tant que tu n'as pas touché l'écran, on y reste (polices, images qui arrivent)
+      tbAnchorSet(a); requestAnimationFrame(() => { if(TB.restoreA === a) tbAnchorSet(a); });
+      try{ document.fonts.ready.then(() => { if(TB.restoreA === a) tbAnchorSet(a); }); }catch(e){}
+    }
   }
+  tbMarkChip();
   try{ markUserInteraction(); }catch(e){}
 }
 function tbClose(quiet){
@@ -44591,6 +44769,7 @@ function tbRender(keep){
   tbRelocateTags();
   tbPaintTags(); tbPaintHits(); if(TB.hintsOn) tbPaintHints(true);
   tbEndHtml();
+  tbPaintMark();
   if(anchor) tbAnchorSet(anchor);
 }
 function tbAnchorGet(){
@@ -45373,7 +45552,9 @@ function tbResults(){
   if(!TB.q || dxFold(TB.q).trim().length < 2){ box.hidden = true; return; }
   const bySent = new Map();
   TB.hits.forEach(k => { const s = TB.toks[k].s; if(!bySent.has(s)) bySent.set(s, []); bySent.get(s).push(k); });
-  if(!bySent.size){ box.innerHTML = `<div class="tb-res-h"><span>« ${escapeHtml(TB.q)} » n'apparaît pas dans ce texte.</span></div>`; box.hidden = false; return; }
+  const lw = tbLexWord(TB.q);
+  const lex = lw ? `<div class="tb-res-lex"><span>📇 <b>« ${escapeHtml(lw.fr)} »</b> est déjà dans tes mots. Tu veux le voir ?</span><button type="button" class="tb-btn hl sm" data-tb="see-word" data-w="${tbAttr(lw.fr)}">👁 Voir sa fiche</button></div>` : '';
+  if(!bySent.size){ box.innerHTML = `${lex}<div class="tb-res-h"><span>« ${escapeHtml(TB.q)} » n'apparaît pas dans ce texte.</span></div>`; box.hidden = false; return; }
   const rows = [...bySent.entries()].map(([s, ks]) => {
     const set = new Set(ks.map(k => TB.toks[k].t));
     const html = TB.sents[s].split(/(\s+)/).reduce((acc, x) => { if(/^\s+$/.test(x)){ acc.out += ' '; return acc; } if(!x) return acc; const i = acc.i++; acc.out += set.has(i) ? `<mark>${escapeHtml(x)}</mark>` : escapeHtml(x); return acc; }, { out:'', i:0 }).out;
@@ -45381,7 +45562,7 @@ function tbResults(){
     return `<div class="tb-r"><div class="tb-r-t" data-tb="res-go" data-k="${ks[0]}" role="button" tabindex="0">${html}</div>
       <button type="button" class="tb-btn hl sm" data-tb="res-tag" data-k="${ks[0]}" ${tagged ? 'disabled' : ''}>${tagged ? '✓ Tagué' : '🖍 Taguer'}</button></div>`;
   }).join('');
-  box.innerHTML = `<div class="tb-res-h"><span>${bySent.size} phrase${bySent.size > 1 ? 's' : ''} avec « ${escapeHtml(TB.q.trim())} »</span><button type="button" class="tb-link" data-tb="res-hide">Masquer</button></div>${rows}
+  box.innerHTML = `${lex}<div class="tb-res-h"><span>${bySent.size} phrase${bySent.size > 1 ? 's' : ''} avec « ${escapeHtml(TB.q.trim())} »</span><button type="button" class="tb-link" data-tb="res-hide">Masquer</button></div>${rows}
     <div class="tb-res-f">🖍 Taguer : le mot part dans ton carnet avec cette phrase comme exemple.</div>`;
   box.hidden = false;
 }
@@ -45405,7 +45586,7 @@ function tbInfoHtml(r, tk){
   const ar = (r.ar || []).filter(Boolean), defs = (r.defs || []).filter(Boolean);
   if(!ar.length && !defs.length) return `<div class="tb-info-l">Pas trouvé dans le dictionnaire${navigator.onLine === false ? ' (pas de connexion)' : ''}. Tu peux écrire le sens toi-même en l'ajoutant à tes mots.</div>`;
   return `${ar.length ? `<div class="tb-ar" dir="rtl" lang="ar">${escapeHtml(ar.join('، '))}</div>` : ''}
-    ${defs.length ? `<ol class="tb-defs">${defs.slice(0, 2).map(d => `<li>${escapeHtml(d)}</li>`).join('')}</ol>` : ''}
+    ${defs.length ? `<ol class="tb-defs">${defs.slice(0, 4).map(d => `<li>${escapeHtml(d)}</li>`).join('')}</ol>` : ''}
     <div class="tb-src">${r.src === 'lexique' ? '✓ Dans ton lexique' : (r.src ? 'Source : ' + escapeHtml(r.src) : '')}${r.pos ? ` <span>(${escapeHtml(r.pos)})</span>` : ''}</div>`;
 }
 /* ---------- 🔎 1.0.23 : une expression de plusieurs mots (« tandis que »), choisie dans la phrase ---------- */
@@ -45523,13 +45704,13 @@ function tbOpenSheet(k, k2){
       ${multi ? `<button type="button" class="tb-chip sm" data-tb="pick-l-">− 1er mot</button><button type="button" class="tb-chip sm" data-tb="pick-r-">− dernier</button>` : ''}
       <button type="button" class="tb-chip sm" data-tb="pick-r" ${ib < 0 || ib >= all.length - 1 ? 'disabled' : ''}>＋ mot après</button>
     </div>
-    <div class="tb-sh-say"><button type="button" class="tb-chip" data-tb="say">🔊 Écouter</button><button type="button" class="tb-chip" data-tb="slow">🐢 Lentement</button><button type="button" class="tb-chip" data-tb="say-sent">🗣️ La phrase</button></div>
+    <div class="tb-sh-say"><button type="button" class="tb-chip" data-tb="say">🔊 Écouter</button><button type="button" class="tb-chip" data-tb="slow">🐢 Lentement</button><button type="button" class="tb-chip" data-tb="say-sent">🗣️ La phrase</button><button type="button" class="tb-chip" data-tb="mark-sent" title="Marquer cette phrase : c'est là que je m'arrête">🔖 Marque-page ici</button></div>
     <div class="tb-info" id="tbInfo">${tbInfoHtml(cached, tk)}</div>
     <blockquote class="tb-ctx" lang="fr">${tbCtxHtml(tk, kz)}</blockquote>
     <div class="tb-pick-h">👆 Touche les mots de la phrase pour en prendre plus ou moins (ex. « tandis » → « tandis que »).</div>
     <div class="tb-sh-act">
       <button type="button" class="tb-btn hl" data-tb="tag" id="tbTagBtn">${tagLbl(tagged)}</button>
-      <button type="button" class="tb-btn" data-tb="add" ${known ? 'disabled' : ''}>${known ? '✓ Déjà dans tes mots' : '➕ Ajouter à mes mots'}</button>
+      ${tbAddBtnHtml(known, [lemma, lemma0, form])}
     </div>
     <div class="tb-addf" id="tbAddF" hidden></div>
     ${rules ? `<div class="tb-rules">${rules}</div>` : ''}
@@ -45546,9 +45727,98 @@ function tbOpenSheet(k, k2){
       const info = document.getElementById('tbInfo'); if(info) info.innerHTML = tbInfoHtml(r || { ar:[], defs:[] }, tk);
       if(r && r.ipa && (!r.ipaOf || dxFold(r.ipaOf) === fk)){ const ip = document.getElementById('tbIpa'); if(ip) ip.textContent = '/' + r.ipa + '/'; }
       if(r && r.lemma && dxFold(r.lemma) !== fk){ const lm = document.getElementById('tbLemma'); if(lm) lm.innerHTML = `forme de <b>${escapeHtml(r.lemma)}</b>`; }
-      if(r && r.lemma && tbIsKnown(r.lemma)){ const ab = sh.querySelector('[data-tb="add"]'); if(ab){ ab.disabled = true; ab.textContent = '✓ Déjà dans tes mots'; } }
+      if(r && r.lemma && tbIsKnown(r.lemma)){ const ab = sh.querySelector('[data-tb="add"]'); if(ab) ab.outerHTML = tbAddBtnHtml(true, [r.lemma, form]); }
     });
   }
+}
+/* ---------- 📇 1.0.26 : les définitions fusionnées, et la fiche d'un mot déjà dans tes mots ---------- */
+function tbDefsJoin(defs){
+  const L = (defs || []).map(d => String(d || '').trim()).filter(Boolean);
+  if(L.length < 2) return L[0] || '';
+  return L.map((d, i) => `${i + 1}. ${d.replace(/[\s.;:,]+$/, '')}.`).join(' ');
+}
+function tbAttr(x){ return escapeHtml(String(x == null ? '' : x)).replace(/"/g, '&quot;'); }
+/* le mot de ton lexique qui correspond (forme exacte, pluriel, verbe conjugué…) */
+function tbLexWord(q){
+  const f = dxFold(String(q || '')).replace(/[«»"“”.,;:!?()]/g, ' ').replace(/\s+/g, ' ').trim();
+  if(!f || typeof WORDS === 'undefined') return null;
+  let w = WORDS.find(x => dxFold(x.fr) === f);
+  if(!w){ const e = tbIndex().get(f); if(e && e.known) w = WORDS.find(x => x.fr === e.fr) || null; }
+  return w || null;
+}
+function tbAddBtnHtml(known, cands){
+  const w = known ? (cands || []).map(tbLexWord).find(Boolean) : null;
+  if(w) return `<button type="button" class="tb-btn see" data-tb="see-word" data-w="${tbAttr(w.fr)}">👁 Déjà dans tes mots · le voir</button>`;
+  return `<button type="button" class="tb-btn" data-tb="add" ${known ? 'disabled' : ''}>${known ? '✓ Déjà dans tes mots' : '➕ Ajouter à mes mots'}</button>`;
+}
+function tbSeeWord(fr){
+  const w = tbLexWord(fr); if(!w) return;
+  try{ wordCardPopup(w, { note:'📇 Ce mot est déjà dans tes mots' }); }catch(e){ console.warn(e); }
+}
+/* ---------- 🔖 1.0.26 : le marque-page (et la position de lecture gardée au pixel près) ---------- */
+function tbMarkOk(){ const m = TB.art && TB.art.mark; return !!(m && TB.sents[m.s] != null) ? m : null; }
+function tbMarkHtml(){
+  const m = tbMarkOk(), t = m ? String(TB.sents[m.s] || '') : '';
+  return `<div class="tb-mk-t">🔖 Marque-page</div>
+    ${m ? `<div class="tb-mk-s">« ${escapeHtml(t.length > 110 ? t.slice(0, 108) + '…' : t)} »<span>posé le ${escapeHtml(tbDateLabel(m.at))}</span></div>`
+        : `<div class="tb-mk-s none">Pose un marque-page là où tu t'arrêtes : tu le retrouveras ici, sur tous tes appareils.</div>`}
+    <div class="tb-mk-b">
+      <button type="button" class="tb-btn hl sm" data-tb="mark-here">🔖 ${m ? 'Le déplacer ici' : 'Marquer ici'}</button>
+      ${m ? `<button type="button" class="tb-btn sm" data-tb="mark-go">↪ Y aller</button><button type="button" class="tb-btn sm" data-tb="mark-del">✕ Retirer</button>` : ''}
+    </div>
+    <div class="tb-pop-hint">« Ici » = la phrase tout en haut de l'écran. Tu peux aussi toucher un mot, puis « 🔖 Marque-page ici ».</div>`;
+}
+function tbToggleMark(force){
+  const p = document.getElementById('tbMk'); if(!p) return;
+  const open = force != null ? !!force : p.hidden;
+  if(open){ try{ tbToggleAa(false); }catch(e){} p.innerHTML = tbMarkHtml(); }
+  p.hidden = !open;
+  const b = document.querySelector('#tbReader [data-tb="mark"]'); if(b) b.setAttribute('aria-expanded', String(open));
+}
+function tbPaintMark(){
+  const body = document.getElementById('tbBody'); if(!body) return;
+  body.querySelectorAll('.tb-mk').forEach(x => x.remove());
+  body.querySelectorAll('.tb-s.marked').forEach(x => x.classList.remove('marked'));
+  const m = tbMarkOk();
+  const b = document.querySelector('#tbReader [data-tb="mark"]'); if(b) b.classList.toggle('on', !!m);
+  if(!m) return;
+  const el = body.querySelector(`.tb-s[data-s="${m.s}"]`); if(!el) return;
+  el.classList.add('marked');
+  el.insertAdjacentHTML('beforebegin', '<button type="button" class="tb-mk" data-tb="mark-pop" aria-label="Ton marque-page">🔖</button>');
+}
+function tbSetMark(si){
+  if(!TB.art || si == null || si < 0 || TB.sents[si] == null) return;
+  const a = tbAnchorGet();
+  TB.art.mark = { s:si, at:Date.now() };
+  tbSaveArtNow();
+  tbPaintMark(); if(a) tbAnchorSet(a);                 // le petit 🔖 ajouté ne fait pas bouger ta lecture
+  tbToggleMark(false);
+  try{ playCorrectSound(); }catch(e){}
+  tbToast('🔖 Marque-page posé : tu le retrouveras ici, sur tous tes appareils', 3000);
+}
+function tbDelMark(){
+  if(!TB.art) return;
+  const a = tbAnchorGet();
+  TB.art.mark = null; tbSaveArtNow();
+  tbPaintMark(); if(a) tbAnchorSet(a);
+  tbToggleMark(false);
+  tbToast('Marque-page retiré');
+}
+function tbGoMark(){
+  const m = tbMarkOk(); tbToggleMark(false);
+  const g = document.getElementById('tbMkGo'); if(g) g.remove();
+  if(!m) return;
+  const sc = document.getElementById('tbScroll'), el = sc && sc.querySelector(`.tb-s[data-s="${m.s}"]`); if(!el) return;
+  TB.restoreA = null;
+  const line = sc.getBoundingClientRect().top + 64;
+  sc.scrollTo({ top:Math.max(0, sc.scrollTop + (el.getBoundingClientRect().top - line) - 40), behavior:'smooth' });
+  el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash');
+}
+function tbMarkChip(){
+  const m = tbMarkOk(), el = document.getElementById('tbReader'); if(!m || !el) return;
+  if(Math.abs((TB.art.pos || 0) - m.s) <= 1) return;                     // on y est déjà
+  el.insertAdjacentHTML('beforeend', '<button type="button" class="tb-mkgo" id="tbMkGo" data-tb="mark-go">🔖 Aller à ton marque-page</button>');
+  setTimeout(() => { const g = document.getElementById('tbMkGo'); if(g){ g.classList.add('out'); setTimeout(() => { if(g.isConnected) g.remove(); }, 400); } }, 9000);
 }
 function tbCloseSheet(){
   const sh = document.getElementById('tbSheet'); if(!sh) return;
@@ -45596,7 +45866,7 @@ function tbAddForm(k){
   TB.exSpan = { s:tk.s, a:tk.s, b:tk.s };
   box.innerHTML = `<label class="tb-lbl">${multi ? 'Expression' : 'Mot'}<input class="tb-in" id="tbAfFr" value="${escapeHtml(lemma)}"></label>
     <label class="tb-lbl">En arabe<input class="tb-in ar" id="tbAfAr" dir="rtl" lang="ar" value="${escapeHtml((r.ar || [])[0] || '')}" placeholder="الترجمة"></label>
-    <label class="tb-lbl">Définition<textarea class="tb-in" id="tbAfDef" rows="2" placeholder="Le sens, avec tes mots">${escapeHtml((r.defs || [])[0] || '')}</textarea></label>
+    <label class="tb-lbl">Définition<textarea class="tb-in" id="tbAfDef" rows="2" placeholder="Le sens, avec tes mots">${escapeHtml(tbDefsJoin(r.defs))}</textarea></label>
     <label class="tb-lbl">Phrase d'exemple <span class="tb-lbl-h">(raccourcis-la ou allonge-la comme tu veux)</span><textarea class="tb-in tb-ex" id="tbAfEx" rows="3">${escapeHtml(TB.sents[tk.s] || '')}</textarea></label>
     <div class="tb-exbar"><button type="button" class="tb-chip sm" data-tb="ex-prev" data-ex="tbAfEx" ${tk.s > 0 ? '' : 'disabled'}>＋ phrase d'avant</button><button type="button" class="tb-chip sm" data-tb="ex-next" data-ex="tbAfEx" ${tk.s < TB.sents.length - 1 ? '' : 'disabled'}>＋ phrase d'après</button><button type="button" class="tb-chip sm" data-tb="ex-reset" data-ex="tbAfEx">↺ La phrase du texte</button></div>
     <button type="button" class="tb-btn pri wide" data-tb="add-go">➕ Ajouter à mes mots</button>`;
@@ -45618,10 +45888,16 @@ function tbAddFromForm(k){
   const n = tbAddWords([{ fr, ar, def, ex:ex.ex, exForm:ex.exForm }]);
   const tag = (TB.art.tags || []).find(x => dxFold(x.lemma) === dxFold(fr) || (x.s === tk.s && x.t === tk.t));
   if(tag){ tag.added = true; tag.lemma = fr; tag.ar = ar; tag.def = def; tag.sent = sent; tbSaveArt(); }
-  if(n){ try{ playCorrectSound(); }catch(e){} tbToast(`➕ « ${fr} » ajouté à tes mots (bloc ${Math.floor((WORDS.length - 1) / 30) + 1})`, 3200); }
-  else tbToast(`« ${fr} » est déjà dans tes mots.`);
-  TB.pickKeep = true;
-  tbOpenSheet(P.k1, P.k2);
+  if(n){
+    try{ playCorrectSound(); }catch(e){}
+    tbToast(`➕ « ${fr} » ajouté à tes mots (bloc ${Math.floor((WORDS.length - 1) / 30) + 1})`, 3200);
+    tbCloseSheet();                                   // ✅ 1.0.26 : c'est fait, la fiche se range toute seule
+    try{ if(TB.hintsOn) tbPaintHints(true); }catch(e){}
+    return;
+  }
+  const box = document.getElementById('tbAddF'), lw = tbLexWord(fr);
+  if(box && lw){ box.innerHTML = `<div class="tb-dup">📇 « ${escapeHtml(lw.fr)} » est déjà dans tes mots. Tu veux le voir ?<button type="button" class="tb-btn hl sm" data-tb="see-word" data-w="${tbAttr(lw.fr)}">👁 Voir sa fiche</button></div>`; box.hidden = false; return; }
+  tbToast(`« ${fr} » est déjà dans tes mots.`);
 }
 /* ---------- 🏷️ le carnet : les mots tagués → tes mots ---------- */
 function tbOpenCarnet(){
@@ -45665,7 +45941,7 @@ async function tbCarnetLookups(){
     if(r){
       if(r.lemma && dxFold(r.lemma) !== dxFold(g.lemma) && !tbEntry(g.w)) g.lemma = r.lemma;
       if(!g.ar && r.ar && r.ar.length) g.ar = r.ar[0];
-      if(!g.def && r.defs && r.defs.length) g.def = r.defs[0];
+      if(!g.def && r.defs && r.defs.length) g.def = tbDefsJoin(r.defs);
     }
     tbSaveArt();
     if(TB.sheetK !== -2) return;
@@ -45695,6 +45971,15 @@ function tbCarnetAdd(){
 /* ---------- les gestes : toucher, pincer, défiler, clavier ---------- */
 function tbWire(el){
   const sc = document.getElementById('tbScroll');
+  sc.addEventListener('load', (e) => {
+    const im = e.target; if(!im || im.tagName !== 'IMG' || im.dataset.h0 == null) return;
+    const h0 = +im.dataset.h0 || 0; delete im.dataset.h0;
+    if(TB.restoreA){ tbAnchorSet(TB.restoreA); return; }
+    const r = im.getBoundingClientRect(), line = sc.getBoundingClientRect().top + 64;
+    if(r.top < line && Math.abs(r.height - h0) > 1) sc.scrollTop += r.height - h0;   // au-dessus de ta lecture : on compense, le texte reste en place
+  }, true);
+  const touched = () => { TB.restoreA = null; };
+  ['pointerdown', 'wheel', 'touchstart', 'keydown'].forEach(t => sc.addEventListener(t, touched, { passive:true }));
   el.addEventListener('click', (e) => {
     const a = e.target.closest('[data-tb]');
     if(a){ tbAction(a.dataset.tb, a, e); return; }
@@ -45708,7 +45993,8 @@ function tbWire(el){
       return;
     }
     if(Date.now() - (TB.tapAt || 0) < 700) return;
-    if(e.target.closest('#tbSheet, #tbAa, #tbRes, .tb-top, .tb-dock, .tb-hud')) return;
+    if(e.target.closest('#tbSheet, #tbAa, #tbMk, #tbRes, .tb-top, .tb-dock, .tb-hud')) return;
+    const mk = document.getElementById('tbMk'); if(mk && !mk.hidden) tbToggleMark(false);
     if(TB.sheetK !== -1) tbCloseSheet();
     const aa = document.getElementById('tbAa'); if(aa && !aa.hidden) tbToggleAa(false);
   });
@@ -45736,7 +46022,8 @@ function tbWire(el){
     clearTimeout(TB.scrollT);
     TB.scrollT = setTimeout(() => {
       if(!TB.art) return;
-      TB.art.pos = tbFirstVisibleSent(); TB.art.pct = Math.max(TB.art.pct || 0, pct);
+      { const a0 = tbAnchorGet(); TB.art.pos = a0 ? a0.s : 0; TB.art.posOff = a0 ? Math.round(a0.off) : 0; }
+      TB.art.pct = Math.max(TB.art.pct || 0, pct);
       if(pct > 0.97 && !TB.art.done){ TB.art.done = true; }
       tbSaveArt();
       try{ markUserInteraction(); }catch(e){}
@@ -45801,6 +46088,7 @@ document.addEventListener('keydown', (e) => {
   if(e.key === 'Escape'){
     if(TB.sheetK !== -1){ tbCloseSheet(); e.preventDefault(); return; }
     const aa = document.getElementById('tbAa'); if(aa && !aa.hidden){ tbToggleAa(false); e.preventDefault(); return; }
+    const mk = document.getElementById('tbMk'); if(mk && !mk.hidden){ tbToggleMark(false); e.preventDefault(); return; }
     const f = document.getElementById('tbFind'); if(f && !f.hidden){ tbFindOpen(false); e.preventDefault(); return; }
     if(TB.hunt){ tbHuntToggle(false); e.preventDefault(); return; }
     if(TB.mode){ tbStopModes(); e.preventDefault(); return; }
@@ -45824,7 +46112,14 @@ function tbAction(id, btn, e){
     case 'res-hide': document.getElementById('tbRes').hidden = true; return;
     case 'res-go': { const k = +btn.dataset.k; const i = TB.hits.indexOf(k); tbGoHit(i >= 0 ? i : 0, true); const s = TB.spans[k] && TB.spans[k].closest('.tb-s'); if(s){ s.classList.remove('flash'); void s.offsetWidth; s.classList.add('flash'); } return; }
     case 'res-tag': { const k = +btn.dataset.k; if(tbTagAt(k) < 0) tbToggleTag(k); btn.disabled = true; btn.textContent = '✓ Tagué'; tbToast(`🖍 « ${TB.toks[k].form} » est dans ton carnet, avec cette phrase`); return; }
-    case 'aa': tbToggleAa(); return;
+    case 'aa': tbToggleMark(false); tbToggleAa(); return;
+    case 'mark': tbToggleMark(); return;
+    case 'mark-pop': tbToggleMark(true); return;
+    case 'mark-here': tbSetMark(tbFirstVisibleSent()); return;
+    case 'mark-sent': { const tk = TB.toks[TB.sheetK]; if(tk){ tbCloseSheet(); tbSetMark(tk.s); } return; }
+    case 'mark-go': tbGoMark(); return;
+    case 'mark-del': tbDelMark(); return;
+    case 'see-word': tbSeeWord(btn.dataset.w); return;
     case 'fs-': tbSetFs(tbUi().fs - 1); return;
     case 'fs+': tbSetFs(tbUi().fs + 1); return;
     case 'align': { const a = tbAnchorGet(); tbUi().align = btn.dataset.v === 'justify' ? 'justify' : 'left'; tbSaveUi(); tbApplyUi(); if(a) tbAnchorSet(a); tbToggleAa(true); return; }
