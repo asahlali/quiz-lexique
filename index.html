@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- 🏷️ Version de l'appli : augmentée automatiquement par publier-site.cmd à chaque publication -->
-<meta name="app-version" content="1.0.27" data-date="2026-10-20">
+<meta name="app-version" content="1.0.28" data-date="2026-10-21">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <title>VocabVISION — Vocabulaire Français ↔ Arabe</title>
 <script>
@@ -2442,6 +2442,28 @@
   .wt-a button:disabled{ opacity:.6; cursor:default; }
   ::highlight(wt){ background-color:rgba(250,204,21,.6); }
   .rw.wt-on{ box-shadow:0 0 0 2px rgba(250,204,21,.95); border-radius:4px; }
+  /* 📥 1.0.28 : importer des fichiers .md dans la Tablette */
+  .tbl-imp{ height:40px; padding:0 14px; border:1px solid var(--border); border-radius:12px; background:var(--surface); color:var(--text); font:900 14px 'Nunito','Inter',sans-serif; cursor:pointer; }
+  .tbl-imp:hover{ border-color:var(--purple); }
+  .tbl-dropzone{ display:none; }
+  .tbl.filedrop .tbl-dropzone{ display:flex; position:absolute; inset:-6px; z-index:30; align-items:center; justify-content:center; border:3px dashed var(--purple); border-radius:24px; background:rgba(79,70,229,.08); pointer-events:none; }
+  .tbl.filedrop .tbl-dropzone span{ padding:12px 18px; border-radius:14px; background:var(--surface); color:var(--purple); font:900 16px 'Nunito','Inter',sans-serif; box-shadow:0 12px 30px -14px rgba(79,70,229,.6); }
+  .tbl.filedrop .tbl-shelf.drop{ outline:3px dashed var(--cc); outline-offset:2px; }
+  .tbk-item.tbl-row.fresh{ animation:tblFresh 2.4s ease-out 1; }
+  @keyframes tblFresh{ 0%, 30%{ background:rgba(250,204,21,.35); } 100%{ background:transparent; } }
+  .tbl-imp-dlg{ width:min(100%, 480px); }
+  .tbl-imp-list{ display:flex; flex-direction:column; gap:6px; max-height:min(46vh, 340px); overflow-y:auto; margin:8px 0 4px; }
+  .tbl-imp-it{ display:flex; align-items:flex-start; gap:10px; padding:10px 12px; border-radius:14px; border:1px solid var(--border); background:var(--surface-sunken); cursor:pointer; }
+  .tbl-imp-it input{ width:20px; height:20px; margin:2px 0 0; accent-color:#4F46E5; flex:none; }
+  .tbl-imp-b{ display:flex; flex-direction:column; gap:2px; min-width:0; }
+  .tbl-imp-b b{ font:800 15px/1.3 'Literata',Georgia,serif; color:var(--text); overflow-wrap:anywhere; }
+  .tbl-imp-b small{ font:700 11.5px 'Nunito','Inter',sans-serif; color:var(--text-dim); overflow-wrap:anywhere; }
+  .tbl-imp-m{ display:flex; flex-wrap:wrap; gap:3px 10px; margin-top:2px; font:800 12px 'Nunito','Inter',sans-serif; color:var(--text-dim); }
+  .tbl-imp-m .warn{ color:#B45309; }
+  .tbl-imp-hint{ font:700 12.5px/1.4 'Nunito','Inter',sans-serif; color:#B45309; background:rgba(251,191,36,.12); border:1px solid rgba(251,191,36,.35); border-radius:12px; padding:8px 10px; margin:6px 0 2px; }
+  .tbl-imp-rep{ display:flex; align-items:flex-start; gap:8px; margin:10px 0 0; font:700 13px/1.35 'Nunito','Inter',sans-serif; color:var(--text); }
+  .tbl-imp-rep input{ width:18px; height:18px; margin:1px 0 0; accent-color:#4F46E5; flex:none; }
+  @media (max-width:560px){ .tbl-imp{ flex:1; } }
   .tb-toast{ position:absolute; left:50%; bottom:calc(env(safe-area-inset-bottom, 0px) + 92px); z-index:8; transform:translate(-50%, 16px); opacity:0; pointer-events:none;
     max-width:calc(100% - 32px); width:max-content; padding:10px 16px; border-radius:14px; background:var(--tb-ink); color:var(--tb-paper); font-weight:800; font-size:13.5px; line-height:1.35; text-align:center; transition:opacity .25s, transform .25s; }
   .tb-toast.show{ opacity:1; transform:translate(-50%, 0); }
@@ -20275,6 +20297,8 @@ const COLOR_PRESETS = {
 /* ============ 🆕 NOUVEAUTÉS — pour que tout ce qui a été ajouté reste découvrable ============ */
 const WHATS_NEW_SECTIONS = [
   { icon:'🆕', title:'Nouveautés', items:[
+    { name:'📥 Importer des fichiers .md dans la Tablette', desc:"Dans « Ma bibliothèque » : « 📥 Importer .md » (ou ⋯ d'une catégorie › « Importer un fichier .md ici », ou glisse le fichier sur un rayon depuis l'ordinateur). Choisis le rayon, et le texte arrive mis en page : titres, gras, italique, ==surligné==, listes, cases à cocher, citations et encadrés, tableaux, séparateurs, et les images. Les images intégrées ou en ligne marchent toutes seules ; celles qui sont à côté du .md, choisis-les en même temps (ou importe le .zip, comme les exports Notion ou Obsidian). Plusieurs fichiers d'un coup, c'est possible." },
+    { name:'📚 Jusqu\'à 200 textes dans la Tablette', desc:"Avant, seuls les 40 derniers textes étaient gardés." },
     { name:'📚 Ta bibliothèque dans la Tablette', desc:"Tes textes sont rangés par catégorie : 📰 Journal, 📖 Histoires, 💬 Sujets… et « ＋ Catégorie » pour créer les tiennes (nom, icône, couleur). Chaque rayon montre ses textes, ligne par ligne : titre, lecture en %, minutes restantes, mots tagués, 🔖. Menu ⋯ : ranger ailleurs, marquer comme lu, recommencer, modifier, supprimer. Sur ordinateur, glisse un texte sur une catégorie. Recherche, tri, et « Reprendre ta lecture » en haut. Modifier un texte ne remet plus ta lecture à zéro." },
     { name:'🎤 Répétition : un vrai enregistreur', desc:"Le micro est refait : touche-le pour commencer, retouche-le quand tu as fini. Un point rouge et le minuteur montrent qu'il t'écoute, l'égaliseur bouge quand tu parles, et « 12 / 18 mots » se remplit au fur et à mesure. 🔊 Écouter et ⏭ Passer sont juste à côté." },
     { name:'🫁 Lire avec les liaisons et la respiration, sans bug', desc:"En Répétition, quand tu marquais les pauses de respiration, l'écoute se coupait et la phrase était comptée à moitié dite. Maintenant elle reprend toute seule et attend que tu aies fini." },
@@ -43171,7 +43195,7 @@ var TB = { art:null, sents:[], toks:[], sentToks:[], spans:[], mode:'', playing:
    Un texte = « lexiqueQuiz::tbDoc::id » (le contenu, en morceaux de 30 000 caractères pour le Google Sheet)
    + « lexiqueQuiz::tbMeta::id » (où tu en es, tes mots tagués). Un texte supprimé laisse une trace (« tbGone »)
    pour que l'autre appareil le supprime aussi. Les images et l'enregistrement de ta voix restent sur l'appareil. */
-var TB_DOC = 'lexiqueQuiz::tbDoc::', TB_META = 'lexiqueQuiz::tbMeta::', TB_GONE = 'lexiqueQuiz::tbGone', TB_PART = 30000, TB_MAX = 40;
+var TB_DOC = 'lexiqueQuiz::tbDoc::', TB_META = 'lexiqueQuiz::tbMeta::', TB_GONE = 'lexiqueQuiz::tbGone', TB_PART = 30000, TB_MAX = 200;
 var TB_DOC_FIELDS = ['title', 'text', 'blocks', 'src', 'at'], TB_LOCAL_FIELDS = ['textOrig', 'blocksOrig', '_du', '_dh'];
 function tbArtKey(){ return nsKey('vocabVision.tablette'); }          // l'ancien rangement (avant 1.0.23) : repris automatiquement
 function tbUserSuf(){ return '::u:' + getCurrentUserId(); }
@@ -43288,7 +43312,7 @@ function tbGet(id){
 }
 function tbPut(art){
   const ok = tbWriteArt(art);
-  if(ok && tbStoreIds().length > TB_MAX){ const L = tbLoad(); L.slice(TB_MAX).forEach(x => { if(x.id !== art.id) tbRemoveArt(x.id); }); }   // on garde les 40 derniers
+  if(ok && tbStoreIds().length > TB_MAX){ const L = tbLoad(); L.slice(TB_MAX).forEach(x => { if(x.id !== art.id) tbRemoveArt(x.id); }); }   // on garde les 200 derniers
   return ok;
 }
 function tbDel(id){ const a = tbGet(id); tbRemoveArt(id); try{ tbRecDel(id); }catch(e){} if(a) tbArtImgIds(a).forEach(i => { if(!tbLoad().some(x => tbArtImgIds(x).includes(i))) tbImgDel(i); }); }
@@ -43579,7 +43603,7 @@ function tbSentsHtml(text, st){
     const s = TB.sents.push(sent) - 1;
     TB.sentToks[s] = [];
     const offs = []; let o = 0;
-    sent.split(/(\s+)/).forEach(p => { if(p && !/^\s+$/.test(p)){ const m = p.search(/[\p{L}\p{N}]/u); offs.push(o + Math.max(0, m)); } o += p.length; });
+    sent.split(/(\s+)/).forEach(p => { if(p && !/^\s+$/.test(p)){ const m = p.search(/[\p{L}\p{N}]/u), el = /^[^\p{L}\p{N}]*(?:qu|jusqu|lorsqu|puisqu|[ldjmtsnc])['’](?=\p{L})/iu.exec(p); offs.push(o + (el ? el[0].length : Math.max(0, m))); } o += p.length; });
     const stOf = (i) => st[base + (offs[i] || 0)] || '';
     const wrap = (raw, i, inner) => {
       const form = tbClean(raw);
@@ -44217,12 +44241,15 @@ function tbLibShellHtml(){
         <select id="tbkLibSort" class="tbl-sort" aria-label="Trier les textes">
           <option value="recent" ${so === 'recent' ? 'selected' : ''}>Récents</option><option value="az" ${so === 'az' ? 'selected' : ''}>A → Z</option><option value="todo" ${so === 'todo' ? 'selected' : ''}>À finir</option>
         </select>
+        <button type="button" class="tbl-imp" data-tbl="import" title="Importer un fichier .md (Markdown), avec ses images (ou un .zip)">📥 Importer .md</button>
         <button type="button" class="tbl-new" data-tbl="new-text">＋ Nouveau texte</button>
+        <input type="file" id="tbkMdFile" multiple hidden aria-hidden="true" tabindex="-1">
       </div>
     </div>
     <div id="tbkLibTop"></div>
     <div class="tbl-shelves tbk-list" id="tbkMine"></div>
-    <div class="tbl-foot"><span class="tbk-sync" id="tbkSync">${getSyncUrl() ? '☁️ sur tous tes appareils' : ''}</span><span class="tbl-tip">Astuce : sur ordinateur, glisse un texte sur une autre catégorie pour le ranger.</span></div>
+    <div class="tbl-foot"><span class="tbk-sync" id="tbkSync">${getSyncUrl() ? '☁️ sur tous tes appareils' : ''}</span><span class="tbl-tip">Astuce : sur ordinateur, glisse un texte (ou un fichier .md) sur une catégorie pour l'y ranger.</span></div>
+    <div class="tbl-dropzone" aria-hidden="true"><span>📥 Lâche ton fichier .md ici</span></div>
     <div class="tbl-menu" id="tbkLibMenu" hidden role="menu"></div>
   </section>`;
 }
@@ -44316,6 +44343,7 @@ function tbCatMenuHtml(c){
   const C = tbCats(), i = C.findIndex(x => x.id === c.id);
   return `<div class="tbl-m-h">${c.icon} ${escapeHtml(c.name)}</div>
     <button type="button" role="menuitem" data-tbl="new-text" data-cat="${tbAttr(c.id)}">✍️ Ajouter un texte ici</button>
+    <button type="button" role="menuitem" data-tbl="import" data-cat="${tbAttr(c.id)}">📥 Importer un fichier .md ici</button>
     <button type="button" role="menuitem" data-tbl="cat-edit" data-cat="${tbAttr(c.id)}">🎨 Renommer, icône, couleur</button>
     ${i > 0 ? `<button type="button" role="menuitem" data-tbl="cat-up" data-cat="${tbAttr(c.id)}">↑ Monter</button>` : ''}
     ${i < C.length - 1 ? `<button type="button" role="menuitem" data-tbl="cat-down" data-cat="${tbAttr(c.id)}">↓ Descendre</button>` : ''}
@@ -44392,6 +44420,7 @@ function tbLibWire(){
     if(act === 'filter'){ S.f = b.dataset.f || 'all'; tbLibRefresh(); return; }
     if(act === 'fold'){ const u = tbUi(); u.libFold = u.libFold || {}; u.libFold[cat] = !u.libFold[cat]; tbSaveUi(); if(S.f !== 'all'){ S.f = 'all'; } tbLibRefresh(); return; }
     if(act === 'new-text'){ tbLibGoNew(cat); return; }
+    if(act === 'import'){ const fi = document.getElementById('tbkMdFile'); TB.impCat = cat || null; fi.value = ''; fi.click(); return; }
     if(act === 'art-menu'){ const a = tbGet(id); if(a) tbLibMenu(b, tbArtMenuHtml(a)); return; }
     if(act === 'cat-menu'){ const c = tbCats().find(x => x.id === cat); if(c) tbLibMenu(b, tbCatMenuHtml(c)); return; }
     if(act === 'move'){ const c = tbCats().find(x => x.id === cat); if(tbArtSetCat(id, cat)){ tbLibRefresh(); try{ setStatus(`📂 Rangé dans ${c.icon} ${c.name}`, 'ok'); }catch(err){} } return; }
@@ -44408,6 +44437,31 @@ function tbLibWire(){
       return;
     }
   });
+  // 📥 les fichiers choisis (bouton « Importer .md »)
+  const mdIn = document.getElementById('tbkMdFile');
+  const doImport = async (files, cat) => {
+    const ids = await tbMdImport(files, cat);
+    if(!ids.length) return;
+    if(ids.length === 1){ renderTabletteReader(ids[0]); return; }
+    TB.lib.f = 'all'; tbLibRefresh();
+    ids.forEach(id => { const r = document.querySelector(`.tbl-row[data-id="${id}"]`); if(r) r.classList.add('fresh'); });
+    const r0 = document.querySelector(`.tbl-row[data-id="${ids[0]}"]`); if(r0) r0.scrollIntoView({ block:'center', behavior:'smooth' });
+  };
+  mdIn.addEventListener('change', () => { const f = [...(mdIn.files || [])]; const cat = TB.impCat; TB.impCat = null; if(f.length) doImport(f, cat); });
+  // 📥 glisser des fichiers .md (ou .zip) depuis l'ordinateur : sur un rayon, ou n'importe où dans la bibliothèque
+  const hasFiles = (e) => { try{ return [...(e.dataTransfer && e.dataTransfer.types || [])].includes('Files'); }catch(err){ return false; } };
+  lib.addEventListener('dragover', (e) => { if(!hasFiles(e)) return; e.preventDefault(); lib.classList.add('filedrop'); const sh = e.target.closest && e.target.closest('.tbl-shelf'); lib.querySelectorAll('.tbl-shelf.drop').forEach(x => { if(x !== sh) x.classList.remove('drop'); }); if(sh) sh.classList.add('drop'); });
+  lib.addEventListener('dragleave', (e) => { if(!hasFiles(e)) return; if(!lib.contains(e.relatedTarget)){ lib.classList.remove('filedrop'); lib.querySelectorAll('.tbl-shelf.drop').forEach(x => x.classList.remove('drop')); } });
+  lib.addEventListener('drop', (e) => {
+    if(!hasFiles(e)) return; e.preventDefault(); e.stopPropagation();
+    lib.classList.remove('filedrop');
+    const sh = e.target.closest && e.target.closest('.tbl-shelf'); lib.querySelectorAll('.tbl-shelf.drop').forEach(x => x.classList.remove('drop'));
+    doImport([...(e.dataTransfer.files || [])], sh ? sh.dataset.cat : null);
+  }, true);
+  // un fichier lâché ailleurs sur la page de la Tablette : on l'importe aussi (au lieu que le navigateur l'ouvre)
+  const onDocOver = (e) => { if(!lib.isConnected){ document.removeEventListener('dragover', onDocOver); return; } if(hasFiles(e) && !lib.contains(e.target)){ e.preventDefault(); lib.classList.add('filedrop'); } };
+  const onDocDrop = (e) => { if(!lib.isConnected){ document.removeEventListener('drop', onDocDrop); return; } if(hasFiles(e) && !lib.contains(e.target)){ e.preventDefault(); lib.classList.remove('filedrop'); doImport([...(e.dataTransfer.files || [])], null); } };
+  document.addEventListener('dragover', onDocOver); document.addEventListener('drop', onDocDrop);
   // 🖱️ glisser-déposer un texte sur un rayon (ou une étiquette) pour le ranger
   lib.addEventListener('dragstart', (e) => { const r = e.target.closest && e.target.closest('.tbl-row'); if(!r) return; TB.dragId = r.dataset.id; r.classList.add('drag'); try{ e.dataTransfer.setData('text/plain', r.dataset.id); e.dataTransfer.effectAllowed = 'move'; }catch(err){} });
   lib.addEventListener('dragend', () => { TB.dragId = null; lib.querySelectorAll('.drag, .drop').forEach(x => x.classList.remove('drag', 'drop')); });
@@ -44422,6 +44476,300 @@ function tbLibWire(){
   document.addEventListener('keydown', function onEsc(e){ if(!lib.isConnected){ document.removeEventListener('keydown', onEsc); return; } if(e.key === 'Escape') tbLibMenuClose(); });
   document.addEventListener('pointerdown', function onOut(e){ if(!lib.isConnected){ document.removeEventListener('pointerdown', onOut, true); return; } const m = document.getElementById('tbkLibMenu'); if(m && !m.hidden && !m.contains(e.target) && !(e.target.closest && e.target.closest('[data-tbl="art-menu"], [data-tbl="cat-menu"]'))) tbLibMenuClose(); }, true);
   tbLibRefresh();
+}
+/* ---------- 📥 1.0.28 : importer des fichiers Markdown (.md) — titres, gras, italique, listes, citations, tableaux, images ----------
+   Un .md seul (images en ligne ou intégrées), ou le .md avec ses images (sélectionnées ensemble, ou dans un .zip
+   comme les exports Notion / Obsidian). Le texte arrive dans la catégorie choisie, prêt à lire. */
+function tbMdAttr(x){ return String(x == null ? '' : x).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
+function tbMdInline(s, refs){
+  refs = refs || {};
+  const keep = [], K = (h) => '\u0001' + (keep.push(h) - 1) + '\u0002';
+  s = String(s || '');
+  s = s.replace(/!\[\[([^\]|]+?)(?:\|[^\]]*)?\]\]/g, (m, f) => `![](${f.trim().replace(/ /g, '%20')})`);      // Obsidian : ![[image.png]]
+  s = s.replace(/\[\[([^\]|]+?)(?:\|([^\]]+))?\]\]/g, (m, a, b) => b || a);                                   // Obsidian : [[Page|alias]]
+  s = s.replace(/\\([\\`*_{}\[\]()#+\-.!|~=>])/g, (m, c) => K(escapeHtml(c)));
+  s = s.replace(/(`+)(?!`)([\s\S]*?[^`])\1(?!`)/g, (m, f, c) => K('<code>' + escapeHtml(c.replace(/^ | $/g, '')) + '</code>'));
+  s = s.replace(/<(https?:\/\/[^\s<>]+)>/g, (m, u) => K(escapeHtml(u)));
+  s = s.replace(/<\/?[a-zA-Z][a-zA-Z0-9-]*(?:\s[^<>]*?)?\/?>/g, m => K(m));                                    // le HTML écrit dans le .md passe tel quel
+  s = escapeHtml(s);
+  s = s.replace(/!\[([^\]]*)\]\(\s*(?:&lt;)?([^\s)]+?)(?:&gt;)?(?:\s+(?:"[^"]*"|'[^']*'|\([^)]*\)))?\s*\)/g, (m, alt, src) => K(`<img src="${src.replace(/"/g, '%22')}" alt="${alt.replace(/"/g, '&quot;')}">`));
+  s = s.replace(/!\[([^\]]*)\]\[([^\]]*)\]/g, (m, alt, ref) => { const u = refs[(ref || alt).toLowerCase()]; return u ? K(`<img src="${tbMdAttr(u)}" alt="${alt.replace(/"/g, '&quot;')}">`) : alt; });
+  s = s.replace(/\[([^\]]+)\]\(\s*[^)]*\)/g, '$1');                 // les liens : on garde le texte
+  s = s.replace(/\[([^\]]+)\]\[[^\]]*\]/g, '$1');
+  s = s.replace(/\[\^([^\]]+)\]/g, '($1)');                          // notes de bas de page
+  s = s.replace(/(\*\*\*|___)(?=\S)([\s\S]*?\S)\1/g, '<b><i>$2</i></b>');
+  s = s.replace(/(\*\*|__)(?=\S)([\s\S]*?\S)\1/g, '<b>$2</b>');
+  s = s.replace(/\*(?=[^\s*])([\s\S]*?[^\s*])\*/g, '<i>$1</i>');
+  s = s.replace(/(^|[^\p{L}\p{N}_])_(?=[^\s_])([\s\S]*?[^\s_])_(?![\p{L}\p{N}_])/gu, '$1<i>$2</i>');
+  s = s.replace(/~~(?=\S)([\s\S]*?\S)~~/g, '<s>$1</s>');
+  s = s.replace(/==(?=\S)([\s\S]*?\S)==/g, '<span style="background-color:#FFF3A3">$1</span>');                 // ==surligné==
+  for(let n = 0; n < 5 && /\u0001\d+\u0002/.test(s); n++) s = s.replace(/\u0001(\d+)\u0002/g, (m, i) => keep[+i]);
+  return s;
+}
+function tbMdLines(L, refs){
+  const s = L.map((x, k) => { const hard = / {2,}$/.test(x) || /\\$/.test(x); x = x.replace(/\\$/, '').trim(); return x + (k < L.length - 1 ? (hard ? '\u0003' : ' ') : ''); }).join('');
+  return tbMdInline(s, refs).replace(/\u0003/g, '<br>');
+}
+var TB_MD_CALLOUT = { note:'📝', info:'ℹ️', tip:'💡', astuce:'💡', important:'❗', warning:'⚠️', attention:'⚠️', caution:'⚠️', danger:'⛔', example:'📌', exemple:'📌', quote:'💬', success:'✅', question:'❓', abstract:'📋', summary:'📋', todo:'☑️' };
+function tbMdBlocks(lines, refs){
+  const out = []; let i = 0;
+  const blank = (l) => !l || !l.trim();
+  const reHr = /^ {0,3}([-*_])(?:\s*\1){2,}\s*$/, reH = /^ {0,3}(#{1,6})(?:\s+(.*?))?\s*#*\s*$/, reHs = /^ {0,3}#{1,6}(\s|$)/;
+  const reFence = /^ {0,3}(`{3,}|~{3,})/, reList = /^( {0,12})([-*+]|\d{1,9}[.)])\s+(.*)$/, reQ = /^ {0,3}>\s?(.*)$/;
+  const reSep = /^\s*\|?\s*:?-{2,}:?\s*(\|\s*:?-{2,}:?\s*)*\|?\s*$/;
+  const isHtml = (l) => /^ {0,3}<\/?(p|div|h[1-6]|table|ul|ol|li|blockquote|figure|img|br|hr|center|details|summary|section|pre|picture)\b/i.test(l);
+  const cells = (x) => x.trim().replace(/^\||\|$/g, '').split(/(?<!\\)\|/).map(c => c.trim().replace(/\\\|/g, '|'));
+  const starts = (x) => (reHs.test(x) && reH.test(x)) || reHr.test(x) || reFence.test(x) || reQ.test(x) || reList.test(x) || isHtml(x);
+  while(i < lines.length){
+    const l = lines[i];
+    if(blank(l)){ i++; continue; }
+    let m;
+    if((m = reFence.exec(l))){                                       // ```code``` : une ligne = un paragraphe
+      const f = m[1], end = new RegExp('^ {0,3}' + (f[0] === '`' ? '`' : '~') + '{' + f.length + ',}\\s*$'); i++;
+      while(i < lines.length && !end.test(lines[i])){ if(lines[i].trim()) out.push(`<p>${escapeHtml(lines[i])}</p>`); i++; }
+      i++; continue;
+    }
+    if(reHs.test(l) && (m = reH.exec(l))){ const n = m[1].length; if((m[2] || '').trim()) out.push(`<h${n}>${tbMdInline(m[2], refs)}</h${n}>`); i++; continue; }
+    if(reHr.test(l)){ out.push('<hr>'); i++; continue; }
+    if(reQ.test(l)){
+      const q = [];
+      while(i < lines.length && (reQ.test(lines[i]) || (!blank(lines[i]) && q.length && !blank(q[q.length - 1]) && !starts(lines[i])))){ const mm = reQ.exec(lines[i]); q.push(mm ? mm[1] : lines[i]); i++; }
+      const c = /^\[!(\w+)\][+-]?\s*(.*)$/.exec(q[0] || '');           // Obsidian : > [!note] Titre
+      if(c){ const ic = TB_MD_CALLOUT[c[1].toLowerCase()] || '📌'; q[0] = `**${ic} ${c[2] || c[1]}**`; q.splice(1, 0, ''); }
+      out.push(`<blockquote>${tbMdBlocks(q, refs)}</blockquote>`); continue;
+    }
+    if(l.includes('|') && i + 1 < lines.length && reSep.test(lines[i + 1])){   // tableau : une ligne par rangée (« colonne : valeur »)
+      const head = cells(l); i += 2;
+      while(i < lines.length && !blank(lines[i]) && lines[i].includes('|')){
+        const r = cells(lines[i]); i++;
+        if(head.length === 2) out.push(`<p><b>${tbMdInline(r[0] || '', refs)}</b> : ${tbMdInline(r[1] || '', refs)}</p>`);
+        else out.push(`<p>${r.map((c, k) => (head[k] ? `<b>${tbMdInline(head[k], refs)}</b> : ` : '') + tbMdInline(c, refs)).join(' ; ')}</p>`);
+      }
+      continue;
+    }
+    if((m = reList.exec(l))){
+      const base = m[1].length, ordered = /\d/.test(m[2]);
+      let h = ordered ? '<ol>' : '<ul>';
+      while(i < lines.length){
+        const mm = reList.exec(lines[i]);
+        if(!mm || mm[1].length < base || mm[1].length > base + 3 || /\d/.test(mm[2]) !== ordered) break;
+        const body = [mm[3]], ci = mm[1].length + mm[2].length + 1; i++;
+        while(i < lines.length){
+          const x = lines[i];
+          if(blank(x)){ let j = i + 1; while(j < lines.length && blank(lines[j])) j++; if(j < lines.length && /^\s*/.exec(lines[j])[0].length >= ci){ body.push(''); i++; continue; } break; }
+          const nx = reList.exec(x), ind = /^\s*/.exec(x)[0].length;
+          if(nx && nx[1].length <= base + 1) break;
+          if(ind >= ci || nx){ body.push(x.slice(Math.min(ind, ci))); i++; continue; }
+          if(!starts(x)){ body.push(x.trim()); i++; continue; }
+          break;
+        }
+        let task = '';
+        body[0] = body[0].replace(/^\[([ xX])\]\s+/, (z, c) => { task = c === ' ' ? '☐ ' : '☑ '; return ''; });
+        let k = 0; const first = [];
+        while(k < body.length && body[k] !== '' && !reList.test(body[k]) && !(k && starts(body[k]))){ first.push(body[k]); k++; }
+        const rest = body.slice(k);
+        h += `<li>${task}${tbMdLines(first, refs)}${rest.length ? tbMdBlocks(rest, refs) : ''}</li>`;
+      }
+      out.push(h + (ordered ? '</ol>' : '</ul>')); continue;
+    }
+    if(isHtml(l)){ const h = []; while(i < lines.length && !blank(lines[i])){ h.push(lines[i]); i++; } out.push(h.join('\n')); continue; }
+    const para = [];
+    while(i < lines.length && !blank(lines[i])){
+      const x = lines[i];
+      if(para.length && /^ {0,3}=+\s*$/.test(x)){ out.push(`<h1>${tbMdLines(para, refs)}</h1>`); para.length = 0; i++; break; }
+      if(para.length && /^ {0,3}-+\s*$/.test(x)){ out.push(`<h2>${tbMdLines(para, refs)}</h2>`); para.length = 0; i++; break; }
+      if(para.length && starts(x)) break;
+      para.push(x); i++;
+    }
+    if(para.length) out.push(`<p>${tbMdLines(para, refs)}</p>`);
+  }
+  return out.join('\n');
+}
+function tbMdToHtml(md){
+  let src = String(md || '').replace(/^﻿/, '').replace(/\r\n?/g, '\n').replace(/\t/g, '    ');
+  const meta = {};
+  const fm = /^---\n([\s\S]*?)\n(?:---|\.\.\.)\s*(?:\n|$)/.exec(src);
+  if(fm){ fm[1].split('\n').forEach(l => { const m = /^([\w-]+)\s*:\s*(.*)$/.exec(l); if(m) meta[m[1].toLowerCase()] = m[2].replace(/^["']|["']$/g, '').trim(); }); src = src.slice(fm[0].length); }
+  src = src.replace(/<!--[\s\S]*?-->/g, '');
+  const refs = {};
+  src = src.replace(/^ {0,3}\[([^\]^][^\]]*)\]:\s*<?(\S+?)>?(?:\s+["'(].*["')])?\s*$/gm, (m, k, u) => { refs[k.toLowerCase()] = u; return ''; });
+  src = src.replace(/^ {0,3}\[\^([^\]]+)\]:\s*(.*)$/gm, '($1) $2');
+  return { html:tbMdBlocks(src.split('\n'), refs), meta };
+}
+/* 🗜 lire un .zip (exports Notion, Obsidian…) sans bibliothèque : le répertoire central + DecompressionStream */
+async function tbUnzip(file){
+  const buf = new Uint8Array(await file.arrayBuffer()), dv = new DataView(buf.buffer, buf.byteOffset, buf.byteLength);
+  let e = -1;
+  for(let i = buf.length - 22; i >= Math.max(0, buf.length - 65557); i--){ if(dv.getUint32(i, true) === 0x06054b50){ e = i; break; } }
+  if(e < 0) throw new Error('zip illisible');
+  const n = dv.getUint16(e + 10, true); let q = dv.getUint32(e + 16, true);
+  const dec = new TextDecoder('utf-8'), out = [];
+  for(let k = 0; k < n && q + 46 <= buf.length; k++){
+    if(dv.getUint32(q, true) !== 0x02014b50) break;
+    const method = dv.getUint16(q + 10, true), csize = dv.getUint32(q + 20, true);
+    const nl = dv.getUint16(q + 28, true), xl = dv.getUint16(q + 30, true), cl = dv.getUint16(q + 32, true), lho = dv.getUint32(q + 42, true);
+    const name = dec.decode(buf.subarray(q + 46, q + 46 + nl));
+    q += 46 + nl + xl + cl;
+    if(name.endsWith('/') || /(^|\/)(__MACOSX|\.DS_Store)/.test(name)) continue;
+    const start = lho + 30 + dv.getUint16(lho + 26, true) + dv.getUint16(lho + 28, true);
+    out.push({ name, method, data:buf.subarray(start, start + csize) });
+  }
+  const files = [];
+  for(const en of out){
+    let blob = null;
+    try{
+      if(en.method === 0) blob = new Blob([en.data]);
+      else if(en.method === 8 && typeof DecompressionStream !== 'undefined') blob = await new Response(new Blob([en.data]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).blob();
+    }catch(err){ blob = null; }
+    if(!blob) continue;
+    const f = new File([blob], en.name.split('/').pop(), { type:tbMdMime(en.name) });
+    f.relPath = en.name;
+    files.push(f);
+  }
+  return files;
+}
+function tbMdMime(name){
+  const x = (String(name).split('.').pop() || '').toLowerCase();
+  return ({ png:'image/png', jpg:'image/jpeg', jpeg:'image/jpeg', gif:'image/gif', webp:'image/webp', svg:'image/svg+xml', bmp:'image/bmp', avif:'image/avif', md:'text/markdown', markdown:'text/markdown', txt:'text/plain', html:'text/html', htm:'text/html' })[x] || '';
+}
+function tbMdKind(f){ const n = String(f.name || '').toLowerCase(); return /\.(md|markdown|mdown|mkd)$/.test(n) ? 'md' : /\.(html?|xhtml)$/.test(n) ? 'html' : /\.txt$/.test(n) ? 'txt' : /\.zip$/.test(n) ? 'zip' : (/^image\//.test(f.type || '') || /\.(png|jpe?g|gif|webp|svg|bmp|avif)$/.test(n)) ? 'img' : ''; }
+async function tbMdText(f){
+  const b = new Uint8Array(await f.arrayBuffer());
+  try{ return new TextDecoder('utf-8', { fatal:true }).decode(b); }catch(e){ return new TextDecoder('windows-1252').decode(b); }
+}
+function tbMdFindImg(pool, ref, dir){
+  let r = String(ref || '').trim().replace(/^<|>$/g, '').split(/[?#]/)[0];
+  try{ r = decodeURIComponent(r); }catch(e){}
+  r = r.replace(/\\/g, '/').replace(/^\.\//, '');
+  const norm = (x) => String(x || '').replace(/\\/g, '/').toLowerCase();
+  const full = norm((dir ? dir + '/' : '') + r).split('/').reduce((a, seg) => { if(seg === '..') a.pop(); else if(seg && seg !== '.') a.push(seg); return a; }, []).join('/');
+  const base = norm(r.split('/').pop());
+  return pool.find(f => norm(f.relPath || f.name) === full) || pool.find(f => norm(f.relPath || f.name).endsWith('/' + norm(r))) || pool.find(f => norm(f.name) === base) || null;
+}
+/* un fichier → un texte de la Tablette (sans encore le ranger) */
+async function tbMdParseFile(f, pool){
+  const kind = tbMdKind(f), raw = await tbMdText(f);
+  const fname = String(f.name || 'texte').replace(/\.[^.]+$/, ''), dir = (f.relPath || '').split('/').slice(0, -1).join('/');
+  let html = '', meta = {};
+  if(kind === 'md'){ const r = tbMdToHtml(raw); html = r.html; meta = r.meta; }
+  else if(kind === 'html') html = raw;
+  else html = String(raw).split(/\n\s*\n/).map(p => `<p>${escapeHtml(p.trim()).replace(/\n/g, '<br>')}</p>`).join('');
+  const doc = new DOMParser().parseFromString(`<div id="tbMdRoot">${html}</div>`, 'text/html');
+  const root = doc.getElementById('tbMdRoot') || doc.body;
+  root.querySelectorAll('mark').forEach(mk => { mk.setAttribute('style', 'background-color:#FFF3A3'); });
+  // le titre : celui du fichier, sinon le premier grand titre, sinon le nom du fichier
+  let title = meta.title || '';
+  const h1 = root.querySelector('h1');
+  if(!title && h1 && h1 === root.querySelector('h1, h2, h3, h4, h5, h6, p, li, img')){ title = h1.textContent.replace(/\s+/g, ' ').trim(); h1.remove(); }
+  if(!title) title = fname.replace(/[_]+/g, ' ').replace(/\s+/g, ' ').trim();
+  // les images : intégrées (data:), sur internet (gardées en lien), ou à côté du .md (sélectionnées avec, ou dans le .zip)
+  const rep = { imgs:0, web:0, missing:[] };
+  const fitW = async (im, blob) => {   // une petite image (icône, schéma) n'est pas agrandie à toute la largeur
+    if(im.getAttribute('data-w')) return;
+    try{ const bm = await createImageBitmap(blob); const w = bm.width; if(bm.close) bm.close(); if(w && w < 680) im.setAttribute('data-w', String(Math.max(20, Math.round(w / 6.8)))); }catch(e){}
+  };
+  for(const im of [...root.querySelectorAll('img')]){
+    const srcA = (im.getAttribute('src') || '').trim(), alt = (im.getAttribute('alt') || im.getAttribute('title') || '').trim();
+    im.setAttribute('data-nm', (() => { try{ return decodeURIComponent(srcA.split(/[?#]/)[0].split('/').pop()); }catch(e){ return srcA; } })().slice(0, 200));
+    if(alt && !/^(image|img|photo|capture|screenshot|pasted image)[\s\d_.-]*$/i.test(alt) && !/\.(png|jpe?g|gif|webp|svg|bmp)$/i.test(alt)) im.setAttribute('data-cap', alt.slice(0, 300));
+    const w = parseInt(im.getAttribute('width') || '', 10); if(w && w < 900) im.setAttribute('data-w', String(Math.max(25, Math.min(100, Math.round(w / 7)))));
+    if(/^data:image\//i.test(srcA)){
+      try{ const blob = await (await fetch(srcA)).blob(); const id = await tbImgAdd(blob); if(id){ await fitW(im, blob); im.setAttribute('data-img', id); im.removeAttribute('src'); rep.imgs++; continue; } }catch(e){}
+    } else if(/^https?:\/\//i.test(srcA)){ rep.web++; continue; }
+    else if(srcA){
+      const fi = tbMdFindImg(pool, srcA, dir);
+      if(fi){ try{ const id = await tbImgAdd(fi); if(id){ await fitW(im, fi); im.setAttribute('data-img', id); im.removeAttribute('src'); rep.imgs++; continue; } }catch(e){} }
+    }
+    const nm = (() => { try{ return decodeURIComponent(srcA.split(/[?#]/)[0].split('/').pop()); }catch(e){ return srcA; } })() || 'image';
+    rep.missing.push(nm);
+    const note = doc.createElement('p'); note.innerHTML = `<i>🖼 Image manquante : ${escapeHtml(nm)}</i>`; note.setAttribute('data-miss', nm);
+    im.replaceWith(note);
+  }
+  const imgNames = [...root.querySelectorAll('img')].map(x => x.getAttribute('data-nm') || '');
+  let blocks = tbDomToBlocks(root, {});
+  let ik = 0;
+  blocks.forEach(b => {
+    if(b.t === 'img'){ if(imgNames[ik]) b.nm = imgNames[ik]; ik++; }
+    else if(b.r && b.r.length === 1 && /^🖼 Image manquante : /.test(b.r[0].x)) b.miss = b.r[0].x.replace(/^🖼 Image manquante : /, '');
+  });
+  let text = tbBlocksText(blocks);
+  if(text.length > 60000){ let n = 0; blocks = blocks.filter(b => { n += tbBlockText(b).length; return n <= 60000; }); text = tbBlocksText(blocks); rep.cut = true; }
+  return { file:f.name, title:title.slice(0, 160), blocks, text, words:tbWordsCount(text), rep, empty:!text.trim() && !blocks.some(b => b.t === 'img') };
+}
+/* 📥 choisir des fichiers → aperçu → ranger dans une catégorie */
+async function tbMdImport(fileList, cat){
+  const all = [...(fileList || [])];
+  let pool = [];
+  for(const f of all){
+    if(tbMdKind(f) === 'zip'){
+      try{ pool = pool.concat(await tbUnzip(f)); }catch(e){ setStatus(`🗜 Impossible d'ouvrir « ${f.name} » : le .zip est abîmé ou trop récent pour ce navigateur.`, 'err'); }
+    } else pool.push(f);
+  }
+  const docs = pool.filter(f => ['md', 'html', 'txt'].includes(tbMdKind(f)));
+  if(!docs.length){ setStatus(pool.some(f => tbMdKind(f) === 'img') ? "🖼 Choisis aussi le fichier .md qui va avec ces images (ou un .zip qui contient tout)." : "📥 Choisis un fichier .md (Markdown), un .zip, ou un .txt.", 'err'); return []; }
+  setStatus(`📥 Je prépare ${docs.length > 1 ? docs.length + ' fichiers' : '« ' + docs[0].name + ' »'}…`, 'ok');
+  const imgs = pool.filter(f => tbMdKind(f) === 'img'), parsed = [];
+  for(const d of docs){ try{ parsed.push(await tbMdParseFile(d, imgs)); }catch(e){ console.warn('md', e); parsed.push({ file:d.name, err:true }); } }
+  const ok = parsed.filter(x => !x.err && !x.empty);
+  if(!ok.length){ setStatus('📥 Ces fichiers sont vides ou illisibles.', 'err'); return []; }
+  const v = await tbMdDialog(ok, cat);
+  if(!v) return [];
+  const ids = [];
+  const now = Date.now();
+  ok.forEach((x, k) => {
+    if(!v.keep.includes(k)) return;
+    const old = v.replace ? tbLoad().find(a => a.src === x.file && (a.title || '') === x.title) : null;
+    if(old){   // réimporté sans ses images : on reprend celles de la première fois
+      const prev = tbBlocksOf(old).filter(b => b.t === 'img' && b.nm);
+      x.blocks = x.blocks.map(b => { if(!b.miss) return b; const o = prev.find(z => z.nm === b.miss); return o ? Object.assign({}, o) : b; });
+    }
+    const art = old ? Object.assign({}, old, { title:x.title, text:x.text, cat:v.cat }) : { id:'t' + (now + k).toString(36) + Math.random().toString(36).slice(2, 5), title:x.title, text:x.text, src:x.file, at:now - k, pos:0, pct:0, tags:[], cat:v.cat };
+    art.fmt = 'md';                                   // mis en page par le fichier : pas de « phrases coupées » à ajuster
+    if(tbIsRich(x.blocks)) art.blocks = x.blocks; else delete art.blocks;
+    delete art.textOrig; delete art.blocksOrig;
+    if(tbPut(art)) ids.push(art.id);
+  });
+  const c = tbCats().find(z => z.id === v.cat) || tbCatOf({});
+  const miss = ok.reduce((n, x) => n + x.rep.missing.length, 0);
+  setStatus(`📥 ${ids.length} texte${ids.length > 1 ? 's' : ''} importé${ids.length > 1 ? 's' : ''} dans ${c.icon} ${c.name}${miss ? ` · ${miss} image${miss > 1 ? 's' : ''} manquante${miss > 1 ? 's' : ''}` : ''}`, 'ok');
+  try{ playCorrectSound(); }catch(e){}
+  return ids;
+}
+function tbMdDialog(list, cat){
+  return new Promise(res => {
+    const C = tbCats(), L = tbLoad();
+    const twin = list.map(x => L.find(a => a.src === x.file && (a.title || '') === x.title)).filter(Boolean), dup = twin.length > 0;
+    const cs = (cat && C.some(c => c.id === cat)) ? cat : (twin.length === list.length ? tbCatOf(twin[0]).id : ((tbLibState().f !== 'all' && C.some(c => c.id === tbLibState().f)) ? tbLibState().f : C[0].id));
+    const ov = document.createElement('div');
+    ov.className = 'am-dlg-ov tbl-dlg-ov';
+    ov.innerHTML = `<div class="am-dlg tbl-dlg tbl-imp-dlg" role="dialog" aria-modal="true" aria-label="Importer">
+      <div class="am-dlg-t">📥 Importer ${list.length > 1 ? list.length + ' textes' : 'un texte'}</div>
+      <div class="tbl-imp-list">${list.map((x, k) => `<label class="tbl-imp-it"><input type="checkbox" data-k="${k}" checked>
+        <span class="tbl-imp-b"><b>${escapeHtml(x.title)}</b><small>${escapeHtml(x.file)}</small>
+        <span class="tbl-imp-m"><span>${x.words} mots</span>${x.rep.imgs ? `<span>🖼 ${x.rep.imgs} image${x.rep.imgs > 1 ? 's' : ''}</span>` : ''}${x.rep.web ? `<span>🌐 ${x.rep.web} en ligne</span>` : ''}${x.rep.missing.length ? `<span class="warn" title="${tbAttr(x.rep.missing.join(', '))}">⚠️ ${x.rep.missing.length} manquante${x.rep.missing.length > 1 ? 's' : ''}</span>` : ''}${x.rep.cut ? '<span class="warn">✂️ raccourci</span>' : ''}</span></span></label>`).join('')}</div>
+      ${list.some(x => x.rep.missing.length) ? `<div class="tbl-imp-hint">⚠️ Des images sont à côté du .md sur ton appareil : choisis-les en même temps que le .md (ou importe le .zip complet).</div>` : ''}
+      <label class="tbl-dlg-l" for="tblImpCat">📂 Ranger dans</label>
+      <select class="am-in" id="tblImpCat">${C.map(c => `<option value="${tbAttr(c.id)}" ${c.id === cs ? 'selected' : ''}>${c.icon} ${escapeHtml(c.name)}</option>`).join('')}</select>
+      ${dup ? `<label class="tbl-imp-rep"><input type="checkbox" id="tblImpRep" checked> Remplacer les textes déjà importés depuis le même fichier (ta lecture est gardée)</label>` : ''}
+      <div class="am-dlg-b"><button class="am-dlg-btn ghost" data-v="cancel">Annuler</button><button class="am-dlg-btn" data-v="ok">${list.length > 1 ? 'Importer' : 'Importer et lire'}</button></div>
+    </div>`;
+    document.body.appendChild(ov);
+    requestAnimationFrame(() => ov.classList.add('show'));
+    const close = (v) => { document.removeEventListener('keydown', onKey, true); ov.remove(); res(v); };
+    const onKey = (e) => { if(e.key === 'Escape'){ e.preventDefault(); close(null); } };
+    document.addEventListener('keydown', onKey, true);
+    const okB = ov.querySelector('[data-v="ok"]');
+    const keep = () => [...ov.querySelectorAll('.tbl-imp-it input:checked')].map(x => +x.dataset.k);
+    ov.addEventListener('change', () => { okB.disabled = !keep().length; });
+    ov.addEventListener('click', (e) => {
+      if(e.target === ov){ close(null); return; }
+      const b = e.target.closest('[data-v]'); if(!b) return;
+      if(b.dataset.v !== 'ok'){ close(null); return; }
+      const r = ov.querySelector('#tblImpRep');
+      close({ cat:ov.querySelector('#tblImpCat').value, keep:keep(), replace:!!(r && r.checked) });
+    });
+    setTimeout(() => { try{ okB.focus(); }catch(e){} }, 60);
+  });
 }
 function tbEdCatOptions(){
   const sel = document.getElementById('tbkCat'); if(!sel) return;
@@ -45340,7 +45688,7 @@ function tbOpen(art){
   tbRender(false);
   tbDock();
   tbWire(el);
-  if(tbNeedsReflowArt(art)){
+  if(art.fmt !== 'md' && tbNeedsReflowArt(art)){
     const body = document.getElementById('tbBody');
     if(body) body.insertAdjacentHTML('beforebegin', `<div class="tb-fixbar" id="tbFixBar"><span>✂️ Des phrases sont coupées par des retours à la ligne.</span><button type="button" class="tb-btn hl sm" data-tb="fix-text">🧹 Ajuster le texte</button><button type="button" class="tb-ib sm" data-tb="fix-x" aria-label="Laisser comme ça">✕</button></div>`);
   }
