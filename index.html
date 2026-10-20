@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- 🏷️ Version de l'appli : augmentée automatiquement par publier-site.cmd à chaque publication -->
-<meta name="app-version" content="1.0.26" data-date="2026-10-20">
+<meta name="app-version" content="1.0.27" data-date="2026-10-20">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <title>VocabVISION — Vocabulaire Français ↔ Arabe</title>
 <script>
@@ -1678,29 +1678,63 @@
   .repeat-sentence:has(.dx-m), .cq-rep-s:has(.dx-m){ line-height:2.05; }
   html[data-theme="dark"] .repeat-sentence{ background:var(--surface-sunken, #1B1F2A); }   /* thème sombre : la phrase restait claire sur fond clair */
   .rw .dx-hy i, .rw.spoken .dx-hy::after{ text-shadow:none; }
-  /* 🎤 1.0.26 : Répétition — la phrase reste en haut, le micro juste dessous, et un petit micro à côté de la phrase */
+  /* 🎤 1.0.27 : Répétition — la phrase en haut, un vrai enregistreur juste dessous (et un petit micro à côté de la phrase) */
   .rep-sent-wrap{ position:relative; }
   .rep-sent-wrap .repeat-sentence{ padding-right:54px; padding-left:54px; }
   .repeat-sentence.long{ font-size:clamp(17px, 4vw, 23px); line-height:1.45; padding-top:16px; padding-bottom:16px; }
-  .rep-mini-mic{ position:absolute; top:8px; right:8px; width:42px; height:42px; border-radius:50%; border:0; cursor:pointer; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,var(--purple),var(--pink)); box-shadow:0 6px 14px -6px rgba(79,70,229,.7); }
+  .rep-mini-mic{ position:absolute; top:8px; right:8px; width:42px; height:42px; border-radius:50%; border:0; cursor:pointer; display:flex; align-items:center; justify-content:center; background:radial-gradient(circle at 30% 25%, #8B7CFF, #4F46E5 65%); box-shadow:0 6px 14px -6px rgba(79,70,229,.7); }
   .rep-mini-mic svg{ width:21px; height:21px; }
-  .rep-mini-mic.listening{ background:linear-gradient(135deg,#22C55E,#16A34A); animation:repMiniPulse 1.1s ease-in-out infinite; }
+  .rep-mini-mic.listening{ background:radial-gradient(circle at 30% 25%, #FF8A8E, #E5484D 65%); animation:repMiniPulse 1.2s ease-in-out infinite; }
   .rep-mini-mic.disabled{ opacity:.35; pointer-events:none; }
-  @keyframes repMiniPulse{ 0%,100%{ box-shadow:0 0 0 0 rgba(34,197,94,.55); } 50%{ box-shadow:0 0 0 9px rgba(34,197,94,0); } }
-  .rep-mic{ margin:6px 0 8px; gap:6px; }
-  .rep-mic-row{ display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:10px; }
-  .mic-btn.rep-mic-btn{ width:auto; height:60px; min-width:190px; padding:0 22px 0 10px; border-radius:999px; gap:10px; justify-content:flex-start; }
-  .rep-mic-btn .rep-mic-ic{ width:44px; height:44px; border-radius:50%; background:rgba(255,255,255,.22); display:flex; align-items:center; justify-content:center; flex:none; }
-  .rep-mic-btn .rep-mic-ic svg{ width:26px; height:26px; }
-  .rep-mic-btn .rep-mic-lbl{ color:#fff; font:900 17px 'Nunito','Inter',sans-serif; white-space:nowrap; }
-  .rep-mic-btn .rep-mic-lbl::after{ content:'Appuie et parle'; }
-  .rep-mic-btn.listening{ background:linear-gradient(135deg,#22C55E,#16A34A); }
-  .rep-mic-btn.listening .rep-mic-lbl::after{ content:'J\2019 écoute… parle !'; }
-  .rep-mic-btn.listening::after{ border-radius:999px; }
-  .rep-mic-btn.disabled .rep-mic-lbl::after{ content:'C\2019 est fait'; }
-  .rep-mic-row .rep-hear{ margin:0; height:46px; padding:0 16px; }
-  #quizCard.rep-done .rep-mic-row, #quizCard.rep-done .speak-actions, #quizCard.rep-done .kbd-hint{ display:none; }
-  #quizCard.rep-done .rep-mini-mic{ display:none; }
+  @keyframes repMiniPulse{ 0%,100%{ box-shadow:0 0 0 0 rgba(229,72,77,.5); } 50%{ box-shadow:0 0 0 9px rgba(229,72,77,0); } }
+  .rec{ display:flex; flex-direction:column; align-items:stretch; gap:8px; max-width:520px; margin:10px auto 10px; padding:14px 16px 12px; border-radius:24px; background:var(--surface); border:1px solid var(--border); box-shadow:0 14px 32px -24px rgba(30,27,75,.6); }
+  .rec-row{ display:flex; align-items:center; justify-content:center; gap:clamp(14px, 6vw, 30px); }
+  .rec-side{ width:66px; display:flex; flex-direction:column; align-items:center; gap:4px; padding:2px 0; border:0; border-radius:14px; background:transparent; color:var(--text-dim); font:800 12px 'Nunito','Inter',sans-serif; cursor:pointer; }
+  .rec-side-i{ width:46px; height:46px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:19px; background:var(--surface-sunken); border:1px solid var(--border); transition:border-color .15s, transform .15s; }
+  .rec-side:hover .rec-side-i{ border-color:var(--purple); }
+  .rec-side:active .rec-side-i{ transform:scale(.94); }
+  .rec-side:focus-visible{ outline:2px solid var(--purple); outline-offset:2px; }
+  .mic-btn.rec-mic{ width:84px; height:84px; flex:none; background:radial-gradient(circle at 30% 25%, #8B7CFF, #4F46E5 60%, #3B2FC9); box-shadow:0 14px 30px -12px rgba(79,70,229,.75), inset 0 -4px 10px rgba(0,0,0,.18); }
+  .mic-btn.rec-mic svg{ width:34px; height:34px; position:relative; z-index:1; }
+  .mic-btn.rec-mic.listening{ background:radial-gradient(circle at 30% 25%, #FF8A8E, #E5484D 60%, #C2262C); box-shadow:0 14px 30px -12px rgba(229,72,77,.8), inset 0 -4px 10px rgba(0,0,0,.18); animation:none; }
+  .mic-btn.rec-mic.listening::after{ display:none; }
+  .mic-btn.rec-mic.disabled{ opacity:.45; }
+  .mic-btn.rec-mic:focus-visible{ outline:3px solid var(--purple); outline-offset:4px; }
+  .rec-wave{ position:absolute; inset:0; border-radius:50%; pointer-events:none; }
+  .rec-mic.listening .rec-wave::before, .rec-mic.listening .rec-wave::after{ content:''; position:absolute; inset:-7px; border-radius:50%; border:2px solid rgba(229,72,77,.5); animation:recWave 1.8s ease-out infinite; }
+  .rec-mic.listening .rec-wave::after{ animation-delay:.9s; }
+  @keyframes recWave{ from{ transform:scale(.94); opacity:1; } to{ transform:scale(1.5); opacity:0; } }
+  .rec-state{ display:flex; align-items:center; justify-content:center; gap:8px; min-height:22px; text-align:center; }
+  .rec-dot{ width:9px; height:9px; border-radius:50%; background:#A3A9B6; flex:none; }
+  .rec.on .rec-dot{ background:#E5484D; animation:recBlink 1.1s steps(2, start) infinite; }
+  @keyframes recBlink{ 50%{ opacity:.2; } }
+  .mic-hint.rec-lbl{ font-size:14px; color:var(--text); }
+  .rec-time{ font:900 13px 'Nunito','Inter',sans-serif; color:#E5484D; font-variant-numeric:tabular-nums; }
+  .rec-time:empty{ display:none; }
+  .rec-meter{ height:30px; display:flex; align-items:center; justify-content:center; }
+  .rec-eq{ display:flex; align-items:center; gap:4px; height:30px; }
+  .rec-eq i{ display:block; width:4px; height:6px; border-radius:3px; background:var(--border); }
+  .rec.on .rec-eq i{ background:#E5484D; animation:recEq 1s ease-in-out infinite; }
+  .rec.on.talk .rec-eq i{ animation-duration:.42s !important; background:#F2555A; }
+  @keyframes recEq{ 0%,100%{ height:6px; } 50%{ height:26px; } }
+  .rec.on .rec-eq i:nth-child(1){ animation-delay:-0.00s; animation-duration:1.05s; }
+  .rec.on .rec-eq i:nth-child(2){ animation-delay:-0.13s; animation-duration:0.85s; }
+  .rec.on .rec-eq i:nth-child(3){ animation-delay:-0.26s; animation-duration:1.2s; }
+  .rec.on .rec-eq i:nth-child(4){ animation-delay:-0.39s; animation-duration:0.95s; }
+  .rec.on .rec-eq i:nth-child(5){ animation-delay:-0.52s; animation-duration:1.1s; }
+  .rec.on .rec-eq i:nth-child(6){ animation-delay:-0.65s; animation-duration:1.05s; }
+  .rec.on .rec-eq i:nth-child(7){ animation-delay:-0.78s; animation-duration:0.85s; }
+  .rec.on .rec-eq i:nth-child(8){ animation-delay:-0.91s; animation-duration:1.2s; }
+  .rec.on .rec-eq i:nth-child(9){ animation-delay:-1.04s; animation-duration:0.95s; }
+  .rec.on .rec-eq i:nth-child(10){ animation-delay:-0.07s; animation-duration:1.1s; }
+  .rec.on .rec-eq i:nth-child(11){ animation-delay:-0.20s; animation-duration:1.05s; }
+  .rec-words{ display:flex; align-items:center; gap:10px; font:800 12.5px 'Nunito','Inter',sans-serif; color:var(--text-dim); font-variant-numeric:tabular-nums; }
+  .rec-bar{ flex:1; height:6px; border-radius:3px; background:var(--surface-sunken); overflow:hidden; }
+  .rec-bar i{ display:block; height:100%; width:0; border-radius:3px; background:linear-gradient(90deg,#22C55E,#16A34A); transition:width .25s ease-out; }
+  .mic-transcript.rec-tr{ font-size:13px; text-align:center; }
+  .mic-transcript.rec-tr:empty{ display:none; }
+  #quizCard.rep-done .rec, #quizCard.rep-done .speak-actions, #quizCard.rep-done .kbd-hint, #quizCard.rep-done .rep-mini-mic{ display:none; }
+  @media (prefers-reduced-motion: reduce){ .rec.on .rec-eq i, .rec-mic.listening .rec-wave::before, .rec-mic.listening .rec-wave::after, .rec.on .rec-dot, .rep-mini-mic.listening{ animation:none; } .rec.on .rec-eq i{ height:16px; } }
   .rep-tools{ display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:4px 10px; }
   .rep-tools .rep-show{ margin:10px 0 6px; }
   .dx-chip{ font-weight:800; }
@@ -2287,6 +2321,127 @@
   .tb-s.marked{ background-image:linear-gradient(transparent 62%, rgba(229,72,77,.18) 62%); }
   .tb-mkgo{ position:absolute; left:50%; top:calc(env(safe-area-inset-top, 0px) + 62px); transform:translateX(-50%); z-index:6; border:0; border-radius:999px; padding:9px 16px; background:#E5484D; color:#fff; font:800 14px 'Nunito','Inter',sans-serif; box-shadow:0 10px 24px -10px rgba(229,72,77,.8); cursor:pointer; transition:opacity .35s, transform .35s; }
   .tb-mkgo.out{ opacity:0; transform:translate(-50%, -10px); }
+  /* 📚 1.0.27 : la bibliothèque de la Tablette (rayons par catégorie) */
+  .tbl{ position:relative; text-align:left; margin:6px 0 24px; }
+  body.tbk-wide .tbl{ max-width:980px; margin-left:auto; margin-right:auto; }
+  .tbl-head{ display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:space-between; gap:10px 16px; margin:4px 2px 12px; }
+  .tbl-title{ display:flex; align-items:center; gap:12px; }
+  .tbl-logo{ width:46px; height:46px; flex:none; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:24px; background:#FFDE40; box-shadow:inset 0 -3px 0 rgba(0,0,0,.12); }
+  .tbl-h{ font:800 clamp(21px, 4.6vw, 27px)/1.1 'Literata',Georgia,serif; color:var(--text); letter-spacing:-.01em; }
+  .tbl-stats{ font:700 12.5px 'Nunito','Inter',sans-serif; color:var(--text-dim); margin-top:3px; }
+  .tbl-tools{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; flex:1 1 320px; justify-content:flex-end; }
+  .tbl-search{ flex:1 1 180px; max-width:320px; display:flex; align-items:center; gap:6px; height:40px; padding:0 12px; border:1px solid var(--border); border-radius:12px; background:var(--surface); }
+  .tbl-search input{ flex:1; min-width:0; height:auto !important; padding:0 !important; margin:0; border:0 !important; outline:0; box-shadow:none !important; border-radius:0; background:transparent !important; color:var(--text); font:700 14px 'Nunito','Inter',sans-serif; }
+  .tbl-search:focus-within{ border-color:var(--purple); box-shadow:0 0 0 3px rgba(79,70,229,.15); }
+  .tbl-sort{ height:40px; border:1px solid var(--border); border-radius:12px; background:var(--surface); color:var(--text); font:800 13px 'Nunito','Inter',sans-serif; padding:0 8px; }
+  .tbl-new{ height:40px; padding:0 16px; border:0; border-radius:12px; background:#1B1F27; color:#FFDE40; font:900 14px 'Nunito','Inter',sans-serif; cursor:pointer; }
+  [data-theme="dark"] .tbl-new{ background:#FFDE40; color:#1B1F27; }
+  .tbl-hero{ width:100%; display:flex; align-items:center; gap:14px; padding:14px 16px; margin:0 0 12px; border-radius:20px; border:1px solid var(--border); background:var(--surface); background:linear-gradient(100deg, color-mix(in srgb, var(--cc) 15%, var(--surface)), var(--surface) 72%); text-align:left; cursor:pointer; color:var(--text); font:inherit; }
+  .tbl-hero:focus-visible, .tbl-chip:focus-visible, .tbk-item.tbl-row:focus-visible{ outline:3px solid var(--purple); outline-offset:2px; }
+  .tbl-hero-ring{ position:relative; flex:none; width:58px; height:58px; --cc2:var(--cc); }
+  .tbl-hero-ring b{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font:900 14px 'Nunito','Inter',sans-serif; }
+  .tbl-hero-t{ flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
+  .tbl-hero-t small{ font:800 12px 'Nunito','Inter',sans-serif; color:var(--text-dim); }
+  .tbl-hero-t b{ font:800 17px/1.25 'Literata',Georgia,serif; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+  .tbl-hero-t span{ font:700 12.5px 'Nunito','Inter',sans-serif; color:var(--text-dim); }
+  .tbl-hero-go{ flex:none; width:46px; height:46px; border-radius:50%; background:var(--cc); color:#fff; display:flex; align-items:center; justify-content:center; font-size:16px; box-shadow:0 8px 18px -8px var(--cc); }
+  .tbl-chips{ display:flex; gap:8px; overflow-x:auto; padding:2px 2px 12px; scrollbar-width:none; }
+  .tbl-chips::-webkit-scrollbar{ display:none; }
+  .tbl-chip{ flex:none; display:inline-flex; align-items:center; gap:6px; height:36px; padding:0 12px; border-radius:999px; border:1px solid var(--border); background:var(--surface); color:var(--text); font:800 13.5px 'Nunito','Inter',sans-serif; cursor:pointer; }
+  .tbl-chip b{ font-weight:900; font-size:12px; color:var(--text-dim); background:var(--surface-sunken); border-radius:999px; padding:1px 7px; }
+  .tbl-chip.on{ background:var(--cc, #1B1F27); border-color:var(--cc, #1B1F27); color:#fff; }
+  [data-theme="dark"] .tbl-chip.on:not([style]){ background:#FFDE40; border-color:#FFDE40; color:#1B1F27; }
+  .tbl-chip.on b{ background:rgba(255,255,255,.25); color:inherit; }
+  .tbl-chip.add{ border-style:dashed; color:var(--text-dim); }
+  .tbl-chip.drop, .tbl-shelf.drop{ outline:3px dashed var(--cc); outline-offset:2px; }
+  .tbl-shelves{ gap:14px; }
+  .tbl-shelf{ position:relative; border-radius:20px; background:var(--surface); border:1px solid var(--border); overflow:hidden; }
+  .tbl-shelf::before{ content:''; position:absolute; left:0; top:0; bottom:0; width:6px; background:var(--cc); }
+  .tbl-sh-h{ display:flex; align-items:center; gap:10px; padding:10px 8px 10px 18px; }
+  .tbl-sh-ic{ width:40px; height:40px; flex:none; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:21px; background:var(--surface-sunken); background:color-mix(in srgb, var(--cc) 16%, transparent); }
+  .tbl-sh-t{ flex:1; min-width:0; display:flex; flex-direction:column; align-items:flex-start; gap:1px; border:0; background:transparent; padding:2px 0; cursor:pointer; color:var(--text); text-align:left; font:inherit; }
+  .tbl-sh-n{ font:800 18px/1.2 'Literata',Georgia,serif; }
+  .tbl-sh-n::after{ content:'▾'; display:inline-block; margin-left:8px; font-size:12px; color:var(--text-dim); transition:transform .2s; }
+  .tbl-shelf.fold .tbl-sh-n::after{ transform:rotate(-90deg); }
+  .tbl-sh-c{ font:700 12.5px 'Nunito','Inter',sans-serif; color:var(--text-dim); }
+  .tbl-sh-avg{ display:flex; align-items:center; gap:5px; flex:none; font:900 12.5px 'Nunito','Inter',sans-serif; color:var(--text-dim); }
+  .tbl-sh-list{ display:flex; flex-direction:column; padding:0 8px 8px 14px; }
+  .tbl-shelf.fold .tbl-sh-list{ display:none; }
+  .tbk-item.tbl-row{ gap:10px; padding:9px 4px 9px 8px; border-radius:14px; border:0; border-top:1px solid var(--border); background:transparent; }
+  .tbk-item.tbl-row:first-child{ border-top-color:transparent; }
+  .tbk-item.tbl-row:hover{ background:var(--surface-sunken); }
+  .tbk-item.tbl-row.drag{ opacity:.45; }
+  .tbl-th{ width:46px; height:46px; flex:none; border-radius:10px; overflow:hidden; display:flex; align-items:center; justify-content:center; background:var(--surface-sunken); background:color-mix(in srgb, var(--cc) 14%, var(--surface-sunken)); color:var(--cc); font:800 20px 'Literata',Georgia,serif; }
+  .tbl-th img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .tbl-row .tbk-main b{ overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+  .tbl-st{ color:var(--cc); }
+  .tbl-row.done .tbl-st{ color:#16A34A; }
+  .tbl-row .tbk-bar{ display:none; }
+  .tbl-pct{ position:relative; flex:none; width:40px; height:40px; display:flex; align-items:center; justify-content:center; }
+  .tbl-pct svg{ position:absolute; inset:0; width:40px; height:40px; }
+  .tbl-pct em{ position:relative; font:900 10.5px 'Nunito','Inter',sans-serif; font-style:normal; color:var(--text); }
+  .tbl-row.done .tbl-pct em{ color:#16A34A; font-size:14px; }
+  .tbl-ring .bg{ fill:none; stroke:var(--surface-sunken); stroke-width:3.4; }
+  .tbl-ring .fg{ fill:none; stroke:var(--cc, #F2C200); stroke-width:3.4; stroke-linecap:round; transform:rotate(-90deg); transform-origin:50% 50%; }
+  .tbl-row.done .tbl-ring .fg{ stroke:#16A34A; }
+  .tbl-empty{ padding:10px 6px 12px; font:700 13.5px 'Nunito','Inter',sans-serif; color:var(--text-dim); }
+  .tbl-link{ border:0; background:transparent; color:var(--cc); font:800 13.5px 'Nunito','Inter',sans-serif; cursor:pointer; padding:4px 0; text-decoration:underline; text-underline-offset:3px; }
+  .tbl-foot{ display:flex; flex-wrap:wrap; gap:6px 14px; justify-content:space-between; margin:10px 4px 0; font:700 12px 'Nunito','Inter',sans-serif; color:var(--text-dim); }
+  .tbl-foot .tbk-sync{ margin-left:0; }
+  @media (hover:none){ .tbl-tip{ display:none; } }
+  .tbl-menu{ position:absolute; z-index:40; width:256px; max-width:calc(100vw - 16px); padding:6px; border-radius:16px; background:var(--surface); border:1px solid var(--border); box-shadow:0 20px 44px -16px rgba(15,23,42,.45); }
+  .tbl-menu[hidden]{ display:none; }
+  .tbl-menu button{ width:100%; display:flex; align-items:center; gap:8px; min-height:38px; padding:0 10px; border:0; border-radius:10px; background:transparent; color:var(--text); font:800 13.5px 'Nunito','Inter',sans-serif; text-align:left; cursor:pointer; }
+  .tbl-menu button:hover, .tbl-menu button:focus-visible{ background:var(--surface-sunken); outline:none; }
+  .tbl-menu button.on{ color:var(--cc); }
+  .tbl-menu button i{ margin-left:auto; font-style:normal; }
+  .tbl-menu button.danger{ color:#DC2626; }
+  .tbl-menu button.warn{ background:#FEE2E2; color:#B91C1C; }
+  .tbl-menu hr{ border:0; border-top:1px solid var(--border); margin:5px 4px; }
+  .tbl-m-h{ padding:6px 10px 4px; font:800 13px 'Literata',Georgia,serif; color:var(--text-dim); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .tbl-m-l{ padding:6px 10px 2px; font:800 12px 'Nunito','Inter',sans-serif; color:var(--text-dim); }
+  #tbkNewH{ margin-top:26px; scroll-margin-top:12px; }
+  .tbk-catpick{ display:inline-flex; align-items:center; gap:4px; height:38px; padding:0 4px 0 10px; border:1px solid var(--border); border-radius:12px; background:var(--surface); }
+  .tbk-catpick select{ border:0; background:transparent; color:var(--text); font:800 13.5px 'Nunito','Inter',sans-serif; height:36px; max-width:150px; }
+  .tbl-dlg-pv{ display:flex; align-items:center; gap:10px; padding:10px 12px; margin:6px 0 10px; border-radius:14px; border-left:6px solid var(--cc); background:var(--surface-sunken); }
+  .tbl-dlg-pv b{ font:800 17px 'Literata',Georgia,serif; }
+  .tbl-dlg-l{ font:800 12.5px 'Nunito','Inter',sans-serif; color:var(--text-dim); margin:12px 0 6px; }
+  .tbl-dlg-ic{ display:grid; grid-template-columns:repeat(9, 1fr); gap:4px; }
+  .tbl-dlg-ic button{ height:36px; border-radius:10px; border:1px solid transparent; background:var(--surface-sunken); font-size:18px; cursor:pointer; padding:0; }
+  .tbl-dlg-ic button.on{ border-color:var(--purple); background:var(--surface); box-shadow:0 0 0 2px rgba(79,70,229,.2); }
+  .tbl-dlg-co{ display:flex; gap:8px; flex-wrap:wrap; }
+  .tbl-dlg-co button{ width:32px; height:32px; border-radius:50%; border:3px solid var(--surface); background:var(--c); box-shadow:0 0 0 1px var(--border); cursor:pointer; padding:0; }
+  .tbl-dlg-co button.on{ box-shadow:0 0 0 2px var(--c); }
+  @media (max-width:560px){
+    .tbl-tools{ justify-content:stretch; }
+    .tbl-search{ max-width:none; flex-basis:100%; }
+    .tbl-new{ flex:1; }
+    .tbl-th{ width:40px; height:40px; font-size:18px; }
+    .tbk-item.tbl-row{ gap:8px; }
+    .tbk-item.tbl-row .tbk-ib{ min-width:32px; }
+    .tbl-dlg-ic{ grid-template-columns:repeat(6, 1fr); }
+  }
+  /* 📖 1.0.27 : touche un mot → sa définition */
+  .wt{ position:fixed; z-index:10060; width:min(330px, calc(100vw - 16px)); max-height:min(62vh, 440px); overflow-y:auto; padding:12px 14px 12px; border-radius:18px; background:var(--surface, #fff); color:var(--text); border:1px solid var(--border); box-shadow:0 22px 48px -18px rgba(15,23,42,.55); text-align:left; font-family:'Nunito','Inter',sans-serif; animation:wtIn .14s ease-out; }
+  @keyframes wtIn{ from{ opacity:0; transform:translateY(4px); } }
+  .wt-h{ display:flex; align-items:center; gap:6px; }
+  .wt-w{ flex:1; min-width:0; font:800 19px/1.2 'Literata',Georgia,serif; overflow-wrap:anywhere; }
+  .wt-ib{ flex:none; width:34px; height:34px; border-radius:50%; border:1px solid var(--border); background:var(--surface-sunken); cursor:pointer; font-size:15px; color:var(--text); padding:0; }
+  .wt-lemma{ font-size:12.5px; font-weight:700; color:var(--text-dim); margin-top:2px; }
+  .wt-lemma.known{ color:#16A34A; }
+  .wt-ar{ font-family:'Amiri','Noto Naskh Arabic',serif; font-size:22px; line-height:1.5; color:var(--purple); text-align:right; margin:4px 0 2px; }
+  .wt-def{ font-size:14px; line-height:1.45; margin-top:2px; }
+  .wt-defs{ margin:4px 0 0; padding-left:20px; font-size:14px; line-height:1.45; }
+  .wt-defs li{ margin:2px 0; }
+  .wt-l{ font-size:13px; color:var(--text-dim); font-weight:700; padding:6px 0; }
+  .wt-src{ font-size:11.5px; color:var(--text-dim); font-weight:700; margin-top:6px; }
+  .wt-a{ display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+  .wt-a:empty{ display:none; }
+  .wt-a button{ flex:1 1 auto; min-height:38px; border-radius:11px; border:1px solid var(--border); background:var(--surface-sunken); color:var(--text); font:800 13px 'Nunito','Inter',sans-serif; cursor:pointer; padding:0 10px; }
+  .wt-a button.pri{ background:linear-gradient(135deg,#6366F1,#4F46E5); color:#fff; border-color:transparent; }
+  .wt-a button:disabled{ opacity:.6; cursor:default; }
+  ::highlight(wt){ background-color:rgba(250,204,21,.6); }
+  .rw.wt-on{ box-shadow:0 0 0 2px rgba(250,204,21,.95); border-radius:4px; }
   .tb-toast{ position:absolute; left:50%; bottom:calc(env(safe-area-inset-bottom, 0px) + 92px); z-index:8; transform:translate(-50%, 16px); opacity:0; pointer-events:none;
     max-width:calc(100% - 32px); width:max-content; padding:10px 16px; border-radius:14px; background:var(--tb-ink); color:var(--tb-paper); font-weight:800; font-size:13.5px; line-height:1.35; text-align:center; transition:opacity .25s, transform .25s; }
   .tb-toast.show{ opacity:1; transform:translate(-50%, 0); }
@@ -15184,6 +15339,157 @@ function wordCardPopup(w, opts){
   }
   return ov;
 }
+/* ============ 📖 1.0.27 : TOUCHE UN MOT → SA DÉFINITION ============
+   Dans les phrases d'exemple, la Répétition, les fiches (Art oratoire, Grammaire…), le Bouquinage : touche un mot
+   difficile, une bulle s'ouvre avec sa traduction et sa définition (ton lexique d'abord, sinon le dictionnaire en ligne),
+   et tu peux l'écouter, l'ajouter à tes mots, ou réentendre la phrase. */
+var WT_SEL = '.ex-text, .result-ex, .def-text, .repeat-sentence, .wcp-ex, .wcp-def, .reading-text, .bq-quote, .cq-sentence';
+var WT = { el:null, bypass:false, ctx:null, tok:0 };
+function wtClose(){
+  if(WT.el){ WT.el.remove(); WT.el = null; }
+  document.querySelectorAll('.rw.wt-on').forEach(x => x.classList.remove('wt-on'));
+  try{ if(window.CSS && CSS.highlights) CSS.highlights.delete('wt'); }catch(e){}
+  WT.ctx = null; WT.tok++;
+}
+function wtPoint(x, y){
+  let node = null, off = 0;
+  try{
+    if(document.caretPositionFromPoint){ const c = document.caretPositionFromPoint(x, y); if(c){ node = c.offsetNode; off = c.offset; } }
+    else if(document.caretRangeFromPoint){ const r = document.caretRangeFromPoint(x, y); if(r){ node = r.startContainer; off = r.startOffset; } }
+  }catch(e){}
+  return node && node.nodeType === 3 ? { node, off } : null;
+}
+function wtWordAt(e, host){
+  const rw = e.target.closest && e.target.closest('.rw[data-word]');
+  if(rw && host.contains(rw)){ if(rw.classList.contains('rw-hidden')) return null; return { word:rw.dataset.word, rect:rw.getBoundingClientRect(), el:rw }; }
+  const P = wtPoint(e.clientX, e.clientY); if(!P || !host.contains(P.node)) return null;
+  const par = P.node.parentNode;
+  if(par && par.closest && par.closest('.dx-m i, .dx-hy i, .tilde, .blank-slot, button')) return null;
+  const t = P.node.textContent, W = /[\p{L}\p{N}'’-]/u;
+  let a = P.off, z = P.off;
+  while(a > 0 && W.test(t[a - 1])) a--;
+  while(z < t.length && W.test(t[z])) z++;
+  if(z <= a) return null;
+  const r = document.createRange(); r.setStart(P.node, a); r.setEnd(P.node, z);
+  const rect = r.getBoundingClientRect();
+  if(e.clientX < rect.left - 4 || e.clientX > rect.right + 4 || e.clientY < rect.top - 4 || e.clientY > rect.bottom + 4) return null;   // à côté du mot (marge, bout de ligne)
+  return { word:t.slice(a, z), rect, range:r };
+}
+function wtClean(w){
+  return String(w || '').trim().replace(/^['’-]+|['’-]+$/g, '').replace(/^(?:jusqu|lorsqu|puisqu|quoiqu|presqu|qu|l|d|j|m|t|s|n|c)['’]/i, '');
+}
+function wtSentence(e, host, word){
+  const sEl = e.target.closest && e.target.closest('.bq-sent');
+  const c = (sEl || host).cloneNode(true);
+  c.querySelectorAll('.dx-m i, .dx-hy i, button, .speak-btn, svg').forEach(x => x.remove());
+  const txt = c.textContent.replace(/\s+/g, ' ').trim();
+  if(sEl) return { text:txt, el:sEl };
+  const parts = txt.match(/[^.!?…]+[.!?…»"]*/g) || [txt], f = dxFold(word);
+  return { text:(parts.find(x => dxFold(x).includes(f)) || txt).trim(), el:null };
+}
+function wtPlace(rect){
+  const el = WT.el; if(!el) return;
+  const w = el.offsetWidth, h = el.offsetHeight, vw = window.innerWidth, vh = window.innerHeight;
+  let left = rect.left + rect.width / 2 - w / 2, top = rect.bottom + 8;
+  if(top + h > vh - 8) top = rect.top - h - 8;
+  if(top < 8) top = Math.max(8, Math.min(vh - h - 8, rect.bottom + 8));
+  left = Math.max(8, Math.min(left, vw - w - 8));
+  el.style.left = Math.round(left) + 'px'; el.style.top = Math.round(top) + 'px';
+}
+function wtActions(known, r){
+  const box = WT.el && WT.el.querySelector('#wtAct'); if(!box) return;
+  const ctx = WT.ctx || {};
+  box.innerHTML = (known ? `<button type="button" class="pri" data-wt="see">👁 Voir sa fiche</button>`
+      : (r && (r.defs || []).length ? `<button type="button" class="pri" data-wt="add">➕ Ajouter à mes mots</button>` : ''))
+    + (ctx.sentence ? `<button type="button" data-wt="sent">🗣️ La phrase</button>` : '');
+}
+function wtShow(word, rect, ctx){
+  wtClose();
+  const w0 = wtClean(word); if(w0.length < 2 || /^\d+$/.test(w0)) return;
+  const el = document.createElement('div');
+  el.className = 'wt'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', 'Définition de ' + w0);
+  el.innerHTML = `<div class="wt-h"><b class="wt-w" lang="fr">${escapeHtml(w0)}</b><button type="button" class="wt-ib" data-wt="say" aria-label="Écouter le mot">🔊</button><button type="button" class="wt-ib" data-wt="x" aria-label="Fermer">✕</button></div>
+    <div class="wt-b" id="wtBody"><div class="wt-l">🔎 Je cherche le sens…</div></div><div class="wt-a" id="wtAct"></div>`;
+  document.body.appendChild(el);
+  WT.el = el; WT.ctx = Object.assign({ word:w0, rect }, ctx || {});
+  const tok = WT.tok;
+  const body = el.querySelector('#wtBody');
+  const known = (typeof tbLexWord === 'function') ? tbLexWord(w0) : null;
+  if(known){
+    WT.ctx.known = known;
+    body.innerHTML = `<div class="wt-lemma known">✓ Dans tes mots${dxFold(known.fr) !== dxFold(w0) ? ` : <b>${escapeHtml(known.fr)}</b>` : ''}</div>
+      ${known.ar ? `<div class="wt-ar" dir="rtl" lang="ar">${escapeHtml(known.ar)}</div>` : ''}
+      ${known.def ? `<div class="wt-def">${escapeHtml(known.def)}</div>` : ''}`;
+    wtActions(true);
+  } else {
+    let vb = null; try{ const e = tbIndex().get(dxFold(w0)); if(e && e.verb) vb = e; }catch(err){}
+    if(vb) body.innerHTML = `<div class="wt-lemma">verbe <b>${escapeHtml(vb.fr)}</b></div>${vb.ar ? `<div class="wt-ar" dir="rtl" lang="ar">${escapeHtml(vb.ar)}</div>` : ''}<div class="wt-l">🔎 Je cherche le sens…</div>`;
+    wtActions(false);
+    const look = (typeof tbLookup === 'function') ? tbLookup(w0) : Promise.resolve(null);
+    look.then(r => {
+      if(WT.tok !== tok || !WT.el) return;
+      WT.ctx.look = r;
+      const ar = ((r && r.ar) || []).filter(Boolean), defs = ((r && r.defs) || []).filter(Boolean);
+      if(!ar.length && !defs.length && !vb){ body.innerHTML = `<div class="wt-l">Pas trouvé dans le dictionnaire${navigator.onLine === false ? ' (pas de connexion)' : ''}.</div>`; wtActions(false); wtPlace(rect); return; }
+      const lemma = (r && r.lemma) || (vb && vb.fr) || w0;
+      body.innerHTML = `${dxFold(lemma) !== dxFold(w0) ? `<div class="wt-lemma">forme de <b>${escapeHtml(lemma)}</b>${r && r.pos ? ` (${escapeHtml(r.pos)})` : ''}</div>` : (r && r.pos ? `<div class="wt-lemma">${escapeHtml(r.pos)}</div>` : '')}
+        ${ar.length ? `<div class="wt-ar" dir="rtl" lang="ar">${escapeHtml(ar.join('، '))}</div>` : (vb && vb.ar ? `<div class="wt-ar" dir="rtl" lang="ar">${escapeHtml(vb.ar)}</div>` : '')}
+        ${defs.length ? `<ol class="wt-defs">${defs.slice(0, 4).map(d => `<li>${escapeHtml(d)}</li>`).join('')}</ol>` : ''}
+        ${r && r.src ? `<div class="wt-src">${r.src === 'lexique' ? '✓ Dans ton lexique' : 'Source : ' + escapeHtml(r.src)}</div>` : ''}`;
+      wtActions(false, r);
+      wtPlace(rect);
+    }).catch(() => { if(WT.tok === tok && WT.el){ body.innerHTML = '<div class="wt-l">Pas trouvé (pas de connexion ?).</div>'; wtPlace(rect); } });
+  }
+  wtPlace(rect);
+  try{ speak(w0, 'fr-FR'); }catch(e){}
+}
+function wtAdd(){
+  const C = WT.ctx; if(!C || !C.look) return;
+  const r = C.look, lemma = String(r.lemma || C.word).trim(), def = (typeof tbDefsJoin === 'function') ? tbDefsJoin(r.defs) : (r.defs || [])[0];
+  if(!lemma || !def) return;
+  let ex = { ex:'~' };
+  try{ if(C.sentence && typeof tbExFor === 'function'){ const x = tbExFor({ sent:C.sentence, w:C.word, lemma }); if(!x.missing) ex = x; } }catch(e){}
+  const w = { fr:lemma, ar:((r.ar || [])[0] || ''), def, ex:ex.ex, cat:'Mes lectures' }; if(ex.exForm) w.exForm = ex.exForm;
+  let n = 0; try{ n = commitImport([w], true); }catch(e){ console.error(e); }
+  try{ if(typeof exFullCache !== 'undefined' && exFullCache) exFullCache.clear(); }catch(e){}
+  try{ if(typeof TB !== 'undefined') TB.idx = null; }catch(e){}
+  const box = WT.el && WT.el.querySelector('#wtAct');
+  if(n){ try{ playCorrectSound(); }catch(e){} setStatus(`➕ « ${lemma} » ajouté à tes mots (bloc ${Math.floor((WORDS.length - 1) / BLOCK_SIZE) + 1})`, 'ok'); }
+  else setStatus(`« ${lemma} » est déjà dans tes mots.`, 'ok');
+  const kw = (typeof tbLexWord === 'function') ? tbLexWord(lemma) : null;
+  if(box){ C.known = kw; box.innerHTML = `<button type="button" disabled>✓ Dans tes mots</button>${kw ? `<button type="button" class="pri" data-wt="see">👁 Voir sa fiche</button>` : ''}`; }
+}
+document.addEventListener('click', (e) => {
+  if(WT.bypass) return;
+  if(WT.el && WT.el.contains(e.target)){
+    const b = e.target.closest('[data-wt]'); if(!b) return;
+    const a = b.dataset.wt, C = WT.ctx || {};
+    if(a === 'x') wtClose();
+    else if(a === 'say') speak(C.word, 'fr-FR');
+    else if(a === 'see'){ const k = C.known; wtClose(); if(k) wordCardPopup(k, { note:'📇 Ce mot est déjà dans tes mots' }); }
+    else if(a === 'add') wtAdd();
+    else if(a === 'sent'){ if(C.sentEl && C.sentEl.isConnected){ WT.bypass = true; try{ C.sentEl.click(); }finally{ WT.bypass = false; } } else if(C.sentence) speak(C.sentence, 'fr-FR'); }
+    return;
+  }
+  const host = e.target.closest && e.target.closest(WT_SEL);
+  if(!host || host.closest('#tbReader, .tbk, [contenteditable="true"], .wt, .wcp-ov .wcp-b')){ if(WT.el) wtClose(); return; }
+  if(e.target.closest('button, a, input, textarea, select, label, [data-sheet-peek], [role="button"]')){ if(WT.el) wtClose(); return; }
+  const sel = window.getSelection(); if(sel && !sel.isCollapsed && String(sel).trim()) return;
+  const hit = wtWordAt(e, host);
+  if(!hit || wtClean(hit.word).length < 2){ if(WT.el) wtClose(); return; }
+  e.stopPropagation(); e.preventDefault();
+  const S = wtSentence(e, host, wtClean(hit.word));
+  wtShow(hit.word, hit.rect, { sentence:S.text, sentEl:S.el });
+  if(hit.el) hit.el.classList.add('wt-on');
+  else if(hit.range){ try{ if(window.CSS && CSS.highlights && typeof Highlight !== 'undefined') CSS.highlights.set('wt', new Highlight(hit.range)); }catch(err){} }
+}, true);
+document.addEventListener('keydown', (e) => { if(e.key === 'Escape' && WT.el){ wtClose(); e.stopImmediatePropagation(); e.preventDefault(); } }, true);   // d'abord la bulle, la carte reste
+window.addEventListener('scroll', () => { if(WT.el && WT.ctx && WT.ctx.rect){ const y = window.scrollY; if(WT.sy == null) WT.sy = y; if(Math.abs(y - WT.sy) > 60) wtClose(); } else WT.sy = null; }, { passive:true });
+window.addEventListener('resize', () => { if(WT.el) wtClose(); });
+(function wtWatch(){
+  const card = document.getElementById('quizCard'); if(!card) return;
+  new MutationObserver(() => { if(WT.el) wtClose(); }).observe(card, { childList:true });
+})();
 function buildWordRowHtml(w){
   return `
     <div class="dict-row">
@@ -17238,6 +17544,7 @@ function renderRepeatCard(){
   const hidden = Math.random() < 0.5 && !(isLong && showLongPref);
   window.__repeatHidden = hidden;
   card.classList.remove('rep-done');
+  window.__repRec = null;                                  // une écoute en cours sur la phrase d'avant ne compte plus
 
   card.innerHTML = `
     <div class="cat-tag">${escapeHtml(word.cat)} · 🗣️ Répétition</div>
@@ -17250,13 +17557,16 @@ function renderRepeatCard(){
       </div>
       <button type="button" class="rep-mini-mic" id="repMiniMic" aria-label="Parler (micro)" title="Parler"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/></svg></button>
     </div>
-    <div class="mic-zone rep-mic">
-      <div class="rep-mic-row">
-        <button class="mic-btn rep-mic-btn" id="micBtn" aria-label="Parler"><span class="rep-mic-ic"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/></svg></span><span class="rep-mic-lbl"></span></button>
-        <button class="speak-ar-btn rep-hear" id="hearSentenceBtn">🔊 ${hidden ? 'Réécouter' : 'Écouter'}</button>
+    <div class="mic-zone rep-mic rec" id="repRec">
+      <div class="rec-row">
+        <button type="button" class="rec-side" id="hearSentenceBtn" aria-label="Écouter la phrase"><span class="rec-side-i" aria-hidden="true">🔊</span><span class="rec-cap">${hidden ? 'Réécouter' : 'Écouter'}</span></button>
+        <button class="mic-btn rec-mic" id="micBtn" aria-label="Parler : touche pour commencer, touche encore quand tu as fini"><span class="rec-wave" aria-hidden="true"></span><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/></svg></button>
+        <button type="button" class="rec-side" id="skipRepeatBtn" aria-label="Passer cette phrase"><span class="rec-side-i" aria-hidden="true">⏭</span><span class="rec-cap">Passer</span></button>
       </div>
-      <div class="mic-hint" id="micHint">Touche le micro (ou le petit 🎤 à côté de la phrase), puis parle</div>
-      <div class="mic-transcript" id="micTranscript"></div>
+      <div class="rec-state"><span class="rec-dot" aria-hidden="true"></span><span class="mic-hint rec-lbl" id="micHint" aria-live="polite">Touche le micro et lis la phrase</span><span class="rec-time" id="repRecTime"></span></div>
+      <div class="rec-meter" aria-hidden="true"><span class="rec-eq"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span></div>
+      <div class="rec-words"><span class="rec-bar"><i id="repRecBar"></i></span><span id="repRecWords"></span></div>
+      <div class="mic-transcript rec-tr" id="micTranscript"></div>
     </div>
     <div class="reveal" id="revealWrap"></div>
     <div class="rep-tools"><label class="rep-show ${isLong ? 'long' : ''}" for="repShowChk"><input type="checkbox" id="repShowChk" ${hidden ? '' : 'checked'}><span>👁 Voir la phrase pour la lire à voix haute</span>${isLong ? '<span class="rep-long">phrase longue</span>' : ''}</label>${dxChipHtml('dxRepChip')}</div>
@@ -17264,9 +17574,8 @@ function renderRepeatCard(){
     <div class="speak-actions">
       <button class="mode-chip ${repeatContinuous ? 'active' : ''}" id="repeatContBtn">${repeatContinuous ? '🎙️ Micro continu : ON' : '🎙️ Activer micro continu'}</button>
       <button class="mode-chip" id="revealRepeatBtn">🏳️ Voir la réponse</button>
-      <button class="mode-chip" id="skipRepeatBtn">⏭ Passer</button>
     </div>
-    <div class="kbd-hint">⌨️ Espace = micro (ou suivant une fois la réponse révélée) · Entrée = suivant</div>
+    <div class="kbd-hint">⌨️ Espace = micro (encore Espace quand tu as fini) · Entrée = suivant</div>
   `;
 
   const playSentence = (onDone) => { mascotTalk(); speak(dxOn() ? dxSpeakText(sentence) : sentence, 'fr-FR', onDone); };   // 🫁 la voix marque aussi les pauses de sens
@@ -17277,15 +17586,22 @@ function renderRepeatCard(){
     el.classList.toggle('hidden', !on && !answered);
     dxRepRedraw();   // les mots déjà dits restent surlignés (+ 🫁 liaisons & pauses quand la phrase est visible)
     const ql = document.getElementById('repeatLine'); if(ql) ql.textContent = on ? '📖 Lis la phrase à voix haute au micro' : '👂 Écoute la phrase, puis répète-la au micro';
-    const hb = document.getElementById('hearSentenceBtn'); if(hb) hb.textContent = on ? '🔊 Écouter' : '🔊 Réécouter';
+    const hb = document.querySelector('#hearSentenceBtn .rec-cap'); if(hb) hb.textContent = on ? 'Écouter' : 'Réécouter';
     if(isLong){ try{ localStorage.setItem(nsKey('lexiqueQuiz::repeatShowLong'), on ? '1' : '0'); }catch(err){} }   // retenu pour les prochaines phrases longues
   });
   document.getElementById('hearSentenceBtn').addEventListener('click', () => playSentence());
-  document.getElementById('micBtn').addEventListener('click', () => startRepeatRecognition(sentence));
-  // 🎤 le petit micro à côté de la phrase fait pareil, et s'allume avec le grand
+  // 🎤 un vrai enregistreur : on touche pour commencer, on retouche quand on a fini ; le petit micro à côté de la phrase fait pareil
+  const repToggle = () => { const R = window.__repRec; if(recoActive && R && !R.done){ R.finish(); return; } startRepeatRecognition(sentence); };
   const miniMic = document.getElementById('repMiniMic'), bigMic = document.getElementById('micBtn');
-  miniMic.addEventListener('click', () => startRepeatRecognition(sentence));
-  new MutationObserver(() => { miniMic.classList.toggle('listening', bigMic.classList.contains('listening')); miniMic.classList.toggle('disabled', bigMic.classList.contains('disabled')); }).observe(bigMic, { attributes:true, attributeFilter:['class'] });
+  bigMic.addEventListener('click', repToggle);
+  miniMic.addEventListener('click', repToggle);
+  new MutationObserver(() => {
+    const on = bigMic.classList.contains('listening'), off = bigMic.classList.contains('disabled');
+    miniMic.classList.toggle('listening', on); miniMic.classList.toggle('disabled', off);
+    const h = document.getElementById('micHint');
+    if(h && !on && !off && !answered && /^🔊 Écoute/.test(h.textContent)) h.textContent = 'Touche le micro et lis la phrase';
+  }).observe(bigMic, { attributes:true, attributeFilter:['class'] });
+  try{ repRecProgress(); }catch(e){}
   // ⬆️ la phrase tout en haut de l'écran (une phrase longue ne te fait plus descendre)
   card.classList.remove('rep-done');
   repFocusTop(false);
@@ -17316,6 +17632,7 @@ function renderRepeatCard(){
    d'écoute — sans ça, les mots surlignés lors d'un 1er essai raté restaient marqués pour le 2e essai,
    ce qui coupait la reconnaissance trop tôt en pensant la phrase déjà complète. */
 function resetRepeatHighlight(){
+  setTimeout(() => { try{ repRecProgress(); }catch(e){} }, 0);
   document.querySelectorAll('#repeatSentence .rw').forEach(span => {
     span.classList.remove('spoken');
     if(window.__repeatHidden && span.dataset.word){
@@ -17325,94 +17642,103 @@ function resetRepeatHighlight(){
   });
 }
 
+/* 🎤 1.0.27 : l'enregistreur de la Répétition — minuteur, mots reconnus, égaliseur ; touche le micro pour finir.
+   🫁 Avec les liaisons et la respiration, on fait des pauses : le navigateur coupait l'écoute (et la phrase partait
+   à moitié dite). Maintenant l'écoute reprend toute seule, sans rien perdre, et on attend plus longtemps avant de vérifier. */
+function repRecUi(on){
+  const rec = document.getElementById('repRec'); if(!rec) return;
+  rec.classList.toggle('on', !!on);
+  if(!on){ rec.classList.remove('talk'); const t = document.getElementById('repRecTime'); if(t) t.textContent = ''; }
+}
+function repRecTalk(){ const rec = document.getElementById('repRec'); if(!rec) return; rec.classList.add('talk'); clearTimeout(repRecTalk.t); repRecTalk.t = setTimeout(() => rec.classList.remove('talk'), 420); }
+function repRecProgress(){
+  const all = document.querySelectorAll('#repeatSentence .rw').length, ok = document.querySelectorAll('#repeatSentence .rw.spoken').length;
+  const w = document.getElementById('repRecWords'), b = document.getElementById('repRecBar');
+  if(w) w.textContent = all ? `${ok} / ${all} mots` : '';
+  if(b) b.style.width = (all ? Math.round(ok / all * 100) : 0) + '%';
+}
+function repRecTimer(){
+  const R = window.__repRec, t = document.getElementById('repRecTime'); if(!R || !t || R.done) return;
+  const sec = Math.floor((Date.now() - R.t0) / 1000);
+  t.textContent = `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`;
+}
 function startRepeatRecognition(sentence){
   if(!speechRecoAvailable || recoActive || answered) return;
   if(ttsSpeaking){ setTimeout(() => { if(!answered){ startRepeatRecognition(sentence); } }, 250); return; }
+  const micBtn = document.getElementById('micBtn'), micHint = document.getElementById('micHint'), micTr = document.getElementById('micTranscript');
+  if(!micBtn || !micHint || !micTr) return;
   resetRepeatHighlight();
-  try{
-    recognition = new SpeechRec();
-    recognition.lang = 'fr-FR';
-    recognition.interimResults = true;   // résultats en direct pour surligner au fur et à mesure
-    recognition.continuous = true;
-    recognition.maxAlternatives = 1;
-  }catch(e){ return; }
-
-  const micBtn = document.getElementById('micBtn');
-  const micHint = document.getElementById('micHint');
-  const micTr = document.getElementById('micTranscript');
-  recoActive = true;
-  micBtn.classList.add('listening');
-  micHint.textContent = '🎧 J\'écoute... répète la phrase !';
-  micTr.textContent = '';
-  let finalTranscript = '';
-  let autoFinalizeScheduled = false; // évite de programmer la validation plusieurs fois
-  let silenceTimer = null;
-
-  const finalizeNow = (heardText) => {
-    if(autoFinalizeScheduled || answered) return;
-    autoFinalizeScheduled = true;
-    if(silenceTimer){ clearTimeout(silenceTimer); silenceTimer = null; }
-    try{ recognition.stop(); }catch(e){}
+  const R = { acc:'', sess:'', done:false, restarts:0, t0:Date.now(), lastTalk:Date.now(), silence:0, tick:0, fatal:'' };
+  window.__repRec = R;
+  const total = () => document.querySelectorAll('#repeatSentence .rw').length;
+  const spoken = () => document.querySelectorAll('#repeatSentence .rw.spoken').length;
+  const heard = () => (R.acc + ' ' + R.sess).replace(/\s+/g, ' ').trim();
+  const cleanup = () => { clearTimeout(R.silence); clearInterval(R.tick); recoActive = false; micBtn.classList.remove('listening'); repRecUi(false); };
+  const finalizeNow = () => {
+    if(R.done || answered) return;
+    R.done = true; clearTimeout(R.silence);
+    try{ if(recognition) recognition.stop(); }catch(e){}
     setTimeout(() => {
+      if(window.__repRec !== R) return;                 // on est passé à une autre phrase entre-temps
+      cleanup();
       if(answered) return;
-      recoActive = false;
-      micBtn.classList.remove('listening');
-      const sim = sentenceSimilarity(heardText, sentence);
-      handleRepeatResult(sim, { heard: heardText });
+      const said = heard();
+      if(!said){ micHint.textContent = '🤫 Rien entendu : touche le micro et parle.'; return; }
+      handleRepeatResult(sentenceSimilarity(said, sentence), { heard:said });
     }, 300);
   };
-
-  recognition.onresult = (ev) => {
-    let interim = '';
-    finalTranscript = '';
-    for(let i=0;i<ev.results.length;i++){
-      const t = ev.results[i][0].transcript;
-      if(ev.results[i].isFinal){ finalTranscript += t + ' '; }
-      else { interim += t + ' '; }
-    }
-    const running = (finalTranscript + ' ' + interim).trim();
-    micTr.textContent = running ? `Tu dis : « ${running} »` : '';
-    highlightSpokenWords(running);           // 🔴 surlignage en temps réel
-
-    // 🆕 Dès que tous les mots de la phrase ont été reconnus, on valide directement
-    // sans attendre l'événement "fin" du navigateur (peu fiable en mode continu).
-    const allWords = document.querySelectorAll('#repeatSentence .rw');
-    const spokenWords = document.querySelectorAll('#repeatSentence .rw.spoken');
-    if(allWords.length > 0 && spokenWords.length === allWords.length){
-      micHint.textContent = '✅ Phrase complète, vérification...';
-      finalizeNow(running);
-      return;
-    }
-
-    // 🆕 Filet de sécurité : le navigateur peut ne jamais signaler la fin en mode continu
-    // (surtout si un mot a été mal reconnu). On détecte donc nous-mêmes le silence :
-    // si rien de nouveau n'est capté pendant ~1,6s après avoir parlé, on valide avec ce qu'on a.
-    if(silenceTimer){ clearTimeout(silenceTimer); }
-    if(running){
-      silenceTimer = setTimeout(() => {
-        micHint.textContent = '✅ Vérification...';
-        finalizeNow(running);
-      }, 1600);
-    }
+  R.finish = () => { micHint.textContent = '✅ Vérification…'; finalizeNow(); };
+  const armSilence = () => {
+    clearTimeout(R.silence);
+    if(!heard()) return;
+    const n = total(), cov = n ? spoken() / n : 0;
+    const wait = cov >= 0.9 ? 1500 : (dxOn() ? 4500 : 3200);       // presque tout dit : on vérifie vite ; sinon on te laisse respirer
+    R.silence = setTimeout(R.finish, wait);
   };
-  recognition.onerror = (ev) => {
-    recoActive = false; micBtn.classList.remove('listening');
-    if(silenceTimer){ clearTimeout(silenceTimer); silenceTimer = null; }
-    if(ev.error === 'not-allowed' || ev.error === 'service-not-allowed'){ micHint.textContent = '🚫 Micro refusé — autorise le micro.'; }
-    else if(ev.error === 'no-speech'){ micHint.textContent = '🤫 Rien entendu — réappuie et parle.'; }
-    else { micHint.textContent = 'Réappuie pour réessayer.'; }
+  const session = () => {
+    if(R.done || answered) return;
+    let rec;
+    try{ rec = new SpeechRec(); rec.lang = 'fr-FR'; rec.interimResults = true; rec.continuous = true; rec.maxAlternatives = 1; }
+    catch(e){ R.done = true; cleanup(); micHint.textContent = 'Le micro n\'est pas disponible ici.'; return; }
+    recognition = rec; R.sess = '';
+    rec.onresult = (ev) => {
+      if(R.done || recognition !== rec) return;
+      let fin = '', interim = '';
+      for(let i = 0; i < ev.results.length; i++){ const t = ev.results[i][0].transcript; if(ev.results[i].isFinal) fin += t + ' '; else interim += t + ' '; }
+      R.sess = (fin + ' ' + interim).trim(); R.lastTalk = Date.now();
+      const running = heard();
+      micTr.textContent = running ? `« ${running} »` : '';
+      highlightSpokenWords(running);
+      repRecTalk(); repRecProgress();
+      const n = total();
+      if(n > 0 && spoken() === n){ micHint.textContent = '✅ Phrase complète, vérification…'; finalizeNow(); return; }
+      micHint.textContent = 'J\'écoute… continue, respire aux pauses';
+      armSilence();
+    };
+    rec.onerror = (ev) => {
+      if(recognition !== rec) return;
+      if(ev.error === 'not-allowed' || ev.error === 'service-not-allowed') R.fatal = '🚫 Micro refusé : autorise le micro dans le navigateur.';
+      else if(ev.error === 'audio-capture') R.fatal = '🎙️ Aucun micro trouvé sur cet appareil.';
+      else if(ev.error === 'network') R.fatal = '📶 Pas de connexion pour la reconnaissance vocale.';
+    };
+    rec.onend = () => {
+      if(R.done || answered || recognition !== rec || window.__repRec !== R) return;
+      if(!recoActive){ R.done = true; cleanup(); micHint.textContent = 'Touche le micro pour reprendre.'; return; }      // coupé exprès (l'appli parle, par exemple)
+      R.acc = heard(); R.sess = '';
+      if(!R.fatal && R.restarts < 12 && Date.now() - R.lastTalk < (dxOn() ? 8000 : 6000)){ R.restarts++; setTimeout(session, 60); return; }   // 🫁 une pause : on continue d'écouter
+      if(R.acc){ R.finish(); return; }
+      R.done = true; cleanup();
+      micHint.textContent = R.fatal || '🤫 Rien entendu : touche le micro et parle.';
+    };
+    try{ rec.start(); }catch(e){ R.done = true; cleanup(); micHint.textContent = 'Touche le micro pour réessayer.'; }
   };
-  recognition.onend = () => {
-    recoActive = false; micBtn.classList.remove('listening');
-    if(silenceTimer){ clearTimeout(silenceTimer); silenceTimer = null; }
-    if(answered || autoFinalizeScheduled) return; // déjà géré (ou en cours) via la validation directe ci-dessus
-    const said = finalTranscript.trim() || (micTr.textContent.replace(/^Tu dis : « /, '').replace(/ »$/, ''));
-    if(said){
-      const sim = sentenceSimilarity(said, sentence);
-      handleRepeatResult(sim, { heard: said });
-    }
-  };
-  try{ recognition.start(); }catch(e){ recoActive = false; micBtn.classList.remove('listening'); }
+  recoActive = true;
+  micBtn.classList.add('listening');
+  micHint.textContent = 'J\'écoute… lis la phrase, prends ton temps';
+  micTr.textContent = '';
+  repRecUi(true); repRecProgress();
+  R.tick = setInterval(repRecTimer, 250); repRecTimer();
+  session();
 }
 
 function handleRepeatResult(similarity, info){
@@ -19299,6 +19625,14 @@ function mergeRemoteData(remote){
       });
       if(m){ saveBlockTitles(); changed = true; }
 
+    } else if(baseKey === 'lexiqueQuiz::tbCats'){
+      // 📚 catégories de la Tablette : une par une, la plus récente gagne (même supprimée)
+      const ro = safeParse(rv, []), lo = safeParse(lv, []) || [];
+      const out = Array.isArray(lo) ? lo.slice() : [];
+      let m = false;
+      (Array.isArray(ro) ? ro : []).forEach(r => { if(!r || !r.id) return; const i = out.findIndex(x => x && x.id === r.id); if(i < 0){ out.push(r); m = true; } else if((r.upd || 0) > (out[i].upd || 0)){ out[i] = r; m = true; } });
+      if(m || lv == null){ putL(key, JSON.stringify(out)); changed = true; }
+
     } else if(/^lexiqueQuiz::tbImg::/.test(baseKey)){
       // 🖼 un morceau d'image de la Tablette : si l'appareil est plein, on le reprendra au prochain tour
       let ok = true; try{ localStorage.setItem(key, rv); }catch(e){ ok = false; }
@@ -19941,6 +20275,10 @@ const COLOR_PRESETS = {
 /* ============ 🆕 NOUVEAUTÉS — pour que tout ce qui a été ajouté reste découvrable ============ */
 const WHATS_NEW_SECTIONS = [
   { icon:'🆕', title:'Nouveautés', items:[
+    { name:'📚 Ta bibliothèque dans la Tablette', desc:"Tes textes sont rangés par catégorie : 📰 Journal, 📖 Histoires, 💬 Sujets… et « ＋ Catégorie » pour créer les tiennes (nom, icône, couleur). Chaque rayon montre ses textes, ligne par ligne : titre, lecture en %, minutes restantes, mots tagués, 🔖. Menu ⋯ : ranger ailleurs, marquer comme lu, recommencer, modifier, supprimer. Sur ordinateur, glisse un texte sur une catégorie. Recherche, tri, et « Reprendre ta lecture » en haut. Modifier un texte ne remet plus ta lecture à zéro." },
+    { name:'🎤 Répétition : un vrai enregistreur', desc:"Le micro est refait : touche-le pour commencer, retouche-le quand tu as fini. Un point rouge et le minuteur montrent qu'il t'écoute, l'égaliseur bouge quand tu parles, et « 12 / 18 mots » se remplit au fur et à mesure. 🔊 Écouter et ⏭ Passer sont juste à côté." },
+    { name:'🫁 Lire avec les liaisons et la respiration, sans bug', desc:"En Répétition, quand tu marquais les pauses de respiration, l'écoute se coupait et la phrase était comptée à moitié dite. Maintenant elle reprend toute seule et attend que tu aies fini." },
+    { name:'📖 Touche un mot difficile : sa définition', desc:"Dans les phrases d'exemple, la Répétition, les fiches (Art oratoire, Grammaire…) et le Bouquinage : touche un mot, une bulle donne sa traduction et sa définition (ton lexique d'abord, sinon le dictionnaire en ligne). Tu peux l'écouter, l'ajouter à tes mots, ou réentendre la phrase." },
     { name:'📇 Un mot déjà dans tes mots ? Tu peux le voir', desc:"Dans la Tablette, cherche un mot (🔍) ou touche-le : s'il est déjà dans tes mots, on te le dit et « 👁 Voir sa fiche » ouvre sa carte : le mot, l'arabe, la définition, la phrase d'exemple et sa traduction en arabe (quand tu es en ligne). Pareil dans « Ajouter un mot »." },
     { name:'📖 Toutes les définitions, en une', desc:"En ajoutant un mot depuis la Tablette, la définition reprend tous les sens trouvés : « 1. … 2. … 3. … ». Une fois le mot ajouté, la fiche se range toute seule." },
     { name:'🔖 Marque-page dans la Tablette', desc:"Le bouton 🔖 en haut : « Marquer ici » (la phrase en haut de l'écran), « Y aller », « Retirer ». Ou touche un mot puis « 🔖 Marque-page ici ». Il se retrouve sur tous tes appareils. Et en rouvrant un texte, tu reviens exactement où tu lisais, même quand les images arrivent après." },
@@ -43815,6 +44153,282 @@ function tbAutoTitle(text){
 function tbDateLabel(ts){ try{ return new Date(ts).toLocaleDateString('fr-FR', { day:'numeric', month:'long' }); }catch(e){ return ''; } }
 
 /* ---------- 🏠 la page d'accueil de la Tablette (dans l'appli) ---------- */
+/* ---------- 📚 1.0.27 : la bibliothèque — des catégories (Journal, Histoires, Sujets… et celles que tu crées) ----------
+   Chaque catégorie est un rayon : une ligne par texte (titre, lecture en %, mots, marque-page), qu'on ouvre, modifie,
+   range ailleurs (menu ⋯ ou glisser-déposer sur ordinateur). Catégories et rangement passent par la synchro. */
+var TB_CATS = 'lexiqueQuiz::tbCats';
+var TB_CAT_DEF = [
+  { id:'journal', name:'Journal', icon:'📰', color:'#2563EB', ord:1 },
+  { id:'histoire', name:'Histoires', icon:'📖', color:'#9333EA', ord:2 },
+  { id:'sujet', name:'Sujets', icon:'💬', color:'#EA580C', ord:3 },
+];
+var TB_CAT_ICONS = ['📰', '📖', '💬', '🧠', '🌍', '🔬', '🎭', '🏛️', '⚽', '🍲', '💼', '✈️', '🎵', '🩺', '💡', '❤️', '🕌', '🧒'];
+var TB_CAT_COLORS = ['#2563EB', '#9333EA', '#EA580C', '#16A34A', '#DB2777', '#0891B2', '#CA8A04', '#475569'];
+function tbCatsAll(){
+  let L = null; try{ L = JSON.parse(localStorage.getItem(nsKey(TB_CATS)) || 'null'); }catch(e){}
+  if(!Array.isArray(L) || !L.some(c => c && c.id && !c.gone)) L = TB_CAT_DEF.map(c => Object.assign({ upd:0 }, c));
+  return L.filter(c => c && c.id);
+}
+function tbCats(){ return tbCatsAll().filter(c => !c.gone).map((c, i) => Object.assign({ ord:i + 1 }, c)).sort((a, b) => (a.ord || 0) - (b.ord || 0)); }
+function tbCatsSave(L){ try{ localStorage.setItem(nsKey(TB_CATS), JSON.stringify(L)); }catch(e){} }
+function tbCatOf(a){ const C = tbCats(), id = a && a.cat; return (id && C.find(c => c.id === id)) || C[0] || TB_CAT_DEF[0]; }
+function tbCatPut(c){
+  const L = tbCatsAll(), i = L.findIndex(x => x.id === c.id);
+  const o = Object.assign({}, i >= 0 ? L[i] : {}, c, { upd:Date.now() });
+  if(o.ord == null) o.ord = Math.max(0, ...tbCats().map(x => x.ord || 0)) + 1;
+  if(i >= 0) L[i] = o; else L.push(o);
+  tbCatsSave(L); return o;
+}
+function tbCatDel(id){
+  const C = tbCats(); if(C.length < 2) return null;
+  const to = C.find(c => c.id !== id), L = tbCatsAll(), c = L.find(x => x.id === id); if(!c) return null;
+  c.gone = 1; c.upd = Date.now(); tbCatsSave(L);
+  let n = 0; tbLoad().forEach(a => { if(tbCatOf(a).id === id || a.cat === id){ a.cat = to.id; tbPut(a); n++; } });
+  return { to, n };
+}
+function tbCatMove(id, dir){
+  const C = tbCats(), i = C.findIndex(c => c.id === id), j = i + dir;
+  if(i < 0 || j < 0 || j >= C.length) return;
+  const L = tbCatsAll(), A = L.find(x => x.id === C[i].id), B = L.find(x => x.id === C[j].id);
+  const oa = C[i].ord, ob = C[j].ord === oa ? oa + dir : C[j].ord;
+  if(A){ A.ord = ob; A.upd = Date.now(); } else L.push(Object.assign({}, C[i], { ord:ob, upd:Date.now() }));
+  if(B){ B.ord = oa; B.upd = Date.now(); } else L.push(Object.assign({}, C[j], { ord:oa, upd:Date.now() }));
+  tbCatsSave(L);
+}
+function tbArtSetCat(id, cat){ const a = tbGet(id); if(!a) return false; a.cat = cat; tbPut(a); return true; }
+function tbPct(a){ return a && a.done ? 1 : Math.max(0, Math.min(1, (a && a.pct) || 0)); }
+function tbRing(p, size){
+  const r = 15, c = 2 * Math.PI * r, d = Math.max(0, Math.min(1, p || 0)) * c;
+  return `<svg class="tbl-ring" viewBox="0 0 36 36" width="${size || 34}" height="${size || 34}" aria-hidden="true"><circle cx="18" cy="18" r="${r}" class="bg"/>${d > 0.3 ? `<circle cx="18" cy="18" r="${r}" class="fg" stroke-dasharray="${d.toFixed(1)} ${c.toFixed(1)}"/>` : ''}</svg>`;
+}
+function tbInitial(t){   // la lettre du premier vrai mot (« Le marché » → M)
+  const w = String(t || '').trim().split(/[\s'’]+/).filter(Boolean);
+  const x = w.find(m => !/^(le|la|les|l|un|une|des|du|de|d|au|aux|the|a)$/i.test(m)) || w[0] || '?';
+  return x.charAt(0).toUpperCase();
+}
+function tbLibState(){ if(!TB.lib) TB.lib = { q:'', f:'all' }; return TB.lib; }
+function tbLibShellHtml(){
+  const S = tbLibState(), so = tbUi().libSort || 'recent';
+  return `<section class="tbl" id="tbkLib" aria-label="Ma bibliothèque">
+    <div class="tbl-head">
+      <div class="tbl-title"><span class="tbl-logo" aria-hidden="true">📚</span><div><div class="tbl-h" role="heading" aria-level="2">Ma bibliothèque</div><div class="tbl-stats" id="tbkLibStats"></div></div></div>
+      <div class="tbl-tools">
+        <label class="tbl-search"><span aria-hidden="true">🔎</span><input id="tbkLibQ" type="search" placeholder="Chercher un texte" value="${tbAttr(S.q)}" autocomplete="off" aria-label="Chercher un texte dans ta bibliothèque"></label>
+        <select id="tbkLibSort" class="tbl-sort" aria-label="Trier les textes">
+          <option value="recent" ${so === 'recent' ? 'selected' : ''}>Récents</option><option value="az" ${so === 'az' ? 'selected' : ''}>A → Z</option><option value="todo" ${so === 'todo' ? 'selected' : ''}>À finir</option>
+        </select>
+        <button type="button" class="tbl-new" data-tbl="new-text">＋ Nouveau texte</button>
+      </div>
+    </div>
+    <div id="tbkLibTop"></div>
+    <div class="tbl-shelves tbk-list" id="tbkMine"></div>
+    <div class="tbl-foot"><span class="tbk-sync" id="tbkSync">${getSyncUrl() ? '☁️ sur tous tes appareils' : ''}</span><span class="tbl-tip">Astuce : sur ordinateur, glisse un texte sur une autre catégorie pour le ranger.</span></div>
+    <div class="tbl-menu" id="tbkLibMenu" hidden role="menu"></div>
+  </section>`;
+}
+function tbLibRow(a, c){
+  const n = tbWordsCount(a.text), tags = (a.tags || []).length, p = tbPct(a), pct = Math.round(p * 100);
+  const img = tbArtImgIds(a)[0], st = a.done ? 'done' : (pct > 2 ? 'on' : 'new');
+  const left = Math.max(1, Math.round(n * (1 - p) / 170));
+  const stl = a.done ? '✓ Lu' : (pct > 2 ? `Encore ${left} min` : `${Math.max(1, Math.round(n / 170))} min`);
+  return `<div class="tbk-item tbl-row ${st}" data-tbk-open="${tbAttr(a.id)}" data-id="${tbAttr(a.id)}" role="button" tabindex="0" draggable="true" style="--cc:${c.color}">
+      <span class="tbl-th ${img ? '' : 'none'}" ${img ? `data-img="${tbAttr(img)}"` : ''} aria-hidden="true">${img ? '<img alt="">' : escapeHtml(tbInitial(a.title))}</span>
+      <div class="tbk-main"><b>${escapeHtml(a.title || 'Sans titre')}</b>
+        <span class="tbk-meta"><span class="tbl-st">${stl}</span><span>${n} mots</span>${tags ? `<span title="Mots tagués">🖍 ${tags}</span>` : ''}${a.mark ? '<span title="Marque-page posé">🔖</span>' : ''}${a.src && a.src !== 'Collé' ? `<span>${escapeHtml(a.src)}</span>` : ''}</span>
+        <span class="tbk-bar"><i style="width:${pct}%;"></i></span></div>
+      <span class="tbl-pct" title="Lu à ${pct} %">${tbRing(p)}<em>${a.done ? '✓' : pct + '%'}</em></span>
+      <button type="button" class="tbk-ib" data-tbk-edit="${tbAttr(a.id)}" aria-label="Modifier « ${tbAttr(a.title || '')} »" title="Modifier le texte">✏️</button>
+      <button type="button" class="tbk-ib" data-tbl="art-menu" data-id="${tbAttr(a.id)}" aria-label="Plus d'options pour « ${tbAttr(a.title || '')} »" aria-haspopup="menu" title="Ranger, marquer comme lu, supprimer">⋯</button>
+    </div>`;
+}
+function tbLibShelf(c, rows, fold){
+  const done = rows.filter(a => a.done).length, avg = rows.length ? rows.reduce((t, a) => t + tbPct(a), 0) / rows.length : 0;
+  return `<section class="tbl-shelf ${fold ? 'fold' : ''}" data-cat="${tbAttr(c.id)}" style="--cc:${c.color}">
+    <div class="tbl-sh-h">
+      <span class="tbl-sh-ic" aria-hidden="true">${c.icon}</span>
+      <button type="button" class="tbl-sh-t" data-tbl="fold" data-cat="${tbAttr(c.id)}" aria-expanded="${!fold}">
+        <span class="tbl-sh-n">${escapeHtml(c.name)}</span>
+        <span class="tbl-sh-c">${rows.length ? `${rows.length} texte${rows.length > 1 ? 's' : ''}${done ? `, ${done} lu${done > 1 ? 's' : ''}` : ''}` : 'vide'}</span>
+      </button>
+      ${rows.length ? `<span class="tbl-sh-avg" title="Lecture moyenne du rayon">${tbRing(avg, 30)}<b>${Math.round(avg * 100)}%</b></span>` : ''}
+      <button type="button" class="tbk-ib" data-tbl="cat-menu" data-cat="${tbAttr(c.id)}" aria-label="Options de la catégorie ${tbAttr(c.name)}" aria-haspopup="menu">⋯</button>
+    </div>
+    <div class="tbl-sh-list">${rows.length ? rows.map(a => tbLibRow(a, c)).join('') : `<div class="tbl-empty">Aucun texte dans ce rayon. <button type="button" class="tbl-link" data-tbl="new-text" data-cat="${tbAttr(c.id)}">✍️ Ajouter un texte dans « ${escapeHtml(c.name)} »</button></div>`}</div>
+  </section>`;
+}
+function tbLibRefresh(){
+  const top = document.getElementById('tbkLibTop'), box = document.getElementById('tbkMine'); if(!top || !box) return;
+  const S = tbLibState(), C = tbCats(), all = tbLoad().filter(a => a.id !== 'sample');
+  if(S.f !== 'all' && !C.some(c => c.id === S.f)) S.f = 'all';
+  const q = dxFold(S.q || '').trim();
+  const hit = (a) => !q || dxFold(a.title || '').includes(q) || dxFold(String(a.text || '').slice(0, 6000)).includes(q);
+  const so = tbUi().libSort || 'recent';
+  const sorter = so === 'az' ? ((x, y) => String(x.title || '').localeCompare(String(y.title || ''), 'fr'))
+    : so === 'todo' ? ((x, y) => (x.done - y.done) || (tbPct(y) - tbPct(x)) || ((y.readAt || y.at || 0) - (x.readAt || x.at || 0)))
+    : ((x, y) => (y.at || 0) - (x.at || 0));
+  const by = new Map(C.map(c => [c.id, []]));
+  all.forEach(a => { const c = tbCatOf(a); if(by.has(c.id)) by.get(c.id).push(a); });
+  const nDone = all.filter(a => a.done).length, nOn = all.filter(a => !a.done && tbPct(a) > 0.02).length;
+  const stats = document.getElementById('tbkLibStats');
+  if(stats) stats.textContent = all.length ? `${all.length} texte${all.length > 1 ? 's' : ''}, ${nDone} lu${nDone > 1 ? 's' : ''}, ${nOn} en cours` : 'Range tes textes par catégorie';
+  const r = tbResumeArt(), rc = r ? tbCatOf(r) : null;
+  const chip = (id, ic, name, k, color) => `<button type="button" class="tbl-chip ${S.f === id ? 'on' : ''}" data-tbl="filter" data-f="${tbAttr(id)}" ${color ? `style="--cc:${color}"` : ''} aria-pressed="${S.f === id}"><span aria-hidden="true">${ic}</span>${escapeHtml(name)}<b>${k}</b></button>`;
+  top.innerHTML = `${r && !q ? `<button type="button" class="tbl-hero" data-tbk-open="${tbAttr(r.id)}" style="--cc:${rc.color}">
+      <span class="tbl-hero-ring">${tbRing(tbPct(r), 58)}<b>${Math.round(tbPct(r) * 100)}%</b></span>
+      <span class="tbl-hero-t"><small>Reprendre ta lecture, ${rc.icon} ${escapeHtml(rc.name)}</small><b>${escapeHtml(r.title || 'Sans titre')}</b><span>Encore ${Math.max(1, Math.round(tbWordsCount(r.text) * (1 - tbPct(r)) / 170))} min${r.mark ? ', 🔖 marque-page posé' : ''}</span></span>
+      <span class="tbl-hero-go" aria-hidden="true">▶</span></button>` : ''}
+    <div class="tbl-chips" role="group" aria-label="Catégories">${chip('all', '📚', 'Tout', all.length)}${C.map(c => chip(c.id, c.icon, c.name, by.get(c.id).length, c.color)).join('')}<button type="button" class="tbl-chip add" data-tbl="cat-new">＋ Catégorie</button></div>`;
+  const fold = tbUi().libFold || {};
+  const shelves = C.filter(c => S.f === 'all' || c.id === S.f).map(c => {
+    const rows = by.get(c.id).filter(hit).sort(sorter);
+    if(q && !rows.length) return '';
+    return tbLibShelf(c, rows, !q && S.f === 'all' && !!fold[c.id]);
+  }).join('');
+  box.innerHTML = shelves || (q ? `<div class="tbk-empty">Aucun texte ne contient « ${escapeHtml(S.q)} ».</div>` : `<div class="tbk-empty">Aucun texte pour l'instant : colle ton premier article ci-dessous, ou essaie un texte plus bas.</div>`);
+  tbLoadImgs(box);
+}
+/* ⋯ les petits menus (un texte, une catégorie) */
+function tbLibMenu(btn, html){
+  const m = document.getElementById('tbkLibMenu'), lib = document.getElementById('tbkLib'); if(!m || !lib) return;
+  if(!m.hidden && m.dataset.for === (btn.dataset.id || btn.dataset.cat)){ m.hidden = true; return; }
+  m.innerHTML = html; m.hidden = false; m.dataset.for = btn.dataset.id || btn.dataset.cat || '';
+  const lr = lib.getBoundingClientRect(), br = btn.getBoundingClientRect(), mw = m.offsetWidth, mh = m.offsetHeight;
+  let left = br.right - mw, top = br.bottom + 6;
+  if(left < 8) left = 8;
+  if(left + mw > window.innerWidth - 8) left = window.innerWidth - mw - 8;
+  if(top + mh > window.innerHeight - 8 && br.top - mh - 6 > 8) top = br.top - mh - 6;
+  m.style.left = Math.round(left - lr.left) + 'px'; m.style.top = Math.round(top - lr.top) + 'px';
+  const f = m.querySelector('button'); if(f) try{ f.focus({ preventScroll:true }); }catch(e){}
+}
+function tbLibMenuClose(){ const m = document.getElementById('tbkLibMenu'); if(m) m.hidden = true; }
+function tbArtMenuHtml(a){
+  const cur = tbCatOf(a).id;
+  return `<div class="tbl-m-h">${escapeHtml(a.title || 'Sans titre')}</div>
+    <div class="tbl-m-l">📂 Ranger dans</div>
+    ${tbCats().map(c => `<button type="button" role="menuitemradio" aria-checked="${c.id === cur}" class="${c.id === cur ? 'on' : ''}" data-tbl="move" data-id="${tbAttr(a.id)}" data-cat="${tbAttr(c.id)}" style="--cc:${c.color}"><span>${c.icon}</span>${escapeHtml(c.name)}${c.id === cur ? '<i>✓</i>' : ''}</button>`).join('')}
+    <hr>
+    ${a.done || tbPct(a) > 0.02 ? `<button type="button" role="menuitem" data-tbl="reset" data-id="${tbAttr(a.id)}">↺ Recommencer à zéro</button>` : ''}
+    ${a.done ? '' : `<button type="button" role="menuitem" data-tbl="mark-read" data-id="${tbAttr(a.id)}">✓ Marquer comme lu</button>`}
+    <button type="button" role="menuitem" data-tbk-edit="${tbAttr(a.id)}">✏️ Modifier le texte</button>
+    <button type="button" role="menuitem" class="danger" data-tbk-del="${tbAttr(a.id)}">🗑 Supprimer</button>`;
+}
+function tbCatMenuHtml(c){
+  const C = tbCats(), i = C.findIndex(x => x.id === c.id);
+  return `<div class="tbl-m-h">${c.icon} ${escapeHtml(c.name)}</div>
+    <button type="button" role="menuitem" data-tbl="new-text" data-cat="${tbAttr(c.id)}">✍️ Ajouter un texte ici</button>
+    <button type="button" role="menuitem" data-tbl="cat-edit" data-cat="${tbAttr(c.id)}">🎨 Renommer, icône, couleur</button>
+    ${i > 0 ? `<button type="button" role="menuitem" data-tbl="cat-up" data-cat="${tbAttr(c.id)}">↑ Monter</button>` : ''}
+    ${i < C.length - 1 ? `<button type="button" role="menuitem" data-tbl="cat-down" data-cat="${tbAttr(c.id)}">↓ Descendre</button>` : ''}
+    ${C.length > 1 ? `<hr><button type="button" role="menuitem" class="danger" data-tbl="cat-del" data-cat="${tbAttr(c.id)}">🗑 Supprimer la catégorie</button>` : ''}`;
+}
+/* ＋ une catégorie : nom, icône, couleur */
+function tbCatDialog(c0){
+  c0 = c0 || {};
+  return new Promise(res => {
+    let icon = c0.icon || TB_CAT_ICONS[3], color = c0.color || TB_CAT_COLORS[(tbCats().length) % TB_CAT_COLORS.length];
+    const ov = document.createElement('div');
+    ov.className = 'am-dlg-ov tbl-dlg-ov';
+    ov.innerHTML = `<div class="am-dlg tbl-dlg" role="dialog" aria-modal="true" aria-label="${c0.id ? 'Modifier la catégorie' : 'Nouvelle catégorie'}">
+      <div class="am-dlg-t">${c0.id ? 'Modifier la catégorie' : 'Nouvelle catégorie'}</div>
+      <div class="tbl-dlg-pv" id="tblDlgPv"></div>
+      <input class="am-in" id="tblDlgName" maxlength="32" autocomplete="off" placeholder="Science, Voyages, Recettes…" value="${tbAttr(c0.name || '')}" aria-label="Nom de la catégorie">
+      <div class="tbl-dlg-l">Icône</div>
+      <div class="tbl-dlg-ic">${TB_CAT_ICONS.map(x => `<button type="button" data-ic="${x}" aria-label="Icône ${x}">${x}</button>`).join('')}</div>
+      <div class="tbl-dlg-l">Couleur</div>
+      <div class="tbl-dlg-co">${TB_CAT_COLORS.map(x => `<button type="button" data-co="${x}" style="--c:${x}" aria-label="Couleur ${x}"></button>`).join('')}</div>
+      <div class="am-dlg-b"><button class="am-dlg-btn ghost" data-v="cancel">Annuler</button><button class="am-dlg-btn" data-v="ok">${c0.id ? 'Enregistrer' : 'Créer la catégorie'}</button></div>
+    </div>`;
+    document.body.appendChild(ov);
+    requestAnimationFrame(() => ov.classList.add('show'));
+    const inp = ov.querySelector('#tblDlgName'), pv = ov.querySelector('#tblDlgPv'), ok = ov.querySelector('[data-v="ok"]');
+    const paint = () => {
+      ov.querySelectorAll('[data-ic]').forEach(b => b.classList.toggle('on', b.dataset.ic === icon));
+      ov.querySelectorAll('[data-co]').forEach(b => b.classList.toggle('on', b.dataset.co === color));
+      pv.style.setProperty('--cc', color);
+      pv.innerHTML = `<span class="tbl-sh-ic">${icon}</span><b>${escapeHtml(inp.value.trim() || 'Ma catégorie')}</b>`;
+      ok.disabled = !inp.value.trim();
+    };
+    const close = (v) => { document.removeEventListener('keydown', onKey, true); ov.remove(); res(v); };
+    const done = () => { const name = inp.value.trim().slice(0, 32); if(!name) return; close({ name, icon, color }); };
+    const onKey = (e) => { if(e.key === 'Escape'){ e.preventDefault(); close(null); } else if(e.key === 'Enter' && document.activeElement === inp){ e.preventDefault(); done(); } };
+    document.addEventListener('keydown', onKey, true);
+    ov.addEventListener('click', (e) => {
+      if(e.target === ov){ close(null); return; }
+      const ic = e.target.closest('[data-ic]'); if(ic){ icon = ic.dataset.ic; paint(); return; }
+      const co = e.target.closest('[data-co]'); if(co){ color = co.dataset.co; paint(); return; }
+      const v = e.target.closest('[data-v]'); if(v){ if(v.dataset.v === 'ok') done(); else close(null); }
+    });
+    inp.addEventListener('input', paint);
+    paint();
+    setTimeout(() => { inp.focus(); try{ inp.select(); }catch(e){} }, 60);
+  });
+}
+function tbLibGoNew(cat){
+  TB.newCat = cat || null;
+  const sel = document.getElementById('tbkCat'); if(sel && cat) sel.value = cat;
+  const h = document.getElementById('tbkNewH'), ed = document.getElementById('tbkEd');
+  if(h) h.scrollIntoView({ block:'start', behavior:'smooth' });
+  if(ed) setTimeout(() => { try{ ed.focus({ preventScroll:true }); }catch(e){} }, 350);
+}
+function tbLibWire(){
+  const lib = document.getElementById('tbkLib'); if(!lib) return;
+  const S = tbLibState();
+  const q = document.getElementById('tbkLibQ'); let qt = 0;
+  q.addEventListener('input', () => { clearTimeout(qt); qt = setTimeout(() => { S.q = q.value; tbLibRefresh(); }, 120); });
+  document.getElementById('tbkLibSort').addEventListener('change', (e) => { tbUi().libSort = e.target.value; tbSaveUi(); tbLibRefresh(); });
+  lib.addEventListener('click', async (e) => {
+    const m = document.getElementById('tbkLibMenu');
+    const del = e.target.closest('[data-tbk-del]');
+    if(del && m.contains(del)){
+      e.stopPropagation();
+      if(del.classList.contains('warn')){ const id = del.dataset.tbkDel, t = (tbGet(id) || {}).title; tbLibMenuClose(); tbDel(id); tbLibRefresh(); try{ setStatus(`🗑 « ${t || 'Le texte'} » est supprimé.`, 'ok'); }catch(err){} }
+      else { del.classList.add('warn'); del.textContent = '🗑 Sûr ? Touche encore pour supprimer'; }
+      return;
+    }
+    const b = e.target.closest('[data-tbl]'); if(!b || !lib.contains(b)){ if(!e.target.closest('#tbkLibMenu')) tbLibMenuClose(); return; }
+    e.stopPropagation();
+    const act = b.dataset.tbl, id = b.dataset.id, cat = b.dataset.cat;
+    if(!['art-menu', 'cat-menu', 'cat-del'].includes(act)) tbLibMenuClose();
+    if(act === 'filter'){ S.f = b.dataset.f || 'all'; tbLibRefresh(); return; }
+    if(act === 'fold'){ const u = tbUi(); u.libFold = u.libFold || {}; u.libFold[cat] = !u.libFold[cat]; tbSaveUi(); if(S.f !== 'all'){ S.f = 'all'; } tbLibRefresh(); return; }
+    if(act === 'new-text'){ tbLibGoNew(cat); return; }
+    if(act === 'art-menu'){ const a = tbGet(id); if(a) tbLibMenu(b, tbArtMenuHtml(a)); return; }
+    if(act === 'cat-menu'){ const c = tbCats().find(x => x.id === cat); if(c) tbLibMenu(b, tbCatMenuHtml(c)); return; }
+    if(act === 'move'){ const c = tbCats().find(x => x.id === cat); if(tbArtSetCat(id, cat)){ tbLibRefresh(); try{ setStatus(`📂 Rangé dans ${c.icon} ${c.name}`, 'ok'); }catch(err){} } return; }
+    if(act === 'mark-read'){ const a = tbGet(id); if(a){ a.done = true; a.pct = 1; tbPut(a); tbLibRefresh(); } return; }
+    if(act === 'reset'){ const a = tbGet(id); if(a){ a.done = false; a.pct = 0; a.pos = 0; a.posOff = 0; tbPut(a); tbLibRefresh(); } return; }
+    if(act === 'cat-new'){ const v = await tbCatDialog(); if(!v) return; const c = tbCatPut({ id:'c' + Date.now().toString(36), name:v.name, icon:v.icon, color:v.color }); S.f = 'all'; tbLibRefresh(); tbEdCatOptions(); try{ setStatus(`${c.icon} « ${c.name} » est créée : range-y tes textes (menu ⋯).`, 'ok'); }catch(err){} return; }
+    if(act === 'cat-edit'){ const c = tbCats().find(x => x.id === cat); if(!c) return; const v = await tbCatDialog(c); if(!v) return; tbCatPut({ id:c.id, name:v.name, icon:v.icon, color:v.color }); tbLibRefresh(); tbEdCatOptions(); return; }
+    if(act === 'cat-up' || act === 'cat-down'){ tbCatMove(cat, act === 'cat-up' ? -1 : 1); tbLibRefresh(); tbEdCatOptions(); return; }
+    if(act === 'cat-del'){
+      if(!b.classList.contains('warn')){ b.classList.add('warn'); b.textContent = '🗑 Sûr ? Ses textes iront dans un autre rayon'; return; }
+      tbLibMenuClose();
+      const r = tbCatDel(cat); if(S.f === cat) S.f = 'all'; tbLibRefresh(); tbEdCatOptions();
+      if(r) try{ setStatus(`🗑 Catégorie supprimée${r.n ? ` : ${r.n} texte${r.n > 1 ? 's' : ''} rangé${r.n > 1 ? 's' : ''} dans ${r.to.icon} ${r.to.name}` : ''}.`, 'ok'); }catch(err){}
+      return;
+    }
+  });
+  // 🖱️ glisser-déposer un texte sur un rayon (ou une étiquette) pour le ranger
+  lib.addEventListener('dragstart', (e) => { const r = e.target.closest && e.target.closest('.tbl-row'); if(!r) return; TB.dragId = r.dataset.id; r.classList.add('drag'); try{ e.dataTransfer.setData('text/plain', r.dataset.id); e.dataTransfer.effectAllowed = 'move'; }catch(err){} });
+  lib.addEventListener('dragend', () => { TB.dragId = null; lib.querySelectorAll('.drag, .drop').forEach(x => x.classList.remove('drag', 'drop')); });
+  const target = (e) => e.target.closest && (e.target.closest('.tbl-shelf') || e.target.closest('.tbl-chip[data-f]:not([data-f="all"])'));
+  lib.addEventListener('dragover', (e) => { const t = TB.dragId && target(e); if(!t) return; e.preventDefault(); lib.querySelectorAll('.drop').forEach(x => { if(x !== t) x.classList.remove('drop'); }); t.classList.add('drop'); });
+  lib.addEventListener('drop', (e) => {
+    const t = TB.dragId && target(e); if(!t) return; e.preventDefault();
+    const cat = t.dataset.cat || t.dataset.f, id = TB.dragId; TB.dragId = null;
+    const c = tbCats().find(x => x.id === cat);
+    if(c && tbArtSetCat(id, cat)){ tbLibRefresh(); try{ setStatus(`📂 Rangé dans ${c.icon} ${c.name}`, 'ok'); }catch(err){} }
+  });
+  document.addEventListener('keydown', function onEsc(e){ if(!lib.isConnected){ document.removeEventListener('keydown', onEsc); return; } if(e.key === 'Escape') tbLibMenuClose(); });
+  document.addEventListener('pointerdown', function onOut(e){ if(!lib.isConnected){ document.removeEventListener('pointerdown', onOut, true); return; } const m = document.getElementById('tbkLibMenu'); if(m && !m.hidden && !m.contains(e.target) && !(e.target.closest && e.target.closest('[data-tbl="art-menu"], [data-tbl="cat-menu"]'))) tbLibMenuClose(); }, true);
+  tbLibRefresh();
+}
+function tbEdCatOptions(){
+  const sel = document.getElementById('tbkCat'); if(!sel) return;
+  const v = sel.value;
+  sel.innerHTML = tbCats().map(c => `<option value="${tbAttr(c.id)}">${c.icon} ${escapeHtml(c.name)}</option>`).join('');
+  if([...sel.options].some(o => o.value === v)) sel.value = v;
+}
 function renderTabletteHome(){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
@@ -43847,7 +44461,8 @@ function renderTabletteHome(){
   const STY = '<option value="p">Paragraphe</option><option value="h2">Titre</option><option value="h3">Sous-titre</option><option value="lead">Chapeau</option><option value="quote">Citation</option>';
   card.innerHTML = `<div class="tbk" id="tbkRoot">
     <div class="cat-tag">📰 La Tablette</div>
-    <div class="tbk-h">Colle un texte, lis‑le comme un pro</div>
+    ${tbLibShellHtml()}
+    <div class="tbk-h" id="tbkNewH">✍️ ${editing ? 'Modifier le texte' : 'Nouveau texte'} : colle-le, lis‑le comme un pro</div>
     <div class="tbk-sub">Mets-le en page comme un journal (titres, images…) : les liaisons et les pauses s'affichent, chaque mot se touche pour l'entendre, et tu chasses les mots difficiles.</div>
     <div class="tbk-studio" id="tbkDevice" style="--efs:${efs}px;">
       <div class="tbk-tools" id="tbkTools" role="toolbar" aria-label="Mise en page">
@@ -43933,13 +44548,12 @@ function renderTabletteHome(){
           <button type="button" class="tbk-paste tbk-fix" id="tbkFix" title="Recolle les phrases coupées : seulement la partie sélectionnée, sinon tout le texte. Tes sauts de ligne restent.">🧹 Ajuster</button>
           <button type="button" class="tbk-paste" id="tbkFlow" title="Lignes continues : la sélection devient un seul paragraphe ; sans sélection, plus aucun retour à la ligne au milieu des phrases (même les tiens). Le texte suit alors la largeur de l'écran.">${tbIcon('flow')} Lignes continues</button>
           <span class="tbk-count" id="tbkCount"></span>
+          <label class="tbk-catpick" title="La catégorie où ranger ce texte"><span aria-hidden="true">📂</span><select id="tbkCat" aria-label="Ranger dans la catégorie">${(() => { const cs = editing ? tbCatOf(editing).id : (TB.newCat || (tbLibState().f !== 'all' ? tbLibState().f : (tbCats()[0] || {}).id)); return tbCats().map(c => `<option value="${tbAttr(c.id)}" ${c.id === cs ? 'selected' : ''}>${c.icon} ${escapeHtml(c.name)}</option>`).join(''); })()}</select></label>
           ${editing ? `<button type="button" class="tbk-cancel" id="tbkCancel">Annuler la modification</button>` : ''}
           <button type="button" class="tbk-open" id="tbkOpen" disabled>${editing ? 'Enregistrer et ouvrir' : 'Ouvrir sur la Tablette'}</button>
         </div>
       </div>
     </div>
-    <div class="tbk-sec">Mes textes <span class="tbk-sync" id="tbkSync">${getSyncUrl() ? '☁️ sur tous tes appareils' : ''}</span></div>
-    <div class="tbk-list" id="tbkMine">${L.length ? L.map(item).join('') : `<div class="tbk-empty">Aucun texte pour l'instant : colle ton premier article ci-dessus, ou essaie un texte ci-dessous.</div>`}</div>
     <div class="tbk-sec">Pour essayer</div>
     <div class="tbk-list">
       ${tbGet('sample') ? item(tbGet('sample')) : `<div class="tbk-item" data-tbk-open="sample" role="button" tabindex="0"><div class="tbk-main"><b>${escapeHtml(TB_SAMPLE.title)}</b><span class="tbk-meta"><span>Texte d'exemple</span><span>${tbWordsCount(TB_SAMPLE.text)} mots</span></span></div></div>`}
@@ -44602,7 +45216,7 @@ function renderTabletteHome(){
     const rich = tbIsRich(bl);
     let art;
     if(editing){
-      art = Object.assign({}, editing, { title, text, pos:0, pct:0, done:false });
+      art = Object.assign({}, editing, { title, text });              // 1.0.27 : modifier le texte garde ta lecture (%, position, marque-page)
       if(rich) art.blocks = bl; else delete art.blocks;
       delete art.textOrig; delete art.blocksOrig;
       const keep = new Set(tbArtImgIds(art)); tbArtImgIds(editing).forEach(id => { if(!keep.has(id)) tbImgDel(id); });
@@ -44610,8 +45224,9 @@ function renderTabletteHome(){
       art = { id:'t' + Date.now().toString(36), title, text, src:'Collé', at:Date.now(), pos:0, pct:0, tags:[] };
       if(rich) art.blocks = bl;
     }
+    { const cs = document.getElementById('tbkCat'); if(cs && cs.value) art.cat = cs.value; }
     if(!tbPut(art)) setStatus("⚠️ Plus de place pour garder ce texte sur l'appareil : il s'ouvre quand même.", 'err');
-    TB.edit = null; TB.draft = null; TB.mem = art; TB.edUsed = [];
+    TB.edit = null; TB.draft = null; TB.mem = art; TB.edUsed = []; TB.newCat = null;
     document.body.classList.remove('tbk-full-on');
     renderTabletteReader(art.id);
   });
@@ -44626,7 +45241,7 @@ function renderTabletteHome(){
       return;
     }
     const edb = e.target.closest('[data-tbk-edit]');
-    if(edb){ e.stopPropagation(); TB.edit = edb.dataset.tbkEdit; renderTabletteHome(); const t = document.getElementById('tbkEd'); if(t){ t.focus(); t.scrollIntoView({ block:'center' }); } return; }
+    if(edb){ e.stopPropagation(); TB.edit = edb.dataset.tbkEdit; renderTabletteHome(); const h = document.getElementById('tbkNewH'), t = document.getElementById('tbkEd'); if(t){ t.focus({ preventScroll:true }); (h || t).scrollIntoView({ block:'start' }); } return; }
     if(e.target.closest('[data-tbk-bq]')){ renderTabletteReader(tbFromBouquinage()); return; }
     const op = e.target.closest('[data-tbk-open]');
     if(op) renderTabletteReader(op.dataset.tbkOpen);
@@ -44635,12 +45250,8 @@ function renderTabletteHome(){
   setQuickNavTarget(() => document.getElementById(ed.textContent.trim() ? 'tbkOpen' : 'tbkEd'));
   startSectionReading('tablette');
   setTimeout(tbImgCleanup, 3000);
-  TB.homeList = () => {
-    const box = document.getElementById('tbkMine'); if(!box) return;
-    const L2 = tbLoad().filter(a => a.id !== 'sample');
-    box.innerHTML = L2.length ? L2.map(item).join('') : `<div class="tbk-empty">Aucun texte pour l'instant : colle ton premier article ci-dessus, ou essaie un texte ci-dessous.</div>`;
-    tbLoadImgs(box);
-  };
+  TB.homeList = () => { tbLibRefresh(); tbEdCatOptions(); };     // ☁️ la synchro met la bibliothèque à jour
+  tbLibWire();
   try{ if(getSyncUrl() && Date.now() - (syncState.lastPull || 0) > 15000) syncSoon(400); }catch(e){}     // ☁️ les textes ajoutés sur ton autre appareil
 }
 /* 🏠 sur l'accueil : la Tablette toujours à portée de main (et la lecture en cours à reprendre) */
