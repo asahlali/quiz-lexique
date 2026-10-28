@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- 🏷️ Version de l'appli : augmentée automatiquement par publier-site.cmd à chaque publication -->
-<meta name="app-version" content="1.0.28" data-date="2026-10-21">
+<meta name="app-version" content="1.0.29" data-date="2026-10-28">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <title>VocabVISION — Vocabulaire Français ↔ Arabe</title>
 <script>
@@ -1820,12 +1820,12 @@
   /* 📰 1.0.16 : La Tablette — une liseuse plein écran, papier gris « encre électronique », surligneur fluo */
   .tb{ --tb-paper:#EDF0EC; --tb-ink:#1B1F27; --tb-ink2:#5A6170; --tb-rule:#D3D8D0; --tb-chrome:rgba(237,240,236,.9); --tb-card:#F7F8F5;
     --tb-hl:#FFE14D; --tb-hl-ink:#1B1F27; --tb-acc:#5B21B6; --tb-on-acc:#fff; --tb-band:rgba(91,33,182,.08); --tb-hit:rgba(91,33,182,.17);
-    --tb-ok:#15803D; --tb-miss:#C2410C; --tb-fs:19px; --tb-lh:1.65;
+    --tb-ok:#15803D; --tb-miss:#C2410C; --tb-fs:19px; --tb-lh:1.65; --tb-kn:rgba(21,128,61,.6);
     position:fixed; inset:0; z-index:9980; display:flex; flex-direction:column; overflow:hidden;
     background:var(--tb-paper); color:var(--tb-ink); font-family:'Nunito','Inter',system-ui,sans-serif; -webkit-text-size-adjust:100%; }
   [data-theme="dark"] .tb{ --tb-paper:#10151E; --tb-ink:#DCE2EB; --tb-ink2:#8F99A9; --tb-rule:#252E3C; --tb-chrome:rgba(16,21,30,.9); --tb-card:#171E29;
     --tb-hl:#EBC72E; --tb-hl-ink:#15120A; --tb-acc:#B9A2FF; --tb-on-acc:#14102A; --tb-band:rgba(185,162,255,.11); --tb-hit:rgba(185,162,255,.27);
-    --tb-ok:#4ADE80; --tb-miss:#FDBA74; }
+    --tb-ok:#4ADE80; --tb-miss:#FDBA74; --tb-kn:rgba(74,222,128,.6); }
   body.tb-open{ overflow:hidden; }
   .tb button{ font-family:inherit; -webkit-tap-highlight-color:transparent; }
   .tb button:focus-visible, .tb [role="button"]:focus-visible, .tb input:focus-visible{ outline:2px solid var(--tb-acc); outline-offset:2px; }
@@ -1853,12 +1853,35 @@
   .tb-page{ font-size:var(--tb-fs); max-width:var(--tb-maxw, 44em); margin:0 auto; padding:0 clamp(12px, 3.6vw, 34px); box-sizing:border-box; }
   .tb.tb-full .tb-page{ padding:0 10px; }
   .tb-meta{ display:flex; flex-wrap:wrap; gap:4px 16px; font-size:13px; font-weight:700; color:var(--tb-ink2); margin:6px 0 10px; }
-  .tb-h1{ font-family:'Literata',Georgia,'Times New Roman',serif; font-weight:800; font-size:1.5em; line-height:1.2; letter-spacing:-.012em; margin:0 0 .75em; text-wrap:balance; color:var(--tb-ink); }
-  .tb-body{ font-family:'Literata',Georgia,'Times New Roman',serif; font-weight:400; line-height:var(--tb-lh); text-align:var(--tb-align, left); text-justify:inter-word; hyphens:auto; -webkit-hyphens:auto; overflow-wrap:break-word; }
+  .tb-h1{ font-family:var(--tb-font, 'Literata',Georgia,'Times New Roman',serif); font-weight:800; font-size:1.5em; line-height:1.2; letter-spacing:-.012em; margin:0 0 .75em; text-wrap:balance; color:var(--tb-ink); }
+  .tb-body{ font-family:var(--tb-font, 'Literata',Georgia,'Times New Roman',serif); font-weight:var(--tb-fw, 400); letter-spacing:var(--tb-ls, 0); word-spacing:var(--tb-ws, 0); -webkit-text-stroke:var(--tb-stroke, 0px) currentColor; line-height:var(--tb-lh); text-align:var(--tb-align, left); text-justify:inter-word; hyphens:auto; -webkit-hyphens:auto; overflow-wrap:break-word; }
   .tb-body p{ margin:0 0 .95em; }
   .tb.pinching .tb-body{ transition:none; }
   .tbw{ border-radius:.22em; cursor:pointer; transition:background-color .15s, color .2s; }
-  @media (hover:hover){ .tbw:hover{ background-color:var(--tb-band); } }
+  @media (hover:hover){ .tb.hov-off .tbw:hover{ background-color:var(--tb-band); } }
+  .tbw.hov{ background-color:var(--tb-hov, rgba(96,165,250,.32)); box-shadow:0 0 0 .12em var(--tb-hov, rgba(96,165,250,.32)); transition:background-color .08s, box-shadow .08s; }
+  .tb.kn-on .tbw.kn{ text-decoration:underline dotted var(--tb-kn); text-decoration-thickness:.1em; text-underline-offset:.26em; text-decoration-skip-ink:none; }
+  .tbw.tipsel{ background-color:var(--tb-hit); box-shadow:0 0 0 .12em var(--tb-hit); }
+  .tb-h1 .tbw{ border-radius:.16em; }
+  .tb-tip{ position:fixed; z-index:7; width:min(360px, calc(100vw - 16px)); box-sizing:border-box; background:var(--tb-card); color:var(--tb-ink); border:1px solid var(--tb-rule);
+    border-radius:18px; padding:10px 12px 12px; box-shadow:0 18px 44px -14px rgba(15,23,42,.45); font-family:'Nunito','Inter',system-ui,sans-serif; animation:tbTipIn .16s ease-out; }
+  @keyframes tbTipIn{ from{ opacity:0; transform:translateY(-4px) scale(.98); } to{ opacity:1; transform:none; } }
+  .tb-tip.up{ animation-name:tbTipUp; }
+  @keyframes tbTipUp{ from{ opacity:0; transform:translateY(4px) scale(.98); } to{ opacity:1; transform:none; } }
+  .tb-tip-h{ display:flex; align-items:center; gap:4px; }
+  .tb-tip-h b{ font-family:'Literata',Georgia,serif; font-size:20px; font-weight:800; flex:0 1 auto; min-width:0; overflow-wrap:anywhere; }
+  .tb-tip-ok{ flex:1; font-size:11.5px; font-weight:800; color:var(--tb-ok); white-space:nowrap; padding-left:4px; }
+  .tb-tip-f{ font-size:12.5px; font-weight:700; color:var(--tb-ink2); margin:2px 0; }
+  .tb-tip-ar{ font-family:'Amiri','IBM Plex Sans Arabic','Noto Naskh Arabic',serif; font-size:24px; line-height:1.5; color:var(--tb-acc); text-align:right; margin:2px 0; }
+  .tb-tip-def{ font-size:14px; line-height:1.45; margin:2px 0 4px; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden; }
+  .tb-tip-ex{ font-family:'Literata',Georgia,serif; font-style:italic; font-size:13.5px; line-height:1.45; color:var(--tb-ink2); border-left:3px solid var(--tb-rule); padding-left:8px; margin:6px 0 4px; }
+  .tb-tip-a{ display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+  .tb-tip-a .tb-chip{ flex:1 1 auto; justify-content:center; }
+  .tb-chip.del, .tb-btn.del{ color:#B91C1C; }
+  [data-theme="dark"] .tb-chip.del, [data-theme="dark"] .tb-btn.del{ color:#FCA5A5; }
+  .tb-tip-conf{ display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin-top:8px; padding:8px 10px; border-radius:12px; background:rgba(220,38,38,.08); border:1px solid rgba(220,38,38,.3); font-size:13.5px; }
+  .tb-tip-conf[hidden]{ display:none; }
+  .tb-tip-conf span{ flex:1 1 100%; }
   .tbw.sel{ background-color:var(--tb-hit); box-shadow:0 0 0 .12em var(--tb-hit); }
   .tbw.hit{ background-color:var(--tb-hit); }
   .tbw.hit.cur{ outline:2px solid var(--tb-acc); outline-offset:1px; }
@@ -1914,10 +1937,38 @@
   .tb-mic.on{ animation:tbMic 1.3s ease-in-out infinite; }
   @keyframes tbMic{ 0%,100%{ box-shadow:0 0 0 0 rgba(220,38,38,.35); } 50%{ box-shadow:0 0 0 8px rgba(220,38,38,0); } }
   /* panneaux */
-  .tb-pop{ position:absolute; top:calc(env(safe-area-inset-top, 0px) + 60px); right:8px; z-index:5; width:min(340px, calc(100% - 16px)); max-height:calc(100% - 150px); overflow-y:auto;
+  .tb-pop{ position:absolute; top:calc(env(safe-area-inset-top, 0px) + 60px); right:8px; z-index:5; width:min(392px, calc(100% - 16px)); max-height:calc(100% - 150px); overflow-y:auto;
     background:var(--tb-card); border:1px solid var(--tb-rule); border-radius:18px; padding:10px 12px 12px; box-shadow:0 18px 40px -14px rgba(15,23,42,.5); }
   .tb-pop[hidden], .tb-res[hidden], .tb-hud[hidden]{ display:none; }
   .tb-pop-row{ display:flex; align-items:center; gap:8px; padding:6px 0; }
+  /* 🅰️ 1.0.29 : onglets, polices, papier, surlignage */
+  .tb[data-paper-l="white"]{ --tb-paper:#FFFFFF; --tb-card:#F7F7F5; --tb-chrome:rgba(255,255,255,.92); --tb-rule:#E3E4E1; --tb-ink:#14171C; }
+  .tb[data-paper-l="cream"]{ --tb-paper:#FBF5E6; --tb-card:#FFFBF2; --tb-chrome:rgba(251,245,230,.92); --tb-rule:#E8DDC4; --tb-ink:#2A2118; --tb-ink2:#6E5F4B; }
+  .tb[data-paper-l="sepia"]{ --tb-paper:#F1E4C8; --tb-card:#F8EEDB; --tb-chrome:rgba(241,228,200,.92); --tb-rule:#DCCBA6; --tb-ink:#3A2A17; --tb-ink2:#77613F; }
+  [data-theme="dark"] .tb[data-paper-l]{ --tb-paper:#10151E; --tb-card:#171E29; --tb-chrome:rgba(16,21,30,.9); --tb-rule:#252E3C; --tb-ink:#DCE2EB; --tb-ink2:#8F99A9; }
+  [data-theme="dark"] .tb[data-paper-d="black"]{ --tb-paper:#000000; --tb-card:#111316; --tb-chrome:rgba(0,0,0,.9); --tb-rule:#22262C; --tb-ink:#E6E8EC; }
+  [data-theme="dark"] .tb[data-paper-d="dim"]{ --tb-paper:#1E1F22; --tb-card:#26282C; --tb-chrome:rgba(30,31,34,.92); --tb-rule:#34373D; --tb-ink:#E4E2DD; --tb-ink2:#A3A09A; }
+  .tb-aa-tabs{ display:flex; gap:2px; padding:3px; margin:0 0 6px; border-radius:12px; background:var(--tb-paper); border:1px solid var(--tb-rule); position:sticky; top:-10px; z-index:1; }
+  .tb-aa-tabs button{ flex:1; border:0; background:transparent; color:var(--tb-ink2); border-radius:9px; padding:8px 4px; font-weight:900; font-size:13px; cursor:pointer; }
+  .tb-aa-tabs button.on{ background:var(--tb-card); color:var(--tb-acc); box-shadow:0 1px 3px rgba(15,23,42,.18); }
+  .tb-aa-l{ font-size:12.5px; font-weight:900; color:var(--tb-ink2); margin:10px 0 6px; }
+  .tb-presets{ display:flex; flex-wrap:wrap; gap:6px; }
+  .tb-fonts{ display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; }
+  .tb-font{ display:flex; flex-direction:column; align-items:center; gap:1px; padding:8px 4px 7px; border:1px solid var(--tb-rule); border-radius:12px; background:var(--tb-paper); color:var(--tb-ink); cursor:pointer; min-width:0; }
+  .tb-font b{ font-size:22px; line-height:1.1; font-weight:600; }
+  .tb-font span{ font-size:12.5px; font-weight:700; }
+  .tb-font small{ font-family:'Nunito','Inter',sans-serif; font-size:10.5px; font-weight:700; color:var(--tb-ink2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
+  .tb-font.on, .tb-paper.on, .tb-hov.on{ border-color:var(--tb-acc); box-shadow:0 0 0 2px var(--tb-hit); color:var(--tb-acc); }
+  .tb-bio-demo{ font-weight:400; } .tb-bio-demo b{ font-weight:800; }
+  .tb-papers, .tb-hovs{ display:flex; flex-wrap:wrap; gap:6px; flex:1; }
+  .tb-paper, .tb-hov{ display:inline-flex; flex-direction:column; align-items:center; gap:3px; min-width:52px; padding:6px 6px 5px; border:1px solid var(--tb-rule); border-radius:12px; background:var(--tb-paper); color:var(--tb-ink); cursor:pointer; font-size:11px; font-weight:800; position:relative; }
+  .tb-paper i, .tb-hov i{ display:block; width:26px; height:18px; border-radius:6px; border:1px solid rgba(0,0,0,.15); }
+  .tb-hov.off i{ background:repeating-linear-gradient(135deg, transparent 0 4px, var(--tb-rule) 4px 6px); }
+  .tb-hov input[type="color"]{ position:absolute; inset:0; opacity:0; width:100%; height:100%; cursor:pointer; border:0; padding:0; }
+  .tb-aa-reset{ display:block; margin:10px auto 2px; }
+  /* la police de lecture passe devant la police de l'appli (qui s'impose partout ailleurs) */
+  html body .tb .tb-body, html body .tb .tb-body *, html body .tb .tb-h1, html body .tb .tb-h1 *, html body .tb .tb-ctx, html body .tb .tb-ctx *{ font-family:var(--tb-font, 'Inter', system-ui, sans-serif) !important; }
+  html body .tb .tb-fonts .tb-font b, html body .tb .tb-fonts .tb-font span, html body .tb .tb-presets .tb-chip{ font-family:var(--ff) !important; }
   .tb-pop-l{ flex:none; width:74px; font-size:13px; font-weight:800; color:var(--tb-ink2); }
   .tb-pop-hint{ font-size:12px; color:var(--tb-ink2); margin:0 0 4px 82px; line-height:1.35; }
   .tb-sh-in .tb-pop-hint{ margin:8px 2px 0; }
@@ -1961,6 +2012,13 @@
   .tb-defs{ margin:6px 0 0; padding-left:1.2em; font-size:15px; line-height:1.45; }
   .tb-defs li + li{ margin-top:4px; }
   .tb-src{ font-size:11.5px; color:var(--tb-ink2); margin-top:6px; font-weight:700; }
+  .tb-auto{ font-size:11.5px; font-weight:800; color:var(--tb-ink2); margin-top:2px; }
+  .tb-tr-bar{ display:flex; flex-wrap:wrap; gap:6px; margin:-4px 0 8px; }
+  .tb-tr{ padding:10px 12px; border-radius:14px; background:var(--tb-paper); border:1px dashed var(--tb-rule); margin:0 0 10px; }
+  .tb-tr[hidden]{ display:none; }
+  .tb-tr-ar{ font-family:'Amiri','IBM Plex Sans Arabic','Noto Naskh Arabic',serif; font-size:21px; line-height:1.65; text-align:right; color:var(--tb-ink); }
+  .tb-tr-b{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:6px; }
+  .tb-long{ margin:4px 0 8px; }
   .tb-ctx{ margin:12px 0; padding:2px 0 2px 12px; border-left:3px solid var(--tb-hl); font-family:'Literata',Georgia,serif; font-size:16px; line-height:1.6; color:var(--tb-ink); }
   .tb-sh-act{ display:flex; gap:8px; }
   .tb-sh-act .tb-btn{ flex:1; }
@@ -2016,7 +2074,9 @@
   .tb-body .tb-hr{ clear:both; display:flex; align-items:center; gap:.8em; margin:1.4em 0; color:var(--tb-ink2); font-size:.8em; }
   .tb-body .tb-hr::before, .tb-body .tb-hr::after{ content:''; flex:1; height:1px; background:var(--tb-rule); }
   .tb-body::after{ content:''; display:block; clear:both; }
-  .tb-st.st-b{ font-weight:700; }
+  .tb-st.st-b{ font-weight:min(900, calc(var(--tb-fw, 400) + 300)); }
+  .tb-body b.bio{ font-weight:min(900, calc(var(--tb-fw, 400) + 300)); }
+  .tb-st.st-b b.bio{ font-weight:900; }
   .tb-st.st-i{ font-style:italic; }
   .tb-st.st-u{ text-decoration:underline; text-decoration-thickness:.07em; text-underline-offset:.2em; }
   .tb-drop::first-letter{ float:left; font-family:'Literata',Georgia,serif; font-size:3.25em; line-height:.84; font-weight:800; margin:.06em .1em 0 0; color:var(--tb-acc); }
@@ -2304,6 +2364,32 @@
   .wcp-b{ display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
   .wcp-b button{ flex:1 1 auto; min-height:42px; border-radius:12px; border:1px solid var(--border); background:var(--surface-sunken); color:var(--text); font:800 14px 'Nunito','Inter',sans-serif; cursor:pointer; padding:0 12px; }
   .wcp-b button.pri{ background:linear-gradient(135deg,#6366F1,#4F46E5); color:#fff; border-color:transparent; }
+  .wcp-b2{ display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+  .wcp-b2 button{ flex:1 1 auto; min-height:38px; border-radius:12px; border:1px dashed var(--border); background:transparent; color:var(--text-dim); font:800 13px 'Nunito','Inter',sans-serif; cursor:pointer; padding:0 12px; }
+  .wcp-b2 button:hover{ color:var(--text); border-style:solid; }
+  .wcp-b button.del, .wcp-b2 button.del:hover{ color:#B91C1C; border-color:rgba(220,38,38,.45); }
+  .wcp-b button.del{ background:rgba(220,38,38,.1); }
+  .wcp-conf{ margin-top:10px; padding:10px 12px; border-radius:14px; background:rgba(220,38,38,.07); border:1px solid rgba(220,38,38,.3); font-size:14px; line-height:1.45; }
+  .wcp-conf[hidden]{ display:none; }
+  .wce-l{ display:block; font-size:12.5px; font-weight:800; color:var(--text-dim); margin:10px 0 0; }
+  .wce-l small{ font-weight:600; }
+  .wce-in{ display:block; width:100%; box-sizing:border-box; margin-top:4px; border:1px solid var(--border); border-radius:12px; background:var(--surface-sunken); color:var(--text); font:600 16px/1.4 'Nunito','Inter',sans-serif; padding:9px 11px; resize:vertical; }
+  .wce-in.ar{ font-family:'Amiri','IBM Plex Sans Arabic','Noto Naskh Arabic',serif; font-size:21px; text-align:right; }
+  .wce-in:focus{ outline:none; border-color:var(--purple); box-shadow:0 0 0 3px rgba(99,102,241,.2); }
+  .wce-in.bad{ border-color:#DC2626; box-shadow:0 0 0 3px rgba(220,38,38,.18); }
+  .wce-err{ margin-top:10px; padding:8px 11px; border-radius:10px; background:rgba(220,38,38,.1); color:#B91C1C; font-weight:800; font-size:13.5px; }
+  .wce-err[hidden]{ display:none; }
+  .wce-sug{ display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin-top:6px; }
+  .wce-sl{ font-size:12.5px; font-weight:700; color:var(--text-dim); }
+  .wce-sbtn{ border:1px solid rgba(79,70,229,.35); background:rgba(79,70,229,.07); color:var(--purple); border-radius:999px; padding:5px 12px; font:800 12.5px 'Nunito','Inter',sans-serif; cursor:pointer; }
+  .wce-chip{ display:inline-flex; flex-direction:column; align-items:center; gap:0; border:1px solid var(--border); background:var(--surface); color:var(--text); border-radius:12px; padding:4px 12px; cursor:pointer; line-height:1.2; }
+  .wce-chip b{ font-family:'Amiri','IBM Plex Sans Arabic',serif; font-size:19px; font-weight:700; }
+  .wce-chip small{ font-size:10.5px; font-weight:700; color:var(--text-dim); }
+  .wce-chip.on{ border-color:var(--purple); box-shadow:0 0 0 2px rgba(99,102,241,.25); background:rgba(99,102,241,.08); }
+  .lx-snack{ position:fixed; left:50%; bottom:calc(env(safe-area-inset-bottom, 0px) + 18px); z-index:10080; transform:translate(-50%, 20px); opacity:0; transition:.22s; display:flex; align-items:center; gap:12px; max-width:calc(100vw - 24px);
+    background:#1F2937; color:#F9FAFB; border-radius:14px; padding:10px 12px 10px 16px; font:700 14px/1.35 'Nunito','Inter',sans-serif; box-shadow:0 14px 34px -12px rgba(0,0,0,.55); }
+  .lx-snack.show{ transform:translate(-50%, 0); opacity:1; }
+  .lx-snack button{ flex:none; border:0; border-radius:10px; background:#FBBF24; color:#1F2937; font:900 13.5px 'Nunito','Inter',sans-serif; padding:7px 12px; cursor:pointer; }
   .wcp-see{ margin-left:6px; padding:4px 10px; border-radius:999px; border:1px solid rgba(79,70,229,.4); background:rgba(79,70,229,.08); color:var(--purple); font-weight:800; cursor:pointer; }
   .tb-res-lex{ display:flex; flex-wrap:wrap; align-items:center; gap:8px 10px; justify-content:space-between; margin:0 0 8px; padding:9px 11px; border-radius:12px; background:rgba(34,197,94,.1); border:1px solid rgba(34,197,94,.35); font-size:13.5px; }
   .tb-dup{ display:flex; flex-wrap:wrap; align-items:center; gap:8px 10px; padding:10px 12px; border-radius:12px; background:rgba(34,197,94,.1); border:1px solid rgba(34,197,94,.35); font-weight:700; }
@@ -2442,6 +2528,57 @@
   .wt-a button:disabled{ opacity:.6; cursor:default; }
   ::highlight(wt){ background-color:rgba(250,204,21,.6); }
   .rw.wt-on{ box-shadow:0 0 0 2px rgba(250,204,21,.95); border-radius:4px; }
+  /* 🦊 1.0.29 : réglages de la mascotte */
+  body.fox-mini-off #mascotZone{ display:none !important; }
+  body.fox-off .gf-fox2d{ display:none !important; }
+  .fox-set{ margin:18px 0 6px; padding:14px 14px 12px; border:1px solid var(--border); border-radius:16px; background:var(--surface-sunken); text-align:left; scroll-margin-top:80px; }
+  .fox-set.flash{ animation:foxSetFlash 1.6s ease-out 1; }
+  @keyframes foxSetFlash{ 0%{ box-shadow:0 0 0 0 rgba(249,115,22,.55); } 60%{ box-shadow:0 0 0 10px rgba(249,115,22,0); } 100%{ box-shadow:none; } }
+  .fox-set-h{ display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+  .fox-set-ic{ font-size:30px; line-height:1; }
+  .fox-set-h b{ display:block; font-size:16px; color:var(--purple); }
+  .fox-set-h small{ display:block; font-size:12.5px; color:var(--text-dim); font-weight:600; }
+  .fox-row{ display:flex; gap:8px; flex-wrap:wrap; }
+  .fox-opts[hidden]{ display:none; }
+  .fox-l{ font-weight:800; font-size:13.5px; color:var(--text); margin:14px 0 6px; }
+  .fox-step{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .fox-pm{ width:46px; height:46px; border-radius:14px; border:1px solid var(--border); background:var(--surface); color:var(--purple); font:900 24px/1 'Nunito','Inter',sans-serif; cursor:pointer; }
+  .fox-pm:active{ transform:scale(.94); }
+  .fox-step output{ min-width:56px; text-align:center; font:900 30px/1 'Nunito','Inter',sans-serif; color:var(--text); }
+  .fox-u{ font-weight:800; color:var(--text-dim); }
+  .fox-quick{ margin-top:8px; }
+  .fox-chk{ display:flex; align-items:center; gap:8px; margin-top:10px; font-size:13.5px; font-weight:700; color:var(--text); cursor:pointer; }
+  .fox-chk input{ width:20px; height:20px; accent-color:var(--purple); flex:none; }
+  .fox-say{ margin-top:12px; padding:9px 12px; border-radius:12px; background:var(--surface); border:1px dashed var(--border); font-size:13px; font-weight:700; color:var(--text); line-height:1.4; }
+  /* 🔄 1.0.29 : revoir l'arabe des mots de la Tablette */
+  .tbl-arv{ display:flex; align-items:center; gap:12px; width:100%; box-sizing:border-box; margin:0 0 12px; padding:12px 14px; border-radius:16px; cursor:pointer; text-align:left;
+    border:1px solid rgba(124,58,237,.35); background:linear-gradient(135deg, rgba(124,58,237,.09), rgba(14,165,233,.08)); color:var(--text); font:inherit; }
+  .tbl-arv > span:first-child{ font-size:24px; }
+  .tbl-arv b{ display:block; font-size:15px; font-weight:900; color:var(--purple); }
+  .tbl-arv small{ display:block; font-size:12.5px; font-weight:700; color:var(--text-dim); }
+  .tbl-arv-go{ margin-left:auto; font-size:26px; font-weight:900; color:var(--purple); }
+  .arv{ width:min(100%, 620px); }
+  .arv-intro{ font-size:14px; line-height:1.5; color:var(--text-dim); margin:6px 0 10px; }
+  .arv-prog{ height:6px; border-radius:6px; background:var(--surface-sunken); overflow:hidden; }
+  .arv-prog i{ display:block; height:100%; width:0; background:linear-gradient(90deg,#7C3AED,#0EA5E9); transition:width .3s; }
+  .arv-pl{ font-size:12.5px; font-weight:800; color:var(--text-dim); margin:6px 0 2px; }
+  .arv-only{ margin:4px 0 8px; }
+  .arv-list{ display:flex; flex-direction:column; gap:10px; }
+  .arv-row{ border:1px solid var(--border); border-radius:14px; padding:10px 12px; background:var(--surface-sunken); }
+  .arv-row.chg{ border-color:rgba(124,58,237,.55); box-shadow:0 0 0 2px rgba(124,58,237,.12); }
+  .only-chg .arv-row:not(.chg){ display:none; }
+  .arv-h{ display:flex; align-items:center; gap:6px; }
+  .arv-h b{ font-size:17px; font-weight:900; }
+  .arv-ib{ border:0; background:transparent; font-size:16px; cursor:pointer; padding:2px 4px; }
+  .arv-st{ margin-left:auto; font-size:12px; font-weight:800; color:var(--text-dim); white-space:nowrap; }
+  .arv-def{ font-size:13px; color:var(--text-dim); line-height:1.4; margin:2px 0; }
+  .arv-now{ font-size:12.5px; font-weight:700; color:var(--text-dim); margin:4px 0; }
+  .arv-now span{ font-family:'Amiri','IBM Plex Sans Arabic',serif; font-size:18px; color:var(--text); }
+  .arv-row.chg .arv-now span{ text-decoration:line-through; text-decoration-color:rgba(220,38,38,.6); }
+  .arv-sug{ display:flex; flex-wrap:wrap; gap:6px; margin:6px 0; }
+  .wce-chip.keep b{ font-family:inherit; font-size:15px; }
+  .arv-foot{ position:sticky; bottom:-18px; background:var(--surface); padding:10px 0 4px; margin-bottom:-4px; }
+  .arv-foot button:disabled{ opacity:.55; cursor:default; }
   /* 📥 1.0.28 : importer des fichiers .md dans la Tablette */
   .tbl-imp{ height:40px; padding:0 14px; border:1px solid var(--border); border-radius:12px; background:var(--surface); color:var(--text); font:900 14px 'Nunito','Inter',sans-serif; cursor:pointer; }
   .tbl-imp:hover{ border-color:var(--purple); }
@@ -4155,6 +4292,7 @@
     <button class="menu-item" id="audioLibMenuBtn"><span class="mi-ic">🎵</span> Audiothèque (MP3)</button>
     <button class="menu-item" id="colorSettingsBtn"><span class="mi-ic">🎨</span> Personnaliser les couleurs</button>
     <button class="menu-item" id="soundSettingsBtn"><span class="mi-ic">🔊</span> Personnaliser les sons</button>
+    <button class="menu-item" id="foxSettingsBtn"><span class="mi-ic">🦊</span> Mascotte (quand elle sort)</button>
     <button class="menu-item" id="voiceSettingsBtn"><span class="mi-ic">🗣️</span> Voix de lecture</button>
     <button class="menu-item" id="authAccountBtn"><span class="mi-ic">🔐</span> Mon compte</button>
     <button class="menu-item" id="whatsNewBtn"><span class="mi-ic">🆕</span> Nouveautés</button>
@@ -4345,6 +4483,7 @@ const PRO_ICON_PATHS = {
   chevronRight:'<path d="m9 18 6-6-6-6"/>',
   tablet:'<rect x="4" y="2" width="16" height="20" rx="2.5"/><path d="M8 7h8M8 11h8M8 15h5"/>',
   tag:'<path d="M20.59 13.41 13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><circle cx="7" cy="7" r="1"/>',
+  fox:'<path d="M4 3l4.5 5h7L20 3v9a8 8 0 0 1-16 0z"/><path d="M9.5 13h.01M14.5 13h.01"/><path d="M10.5 16.5 12 18l1.5-1.5"/>',
 };
 function proIcon(name, size, sw){
   const p = PRO_ICON_PATHS[name];
@@ -4361,7 +4500,7 @@ const PRO_TILE_ICONS = {
 };
 const PRO_SECTION_ICONS = { quick:'zap', modules:'cap', fiches:'library', daily:'calendar', jeux:'grid' };
 const PRO_MENU_ICONS = {
-  switchAppBtn:'shuffle', tabletteMenuBtn:'tablet', audioLibMenuBtn:'headphones', colorSettingsBtn:'palette', soundSettingsBtn:'volume', voiceSettingsBtn:'mic',
+  switchAppBtn:'shuffle', tabletteMenuBtn:'tablet', audioLibMenuBtn:'headphones', colorSettingsBtn:'palette', soundSettingsBtn:'volume', foxSettingsBtn:'fox', voiceSettingsBtn:'mic',
   authAccountBtn:'lock', whatsNewBtn:'sparkles', soundTestBtn:'volume', leaderboardBtn:'trophy', timeBreakdownBtn:'pie', homeBtn:'home',
   dictBtn:'search', historyBtn:'history', profileBtn:'user', addWordsBtn:'plus', importBtn:'upload', exportBtn:'download', syncBtn:'cloud',
   resetBtn:'rotate', autoSpeakBtn:'volume', installBtn:'phone', voiceHelpBtn:'message', handsFreeBtn:'volume', voiceAutoBtn:'eye',
@@ -4389,7 +4528,7 @@ function proApplyChromeIcons(){
    Au rechargement, on revient sur l'écran où l'on était, pas sur l'accueil. */
 const NAV_TITLES = {
   renderBlockSelect:'Accueil', renderQcmHome:'Accueil QCM', renderAppSwitcher:'Choix de l’application',
-  renderSoundSettings:'Sons', renderVoiceSettings:'Voix', renderColorSettings:'Couleurs', renderAddWordsScreen:'Ajouter des mots',
+  renderSoundSettings:'Sons', renderFoxSettings:'Mascotte', renderVoiceSettings:'Voix', renderColorSettings:'Couleurs', renderAddWordsScreen:'Ajouter des mots',
   renderQuestSettings:'Objectifs', renderRadioSetup:'Radio', renderBlitzIntro:'Blitz', renderSwipeIntro:'Swipe', renderFlashcardsIntro:'Flashcards',
   renderDailyChallenge:'Défi du jour', renderBadgesScreen:'Badges', renderAssociationIntro:'Association', renderGrammarHome:'Grammaire',
   renderCodCoiIntro:'COD / COI', renderSentenceTypeIntro:'Types de phrases', renderGenericRecoIntro:'Exercice', renderPluralPractice:'Pluriels',
@@ -7929,6 +8068,96 @@ function clearCustomWords(){
   try{ localStorage.removeItem(nsKey(CUSTOM_WORDS_KEY)); }catch(e){}
 }
 
+/* ✏️ 1.0.29 : modifier ou retirer un mot de tes mots (sa fiche, la Tablette…), et c'est pareil sur tous tes appareils.
+   • un mot retiré laisse une petite trace datée (« wordsGone ») : la synchro ne le fait pas revenir d'un autre appareil ;
+   • un mot modifié porte la date de sa modification (upd) : la version la plus récente gagne partout. */
+const WORDS_GONE_KEY = 'lexiqueQuiz::wordsGone';
+function lexKey(fr){ return String(fr == null ? '' : fr).trim().toLowerCase(); }
+function lexGone(){ try{ return JSON.parse(localStorage.getItem(nsKey(WORDS_GONE_KEY)) || '{}') || {}; }catch(e){ return {}; } }
+function lexGoneSave(m){ try{ localStorage.setItem(nsKey(WORDS_GONE_KEY), JSON.stringify(m || {})); }catch(e){} }
+function lexIsGone(w, gone){ const g = gone || lexGone(), t = +g[lexKey(w && w.fr)] || 0; return t > 0 && t >= ((w && (w.upd || w.addedAt)) || 1); }
+function lexAfterChange(){
+  try{ saveCustomWords(WORDS); }catch(e){}
+  try{ rebuildBlocks(); }catch(e){}
+  try{ if(typeof exFullCache !== 'undefined' && exFullCache) exFullCache.clear(); }catch(e){}
+  try{ if(typeof TB !== 'undefined' && TB){ TB.idx = null; } }catch(e){}
+  try{ cloudAutoPush(); }catch(e){}
+  try{ document.dispatchEvent(new CustomEvent('vv:words')); }catch(e){}
+}
+/* la phrase d'exemple écrite en entier → « ~ » à la place du mot (sinon null) */
+function lexExFrom(sentence, forms){
+  const s = String(sentence || '').replace(/\s+/g, ' ').trim();
+  if(!s) return { ex:'~' };
+  const esc = (w) => String(w || '').trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '[\\s\\u00a0]+').replace(/'/g, "['’ʼ]");
+  for(const f of forms){
+    const e = esc(f); if(!e) continue;
+    const m = s.match(new RegExp('(^|[^\\p{L}\\p{N}])(' + e + ')(?![\\p{L}\\p{N}])', 'iu'));
+    if(m){ const at = m.index + m[1].length, form = m[2]; return { ex:s.slice(0, at) + '~' + s.slice(at + form.length), form }; }
+  }
+  return null;
+}
+function lexEditWord(w, patch){
+  if(!w || WORDS.indexOf(w) < 0) return { ok:false, err:"Ce mot n'est plus dans tes mots." };
+  patch = patch || {};
+  const fr = String(patch.fr != null ? patch.fr : w.fr).replace(/\s+/g, ' ').trim();
+  const ar = String(patch.ar != null ? patch.ar : (w.ar || '')).replace(/\s+/g, ' ').trim();
+  const def = String(patch.def != null ? patch.def : (w.def || '')).replace(/\s+/g, ' ').trim();
+  if(!fr) return { ok:false, err:'Écris le mot en français.', field:'fr' };
+  if(!def) return { ok:false, err:'Écris une petite définition (le sens).', field:'def' };
+  const oldKey = lexKey(w.fr), newKey = lexKey(fr), renamed = oldKey !== newKey;
+  if(renamed && WORDS.some(x => x !== w && lexKey(x.fr) === newKey)) return { ok:false, err:`« ${fr} » est déjà dans tes mots.`, field:'fr' };
+  let ex = null;
+  if(patch.ex != null){
+    const full0 = (typeof exFull === 'function' ? exFull(w) : String(w.ex || '')) || '';
+    if(String(patch.ex).replace(/\s+/g, ' ').trim() !== full0.replace(/\s+/g, ' ').trim() || renamed){
+      const oldForm = (typeof exFullForm === 'function' ? exFullForm(w) : '') || w.fr;
+      ex = lexExFrom(patch.ex, [oldForm, fr, w.fr]);
+      if(!ex) return { ok:false, err:`Garde le mot « ${renamed ? fr : oldForm} » dans la phrase d'exemple (ou vide-la).`, field:'ex' };
+    }
+  }
+  const now = Date.now();
+  if(renamed){
+    const g = lexGone(); g[oldKey] = now; lexGoneSave(g);
+    try{ if(typeof wordStats !== 'undefined' && wordStats && wordStats[w.fr] && !wordStats[fr]){ wordStats[fr] = wordStats[w.fr]; delete wordStats[w.fr]; saveWordStats(); } }catch(e){}
+    try{ if(typeof DEFAULT_WORDS !== 'undefined' && DEFAULT_WORDS.some(d => lexKey(d.fr) === oldKey)) w.addedAt = now; }catch(e){}   // un mot de base renommé devient « à toi »
+  }
+  w.fr = fr; w.ar = ar; w.def = def;
+  if(ex){ w.ex = ex.ex; if(ex.form && lexKey(ex.form) !== newKey) w.exForm = ex.form; else delete w.exForm; }
+  w.upd = now;
+  try{ reconcileWordsOrder(); }catch(e){}
+  lexAfterChange();
+  return { ok:true, w };
+}
+function lexDeleteWord(w){
+  const i = WORDS.indexOf(w); if(i < 0) return null;
+  const g = lexGone(); g[lexKey(w.fr)] = Date.now(); lexGoneSave(g);
+  WORDS.splice(i, 1);
+  lexAfterChange();
+  return { w, i };
+}
+function lexUndoDelete(d){
+  if(!d || !d.w || WORDS.some(x => lexKey(x.fr) === lexKey(d.w.fr))) return false;
+  const g = lexGone(); delete g[lexKey(d.w.fr)]; lexGoneSave(g);
+  d.w.upd = Date.now();
+  WORDS.splice(Math.min(d.i, WORDS.length), 0, d.w);
+  try{ reconcileWordsOrder(); }catch(e){}
+  lexAfterChange();
+  return true;
+}
+/* une petite barre en bas : « 🗑 retiré · ↩ Annuler » (au-dessus de tout, même de la Tablette) */
+function lexSnack(msg, undoLabel, onUndo, ms){
+  document.querySelectorAll('.lx-snack').forEach(x => x.remove());
+  const el = document.createElement('div');
+  el.className = 'lx-snack'; el.setAttribute('role', 'status');
+  el.innerHTML = `<span>${escapeHtml(msg)}</span>${onUndo ? `<button type="button">${escapeHtml(undoLabel || '↩ Annuler')}</button>` : ''}`;
+  document.body.appendChild(el);
+  requestAnimationFrame(() => el.classList.add('show'));
+  const kill = () => { el.classList.remove('show'); setTimeout(() => el.remove(), 250); };
+  const t = setTimeout(kill, ms || 6000);
+  const b = el.querySelector('button');
+  if(b) b.addEventListener('click', () => { clearTimeout(t); kill(); try{ onUndo(); }catch(e){ console.warn(e); } });
+  return el;
+}
 /* 🔧 Garantit que "Bloc N" désigne TOUJOURS le même groupe de mots sur tous les appareils :
    les mots du lexique par défaut restent dans leur ordre fixe (identique partout, gravé dans le
    fichier), et tous les mots ajoutés par l'utilisateur sont replacés à la suite, triés par ordre
@@ -7936,14 +8165,17 @@ function clearCustomWords(){
    Corrige à la racine les blocs qui différaient entre PC/téléphone et les résultats qui ne se
    synchronisaient pas (le calcul du bloc dépend de cet ordre). */
 function reconcileWordsOrder(){
-  const defaultKeys = new Set(DEFAULT_WORDS.map(w => w.fr.toLowerCase()));
-  const extra = WORDS.filter(w => !defaultKeys.has(w.fr.toLowerCase()));
+  // ✏️ 1.0.29 : un mot de base retiré ne revient pas, un mot de base modifié garde ta version
+  const gone = lexGone(), cur = new Map(WORDS.map(w => [w.fr.toLowerCase(), w]));
+  const defs = DEFAULT_WORDS.filter(w => !lexIsGone(w, gone)).map(d => { const c = cur.get(d.fr.toLowerCase()); return (c && c.upd) ? c : d; });
+  const defaultKeys = new Set(defs.map(w => w.fr.toLowerCase()));
+  const extra = WORDS.filter(w => !defaultKeys.has(w.fr.toLowerCase()) && !lexIsGone(w, gone));
   // 🧩 1.0.8 : chaque mot ajouté garde sa date d'ajout → les nouveaux toujours à la FIN (avant : rangés de A à Z,
   // chaque ajout décalait les blocs et mélangeait des mots déjà faits avec des nouveaux). Même ordre sur tous les appareils.
   let stamped = false;
   if(typeof wordsOrderFixed === 'function' && wordsOrderFixed()){ const now = Date.now(); extra.forEach((w, i) => { if(!w.addedAt){ w.addedAt = now + i; stamped = true; } }); }
   extra.sort((a, b) => (a.addedAt || 0) - (b.addedAt || 0) || a.fr.localeCompare(b.fr, 'fr'));
-  const newWords = DEFAULT_WORDS.concat(extra);
+  const newWords = defs.concat(extra);
   const changed = stamped || newWords.length !== WORDS.length || newWords.some((w, i) => !WORDS[i] || w.fr !== WORDS[i].fr);
   WORDS = newWords;
   if(changed){ saveCustomWords(WORDS); }
@@ -8037,6 +8269,7 @@ function bumpCombo(isCorrect){
   }
   else { comboStreak = 0; }
   saveComboStreak();
+  try{ foxOnAnswer(!!isCorrect); }catch(e){}   // 🦊 1.0.29 : la mascotte sort au rythme choisi
 }
 let chronoBestStreak = 0;
 let questionTimer = null;
@@ -8956,6 +9189,63 @@ function saveSoundPrefs(){ try{ localStorage.setItem(SOUND_PREF_KEY, JSON.string
 let soundPrefs = loadSoundPrefs();
 function playPreset(preset){ if(preset){ playChime(preset.notes, preset.opts); } }
 
+/* 🦊 1.0.29 : le panneau « La mascotte » */
+function foxSetHtml(){
+  const c = foxCfg();
+  const qv = [1, 3, 5, 10, 20];
+  return `<section class="fox-set" id="foxSet" aria-label="Réglages de la mascotte">
+    <div class="fox-set-h"><span class="fox-set-ic" aria-hidden="true">🦊</span><div><b>La mascotte</b><small>Abdel &amp; Souky viennent fêter tes bonnes réponses</small></div></div>
+    <div class="fox-row" role="group" aria-label="Mascotte activée ou désactivée">
+      <button type="button" class="mode-chip ${c.on ? 'active' : ''}" data-fox="on" aria-pressed="${c.on}">✅ Activée</button>
+      <button type="button" class="mode-chip ${c.on ? '' : 'active'}" data-fox="off" aria-pressed="${!c.on}">🚫 Désactivée : elle ne sort jamais</button>
+    </div>
+    <div class="fox-opts" ${c.on ? '' : 'hidden'}>
+      <div class="fox-l">Elle sort pour fêter ça toutes les…</div>
+      <div class="fox-step">
+        <button type="button" class="fox-pm" data-fox="n-" aria-label="Moins souvent : une bonne réponse de moins">−</button>
+        <output id="foxN" aria-live="polite">${c.n}</output>
+        <button type="button" class="fox-pm" data-fox="n+" aria-label="Une bonne réponse de plus">+</button>
+        <span class="fox-u">bonne${c.n > 1 ? 's' : ''} réponse${c.n > 1 ? 's' : ''}</span>
+      </div>
+      <div class="fox-row fox-quick" role="group" aria-label="Choix rapide">${qv.map(v => `<button type="button" class="mode-chip ${c.n === v ? 'active' : ''}" data-fox="n" data-v="${v}">${v === 1 ? '1 (à chaque fois)' : v}</button>`).join('')}</div>
+      <div class="fox-l">Je compte les bonnes réponses…</div>
+      <div class="fox-row" role="group" aria-label="Façon de compter">
+        <button type="button" class="mode-chip ${c.count === 'streak' ? 'active' : ''}" data-fox="count" data-v="streak">🔥 d'affilée (une erreur remet à zéro)</button>
+        <button type="button" class="mode-chip ${c.count === 'total' ? 'active' : ''}" data-fox="count" data-v="total">✅ au total (même avec des erreurs)</button>
+      </div>
+      <label class="fox-chk"><input type="checkbox" data-fox="visits" ${c.visits ? 'checked' : ''}> 👋 Petites visites : bonjour à l'accueil, bravo en fin de session</label>
+      <label class="fox-chk"><input type="checkbox" data-fox="mini" ${c.mini ? 'checked' : ''}> 🦊 Le petit renard à côté des questions</label>
+    </div>
+    <div class="fox-say" id="foxSay">${escapeHtml(foxCfgSentence(c))}</div>
+  </section>`;
+}
+function foxSetWire(root){
+  const box = root.querySelector('#foxSet'); if(!box) return;
+  const redraw = () => { const n = document.createElement('div'); n.innerHTML = foxSetHtml(); box.replaceWith(n.firstElementChild); foxSetWire(root); };
+  box.addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-fox]'); if(!b) return;
+    const c = foxCfg(), a = b.dataset.fox;
+    if(a === 'on' || a === 'off') foxCfgSave({ on:a === 'on' });
+    else if(a === 'n-' || a === 'n+') foxCfgSave({ n:Math.max(1, Math.min(100, c.n + (a === 'n+' ? 1 : -1))) });
+    else if(a === 'n') foxCfgSave({ n:+b.dataset.v || 5 });
+    else if(a === 'count') foxCfgSave({ count:b.dataset.v === 'total' ? 'total' : 'streak' });
+    redraw();
+    try{ haptic('tap'); }catch(err){}
+  });
+  box.addEventListener('change', (e) => {
+    const i = e.target.closest('input[data-fox]'); if(!i) return;
+    foxCfgSave({ [i.dataset.fox]:!!i.checked });
+    const s = document.getElementById('foxSay'); if(s) s.textContent = foxCfgSentence();
+  });
+}
+function renderFoxSettings(){
+  renderSoundSettings();
+  setTimeout(() => {
+    const s = document.getElementById('foxSet'); if(!s) return;
+    try{ s.scrollIntoView({ block:'start', behavior:'smooth' }); }catch(e){ s.scrollIntoView(); }
+    s.classList.remove('flash'); void s.offsetWidth; s.classList.add('flash');
+  }, 60);
+}
 function renderSoundSettings(){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
@@ -8996,12 +9286,8 @@ function renderSoundSettings(){
       <button class="mode-chip ${fxOn ? '' : 'active'}" data-fx="0">🙈 Désactivées</button>
       <button class="mode-chip" id="fxDemoBtn">🎬 Voir la démo</button>
     </div>
-    <div style="font-weight:800;color:var(--purple);margin:18px 0 8px;">🎉 Quand le renard sort pour fêter ça</div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;">
-      <button class="mode-chip ${celebFreq === 'series' ? 'active' : ''}" data-celeb="series">🔥 Aux séries : 5, 10, 20… d'affilée</button>
-      <button class="mode-chip ${celebFreq === 'all' ? 'active' : ''}" data-celeb="all">À chaque bonne réponse</button>
-      <button class="mode-chip ${celebFreq === 'half' ? 'active' : ''}" data-celeb="half">Une sur deux</button>
-      <button class="mode-chip ${celebFreq === 'none' ? 'active' : ''}" data-celeb="none">Jamais</button>
+    ${foxSetHtml()}
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
       <button class="mode-chip" id="celebDemoBtn">🦊 Voir une fête</button>
       <button class="mode-chip" id="celebStreakDemoBtn">🔥 Voir les fêtes 5 · 10 · 20</button>
       <button class="mode-chip" id="finaleDemoBtn">🏆 Voir la grande fête de l'objectif du jour</button>
@@ -9013,13 +9299,13 @@ function renderSoundSettings(){
   card.querySelectorAll('[data-haptic-test]').forEach(b => b.addEventListener('click', () => { hapticLastAt = 0; haptic(b.dataset.hapticTest); }));
   document.getElementById('fxDemoBtn').addEventListener('click', () => {
     if(!fxOn) return;
-    foxCameo('party', 'Regarde ce que je sais faire ! 🦊', { force:true, edge:'bottom' });
+    foxCameo('party', 'Regarde ce que je sais faire ! 🦊', { force:true, edge:'bottom', demo:true });
     setTimeout(() => fxFireworks(3), 600); setTimeout(() => fxExplosion(null, null, true), 1900); setTimeout(() => fxStorm(true, 1800), 3000);
   });
-  card.querySelectorAll('[data-celeb]').forEach(b => b.addEventListener('click', () => { celebFreq = b.dataset.celeb; try{ localStorage.setItem(CELEB_FREQ_KEY, celebFreq); }catch(e){} renderSoundSettings(); }));
-  document.getElementById('celebDemoBtn').addEventListener('click', () => { if(fxOn) foxCelebrate({ force:true }); });
+  foxSetWire(card);
+  document.getElementById('celebDemoBtn').addEventListener('click', () => { if(fxOn) foxCelebrate({ force:true, demo:true }); });
   let demoN = 0;
-  document.getElementById('celebStreakDemoBtn').addEventListener('click', (e) => { if(!fxOn) return; const n = [5, 10, 20][demoN++ % 3]; e.currentTarget.textContent = `🔥 Fête des ${n} d'affilée (touche encore : ${[5, 10, 20][demoN % 3]})`; celebStreak(n); });
+  document.getElementById('celebStreakDemoBtn').addEventListener('click', (e) => { if(!fxOn) return; const n = [5, 10, 20][demoN++ % 3]; e.currentTarget.textContent = `🔥 Fête des ${n} d'affilée (touche encore : ${[5, 10, 20][demoN % 3]})`; celebStreak(n, 0, { demo:true }); });
   document.getElementById('finaleDemoBtn').addEventListener('click', () => goalFinale(true));
   document.getElementById('goVoiceSettingsBtn').addEventListener('click', () => renderVoiceSettings());
   document.getElementById('backFromSoundsBtn').addEventListener('click', renderBlockSelect);
@@ -15325,6 +15611,8 @@ function wordCardPopup(w, opts){
       ${full ? `<button type="button" data-wcp="ex">🗣️ La phrase</button>` : ''}
       <button type="button" data-wcp="x">Fermer</button>
     </div>
+    ${i >= 0 ? `<div class="wcp-b2"><button type="button" data-wcp="edit">✏️ Modifier</button><button type="button" class="del" data-wcp="del">🗑 Retirer de mes mots</button></div>
+    <div class="wcp-conf" id="wcpConf" hidden>Retirer « <b>${escapeHtml(w.fr)}</b> » de tes mots ? Il disparaît de tes blocs et de tes révisions, sur tous tes appareils.<div class="wcp-b"><button type="button" class="del" data-wcp="del-go">🗑 Oui, le retirer</button><button type="button" data-wcp="del-no">Non, le garder</button></div></div>` : ''}
   </div>`;
   document.body.appendChild(ov);
   requestAnimationFrame(() => ov.classList.add('show'));
@@ -15339,6 +15627,10 @@ function wordCardPopup(w, opts){
     else if(a === 'say') speak(w.fr, 'fr-FR');
     else if(a === 'ar') speak(w.ar, 'ar-SA');
     else if(a === 'ex') speak(full, 'fr-FR');
+    else if(a === 'edit'){ close(); wordEditPopup(w, opts); }
+    else if(a === 'del'){ const c = ov.querySelector('#wcpConf'); if(c){ c.hidden = false; c.scrollIntoView({ block:'nearest' }); const g = c.querySelector('[data-wcp="del-go"]'); if(g) g.focus(); } }
+    else if(a === 'del-no'){ const c = ov.querySelector('#wcpConf'); if(c) c.hidden = true; }
+    else if(a === 'del-go'){ close(); lexDeleteUi(w); }
   });
   setTimeout(() => { const x = ov.querySelector('.wcp-b .pri'); if(x) try{ x.focus({ preventScroll:true }); }catch(e){} }, 60);
   // 🌐 la phrase en arabe (traduction automatique, gardée sur l'appareil)
@@ -15360,6 +15652,74 @@ function wordCardPopup(w, opts){
     }
   }
   return ov;
+}
+/* 🗑 retirer un mot, avec « ↩ Annuler » pendant quelques secondes */
+function lexDeleteUi(w){
+  const d = lexDeleteWord(w);
+  if(!d){ lexSnack("Ce mot n'est déjà plus dans tes mots."); return null; }
+  try{ haptic('tap'); }catch(e){}
+  lexSnack(`🗑 « ${w.fr} » retiré de tes mots`, '↩ Annuler', () => { if(lexUndoDelete(d)) lexSnack(`↩ « ${w.fr} » est revenu dans tes mots`); });
+  return d;
+}
+/* ✏️ modifier un mot : le français, l'arabe (avec des propositions), la définition, la phrase d'exemple */
+function wordEditPopup(w, opts){
+  opts = opts || {};
+  if(!w) return null;
+  document.querySelectorAll('.wcp-ov').forEach(x => x.remove());
+  const full = (typeof exFull === 'function' ? exFull(w) : '') || '';
+  const ov = document.createElement('div');
+  ov.className = 'wcp-ov wce-ov';
+  ov.innerHTML = `<form class="wcp wce" role="dialog" aria-modal="true" aria-label="Modifier le mot ${escapeHtml(w.fr)}" novalidate>
+    <div class="wcp-head"><div class="wcp-fr">✏️ Modifier le mot</div><button type="button" class="wcp-x" data-wce="x" aria-label="Fermer">✕</button></div>
+    <label class="wce-l">En français<input class="wce-in" name="fr" value="${escapeHtml(w.fr)}" autocomplete="off" autocapitalize="off" spellcheck="false" lang="fr"></label>
+    <label class="wce-l">En arabe<input class="wce-in ar" name="ar" dir="rtl" lang="ar" value="${escapeHtml(w.ar || '')}" placeholder="الترجمة"></label>
+    <div class="wce-sug" id="wceSug"><button type="button" class="wce-sbtn" data-wce="sug">🌐 Proposer des traductions</button></div>
+    <label class="wce-l">Définition<textarea class="wce-in" name="def" rows="3">${escapeHtml(w.def || '')}</textarea></label>
+    <label class="wce-l">Phrase d'exemple <small>(garde le mot dedans)</small><textarea class="wce-in" name="ex" rows="3" lang="fr">${escapeHtml(full.replace(/^~$/, ''))}</textarea></label>
+    <div class="wce-err" id="wceErr" role="alert" hidden></div>
+    <div class="wcp-b"><button type="submit" class="pri">💾 Enregistrer</button><button type="button" data-wce="x">Annuler</button></div>
+  </form>`;
+  document.body.appendChild(ov);
+  requestAnimationFrame(() => ov.classList.add('show'));
+  const form = ov.querySelector('form');
+  const close = () => { document.removeEventListener('keydown', onKey, true); ov.remove(); };
+  const onKey = (e) => { if(e.key === 'Escape'){ e.preventDefault(); e.stopPropagation(); close(); } };
+  document.addEventListener('keydown', onKey, true);
+  const err = (m, f) => { const b = ov.querySelector('#wceErr'); b.textContent = m; b.hidden = false; const el = f && form.elements[f]; if(el){ el.focus(); el.classList.add('bad'); setTimeout(() => el.classList.remove('bad'), 1600); } };
+  ov.addEventListener('click', (e) => {
+    if(e.target === ov){ close(); return; }
+    const b = e.target.closest('[data-wce]'); if(!b) return;
+    const a = b.dataset.wce;
+    if(a === 'x') close();
+    else if(a === 'sug') wceSuggest(ov, w);
+    else if(a === 'pick'){ form.elements.ar.value = b.dataset.v || ''; ov.querySelectorAll('[data-wce="pick"]').forEach(x => x.classList.toggle('on', x === b)); }
+  });
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const r = lexEditWord(w, { fr:form.elements.fr.value, ar:form.elements.ar.value, def:form.elements.def.value, ex:form.elements.ex.value });
+    if(!r.ok){ err(r.err, r.field); return; }
+    close();
+    try{ playCorrectSound(); }catch(err2){}
+    lexSnack(`✏️ « ${r.w.fr} » est enregistré`);
+    if(opts.onSaved) try{ opts.onSaved(r.w); }catch(err3){}
+    if(opts.reopen !== false) wordCardPopup(r.w, Object.assign({}, opts, { note:'✏️ Modifié' }));
+  });
+  setTimeout(() => { try{ form.elements[opts.focus || 'ar'].focus({ preventScroll:true }); }catch(e){} }, 60);
+  if(opts.suggest) wceSuggest(ov, w);
+  return ov;
+}
+/* 🌐 des traductions proposées (dictionnaire, puis traduction automatique), à choisir d'un toucher */
+function wceSuggest(ov, w){
+  const box = ov.querySelector('#wceSug'); if(!box) return;
+  if(typeof tbArSuggest !== 'function'){ box.innerHTML = '<span class="wce-sl">Pas de proposition ici.</span>'; return; }
+  box.innerHTML = '<span class="wce-sl">🔎 Je cherche…</span>';
+  const fr = ov.querySelector('form').elements.fr.value.trim() || w.fr;
+  tbArSuggest(fr, (typeof exFull === 'function' ? exFull(w) : ''), w).then(L => {
+    if(!box.isConnected) return;
+    const cur = ov.querySelector('form').elements.ar.value.trim();
+    if(!L || !L.length){ box.innerHTML = `<span class="wce-sl">Rien trouvé${navigator.onLine === false ? ' (pas de connexion)' : ''}. Tu peux l'écrire toi-même.</span>`; return; }
+    box.innerHTML = '<span class="wce-sl">Touche la bonne :</span>' + L.map(s => `<button type="button" class="wce-chip ${s.ar === cur ? 'on' : ''}" data-wce="pick" data-v="${escapeHtml(s.ar).replace(/"/g, '&quot;')}"><b dir="rtl" lang="ar">${escapeHtml(s.ar)}</b><small>${escapeHtml(s.src || '')}</small></button>`).join('');
+  }).catch(() => { if(box.isConnected) box.innerHTML = '<span class="wce-sl">Pas de connexion ?</span>'; });
 }
 /* ============ 📖 1.0.27 : TOUCHE UN MOT → SA DÉFINITION ============
    Dans les phrases d'exemple, la Répétition, les fiches (Art oratoire, Grammaire…), le Bouquinage : touche un mot
@@ -15421,7 +15781,7 @@ function wtPlace(rect){
 function wtActions(known, r){
   const box = WT.el && WT.el.querySelector('#wtAct'); if(!box) return;
   const ctx = WT.ctx || {};
-  box.innerHTML = (known ? `<button type="button" class="pri" data-wt="see">👁 Voir sa fiche</button>`
+  box.innerHTML = (known ? `<button type="button" class="pri" data-wt="see">👁 Voir sa fiche</button><button type="button" data-wt="edit">✏️ Modifier</button>`
       : (r && (r.defs || []).length ? `<button type="button" class="pri" data-wt="add">➕ Ajouter à mes mots</button>` : ''))
     + (ctx.sentence ? `<button type="button" data-wt="sent">🗣️ La phrase</button>` : '');
 }
@@ -15444,7 +15804,7 @@ function wtShow(word, rect, ctx){
       ${known.def ? `<div class="wt-def">${escapeHtml(known.def)}</div>` : ''}`;
     wtActions(true);
   } else {
-    let vb = null; try{ const e = tbIndex().get(dxFold(w0)); if(e && e.verb) vb = e; }catch(err){}
+    let vb = null; try{ const e = tbEntry(w0); if(e && e.verb) vb = e; }catch(err){}
     if(vb) body.innerHTML = `<div class="wt-lemma">verbe <b>${escapeHtml(vb.fr)}</b></div>${vb.ar ? `<div class="wt-ar" dir="rtl" lang="ar">${escapeHtml(vb.ar)}</div>` : ''}<div class="wt-l">🔎 Je cherche le sens…</div>`;
     wtActions(false);
     const look = (typeof tbLookup === 'function') ? tbLookup(w0) : Promise.resolve(null);
@@ -15489,6 +15849,7 @@ document.addEventListener('click', (e) => {
     if(a === 'x') wtClose();
     else if(a === 'say') speak(C.word, 'fr-FR');
     else if(a === 'see'){ const k = C.known; wtClose(); if(k) wordCardPopup(k, { note:'📇 Ce mot est déjà dans tes mots' }); }
+    else if(a === 'edit'){ const k = C.known; wtClose(); if(k) wordEditPopup(k); }
     else if(a === 'add') wtAdd();
     else if(a === 'sent'){ if(C.sentEl && C.sentEl.isConnected){ WT.bypass = true; try{ C.sentEl.click(); }finally{ WT.bypass = false; } } else if(C.sentence) speak(C.sentence, 'fr-FR'); }
     return;
@@ -19579,21 +19940,42 @@ function mergeRemoteData(remote){
       const ro = safeParse(rv, null), lo = safeParse(lv, null);
       if(ro && (!lo || (ro.at || 0) > (lo.at || 0))){ putL(key, rv); changed = true; }
 
+    } else if(baseKey === WORDS_GONE_KEY){
+      // 🗑 1.0.29 : les mots retirés (la date la plus récente gagne), et on les enlève ici aussi
+      const ro = safeParse(rv, {}) || {}, lo = lexGone();
+      let m = false;
+      Object.keys(ro).forEach(k => { const t = +ro[k] || 0; if(t > (+lo[k] || 0)){ lo[k] = t; m = true; } });
+      if(m){
+        lexGoneSave(lo);
+        const n0 = WORDS.length;
+        WORDS = WORDS.filter(w => !lexIsGone(w, lo));
+        if(WORDS.length !== n0){ saveCustomWords(WORDS); rebuildBlocks(); try{ document.dispatchEvent(new CustomEvent('vv:words')); }catch(e){} }
+        changed = true;
+      }
+
     } else if(baseKey === CUSTOM_WORDS_KEY){
       const remoteWords = safeParse(rv, null);
       if(Array.isArray(remoteWords) && remoteWords.length){
-        const base0 = loadCustomWords() || WORDS.slice();
+        const gone = lexGone();
+        const base0 = (loadCustomWords() || WORDS.slice()).filter(w => w && w.fr && !lexIsGone(w, gone));
         const byKey = new Map(base0.map(w => [w.fr.toLowerCase(), w]));
         let added = 0;
         remoteWords.forEach(w => {
           if(!w || !w.fr) return;
+          if(lexIsGone(w, gone)) return;                                  // 🗑 retiré sur un appareil : il ne revient pas
           const k = w.fr.toLowerCase(), l = byKey.get(k);
-          if(!l){ byKey.set(k, w); base0.push(w); added++; }
-          else if(w.addedAt && (!l.addedAt || w.addedAt < l.addedAt)){ l.addedAt = w.addedAt; added++; }   // 🧩 même place dans les blocs partout
+          if(!l){ byKey.set(k, w); base0.push(w); added++; return; }
+          if(w.addedAt && (!l.addedAt || w.addedAt < l.addedAt)){ l.addedAt = w.addedAt; added++; }   // 🧩 même place dans les blocs partout
+          if((+w.upd || 0) > (+l.upd || 0)){                              // ✏️ modifié ailleurs, plus récemment
+            ['fr', 'ar', 'def', 'ex', 'exForm', 'cat', 'upd'].forEach(f => { if(w[f] === undefined) delete l[f]; else l[f] = w[f]; });
+            added++;
+          }
         });
         if(added > 0 || !loadCustomWords()){
           WORDS = base0;
           reconcileWordsOrder(); // ordre déterministe : "Bloc N" reste identique une fois synchronisé
+          saveCustomWords(WORDS);
+          try{ if(typeof exFullCache !== 'undefined' && exFullCache) exFullCache.clear(); if(typeof TB !== 'undefined' && TB) TB.idx = null; document.dispatchEvent(new CustomEvent('vv:words')); }catch(e){}
           changed = true;
         }
       }
@@ -19692,7 +20074,7 @@ function mergeRemoteData(remote){
     }
   }
   syncSaveBase();
-  if(changed){ try{ tbSyncIn(); }catch(e){ console.warn('tablette : synchro', e); } }
+  if(changed){ try{ tbSyncIn(); }catch(e){ console.warn('tablette : synchro', e); } try{ foxMiniApply(); }catch(e){} }
 
   if(changed){
     quizTimerSeconds = loadTimerSetting();
@@ -20297,6 +20679,14 @@ const COLOR_PRESETS = {
 /* ============ 🆕 NOUVEAUTÉS — pour que tout ce qui a été ajouté reste découvrable ============ */
 const WHATS_NEW_SECTIONS = [
   { icon:'🆕', title:'Nouveautés', items:[
+    { name:'🦊 La mascotte se règle', desc:"☰ menu › « 🦊 Mascotte » : choisis toutes les combien de bonnes réponses elle sort (1, 3, 5, 10, 20… ou le chiffre que tu veux), d'affilée ou au total, ses petites visites, le petit renard à côté des questions. « 🚫 Désactivée » : elle ne sort plus jamais." },
+    { name:'🖊️ Tablette : le mot sous ton doigt s\'allume', desc:"Passe ton doigt, ton stylo ou la souris sur le texte : le mot s'allume d'une couleur claire. Choisis la couleur (ciel, menthe, lilas, pêche, rose, gris, ou la tienne) dans Aa › Page, ou « Aucun »." },
+    { name:'📇 Tes mots : leur bulle, tout de suite', desc:"Dans la Tablette, les mots déjà dans tes mots sont soulignés en pointillé. Touche-en un : sa bulle s'ouvre directement (arabe, définition, phrase), avec 👁 Sa fiche, ✏️ Modifier, 🗑 Retirer, et ⋯ Plus pour le reste." },
+    { name:'✏️ Modifier ou retirer un mot', desc:"Depuis sa bulle ou sa fiche : change le mot, l'arabe (avec des traductions proposées à toucher), la définition, la phrase d'exemple ; ou retire-le de tes mots (avec « ↩ Annuler »). C'est pareil sur tous tes appareils." },
+    { name:'🔤 Le titre aussi se touche', desc:"Les mots du titre d'un texte s'ouvrent comme ceux du texte, et la chasse aux mots difficiles marche aussi sur le titre." },
+    { name:'🌐 Traduire plusieurs mots, une phrase, un passage', desc:"Choisis 2, 3 mots ou plus (jusqu'à 40) : leur traduction en arabe. « 🌐 Traduire toute la phrase » sous la phrase, « ↔ Prendre toute la phrase », et une sélection sur plusieurs phrases donne « 🌐 Traduire la sélection »." },
+    { name:'🔄 Un arabe plus juste', desc:"« l'été » n'est plus traduit comme le verbe être, ni « le marché » comme « je marche » : la phrase dit si c'est un nom ou un verbe, et le dictionnaire donne la traduction du bon sens. Dans « Ma bibliothèque », « 🔄 Revoir l'arabe de tes mots » propose une correction pour chaque mot ajouté depuis la Tablette : tu choisis, puis tu enregistres." },
+    { name:'🅰️ Lire à ton goût', desc:"Aa › Texte : 6 polices (dont Lexend « facile à lire » et Atkinson « très lisible »), le gras en pourcentage, le début des mots en gras (25, 40 ou 55 %), l'espacement, l'interligne, et des réglages tout prêts (Confort, Très lisible, Lecture guidée). Aa › Page : papier blanc, crème ou sépia (noir ou gris doux la nuit)." },
     { name:'📥 Importer des fichiers .md dans la Tablette', desc:"Dans « Ma bibliothèque » : « 📥 Importer .md » (ou ⋯ d'une catégorie › « Importer un fichier .md ici », ou glisse le fichier sur un rayon depuis l'ordinateur). Choisis le rayon, et le texte arrive mis en page : titres, gras, italique, ==surligné==, listes, cases à cocher, citations et encadrés, tableaux, séparateurs, et les images. Les images intégrées ou en ligne marchent toutes seules ; celles qui sont à côté du .md, choisis-les en même temps (ou importe le .zip, comme les exports Notion ou Obsidian). Plusieurs fichiers d'un coup, c'est possible." },
     { name:'📚 Jusqu\'à 200 textes dans la Tablette', desc:"Avant, seuls les 40 derniers textes étaient gardés." },
     { name:'📚 Ta bibliothèque dans la Tablette', desc:"Tes textes sont rangés par catégorie : 📰 Journal, 📖 Histoires, 💬 Sujets… et « ＋ Catégorie » pour créer les tiennes (nom, icône, couleur). Chaque rayon montre ses textes, ligne par ligne : titre, lecture en %, minutes restantes, mots tagués, 🔖. Menu ⋯ : ranger ailleurs, marquer comme lu, recommencer, modifier, supprimer. Sur ordinateur, glisse un texte sur une catégorie. Recherche, tri, et « Reprendre ta lecture » en haut. Modifier un texte ne remet plus ta lecture à zéro." },
@@ -36285,6 +36675,7 @@ function renderColorSettings(){
 }
 document.getElementById('colorSettingsBtn').addEventListener('click', () => renderColorSettings());
 document.getElementById('soundSettingsBtn').addEventListener('click', () => renderSoundSettings());
+document.getElementById('foxSettingsBtn').addEventListener('click', () => renderFoxSettings());
 document.getElementById('voiceSettingsBtn').addEventListener('click', () => { if(typeof closeMenu === 'function') closeMenu(); renderVoiceSettings(); });
 document.getElementById('audioLibMenuBtn').addEventListener('click', () => { if(typeof closeMenu === 'function') closeMenu(); renderAudioLibrary(); });
 document.getElementById('tabletteMenuBtn').addEventListener('click', () => { if(typeof closeMenu === 'function') closeMenu(); renderTabletteHome(); });
@@ -39064,6 +39455,7 @@ function kbUpdate(){
 })();
 function foxCameo(kind, msg, opts){
   opts = opts || {};
+  if(!opts.demo){ const fc = foxCfg(); if(!fc.on || !fc.visits) return false; }   // 🦊 1.0.29 : désactivée, elle ne sort jamais
   if(typeof VA !== 'undefined' && VA.open) return false;   // on discute avec le renard : pas de surprise
   if(document.getElementById('goalFinale')) return false;     // 🏆 la grande fête est en cours
   if(!fxOn || cameoBusy) return false;
@@ -39127,7 +39519,49 @@ let celebFreq = (() => { try{
   if(!localStorage.getItem('vocabVision.celebV2')){ localStorage.setItem('vocabVision.celebV2', '1'); if(!v || v === 'all' || v === 'off'){ v = 'series'; localStorage.setItem(CELEB_FREQ_KEY, v); } }
   return v === 'off' ? 'series' : (v || 'series');
 }catch(e){ return 'series'; } })();
-const celebEach = () => celebFreq === 'all' || celebFreq === 'half';   // le renard sort aussi en dehors des séries ?
+/* 🦊 1.0.29 : la mascotte se règle (☰ menu › 🦊 Mascotte) : activée ou pas, toutes les combien de bonnes réponses
+   elle sort pour fêter ça (d'affilée, ou au total même avec des erreurs), ses petites visites (bonjour à l'accueil,
+   bravo en fin de session) et le petit renard à côté des questions. Désactivée : elle ne sort jamais. */
+const FOX_CFG_KEY = 'lexiqueQuiz::foxCfg';
+function foxCfg(){
+  let c = null;
+  try{ c = JSON.parse(localStorage.getItem(FOX_CFG_KEY) || 'null'); }catch(e){ c = null; }
+  if(!c || typeof c !== 'object'){
+    // on reprend l'ancien réglage (🔊 Sons : séries / chaque réponse / une sur deux / jamais)
+    c = celebFreq === 'all' ? { on:true, n:1, count:'total' } : celebFreq === 'half' ? { on:true, n:2, count:'total' }
+      : celebFreq === 'none' ? { on:false, n:5, count:'streak' } : { on:true, n:5, count:'streak' };
+  }
+  return { on:c.on !== false, n:Math.max(1, Math.min(100, parseInt(c.n, 10) || 5)), count:c.count === 'total' ? 'total' : 'streak',
+    visits:c.visits !== false, mini:c.mini !== false, upd:c.upd || 0 };
+}
+function foxCfgSave(patch){
+  const c = Object.assign(foxCfg(), patch || {}, { upd:Date.now() });
+  try{ localStorage.setItem(FOX_CFG_KEY, JSON.stringify(c)); }catch(e){}
+  celebFreq = !c.on ? 'none' : (c.n === 1 ? 'all' : (c.count === 'total' && c.n === 2 ? 'half' : 'series'));
+  try{ localStorage.setItem(CELEB_FREQ_KEY, celebFreq); }catch(e){}
+  foxMiniApply();
+  return c;
+}
+function foxMiniApply(){ try{ const c = foxCfg(); document.body.classList.toggle('fox-mini-off', !c.on || !c.mini); document.body.classList.toggle('fox-off', !c.on); }catch(e){} }
+/* « elle sort à 5, 10, 15… bonnes réponses d'affilée » */
+function foxCfgSentence(c){
+  c = c || foxCfg();
+  if(!c.on) return "🚫 La mascotte ne sort jamais (ni fêtes, ni visites).";
+  const L = [1, 2, 3].map(i => i * c.n).join(', ') + '…';
+  if(c.n === 1) return c.count === 'total' ? '🎉 Elle sort à chaque bonne réponse.' : "🎉 Elle sort à chaque bonne réponse (tant que tu ne te trompes pas).";
+  return c.count === 'total' ? `🎉 Elle sort toutes les ${c.n} bonnes réponses, même avec des erreurs entre-temps (${L}).` : `🔥 Elle sort à ${L} bonnes réponses d'affilée, sans faute.`;
+}
+const celebEach = () => { const c = foxCfg(); return c.on && c.n <= 2; };   // réglée « très souvent » : elle vient aussi consoler et encourager pendant l'exercice
+/* une bonne (ou mauvaise) réponse : c'est ici que la mascotte décide de sortir */
+function foxOnAnswer(ok){
+  if(!ok) return;
+  celeb.tot = (celeb.tot || 0) + 1;
+  const c = foxCfg();
+  if(!c.on || !fxOn) return;
+  const n = c.count === 'total' ? celeb.tot : comboStreak;
+  if(n > 0 && n % c.n === 0) setTimeout(() => celebStreak(n, 0, { total:c.count === 'total', every:c.n }), 90);
+}
+try{ setTimeout(foxMiniApply, 0); }catch(e){}
 const CELEB_PRAISE = ['Bravo !', 'Super !', 'Excellent !', 'Génial !', 'Top !', 'Parfait !', 'Bien joué !', 'Trop fort !', 'Waouh !', 'Champion·ne !', 'Impeccable !', 'Magnifique !', 'Tu assures !', 'Incroyable !', 'Yes !', 'Bingo !'];
 const celeb = { busy:false, draining:false, last:0, n:0, bag:[], lastRoute:'', skip:false, manual:false, safety:0, route:'' };
 const celCl = (x) => Math.max(0, Math.min(1, x));
@@ -39461,13 +39895,11 @@ function celebFinish(P){
 
 function foxCelebrate(opts){
   opts = opts || {};
+  if(!opts.demo && !foxCfg().on) return false;   // 🦊 1.0.29 : désactivée, elle ne sort jamais
   if(typeof VA !== 'undefined' && VA.open) return false;
   if(!fxOn || document.hidden) return false;
   if(opts.route !== 'finale' && document.getElementById('goalFinale')) return false;   // 🏆 pendant la grande fête : rien d'autre
-  if(!opts.force){
-    if(!celebEach()) return false;
-    if(celebFreq === 'half' && (celeb.n++ % 2)) return false;
-  }
+  if(!opts.force && !opts.demo) return false;   // 1.0.29 : le renard ne sort qu'au rythme choisi (celebStreak), ou pour une démo
   if(celeb.busy || cameoBusy) return false;
   const now = Date.now();
   if(!opts.force && now - celeb.last < 900) return false;
@@ -39523,15 +39955,19 @@ function foxCelebrate(opts){
    (les plus grandes — feu d'artifice, trampoline, orbite, magicien, pluie d'or, podium… — à partir de 10). */
 const CELEB_BIG = ['feuArtifice', 'trampoline', 'orbite', 'magicien', 'pluieOr', 'podium', 'zigzag', 'fusee', 'jackpot', 'heros'];
 function celebFoxAt(n){ return n === 5 || n === 10 || n === 20 || (n > 20 && n % 10 === 0); }
-function celebStreak(n, tries){
-  if(!fxOn || celebFreq === 'none') return false;
-  if((celeb.busy || cameoBusy) && (tries || 0) < 5){ setTimeout(() => celebStreak(n, (tries || 0) + 1), 450); return true; }   // il finit ce qu'il fait, puis il arrive
+function celebStreak(n, tries, o){
+  o = o || {};
+  if(!fxOn || (!o.demo && !foxCfg().on)) return false;
+  if((celeb.busy || cameoBusy) && (tries || 0) < 5){ setTimeout(() => celebStreak(n, (tries || 0) + 1, o), 450); return true; }   // il finit ce qu'il fait, puis il arrive
   let route = '';
-  if(n >= 10){
+  const every = o.every || 5, lvl = n / every;
+  if(o.every ? (lvl >= 2 && n >= 4) : n >= 10){
     if(!celeb.bigBag || !celeb.bigBag.length){ celeb.bigBag = CELEB_BIG.filter(r => CELEB_ROUTES[r]).sort(() => Math.random() - 0.5); if(celeb.bigBag[0] === celeb.lastRoute) celeb.bigBag.push(celeb.bigBag.shift()); }
     route = celeb.bigBag.shift();
   }
-  celeb.word = n >= 20 ? pick(['👑 Légendaire !', '🏆 Imbattable !', '🚀 Phénoménal !']) : n >= 10 ? pick(['⚡ Électrique !', '🌟 Incroyable !', '💎 Brillant !']) : pick(['🔥 En feu !', '💪 Bravo !', '✨ Génial !']);
+  celeb.word = o.total ? (n >= 2 ? `✅ ${n} bonnes réponses !` : pick(['💪 Bravo !', '✨ Génial !', '👏 Bien joué !']))
+    : (o.every ? (lvl >= 4 && n >= 8) : n >= 20) ? pick(['👑 Légendaire !', '🏆 Imbattable !', '🚀 Phénoménal !'])
+    : (o.every ? (lvl >= 2 && n >= 4) : n >= 10) ? pick(['⚡ Électrique !', '🌟 Incroyable !', '💎 Brillant !']) : pick(['🔥 En feu !', '💪 Bravo !', '✨ Génial !']);
   const ok = foxCelebrate({ force:true, route });
   if(!ok) celeb.word = '';
   return ok;
@@ -39619,6 +40055,7 @@ const VA_DEST = [
   { id:'badges', icon:'🏅', label:'Badges', ar:'الشارات', words:['badges', 'badge', 'recompenses', 'trophees'], go:() => renderBadgesScreen(), say:"Voici tes badges ! 🏅" },
   { id:'progres', icon:'📊', label:'Mes progrès', ar:'تقدمي', words:['progres', 'mes progres', 'statistiques', 'stats', 'profil', 'mon niveau', 'mon score', 'تقدم'], go:() => renderProfileView(), say:"Voici tes progrès ! 📊" },
   { id:'nouveautes', icon:'🆕', label:'Nouveautés', ar:'الجديد', words:['nouveautes', 'quoi de neuf', 'nouveau'], go:() => renderWhatsNew(), say:"Voici les nouveautés ! 🆕" },
+  { id:'mascotte', icon:'🦊', label:'Mascotte', ar:'التميمة', words:['mascotte', 'la mascotte', 'reglage de la mascotte', 'regler la mascotte', 'desactiver la mascotte', 'desactiver le renard'], go:() => renderFoxSettings(), say:"Voici les réglages de la mascotte ! 🦊" },
   { id:'sons', icon:'🔊', label:'Sons', ar:'الأصوات', words:['reglage des sons', 'les sons', 'son', 'sons'], go:() => renderSoundSettings(), say:"Voici les réglages des sons ! 🔊" },
   { id:'voix', icon:'🗣️', label:'Voix', ar:'الصوت', words:['voix', 'la voix', 'vitesse de lecture'], go:() => renderVoiceSettings(), say:"Voici les réglages de la voix ! 🗣️" },
   // 🧭 toutes les autres rubriques du menu, accessibles à la voix
@@ -43189,7 +43626,7 @@ document.addEventListener('click', (e) => {
    • zoom : A−/A+, pincer avec deux doigts (ou Ctrl + molette).
    Les textes restent sur l'appareil (ils peuvent être longs) ; les mots ajoutés, eux, se synchronisent. */
 var TB = { art:null, sents:[], toks:[], sentToks:[], spans:[], mode:'', playing:false, cur:0, token:0, gapT:0, hunt:false, hintsOn:false,
-  q:'', hits:[], hitI:-1, sheetK:-1, idx:null, idxN:-1, known:null, ui:null, dict:null, pts:null, pinch:null, noTapUntil:0,
+  q:'', hits:[], hitI:-1, sheetK:-1, tipK:-1, tipW:null, idx:null, idxX:null, vf:null, nS:null, idxN:-1, known:null, ui:null, dict:null, pts:null, pinch:null, noTapUntil:0,
   lastY:0, saveT:0, scrollT:0, selfTry:0, selfSil:0, selfScores:{}, edit:null, draft:null, look:{} };
 /* ☁️ 1.0.23 : les textes de la Tablette passent par la synchro (PC ↔ téléphone).
    Un texte = « lexiqueQuiz::tbDoc::id » (le contenu, en morceaux de 30 000 caractères pour le Google Sheet)
@@ -43366,11 +43803,19 @@ function tbClean(raw){
   if(m) w = m[2];
   return w;
 }
+/* 🔤 1.0.29 : deux index. Le premier, sans accents, sert à chercher ; le second garde les accents et donne le sens :
+   « marché » n'est plus « je marche », « été » (la saison) n'est plus « être ». On note aussi les formes qui viennent
+   d'une conjugaison, pour reconnaître un nom employé avec un article (« le marché », « l'été », « les cours »). */
+function tbKey(s){ return String(s == null ? '' : s).normalize('NFC').toLowerCase().replace(/[’`´ʼ‘]/g, "'").trim(); }
 function tbIndex(){
   const n = (typeof WORDS !== 'undefined' && Array.isArray(WORDS)) ? WORDS.length : 0;
-  if(TB.idx && TB.idxN === n) return TB.idx;
-  const m = new Map(), known = new Set();
-  const put = (k, v) => { k = dxFold(k); if(k && !m.has(k)) m.set(k, v); };
+  if(TB.idx && TB.idxN === n && TB.idxX) return TB.idx;
+  const m = new Map(), mx = new Map(), vf = new Set(), known = new Set();
+  const put = (k, v, verbForm) => {
+    const kx = tbKey(k), kf = dxFold(k);
+    if(kx && !mx.has(kx)){ mx.set(kx, v); if(verbForm) vf.add(kx); }
+    if(kf && !m.has(kf)) m.set(kf, v);
+  };
   try{
     (WORDS || []).forEach(w => {
       const fr = String(w && w.fr || '').trim();
@@ -43386,7 +43831,7 @@ function tbIndex(){
       if(/adjectif/i.test(w.cat || '')){ put(fr + 'e', v); put(fr + 'es', v); }
       if(/verbe/i.test(w.cat || '') && /(er|ir|re|oir)$/.test(fr) && typeof exVerbForms === 'function'){
         const F = exVerbForms(fr);
-        if(F){ (F.all || []).forEach(f => put(f, v)); if(F.pp) ['', 'e', 's', 'es'].forEach(x => put(F.pp + x, v)); }
+        if(F){ (F.all || []).forEach(f => put(f, v, true)); if(F.pp) ['', 'e', 's', 'es'].forEach(x => put(F.pp + x, v, true)); }
       }
     });
     (typeof getAllVerbs === 'function' ? getAllVerbs() : []).forEach(vb => {
@@ -43397,18 +43842,66 @@ function tbIndex(){
       Object.values(vb.tenses || {}).forEach(arr => (arr || []).forEach(f => {
         const parts = String(f || '').trim().split(/\s+/);
         const last = parts[parts.length - 1];
-        if(last) put(last.replace(/^(m'|t'|s'|j')/, ''), v);
+        if(last) put(last.replace(/^(m'|t'|s'|j')/, ''), v, true);
       }));
     });
   }catch(e){ console.warn('tablette : index', e); }
-  TB.idx = m; TB.idxN = n; TB.known = known;
+  TB.idx = m; TB.idxX = mx; TB.vf = vf; TB.idxN = n; TB.known = known;
   return m;
 }
-function tbEntry(form){ return tbIndex().get(dxFold(form)) || null; }
+/* le mot du lexique (ou le verbe) qui correspond à cette forme — accents compris */
+function tbEntry(form){
+  const m = tbIndex(), kx = tbKey(form), kf = dxFold(form);
+  const x = TB.idxX.get(kx); if(x) return x;
+  const f = m.get(kf);
+  if(f && f.known && tbKey(f.fr) === dxFold(f.fr) && kx !== kf) return f;     // ton mot est écrit sans accents (« ecole » pour « école »)
+  return null;
+}
+var TB_DET = null, TB_SUBJ = /^(je|j|tu|il|elle|on|nous|vous|ils|elles|ne|n|se|s|me|m|te|t|y|qui|que|qu|ce|c|ca|cela)$/;
+function tbDetSet(){ return TB_DET || (TB_DET = new Set('le la les l un une des du au aux ce cet cette ces mon ma mes ton ta tes son sa ses notre nos votre vos leur leurs quel quelle quels quelles chaque plusieurs quelques certains certaines aucun aucune tout toute tous toutes nul nulle'.split(' '))); }
+function tbKOf(x){ return typeof x === 'number' ? x : TB.toks.indexOf(x); }
+function tbPrevRaw(k, back){
+  const tk = TB.toks[k]; if(!tk) return '';
+  const L = TB.sentToks[tk.s] || [], i = L.indexOf(k) - (back || 1);
+  if(i < 0) return '';
+  const r = dxFold(String(TB.toks[L[i]].raw || '').replace(/[^\p{L}\p{N}'’-]+/gu, ''));
+  return r.replace(/^.*'(?=.)/, '').replace(/'$/, '');
+}
+/* le mot est-il employé comme un nom ici (« l'été », « le marché », « en cours ») ? */
+function tbNounCtx(k){
+  const tk = TB.toks[k]; if(!tk) return false;
+  const raw = dxFold(String(tk.raw || '').replace(/^[^\p{L}]+/u, ''));
+  if(/^(l|d)'/.test(raw) && /[éÉ]e?s?$/.test(tk.form)) return true;                 // l'été, d'été (pas « l'a », « l'aime »)
+  const p = tbPrevRaw(k);
+  if(tbDetSet().has(p) && !(/^(le|la|les|l|leur)$/.test(p) && TB_SUBJ.test(tbPrevRaw(k, 2)))) return true;   // « la porte », pas « il la porte »
+  if(p === 'en' && !/ant$/.test(dxFold(tk.form)) && !TB_SUBJ.test(tbPrevRaw(k, 2))) return true;            // « en été », pas « il en sort »
+  return false;
+}
+/* l'entrée qui convient ici : un nom qui ressemble à un verbe conjugué n'est pas pris pour le verbe */
+function tbEntryCtx(x){
+  const k = tbKOf(x), tk = TB.toks[k]; if(!tk) return null;
+  const e = tbEntry(tk.form); if(!e) return null;
+  if(TB.vf && TB.vf.has(tbKey(tk.form))){
+    if(tbNounCtx(k)) return null;
+    // « nous doublons », « vous marchez » : sans « nous » / « vous » juste avant, c'est un nom (« des doublons », « les nez »)
+    if(/(ons|ez)$/.test(dxFold(tk.form)) && ![1, 2, 3].some(n => /^(nous|vous)$/.test(tbPrevRaw(k, n)))) return null;
+  }
+  return e;
+}
+/* … ou comme un verbe (« il marche », « elle a été ») ? */
+var TB_VPREV = /^(je|j|tu|il|elle|on|nous|vous|ils|elles|qui|ne|n|se|s|me|m|te|t|lui|y|ai|as|a|avons|avez|ont|avait|avaient|avais|aura|auront|eu|suis|es|est|sommes|etes|sont|etait|etaient|sera|seront|ete)$/;
+function tbVerbCtx(k){
+  const tk = TB.toks[k]; if(!tk) return false;
+  const L = TB.sentToks[tk.s] || [], i = L.indexOf(k) - 1; if(i < 0) return false;
+  const raw = String(TB.toks[L[i]].raw || '').toLowerCase().replace(/[^\p{L}'’-]+/gu, '').replace(/^.*['’](?=.)/, '').replace(/['’]$/, '');
+  if(!raw || raw === 'à') return false;
+  return TB_VPREV.test(dxFold(raw)) && !tbNounCtx(k);
+}
+function tbNounAt(x){ const k = tbKOf(x), tk = TB.toks[k]; return !!tk && !!TB.vf && (tbIndex(), TB.vf.has(tbKey(tk.form))) && tbNounCtx(k); }
 function tbIsKnown(lemma){ tbIndex(); return !!(TB.known && TB.known.has(dxFold(lemma))); }
 /* le mot tel qu'on l'ajoute : la forme de base si on la connaît, sinon le mot en minuscules (sauf nom propre) */
 function tbLemmaOf(tk){
-  const e = tbEntry(tk.form);
+  const e = tbEntryCtx(tk);
   if(e) return e.fr;
   const f = tk.form;
   if(/^\p{Lu}\p{Ll}*$/u.test(f) && (tk.t === 0 || /^[«"“(—–-]/.test(TB.sents[tk.s] || ''))) return f.toLowerCase();
@@ -43417,12 +43910,18 @@ function tbLemmaOf(tk){
 }
 
 /* ---------- 📖 dictionnaire : ton lexique, sinon le Wiktionnaire (+ traduction arabe) ---------- */
-function tbDictLoad(){ if(!TB.dict){ try{ TB.dict = JSON.parse(localStorage.getItem('vocabVision.tbDict') || '{}') || {}; }catch(e){ TB.dict = {}; } } return TB.dict; }
+function tbDictLoad(){
+  if(!TB.dict){
+    try{ localStorage.removeItem('vocabVision.tbDict'); }catch(e){}            // 1.0.29 : l'ancien (arabe parfois faux) est oublié
+    try{ TB.dict = JSON.parse(localStorage.getItem('vocabVision.tbDict2') || '{}') || {}; }catch(e){ TB.dict = {}; }
+  }
+  return TB.dict;
+}
 function tbDictPut(k, v){
   const d = tbDictLoad(); d[k] = Object.assign({}, v, { at:Date.now() });
   const ks = Object.keys(d);
   if(ks.length > 400) ks.sort((a, b) => (d[a].at || 0) - (d[b].at || 0)).slice(0, ks.length - 400).forEach(x => delete d[x]);
-  try{ localStorage.setItem('vocabVision.tbDict', JSON.stringify(d)); }catch(e){}
+  try{ localStorage.setItem('vocabVision.tbDict2', JSON.stringify(d)); }catch(e){}
 }
 async function tbFetchJson(url, ms){
   const ctl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
@@ -43441,7 +43940,16 @@ function tbWikiClean(s){
   for(let k = 0; k < 3; k++) x = x.replace(/\{\{[^{}]*\}\}/g, '');
   return x.replace(/\[\[(?:[^\]|]*\|)?([^\]]+)\]\]/g, '$1').replace(/'''?/g, '').replace(/\s+/g, ' ').replace(/\s+([,.;:])/g, '$1').replace(/^[\s,;:.]+/, '').trim();
 }
-function tbParseWikt(wt){
+/* les traductions arabes d'une section : celles du premier sens qui en a (avant : toute la page, tous sens mêlés) */
+function tbWiktAr(txt){
+  const re = /\{\{trad[+-]?\|ar\|([^|}]+)/g;
+  const grab = (s) => { const L = []; let t; re.lastIndex = 0; while((t = re.exec(s)) && L.length < 3){ const w = t[1].trim(); if(w && /[\u0600-\u06FF]/.test(w) && !L.includes(w)) L.push(w); } return L; };
+  const parts = String(txt || '').split(/\{\{trad-début/);
+  for(let i = 1; i < parts.length; i++){ const L = grab(parts[i]); if(L.length) return L; }
+  return parts.length > 1 ? [] : grab(txt);
+}
+function tbParseWikt(wt, o){
+  o = o || {};
   const a = wt.search(/==\s*\{\{langue\|fr\}\}\s*==/);
   if(a < 0) return null;
   let fr = wt.slice(a);
@@ -43450,32 +43958,72 @@ function tbParseWikt(wt){
   const out = { ipa:'', defs:[], ar:[], pos:'', lemma:'' };
   const ipa = fr.match(/\{\{pron\|([^|}]+)\|fr\}\}/);
   if(ipa) out.ipa = ipa[1].trim();
+  if(o.verbCtx){                                     // « il marche » : c'est le verbe marcher, pas « la marche »
+    const vf = fr.match(/===\s*\{\{S\|verbe\|fr\|flexion[^}]*\}\}\s*===([\s\S]*?)(?=\n===?\s*\{\{S\||$)/);
+    const L1 = vf && vf[1].split('\n').find(l => /^#(?![*:#])/.test(l));
+    const lm = L1 && L1.match(/\[\[([^\]|#]+)/);
+    if(lm){ out.lemma = lm[1].trim(); out.pos = 'verbe'; return out; }
+  }
   const re = /===\s*\{\{S\|([^|}]+)\|fr([^}]*)\}\}\s*===([\s\S]*?)(?=\n===?\s*\{\{S\||$)/g;
   let m;
   while((m = re.exec(fr))){
     const pos = m[1].trim(), flex = /flexion/.test(m[2]);
     const lines = m[3].split('\n').filter(l => /^#(?![*:#])/.test(l)).map(l => l.replace(/^#\s*/, ''));
     if(!lines.length) continue;
+    if(o.noun && /verbe/i.test(pos)) continue;                       // employé comme un nom : on saute les sens de verbe
+    if(o.verb && !flex && !/verbe/i.test(pos) && /verbe/.test(fr)) continue;
     if(flex){ if(!out.lemma){ const L = lines[0].match(/\[\[([^\]|#]+)/); if(L) out.lemma = L[1].trim(); } continue; }
     if(!out.pos) out.pos = pos;
     lines.forEach(l => { const c = tbWikiClean(l); if(c && c.length > 2 && out.defs.length < 4) out.defs.push(c.length > 220 ? c.slice(0, 217) + '…' : c); });
-    if(out.defs.length) break;
+    if(out.defs.length){ out.ar = tbWiktAr(m[3]); break; }
   }
-  const tr = /\{\{trad[+-]?\|ar\|([^|}]+)/g;
-  let t;
-  while((t = tr.exec(fr)) && out.ar.length < 3){ const w = t[1].trim(); if(w && !out.ar.includes(w)) out.ar.push(w); }
   return out;
 }
-async function tbWikt(title){
+async function tbWikt(title, o){
   const j = await tbFetchJson('https://fr.wiktionary.org/w/api.php?action=parse&format=json&formatversion=2&prop=wikitext&redirects=1&origin=*&page=' + encodeURIComponent(title));
-  return (j && j.parse && j.parse.wikitext) ? tbParseWikt(j.parse.wikitext) : null;
+  return (j && j.parse && j.parse.wikitext) ? tbParseWikt(j.parse.wikitext, o) : null;
 }
-async function tbLookup(form){
+/* 🌐 traduction automatique (MyMemory) — un mot : seulement des réponses courtes, en arabe, qui traduisent bien CE mot */
+function tbArOk(t){ t = String(t || '').trim(); return !!t && /[\u0600-\u06FF]/.test(t) && !/MYMEMORY|QUERY LENGTH|INVALID|PLEASE SELECT/i.test(t) && !/[A-Za-z]{2,}/.test(t); }
+function tbArTidy(t){ return String(t || '').replace(/[.!?؟،,;:«»"“”()\[\]]+/g, ' ').replace(/\s+/g, ' ').trim(); }
+async function tbMtWord(fr){
+  const q = String(fr || '').trim(); if(!q) return [];
+  if(typeof navigator !== 'undefined' && navigator.onLine === false) return [];
+  const j = await tbFetchJson('https://api.mymemory.translated.net/get?langpair=fr|ar&q=' + encodeURIComponent(q), 7000);
+  if(!j) return [];
+  const words = q.split(/\s+/).length, maxW = Math.max(3, words * 2 + 1), qf = dxFold(q);
+  const out = [];
+  const add = (t, score) => { t = tbArTidy(t); if(!tbArOk(t) || t.split(/\s+/).length > maxW) return; const o = out.find(x => x.ar === t); if(o) o.score = Math.max(o.score, score); else out.push({ ar:t, score }); };
+  (j.matches || []).forEach(m => {
+    const seg = dxFold(String(m.segment || '').replace(/[.!?]+$/, '').trim());
+    const mt = /MT!/.test(String(m['created-by'] || '')), mm = +m.match || 0, ql = +m.quality || 0;
+    if(mt) add(m.translation, 2 + mm);
+    else if(seg === qf && mm >= 0.95) add(m.translation, 1 + mm + ql / 200 + Math.min(1, (+m['usage-count'] || 0) / 10));
+  });
+  const rd = j.responseData || {};
+  if(!out.length && (+rd.match || 0) >= 0.85) add(rd.translatedText, 1);
+  return out.sort((a, b) => b.score - a.score).slice(0, 3).map(x => x.ar);
+}
+/* une phrase, une expression : la traduction entière (gardée sur l'appareil) */
+async function tbMtText(text){
+  const q = String(text || '').replace(/\s+/g, ' ').trim(); if(!q) return '';
+  let C = {}; try{ C = JSON.parse(localStorage.getItem('vocabVision.exAr') || '{}') || {}; }catch(e){}
+  if(C[q]) return C[q];
+  if(typeof navigator !== 'undefined' && navigator.onLine === false) return '';
+  const j = await tbFetchJson('https://api.mymemory.translated.net/get?langpair=fr|ar&q=' + encodeURIComponent(q.slice(0, 480)), 8000);
+  const t = j && j.responseData && j.responseData.translatedText ? String(j.responseData.translatedText).trim() : '';
+  if(!t || !/[\u0600-\u06FF]/.test(t) || /MYMEMORY|QUERY LENGTH|INVALID/i.test(t)) return '';
+  try{ C[q] = t; const ks = Object.keys(C); if(ks.length > 400) delete C[ks[0]]; localStorage.setItem('vocabVision.exAr', JSON.stringify(C)); }catch(e){}
+  return t;
+}
+async function tbLookup(form, o){
+  o = o || {};
   const key = String(form || '').toLowerCase();
   if(!key) return null;
+  const ck = key + (o.noun ? '#n' : (o.verbCtx ? '#v' : ''));
   const d = tbDictLoad();
-  if(d[key] && (d[key].defs && d[key].defs.length || d[key].ar && d[key].ar.length)) return d[key];
-  const e = tbEntry(form);
+  if(d[ck] && (d[ck].defs && d[ck].defs.length || d[ck].ar && d[ck].ar.length)) return d[ck];
+  const e = o.noun ? null : tbEntry(form);
   const res = { lemma: e ? e.fr : key, ipa:'', ipaOf:'', defs: e && e.def ? [e.def] : [], ar: e && e.ar ? [e.ar] : [], pos:'', src: e && e.known ? 'lexique' : '' };
   if(res.defs.length && res.ar.length) return res;
   if(typeof navigator !== 'undefined' && navigator.onLine === false) return res;
@@ -43483,7 +44031,7 @@ async function tbLookup(form){
   const hy = key.match(/^(.+?)-(je|tu|il|elle|on|nous|vous|ils|elles|t-il|t-elle|t-on|ce|moi|toi|le|la|les|lui|leur|y|en)$/);
   if(hy && !e) cands.push(hy[1]);
   let w = null, used = '';
-  for(const c of cands){ w = await tbWikt(c); used = c; if(w && (w.defs.length || w.lemma)) break; }
+  for(const c of cands){ w = await tbWikt(c, { noun:!!o.noun, verb:!!(e && e.verb), verbCtx:!e && !!o.verbCtx }); used = c; if(w && (w.defs.length || w.lemma)) break; }
   if(w){
     if(w.ipa){ res.ipa = w.ipa; res.ipaOf = used; }
     if(!w.defs.length && w.lemma){
@@ -43499,14 +44047,129 @@ async function tbLookup(form){
     if(w.defs.length || res.defs.length) res.src = res.src || 'Wiktionnaire';
   }
   if(!res.ar.length){
-    const j = await tbFetchJson('https://api.mymemory.translated.net/get?langpair=fr|ar&q=' + encodeURIComponent(res.lemma), 7000);
-    const t = j && j.responseData && j.responseData.translatedText;
-    if(t && /[؀-ۿ]/.test(t) && !/MYMEMORY/i.test(t)) res.ar = [String(t).trim()];
+    const L = /\s/.test(res.lemma) ? [await tbMtText(res.lemma)].filter(Boolean) : await tbMtWord(res.lemma);
+    if(L.length){ res.ar = L.slice(0, 2); res.arAuto = true; }
   }
-  if(res.defs.length || res.ar.length) tbDictPut(key, res);
+  if(res.defs.length || res.ar.length) tbDictPut(ck, res);
   return res;
 }
 
+/* 🌐 1.0.29 : des traductions arabes proposées pour un mot de tes mots (fiche ✏️, revue des mots de la Tablette).
+   D'abord la conjugaison (verbes), puis le Wiktionnaire (le bon sens : nom ou verbe selon la phrase d'exemple),
+   puis la traduction automatique, filtrée (réponses courtes, vraiment en arabe). */
+async function tbArSuggest(fr, sentence, w){
+  const out = [];
+  const add = (ar, src) => { ar = tbArTidy(ar); if(!ar || !tbArOk(ar) || out.some(x => x.ar === ar)) return; out.push({ ar, src }); };
+  fr = String(fr || '').replace(/\s+/g, ' ').trim(); if(!fr) return out;
+  const base = fr.replace(/^(se |s'|s’)/i, '');
+  // un nom ? (dans la phrase d'exemple : « le ~ », « l'~ », « des ~ »)
+  let noun = false;
+  try{
+    const form = String((w && w.exForm) || fr).trim(), s = String(sentence || '');
+    const esc = form.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const m = s.match(new RegExp("(^|[^\\p{L}])(\\p{L}+)(?:['’]|\\s+)" + esc + "(?![\\p{L}])", 'iu'));
+    if(m && tbDetSet().has(dxFold(m[2])) && !/^(se|s)$/i.test(m[2])) noun = true;
+  }catch(e){}
+  let vb = null;
+  try{ vb = (getAllVerbs() || []).find(v => String(v.inf || '').replace(/^s'|^se /, '') === base) || null; }catch(e){}
+  if(vb && vb.ar && !noun) add(vb.ar, 'Conjugaison');
+  if(typeof navigator !== 'undefined' && navigator.onLine === false) return out;
+  try{
+    let wk = await tbWikt(fr, { noun, verb:!!vb && !noun });
+    if((!wk || (!wk.defs.length && !wk.lemma)) && base !== fr) wk = await tbWikt(base, { noun, verb:!!vb && !noun });
+    if(wk && !wk.defs.length && wk.lemma) wk = await tbWikt(wk.lemma, { noun });
+    if(wk) (wk.ar || []).forEach(a => add(a, 'Wiktionnaire'));
+  }catch(e){}
+  try{
+    const L = /\s/.test(fr) ? [await tbMtText(fr)].filter(Boolean) : await tbMtWord(fr);
+    L.forEach(a => add(a, 'Traduction auto'));
+  }catch(e){}
+  return out.slice(0, 5);
+}
+/* 🔄 revoir l'arabe des mots ajoutés depuis la Tablette (et « Mes lectures ») : propositions à choisir, puis on enregistre */
+function tbArWords(){ return (typeof WORDS !== 'undefined' ? WORDS : []).filter(w => w && (w.cat === 'Tablette' || w.cat === 'Mes lectures')); }
+function tbArReview(){
+  const words = tbArWords();
+  document.querySelectorAll('.wcp-ov').forEach(x => x.remove());
+  const ov = document.createElement('div');
+  ov.className = 'wcp-ov arv-ov';
+  const rows = words.map((w, i) => `<div class="arv-row" data-i="${i}">
+      <div class="arv-h"><b lang="fr">${escapeHtml(w.fr)}</b><button type="button" class="arv-ib" data-arv="say" data-i="${i}" aria-label="Écouter ${escapeHtml(w.fr)}">🔊</button><span class="arv-st" id="arvSt${i}">⏳</span></div>
+      ${w.def ? `<div class="arv-def">${escapeHtml(String(w.def).length > 120 ? String(w.def).slice(0, 117) + '…' : w.def)}</div>` : ''}
+      <div class="arv-now">Maintenant : <span dir="rtl" lang="ar">${w.ar ? escapeHtml(w.ar) : '<i>(vide)</i>'}</span></div>
+      <div class="arv-sug" id="arvSug${i}"></div>
+      <input class="wce-in ar arv-in" id="arvIn${i}" dir="rtl" lang="ar" value="${escapeHtml(w.ar || '')}" placeholder="الترجمة" aria-label="Arabe de ${escapeHtml(w.fr)}">
+    </div>`).join('');
+  ov.innerHTML = `<div class="wcp arv" role="dialog" aria-modal="true" aria-label="Revoir l'arabe de tes mots">
+    <div class="wcp-head"><div class="wcp-fr">🔄 Revoir l'arabe</div><button type="button" class="wcp-x" data-arv="x" aria-label="Fermer">✕</button></div>
+    <div class="arv-intro">${words.length ? `Tes <b>${words.length}</b> mots ajoutés depuis la Tablette. Pour chacun, je cherche la bonne traduction (le dictionnaire d'abord). Touche celle qui convient, ou écris-la ; rien ne change tant que tu n'as pas enregistré.` : "Tu n'as encore ajouté aucun mot depuis la Tablette."}</div>
+    ${words.length ? `<div class="arv-prog"><i id="arvBar"></i></div><div class="arv-pl" id="arvPl" aria-live="polite">Je cherche… 0 / ${words.length}</div>
+    <label class="fox-chk arv-only"><input type="checkbox" id="arvOnly"> Voir seulement ceux qui changent</label>` : ''}
+    <div class="arv-list">${rows}</div>
+    <div class="wcp-b arv-foot">${words.length ? `<button type="button" class="pri" data-arv="save" id="arvSave">💾 Enregistrer</button>` : ''}<button type="button" data-arv="x">Fermer</button></div>
+  </div>`;
+  document.body.appendChild(ov);
+  requestAnimationFrame(() => ov.classList.add('show'));
+  const st = { stop:false, done:0 };
+  const close = () => { st.stop = true; document.removeEventListener('keydown', onKey, true); ov.remove(); };
+  const onKey = (e) => { if(e.key === 'Escape'){ e.preventDefault(); e.stopPropagation(); close(); } };
+  document.addEventListener('keydown', onKey, true);
+  const count = () => {
+    let n = 0; words.forEach((w, i) => { const inp = ov.querySelector('#arvIn' + i); if(inp && inp.value.trim() !== String(w.ar || '').trim()) n++; });
+    const b = ov.querySelector('#arvSave'); if(b){ b.textContent = n ? `💾 Enregistrer ${n} changement${n > 1 ? 's' : ''}` : '💾 Rien à changer'; b.disabled = !n; }
+    words.forEach((w, i) => { const r = ov.querySelector(`.arv-row[data-i="${i}"]`), inp = ov.querySelector('#arvIn' + i); if(r && inp) r.classList.toggle('chg', inp.value.trim() !== String(w.ar || '').trim()); });
+    return n;
+  };
+  const pickChip = (i, val) => {
+    const inp = ov.querySelector('#arvIn' + i); if(inp) inp.value = val;
+    ov.querySelectorAll(`#arvSug${i} .wce-chip`).forEach(c => c.classList.toggle('on', c.dataset.v === val));
+    count();
+  };
+  ov.addEventListener('click', (e) => {
+    if(e.target === ov){ close(); return; }
+    const b = e.target.closest('[data-arv]'); if(!b) return;
+    const a = b.dataset.arv, i = +b.dataset.i;
+    if(a === 'x') close();
+    else if(a === 'say'){ const w = words[i]; if(w) speak(w.fr, 'fr-FR'); }
+    else if(a === 'pick') pickChip(i, b.dataset.v || '');
+    else if(a === 'save'){
+      let n = 0; const now = Date.now();
+      words.forEach((w, j) => { const inp = ov.querySelector('#arvIn' + j); if(!inp) return; const v = inp.value.replace(/\s+/g, ' ').trim(); if(v !== String(w.ar || '').trim() && WORDS.indexOf(w) >= 0){ w.ar = v; w.upd = now; n++; } });
+      if(n){ lexAfterChange(); try{ playCorrectSound(); }catch(err){} }
+      close();
+      lexSnack(n ? `✅ ${n} traduction${n > 1 ? 's' : ''} corrigée${n > 1 ? 's' : ''}, sur tous tes appareils` : 'Rien n’a changé');
+      try{ if(document.getElementById('tbkLib')) tbLibRefresh(); }catch(err){}
+    }
+  });
+  ov.addEventListener('input', (e) => { if(e.target.classList.contains('arv-in')){ const i = +e.target.id.replace('arvIn', ''); ov.querySelectorAll(`#arvSug${i} .wce-chip`).forEach(c => c.classList.toggle('on', c.dataset.v === e.target.value.trim())); count(); } });
+  ov.addEventListener('change', (e) => { if(e.target.id === 'arvOnly') ov.classList.toggle('only-chg', e.target.checked); });
+  count();
+  if(!words.length) return ov;
+  if(typeof navigator !== 'undefined' && navigator.onLine === false){ const pl = ov.querySelector('#arvPl'); if(pl) pl.textContent = '📴 Pas de connexion : je ne peux rien proposer. Tu peux corriger à la main.'; words.forEach((w, i) => { const s = ov.querySelector('#arvSt' + i); if(s) s.textContent = ''; }); return ov; }
+  // on cherche, deux mots à la fois
+  let next = 0;
+  const one = async () => {
+    while(!st.stop && next < words.length){
+      const i = next++, w = words[i];
+      let L = [];
+      try{ L = await tbArSuggest(w.fr, (typeof exFull === 'function' ? exFull(w) : ''), w); }catch(e){ L = []; }
+      if(st.stop || !ov.isConnected) return;
+      const box = ov.querySelector('#arvSug' + i), s = ov.querySelector('#arvSt' + i), cur = String(w.ar || '').trim();
+      if(box) box.innerHTML = L.length ? L.map(x => `<button type="button" class="wce-chip ${x.ar === cur ? 'on' : ''}" data-arv="pick" data-i="${i}" data-v="${escapeHtml(x.ar).replace(/"/g, '&quot;')}"><b dir="rtl" lang="ar">${escapeHtml(x.ar)}</b><small>${escapeHtml(x.src)}</small></button>`).join('')
+        + (cur ? `<button type="button" class="wce-chip keep" data-arv="pick" data-i="${i}" data-v="${escapeHtml(cur).replace(/"/g, '&quot;')}"><b>↩</b><small>garder</small></button>` : '') : '<span class="wce-sl">Pas de proposition : corrige à la main si besoin.</span>';
+      const sure = L[0] && L[0].src !== 'Traduction auto';
+      if(L.some(x => x.ar === cur)){ if(s) s.textContent = '✓ semble juste'; }
+      else if(L.length && (!cur || sure)){ pickChip(i, L[0].ar); if(s) s.textContent = cur ? '✏️ à corriger' : '➕ ajoutée'; }
+      else if(s) s.textContent = L.length ? '🤔 à vérifier' : '';
+      st.done++;
+      const bar = ov.querySelector('#arvBar'), pl = ov.querySelector('#arvPl');
+      if(bar) bar.style.width = Math.round(st.done / words.length * 100) + '%';
+      if(pl) pl.textContent = st.done < words.length ? `Je cherche… ${st.done} / ${words.length}` : `✓ Fini : ${count()} proposition${count() > 1 ? 's' : ''} de changement. Vérifie, puis enregistre.`;
+    }
+  };
+  one(); one();
+  return ov;
+}
 /* ============ 📰 1.0.19 : LA TABLETTE « JOURNAL » ============
    • le texte se met en page comme un journal : titre, sous-titre, chapeau, citation, liste, séparateur,
      gras / italique / souligné, sauts de ligne, et des images (collées ou choisies), à la taille qu'on veut ;
@@ -43596,7 +44259,17 @@ function tbDecorate(text, wordFn, stOf, plain){
   style('');
   return out;
 }
-function tbSentsHtml(text, st){
+/* 🅰️ le début du mot en gras (« lecture guidée ») */
+function tbBioHtml(w, pct){
+  const s = String(w || ''), L = [...s];
+  const letters = L.filter(c => /[\p{L}\p{N}]/u.test(c)).length;
+  if(letters < 2) return escapeHtml(s);
+  let n = Math.max(1, Math.round(letters * pct / 100)), i = 0, c = 0;
+  while(i < L.length && c < n){ if(/[\p{L}\p{N}]/u.test(L[i])) c++; i++; }
+  return `<b class="bio">${escapeHtml(L.slice(0, i).join(''))}</b>${escapeHtml(L.slice(i).join(''))}`;
+}
+function tbSentsHtml(text, st, plain){
+  const bio = plain ? 0 : (+tbUi().bio || 0);
   let pos = 0;
   return bqSplit(text).map(sent => {
     let base = text.indexOf(sent, pos); if(base < 0) base = pos; pos = base + sent.length;
@@ -43613,13 +44286,13 @@ function tbSentsHtml(text, st){
       const at = `class="tbw" data-k="${k}" data-n="${escapeHtml(spCompact(raw))}"`;
       if(inner == null || inner === escapeHtml(raw)){        // la ponctuation reste hors du mot (surligneur, couleurs du micro)
         const m = String(raw).match(/^([^\p{L}\p{N}]*)([\s\S]*?)([^\p{L}\p{N}]*)$/u);
-        if(m && m[2]) return escapeHtml(m[1]) + `<span ${at}>${escapeHtml(m[2])}</span>` + escapeHtml(m[3]);
+        if(m && m[2]) return escapeHtml(m[1]) + `<span ${at}>${bio ? tbBioHtml(m[2], bio) : escapeHtml(m[2])}</span>` + escapeHtml(m[3]);
       }
       return `<span ${at}>${inner}</span>`;
     };
     const before = TB.toks.length;
     let html;
-    try{ html = tbDecorate(sent, wrap, stOf); }
+    try{ html = tbDecorate(sent, wrap, stOf, !!plain); }
     catch(e){ TB.toks.length = before; TB.sentToks[s] = []; html = tbDecorate(sent, wrap, stOf, true); }
     return `<span class="tb-s" data-s="${s}">${html}</span>`;
   }).join(' ');
@@ -44097,6 +44770,7 @@ async function tbImgRemove(bi){
 function tbNearestWord(x, y){
   let best = null, bd = 26 * 26;
   for(const sp of TB.spans){
+    if(!sp) continue;
     const r = sp.getBoundingClientRect();
     if(r.bottom < y - 30 || r.top > y + 30) continue;
     const dx = x < r.left ? r.left - x : (x > r.right ? x - r.right : 0), dy = y < r.top ? r.top - y : (y > r.bottom ? y - r.bottom : 0);
@@ -44107,12 +44781,77 @@ function tbNearestWord(x, y){
 }
 function tbTapWord(k){
   const tk = TB.toks[k]; if(!tk) return;
-  if(TB.mode === 'play'){ TB.playing = true; tbDock(); tbSpeak(tk.s); return; }
+  if(TB.mode === 'play'){ if(tk.s >= tbNS()) return; TB.playing = true; tbDock(); tbSpeak(tk.s); return; }
   if(TB.mode === 'self'){ tbSelfSpeak(tk.form, Math.max(0.8, readingRate)); return; }
-  if(TB.mode === 'replay'){ tbReplaySeekS(tk.s); return; }
+  if(TB.mode === 'replay'){ if(tk.s < tbNS()) tbReplaySeekS(tk.s); return; }
   if(TB.hunt){ tbSay(tk.form); tbToggleTag(k); return; }
+  if(TB.tipK === k){ tbTipClose(); return; }
+  const w = tbKnownOf(k);
+  if(w){ tbTipOpen(k, w); return; }                 // 📇 1.0.29 : déjà dans tes mots → sa bulle, directement
+  tbTipClose();
   tbOpenSheet(k);
 }
+/* 📇 le mot de tes mots qui correspond à ce mot du texte (en tenant compte de la phrase) */
+function tbKnownOf(k){
+  const tk = TB.toks[k]; if(!tk || typeof WORDS === 'undefined') return null;
+  const e = tbEntryCtx(k);
+  if(!e || !e.known) return null;
+  return WORDS.find(x => x.fr === e.fr) || null;
+}
+function tbPaintKnown(){
+  const on = tbUi().kn !== false;
+  const R = document.getElementById('tbReader'); if(R) R.classList.toggle('kn-on', on);
+  TB.spans.forEach((sp, k) => { if(sp) sp.classList.toggle('kn', on && !!tbKnownOf(k)); });
+}
+function tbTipClose(){
+  const t = document.getElementById('tbTip'); if(t) t.remove();
+  if(TB.tipK >= 0 && TB.spans[TB.tipK]) TB.spans[TB.tipK].classList.remove('tipsel');
+  TB.tipK = -1; TB.tipW = null;
+}
+function tbTipOpen(k, w){
+  tbTipClose();
+  if(TB.sheetK !== -1) tbCloseSheet();
+  const sp = TB.spans[k], R = document.getElementById('tbReader'); if(!sp || !R) return;
+  const tk = TB.toks[k], full = (typeof exFull === 'function' ? exFull(w) : '') || '';
+  const el = document.createElement('div');
+  el.id = 'tbTip'; el.className = 'tb-tip'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', 'Ton mot ' + w.fr);
+  el.innerHTML = `<div class="tb-tip-h"><b lang="fr">${escapeHtml(w.fr)}</b><span class="tb-tip-ok">✓ dans tes mots</span>
+      <button type="button" class="tb-ib sm" data-tb="tip-say" aria-label="Écouter">🔊</button><button type="button" class="tb-ib sm" data-tb="tip-x" aria-label="Fermer">✕</button></div>
+    ${dxFold(w.fr) !== dxFold(tk.form) ? `<div class="tb-tip-f">« ${escapeHtml(tk.form)} » dans le texte</div>` : ''}
+    ${w.ar ? `<div class="tb-tip-ar" dir="rtl" lang="ar">${escapeHtml(w.ar)}</div>` : `<div class="tb-tip-f">Pas encore de traduction en arabe : ✏️ pour l'ajouter.</div>`}
+    ${w.def ? `<div class="tb-tip-def">${escapeHtml(w.def)}</div>` : ''}
+    ${full && full !== '~' ? `<div class="tb-tip-ex" lang="fr">${escapeHtml(full.length > 150 ? full.slice(0, 147) + '…' : full)}</div>` : ''}
+    <div class="tb-tip-a">
+      <button type="button" class="tb-chip" data-tb="tip-see">👁 Sa fiche</button>
+      <button type="button" class="tb-chip" data-tb="tip-edit">✏️ Modifier</button>
+      <button type="button" class="tb-chip del" data-tb="tip-del">🗑 Retirer</button>
+      <button type="button" class="tb-chip" data-tb="tip-more" title="Traduire, taguer, choisir plusieurs mots…">⋯ Plus</button>
+    </div>
+    <div class="tb-tip-conf" id="tbTipConf" hidden><span>Retirer « <b>${escapeHtml(w.fr)}</b> » de tes mots ?</span>
+      <button type="button" class="tb-btn sm del" data-tb="tip-del-go">🗑 Oui, le retirer</button><button type="button" class="tb-btn sm" data-tb="tip-del-no">Non</button></div>`;
+  R.appendChild(el);
+  TB.tipK = k; TB.tipW = w;
+  sp.classList.add('tipsel');
+  tbTipPlace();
+  tbSay(tk.form);
+}
+function tbTipPlace(){
+  const el = document.getElementById('tbTip'), sp = TB.spans[TB.tipK]; if(!el || !sp) return;
+  const r = sp.getBoundingClientRect(), vw = window.innerWidth, vh = window.innerHeight, w = el.offsetWidth, h = el.offsetHeight;
+  if(r.bottom < 40 || r.top > vh - 40){ tbTipClose(); return; }
+  let top = r.bottom + 10, left = r.left + r.width / 2 - w / 2;
+  if(top + h > vh - 96) top = r.top - h - 10;
+  if(top < 60) top = Math.min(vh - h - 8, r.bottom + 10);
+  left = Math.max(8, Math.min(left, vw - w - 8));
+  el.style.left = Math.round(left) + 'px'; el.style.top = Math.round(top) + 'px';
+  el.classList.toggle('up', top < r.top);
+}
+document.addEventListener('vv:words', () => {
+  if(typeof TB === 'undefined' || !document.getElementById('tbReader')) return;
+  TB.idx = null; TB.look = {};
+  tbTipClose();
+  try{ tbPaintKnown(); }catch(e){}
+});
 function tbHintSheet(){
   const sh = document.getElementById('tbSheet'); if(!sh) return;
   TB.sheetK = -7;
@@ -44304,6 +45043,7 @@ function tbLibRefresh(){
       <span class="tbl-hero-ring">${tbRing(tbPct(r), 58)}<b>${Math.round(tbPct(r) * 100)}%</b></span>
       <span class="tbl-hero-t"><small>Reprendre ta lecture, ${rc.icon} ${escapeHtml(rc.name)}</small><b>${escapeHtml(r.title || 'Sans titre')}</b><span>Encore ${Math.max(1, Math.round(tbWordsCount(r.text) * (1 - tbPct(r)) / 170))} min${r.mark ? ', 🔖 marque-page posé' : ''}</span></span>
       <span class="tbl-hero-go" aria-hidden="true">▶</span></button>` : ''}
+    ${tbArWords().length ? `<button type="button" class="tbl-arv" data-tbl="ar-review"><span aria-hidden="true">🔄</span><span><b>Revoir l'arabe de tes mots</b><small>${tbArWords().length} mot${tbArWords().length > 1 ? 's' : ''} ajouté${tbArWords().length > 1 ? 's' : ''} depuis la Tablette : je propose la bonne traduction</small></span><span class="tbl-arv-go" aria-hidden="true">›</span></button>` : ''}
     <div class="tbl-chips" role="group" aria-label="Catégories">${chip('all', '📚', 'Tout', all.length)}${C.map(c => chip(c.id, c.icon, c.name, by.get(c.id).length, c.color)).join('')}<button type="button" class="tbl-chip add" data-tbl="cat-new">＋ Catégorie</button></div>`;
   const fold = tbUi().libFold || {};
   const shelves = C.filter(c => S.f === 'all' || c.id === S.f).map(c => {
@@ -44420,6 +45160,7 @@ function tbLibWire(){
     if(act === 'filter'){ S.f = b.dataset.f || 'all'; tbLibRefresh(); return; }
     if(act === 'fold'){ const u = tbUi(); u.libFold = u.libFold || {}; u.libFold[cat] = !u.libFold[cat]; tbSaveUi(); if(S.f !== 'all'){ S.f = 'all'; } tbLibRefresh(); return; }
     if(act === 'new-text'){ tbLibGoNew(cat); return; }
+    if(act === 'ar-review'){ tbArReview(); return; }
     if(act === 'import'){ const fi = document.getElementById('tbkMdFile'); TB.impCat = cat || null; fi.value = ''; fi.click(); return; }
     if(act === 'art-menu'){ const a = tbGet(id); if(a) tbLibMenu(b, tbArtMenuHtml(a)); return; }
     if(act === 'cat-menu'){ const c = tbCats().find(x => x.id === cat); if(c) tbLibMenu(b, tbCatMenuHtml(c)); return; }
@@ -45709,6 +46450,7 @@ function tbOpen(art){
   try{ markUserInteraction(); }catch(e){}
 }
 function tbClose(quiet){
+  try{ TB.tipK = -1; TB.tipW = null; }catch(e){}
   const el = document.getElementById('tbReader');
   if(TB.mode){ tbStopModes(true); }
   if(TB.art && el) tbSaveArtNow();
@@ -45718,23 +46460,35 @@ function tbClose(quiet){
 }
 function tbSaveArt(){ clearTimeout(TB.saveT); TB.saveT = setTimeout(tbSaveArtNow, 500); }
 function tbSaveArtNow(){ clearTimeout(TB.saveT); if(TB.art){ TB.art.readAt = Date.now(); if(!tbPut(TB.art)) TB.mem = TB.art; } }
+function tbNS(){ return TB.nS != null ? TB.nS : TB.sents.length; }       // le nombre de phrases du texte (sans le titre)
 function tbRender(keep){
   const body = document.getElementById('tbBody');
   if(!body) return;
   const anchor = keep ? tbAnchorGet() : null;
   body.innerHTML = tbBuild(TB.art);
   tbLoadImgs(body);
-  TB.spans = [...body.querySelectorAll('.tbw')];
+  // 🔤 1.0.29 : le titre aussi : ses mots se touchent comme ceux du texte (ses phrases viennent après celles du texte)
+  TB.nS = TB.sents.length;
+  const h1 = document.querySelector('#tbPage .tb-h1');
+  if(h1){
+    const t = String(TB.art.title || '').replace(/\s+/g, ' ').trim();
+    let html = '';
+    try{ html = t ? tbSentsHtml(t, [], true).replace(/class="tb-s"/g, 'class="tb-s tb-ts"') : ''; }catch(e){ html = ''; }
+    h1.innerHTML = html || escapeHtml(t);
+  }
+  TB.spans = [];
+  document.querySelectorAll('#tbPage .tbw').forEach(sp => { TB.spans[+sp.dataset.k] = sp; });
   tbRelocateTags();
   tbPaintTags(); tbPaintHits(); if(TB.hintsOn) tbPaintHints(true);
   tbEndHtml();
   tbPaintMark();
+  tbPaintKnown();
   if(anchor) tbAnchorSet(anchor);
 }
 function tbAnchorGet(){
   const sc = document.getElementById('tbScroll'); if(!sc) return null;
   const top = sc.getBoundingClientRect().top + 64;
-  for(const el of sc.querySelectorAll('.tb-s')){ const r = el.getBoundingClientRect(); if(r.bottom > top) return { s:+el.dataset.s, off:r.top - top }; }
+  for(const el of sc.querySelectorAll('#tbBody .tb-s')){ const r = el.getBoundingClientRect(); if(r.bottom > top) return { s:+el.dataset.s, off:r.top - top }; }
   return null;
 }
 function tbAnchorSet(a){
@@ -45765,6 +46519,18 @@ function tbApplyUi(){
   el.style.setProperty('--tb-align', u.align === 'justify' ? 'justify' : 'left');
   el.style.setProperty('--tb-maxw', u.w ? u.w + '%' : '44em');
   el.classList.toggle('tb-full', u.w >= 100);
+  // 🅰️ 1.0.29 : police, gras, espacement, papier, surlignage
+  const F = TB_FONTS[u.font] || TB_FONTS.sans, fw = Math.max(0, Math.min(100, +u.fw || 0)), sp = +u.sp || 0;
+  tbFontLoad(TB_FONTS[u.font] ? u.font : 'sans');
+  el.style.setProperty('--tb-font', F.css);
+  el.style.setProperty('--tb-fw', String(F.v ? Math.round(400 + fw * 4) : (fw >= 70 ? 700 : 400)));
+  el.style.setProperty('--tb-stroke', F.v ? '0px' : (fw && fw < 70 ? (fw / 100 * 0.05).toFixed(3) + 'em' : (fw >= 70 ? ((fw - 70) / 30 * 0.02).toFixed(3) + 'em' : '0px')));
+  el.style.setProperty('--tb-ls', ['0', '.03em', '.06em'][sp] || '0');
+  el.style.setProperty('--tb-ws', ['0', '.12em', '.26em'][sp] || '0');
+  el.style.setProperty('--tb-hov', `rgba(${tbHovRgb(u)},${document.documentElement.getAttribute('data-theme') === 'dark' ? '.36' : '.30'})`);
+  el.classList.toggle('hov-off', u.hov === 'off');
+  el.dataset.paperL = u.paperL || 'auto'; el.dataset.paperD = u.paperD || 'auto';
+  const fo = document.getElementById('tbFwOut'); if(fo) fo.textContent = tbFwLbl(fw);
   const o = document.getElementById('tbFs'); if(o) o.textContent = Math.round(u.fs / 19 * 100) + ' %';
   const wo = document.getElementById('tbWOut'); if(wo) wo.textContent = u.w ? u.w + ' %' : 'Auto';
 }
@@ -45777,18 +46543,77 @@ function tbSetFs(v, save){
   if(a) tbAnchorSet(a);
   if(save !== false) tbSaveUi();
 }
+/* 🅰️ 1.0.29 : la lecture à ton goût — police, gras (en %), début des mots en gras (en %), espacement, papier,
+   surlignage du mot sous le doigt, tes mots soulignés, et des réglages tout prêts. */
+var TB_FONTS = {
+  literata:{ n:'Literata', d:'Journal', css:"'Literata', Georgia, 'Times New Roman', serif", g:'Literata:ital,opsz,wght@0,7..72,200..900;1,7..72,200..900', v:true },
+  georgia:{ n:'Georgia', d:'Livre', css:"Georgia, 'Times New Roman', serif", v:false },
+  sans:{ n:'Inter', d:'Moderne', css:"'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif", g:'Inter:wght@100..900', v:true },
+  lexend:{ n:'Lexend', d:'Facile à lire', css:"'Lexend', 'Inter', system-ui, sans-serif", g:'Lexend:wght@100..900', v:true },
+  atkinson:{ n:'Atkinson', d:'Très lisible', css:"'Atkinson Hyperlegible Next', 'Atkinson Hyperlegible', Verdana, sans-serif", g:'Atkinson+Hyperlegible+Next:ital,wght@0,200..800;1,200..800', g2:'Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700', v:true },
+  andika:{ n:'Andika', d:"Lettres d'école", css:"'Andika', 'Trebuchet MS', sans-serif", g:'Andika:ital,wght@0,400;0,700;1,400;1,700', v:false },
+};
+var TB_HOV = { sky:['Ciel', '96,165,250'], mint:['Menthe', '52,211,153'], lilac:['Lilas', '167,139,250'], peach:['Pêche', '251,146,60'], rose:['Rose', '244,114,182'], grey:['Gris', '148,163,184'] };
+var TB_PAPER_L = { auto:['Gris clair', '#EDF0EC'], white:['Blanc', '#FFFFFF'], cream:['Crème', '#FBF5E6'], sepia:['Sépia', '#F1E4C8'] };
+var TB_PAPER_D = { auto:['Nuit', '#10151E'], black:['Noir', '#000000'], dim:['Gris doux', '#1E1F22'] };
+var TB_PRESETS = {
+  std:{ n:'Standard', font:'sans', fs:19, lh:1.65, fw:0, bio:0, sp:0 },
+  comfort:{ n:'Confort', font:'lexend', fs:22, lh:1.9, fw:10, bio:0, sp:1 },
+  big:{ n:'Très lisible', font:'atkinson', fs:26, lh:1.9, fw:30, bio:0, sp:2 },
+  guided:{ n:'Lecture guidée', font:'sans', fs:21, lh:1.8, fw:0, bio:40, sp:1 },
+};
+function tbFontLoad(key){
+  const f = TB_FONTS[key]; if(!f || !f.g) return;
+  [f.g, f.g2].filter(Boolean).forEach(g => {
+    const id = 'tbf-' + g.split(':')[0].replace(/\W+/g, '');
+    if(document.getElementById(id)) return;
+    const l = document.createElement('link'); l.rel = 'stylesheet'; l.id = id; l.href = 'https://fonts.googleapis.com/css2?family=' + g + '&display=swap';
+    l.onload = () => { try{ const a = tbAnchorGet(); document.fonts.ready.then(() => { if(a) tbAnchorSet(a); }); }catch(e){} };
+    document.head.appendChild(l);
+  });
+}
+function tbHexRgb(h){ const m = /^#?([0-9a-f]{6})$/i.exec(String(h || '')); if(!m) return null; const n = parseInt(m[1], 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255].join(','); }
+function tbHovRgb(u){ u = u || tbUi(); if(u.hov === 'custom') return tbHexRgb(u.hovc) || TB_HOV.sky[1]; return (TB_HOV[u.hov] || TB_HOV.sky)[1]; }
+function tbFwLbl(v){ v = +v || 0; return v ? '+' + v + ' %' : 'Normal'; }
 function tbAaHtml(){
   const u = tbUi(), dark = document.documentElement.getAttribute('data-theme') === 'dark', dx = dxOn();
-  const lh = (v, l) => `<button type="button" data-tb="lh" data-v="${v}" class="${Math.abs(u.lh - v) < 0.01 ? 'on' : ''}">${l}</button>`;
-  return `
+  const tab = u.aaTab || 'texte';
+  const seg = (id, v, l, on) => `<button type="button" data-tb="${id}" data-v="${v}" class="${on ? 'on' : ''}">${l}</button>`;
+  const lh = (v, l) => seg('lh', v, l, Math.abs(u.lh - v) < 0.01);
+  const fk = TB_FONTS[u.font] ? u.font : 'sans', bio = +u.bio || 0, sp = +u.sp || 0, fw = +u.fw || 0, hov = u.hov || 'sky';
+  const papers = dark ? TB_PAPER_D : TB_PAPER_L, pk = (dark ? u.paperD : u.paperL) || 'auto';
+  const tabs = `<div class="tb-aa-tabs" role="tablist">${[['texte', '🅰️ Texte'], ['page', '📄 Page'], ['voix', '🗣️ Voix']].map(([k, l]) => `<button type="button" role="tab" data-tb="aa-tab" data-v="${k}" aria-selected="${tab === k}" class="${tab === k ? 'on' : ''}">${l}</button>`).join('')}</div>`;
+  let body = '';
+  if(tab === 'texte'){
+    body = `
+    <div class="tb-aa-l">Réglages tout prêts</div>
+    <div class="tb-presets">${Object.entries(TB_PRESETS).map(([k, P]) => `<button type="button" class="tb-chip" data-tb="preset" data-v="${k}" style="--ff:${TB_FONTS[P.font].css}">${P.n}</button>`).join('')}</div>
+    <div class="tb-aa-l">Police</div>
+    <div class="tb-fonts" role="group" aria-label="Police du texte">${Object.entries(TB_FONTS).map(([k, F]) => `<button type="button" class="tb-font ${fk === k ? 'on' : ''}" data-tb="font" data-v="${k}" aria-pressed="${fk === k}" style="--ff:${F.css.replace(/"/g, "'")}"><b>Aa</b><span>${F.n}</span><small>${F.d}</small></button>`).join('')}</div>
     <div class="tb-pop-row"><span class="tb-pop-l">Taille</span><button type="button" class="tb-chip" data-tb="fs-" aria-label="Texte plus petit">A−</button><output id="tbFs" class="tb-out"></output><button type="button" class="tb-chip big" data-tb="fs+" aria-label="Texte plus grand">A+</button></div>
     <div class="tb-pop-hint">Ou pince l'écran avec deux doigts (Ctrl + molette sur ordinateur).</div>
-    <div class="tb-pop-row"><span class="tb-pop-l">Texte</span><div class="tb-seg"><button type="button" data-tb="align" data-v="left" class="${u.align === 'justify' ? '' : 'on'}"><span class="tb-al l" aria-hidden="true"><i></i><i></i><i></i></span> À gauche</button><button type="button" data-tb="align" data-v="justify" class="${u.align === 'justify' ? 'on' : ''}"><span class="tb-al j" aria-hidden="true"><i></i><i></i><i></i></span> Justifié</button></div></div>
+    <div class="tb-pop-row"><span class="tb-pop-l">Gras</span><input type="range" class="tb-range" id="tbFw" min="0" max="100" step="5" value="${fw}" aria-label="Épaisseur du texte, en pourcentage"><output class="tb-out" id="tbFwOut">${tbFwLbl(fw)}</output></div>
+    <div class="tb-pop-row"><span class="tb-pop-l">Début en gras</span><div class="tb-seg" role="group" aria-label="Début des mots en gras">${seg('bio', 0, 'Non', !bio)}${seg('bio', 25, '25 %', bio === 25)}${seg('bio', 40, '40 %', bio === 40)}${seg('bio', 55, '55 %', bio === 55)}</div></div>
+    <div class="tb-pop-hint">Le début de chaque mot en gras : l'œil glisse plus vite d'un mot à l'autre (<b class="tb-bio-demo"><b>lec</b>ture <b>gui</b>dée</b>).</div>
+    <div class="tb-pop-row"><span class="tb-pop-l">Espacement</span><div class="tb-seg">${seg('sp', 0, 'Normal', !sp)}${seg('sp', 1, 'Large', sp === 1)}${seg('sp', 2, 'Très large', sp === 2)}</div></div>
+    <div class="tb-pop-row"><span class="tb-pop-l">Interligne</span><div class="tb-seg">${lh(1.5, 'Serré')}${lh(1.65, 'Normal')}${lh(1.9, 'Aéré')}${lh(2.2, 'Très aéré')}</div></div>
+    <button type="button" class="tb-link tb-aa-reset" data-tb="aa-reset">↺ Revenir aux réglages de départ</button>`;
+  } else if(tab === 'page'){
+    body = `
+    <div class="tb-pop-row"><span class="tb-pop-l">Fond</span><div class="tb-seg">${seg('theme', 'light', '☀️ Jour', !dark)}${seg('theme', 'dark', '🌙 Nuit', dark)}</div></div>
+    <div class="tb-pop-row"><span class="tb-pop-l">Papier</span><div class="tb-papers" role="group" aria-label="Couleur du papier">${Object.entries(papers).map(([k, P]) => `<button type="button" class="tb-paper ${pk === k ? 'on' : ''}" data-tb="paper" data-v="${k}" aria-pressed="${pk === k}" title="${P[0]}"><i style="background:${P[1]}"></i><span>${P[0]}</span></button>`).join('')}</div></div>
+    <div class="tb-aa-l">🖊️ Le mot sous ton doigt ou ton stylo s'allume</div>
+    <div class="tb-hovs" role="group" aria-label="Couleur du surlignage">${Object.entries(TB_HOV).map(([k, H]) => `<button type="button" class="tb-hov ${hov === k ? 'on' : ''}" data-tb="hov" data-v="${k}" aria-pressed="${hov === k}" title="${H[0]}"><i style="background:rgba(${H[1]},.38)"></i><span>${H[0]}</span></button>`).join('')}
+      <label class="tb-hov ${hov === 'custom' ? 'on' : ''}" title="Ta couleur"><i style="background:rgba(${tbHexRgb(u.hovc) || '96,165,250'},.38)"></i><span>À toi</span><input type="color" id="tbHovC" value="${/^#[0-9a-f]{6}$/i.test(u.hovc || '') ? u.hovc : '#60a5fa'}" aria-label="Choisir ta couleur de surlignage"></label>
+      <button type="button" class="tb-hov off ${hov === 'off' ? 'on' : ''}" data-tb="hov" data-v="off" aria-pressed="${hov === 'off'}"><i></i><span>Aucun</span></button></div>
+    <div class="tb-pop-row"><span class="tb-pop-l">Mes mots</span><div class="tb-seg">${seg('kn', 1, '┄ Soulignés', u.kn !== false)}${seg('kn', 0, 'Non', u.kn === false)}</div></div>
+    <div class="tb-pop-hint">Les mots déjà dans tes mots sont soulignés en pointillé : touche-les pour leur bulle.</div>
+    <div class="tb-pop-row"><span class="tb-pop-l">Texte</span><div class="tb-seg">${seg('align', 'left', '<span class="tb-al l" aria-hidden="true"><i></i><i></i><i></i></span> À gauche', u.align !== 'justify')}${seg('align', 'justify', '<span class="tb-al j" aria-hidden="true"><i></i><i></i><i></i></span> Justifié', u.align === 'justify')}</div></div>
     <div class="tb-pop-row"><span class="tb-pop-l">Largeur</span><input type="range" class="tb-range" id="tbW" min="40" max="100" step="1" value="${u.w || 100}" aria-label="Largeur de la colonne de texte"><output class="tb-out" id="tbWOut"></output></div>
-    <div class="tb-pop-hint">Glisse pour choisir la largeur du texte : 100 % = tout l'écran. <button type="button" class="tb-link" data-tb="w-auto">Remettre « Auto »</button></div>
-    <div class="tb-pop-row"><span class="tb-pop-l">Interligne</span><div class="tb-seg">${lh(1.5, 'Serré')}${lh(1.65, 'Normal')}${lh(1.9, 'Aéré')}</div></div>
-    <div class="tb-pop-row"><span class="tb-pop-l">Lettrine</span><div class="tb-seg"><button type="button" data-tb="drop" data-v="1" class="${u.drop ? 'on' : ''}">𝐃 Grande initiale</button><button type="button" data-tb="drop" data-v="0" class="${u.drop ? '' : 'on'}">Non</button></div></div>
-    <div class="tb-pop-row"><span class="tb-pop-l">Fond</span><div class="tb-seg"><button type="button" data-tb="theme" data-v="light" class="${dark ? '' : 'on'}">☀️ Jour</button><button type="button" data-tb="theme" data-v="dark" class="${dark ? 'on' : ''}">🌙 Nuit</button></div></div>
+    <div class="tb-pop-hint">100 % = tout l'écran. <button type="button" class="tb-link" data-tb="w-auto">Remettre « Auto »</button></div>
+    <div class="tb-pop-row"><span class="tb-pop-l">Lettrine</span><div class="tb-seg">${seg('drop', 1, '𝐃 Grande initiale', !!u.drop)}${seg('drop', 0, 'Non', !u.drop)}</div></div>`;
+  } else {
+    body = `
     <div class="tb-pop-row"><span class="tb-pop-l">Voix</span><button type="button" class="tb-chip tb-vchip" data-tb="voice">🗣️ ${escapeHtml((tbVoice() && !u.voice ? 'Conteur · ' : '') + (tbVoice() ? tbVoiceName(tbVoice().voice) : 'par défaut'))}</button></div>
     <div class="tb-pop-row"><span class="tb-pop-l">Vitesse</span><button type="button" class="tb-chip" data-tb="rate-" aria-label="Voix plus lente">🐢</button><output class="tb-out" id="tbRate">${readingRate.toFixed(2)}×</output><button type="button" class="tb-chip" data-tb="rate+" aria-label="Voix plus rapide">🐇</button></div>
     <div class="tb-pop-row"><span class="tb-pop-l">Marques</span><div class="tb-seg"><button type="button" data-tb="marks-set" data-v="1" class="${dx ? 'on' : ''}">🫁 Affichées</button><button type="button" data-tb="marks-set" data-v="0" class="${dx ? '' : 'on'}">Masquées</button></div></div>
@@ -45796,11 +46621,13 @@ function tbAaHtml(){
     <div class="tb-pop-row"><span class="tb-pop-l">Lignes</span><button type="button" class="tb-chip" data-tb="fix-text">🧹 Ajuster</button><button type="button" class="tb-chip" data-tb="fix-flow" title="Plus aucun retour à la ligne au milieu des phrases : chaque paragraphe sur une seule ligne, qui suit la largeur de l'écran">⟿ Lignes continues</button></div>
     ${TB.art && TB.art.textOrig != null ? `<div class="tb-pop-hint">Texte ajusté. <button type="button" class="tb-link" data-tb="fix-undo">↩ Remettre comme avant</button></div>` : `<div class="tb-pop-hint">Recolle les lignes coupées : chaque phrase va de la majuscule jusqu'au point.</div>`}
     ${TB.art && TB.art.src === 'Collé' ? `<button type="button" class="tb-btn wide" data-tb="edit">✏️ Modifier le texte</button>` : ''}`;
+  }
+  return tabs + `<div class="tb-aa-body" role="tabpanel">${body}</div>`;
 }
 function tbToggleAa(force){
   const p = document.getElementById('tbAa'); if(!p) return;
   const open = force != null ? force : p.hidden;
-  if(open){ p.innerHTML = tbAaHtml(); tbApplyUi(); }
+  if(open){ const st = p.hidden ? 0 : p.scrollTop; p.innerHTML = tbAaHtml(); tbApplyUi(); p.scrollTop = st; if((tbUi().aaTab || 'texte') === 'texte') Object.keys(TB_FONTS).forEach(tbFontLoad); }
   p.hidden = !open;
   const b = document.querySelector('#tbReader [data-tb="aa"]'); if(b) b.setAttribute('aria-expanded', String(open));
 }
@@ -45821,7 +46648,7 @@ function tbDock(){
     d.innerHTML = `<button type="button" class="tb-pb" data-tb="pl-prev" aria-label="Phrase précédente">⏮</button>
       <button type="button" class="tb-pb main" data-tb="pl-toggle" aria-label="${TB.playing ? 'Pause' : 'Reprendre'}">${TB.playing ? '⏸' : '▶'}</button>
       <button type="button" class="tb-pb" data-tb="pl-next" aria-label="Phrase suivante">⏭</button>
-      <span class="tb-pl-n" id="tbPlN">${Math.min(TB.cur + 1, TB.sents.length)} / ${TB.sents.length}</span>
+      <span class="tb-pl-n" id="tbPlN">${Math.min(TB.cur + 1, tbNS())} / ${tbNS()}</span>
       <button type="button" class="tb-pb" data-tb="rate-" aria-label="Plus lent">🐢</button><span class="tb-pl-r" id="tbRateD">${readingRate.toFixed(2)}×</span><button type="button" class="tb-pb" data-tb="rate+" aria-label="Plus rapide">🐇</button>
       <button type="button" class="tb-pb" data-tb="pl-stop" aria-label="Arrêter la lecture">✕</button>`;
     return;
@@ -45892,7 +46719,7 @@ function tbPlay(from){
 function tbSpeak(i){
   clearTimeout(TB.gapT);
   if(i < 0) i = 0;
-  if(i >= TB.sents.length){
+  if(i >= tbNS()){
     TB.playing = false; TB.mode = ''; tbHl(-1); tbDock();
     TB.art.done = true; TB.art.pct = 1; tbSaveArt();
     tbToast('✓ Texte écouté jusqu\'au bout');
@@ -45900,7 +46727,7 @@ function tbSpeak(i){
   }
   const tok = ++TB.token;
   TB.cur = i; tbHl(i, true);
-  const n = document.getElementById('tbPlN'); if(n) n.textContent = `${i + 1} / ${TB.sents.length}`;
+  const n = document.getElementById('tbPlN'); if(n) n.textContent = `${i + 1} / ${tbNS()}`;
   const s = TB.sents[i];
   tbNarrFr(dxOn() ? dxSpeakText(s) : s, 'fr-FR', () => {
     if(tok !== TB.token || !TB.playing || !document.getElementById('tbReader')) return;
@@ -45946,7 +46773,7 @@ function tbSelfOpen(){
     : "Lis la phrase surlignée à voix haute : les mots s'allument en vert quand tu les dis, et on passe tout seul à la suivante. Tu peux respirer au milieu d'une phrase, rien n'est perdu.";
   sh.innerHTML = `<div class="tb-sh-in">
     <div class="tb-grab" aria-hidden="true"></div>
-    <div class="tb-sh-top"><div><div class="tb-sh-w">Lire à voix haute</div><div class="tb-sh-ipa">${TB.sents.length} phrase${TB.sents.length > 1 ? 's' : ''}</div></div><button type="button" class="tb-ib" data-tb="sheet-x" aria-label="Fermer">✕</button></div>
+    <div class="tb-sh-top"><div><div class="tb-sh-w">Lire à voix haute</div><div class="tb-sh-ipa">${tbNS()} phrase${tbNS() > 1 ? 's' : ''}</div></div><button type="button" class="tb-ib" data-tb="sheet-x" aria-label="Fermer">✕</button></div>
     <div class="tb-info-l">${how}</div>
     <div class="tb-pop-row"><span class="tb-pop-l">Mode</span><div class="tb-seg">
       <button type="button" data-tb="self-mode" data-v="sr" class="${mode === 'sr' ? 'on' : ''}" ${canSR ? '' : 'disabled'}>🔤 Les mots s'allument</button>
@@ -45980,18 +46807,18 @@ async function tbSelfStart(from){
       tbToast("🎙️ Ta voix ne peut pas être gardée ici : on lit sans l'enregistrer.", 3200);
     }
   }
-  tbSelfSent(Math.max(0, Math.min(from || 0, TB.sents.length - 1)));
+  tbSelfSent(Math.max(0, Math.min(from || 0, tbNS() - 1)));
   if(TB.selfKind === 'sr') tbSRStart();
   clearInterval(TB.selfTick); TB.selfTick = setInterval(tbSelfTickFn, 500);
 }
 function tbSelfSay(msg){ TB.selfMsg = msg; const m = document.getElementById('tbSelfMsg'); if(m) m.textContent = msg; }
 function tbSelfHead(){
   const n = document.getElementById('tbSelfN'); if(!n) return;
-  n.textContent = `Phrase ${Math.min(TB.cur + 1, TB.sents.length)} / ${TB.sents.length}` + (TB.rec ? ` · ● ${tbFmtT(tbRecNow())}` : '');
+  n.textContent = `Phrase ${Math.min(TB.cur + 1, tbNS())} / ${tbNS()}` + (TB.rec ? ` · ● ${tbFmtT(tbRecNow())}` : '');
 }
 function tbSelfSent(i){
   if(TB.mode !== 'self') return;
-  if(i >= TB.sents.length) return tbSelfDone();
+  if(i >= tbNS()) return tbSelfDone();
   TB.cur = i; TB.selfRatio = 0; TB.selfStall = false; TB.selfLastHeard = Date.now();
   tbHl(i, true);
   tbSentSpans(i).forEach(sp => sp.classList.remove('ok', 'miss'));
@@ -46394,12 +47221,13 @@ function tbToggleTag(k, opts){
   if(i >= 0){ tags.splice(i, 1); tbPaintTags(); tbSaveArt(); tbEndHtml(); return false; }
   const ks = tbPickToks(k, k2), kz = ks[ks.length - 1];
   const form = multi ? tbPickText(k, kz) : tk.form;
-  const lemma = multi ? tbPickLemma(form, tk) : tbLemmaOf(tk), e = multi ? null : tbEntry(tk.form);
+  const lemma = multi ? tbPickLemma(form, tk) : tbLemmaOf(tk), e = multi ? null : tbEntryCtx(k);
   const j = tags.findIndex(g => dxFold(g.lemma) === dxFold(lemma));
   if(j >= 0) tags.splice(j, 1);                        // même mot : on garde la phrase choisie maintenant
   if(multi) for(let x = tags.length - 1; x >= 0; x--){ const g = tags[x]; if(g.s === tk.s && g.t >= tk.t && (g.t2 == null ? g.t : g.t2) <= TB.toks[kz].t) tags.splice(x, 1); }   // « tandis » seul → « tandis que »
   const tag = { s:tk.s, t:tk.t, w:form, lemma, sent:TB.sents[tk.s], ar:(e && e.ar) || '', def:(e && e.def) || '', at:Date.now() };
   if(multi){ tag.t2 = TB.toks[kz].t; tag.n = ks.length; }
+  else if(tbNounAt(k)) tag.noun = true;                // « l'été », « le marché » : un nom
   tags.push(tag);
   tbPaintTags(k); tbSaveArt(); tbEndHtml();
   try{ playChime([523, 784], { type:'triangle', noteDur:0.05, gap:0.015, volume:0.07 }); }catch(e){}
@@ -46541,10 +47369,10 @@ function tbCtxHtml(tk, kz){
   let i = 0; return s.split(/(\s+)/).map(x => /^\s+$/.test(x) ? ' ' : (x ? mark(x, i++, null) : '')).join('');
 }
 function tbInfoHtml(r, tk){
-  if(!r) return `<div class="tb-info-l">🔎 Je cherche le sens de ce mot…</div>`;
+  if(!r) return `<div class="tb-info-l">🔎 Je cherche le sens${TB.pick && TB.pick.k2 !== TB.pick.k1 ? ' et la traduction' : ' de ce mot'}…</div>`;
   const ar = (r.ar || []).filter(Boolean), defs = (r.defs || []).filter(Boolean);
   if(!ar.length && !defs.length) return `<div class="tb-info-l">Pas trouvé dans le dictionnaire${navigator.onLine === false ? ' (pas de connexion)' : ''}. Tu peux écrire le sens toi-même en l'ajoutant à tes mots.</div>`;
-  return `${ar.length ? `<div class="tb-ar" dir="rtl" lang="ar">${escapeHtml(ar.join('، '))}</div>` : ''}
+  return `${ar.length ? `<div class="tb-ar" dir="rtl" lang="ar">${escapeHtml(ar.join('، '))}</div>${r.arAuto ? `<div class="tb-auto">🌐 traduction automatique : à vérifier</div>` : ''}` : ''}
     ${defs.length ? `<ol class="tb-defs">${defs.slice(0, 4).map(d => `<li>${escapeHtml(d)}</li>`).join('')}</ol>` : ''}
     <div class="tb-src">${r.src === 'lexique' ? '✓ Dans ton lexique' : (r.src ? 'Source : ' + escapeHtml(r.src) : '')}${r.pos ? ` <span>(${escapeHtml(r.pos)})</span>` : ''}</div>`;
 }
@@ -46569,7 +47397,7 @@ function tbPickSet(i, j){
   const P = TB.pick; if(!P) return;
   const all = TB.sentToks[TB.toks[P.k1].s] || [];
   i = Math.max(0, Math.min(i, all.length - 1)); j = Math.max(i, Math.min(j, all.length - 1));
-  if(j - i > 7){ tbToast('Une expression : 8 mots au plus'); return; }
+  if(j - i > 39){ tbToast('40 mots au plus : pour plus long, sélectionne le passage et touche « Traduire »'); return; }
   TB.pickKeep = true;
   tbOpenSheet(all[i], all[j]);
 }
@@ -46597,8 +47425,8 @@ function tbExGrow(id, dir){
   const ta = document.getElementById(id); if(!ta) return;
   const S = TB.exSpan || (TB.exSpan = { a:0, b:0 });
   if(dir === 'reset'){ S.a = S.b = S.s; ta.value = TB.sents[S.s] || ''; ta.focus(); return; }
-  if(dir < 0 && S.a > 0){ S.a--; ta.value = (TB.sents[S.a] || '') + ' ' + ta.value.trim(); }
-  else if(dir > 0 && S.b < TB.sents.length - 1){ S.b++; ta.value = ta.value.trim() + ' ' + (TB.sents[S.b] || ''); }
+  if(dir < 0 && S.a > 0 && S.s < tbNS()){ S.a--; ta.value = (TB.sents[S.a] || '') + ' ' + ta.value.trim(); }
+  else if(dir > 0 && S.b < tbNS() - 1 && S.s < tbNS()){ S.b++; ta.value = ta.value.trim() + ' ' + (TB.sents[S.b] || ''); }
   ta.focus();
 }
 /* 🔎 sélectionner plusieurs mots dans le texte (à la souris, ou en appuyant longuement au doigt) */
@@ -46613,16 +47441,17 @@ function tbSelPick(){
   const ks = TB.spans.map((sp, k) => (sp && r.intersectsNode(sp) ? k : -1)).filter(k => k >= 0);
   if(!ks.length){ off(); return; }
   const s0 = TB.toks[ks[0]].s, inS = ks.filter(k => TB.toks[k].s === s0);
-  const k1 = inS[0], k2 = inS[Math.min(inS.length - 1, 7)];
-  TB.selPick = { k1, k2 };
+  const many = inS.length < ks.length || ks.length > 40;            // 🌐 1.0.29 : plusieurs phrases → on traduit le passage
+  const k1 = inS[0], k2 = inS[Math.min(inS.length - 1, 39)];
+  TB.selPick = many ? { ks } : { k1, k2 };
   let el = pill;
   if(!el){
     el = document.createElement('button'); el.type = 'button'; el.id = 'tbPickPill'; el.className = 'tb-pickpill';
     el.addEventListener('pointerdown', (e) => e.preventDefault());
-    el.addEventListener('click', (e) => { e.stopPropagation(); const P = TB.selPick; if(!P) return; try{ window.getSelection().removeAllRanges(); }catch(err){} el.hidden = true; TB.pickKeep = false; tbOpenSheet(P.k1, P.k2); });
+    el.addEventListener('click', (e) => { e.stopPropagation(); const P = TB.selPick; if(!P) return; try{ window.getSelection().removeAllRanges(); }catch(err){} el.hidden = true; TB.pickKeep = false; if(P.ks) tbTransSheet(P.ks); else tbOpenSheet(P.k1, P.k2); });
     document.getElementById('tbReader').appendChild(el);
   }
-  el.innerHTML = `🔎 <b>${escapeHtml(tbPickText(k1, k2))}</b><span>Traduire · Taguer</span>`;
+  el.innerHTML = many ? `🌐 <b>Traduire la sélection</b><span>${ks.length} mots</span>` : `🔎 <b>${escapeHtml(tbPickText(k1, k2))}</b><span>${k2 !== k1 ? 'Traduire' : 'Traduire · Taguer'}</span>`;
   el.hidden = false;
   const rr = r.getBoundingClientRect(), w = el.offsetWidth, h = el.offsetHeight;
   let top = TB.selTouch ? rr.bottom + 12 : rr.top - h - 10;
@@ -46634,6 +47463,43 @@ function tbSelPick(){
 document.addEventListener('selectionchange', () => { if(!document.getElementById('tbReader')) return; clearTimeout(TB.selT); TB.selT = setTimeout(tbSelPick, 260); });
 document.addEventListener('pointerdown', (e) => { if(document.getElementById('tbReader')) TB.selTouch = e.pointerType === 'touch'; }, true);
 
+/* 🌐 1.0.29 : un passage sur plusieurs phrases → sa traduction (on peut l'écouter dans les deux langues) */
+function tbTransSheet(ks){
+  const sh = document.getElementById('tbSheet'); if(!sh || !ks || !ks.length) return;
+  tbTipClose();
+  TB.sheetK = -8; TB.pick = null;
+  TB.spans.forEach(sp => sp && sp.classList.remove('sel'));
+  ks.forEach(x => { if(TB.spans[x]) TB.spans[x].classList.add('sel'); });
+  const text = ks.map(k => String(TB.toks[k].raw || TB.toks[k].form)).join(' ').replace(/\s+([,.;:!?»)])/g, '$1').replace(/([«(])\s+/g, '$1').trim();
+  TB.trText = text; TB.trAr = '';
+  sh.innerHTML = `<div class="tb-sh-in">
+    <div class="tb-grab" aria-hidden="true"></div>
+    <div class="tb-sh-top"><div><div class="tb-sh-w">Traduction</div><div class="tb-sh-ipa">${ks.length} mots</div></div><button type="button" class="tb-ib" data-tb="sheet-x" aria-label="Fermer">✕</button></div>
+    <blockquote class="tb-ctx" lang="fr">${escapeHtml(text)}</blockquote>
+    <div class="tb-tr" id="tbTrAr"><div class="tb-info-l">🌐 Je traduis…</div></div>
+    <div class="tb-sh-say"><button type="button" class="tb-chip" data-tb="tr-say">🔊 En français</button><button type="button" class="tb-chip" data-tb="tr-say-ar">🔊 En arabe</button></div>
+  </div>`;
+  sh.classList.add('open'); sh.setAttribute('aria-hidden', 'false');
+  tbMtText(text).then(t => {
+    const box = document.getElementById('tbTrAr'); if(!box || TB.sheetK !== -8 || TB.trText !== text) return;
+    TB.trAr = t || '';
+    box.innerHTML = t ? `<div class="tb-tr-ar" dir="rtl" lang="ar">${escapeHtml(t)}</div><div class="tb-auto">🌐 traduction automatique</div>` : `<div class="tb-info-l">Pas de traduction${navigator.onLine === false ? ' (pas de connexion)' : ''}.</div>`;
+  });
+}
+/* 🌐 la phrase du mot, en arabe (sous la phrase) */
+function tbSentAr(btn){
+  const box = document.getElementById('tbSentAr'), tk = TB.toks[TB.sheetK]; if(!box || !tk) return;
+  if(!box.hidden){ box.hidden = true; if(btn) btn.setAttribute('aria-expanded', 'false'); return; }
+  box.hidden = false; if(btn) btn.setAttribute('aria-expanded', 'true');
+  const s = TB.sents[tk.s] || '';
+  box.innerHTML = '<div class="tb-info-l">🌐 Je traduis la phrase…</div>';
+  tbMtText(s).then(t => {
+    if(!box.isConnected || TB.toks[TB.sheetK] !== tk) return;
+    box.innerHTML = t ? `<div class="tb-tr-ar" dir="rtl" lang="ar">${escapeHtml(t)}</div><div class="tb-tr-b"><span class="tb-auto">🌐 traduction automatique</span><button type="button" class="tb-chip sm" data-tb="sent-ar-say">🔊 En arabe</button></div>`
+      : `<div class="tb-info-l">Pas de traduction${navigator.onLine === false ? ' (pas de connexion)' : ''}.</div>`;
+    box.dataset.ar = t || '';
+  });
+}
 function tbOpenSheet(k, k2){
   const tk = TB.toks[k]; if(!tk) return;
   const sh = document.getElementById('tbSheet'); if(!sh) return;
@@ -46646,8 +47512,9 @@ function tbOpenSheet(k, k2){
   ks.forEach(x => { if(TB.spans[x]) TB.spans[x].classList.add('sel'); });
   const form = multi ? tbPickText(k, kz) : tk.form;
   const lemma0 = multi ? tbPickLemma(form, tk) : tbLemmaOf(tk), tagged = (multi ? tbTagIdx(k, kz) : tbTagIdx(k, k)) >= 0;
-  const e = multi ? null : tbEntry(tk.form);
-  const looked = TB.look[dxFold(form)];
+  const e = multi ? null : tbEntryCtx(k), nounCtx = !multi && tbNounAt(k), verbCtx = !multi && !e && tbVerbCtx(k);
+  const lookK = dxFold(form) + (nounCtx ? '#n' : (verbCtx ? '#v' : ''));
+  const looked = TB.look[lookK];
   const lemma = (looked && looked.lemma) || lemma0, known = tbIsKnown(lemma) || tbIsKnown(lemma0);
   const cached = looked || (known && e ? { lemma:e.fr, ar:[e.ar], defs:[e.def], src:'lexique' } : null);
   let rules = '';
@@ -46663,14 +47530,16 @@ function tbOpenSheet(k, k2){
       ${multi ? `<button type="button" class="tb-chip sm" data-tb="pick-l-">− 1er mot</button><button type="button" class="tb-chip sm" data-tb="pick-r-">− dernier</button>` : ''}
       <button type="button" class="tb-chip sm" data-tb="pick-r" ${ib < 0 || ib >= all.length - 1 ? 'disabled' : ''}>＋ mot après</button>
     </div>
-    <div class="tb-sh-say"><button type="button" class="tb-chip" data-tb="say">🔊 Écouter</button><button type="button" class="tb-chip" data-tb="slow">🐢 Lentement</button><button type="button" class="tb-chip" data-tb="say-sent">🗣️ La phrase</button><button type="button" class="tb-chip" data-tb="mark-sent" title="Marquer cette phrase : c'est là que je m'arrête">🔖 Marque-page ici</button></div>
+    <div class="tb-sh-say"><button type="button" class="tb-chip" data-tb="say">🔊 Écouter</button><button type="button" class="tb-chip" data-tb="slow">🐢 Lentement</button><button type="button" class="tb-chip" data-tb="say-sent">🗣️ La phrase</button>${tk.s < tbNS() ? `<button type="button" class="tb-chip" data-tb="mark-sent" title="Marquer cette phrase : c'est là que je m'arrête">🔖 Marque-page ici</button>` : ''}</div>
     <div class="tb-info" id="tbInfo">${tbInfoHtml(cached, tk)}</div>
     <blockquote class="tb-ctx" lang="fr">${tbCtxHtml(tk, kz)}</blockquote>
+    <div class="tb-tr-bar"><button type="button" class="tb-chip" data-tb="sent-ar" aria-expanded="false">🌐 Traduire toute la phrase</button>${all.length > 1 && !(ia === 0 && ib === all.length - 1) ? `<button type="button" class="tb-chip" data-tb="pick-all">↔ Prendre toute la phrase</button>` : ''}</div>
+    <div class="tb-tr" id="tbSentAr" hidden></div>
     <div class="tb-pick-h">👆 Touche les mots de la phrase pour en prendre plus ou moins (ex. « tandis » → « tandis que »).</div>
-    <div class="tb-sh-act">
+    ${ks.length > 8 ? `<div class="tb-pop-hint tb-long">✂️ ${ks.length} mots : c'est pour traduire. Pour l'ajouter à tes mots ou le taguer, garde 8 mots au plus.</div>` : `<div class="tb-sh-act">
       <button type="button" class="tb-btn hl" data-tb="tag" id="tbTagBtn">${tagLbl(tagged)}</button>
       ${tbAddBtnHtml(known, [lemma, lemma0, form])}
-    </div>
+    </div>`}
     <div class="tb-addf" id="tbAddF" hidden></div>
     ${rules ? `<div class="tb-rules">${rules}</div>` : ''}
   </div>`;
@@ -46680,8 +47549,8 @@ function tbOpenSheet(k, k2){
   TB.pickKeep = false;
   if(!cached || (!known && !(cached.defs && cached.defs.length))){
     const fk = dxFold(form);
-    tbLookup(form).then(r => {
-      if(r) TB.look[fk] = r;
+    tbLookup(form, { noun:nounCtx, verbCtx }).then(r => {
+      if(r) TB.look[lookK] = r;
       if(TB.sheetK !== k || !TB.pick || TB.pick.k2 !== kz) return;
       const info = document.getElementById('tbInfo'); if(info) info.innerHTML = tbInfoHtml(r || { ar:[], defs:[] }, tk);
       if(r && r.ipa && (!r.ipaOf || dxFold(r.ipaOf) === fk)){ const ip = document.getElementById('tbIpa'); if(ip) ip.textContent = '/' + r.ipa + '/'; }
@@ -46699,15 +47568,17 @@ function tbDefsJoin(defs){
 function tbAttr(x){ return escapeHtml(String(x == null ? '' : x)).replace(/"/g, '&quot;'); }
 /* le mot de ton lexique qui correspond (forme exacte, pluriel, verbe conjugué…) */
 function tbLexWord(q){
-  const f = dxFold(String(q || '')).replace(/[«»"“”.,;:!?()]/g, ' ').replace(/\s+/g, ' ').trim();
-  if(!f || typeof WORDS === 'undefined') return null;
-  let w = WORDS.find(x => dxFold(x.fr) === f);
-  if(!w){ const e = tbIndex().get(f); if(e && e.known) w = WORDS.find(x => x.fr === e.fr) || null; }
+  const raw = String(q || '').replace(/[«»"“”.,;:!?()]/g, ' ').replace(/\s+/g, ' ').trim();
+  if(!raw || typeof WORDS === 'undefined') return null;
+  const kx = tbKey(raw), f = dxFold(raw);
+  let w = WORDS.find(x => tbKey(x.fr) === kx);                                                  // accents compris
+  if(!w) w = WORDS.find(x => dxFold(x.fr) === f && (kx === f || tbKey(x.fr) === dxFold(x.fr)));   // l'un des deux écrit sans accents
+  if(!w){ const e = tbEntry(raw); if(e && e.known) w = WORDS.find(x => x.fr === e.fr) || null; }
   return w || null;
 }
 function tbAddBtnHtml(known, cands){
   const w = known ? (cands || []).map(tbLexWord).find(Boolean) : null;
-  if(w) return `<button type="button" class="tb-btn see" data-tb="see-word" data-w="${tbAttr(w.fr)}">👁 Déjà dans tes mots · le voir</button>`;
+  if(w) return `<button type="button" class="tb-btn see" data-tb="see-word" data-w="${tbAttr(w.fr)}">👁 Déjà dans tes mots · le voir</button><button type="button" class="tb-btn" data-tb="edit-word" data-w="${tbAttr(w.fr)}">✏️ Modifier</button>`;
   return `<button type="button" class="tb-btn" data-tb="add" ${known ? 'disabled' : ''}>${known ? '✓ Déjà dans tes mots' : '➕ Ajouter à mes mots'}</button>`;
 }
 function tbSeeWord(fr){
@@ -46746,7 +47617,7 @@ function tbPaintMark(){
   el.insertAdjacentHTML('beforebegin', '<button type="button" class="tb-mk" data-tb="mark-pop" aria-label="Ton marque-page">🔖</button>');
 }
 function tbSetMark(si){
-  if(!TB.art || si == null || si < 0 || TB.sents[si] == null) return;
+  if(!TB.art || si == null || si < 0 || TB.sents[si] == null || si >= tbNS()) return;
   const a = tbAnchorGet();
   TB.art.mark = { s:si, at:Date.now() };
   tbSaveArtNow();
@@ -46820,14 +47691,14 @@ function tbAddForm(k){
   const tk = TB.toks[k], box = document.getElementById('tbAddF'); if(!tk || !box) return;
   const P = TB.pick && TB.pick.k1 === k ? TB.pick : { k1:k, k2:k }, multi = P.k2 !== P.k1;
   const form = multi ? tbPickText(P.k1, P.k2) : tk.form;
-  const r = TB.look[dxFold(form)] || {};
+  const r = TB.look[dxFold(form) + (!multi && tbNounAt(k) ? '#n' : (!multi && !tbEntryCtx(k) && tbVerbCtx(k) ? '#v' : ''))] || TB.look[dxFold(form)] || {};
   const lemma = r.lemma || (multi ? tbPickLemma(form, tk) : tbLemmaOf(tk));
   TB.exSpan = { s:tk.s, a:tk.s, b:tk.s };
   box.innerHTML = `<label class="tb-lbl">${multi ? 'Expression' : 'Mot'}<input class="tb-in" id="tbAfFr" value="${escapeHtml(lemma)}"></label>
     <label class="tb-lbl">En arabe<input class="tb-in ar" id="tbAfAr" dir="rtl" lang="ar" value="${escapeHtml((r.ar || [])[0] || '')}" placeholder="الترجمة"></label>
     <label class="tb-lbl">Définition<textarea class="tb-in" id="tbAfDef" rows="2" placeholder="Le sens, avec tes mots">${escapeHtml(tbDefsJoin(r.defs))}</textarea></label>
     <label class="tb-lbl">Phrase d'exemple <span class="tb-lbl-h">(raccourcis-la ou allonge-la comme tu veux)</span><textarea class="tb-in tb-ex" id="tbAfEx" rows="3">${escapeHtml(TB.sents[tk.s] || '')}</textarea></label>
-    <div class="tb-exbar"><button type="button" class="tb-chip sm" data-tb="ex-prev" data-ex="tbAfEx" ${tk.s > 0 ? '' : 'disabled'}>＋ phrase d'avant</button><button type="button" class="tb-chip sm" data-tb="ex-next" data-ex="tbAfEx" ${tk.s < TB.sents.length - 1 ? '' : 'disabled'}>＋ phrase d'après</button><button type="button" class="tb-chip sm" data-tb="ex-reset" data-ex="tbAfEx">↺ La phrase du texte</button></div>
+    <div class="tb-exbar"><button type="button" class="tb-chip sm" data-tb="ex-prev" data-ex="tbAfEx" ${tk.s > 0 && tk.s < tbNS() ? '' : 'disabled'}>＋ phrase d'avant</button><button type="button" class="tb-chip sm" data-tb="ex-next" data-ex="tbAfEx" ${tk.s < tbNS() - 1 ? '' : 'disabled'}>＋ phrase d'après</button><button type="button" class="tb-chip sm" data-tb="ex-reset" data-ex="tbAfEx">↺ La phrase du texte</button></div>
     <button type="button" class="tb-btn pri wide" data-tb="add-go">➕ Ajouter à mes mots</button>`;
   box.hidden = false;
   box.scrollIntoView({ block:'nearest', behavior:'smooth' });
@@ -46895,7 +47766,7 @@ async function tbCarnetLookups(){
     if(g.added || tbIsKnown(g.lemma) || (g.def && g.ar) || g.look) continue;
     g.look = 'busy';
     const st = document.querySelector(`#tbSheet .tb-cr[data-i="${tags.indexOf(g)}"] .tb-cr-st`); if(st) st.textContent = '🔎…';
-    const r = await tbLookup(g.w);
+    const r = await tbLookup(g.w, { noun:!!g.noun });
     g.look = 'done';
     if(r){
       if(r.lemma && dxFold(r.lemma) !== dxFold(g.lemma) && !tbEntry(g.w)) g.lemma = r.lemma;
@@ -46952,6 +47823,8 @@ function tbWire(el){
       return;
     }
     if(Date.now() - (TB.tapAt || 0) < 700) return;
+    if(e.target.closest('#tbTip')) return;
+    if(TB.tipK >= 0) tbTipClose();
     if(e.target.closest('#tbSheet, #tbAa, #tbMk, #tbRes, .tb-top, .tb-dock, .tb-hud')) return;
     const mk = document.getElementById('tbMk'); if(mk && !mk.hidden) tbToggleMark(false);
     if(TB.sheetK !== -1) tbCloseSheet();
@@ -46961,6 +47834,8 @@ function tbWire(el){
     if(e.target.id === 'tbQ'){ clearTimeout(TB.qT); const v = e.target.value; TB.qT = setTimeout(() => tbSearch(v), 140); return; }
     if(e.target.id === 'tbRpBar' && TB.replay){ const P = TB.replay; try{ P.au.currentTime = (+e.target.value / 1000) * (P.dur || 0); P.ended = false; }catch(err){} tbReplayUi(); return; }
     if(e.target.id === 'tbW'){ const a = tbAnchorGet(); tbUi().w = +e.target.value; tbApplyUi(); if(a) tbAnchorSet(a); clearTimeout(TB.wT); TB.wT = setTimeout(tbSaveUi, 300); return; }
+    if(e.target.id === 'tbFw'){ const a = tbAnchorGet(); tbUi().fw = +e.target.value; tbApplyUi(); if(a) tbAnchorSet(a); clearTimeout(TB.wT); TB.wT = setTimeout(tbSaveUi, 300); return; }
+    if(e.target.id === 'tbHovC'){ const u = tbUi(); u.hov = 'custom'; u.hovc = e.target.value; tbApplyUi(); clearTimeout(TB.wT); TB.wT = setTimeout(tbSaveUi, 300); const L = e.target.closest('.tb-hov'); if(L){ document.querySelectorAll('#tbAa .tb-hov').forEach(x => x.classList.toggle('on', x === L)); const i = L.querySelector('i'); if(i) i.style.background = `rgba(${tbHovRgb(u)},.38)`; } return; }
     if(e.target.id === 'tbImgW' && TB.imgSel >= 0){ tbImgSet(TB.imgSel, { w:+e.target.value }); return; }
     if(e.target.id === 'tbImgCap' && TB.imgSel >= 0){ tbImgSet(TB.imgSel, { cap:e.target.value.trim() }); return; }
     const f = e.target.dataset && e.target.dataset.cr;
@@ -46976,6 +47851,7 @@ function tbWire(el){
     const max = Math.max(1, sc.scrollHeight - sc.clientHeight), pct = Math.min(1, sc.scrollTop / max);
     const p = document.getElementById('tbProg'); if(p) p.style.width = (pct * 100).toFixed(1) + '%';
     const dy = sc.scrollTop - TB.lastY; TB.lastY = sc.scrollTop;
+    if(TB.tipK >= 0) tbTipPlace();
     const finding = !document.getElementById('tbFind').hidden || !document.getElementById('tbAa').hidden;
     if(dy > 6 && sc.scrollTop > 90 && !finding) el.classList.add('top-hide'); else if(dy < -6 || sc.scrollTop < 40) el.classList.remove('top-hide');
     clearTimeout(TB.scrollT);
@@ -46990,6 +47866,22 @@ function tbWire(el){
   }, { passive:true });
   // 🤏 pincer pour zoomer (deux doigts), Ctrl + molette sur ordinateur
   const pts = new Map(), dist = () => { const [a, b] = [...pts.values()]; return Math.hypot(a.x - b.x, a.y - b.y) || 1; };
+  // 🖊️ 1.0.29 : le mot sous ton doigt, ton stylo ou ta souris s'allume (couleur claire, au choix dans Aa)
+  const H = { el:null, raf:0, x:0, y:0, t:0 };
+  const hovSet = (sp) => { if(sp === H.el) return; if(H.el) H.el.classList.remove('hov'); H.el = sp; if(sp) sp.classList.add('hov'); };
+  const hovRun = () => {
+    H.raf = 0;
+    if(tbUi().hov === 'off' || pts.size > 1 || TB.pinch){ hovSet(null); return; }
+    const t = document.elementFromPoint(H.x, H.y), sp = t && t.closest ? t.closest('.tbw') : null;
+    hovSet(sp && sc.contains(sp) ? sp : null);
+  };
+  const hovAt = (x, y) => { clearTimeout(H.t); H.x = x; H.y = y; if(!H.raf) H.raf = requestAnimationFrame(hovRun); };
+  const hovLater = (ms) => { clearTimeout(H.t); H.t = setTimeout(() => hovSet(null), ms); };
+  sc.addEventListener('pointermove', (e) => { if(!e.isPrimary) return; hovAt(e.clientX, e.clientY); }, { passive:true });
+  sc.addEventListener('pointerdown', (e) => { if(e.pointerType !== 'mouse') hovAt(e.clientX, e.clientY); }, { passive:true });
+  sc.addEventListener('touchmove', (e) => { if(e.touches.length === 1) hovAt(e.touches[0].clientX, e.touches[0].clientY); else hovSet(null); }, { passive:true });
+  ['pointerup', 'pointercancel', 'touchend'].forEach(t => sc.addEventListener(t, (e) => { if(e.pointerType !== 'mouse') hovLater(1600); }, { passive:true }));
+  sc.addEventListener('pointerleave', (e) => { if(e.pointerType === 'mouse' || e.pointerType === 'pen') hovLater(e.pointerType === 'pen' ? 900 : 0); });
   sc.addEventListener('pointerdown', (e) => {
     // 🖼 la poignée d'une image : on la redimensionne au doigt
     const hd = e.target.closest && e.target.closest('.tb-fig-h');
@@ -47024,7 +47916,7 @@ function tbWire(el){
     if(s0.multi || TB.pinch || Date.now() < TB.noTapUntil) return;
     if(Math.hypot(e.clientX - s0.x, e.clientY - s0.y) > 12 || Date.now() - s0.t > 1200) return;
     if(e.button > 0 || (e.target.closest && e.target.closest('[data-tb], .tb-fig, a, input, button, textarea, #tbSheet'))) return;
-    const w = e.target.closest('.tbw') || (e.target.closest('#tbBody') ? tbNearestWord(e.clientX, e.clientY) : null);
+    const w = e.target.closest('.tbw') || (e.target.closest('#tbBody, .tb-h1') ? tbNearestWord(e.clientX, e.clientY) : null);
     if(!w || !sc.contains(w)) return;
     TB.tapAt = Date.now();
     tbTapWord(+w.dataset.k);
@@ -47045,6 +47937,8 @@ function tbWire(el){
 document.addEventListener('keydown', (e) => {
   if(!document.getElementById('tbReader')) return;
   if(e.key === 'Escape'){
+    if(document.querySelector('.wcp-ov')) return;                   // d'abord la fiche du mot (elle se ferme toute seule)
+    if(TB.tipK >= 0){ tbTipClose(); e.preventDefault(); return; }
     if(TB.sheetK !== -1){ tbCloseSheet(); e.preventDefault(); return; }
     const aa = document.getElementById('tbAa'); if(aa && !aa.hidden){ tbToggleAa(false); e.preventDefault(); return; }
     const mk = document.getElementById('tbMk'); if(mk && !mk.hidden){ tbToggleMark(false); e.preventDefault(); return; }
@@ -47075,16 +47969,34 @@ function tbAction(id, btn, e){
     case 'mark': tbToggleMark(); return;
     case 'mark-pop': tbToggleMark(true); return;
     case 'mark-here': tbSetMark(tbFirstVisibleSent()); return;
-    case 'mark-sent': { const tk = TB.toks[TB.sheetK]; if(tk){ tbCloseSheet(); tbSetMark(tk.s); } return; }
+    case 'mark-sent': { const tk = TB.toks[TB.sheetK]; if(tk){ tbCloseSheet(); tbSetMark(tk.s < tbNS() ? tk.s : 0); } return; }
     case 'mark-go': tbGoMark(); return;
     case 'mark-del': tbDelMark(); return;
     case 'see-word': tbSeeWord(btn.dataset.w); return;
+    case 'edit-word': { const w = tbLexWord(btn.dataset.w); if(w){ tbCloseSheet(); wordEditPopup(w); } return; }
+    case 'tip-x': tbTipClose(); return;
+    case 'tip-say': if(TB.tipW) tbSay(TB.tipW.fr); return;
+    case 'tip-see': { const w = TB.tipW; tbTipClose(); if(w) wordCardPopup(w, { note:'📇 Dans tes mots' }); return; }
+    case 'tip-edit': { const w = TB.tipW; tbTipClose(); if(w) wordEditPopup(w); return; }
+    case 'tip-del': { const c = document.getElementById('tbTipConf'); if(c){ c.hidden = false; tbTipPlace(); } return; }
+    case 'tip-del-no': { const c = document.getElementById('tbTipConf'); if(c) c.hidden = true; return; }
+    case 'tip-del-go': { const w = TB.tipW; tbTipClose(); if(w) lexDeleteUi(w); return; }
+    case 'tip-more': { const k = TB.tipK; tbTipClose(); if(k >= 0) tbOpenSheet(k); return; }
+    case 'aa-tab': tbUi().aaTab = btn.dataset.v || 'texte'; tbSaveUi(); tbToggleAa(true); return;
+    case 'font': { const a = tbAnchorGet(); tbUi().font = btn.dataset.v; tbSaveUi(); tbApplyUi(); if(a){ tbAnchorSet(a); try{ document.fonts.ready.then(() => tbAnchorSet(a)); }catch(err){} } tbToggleAa(true); return; }
+    case 'bio': { tbUi().bio = +btn.dataset.v || 0; tbSaveUi(); tbRender(true); tbToggleAa(true); return; }
+    case 'sp': { const a = tbAnchorGet(); tbUi().sp = +btn.dataset.v || 0; tbSaveUi(); tbApplyUi(); if(a) tbAnchorSet(a); tbToggleAa(true); return; }
+    case 'paper': { const dk = document.documentElement.getAttribute('data-theme') === 'dark'; tbUi()[dk ? 'paperD' : 'paperL'] = btn.dataset.v; tbSaveUi(); tbApplyUi(); tbToggleAa(true); return; }
+    case 'hov': { tbUi().hov = btn.dataset.v; tbSaveUi(); tbApplyUi(); tbToggleAa(true); if(btn.dataset.v !== 'off') tbToast('🖊️ Passe ton doigt ou ton stylo sur le texte', 1800); return; }
+    case 'kn': { tbUi().kn = btn.dataset.v === '1'; tbSaveUi(); tbPaintKnown(); tbToggleAa(true); return; }
+    case 'preset': { const P0 = TB_PRESETS[btn.dataset.v]; if(!P0) return; const a = tbAnchorGet(), u = tbUi(); ['font', 'fs', 'lh', 'fw', 'bio', 'sp'].forEach(x => { u[x] = P0[x]; }); tbSaveUi(); tbApplyUi(); tbRender(true); if(a) tbAnchorSet(a); tbToggleAa(true); tbToast('🅰️ ' + P0.n, 1400); return; }
+    case 'aa-reset': { const a = tbAnchorGet(), u = tbUi(); ['font', 'fw', 'bio', 'sp', 'paperL', 'paperD', 'hov', 'hovc'].forEach(x => { delete u[x]; }); u.fs = 19; u.lh = 1.65; u.kn = true; tbSaveUi(); tbApplyUi(); tbRender(true); if(a) tbAnchorSet(a); tbToggleAa(true); return; }
     case 'fs-': tbSetFs(tbUi().fs - 1); return;
     case 'fs+': tbSetFs(tbUi().fs + 1); return;
     case 'align': { const a = tbAnchorGet(); tbUi().align = btn.dataset.v === 'justify' ? 'justify' : 'left'; tbSaveUi(); tbApplyUi(); if(a) tbAnchorSet(a); tbToggleAa(true); return; }
     case 'w-auto': { const a = tbAnchorGet(); tbUi().w = 0; tbSaveUi(); tbApplyUi(); if(a) tbAnchorSet(a); tbToggleAa(true); return; }
     case 'lh': { const a = tbAnchorGet(); tbUi().lh = parseFloat(btn.dataset.v); tbSaveUi(); tbApplyUi(); if(a) tbAnchorSet(a); tbToggleAa(true); return; }
-    case 'theme': { const v = btn.dataset.v; if(v !== (document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light')){ const t = document.getElementById('themeToggle'); if(t) t.click(); else applyTheme(v); } tbToggleAa(true); return; }
+    case 'theme': { const v = btn.dataset.v; if(v !== (document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light')){ const t = document.getElementById('themeToggle'); if(t) t.click(); else applyTheme(v); } tbApplyUi(); tbToggleAa(true); return; }
     case 'rate-': case 'rate+': {
       const i = READING_RATES.indexOf(readingRate), j = Math.max(0, Math.min(READING_RATES.length - 1, (i < 0 ? 2 : i) + (id === 'rate+' ? 1 : -1)));
       readingRate = READING_RATES[j]; saveReadingRate(readingRate);
@@ -47134,6 +48046,11 @@ function tbAction(id, btn, e){
     case 'say': if(TB.pick && TB.toks[TB.pick.k1]) tbSay(tbPickText(TB.pick.k1, TB.pick.k2)); else if(TB.toks[TB.sheetK]) tbSay(TB.toks[TB.sheetK].form); return;
     case 'slow': if(TB.pick && TB.toks[TB.pick.k1]) tbSay(tbPickText(TB.pick.k1, TB.pick.k2), true); else if(TB.toks[TB.sheetK]) tbSay(TB.toks[TB.sheetK].form, true); return;
     case 'pick': tbPickTap(+btn.dataset.k); return;
+    case 'pick-all': { const P = TB.pick; if(!P) return; const all = TB.sentToks[TB.toks[P.k1].s] || []; tbPickSet(0, Math.min(all.length - 1, 39)); return; }
+    case 'sent-ar': tbSentAr(btn); return;
+    case 'sent-ar-say': { const b = document.getElementById('tbSentAr'); if(b && b.dataset.ar) speak(b.dataset.ar, 'ar-SA'); return; }
+    case 'tr-say': if(TB.trText) tbNarrFr(TB.trText, 'fr-FR', null, readingRate); return;
+    case 'tr-say-ar': if(TB.trAr) speak(TB.trAr, 'ar-SA'); return;
     case 'pick-l': case 'pick-r': case 'pick-l-': case 'pick-r-': {
       const P = TB.pick; if(!P) return;
       const all = TB.sentToks[TB.toks[P.k1].s] || [], a = all.indexOf(P.k1), b = all.indexOf(P.k2);
@@ -47181,11 +48098,11 @@ function tbAction(id, btn, e){
   const okFn = playCorrectSound, koFn = playWrongSound;
   playCorrectSound = function(){
     okFn.apply(this, arguments); window.__answerFx = { ok:true, t:Date.now() }; fxHideKeyboard();
-    if(fxOn){ fxSparkleAtPointer(); if(!celeb.skip && celebEach()) setTimeout(() => foxCelebrate(), 90); }   // par défaut, le renard ne sort qu'aux séries
+    if(fxOn){ fxSparkleAtPointer(); }   // 🦊 la mascotte sort au rythme choisi (foxOnAnswer)
   };
   playWrongSound = function(){
     koFn.apply(this, arguments); window.__answerFx = { ok:false, t:Date.now() }; fxHideKeyboard();
-    if(fxOn){ fxShake(380); if(celebEach()) foxCameo('oops', pick(CAMEO_OOPS), { minGap:7000 }); }
+    if(fxOn){ fxShake(380); if(celebEach() && foxCfg().visits) foxCameo('oops', pick(CAMEO_OOPS), { minGap:7000 }); }
   };
   const msFn = mascotMilestone;
   mascotMilestone = function(n){
@@ -47196,10 +48113,10 @@ function tbAction(id, btn, e){
     else if(n === 10){ fxStorm(true, 2000); setTimeout(() => fxExplosion(null, null, true), 450); fxBigText('⚡ ÉLECTRIQUE !', '#FFD23F'); }
     else if(n === 5){ fxFireworks(3); fxBigText('🎆 x5 COMBO !', '#FF5DA2'); }
     else if(n === 3){ fxBurst(fx.w / 2, fx.h, { count:50, angle:-Math.PI / 2, spread:0.6, speed:1100, speedMin:500, gravity:900, colors:['#FFD23F', '#FF8A1F', '#FF4D5E'], shape:'spark', size:6 }); fxBigText('🔥 EN FEU !', '#FF8A1F'); }
-    if(celebFoxAt(n)) celebStreak(n);   // 🦊 le renard sort : 5, 10, 20, 30… d'affilée
+    // 🦊 1.0.29 : le renard ne sort plus ici, mais au rythme choisi dans ☰ › Mascotte (foxOnAnswer)
   };
   const gcFn = launchGravityConfetti;
-  launchGravityConfetti = function(){ gcFn.apply(this, arguments); if(fxOn){ fxFireworks(5); if(celebEach()) setTimeout(() => foxCameo('party', 'Session réussie ! 🎉 Je suis fier de toi', { force:true, edge:'bottom' }), 400); } };
+  launchGravityConfetti = function(){ gcFn.apply(this, arguments); if(fxOn){ fxFireworks(5); if(foxCfg().on && foxCfg().visits) setTimeout(() => foxCameo('party', 'Session réussie ! 🎉 Je suis fier de toi', { force:true, edge:'bottom' }), 400); } };
 })();
 // De temps en temps, le renard passe la tête pour motiver (jamais pendant une correction)
 setInterval(() => {
@@ -47208,7 +48125,7 @@ setInterval(() => {
   const since = Date.now() - cameoLast;
   const inQuiz = document.body.classList.contains('quiz-active');
   const recentAnswer = Date.now() - (window.__answerFx.t || 0) < 3000;
-  if(inQuiz && !recentAnswer && since > rnd(70000, 130000) && celebEach()) foxCameo('wave', pick(CAMEO_MOTIV));   // par défaut, pendant un exercice il ne sort qu'aux séries
+  if(inQuiz && !recentAnswer && since > rnd(70000, 130000) && celebEach() && foxCfg().visits) foxCameo('wave', pick(CAMEO_MOTIV));   // par défaut, pendant un exercice il ne sort qu'aux séries
   else if(isHomeScreen && !inQuiz && since > 180000) foxCameo('wave', pick(CAMEO_HOME), { edge:pick(['left', 'right', 'bl', 'br']) });
 }, 12000);
 setTimeout(() => { if(fxOn && isHomeScreen && !document.body.classList.contains('quiz-active')) foxCameo('wave', pick(CAMEO_HOME), { edge:pick(['bl', 'br', 'right']) }); }, 6500);
