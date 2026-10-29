@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- 🏷️ Version de l'appli : augmentée automatiquement par publier-site.cmd à chaque publication -->
-<meta name="app-version" content="1.0.39" data-date="2026-10-29">
+<meta name="app-version" content="1.0.40" data-date="2026-10-30">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <title>VocabVISION — Vocabulaire Français ↔ Arabe</title>
 <script>
@@ -22660,6 +22660,7 @@ const COLOR_PRESETS = {
 /* ============ 🆕 NOUVEAUTÉS — pour que tout ce qui a été ajouté reste découvrable ============ */
 const WHATS_NEW_SECTIONS = [
   { icon:'🆕', title:'Nouveautés', items:[
+    { name:'📄 Des PDF bien mis en page', desc:"L'import des PDF retrouve l'ordre de lecture d'après la page (deux colonnes, un titre au-dessus, une image à côté du texte), reconnaît les titres (plus grands ou en gras), les listes à puces, les lignes de tableau (« mot · sens »), l'italique et le gras. Les images gardent leur taille et leur place (à gauche, à droite ou au centre) avec leur légende ; les images de fond et les logos répétés sont laissés de côté. Une phrase coupée en bas d'une colonne ou d'une page continue au même paragraphe. Pour un PDF déjà importé : réimporte-le (« Remplacer l'import précédent »)." },
     { name:'➕ Les mots d\'une fiche dans mes blocs, d\'un seul coup', desc:"Sur une fiche qui donne des mots (« Éviter / Préférer », « Expression / Sens », une liste de formules…) : « ➕ Ajouter ces mots à mes blocs ». Chaque mot arrive avec son arabe, sa définition (le sens donné par la fiche) et sa phrase d'exemple, traduite en arabe en entier. Tu relis, décoches, corriges, puis tout part dans tes blocs, et dans un bloc au nom de la fiche, à jouer tout de suite." },
     { name:'👆 Appuyer sur un mot et glisser', desc:"Au doigt aussi : appuie sur un mot et glisse de côté pour sélectionner plusieurs mots (glisser vers le haut ou le bas fait toujours défiler). « 🌐 Traduire » : la traduction d'un coup, puis « ➕ Les mots un par un » pour les ajouter tous à tes blocs, ou « ➕ Ajouter l'expression »." },
     { name:'📑 Choisir les pages d\'un PDF', desc:"À l'import d'un PDF, ses pages s'affichent en petit : garde-les toutes, touche celles que tu veux, ou écris-les (« 1-3, 6, 9 »). Seules ces pages arrivent dans la Tablette." },
@@ -48459,49 +48460,73 @@ async function tbPdfLib(){
   throw new Error(navigator.onLine === false ? 'il faut une connexion la première fois (pour le lecteur de PDF)' : 'le lecteur de PDF n’a pas pu se charger');
 }
 function tbPdfNorm(s){ return String(s || '').replace(/­/g, '').replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').replace(/ﬁ/g, 'fi').replace(/ﬂ/g, 'fl').replace(/ﬀ/g, 'ff').replace(/ﬃ/g, 'ffi').replace(/ﬄ/g, 'ffl'); }
-/* les morceaux de texte d'une page → des lignes (dans l'ordre de lecture du fichier) */
-function tbPdfLines(items){
+/* les morceaux de texte d'une page → des lignes (avec leur taille, gras, italique, et leur boîte sur la page).
+   🧭 1.0.40 : deux morceaux sur la même ligne mais très éloignés (deux colonnes, deux cases d'un tableau) restent
+   séparés : l'ordre de lecture est retrouvé ensuite d'après la mise en page, pas d'après l'ordre du fichier. */
+function tbPdfLines(items, fonts){
+  fonts = fonts || {};
   const lines = []; let cur = null;
-  const close = () => { if(cur){ cur.text = cur.text.replace(/\s+/g, ' ').trim(); if(cur.text) lines.push(cur); } cur = null; };
+  const close = () => {
+    if(cur){ cur.text = cur.text.replace(/\s+/g, ' ').trim(); if(cur.text){ cur.bold = cur.n > 0 && cur.nb >= cur.n * 0.7; cur.ital = cur.n > 0 && cur.ni >= cur.n * 0.7; lines.push(cur); } }
+    cur = null;
+  };
   for(const it of items || []){
     if(!it || typeof it.str !== 'string') continue;
     const tr = it.transform || [1, 0, 0, 1, 0, 0];
     const size = Math.hypot(tr[2], tr[3]) || Math.abs(tr[3]) || it.height || 10, x = tr[4], y = tr[5];
-    const str = tbPdfNorm(it.str);
+    const str = tbPdfNorm(it.str), f = fonts[it.fontName] || {};
     if(str.trim()){
-      if(cur && (Math.abs(y - cur.y) > Math.max(size, cur.size) * 0.55 || x < cur.xEnd - Math.max(size, cur.size) * 6)) close();
-      if(!cur) cur = { y, x, xEnd:x, size, text:'', n:0 };
-      else {
-        const gap = x - cur.xEnd;
-        if(gap > size * 0.12 && !/\s$/.test(cur.text) && !/^\s/.test(str)) cur.text += ' ';
-      }
-      cur.text += str; cur.n += str.length;
+      const S = cur ? Math.max(size, cur.size) : size;
+      if(cur && (cur.wide || Math.abs(y - cur.y) > S * 0.55 || x < cur.xEnd - S * 6 || x > cur.xEnd + S * 1.4)) close();   // un grand blanc (tabulation, case suivante) : un autre morceau
+      if(!cur) cur = { y, x, xEnd:x, size, text:'', n:0, nb:0, ni:0, top:y + size * 0.8, bot:y - size * 0.22 };
+      else { const gap = x - cur.xEnd; if(gap > size * 0.12 && !/\s$/.test(cur.text) && !/^\s/.test(str)) cur.text += ' '; }
+      cur.text += str;
+      const len = str.replace(/\s/g, '').length; cur.n += len; if(f.bold) cur.nb += len; if(f.italic) cur.ni += len;
       cur.xEnd = Math.max(cur.xEnd, x + (it.width || str.length * size * 0.5));
       cur.size = Math.max(cur.size, size); cur.x = Math.min(cur.x, x);
-    } else if(cur && str && !/\s$/.test(cur.text)) cur.text += ' ';
+      cur.top = Math.max(cur.top, y + size * 0.8); cur.bot = Math.min(cur.bot, y - size * 0.22);
+    } else if(cur && str){ if(!/\s$/.test(cur.text)) cur.text += ' '; if((it.width || 0) > size * 1.1) cur.wide = true; }
     if(it.hasEOL) close();
   }
   close();
   return lines;
 }
-/* les images d'une page, avec leur hauteur sur la page (pour les remettre à leur place dans le texte) */
+/* gras / italique de chaque police (d'après son nom : « Calibri-Bold »…) */
+async function tbPdfFonts(page, tc){
+  const out = {}, names = [...new Set(((tc && tc.items) || []).map(it => it && it.fontName).filter(Boolean))];
+  await Promise.all(names.map(n => new Promise(res => {
+    let done = false; const fin = (f) => { if(done) return; done = true;
+      const st = ((tc && tc.styles) || {})[n] || {}, nm = String((f && (f.name || f.loadedName)) || '') + ' ' + String(st.fontFamily || '');
+      out[n] = { bold:!!(f && (f.bold || f.black)) || /bold|black|heavy|semibold|demibold|extrabold|[-_,]bd\b|[-_,]b\b/i.test(nm), italic:!!(f && f.italic) || /italic|oblique|[-_,]it\b/i.test(nm) };
+      res(); };
+    setTimeout(() => fin(null), 1500);
+    try{ page.commonObjs.get(n, fin); }catch(e){ fin(null); }
+  })));
+  return out;
+}
+/* les images d'une page, avec leur boîte sur la page (pour les remettre à leur place, à leur taille) */
 async function tbPdfImages(page, lib, seen){
   const out = [];
   let ops = null; try{ ops = await page.getOperatorList(); }catch(e){ return out; }
   const O = lib.OPS || {}, mul = (a, b) => [a[0] * b[0] + a[2] * b[1], a[1] * b[0] + a[3] * b[1], a[0] * b[2] + a[2] * b[3], a[1] * b[2] + a[3] * b[3], a[0] * b[4] + a[2] * b[5] + a[4], a[1] * b[4] + a[3] * b[5] + a[5]];
-  let m = [1, 0, 0, 1, 0, 0]; const st = [];
+  let m = [1, 0, 0, 1, 0, 0]; const st = [], dots = []; let pend = null;
+  const box = (x0, x1, y0, y1) => { const xs = [], ys = []; [[x0, y0], [x1, y0], [x0, y1], [x1, y1]].forEach(([x, y]) => { xs.push(m[0] * x + m[2] * y + m[4]); ys.push(m[1] * x + m[3] * y + m[5]); }); return [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)]; };
   for(let i = 0; i < ops.fnArray.length; i++){
     const fn = ops.fnArray[i], a = ops.argsArray[i];
+    // • les puces dessinées (petits ronds ou carrés pleins), pour reconnaître les listes
+    if(fn === O.constructPath){ const mm = a && a[2]; pend = mm && mm.length >= 4 && isFinite(mm[0]) ? box(mm[0], mm[1], mm[2], mm[3]) : null; continue; }
+    if(fn === O.fill || fn === O.eoFill || fn === O.fillStroke || fn === O.eoFillStroke){ if(pend){ const w = pend[1] - pend[0], h = pend[3] - pend[2]; if(w >= 0 && w <= 9 && h >= 0 && h <= 9 && Math.abs(w - h) <= 2.5) dots.push({ x:(pend[0] + pend[1]) / 2, y:(pend[2] + pend[3]) / 2 }); } pend = null; continue; }
+    if(fn === O.endPath || fn === O.stroke || fn === O.closeStroke) pend = null;
     if(fn === O.save) st.push(m);
     else if(fn === O.restore){ if(st.length) m = st.pop(); }
     else if(fn === O.transform && a) m = mul(m, a);
     else if(fn === O.paintFormXObjectBegin){ st.push(m); if(a && Array.isArray(a[0]) && a[0].length === 6) m = mul(m, a[0]); }
     else if(fn === O.paintFormXObjectEnd){ if(st.length) m = st.pop(); }
     else if(fn === O.paintImageXObject || fn === O.paintInlineImageXObject || fn === O.paintJpegXObject){
-      const wU = Math.hypot(m[0], m[1]), hU = Math.hypot(m[2], m[3]);
-      if(wU < 40 || hU < 30) continue;                                    // une puce, un trait : on passe
-      const top = Math.max(m[5], m[5] + m[1] + m[3], m[5] + m[3], m[5] + m[1]);
-      out.push({ top, wU, hU, id:fn === O.paintInlineImageXObject ? null : a && a[0], inline:fn === O.paintInlineImageXObject ? a && a[0] : null });
+      const xs = [m[4], m[4] + m[0], m[4] + m[2], m[4] + m[0] + m[2]], ys = [m[5], m[5] + m[1], m[5] + m[3], m[5] + m[1] + m[3]];
+      const l = Math.min(...xs), r = Math.max(...xs), b = Math.min(...ys), t = Math.max(...ys), wU = r - l, hU = t - b;
+      if(wU < 36 || hU < 28 || wU / hU > 18 || hU / wU > 18) continue;           // une puce, un trait, un filet : on passe
+      out.push({ l, r, t, b, top:t, wU, hU, id:fn === O.paintInlineImageXObject ? null : a && a[0], inline:fn === O.paintInlineImageXObject ? a && a[0] : null });
     }
   }
   for(const im of out){
@@ -48514,7 +48539,8 @@ async function tbPdfImages(page, lib, seen){
     });
     im.blob = await tbPdfImgBlob(obj);
   }
-  return out.filter(x => x.blob);
+  const res = out.filter(x => x.blob); res.dots = dots;
+  return res;
 }
 async function tbPdfImgBlob(img){
   if(!img) return null;
@@ -48538,33 +48564,138 @@ async function tbPdfImgBlob(img){
 }
 /* une ligne qui revient en haut ou en bas de beaucoup de pages (titre courant, numéro de page) */
 function tbPdfSig(t){ return dxFold(t).replace(/\d+/g, '#').replace(/\s+/g, ' ').trim(); }
-/* les lignes d'une page → titres et paragraphes (HTML), avec les images à leur place */
-function tbPdfPageHtml(pg, B, G){
-  const parts = []; let para = null, prev = null;
-  const flush = () => { if(para && para.t.trim()) parts.push({ top:para.top, h:`<${para.tag}>${escapeHtml(para.t.replace(/\s+/g, ' ').trim())}</${para.tag}>` }); para = null; };
-  const right = Math.max(...pg.lines.map(l => l.xEnd), 0), left = Math.min(...pg.lines.map(l => l.x), 1e9);
-  pg.lines.forEach(l => {
-    const t = l.text;
-    const head = l.size >= B * 1.22 && t.length <= 140 && !/[.;,]$/.test(t);
-    const tag = head ? (l.size >= B * 1.55 ? 'h2' : 'h3') : 'p';
-    const bullet = /^([•●▪◦‣∙·\-–—*]|\d{1,2}[.)]|[a-z][.)])\s+/.test(t) && !head;
-    let brk = !para || para.tag !== tag || bullet;
-    if(!brk && prev){
-      const gap = prev.y - l.y;
-      if(gap < 0 || gap > (tag === 'p' ? G * 1.45 : G * 2.2)) brk = true;                   // un blanc, ou une autre colonne
-      else if(tag === 'p' && /[.!?:»"”…]$/.test(prev.text) && (prev.xEnd < right - B * 2.5 || l.x > left + B * 1.2)) brk = true;   // fin de phrase et ligne courte, ou alinéa
+/* 🧭 1.0.40 : l'ordre de lecture d'une page, d'après sa mise en page (« XY-cut ») : on coupe la page là où il y a
+   du blanc — d'abord entre deux colonnes (de haut en bas), sinon entre deux bandes horizontales — et on recommence
+   dans chaque morceau. Un titre au-dessus de deux colonnes vient donc d'abord, puis toute la colonne de gauche, puis
+   celle de droite ; une image à côté d'un texte vient avant ce texte. Les cases d'un tableau restent ligne par ligne. */
+function tbPdfOrder(boxes, B, pageW){
+  const out = [];
+  const med = (a) => { if(!a.length) return 0; const s = a.slice().sort((x, y) => x - y); return s[Math.floor(s.length / 2)]; };
+  const span = (S) => [Math.min(...S.map(x => x.l)), Math.max(...S.map(x => x.r))];
+  const cut = (L, depth, cl, cr) => {                       // cl / cr : les bords de la colonne (pour reconnaître une ligne courte)
+    const leaf = () => { L.slice().sort((a, b) => (Math.abs(b.y - a.y) > B * 0.3 ? b.y - a.y : a.l - b.l)).forEach(x => { x.rl = cl; x.rr = cr; out.push(x); }); };
+    if(L.length <= 1 || depth > 60){ leaf(); return; }
+    // un blanc vertical (entre deux colonnes, ou entre une image et le texte à côté)
+    const xs = L.map(x => [x.l, x.r]).sort((a, b) => a[0] - b[0]);
+    let vB = null, reach = xs[0][1];
+    for(let i = 1; i < xs.length; i++){ const g = xs[i][0] - reach; if(g > B * 1.1 && (!vB || g > vB.g)) vB = { g, at:(reach + xs[i][0]) / 2 }; reach = Math.max(reach, xs[i][1]); }
+    // une bande de blanc horizontale : le plus grand écart
+    const ys = L.map(x => [x.t, x.b]).sort((a, b) => b[0] - a[0]);
+    let hB = null, low = ys[0][1];
+    for(let i = 1; i < ys.length; i++){ const g = low - ys[i][0]; if(g > B * 0.3 && (!hB || g > hB.g)) hB = { g, at:(low + ys[i][0]) / 2 }; low = Math.min(low, ys[i][1]); }
+    const hcut = () => {
+      if(!hB) return false;
+      const A = L.filter(x => (x.t + x.b) / 2 > hB.at), Z = L.filter(x => (x.t + x.b) / 2 <= hB.at);
+      if(!A.length || !Z.length) return false;
+      cut(A, depth + 1, cl, cr); cut(Z, depth + 1, cl, cr); return true;
+    };
+    if(vB){
+      const A = L.filter(x => (x.l + x.r) / 2 < vB.at), Z = L.filter(x => (x.l + x.r) / 2 >= vB.at);
+      const onlyImg = (S) => S.every(x => x.img);
+      // une image seule d'un côté : d'abord séparer ce qui est au-dessus (un titre…) s'il y a un blanc
+      if((onlyImg(A) || onlyImg(Z)) && hB && hB.g > B * 0.6 && hcut()) return;
+      const lines = (S) => S.filter(x => !x.img), wide = (S) => med(lines(S).map(x => x.r - x.l)) > pageW * 0.2 || lines(S).length === 0;
+      // deux vraies colonnes de texte (ou une image d'un côté) : on lit tout à gauche, puis tout à droite.
+      // Des cases étroites alignées (un tableau) : on garde la lecture ligne par ligne.
+      if(A.length && Z.length && ((wide(A) && wide(Z)) || !lines(A).length || !lines(Z).length)){
+        const a = span(A), z = span(Z);
+        if(!lines(Z).length && lines(A).length){ cut(Z, depth + 1, z[0], z[1]); cut(A, depth + 1, a[0], a[1]); }   // une image à droite du texte : avant lui (elle flotte à côté)
+        else { cut(A, depth + 1, a[0], a[1]); cut(Z, depth + 1, z[0], z[1]); }
+        return;
+      }
     }
-    if(brk){ flush(); para = { tag, t:t, top:l.y + l.size }; }
-    else if(/[\p{L}]-$/u.test(para.t) && /^\p{Ll}/u.test(t)) para.t = para.t.slice(0, -1) + t;   // « appren- » + « dre »
-    else para.t += ' ' + t;
-    prev = l;
+    if(hcut()) return;
+    leaf();
+  };
+  if(boxes.length){ const a = span(boxes); cut(boxes, 0, a[0], a[1]); }
+  return out;
+}
+const TB_PDF_BUL = /^(?:[•●▪◦‣∙·■□➢➤►▸✓✔\-–—*]\s+|[\uF000-\uF0FF]\s*)/;   // (les puces de Word arrivent souvent comme des caractères privés)
+const TB_PDF_CAP = /^(fig(ure)?\.?|image|photo|illustration|source|tableau|graphique|carte|schéma|document)\s*\d*\s*[:.\-–—]?/i;
+/* une page → titres, paragraphes, listes, images (à leur taille, à leur place, avec leur légende) */
+function tbPdfPageHtml(pg, B, G){
+  const W = pg.w || 600, PL = pg.left || 0;
+  const lines = pg.lines.map(l => Object.assign(l, { l:l.x, r:l.xEnd, t:l.top, b:l.bot }));
+  // une image de fond (sous le texte) : on ne la garde pas
+  const imgs = (pg.imgs || []).filter(im => !(im.wU * im.hU > W * (pg.h || 800) * 0.5 && lines.filter(l => l.y < im.t && l.y > im.b && l.x < im.r && l.xEnd > im.l).length > 3))
+    .map(im => Object.assign(im, { img:true, y:im.t }));
+  // la légende d'une image (juste en dessous, plus petite, ou « Figure 2 : … ») : rattachée à l'image avant de chercher l'ordre
+  const used = new Set();
+  imgs.forEach(im => {
+    const c = lines.filter(l => !used.has(l) && l.top <= im.b + B * 0.8 && im.b - l.top < B * 2.6 && l.x >= im.l - B * 2 && l.x <= im.r && l.text.length <= 220)
+      .sort((a, b) => b.y - a.y)[0];
+    if(!c || !(TB_PDF_CAP.test(c.text) || c.size <= B * 0.93 || c.ital)) return;
+    let cap = c.text, last = c; used.add(c);
+    lines.filter(l => !used.has(l) && Math.abs(l.size - c.size) < 0.3 && l.y < last.y && last.y - l.y < G * 1.3 && l.x >= im.l - B * 2 && l.x <= im.r).sort((a, b) => b.y - a.y).forEach(l => { if(cap.length < 300 && last.y - l.y < G * 1.3){ cap += ' ' + l.text; used.add(l); last = l; } });
+    im.cap = cap.replace(/\s+/g, ' ').trim(); im.b = Math.min(im.b, last.bot);
   });
+  // les puces dessinées : la ligne juste à droite d'un petit rond est un point de liste
+  (pg.dots || []).forEach(d => { const l = lines.find(z => z.x > d.x && z.x - d.x < B * 3.5 && Math.abs(d.y - (z.y + z.size * 0.3)) < z.size * 0.6); if(l) l.bul = true; });
+  const order = tbPdfOrder(lines.filter(l => !used.has(l)).concat(imgs), B, W);
+  const txtL = Math.min(...lines.map(l => l.x), PL + W * 0.1), txtR = Math.max(...lines.map(l => l.xEnd), PL + W * 0.9), CW = Math.max(60, txtR - txtL);
+  const parts = []; let para = null, prev = null;
+  const flush = () => {
+    if(para && para.t.trim()){
+      const x = escapeHtml(para.t.replace(/\s+/g, ' ').trim());
+      const y = para.tag === 'p' || para.tag === 'li' ? (para.bold ? `<b>${x}</b>` : x) : x;
+      parts.push(para.tag === 'li' ? `<ul><li>${y}</li></ul>` : para.tag === 'p' && para.ital ? `<p><i>${y}</i></p>` : `<${para.tag}>${y}</${para.tag}>`);
+    }
+    para = null;
+  };
+  const isHead = (l, i) => {
+    const t = l.text, words = t.split(' ').length;
+    if(t.length > 140 || words > 18 || /^[\d\s.,;:()\-–—/%€$]+$/.test(t)) return 0;
+    if(l.size >= B * 1.5) return 2;
+    if(l.size >= B * 1.18 && !/[,;]$/.test(t)) return 3;
+    const nx = order[i + 1];
+    const continues = nx && !nx.img && !/[.!?:»"”]$/.test(t) && /^\p{Ll}/u.test(nx.text) && Math.abs(nx.size - l.size) < 0.6 && (!l.bold || nx.bold) && l.y - nx.y < G * 1.4;
+    if(continues) return 0;
+    if(nx && !nx.img && Math.abs(nx.y - l.y) < B * 0.3) return 0;                    // la 1re case d'un tableau
+    if(l.bold && words <= 14 && !/[.,;]$/.test(t) && (!nx || nx.img || !nx.bold || nx.size > l.size + 0.5)) return 3;
+    if(/\p{L}{3}/u.test(t) && t === t.toUpperCase() && /\p{Lu}/u.test(t) && t.length <= 80 && words <= 10 && !/[.,;]$/.test(t)) return 3;
+    return 0;
+  };
+  for(let i = 0; i < order.length; i++){
+    const o = order[i];
+    if(o.img){
+      flush();
+      const w = Math.max(15, Math.min(100, Math.round((o.r - o.l) / CW * 100)));
+      const beside = lines.some(l => l.bot < o.t - B * 0.2 && l.top > o.b + B * 0.2 && (l.xEnd < o.l - B * 0.3 || l.x > o.r + B * 0.3));   // du texte à côté de l'image
+      const al = beside && w <= 62 ? ((o.l + o.r) / 2 < txtL + CW / 2 ? 'l' : 'r') : 'c';
+      const cap = o.cap || '';
+      parts.push(`<img data-img="${o.sid}" data-w="${w}" data-al="${al}"${cap ? ` data-cap="${tbAttr(cap.replace(/\s+/g, ' ').trim().slice(0, 300))}"` : ''} alt="">`);
+      prev = null;
+      continue;
+    }
+    const l = o, t = l.text;
+    if(prev && para && Math.abs(prev.y - l.y) < B * 0.3 && l.x > prev.xEnd + B * 1.2){ para.t += '  ·  ' + t; para.row = true; if(!l.bold) para.bold = false; prev = l; continue; }   // une case de tableau : sur la même ligne
+    const h = isHead(l, i);
+    const bm = TB_PDF_BUL.exec(t), num = /^(\d{1,2}|[a-z])[.)]\s+\S/.test(t);
+    const tag = h ? 'h' + h : (bm || l.bul ? 'li' : 'p');
+    const right = o.rr != null ? o.rr : txtR, left = o.rl != null ? o.rl : txtL;
+    let brk = !para || !prev;
+    if(!brk){
+      const gap = prev.y - l.y;
+      const goesOn = para.tag === 'p' && tag === 'p' && !/[.!?:»"”…]$/.test(prev.text) && /^\p{Ll}/u.test(t) && Math.abs(l.size - prev.size) < 0.6;   // une phrase coupée en bas d'une colonne
+      if(tag === 'li' || (num && para.tag !== 'h2' && para.tag !== 'h3')) brk = true;
+      else if(goesOn && gap < -B * 0.3) brk = false;
+      else if(para.tag !== tag && !(para.tag === 'li' && tag === 'p' && l.x > para.x0 + B * 0.4 && gap < G * 1.35)) brk = true;   // la suite d'une puce (retrait)
+      else if(gap < -B * 0.3 || gap > (tag === 'p' || tag === 'li' ? G * 1.32 : G * 2.2)) brk = true;                           // un blanc, une autre colonne
+      else if(para.row) brk = true;
+      else if(Math.abs(l.size - prev.size) > 1.2 && tag === 'p') brk = true;
+      else if(!!l.ital !== !!para.ital && tag === 'p' && l.text.length > 30) brk = true;
+      else if(tag === 'p' && /[.!?:»"”…]$/.test(prev.text) && (prev.xEnd < right - B * 2.5 || l.x > left + B * 1.1)) brk = true;     // fin de phrase et ligne courte, ou alinéa
+    }
+    if(brk){ flush(); para = { tag, t:bm ? t.slice(bm[0].length) : t, top:l.top, x0:l.x, ital:!!l.ital && tag === 'p', bold:!!l.bold }; }
+    else {
+      if(!l.bold) para.bold = false;
+      if(/[\p{L}]-$/u.test(para.t) && /^\p{Ll}/u.test(t)) para.t = para.t.slice(0, -1) + t;      // « appren- » + « dre »
+      else para.t += ' ' + t;
+    }
+    prev = l;
+  }
   flush();
-  (pg.imgs || []).forEach(im => parts.push({ top:im.top + 0.01, h:im.html }));
-  // les images : avant le premier morceau qui est plus bas qu'elles (l'ordre des textes reste celui du fichier)
-  const txt = parts.filter(p => !/^<img/.test(p.h)), ims = parts.filter(p => /^<img/.test(p.h)).sort((a, b) => b.top - a.top);
-  ims.forEach(im => { const k = txt.findIndex(p => p.top < im.top); if(k < 0) txt.push(im); else txt.splice(k, 0, im); });
-  return txt.map(p => p.h).join('\n');
+  return parts.join('\n').replace(/<\/ul>\n<ul>/g, '');
 }
 /* ============ 📄 1.0.38 : CHOISIR SES PAGES, ET LIRE LES PDF SCANNÉS (OCR) ============
    À l'import d'un PDF, une fenêtre montre ses pages en petit : on garde toutes les pages, ou seulement celles qu'on
@@ -48809,31 +48940,32 @@ async function tbPdfBuild(P, v, prog){
         const page = await P.doc.getPage(p), vw = page.view || [0, 0, 600, 800];
         let tc = null; try{ tc = await page.getTextContent(); }catch(e){}
         const imgs = (await tbPdfImages(page, P.lib, seen)) || [];
-        pages.push({ n:p, lines:tbPdfLines(tc && tc.items), imgs, top:vw[3], bottom:vw[1], h:vw[3] - vw[1] });
+        const fonts = await tbPdfFonts(page, tc);
+        pages.push({ n:p, lines:tbPdfLines(tc && tc.items, fonts), imgs, dots:imgs.dots || [], top:vw[3], bottom:vw[1], h:vw[3] - vw[1], left:vw[0], w:vw[2] - vw[0] });
         try{ page.cleanup(); }catch(e){}
       }
     }
   } finally { if(ocr){ try{ await ocr.terminate(); }catch(e){} } }
   prog.set(1, 1, '✍️ Je mets le texte en forme…'); prog.sub('');
   const tp = pages.filter(pg => !pg.ocr), NTall = P.chars ? P.chars.filter(n => n >= 25).length : 0, NT = Math.max(tp.length, NTall);
-  if(NT >= 3){
+  if(NT >= 2){
     let cnt = P.edge && P.edge.size ? P.edge : null;                  // compté sur TOUT le document (même les pages pas choisies)
     if(!cnt){ cnt = new Map(); tp.forEach(pg => { const zone = pg.h * 0.09; const S = new Set(); pg.lines.forEach(l => { if(l.y > pg.top - zone || l.y < pg.bottom + zone){ const s = tbPdfSig(l.text); if(s && !S.has(s)){ S.add(s); cnt.set(s, (cnt.get(s) || 0) + 1); } } }); }); }
-    tp.forEach(pg => { const zone = pg.h * 0.09; pg.lines = pg.lines.filter(l => !((l.y > pg.top - zone || l.y < pg.bottom + zone) && ((cnt.get(tbPdfSig(l.text)) || 0) >= Math.max(3, NT * 0.4) || /^[-–—\s]*(page\s*)?\d{1,4}(\s*(\/|sur|of)\s*\d{1,4})?[-–—\s]*$/i.test(l.text)))); });
+    tp.forEach(pg => { const zone = pg.h * 0.09; pg.lines = pg.lines.filter(l => !((l.y > pg.top - zone || l.y < pg.bottom + zone) && ((cnt.get(tbPdfSig(l.text)) || 0) >= (NT === 2 ? 2 : Math.max(3, NT * 0.4)) || /^[-–—\s]*(page\s*)?\d{1,4}(\s*(\/|sur|of)\s*\d{1,4})?[-–—\s]*$/i.test(l.text)))); });
   } else tp.forEach(pg => { pg.lines = pg.lines.filter(l => !/^[-–—\s]*(page\s*)?\d{1,4}[-–—\s]*$/i.test(l.text)); });
   const sz = new Map(); tp.forEach(pg => pg.lines.forEach(l => { const k = Math.round(l.size * 2) / 2; sz.set(k, (sz.get(k) || 0) + l.text.length); }));
   const top1 = [...sz.entries()].sort((a, b) => b[1] - a[1])[0], B = top1 ? top1[0] : 11;
-  const gaps = []; tp.forEach(pg => { for(let i = 1; i < pg.lines.length; i++){ const g = pg.lines[i - 1].y - pg.lines[i].y; if(g > B * 0.8 && g < B * 2.6 && Math.abs(pg.lines[i].size - B) < 1) gaps.push(g); } });
+  const gaps = []; tp.forEach(pg => { for(let i = 1; i < pg.lines.length; i++){ const g = pg.lines[i - 1].y - pg.lines[i].y; if(g > B * 0.8 && g < B * 2.6 && Math.abs(pg.lines[i].size - B) < 1 && Math.abs(pg.lines[i].x - pg.lines[i - 1].x) < B * 4) gaps.push(g); } });
   gaps.sort((a, b) => a - b);
   const G = gaps.length ? gaps[Math.floor(gaps.length / 2)] : B * 1.25;
   let nImg = 0;
   for(const pg of tp){
     for(const im of pg.imgs){
-      if((im.id && (seen.get(im.id) || 0) >= 3) || nImg >= 60){ im.html = ''; continue; }
+      if((im.id && (seen.get(im.id) || 0) >= 3) || nImg >= 100){ im.sid = ''; continue; }
       let id = null; try{ id = await tbImgAdd(im.blob); }catch(e){}
-      im.html = id ? `<img data-img="${id}" alt="">` : ''; if(id) nImg++;
+      im.sid = id || ''; if(id) nImg++;
     }
-    pg.imgs = pg.imgs.filter(im => im.html);
+    pg.imgs = pg.imgs.filter(im => im.sid);
     pg.html = tbPdfPageHtml(pg, B, G);
   }
   // les parties : le sommaire du PDF (signets), limité aux pages choisies ; sinon un texte (ou des groupes de 10 pages)
@@ -48866,7 +48998,7 @@ async function tbPdfBuild(P, v, prog){
   const byN = new Map(pages.map(pg => [pg.n, pg]));
   const book = { title:P.title, author:P.author, chapters:[], imgs:nImg, pages:P.N, ocr:nOcr, conf:nOcr ? Math.round(conf / nOcr) : 0, stopped:done.length < sel.length };
   groups.forEach(g => {
-    const html = g.ps.map(n => (byN.get(n) || {}).html || '').join('\n');
+    const html = tbPdfJoinPages(g.ps.map(n => (byN.get(n) || {}).html || ''));
     const body = new DOMParser().parseFromString('<body>' + html + '</body>', 'text/html').body;
     let blocks = tbDomToBlocks(body, {});
     if(blocks.length && /^h[23]$/.test(blocks[0].t) && dxFold(tbBlockText(blocks[0]).replace(/\s+/g, ' ').trim()) === dxFold(g.title)) blocks = blocks.slice(1);
@@ -48878,6 +49010,15 @@ async function tbPdfBuild(P, v, prog){
     parts.forEach((bl, i) => book.chapters.push({ title:(g.title || P.title).slice(0, 150) + (parts.length > 1 ? ` (${i + 1}/${parts.length})` : ''), blocks:bl, text:tbBlocksText(bl), ocr:ocrG }));
   });
   return book;
+}
+/* une page qui finit au milieu d'une phrase : la page suivante la continue (même paragraphe) */
+function tbPdfJoinPages(L){
+  let out = '';
+  L.filter(Boolean).forEach(h => {
+    if(out && /[^.!?:»"”…]<\/p>\s*$/.test(out) && /^\s*<p>(?:<[bi]>)?\p{Ll}/u.test(h) && !/<\/[bi]><\/p>\s*$/.test(out)) out = out.replace(/<\/p>\s*$/, ' ') + h.replace(/^\s*<p>/, '');
+    else out += (out ? '\n' : '') + h;
+  });
+  return out;
 }
 /* ranger le livre dans la bibliothèque (comme un .epub) */
 function tbBookStore(file, kind, bid, bk, v, olds){
