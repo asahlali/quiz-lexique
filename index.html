@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- 🏷️ Version de l'appli : augmentée automatiquement par publier-site.cmd à chaque publication -->
-<meta name="app-version" content="1.0.34" data-date="2026-10-29">
+<meta name="app-version" content="1.0.35" data-date="2026-10-29">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <title>VocabVISION — Vocabulaire Français ↔ Arabe</title>
 <script>
@@ -1361,6 +1361,11 @@
   .pk-mini span{ font-family:'Changa',sans-serif; color:var(--purple); font-size:15px; }
   .pk-mini.peek-playing{ border-color:var(--purple); }
   .pk-none{ color:var(--text-dim); text-align:center; padding:10px; }
+  .pk-play{ margin:18px 0 4px; padding:14px; border-radius:18px; background:linear-gradient(135deg, rgba(109,74,255,.08), rgba(236,72,153,.07)); border:1px solid var(--border); }
+  .pk-play-h{ font-weight:800; font-size:15px; color:var(--text); margin-bottom:6px; }
+  .pk-play-n{ font-size:12.5px; color:var(--text-dim); margin-bottom:8px; }
+  .pk-play-g{ display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:8px; }
+  .pk-pm{ padding:12px 12px !important; font-weight:800 !important; }
   @media (prefers-reduced-motion:reduce){ .pk-cw{ animation:none; } .pk-slide.in-r, .pk-slide.in-l{ animation:none; } }
 
   .flip-card{ perspective:1000px; height:130px; cursor:pointer; }
@@ -2450,6 +2455,16 @@
   @media (min-width:640px){ .wcp-ov{ align-items:center; } }
   .wcp{ width:min(100%, 460px); max-height:calc(100dvh - 20px); overflow-y:auto; background:var(--surface, #fff); color:var(--text); border-radius:24px; padding:16px 18px 18px; box-shadow:0 24px 60px -20px rgba(0,0,0,.55); transform:translateY(14px); transition:transform .18s; text-align:left; font-family:'Nunito','Inter',sans-serif; }
   .wcp-ov.show .wcp{ transform:none; }
+  .wcp-ov.instant{ transition:none !important; }
+  .wcp{ touch-action:pan-y; }
+  .wcp.nav-in-r{ animation:wcpInR .28s cubic-bezier(.2,.8,.2,1); } .wcp.nav-in-l{ animation:wcpInL .28s cubic-bezier(.2,.8,.2,1); }
+  @keyframes wcpInR{ from{ opacity:.2; transform:translateX(42px); } } @keyframes wcpInL{ from{ opacity:.2; transform:translateX(-42px); } }
+  .wcp-nav{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin:-2px 0 10px; }
+  .wcp-nav span{ font-size:12.5px; font-weight:800; color:var(--text-dim); font-variant-numeric:tabular-nums; }
+  .wcp-nav button{ border:1px solid var(--border); background:var(--surface-sunken); color:var(--text); border-radius:999px; padding:8px 14px; font:800 13.5px 'Nunito','Inter',sans-serif; cursor:pointer; }
+  .wcp-nav button:disabled{ opacity:.35; cursor:default; }
+  .wcp-back{ display:block; width:100%; text-align:left; margin:0 0 10px; border:1px dashed rgba(124,58,237,.5); background:rgba(124,58,237,.07); color:var(--purple); border-radius:12px; padding:8px 12px; font:800 13.5px 'Nunito','Inter',sans-serif; cursor:pointer; }
+  @media (prefers-reduced-motion:reduce){ .wcp.nav-in-r, .wcp.nav-in-l{ animation:none; } }
   .wcp-note{ display:inline-block; font-size:12.5px; font-weight:800; color:#16A34A; background:rgba(34,197,94,.12); border-radius:999px; padding:4px 10px; margin-bottom:8px; }
   .wcp-head{ display:flex; align-items:flex-start; gap:8px; }
   .wcp-fr{ flex:1; font-size:clamp(24px, 6vw, 30px); font-weight:900; line-height:1.15; color:var(--ink, var(--text)); overflow-wrap:anywhere; }
@@ -2719,6 +2734,27 @@
   .trxv-bar{ display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin:12px 0 10px; }
   .trxv-del{ color:#DC2626 !important; }
   .trxv-text{ max-height:none !important; text-align:left; }
+  .speak-ovr{ display:block; margin:10px auto 0; }
+  /* ⚡ 1.0.35 : transcription au rythme de l'audio */
+  .trx-seg.fut{ display:none; }
+  .trx-seg .tw{ transition:opacity .18s ease; }
+  .trx-seg .tw.hid{ opacity:0; }
+  .trx-wait{ color:var(--text-dim); font-style:italic; font-size:14px; margin:6px 0; }
+  /* ➕ 1.0.35 : d'autres mots de la phrase */
+  .wt-oth{ margin-top:10px; padding-top:10px; border-top:1px dashed var(--border); }
+  .wt-oth-h{ font-size:13px; font-weight:800; color:var(--text); margin-bottom:6px; } .wt-oth-h small{ color:var(--text-dim); font-weight:600; }
+  .wt-oth-c{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px; }
+  .wt-oc{ border:1px solid var(--border); background:var(--surface-sunken); color:var(--text); border-radius:999px; padding:5px 10px; font:700 13px 'Nunito','Inter',sans-serif; cursor:pointer; }
+  .wt-oc.on{ background:rgba(124,58,237,.14); border-color:var(--purple); color:var(--purple); }
+  .wt-oc.on::before{ content:'✓ '; }
+  .wt-oc.done{ opacity:.55; } .wt-oc.done::before{ content:'✓ '; }
+  .wt-oth-go{ width:100%; }
+  .wt-oth-st{ font-size:12.5px; font-weight:700; color:var(--text-dim); margin-top:6px; min-height:1em; }
+  .tb-oth-c{ display:flex; flex-wrap:wrap; gap:8px; margin:12px 0; }
+  .tb-oc.on{ background:rgba(124,58,237,.16) !important; border-color:var(--purple) !important; color:var(--purple) !important; }
+  .tb-oc.on::before{ content:'✓ '; }
+  .tb-oc small{ opacity:.7; font-weight:600; }
+  .tb-othgo{ top:auto !important; bottom:calc(env(safe-area-inset-bottom, 0px) + 96px) !important; background:linear-gradient(135deg,#7C3AED,#DB2777) !important; box-shadow:0 10px 26px rgba(124,58,237,.45) !important; }
   /* 📕 1.0.33 : importer un livre .epub, une BD .cbz */
   .tbl-book{ display:flex; flex-direction:column; gap:2px; padding:10px 12px; border-radius:14px; background:var(--surface-sunken); border:1px solid var(--border); margin:6px 0 8px; }
   .tbl-book b{ font-size:16px; } .tbl-book small{ font-size:12.5px; color:var(--text-dim); font-weight:700; }
@@ -5560,6 +5596,7 @@ function renderBlockWordsPeek(words, title, onBack, src){
       <div class="pk-st" id="pkSt"></div>
     </div>
     <div id="peekResultsWrap" style="margin-top:6px;"></div>
+    <div class="pk-play" id="pkPlay"></div>
   `;
   const stOf = (w) => pkStatus(w, src0);
   const all = () => words.map((w, i) => ({ w, i, s:stOf(w) })).filter(x => !pk.gone.has(x.i));
@@ -5588,10 +5625,13 @@ function renderBlockWordsPeek(words, title, onBack, src){
     if(st) st.innerHTML = [['all', `Tous · ${A.length}`], ['new', `🆕 Nouveaux · ${c.new}`], ['go', `🔥 En cours · ${c.go}`], ['ok', `✅ Maîtrisés · ${c.ok}`]].map(x => `<button type="button" class="pk-s ${pk.st === x[0] ? 'on' : ''}" data-pkst="${x[0]}">${x[1]}</button>`).join('');
   }
   function stopAuto(){ pk.auto = false; pk.tok++; try{ window.speechSynthesis.cancel(); }catch(e){} }
+  // l'ordre affiché (« Par statut » : colonne par colonne) — la fiche passe d'un mot à l'autre dans cet ordre
+  function shownOrder(){ const L = items(); return peekView === 'board' ? ['new', 'go', 'ok'].flatMap(s => L.filter(x => x.s === s)) : L; }
   function openWord(i){
     const w = words[i]; if(!w) return;
     stopAuto();
-    wordCardPopup(w, { onClose:() => { if(!WORDS.includes(w)) pk.gone.add(i); if(document.getElementById('peekResultsWrap')) render(); } });
+    const order = shownOrder(), list = order.map(x => x.w), idx = order.findIndex(x => x.i === i);
+    wordCardPopup(w, { list, index:idx, onClose:() => { words.forEach((x, j) => { if(!WORDS.includes(x)) pk.gone.add(j); }); if(document.getElementById('peekResultsWrap')) render(); } });
   }
   function slideTo(k, dir){
     const L = items(); if(!L.length) return;
@@ -5605,7 +5645,18 @@ function renderBlockWordsPeek(words, title, onBack, src){
       const nx = () => setTimeout(() => { if(!still()) return; slideTo(pk.slide + 1, 'r'); setTimeout(autoStep, 250); }, 1400);
       if(x.w.ar) speak(x.w.ar, 'ar-SA', () => { if(still()) nx(); }); else nx(); }, 500); });
   }
+  function renderPlay(){
+    const box = document.getElementById('pkPlay'); if(!box) return;
+    const L = items(), filtered = L.length !== all().length;
+    if(!L.length){ box.innerHTML = ''; return; }
+    const lbl = pk.st !== 'all' ? PK_ST[pk.st].l.toLowerCase() + (L.length > 1 ? (pk.st === 'new' ? 'x' : 's') : '') : 'trouvés';
+    let done = {}; try{ if(!filtered) done = listModeScores(src0, words); }catch(e){}
+    box.innerHTML = `<div class="pk-play-h">🎮 Jouer avec ${filtered ? `ces <b>${L.length}</b> mots ${escapeHtml(lbl)}` : `ces <b>${L.length}</b> mots`}</div>
+      ${filtered ? `<div class="pk-play-n">Seulement les mots affichés (une liste à part : le score du bloc ne change pas).</div>` : ''}
+      <div class="pk-play-g">${PEEK_SUGGEST_MODES.map(m => { const sc = done[m.mode]; return `<button type="button" class="opt pk-pm" data-pkmode="${m.mode}">${m.label}${sc != null ? ` <span class="rp-score" style="${sc >= PASS_THRESHOLD ? 'color:#16A34A;' : ''}">${sc}%</span>` : (filtered ? '' : ' <span class="rp-new">nouveau</span>')}</button>`; }).join('')}</div>`;
+  }
   function render(){
+    renderPlay();
     const wrap = document.getElementById('peekResultsWrap'); if(!wrap) return;
     card.querySelectorAll('[data-pkv]').forEach(bt => { const on = bt.dataset.pkv === peekView; bt.classList.toggle('on', on); bt.setAttribute('aria-selected', on ? 'true' : 'false'); });
     renderSummary();
@@ -5724,6 +5775,13 @@ function renderBlockWordsPeek(words, title, onBack, src){
     peekView = bt.dataset.pkv; pk.slide = 0;
     try{ localStorage.setItem('vocabVision.peekView', peekView); }catch(err){}
     render();
+  });
+  card.querySelector('#pkPlay').addEventListener('click', (e) => {
+    const bt = e.target.closest('[data-pkmode]'); if(!bt) return;
+    const L = items(), filtered = L.length !== all().length;
+    stopPeekPlay(); stopAuto(); window.__pkOnPlay = null;
+    if(filtered) startModeWithWords(L.map(x => x.w), bt.dataset.pkmode, { title:title + (pk.st !== 'all' ? ' · ' + PK_ST[pk.st].l : ' · recherche'), back:onBack || null });
+    else startListMode(words, bt.dataset.pkmode, src0);
   });
   card.querySelector('#pkSt').addEventListener('click', (e) => { const bt = e.target.closest('[data-pkst]'); if(!bt) return; pk.st = bt.dataset.pkst; pk.slide = 0; render(); });
   document.getElementById('pkQ').addEventListener('input', (e) => { pk.q = e.target.value; pk.slide = 0; render(); });
@@ -16542,9 +16600,22 @@ function findLexWord(q){
   if(!f) return null;
   return WORDS.find(w => normalizeForSearch(w.fr) === f) || null;
 }
+/* 🧭 1.0.35 : la pile des fiches — ouvrir un mot depuis la fiche d'un autre garde le chemin (↩ et « précédent » y reviennent) */
+var WCP = { stack:[], cur:null };
 function wordCardPopup(w, opts){
   opts = opts || {};
   if(!w) return null;
+  const had = document.querySelector('.wcp-ov');
+  if(opts._nav || opts._back){ /* même chemin */ }
+  else if(had && WCP.cur && WCP.cur.w !== w) WCP.stack.push(WCP.cur);
+  else if(!had) WCP.stack = [];
+  const dir = opts._dir || '';
+  opts = Object.assign({}, opts); delete opts._nav; delete opts._back; delete opts._dir;
+  WCP.cur = { w, opts };
+  const L = Array.isArray(opts.list) && opts.list.length > 1 ? opts.list : null;
+  let li = L ? (L[opts.index] === w ? opts.index : L.indexOf(w)) : -1;
+  if(L && li < 0) li = 0;
+  const prevW = WCP.stack.length ? WCP.stack[WCP.stack.length - 1].w : null;
   document.querySelectorAll('.wcp-ov').forEach(x => x.remove());
   const i = WORDS.indexOf(w), blk = i >= 0 ? Math.floor(i / BLOCK_SIZE) + 1 : 0;
   const full = exFull(w) || '', form = exFullForm(w) || w.fr;
@@ -16554,8 +16625,10 @@ function wordCardPopup(w, opts){
     if(at >= 0) exHtml = escapeHtml(full.slice(0, at)) + '<mark>' + escapeHtml(full.slice(at, at + form.length)) + '</mark>' + escapeHtml(full.slice(at + form.length));
   }
   const ov = document.createElement('div');
-  ov.className = 'wcp-ov';
-  ov.innerHTML = `<div class="wcp" role="dialog" aria-modal="true" aria-label="Fiche du mot ${escapeHtml(w.fr)}">
+  ov.className = 'wcp-ov' + (had ? ' instant' : '');
+  ov.innerHTML = `<div class="wcp ${dir ? 'nav-in-' + dir : ''}" role="dialog" aria-modal="true" aria-label="Fiche du mot ${escapeHtml(w.fr)}">
+    ${prevW ? `<button type="button" class="wcp-back" data-wcp="back">↩ Revenir à « ${escapeHtml(prevW.fr)} »</button>` : ''}
+    ${L ? `<div class="wcp-nav"><button type="button" data-wcp="prev" ${li <= 0 ? 'disabled' : ''} aria-label="Mot précédent">‹ Précédent</button><span>${li + 1} / ${L.length}</span><button type="button" data-wcp="next" ${li >= L.length - 1 ? 'disabled' : ''} aria-label="Mot suivant">Suivant ›</button></div>` : ''}
     ${opts.note ? `<div class="wcp-note">${escapeHtml(opts.note)}</div>` : ''}
     <div class="wcp-head"><div class="wcp-fr" lang="fr">${escapeHtml(w.fr)}</div><button type="button" class="wcp-x" data-wcp="x" aria-label="Fermer">✕</button></div>
     <div class="wcp-meta"><span>${escapeHtml(w.cat || '')}</span>${blk ? `<span>· Bloc ${blk}</span>` : ''}<span>${getWordBadge(w.fr)}</span></div>
@@ -16572,16 +16645,52 @@ function wordCardPopup(w, opts){
     <div class="wcp-conf" id="wcpConf" hidden>Retirer « <b>${escapeHtml(w.fr)}</b> » de tes mots ? Il disparaît de tes blocs et de tes révisions, sur tous tes appareils.<div class="wcp-b"><button type="button" class="del" data-wcp="del-go">🗑 Oui, le retirer</button><button type="button" data-wcp="del-no">Non, le garder</button></div></div>` : ''}
   </div>`;
   document.body.appendChild(ov);
-  requestAnimationFrame(() => ov.classList.add('show'));
-  const close = () => { document.removeEventListener('keydown', onKey, true); bkPop('wcp'); ov.remove(); if(opts.onClose) try{ opts.onClose(); }catch(e){} };
-  bkPush('wcp', close);
-  const onKey = (e) => { if(e.key === 'Escape'){ e.preventDefault(); e.stopPropagation(); close(); } };
+  if(had) ov.classList.add('show'); else requestAnimationFrame(() => ov.classList.add('show'));
+  const firstOnClose = (WCP.stack[0] || WCP.cur).opts.onClose;
+  const close = () => {
+    document.removeEventListener('keydown', onKey, true); bkPop('wcp'); ov.remove();
+    WCP.stack = []; WCP.cur = null;
+    const f = opts.onClose || firstOnClose; if(f) try{ f(); }catch(e){}
+  };
+  // ↩ revenir au mot d'avant (bouton, « précédent » du téléphone) ; sinon on ferme
+  const goBack = () => {
+    if(!WCP.stack.length){ close(); return; }
+    const pv = WCP.stack.pop();
+    document.removeEventListener('keydown', onKey, true); ov.remove();
+    wordCardPopup(pv.w, Object.assign({}, pv.opts, { _back:true, _dir:'l' }));
+  };
+  const step = (d) => {
+    if(!L) return;
+    const j = li + d; if(j < 0 || j >= L.length) return;
+    document.removeEventListener('keydown', onKey, true); ov.remove();
+    wordCardPopup(L[j], Object.assign({}, opts, { index:j, _nav:true, _dir:d > 0 ? 'r' : 'l' }));
+    try{ haptic('tap'); }catch(e){}
+  };
+  bkPush('wcp', goBack);
+  const onKey = (e) => {
+    if(e.key === 'Escape'){ e.preventDefault(); e.stopPropagation(); close(); }
+    else if(L && (e.key === 'ArrowRight' || e.key === 'ArrowLeft') && !/input|textarea|select/i.test((e.target && e.target.tagName) || '')){ e.preventDefault(); e.stopPropagation(); step(e.key === 'ArrowRight' ? 1 : -1); }
+  };
   document.addEventListener('keydown', onKey, true);
+  // 👉 glisser à gauche / à droite pour passer au mot suivant / précédent
+  if(L){
+    const box = ov.querySelector('.wcp'); let sx = null, sy = 0, st0 = 0;
+    box.addEventListener('pointerdown', (e) => { sx = e.clientX; sy = e.clientY; st0 = Date.now(); });
+    box.addEventListener('pointerup', (e) => {
+      if(sx == null) return; const dx = e.clientX - sx, dy = e.clientY - sy; sx = null;
+      if(Math.abs(dx) > 60 && Math.abs(dy) < 60 && Math.abs(dx) > Math.abs(dy) * 1.5 && Date.now() - st0 < 800){ ov.__swiped = Date.now(); step(dx < 0 ? 1 : -1); }
+    });
+    box.addEventListener('pointercancel', () => { sx = null; });
+  }
   ov.addEventListener('click', (e) => {
+    if(ov.__swiped && Date.now() - ov.__swiped < 400) return;
     if(e.target === ov){ close(); return; }
     const b = e.target.closest('[data-wcp]'); if(!b) return;
     const a = b.dataset.wcp;
     if(a === 'x') close();
+    else if(a === 'back') goBack();
+    else if(a === 'prev') step(-1);
+    else if(a === 'next') step(1);
     else if(a === 'say') speak(w.fr, 'fr-FR');
     else if(a === 'ar') speak(w.ar, 'ar-SA');
     else if(a === 'ex') speak(full, 'fr-FR');
@@ -16815,7 +16924,58 @@ function wtActions(known, r){
   const ctx = WT.ctx || {};
   box.innerHTML = (known ? `<button type="button" class="pri" data-wt="see">👁 Voir sa fiche</button><button type="button" data-wt="edit">✏️ Modifier</button>`
       : (r && (r.defs || []).length ? `<button type="button" class="pri" data-wt="add">➕ Ajouter à mes mots</button>` : ''))
-    + (ctx.sentence ? `<button type="button" data-wt="sent">🗣️ La phrase</button>` : '');
+    + (ctx.sentence ? `<button type="button" data-wt="sent">🗣️ La phrase</button>` : '')
+    + (wtOthers().length ? `<button type="button" data-wt="others">➕ D'autres mots de la phrase</button>` : '');
+}
+/* ➕ 1.0.35 : les autres mots de la phrase, pour en ajouter plusieurs d'un coup (les plus rares sont déjà cochés) */
+function wtFunctionWord(f){
+  try{ dxInit(); return ['det', 'detSing', 'detPlur', 'pron', 'prep', 'clitic', 'coord', 'rel', 'sub', 'aux', 'inv', 'facAdv', 'facVerb', 'wh', 'num'].some(k => DX[k] && DX[k][f]); }catch(e){ return false; }
+}
+function wtOthers(){
+  const C = WT.ctx || {}; if(!C.sentence) return [];
+  const me = dxFold(C.word || ''), lem = C.look && C.look.lemma ? dxFold(C.look.lemma) : '';
+  try{ trxCommonInit(); }catch(e){}
+  const seen = new Set(), out = [];
+  (String(C.sentence).match(/[\p{L}][\p{L}'’-]*/gu) || []).forEach(raw => {
+    const w = wtClean(raw), f = dxFold(w);
+    if(f.length < 3 || f === me || f === lem || seen.has(f) || /^\d/.test(f)) return;
+    seen.add(f);
+    if(wtFunctionWord(f)) return;
+    if(typeof tbLexWord === 'function' && tbLexWord(w)) return;
+    const common = !!(TRX_COMMON && (TRX_COMMON.has(f) || TRX_COMMON_B.has(trxBase(f))));
+    out.push({ w, f, rare:!common });
+  });
+  return out.sort((a, b) => (b.rare - a.rare)).slice(0, 14);
+}
+function wtOthersHtml(){
+  const L = wtOthers();
+  if(!L.length) return `<div class="wt-oth"><div class="wt-oth-h">Les autres mots de la phrase sont déjà dans tes mots. 👍</div></div>`;
+  return `<div class="wt-oth" id="wtOth"><div class="wt-oth-h">➕ Lesquels ajouter aussi ? <small>(touche pour cocher)</small></div>
+    <div class="wt-oth-c">${L.map(x => `<button type="button" class="wt-oc ${x.rare ? 'on' : ''}" data-wt="oth-t" data-w="${escapeHtml(x.w).replace(/"/g, '&quot;')}" aria-pressed="${x.rare}">${escapeHtml(x.w)}</button>`).join('')}</div>
+    <button type="button" class="pri wt-oth-go" data-wt="oth-go">➕ Ajouter les mots cochés</button><div class="wt-oth-st" aria-live="polite"></div></div>`;
+}
+async function wtAddMany(list){
+  const C = WT.ctx || {}, tok = WT.tok;
+  const st = () => WT.el && WT.tok === tok ? WT.el.querySelector('.wt-oth-st') : null;
+  const go = WT.el && WT.el.querySelector('.wt-oth-go'); if(go) go.disabled = true;
+  const add = [], miss = [];
+  for(let i = 0; i < list.length; i++){
+    const w = list[i]; const s = st(); if(s) s.textContent = `🔎 ${i + 1}/${list.length} : « ${w} »…`;
+    let r = null; try{ r = await tbLookup(w); }catch(e){}
+    const defs = ((r && r.defs) || []).filter(Boolean);
+    if(!defs.length){ miss.push(w); continue; }
+    const lemma = String(r.lemma || w).trim(), def = (typeof tbDefsJoin === 'function') ? tbDefsJoin(defs) : defs[0];
+    let ex = { ex:'~' }; try{ if(C.sentence && typeof tbExFor === 'function'){ const x = tbExFor({ sent:C.sentence, w, lemma }); if(!x.missing) ex = x; } }catch(e){}
+    const o = { fr:lemma, ar:((r.ar || [])[0] || ''), def, ex:ex.ex, cat:C.cat || 'Mes lectures' }; if(ex.exForm) o.exForm = ex.exForm;
+    if(!add.some(a => dxFold(a.fr) === dxFold(o.fr))) add.push(o);
+  }
+  let n = 0;
+  if(add.length){ try{ n = commitImport(add, true); }catch(e){ console.error(e); } try{ if(typeof exFullCache !== 'undefined' && exFullCache) exFullCache.clear(); }catch(e){} try{ if(typeof TB !== 'undefined') TB.idx = null; }catch(e){} }
+  if(n){ try{ playCorrectSound(); }catch(e){} }
+  const msg = (n ? `✓ ${n} mot${n > 1 ? 's' : ''} ajouté${n > 1 ? 's' : ''} à tes mots` : 'Aucun mot ajouté') + (miss.length ? ` · sans définition trouvée : ${miss.join(', ')}` : '');
+  const s = st(); if(s) s.textContent = msg;
+  setStatus(msg, n ? 'ok' : '');
+  if(WT.el && WT.tok === tok){ WT.el.querySelectorAll('.wt-oc.on').forEach(b => { b.classList.remove('on'); b.classList.add('done'); b.disabled = true; }); }
 }
 function wtShow(word, rect, ctx){
   wtClose();
@@ -16871,7 +17031,7 @@ function wtAdd(){
   if(n){ try{ playCorrectSound(); }catch(e){} setStatus(`➕ « ${lemma} » ajouté à tes mots (bloc ${Math.floor((WORDS.length - 1) / BLOCK_SIZE) + 1})`, 'ok'); }
   else setStatus(`« ${lemma} » est déjà dans tes mots.`, 'ok');
   const kw = (typeof tbLexWord === 'function') ? tbLexWord(lemma) : null;
-  if(box){ C.known = kw; box.innerHTML = `<button type="button" disabled>✓ Dans tes mots</button>${kw ? `<button type="button" class="pri" data-wt="see">👁 Voir sa fiche</button>` : ''}`; }
+  if(box){ C.known = kw; box.innerHTML = `<button type="button" disabled>✓ Dans tes mots</button>${kw ? `<button type="button" class="pri" data-wt="see">👁 Voir sa fiche</button>` : ''}${wtOthers().length ? `<button type="button" data-wt="others">➕ D'autres mots de cette phrase ?</button>` : ''}`; }
 }
 document.addEventListener('click', (e) => {
   if(WT.bypass) return;
@@ -16883,6 +17043,9 @@ document.addEventListener('click', (e) => {
     else if(a === 'see'){ const k = C.known; wtClose(); if(k) wordCardPopup(k, { note:'📇 Ce mot est déjà dans tes mots' }); }
     else if(a === 'edit'){ const k = C.known; wtClose(); if(k) wordEditPopup(k); }
     else if(a === 'add') wtAdd();
+    else if(a === 'others'){ const old = WT.el.querySelector('.wt-oth'); if(old) old.remove(); else { WT.el.insertAdjacentHTML('beforeend', wtOthersHtml()); if(C.rect) wtPlace(C.rect); } }
+    else if(a === 'oth-t'){ const on = !b.classList.contains('on'); b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); }
+    else if(a === 'oth-go'){ const L = [...WT.el.querySelectorAll('.wt-oc.on')].map(x => x.dataset.w); if(L.length) wtAddMany(L); else { const s = WT.el.querySelector('.wt-oth-st'); if(s) s.textContent = 'Coche au moins un mot.'; } }
     else if(a === 'sent'){ if(C.sentEl && C.sentEl.isConnected){ WT.bypass = true; try{ C.sentEl.click(); }finally{ WT.bypass = false; } } else if(C.sentence) speak(C.sentence, 'fr-FR'); }
     return;
   }
@@ -18719,7 +18882,7 @@ function startRecognition(word){
     recognition = new SpeechRec();
     recognition.lang = 'fr-FR';
     recognition.interimResults = false;
-    recognition.maxAlternatives = 3;
+    recognition.maxAlternatives = 5;
   }catch(e){ return; }
 
   const micBtn = document.getElementById('micBtn');
@@ -18817,6 +18980,7 @@ function handleSpeakResult(isCorrect, word, info){
     masteredCount++;
     sessionHistory.push({ fr: word.fr, ar: word.ar, def: word.def, cat: word.cat, attempts: attemptsByFr[word.fr], failed: true });
   }
+  const statSnap = wordStats[word.fr.toLowerCase()] ? JSON.parse(JSON.stringify(wordStats[word.fr.toLowerCase()])) : null;
   recordWordStat(word.fr, isCorrect);
   if(window.__reviewSession && isCorrect){
     const s = wordStats[word.fr.toLowerCase()];
@@ -18857,9 +19021,23 @@ function handleSpeakResult(isCorrect, word, info){
     ${dxExampleHtml(word)}
     ${renderStreakProgressHtml(word.fr)}
     ${renderVariantsExtra(word)}
+    ${!isCorrect && info.heard ? `<button type="button" class="mode-chip speak-ovr" id="speakOverrideBtn">✋ J'ai bien dit « ${escapeHtml(word.fr)} » : le micro s'est trompé</button>` : ''}
     <button class="next-btn" id="nextBtn">Suivant →</button>
   `;
   document.getElementById('speakFrBtn').addEventListener('click', () => speak(word.fr, 'fr-FR'));
+  const ovr = document.getElementById('speakOverrideBtn');
+  if(ovr) ovr.addEventListener('click', () => {
+    if(ovr.disabled) return; ovr.disabled = true;
+    score.correct++; if(catScore[word.cat]) catScore[word.cat].c++;
+    const h = sessionHistory[sessionHistory.length - 1]; if(h && h.fr === word.fr) delete h.failed;
+    const k = word.fr.toLowerCase(); if(statSnap) wordStats[k] = statSnap; else delete wordStats[k];
+    recordWordStat(word.fr, true);
+    const bf = revealWrap.querySelector('.big-feedback'); if(bf){ bf.className = 'big-feedback ok'; bf.textContent = '✋ Compté juste, bravo !'; }
+    const rw = revealWrap.querySelector('.rw.missed'); if(rw){ rw.classList.remove('missed'); rw.classList.add('spoken'); }
+    ovr.textContent = '✓ Compté juste';
+    try{ playCorrectSound(); }catch(e){}
+    renderScoreboard(); renderProgress();
+  });
   dxBindExample(revealWrap);
   attachAutoAdvance('nextBtn', () => { renderCard(); });
   autoSpeakWord(word.fr, 'fr-FR');
@@ -21855,6 +22033,13 @@ const COLOR_PRESETS = {
 /* ============ 🆕 NOUVEAUTÉS — pour que tout ce qui a été ajouté reste découvrable ============ */
 const WHATS_NEW_SECTIONS = [
   { icon:'🆕', title:'Nouveautés', items:[
+    { name:'‹ › Feuilleter les mots un par un', desc:"Dans 👁 Voir les mots (Par statut, Liste, Tableau…), quand tu ouvres un mot : « ‹ Précédent · 3 / 30 · Suivant › » en bas de la fiche, ou glisse à gauche / à droite (← → au clavier)." },
+    { name:'↩ Revenir au mot d\'avant', desc:"Tu cherches un mot depuis la fiche d'un autre mot ? « ↩ Revenir à « … » » te ramène au mot précédent, où que tu sois. Le bouton retour du téléphone fait pareil ; ✕ ferme tout." },
+    { name:'🎮 Jouer avec ces mots', desc:"En bas de 👁 Voir les mots : les boutons des modes de jeu, pour jouer tout de suite avec les mots affichés (tous ceux du bloc, ou seulement ceux du filtre choisi)." },
+    { name:'➕ D\'autres mots de cette phrase ?', desc:"Quand tu touches un mot pour l'expliquer (Tablette, transcriptions…), la bulle propose aussi les autres mots de la phrase, les plus rares déjà cochés : un geste pour les ajouter tous, chacun avec sa phrase d'exemple." },
+    { name:'🎤 Prononciation plus juste', desc:"Les mots avec trait d'union (peut-être, c'est-à-dire), les liaisons (un‿ami, les‿enfants), les mots comme « héros » ou « Knesset » passent mieux : le micro compare maintenant les sons, pas seulement l'orthographe. Et si le micro s'est trompé : « ✋ J'ai bien dit « … » » corrige ta note." },
+    { name:'⚡ Transcription écrite en avance', desc:"Pour les MP3, le texte est préparé quelques secondes avant que tu l'entendes, puis s'affiche au rythme de la voix, mot par mot (« 📜 Tout le texte » pour tout voir). Sur ordinateur, un modèle plus précis est choisi (téléchargé une seule fois)." },
+    { name:'🪟 Lecteur flottant (ordinateur)', desc:"Dans l'Audiothèque ou le mini-lecteur : « 🪟 Lecteur flottant » ouvre une petite fenêtre toujours visible, même l'appli réduite, avec ⏮ ↺10 ⏯ 10↻ ⏭ ⏹, la barre de progression et la phrase en cours. Chrome et Edge sur ordinateur." },
     { name:'🏆 Le grand spectacle 3D de l\'objectif du jour', desc:"Objectif atteint : Abdel et Souky arrivent en courant sur une scène illuminée, sautent (salto, vrille), brandissent ensemble le trophée qui descend du ciel, se tapent dans la patte (pluie d'étoiles), dansent en musique, puis l'un te félicite pendant que l'autre applaudit. Touche un renard : il fait une pirouette. Toujours là, même si la mascotte des bonnes réponses est coupée (« Version simple » dans les réglages de la mascotte)." },
     { name:'🗣️ Conjugaison : plus de 200 tournures', desc:"Le temps s'annonce de mille façons : au début, au milieu ou à la fin de la phrase, en question, avec « si », « bien que », « pourvu que », « il faudrait que », « je ne pense pas que »… Jamais deux fois la même d'affilée. « Quel temps utiliser ? » en pioche 20 à chaque partie, tous les temps mélangés." },
     { name:'🧩 Les nouveaux blocs restent vraiment nouveaux', desc:"Dans un bloc jamais commencé, les mots sont « nouveaux » : le « maîtrisé » d'un bloc ne compte que ce que tu as réussi dans les blocs. Blitz, Swipe, Flashcards, Association, le défi du jour et les révisions ne piochent plus dans les blocs pas encore commencés." },
@@ -44186,12 +44371,42 @@ function spPhon(w){
   t = t.replace(/([bcdfgjklmnprstvz])\1/g, '$1').replace(/h/g, '');
   return t;
 }
+/* 🗣️ 1.0.35 : une vraie clé « à l'oreille » (nasales an/in/on, ou, oi, ch, gn, s entre voyelles, lettres finales muettes,
+   h muet ou aspiré, ph, qu, c/g doux…) : « peut-être » = « peut être », « héros » = « éros », « Knesset » ≈ « Nesset ». */
+function spKey(s){
+  let t = spCompact(s); if(!t) return '';
+  t = t.replace(/^h/, '').replace(/([^cspt])h/g, '$1');
+  t = t.replace(/ph/g, 'f').replace(/th/g, 't').replace(/sch/g, 'C').replace(/ch/g, 'C').replace(/sh/g, 'C');
+  t = t.replace(/qu/g, 'k').replace(/ck/g, 'k').replace(/cc(?=[eiy])/g, 'ks').replace(/c(?=[eiy])/g, 's').replace(/c/g, 'k').replace(/q/g, 'k');
+  t = t.replace(/gn/g, 'N').replace(/gu(?=[eiy])/g, 'g').replace(/g(?=[eiy])/g, 'j');
+  t = t.replace(/w/g, 'v').replace(/x$/, '').replace(/x/g, 'ks').replace(/y/g, 'i');
+  t = t.replace(/eaux?/g, 'o').replace(/au/g, 'o').replace(/oi/g, 'wa').replace(/ou/g, 'u');
+  t = t.replace(/(ain|ein|aim|eim)(?![aeiou])/g, '5').replace(/(in|im|un|um)(?![aeiou])/g, '5');
+  t = t.replace(/(an|am|en|em)(?![aeiou])/g, '4').replace(/(on|om)(?![aeiou])/g, '6');
+  t = t.replace(/(ai|ei|eu|oe)/g, 'e');
+  t = t.replace(/([aeiou])s(?=[aeiou])/g, '$1z');
+  t = t.replace(/(er|ez|et)$/, 'e').replace(/[sdtxzpg]+$/, '');
+  if(t.length > 2) t = t.replace(/e$/, '');
+  t = t.replace(/z/g, 's').replace(/(.)\1+/g, '$1');
+  return t;
+}
+function spKeyNear(a, b){
+  if(!a || !b) return false;
+  if(a === b) return true;
+  const n = Math.max(a.length, b.length), tol = n <= 3 ? 0 : (n <= 6 ? 1 : 2);
+  return tol > 0 && Math.abs(a.length - b.length) <= tol && levenshtein(a, b) <= tol;
+}
+/* la liaison colle une consonne devant le mot (« les héros » → « zéro », « un ami » → « nami ») */
+function spLiaisonNear(target, heard){
+  return /^[aeiouyh]/.test(target) && /^[ztnrp]/.test(heard) && heard.length > 2 && spKeyNear(spKey(target), spKey(heard.slice(1)));
+}
 /* deux formes « collées » (sans espace) sont-elles le même mot à l'oral ? */
 function spSame(target, heard, fuzzy){
   if(!target || !heard) return false;
   if(target === heard) return true;
   if(!fuzzy) return false;
   if(target.length >= 3 && heard.length >= 2 && spPhon(target) === spPhon(heard)) return true;
+  if(target.length >= 4 && (spKeyNear(spKey(target), spKey(heard)) || spLiaisonNear(target, heard))) return true;
   const n = target.length;
   const tol = n <= 2 ? (heard.length === n ? 1 : 0) : (n <= 4 ? 1 : (n <= 9 ? 2 : 3));
   if(!tol || Math.abs(n - heard.length) > tol) return false;
@@ -44264,6 +44479,7 @@ function speechMatches(transcript, expected){
         if(c === ec) return true;
         if(Math.abs(c.length - ec.length) <= tol && levenshtein(c, ec) <= tol) return true;
         if(ec.length >= 3 && c.length >= 2 && spPhon(c) === spPhon(ec)) return true;
+        if(ec.length >= 3 && (spKeyNear(spKey(c), spKey(ec)) || spLiaisonNear(ec, c))) return true;   // 🗣️ 1.0.35 : à l'oreille, avec la liaison
         if(c.length > ec.length + tol) break;
       }
     }
@@ -49717,6 +49933,7 @@ function tbOpenSheet(k, k2){
     ${ks.length > 8 ? `<div class="tb-pop-hint tb-long">✂️ ${ks.length} mots : c'est pour traduire. Pour l'ajouter à tes mots ou le taguer, garde 8 mots au plus.</div>` : `<div class="tb-sh-act">
       <button type="button" class="tb-btn hl" data-tb="tag" id="tbTagBtn">${tagLbl(tagged)}</button>
       ${tbAddBtnHtml(known, [lemma, lemma0, form])}
+      ${tbOtherCands(tk.s, ks).length ? `<button type="button" class="tb-btn" data-tb="others">➕ D'autres mots de la phrase</button>` : ''}
     </div>`}
     <div class="tb-addf" id="tbAddF" hidden></div>
     ${rules ? `<div class="tb-rules">${rules}</div>` : ''}
@@ -49753,6 +49970,43 @@ function tbLexWord(q){
   if(!w) w = WORDS.find(x => dxFold(x.fr) === f && (kx === f || tbKey(x.fr) === dxFold(x.fr)));   // l'un des deux écrit sans accents
   if(!w){ const e = tbEntry(raw); if(e && e.known) w = WORDS.find(x => x.fr === e.fr) || null; }
   return w || null;
+}
+/* ➕ 1.0.35 : d'autres mots de la même phrase → dans le carnet, puis ajoutés ensemble */
+function tbOtherCands(s, except){
+  const ex = new Set(except || []), out = [], seen = new Set();
+  try{ trxCommonInit(); }catch(e){}
+  (TB.sentToks[s] || []).forEach(k => {
+    if(ex.has(k)) return;
+    const tk = TB.toks[k]; if(!tk || !/\p{L}/u.test(tk.form)) return;
+    const f = dxFold(tk.form); if(f.length < 3 || seen.has(f) || wtFunctionWord(f)) return;
+    let lemma = tk.form; try{ lemma = tbLemmaOf(tk); }catch(e){}
+    if(tbIsKnown(lemma) || tbIsKnown(tk.form)) return;
+    seen.add(f);
+    const common = !!(TRX_COMMON && (TRX_COMMON.has(f) || TRX_COMMON_B.has(trxBase(f))));
+    out.push({ k, form:tk.form, lemma, rare:!common, tagged:tbTagAt(k) >= 0 });
+  });
+  return out;
+}
+function tbOthersSheet(s, except){
+  const sh = document.getElementById('tbSheet'); if(!sh || TB.sents[s] == null) return;
+  const L = tbOtherCands(s, except);
+  TB.sheetK = -3;
+  sh.innerHTML = `<div class="tb-sh-in">
+    <div class="tb-grab" aria-hidden="true"></div>
+    <div class="tb-sh-top"><div><div class="tb-sh-w">D'autres mots de cette phrase</div><div class="tb-sh-ipa">Coche ceux que tu veux ajouter à tes mots</div></div><button type="button" class="tb-ib" data-tb="sheet-x" aria-label="Fermer">✕</button></div>
+    <blockquote class="tb-ctx" lang="fr">${escapeHtml(TB.sents[s])}</blockquote>
+    ${L.length ? `<div class="tb-oth-c">${L.map(x => `<button type="button" class="tb-chip tb-oc ${x.rare || x.tagged ? 'on' : ''}" data-tb="oth-t" data-k="${x.k}" aria-pressed="${x.rare || x.tagged}">${escapeHtml(x.form)}${dxFold(x.lemma) !== dxFold(x.form) ? ` <small>(${escapeHtml(x.lemma)})</small>` : ''}</button>`).join('')}</div>
+      <button type="button" class="tb-btn pri wide" data-tb="oth-go">🏷️ Les mettre dans mon carnet et les ajouter</button>
+      <div class="tb-pop-hint">Le carnet cherche leur sens et leur traduction ; tu vérifies, puis « ➕ Ajouter ». La phrase du texte sert d'exemple.</div>`
+      : `<div class="tb-info-l">Tous les mots de cette phrase sont déjà dans tes mots (ou ce sont de tout petits mots). 👍</div>`}
+  </div>`;
+  tbSheetShow(sh);
+}
+function tbOthersPrompt(s){
+  const rd = document.getElementById('tbReader'); if(!rd || !tbOtherCands(s).length) return;
+  const old = document.getElementById('tbOthGo'); if(old) old.remove();
+  rd.insertAdjacentHTML('beforeend', `<button type="button" class="tb-mkgo tb-othgo" id="tbOthGo" data-tb="others-s" data-s="${s}">➕ D'autres mots de cette phrase ?</button>`);
+  setTimeout(() => { const g = document.getElementById('tbOthGo'); if(g){ g.classList.add('out'); setTimeout(() => { if(g.isConnected) g.remove(); }, 400); } }, 9000);
 }
 function tbAddBtnHtml(known, cands){
   const w = known ? (cands || []).map(tbLexWord).find(Boolean) : null;
@@ -49918,6 +50172,7 @@ function tbAddFromForm(k){
     tbCloseSheet();                                   // ✅ 1.0.26 : c'est fait, la fiche se range toute seule
     try{ if(TB.hintsOn) tbPaintHints(true); }catch(e){}
     tbBackToWord(P.k1, P.k2);                         // 📍 1.0.33 : on revient sur le mot, souligné
+    setTimeout(() => tbOthersPrompt(tk.s), 900);      // ➕ 1.0.35 : « D'autres mots de cette phrase ? »
     return;
   }
   const box = document.getElementById('tbAddF'), lw = tbLexWord(fr);
@@ -50280,6 +50535,16 @@ function tbAction(id, btn, e){
     case 'say-sent': { const tk = TB.toks[TB.sheetK]; if(tk){ const s = TB.sents[tk.s]; tbNarrFr(dxOn() ? dxSpeakText(s) : s, 'fr-FR', null, readingRate); } return; }
     case 'tag': { const P = TB.pick || { k1:TB.sheetK, k2:TB.sheetK }; const multi = P.k2 !== P.k1; const on = tbToggleTag(P.k1, { noFly:true, k2:P.k2 }); btn.textContent = on ? '✓ Tagué : retirer' : (multi ? '🖍 Taguer l\'expression' : '🖍 Taguer ce mot'); if(on) tbToast(multi ? '🖍 L\'expression est dans ton carnet, avec sa phrase' : '🖍 Ajouté à ton carnet, avec sa phrase'); tbPickToks(P.k1, P.k2).forEach(x => { if(TB.spans[x]) TB.spans[x].classList.add('sel'); }); return; }
     case 'add': tbAddForm(TB.sheetK); return;
+    case 'others': { const P = TB.pick || { k1:TB.sheetK, k2:TB.sheetK }; const tk = TB.toks[P.k1]; if(tk) tbOthersSheet(tk.s, tbPickToks(P.k1, P.k2)); return; }
+    case 'others-s': { const g = document.getElementById('tbOthGo'); if(g) g.remove(); tbOthersSheet(+btn.dataset.s); return; }
+    case 'oth-t': { const on = !btn.classList.contains('on'); btn.classList.toggle('on', on); btn.setAttribute('aria-pressed', String(on)); return; }
+    case 'oth-go': {
+      const ks = [...document.querySelectorAll('#tbSheet .tb-oc.on')].map(x => +x.dataset.k);
+      if(!ks.length){ tbToast('Coche au moins un mot.'); return; }
+      ks.forEach(k => { if(tbTagAt(k) < 0) tbToggleTag(k, { noFly:true }); });
+      tbOpenCarnet();
+      return;
+    }
     case 'add-go': tbAddFromForm(TB.sheetK); return;
     case 'cr-say': { const g = TB.art.tags[+btn.dataset.i]; if(g) tbSay(g.lemma); return; }
     case 'cr-go': { const g = TB.art.tags[+btn.dataset.i]; if(!g) return; const k = TB.toks.findIndex(x => x.s === g.s && x.t === g.t); tbCloseSheet(); if(TB.spans[k]){ TB.spans[k].scrollIntoView({ block:'center', behavior:'smooth' }); const s = TB.spans[k].closest('.tb-s'); if(s){ s.classList.remove('flash'); void s.offsetWidth; s.classList.add('flash'); } } return; }
@@ -50597,6 +50862,7 @@ function audioMediaSession(){
       seekto:(d) => { const e = el(); if(e && d && d.seekTime != null && isFinite(e.duration)){ if(d.fastSeek && 'fastSeek' in e) e.fastSeek(d.seekTime); else e.currentTime = d.seekTime; audioMsState(); } },
     };
     Object.keys(h).forEach(k => { try{ navigator.mediaSession.setActionHandler(k, h[k]); }catch(e){} });
+    if(apSupported()){ try{ navigator.mediaSession.setActionHandler('enterpictureinpicture', () => apOpen(true)); }catch(e){} }   // 🪟 Chrome peut l'ouvrir tout seul quand tu quittes l'appli
   }catch(e){}
   audioMsState();
 }
@@ -50613,11 +50879,11 @@ function audioMsState(){
    Le texte s'écrit pendant l'écoute ; touche un mot pour sa définition et l'ajouter à tes mots (avec sa phrase),
    ▶ devant une phrase pour la réentendre, et « 📰 Dans la Tablette » pour lire tout le texte. */
 var TRX = { on:false, worker:null, ready:false, loading:false, pct:0, err:'', ctx:null, src:null, proc:null, stream:null, buf:[], bufLen:0, sr:48000,
-  busy:false, queue:[], segs:[], file:'', id:0, silentFor:0, heard:false, gpu:false, lastCur:-1, follow:true };
+  busy:false, queue:[], segs:[], file:'', id:0, silentFor:0, heard:false, gpu:false, lastCur:-1, follow:true, mode:'', ah:null, reveal:'live' };
 const TRX_MODELS = { tiny:{ id:'onnx-community/whisper-tiny', l:'Rapide', mb:'≈ 40 Mo' }, base:{ id:'onnx-community/whisper-base', l:'Équilibré', mb:'≈ 80 Mo' }, small:{ id:'onnx-community/whisper-small', l:'Précis', mb:'≈ 250 Mo' } };
 const TRX_LANGS = { fr:['Français', 'french'], ar:['Arabe', 'arabic'], en:['Anglais', 'english'] };
 const TRX_CACHE = 'vocabVision.trx';
-function trxCfg(){ let c = null; try{ c = JSON.parse(localStorage.getItem('vocabVision.trxCfg') || 'null'); }catch(e){} c = c || {}; const mob = /Android|iPhone|iPad|Mobile/i.test(navigator.userAgent || ''); return { model:TRX_MODELS[c.model] ? c.model : (mob ? 'tiny' : 'base'), lang:TRX_LANGS[c.lang] ? c.lang : 'fr' }; }
+function trxCfg(){ let c = null; try{ c = JSON.parse(localStorage.getItem('vocabVision.trxCfg') || 'null'); }catch(e){} c = c || {}; const mob = /Android|iPhone|iPad|Mobile/i.test(navigator.userAgent || ''); return { model:TRX_MODELS[c.model] ? c.model : (mob ? 'base' : (navigator.gpu ? 'small' : 'base')), lang:TRX_LANGS[c.lang] ? c.lang : 'fr' }; }
 function trxCfgSave(patch){ try{ localStorage.setItem('vocabVision.trxCfg', JSON.stringify(Object.assign(trxCfg(), patch))); }catch(e){} }
 const TRX_WORKER_SRC = `
 import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.6/dist/transformers.min.js';
@@ -50633,6 +50899,14 @@ self.onmessage = async (e) => {
         progress_callback:(p) => { try{ self.postMessage({ type:'progress', p:{ status:p.status, file:p.file, progress:p.progress, loaded:p.loaded, total:p.total } }); }catch(err){} } });
       self.postMessage({ type:'ready', gpu });
     }catch(err){ self.postMessage({ type:'error', error:String(err && err.message || err) }); }
+    return;
+  }
+  if(m.type === 'runTs'){
+    try{
+      const out = await asr(m.audio, { language:m.lang || 'french', task:'transcribe', return_timestamps:true });
+      const ch = (out && out.chunks && out.chunks.length) ? out.chunks : [{ timestamp:[0, null], text:(out && out.text) || '' }];
+      self.postMessage({ type:'segs', id:m.id, t0:m.t0, k:m.k, core:m.core, file:m.file, chunks:ch.map(c => ({ s:(c.timestamp || [])[0] || 0, e:(c.timestamp || [])[1], x:c.text || '' })) });
+    }catch(err){ self.postMessage({ type:'error', id:m.id, k:m.k, error:String(err && err.message || err) }); }
     return;
   }
   if(m.type === 'run'){
@@ -50653,11 +50927,12 @@ function trxLoad(){
     const m = e.data || {};
     if(m.type === 'progress' && m.p){
       if(m.p.file && m.p.total){ files[m.p.file] = [m.p.loaded || 0, m.p.total]; const L = Object.values(files), t = L.reduce((s, x) => s + x[1], 0), l = L.reduce((s, x) => s + x[0], 0); TRX.pct = t ? Math.round(l / t * 100) : 0; trxStatus(); }
-    } else if(m.type === 'ready'){ TRX.ready = true; TRX.loading = false; TRX.gpu = !!m.gpu; trxStatus(); trxPump(); }
+    } else if(m.type === 'ready'){ TRX.ready = true; TRX.loading = false; TRX.gpu = !!m.gpu; trxStatus(); trxPump(); trxAheadPump(); }
+    else if(m.type === 'segs'){ TRX.busy = false; trxAheadText(m); trxAheadPump(); }
     else if(m.type === 'text'){ TRX.busy = false; trxAddText(m); trxPump(); }
     else if(m.type === 'error'){
       if(!TRX.ready){ TRX.loading = false; TRX.err = 'Le modèle de reconnaissance n’a pas pu se charger (' + String(m.error || '').slice(0, 120) + '). Vérifie ta connexion, ou choisis « Rapide ».'; try{ TRX.worker.terminate(); }catch(err){} TRX.worker = null; trxStatus(); }
-      else { TRX.busy = false; trxPump(); }
+      else { TRX.busy = false; if(m.k != null && TRX.ah){ TRX.ah.busyW = -1; TRX.ah.bad.add(m.k); setTimeout(trxAheadPump, 300); } else trxPump(); }
     }
   };
   TRX.worker.onerror = (e) => { TRX.loading = false; TRX.err = 'La reconnaissance n’a pas pu démarrer (' + String(e && e.message || 'erreur').slice(0, 100) + ').'; TRX.worker = null; trxStatus(); };
@@ -50669,10 +50944,11 @@ function trxToggle(force){
   if(TRX.on){
     const c = audioCurrent(); if(c && TRX.file !== c.t.file) trxOnTrack(c.t.file);
     trxLoad();
+    trxAheadInit();
     const el = audioLib.el;
     if(el && el.src) trxBeforeSrc(el, el.src, true);
     if(el && !el.paused) trxStartCapture();
-  } else trxStopCapture();
+  } else { trxStopCapture(); TRX.ah = null; TRX.mode = ''; }
   trxRender();
 }
 /* une source sur un autre site (Cloudflare R2…) doit être demandée en mode CORS pour pouvoir l'écouter */
@@ -50694,7 +50970,7 @@ function trxCorsFail(el){
   return true;
 }
 function trxStartCapture(){
-  const el = audioLib.el; if(!TRX.on || !el) return;
+  const el = audioLib.el; if(!TRX.on || !el || TRX.mode === 'ahead') return;
   try{
     const cs = el.captureStream ? el.captureStream() : (el.mozCaptureStream ? el.mozCaptureStream() : null);
     if(!cs){ TRX.err = 'Ce navigateur ne permet pas d’écouter l’audio pour le transcrire (essaie Chrome ou Edge).'; trxStatus(); return; }
@@ -50716,7 +50992,7 @@ function trxStopCapture(keepCtx){
   TRX.proc = null; TRX.src = null; TRX.stream = null;
   if(!keepCtx){ trxFlush(true); }
 }
-function trxOnPlaying(){ if(TRX.on) setTimeout(trxStartCapture, 60); }
+function trxOnPlaying(){ if(!TRX.on) return; if(TRX.mode === 'ahead'){ trxAheadPump(); trxReveal(); } else setTimeout(trxStartCapture, 60); }
 /* le son arrive par petits morceaux : on coupe toutes les ~8 s, à l'endroit le plus calme (pour ne pas couper un mot) */
 function trxFeed(samples, sr, now){
   TRX.sr = sr || TRX.sr;
@@ -50768,7 +51044,7 @@ function trxAddText(m){
   if(box){ box.insertAdjacentHTML('beforeend', trxSegHtml(TRX.segs[TRX.segs.length - 1], TRX.segs.length - 1)); const ph = box.querySelector('.trx-ph'); if(ph) ph.remove(); if(TRX.follow) box.scrollTop = box.scrollHeight; const bx = box.closest('.trx-box'); if(bx) bx.querySelectorAll('[data-trx]').forEach(x => { x.disabled = false; }); }
   trxStatus();
 }
-function trxSegHtml(s, i){ return `<p class="trx-seg" data-i="${i}"><button type="button" class="trx-t" data-trx-seek="${s.t}" aria-label="Réentendre à ${audioFmt(s.t)}">▶ ${audioFmt(s.t)}</button> <span class="trx-x">${trxTextHtml(s.x, TRX.hardOn ? TRX.hardSets : null)}</span></p>`; }
+function trxSegHtml(s, i){ const ah = TRX.mode === 'ahead'; return `<p class="trx-seg${ah && TRX.reveal !== 'all' ? ' fut' : ''}" data-i="${i}"${ah ? ` data-t="${s.t}" data-e="${s.e != null ? s.e : s.t + 3}"` : ''}><button type="button" class="trx-t" data-trx-seek="${s.t}" aria-label="Réentendre à ${audioFmt(s.t)}">▶ ${audioFmt(s.t)}</button> <span class="trx-x">${trxTextHtml(s.x, TRX.hardOn ? TRX.hardSets : null, '', ah)}</span></p>`; }
 function trxLoadCache(file){ try{ const C = JSON.parse(localStorage.getItem(TRX_CACHE) || '{}') || {}; return (C[file] && C[file].segs) || []; }catch(e){ return []; } }
 function trxSave(){
   if(!TRX.file) return;
@@ -50783,12 +51059,14 @@ function trxSave(){
 function trxOnTrack(file){
   if(TRX.file === file) return;
   TRX.buf = []; TRX.bufLen = 0; TRX.queue = []; TRX.silentFor = 0; TRX.heard = false; TRX.lastCur = -1;
-  TRX.file = file; TRX.segs = trxLoadCache(file);
+  TRX.file = file; TRX.segs = trxLoadCache(file); TRX.ah = null; TRX.mode = ''; TRX.lastCurEl = null;
+  if(TRX.on) setTimeout(trxAheadInit, 30);
   if(!TRX.segs.length && trxsIdx()[file]) trxsGet(file).then(rec => { if(rec && TRX.file === file && !TRX.segs.length){ TRX.segs = (rec.segs || []).slice(); trxRender(); } }).catch(() => {});
   if(TRX.err && !/modèle|navigateur/.test(TRX.err)) TRX.err = '';
   trxRender();
 }
 function trxTick(){
+  if(TRX.mode === 'ahead'){ trxAheadPump(); trxReveal(); return; }
   if(!TRX.segs.length) return;
   const el = audioLib.el; if(!el) return;
   const t = el.currentTime; let i = -1;
@@ -50806,6 +51084,10 @@ function trxStatus(){
   let h = '';
   if(TRX.err) h = `<span class="trx-err">⚠️ ${escapeHtml(TRX.err)}</span>`;
   else if(!TRX.on) h = TRX.segs.length ? '⏸ Transcription arrêtée.' : '';
+  else if(TRX.mode === 'ahead' && !TRX.loading && TRX.ready){
+    const el = audioLib.el, now = el ? el.currentTime : 0, rdy = trxAheadReadyUntil();
+    h = (el && el.paused ? '⏸ ' : '<span class="trx-live">● En direct</span> ') + `⚡ Écrit en avance${TRX.gpu ? ' (carte graphique)' : ''} : texte prêt jusqu’à <b>${audioFmt(rdy)}</b>` + (rdy <= now + 0.5 && TRX.busy ? ' · ⏳ j’écris ce passage…' : '');
+  }
   else if(TRX.loading) h = `⬇️ Je prépare la reconnaissance (${m.l}, ${m.mb}, une seule fois)… <b>${TRX.pct} %</b><span class="trx-pbar"><i style="width:${TRX.pct}%"></i></span>`;
   else if(!TRX.ready) h = '⏳ Préparation…';
   else if(audioLib.el && audioLib.el.paused) h = `✅ Prêt${TRX.gpu ? ' (carte graphique)' : ''} : lance l'audio ▶, le texte s'écrit pendant l'écoute.`;
@@ -50827,6 +51109,7 @@ function trxRender(){
     <div class="trx-b">
       <button type="button" class="mode-chip" data-trx="tb" ${TRX.segs.length ? '' : 'disabled'}>📰 Dans la Tablette</button>
       <button type="button" class="mode-chip" data-trx="copy" ${TRX.segs.length ? '' : 'disabled'}>📋 Copier</button>
+      ${TRX.mode === 'ahead' ? `<button type="button" class="mode-chip" data-trx="reveal">${TRX.reveal === 'all' ? '🎬 Au rythme de l’audio' : '📜 Tout le texte'}</button>` : ''}
       <button type="button" class="mode-chip ${saved ? 'active' : ''}" data-trx="save" ${TRX.segs.length ? '' : 'disabled'}>${saved ? '✅ Sauvegardée' : '💾 Sauvegarder'}</button>
       <button type="button" class="mode-chip ${TRX.hardOn ? 'active' : ''}" data-trx="hard" ${TRX.segs.length ? '' : 'disabled'} aria-pressed="${!!TRX.hardOn}">🔎 Mots difficiles</button>
       <button type="button" class="mode-chip" data-trx="lib">📚 Mes transcriptions</button>
@@ -50835,6 +51118,7 @@ function trxRender(){
     </div>
     <div class="trx-note">🔒 La reconnaissance se fait sur ton appareil : l'audio n'est envoyé nulle part.</div>`;
   const tx = box.querySelector('#trxText'); if(tx) tx.scrollTop = tx.scrollHeight;
+  if(TRX.mode === 'ahead'){ TRX.lastCurEl = null; trxReveal(); }
   box.querySelector('#trxModel').addEventListener('change', (e) => { trxCfgSave({ model:e.target.value }); if(TRX.worker){ try{ TRX.worker.terminate(); }catch(err){} } TRX.worker = null; TRX.ready = false; TRX.busy = false; if(TRX.on) trxLoad(); trxStatus(); });
   box.querySelector('#trxLang').addEventListener('change', (e) => { trxCfgSave({ lang:e.target.value }); trxRender(); });
   box.querySelector('#trxFollow').addEventListener('change', (e) => { TRX.follow = !!e.target.checked; });
@@ -50926,7 +51210,7 @@ function trxHard(segs, lang){
   const all = [...map.values()];
   return { hard:all.filter(e => !e.known).sort((a, b) => b.w.length - a.w.length || a.si - b.si), known:all.filter(e => e.known).sort((a, b) => a.si - b.si) };
 }
-function trxTextHtml(x, H, q){
+function trxTextHtml(x, H, q, wrap){
   const qf = q ? dxFold(q) : '';
   const parts = String(x || '').split(/([\p{L}][\p{L}'’-]*)/u);
   let html = parts.map((p, i) => {
@@ -50934,6 +51218,7 @@ function trxTextHtml(x, H, q){
     const f = dxFold(wtClean(p));
     const cls = H && H.hardSet && H.hardSet.has(f) ? 'trx-hw' : (H && H.knownSet && H.knownSet.has(f) ? 'trx-kw' : '');
     const inner = escapeHtml(p);
+    if(wrap) return `<span class="tw${cls ? ' ' + cls : ''}">${inner}</span>`;
     return cls ? `<span class="${cls}">${inner}</span>` : inner;
   }).join('');
   if(qf){ // surligner la recherche (sans toucher aux balises)
@@ -51108,7 +51393,197 @@ function trxBoxClick(e){
   else if(a === 'save') trxsSaveCurrent();
   else if(a === 'hard'){ TRX.hardOn = !TRX.hardOn; if(TRX.hardOn) trxHardRefresh(); trxRender(); }
   else if(a === 'lib') renderTrxLibrary();
+  else if(a === 'reveal'){ TRX.reveal = TRX.reveal === 'all' ? 'live' : 'all'; trxRender(); }
 }
+
+/* ============ ⚡ 1.0.35 : LA TRANSCRIPTION EN AVANCE, AU RYTHME DE L'AUDIO ============
+   Avant : le son était capté pendant l'écoute et écrit par morceaux de 10 s → 10 à 20 s de retard, des mots coupés
+   en deux, et des fautes. Maintenant, pour un MP3 (ou un petit fichier), l'appli lit le fichier EN AVANCE sur l'écoute,
+   par morceaux de 30 s (la taille que préfère le modèle : il comprend mieux, il se trompe moins), avec l'heure de chaque
+   phrase. Le texte s'affiche au rythme de l'audio, mot à mot, comme les sous-titres en direct de Windows. Si le fichier
+   ne peut pas être lu ainsi (gros fichier dans un autre format, serveur qui refuse), on revient à l'écoute en direct. */
+const TRX_W = 27.5, TRX_OV = 1.2, TRX_AHEAD = 3;
+function trxRange(url, a, b, max){
+  const ctl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+  return fetch(url, { headers:{ Range:'bytes=' + a + '-' + b }, mode:'cors', credentials:'omit', signal:ctl ? ctl.signal : undefined }).then(async r => {
+    if(!(r.status === 206 || r.status === 200)) throw new Error('http ' + r.status);
+    const cr = r.headers.get('content-range') || '', m = /\/(\d+)\s*$/.exec(cr);
+    const len = +(r.headers.get('content-length') || 0);
+    if(r.status === 200 && max && len > max){ try{ if(ctl) ctl.abort(); }catch(e){} throw new Error('trop gros'); }
+    const buf = await r.arrayBuffer();
+    return { buf, total:m ? +m[1] : (r.status === 200 ? (len || buf.byteLength) : 0), type:r.headers.get('content-type') || '', full:r.status === 200 };
+  }, () => { const er = new Error('cors'); er.cors = true; throw er; });
+}
+/* en-tête d'une trame MP3 (couche III) */
+function trxMp3Header(u, i){
+  if(i + 3 >= u.length || u[i] !== 0xFF || (u[i + 1] & 0xE0) !== 0xE0) return null;
+  const ver = (u[i + 1] >> 3) & 3, layer = (u[i + 1] >> 1) & 3, bi = u[i + 2] >> 4, si = (u[i + 2] >> 2) & 3, pad = (u[i + 2] >> 1) & 1, ch = u[i + 3] >> 6;
+  if(ver === 1 || layer !== 1 || bi === 0 || bi === 15 || si === 3) return null;
+  const v1 = ver === 3;
+  const br = (v1 ? [0, 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320] : [0, 8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160])[bi];
+  const sr = ({ 3:[44100, 48000, 32000], 2:[22050, 24000, 16000], 0:[11025, 12000, 8000] })[ver][si], spf = v1 ? 1152 : 576;
+  return { br, sr, spf, len:Math.floor((spf / 8) * br * 1000 / sr) + pad, v1, mono:ch === 3 };
+}
+function trxMp3Sync(u, from){ for(let i = from || 0; i < u.length - 4; i++){ const h = trxMp3Header(u, i); if(h && (i + h.len + 3 >= u.length || trxMp3Header(u, i + h.len))) return i; } return -1; }
+/* le début du son, le débit, et la table Xing (MP3 à débit variable) */
+function trxMp3Probe(u, base){
+  base = base || 0;
+  let o = 0;
+  if(!base && u[0] === 0x49 && u[1] === 0x44 && u[2] === 0x33) o = 10 + (((u[6] & 0x7f) << 21) | ((u[7] & 0x7f) << 14) | ((u[8] & 0x7f) << 7) | (u[9] & 0x7f)) + ((u[5] & 0x10) ? 10 : 0);
+  if(o + 64 > u.length) return { need:o };
+  const i = trxMp3Sync(u.subarray(0, Math.min(u.length, o + 65536)), o); if(i < 0) return null;
+  const h = trxMp3Header(u, i);
+  const xo = i + 4 + (h.v1 ? (h.mono ? 17 : 32) : (h.mono ? 9 : 17));
+  const tag = String.fromCharCode(u[xo], u[xo + 1], u[xo + 2], u[xo + 3]);
+  const res = { dataStart:base + i, br:h.br, sr:h.sr, spf:h.spf, toc:null, bytes:0, frames:0 };
+  if(tag === 'Xing' || tag === 'Info'){
+    const rd = (p) => ((u[p] << 24) | (u[p + 1] << 16) | (u[p + 2] << 8) | u[p + 3]) >>> 0;
+    const fl = rd(xo + 4); let p = xo + 8;
+    if(fl & 1){ res.frames = rd(p); p += 4; }
+    if(fl & 2){ res.bytes = rd(p); p += 4; }
+    if((fl & 4) && tag === 'Xing') res.toc = Array.from(u.subarray(p, p + 100));
+    res.dataStart += h.len;                                        // la trame Xing/Info ne contient pas de son
+  }
+  return res;
+}
+function trxMp3Bps(ah){ const m = ah.mp3; if(m.frames && m.bytes && !m.toc) return m.bytes / (m.frames * m.spf / m.sr); if(m.toc) return (ah.size - m.dataStart) / Math.max(1, ah.dur || 1); return m.br * 125; }
+function trxByteAt(ah, t){
+  const m = ah.mp3, dur = ah.dur || 1;
+  if(m.toc && m.bytes){ const pc = Math.max(0, Math.min(99.999, t / dur * 100)), a = Math.floor(pc), fa = m.toc[a], fb = a < 99 ? m.toc[a + 1] : 256; return Math.round(m.dataStart + (fa + (fb - fa) * (pc - a)) / 256 * m.bytes); }
+  return Math.round(m.dataStart + t * trxMp3Bps(ah));
+}
+function trxTimeAt(ah, b){
+  const m = ah.mp3, dur = ah.dur || 1;
+  if(m.toc && m.bytes){ const f = (b - m.dataStart) / m.bytes * 256; let a = 0; while(a < 99 && m.toc[a + 1] <= f) a++; const fa = m.toc[a], fb = a < 99 ? m.toc[a + 1] : 256; return Math.max(0, (a + (fb > fa ? Math.min(1, (f - fa) / (fb - fa)) : 0)) / 100 * dur); }
+  return Math.max(0, (b - m.dataStart) / trxMp3Bps(ah));
+}
+/* décoder un morceau en son mono à 16 kHz (ce que le modèle attend) */
+function trxDecode16k(buf){
+  const C = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+  const ctx = new C(1, 16000, 16000);
+  return new Promise((res, rej) => { try{ const pr = ctx.decodeAudioData(buf, res, rej); if(pr && pr.then) pr.then(res, rej); }catch(e){ rej(e); } }).then(ab => {
+    const n = ab.length, out = new Float32Array(n), nc = ab.numberOfChannels;
+    for(let c = 0; c < nc; c++){ const d = ab.getChannelData(c); for(let i = 0; i < n; i++) out[i] += d[i] / nc; }
+    return ab.sampleRate === 16000 ? out : trxResample(out, ab.sampleRate);
+  });
+}
+async function trxAheadInit(){
+  const c = audioCurrent(), el = audioLib.el;
+  if(!TRX.on || !c || !el) return;
+  const file = c.t.file;
+  if(TRX.ah && TRX.ah.file === file) return;
+  const url = audioUrl(file);
+  const ah = TRX.ah = { file, url, done:new Set(), bad:new Set(), busyW:-1, fail:false, ready:false, nbad:0 };
+  if(window.__trxForceLive){ trxAheadFallback(ah); return; }                // (tests : l'écoute en direct)
+  try{
+    let r = await trxRange(url, 0, 65535, 16e6);
+    if(TRX.ah !== ah) return;
+    ah.size = r.total;
+    let u = new Uint8Array(r.buf);
+    const looksMp3 = /\.mp3(\?|#|$)/i.test(url) || /mpeg|mp3/i.test(r.type) || (u[0] === 0x49 && u[1] === 0x44 && u[2] === 0x33);
+    let m = looksMp3 ? trxMp3Probe(u, 0) : null;
+    if(m && m.need != null){ const r2 = await trxRange(url, m.need, m.need + 16383); if(TRX.ah !== ah) return; m = trxMp3Probe(new Uint8Array(r2.buf), m.need); }
+    if(m && !m.need && r.total){
+      ah.kind = 'mp3'; ah.mp3 = m;
+      const d = el.duration;
+      ah.dur = isFinite(d) && d > 0 ? d : (m.frames ? m.frames * m.spf / m.sr : (r.total - m.dataStart) / (m.br * 125));
+    } else if(r.full || (r.total && r.total <= 16e6)){
+      const all = r.full ? r : await trxRange(url, 0, r.total - 1, 16e6);
+      if(TRX.ah !== ah) return;
+      ah.kind = 'whole'; ah.pcm = await trxDecode16k(all.buf); ah.dur = ah.pcm.length / 16000;
+    } else throw new Error('format');
+    if(TRX.ah !== ah) return;
+    ah.ready = true; TRX.mode = 'ahead'; TRX.err = '';
+    trxStopCapture(true); TRX.buf = []; TRX.bufLen = 0; TRX.queue = [];
+    trxRender(); trxAheadPump();
+  }catch(e){
+    if(TRX.ah !== ah) return;
+    trxAheadFallback(ah, e);
+  }
+}
+function trxAheadFallback(ah, e){
+  ah.fail = true; TRX.mode = 'live';
+  const el = audioLib.el;
+  if(el && !el.paused && TRX.on) trxStartCapture();
+  trxStatus();
+}
+function trxAheadReadyUntil(){
+  const ah = TRX.ah, el = audioLib.el; if(!ah || !el) return 0;
+  let k = Math.floor((el.currentTime || 0) / TRX_W);
+  while(ah.done.has(k)) k++;
+  return Math.min(ah.dur || 0, k * TRX_W);
+}
+function trxAheadPump(){
+  const ah = TRX.ah, el = audioLib.el;
+  if(!TRX.on || TRX.mode !== 'ahead' || !ah || !ah.ready || ah.fail || !TRX.ready || !TRX.worker || TRX.busy || ah.busyW >= 0 || !el) return;
+  if(el.readyState < 1){ if(!ah.waitMeta){ ah.waitMeta = true; el.addEventListener('loadedmetadata', () => { ah.waitMeta = false; trxAheadPump(); }, { once:true }); } return; }   // l'heure de lecture n'est pas encore la bonne
+  if(isFinite(el.duration) && el.duration > 0) ah.dur = el.duration;
+  const now = el.currentTime || 0, k0 = Math.floor(now / TRX_W), kmax = Math.max(0, Math.ceil((ah.dur || 0) / TRX_W) - 1);
+  const lim = Math.min(kmax, k0 + (el.paused ? 1 : TRX_AHEAD));
+  let k = -1; for(let j = k0; j <= lim; j++){ if(!ah.done.has(j) && !ah.bad.has(j)){ k = j; break; } }
+  if(k < 0) return;
+  ah.busyW = k; TRX.busy = true; trxStatus();
+  const t0w = Math.max(0, k * TRX_W - TRX_OV), t1w = Math.min(ah.dur, (k + 1) * TRX_W + TRX_OV);
+  const job = ah.kind === 'mp3' ? (async () => {
+    let a = Math.max(ah.mp3.dataStart, trxByteAt(ah, t0w) - 1200), b = Math.min(ah.size - 1, trxByteAt(ah, t1w) + 1200);
+    const r = await trxRange(ah.url, a, b);
+    let buf = r.buf;
+    if(a > ah.mp3.dataStart){ const s = trxMp3Sync(new Uint8Array(buf).subarray(0, 8192), 0); if(s > 0){ buf = buf.slice(s); a += s; } }
+    const pcm = await trxDecode16k(buf);
+    return { pcm, t0:a <= ah.mp3.dataStart ? 0 : trxTimeAt(ah, a) };
+  })() : Promise.resolve((() => { const s = Math.floor(t0w * 16000), e = Math.min(ah.pcm.length, Math.ceil(t1w * 16000)); return { pcm:ah.pcm.slice(s, e), t0:s / 16000 }; })());
+  job.then((res) => { let pcm = res.pcm; const t0 = res.t0;
+    if(TRX.ah !== ah || !TRX.on || !TRX.worker){ TRX.busy = false; ah.busyW = -1; return; }
+    if(pcm.length > 480000) pcm = pcm.slice(0, 480000);                 // 30 s au plus (la limite du modèle)
+    TRX.worker.postMessage({ type:'runTs', id:++TRX.id, audio:pcm, t0, k, core:[k * TRX_W, (k + 1) * TRX_W], file:ah.file, lang:TRX_LANGS[trxCfg().lang][1] }, [pcm.buffer]);
+  }).catch(err => {
+    ah.busyW = -1; TRX.busy = false; ah.bad.add(k); ah.nbad++;
+    if(ah.nbad >= 3 && !ah.done.size){ trxAheadFallback(ah, err); return; }
+    setTimeout(trxAheadPump, 300);
+  });
+}
+/* le modèle a écrit un morceau : ses phrases (avec leur heure) rejoignent le texte, sans doublon */
+function trxAheadText(m){
+  const ah = TRX.ah;
+  if(ah && ah.file === m.file){ ah.busyW = -1; ah.done.add(m.k); }
+  if(!ah || m.file !== ah.file || m.file !== TRX.file) return;
+  const c0 = (m.core || [0])[0], c1 = (m.core || [0, 1e9])[1];
+  let added = 0;
+  (m.chunks || []).forEach(c => {
+    const x = String(c.x || '').replace(/\s+/g, ' ').trim();
+    if(!x || TRX_JUNK.test(x) || /^[.…,!?\s-]+$/.test(x)) return;
+    const s = m.t0 + (+c.s || 0), e = (c.e != null && isFinite(c.e)) ? m.t0 + +c.e : s + Math.max(1, x.split(' ').length * 0.38);
+    if(s >= c1) return;                                                     // le morceau suivant s'en charge
+    if(s < c0 - 0.4 && (e - c0) < (c0 - s)) return;                         // surtout dans le morceau d'avant
+    if(TRX.segs.some(o => { const oe = o.e != null ? o.e : o.t + 2; return Math.min(e, oe) - Math.max(s, o.t) > 0.5 * Math.max(0.3, e - s); })) return;
+    const seg = { t:Math.round(s * 10) / 10, e:Math.round(e * 10) / 10, x };
+    let i = TRX.segs.findIndex(o => o.t > seg.t); if(i < 0) i = TRX.segs.length;
+    TRX.segs.splice(i, 0, seg); added++;
+  });
+  if(added){ trxSave(); trxsAutoSave(); if(TRX.hardOn) trxHardRefresh(); trxRender(); }
+  else trxStatus();
+}
+/* 🎬 l'affichage au rythme de l'audio : les phrases déjà dites, et celle en cours, mot à mot */
+function trxReveal(){
+  if(TRX.mode !== 'ahead') return;
+  const box = document.getElementById('trxText'); if(!box) return;
+  const el = audioLib.el, now = el ? (el.currentTime || 0) : 0, all = TRX.reveal === 'all';
+  let cur = null;
+  box.querySelectorAll('.trx-seg[data-t]').forEach(p => {
+    const t = +p.dataset.t, e = +(p.dataset.e || t + 3);
+    const fut = !all && t > now + 0.15, isCur = t <= now + 0.15 && now < e + 0.2;
+    p.classList.toggle('fut', fut); p.classList.toggle('cur', isCur);
+    if(isCur) cur = p;
+    const ws = p.querySelectorAll('.tw'); if(!ws.length) return;
+    const n = ws.length, k = (all || !isCur) ? (fut ? 0 : n) : Math.max(1, Math.ceil((now - t) / Math.max(0.4, e - t) * n + 0.35));
+    ws.forEach((w, i) => w.classList.toggle('hid', i >= k));
+  });
+  const ph = box.querySelector('.trx-wait');
+  const wait = !all && !cur && el && !el.paused && trxAheadReadyUntil() <= now + 0.5;
+  if(wait && !ph) box.insertAdjacentHTML('beforeend', '<p class="trx-wait">⏳ J’écris ce passage…</p>'); else if(!wait && ph) ph.remove();
+  if(cur && TRX.follow && cur !== TRX.lastCurEl){ TRX.lastCurEl = cur; const r = cur.getBoundingClientRect(), R = box.getBoundingClientRect(); if(r.bottom > R.bottom - 8 || r.top < R.top) box.scrollTop += r.top - R.top - 24; }
+}
+setInterval(() => { try{ if(TRX.on && TRX.mode === 'ahead' && audioLib.el && !audioLib.el.paused) trxReveal(); }catch(e){} }, 180);
 
 /* 📰 le texte entendu → un texte de la Tablette (par paragraphes) */
 function trxToTablette(){
@@ -51123,6 +51598,81 @@ function trxToTablette(){
   if(!tbPut(art)){ lexSnack('⚠️ Plus de place sur cet appareil.'); return; }
   lexSnack(old ? '📰 Le texte est mis à jour dans la Tablette' : '📰 Le texte est dans la Tablette', '📖 Le lire', () => renderTabletteReader(art.id), 7000);
 }
+/* ============ 🪟 1.0.35 : LE LECTEUR FLOTTANT (PC) ============
+   Une petite fenêtre toujours au premier plan (Chrome / Edge sur ordinateur) : elle reste là même quand l'appli est
+   réduite, avec ⏮ ↺10 ⏯ 10↻ ⏭ ⏹, la barre de progression (on peut cliquer dedans) et la phrase en cours de la
+   transcription. Windows n'autorise pas une page web à mettre des boutons dans l'aperçu de la barre des tâches :
+   ce lecteur flottant les remplace. */
+var AP = { win:null, timer:0 };
+function apSupported(){ try{ return 'documentPictureInPicture' in window && window.isSecureContext !== false; }catch(e){ return false; } }
+function apCaption(){
+  try{
+    if(!TRX.segs || !TRX.segs.length || !audioLib.el) return '';
+    const now = audioLib.el.currentTime || 0; let s = null;
+    for(let i = TRX.segs.length - 1; i >= 0; i--){ if(TRX.segs[i].t <= now + 0.1){ s = TRX.segs[i]; break; } }
+    return s && now - s.t < 30 ? s.x : '';
+  }catch(e){ return ''; }
+}
+function apSync(){
+  const w = AP.win;
+  if(!w || w.closed){ clearInterval(AP.timer); AP.timer = 0; AP.win = null; return; }
+  const d = w.document, el = audioLib.el, c = audioCurrent();
+  const $ = (id) => d.getElementById(id);
+  if(!$('apT')) return;
+  $('apT').textContent = c ? c.t.title : 'Aucun audio en cours';
+  $('apS').textContent = c ? c.p.title : 'Choisis un audio dans l’Audiothèque';
+  const on = !!(el && el.src && !el.paused);
+  $('apPlay').textContent = on ? '⏸' : '▶'; $('apPlay').setAttribute('aria-label', on ? 'Pause' : 'Lecture');
+  const dur = el && isFinite(el.duration) ? el.duration : 0, t = el ? el.currentTime || 0 : 0;
+  $('apBar').style.width = dur ? (t / dur * 100).toFixed(2) + '%' : '0%';
+  $('apTime').textContent = dur ? `${audioFmt(t)} / ${audioFmt(dur)}` : '';
+  const cap = apCaption(); $('apCap').textContent = cap; $('apCap').hidden = !cap;
+}
+async function apOpen(auto){
+  if(!apSupported()){ lexSnack('🪟 Le lecteur flottant marche dans Chrome ou Edge sur ordinateur.'); return; }
+  if(AP.win && !AP.win.closed){ try{ AP.win.focus(); }catch(e){} return; }
+  let w;
+  try{ w = await window.documentPictureInPicture.requestWindow({ width:360, height:auto ? 170 : 200 }); }
+  catch(e){ if(!auto) lexSnack('🪟 Impossible d’ouvrir le lecteur flottant (' + String(e && e.message || e).slice(0, 60) + ').'); return; }
+  AP.win = w;
+  const d = w.document;
+  d.title = 'VocabVISION · lecteur';
+  const st = d.createElement('style');
+  st.textContent = `html,body{margin:0;height:100%;}
+    body{font-family:'Nunito','Segoe UI',system-ui,sans-serif;background:radial-gradient(120% 90% at 0% 0%,#4C1D95,#1E0B4B 60%,#0D0326);color:#fff;overflow:hidden;user-select:none;}
+    .ap{display:flex;flex-direction:column;gap:6px;padding:10px 12px;box-sizing:border-box;height:100%;}
+    .ap-h{display:flex;align-items:center;gap:10px;min-width:0;}
+    .ap-ic{width:34px;height:34px;border-radius:9px;flex:none;background:#fff center/cover no-repeat;box-shadow:0 3px 10px rgba(0,0,0,.4);}
+    .ap-tt{min-width:0;flex:1;}
+    .ap-t{font-weight:800;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .ap-s{font-size:11.5px;opacity:.75;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .ap-bar{height:6px;border-radius:6px;background:rgba(255,255,255,.18);cursor:pointer;overflow:hidden;}
+    .ap-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#FDE047,#FB923C,#EC4899);}
+    .ap-time{font-size:11px;opacity:.7;text-align:right;font-variant-numeric:tabular-nums;margin-top:-2px;}
+    .ap-b{display:flex;justify-content:center;gap:6px;}
+    .ap-b button{flex:none;min-width:38px;height:38px;border-radius:12px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.1);color:#fff;font-family:inherit;font-weight:800;font-size:17px;line-height:1;cursor:pointer;}
+    .ap-b button:hover{background:rgba(255,255,255,.2);}
+    .ap-b button.main{min-width:52px;background:linear-gradient(135deg,#F97316,#EC4899);border:0;font-size:20px;}
+    .ap-cap{font-size:12.5px;line-height:1.35;background:rgba(0,0,0,.25);border-radius:9px;padding:5px 8px;max-height:3.9em;overflow:hidden;}`;
+  d.head.appendChild(st);
+  let logo = ''; try{ logo = getComputedStyle(document.documentElement).getPropertyValue('--vv-logo').trim(); }catch(e){}
+  d.body.innerHTML = `<div class="ap" role="group" aria-label="Lecteur audio VocabVISION">
+    <div class="ap-h"><span class="ap-ic" id="apIc"></span><div class="ap-tt"><div class="ap-t" id="apT"></div><div class="ap-s" id="apS"></div></div></div>
+    <div class="ap-bar" id="apBarW" title="Aller à…"><i id="apBar"></i></div><div class="ap-time" id="apTime"></div>
+    <div class="ap-b"><button id="apPrev" title="Précédent" aria-label="Précédent">⏮</button><button id="apBack" title="Reculer de 10 s" aria-label="Reculer de 10 secondes">↺10</button><button id="apPlay" class="main" aria-label="Lecture">▶</button><button id="apFwd" title="Avancer de 10 s" aria-label="Avancer de 10 secondes">10↻</button><button id="apNext" title="Suivant" aria-label="Suivant">⏭</button><button id="apStop" title="Arrêter" aria-label="Arrêter">⏹</button></div>
+    <div class="ap-cap" id="apCap" hidden></div></div>`;
+  if(logo) d.getElementById('apIc').style.backgroundImage = logo;
+  const on = (id, f) => d.getElementById(id).addEventListener('click', () => { try{ f(); }catch(e){} setTimeout(apSync, 60); });
+  on('apPrev', () => audioPrev()); on('apNext', () => audioNext()); on('apBack', () => audioSkip(-10)); on('apFwd', () => audioSkip(10));
+  on('apPlay', () => { const el = audioLib.el; if(el && el.src) audioToggle(); else { const c = audioCurrent(); if(c) audioPlay(audioLib.pl, audioLib.tr); } });
+  on('apStop', () => audioStop());
+  d.getElementById('apBarW').addEventListener('click', (e) => { const el = audioLib.el, r = e.currentTarget.getBoundingClientRect(); if(el && isFinite(el.duration)) el.currentTime = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * el.duration; setTimeout(apSync, 60); });
+  d.addEventListener('keydown', (e) => { if(e.key === ' '){ e.preventDefault(); audioToggle(); setTimeout(apSync, 60); } });
+  w.addEventListener('pagehide', () => { AP.win = null; clearInterval(AP.timer); AP.timer = 0; const b = document.getElementById('apBtn'); if(b) b.classList.remove('active'); });
+  clearInterval(AP.timer); AP.timer = setInterval(apSync, 400); apSync();
+  const b = document.getElementById('apBtn'); if(b) b.classList.add('active');
+}
+function apClose(){ try{ if(AP.win && !AP.win.closed) AP.win.close(); }catch(e){} AP.win = null; }
 /* ---------- Écran Audiothèque ---------- */
 function renderAudioLibrary(forceRefresh){
   clearQuestionTimer();
@@ -51278,9 +51828,11 @@ function audioUpdateUI(rebuild){
             ${[0.75, 1, 1.25, 1.5].map(s => `<button class="mode-chip ${audioLib.speed === s ? 'active' : ''}" data-audio-speed="${s}">${s}×</button>`).join('')}
             <button class="mode-chip ${audioLib.loopOne ? 'active' : ''}" id="audioLoopBtn">🔂 Répéter</button>
             <button class="mode-chip ${TRX.on ? 'active' : ''}" id="trxBtn" aria-pressed="${TRX.on}">📝 Transcription en direct</button>
+            ${apSupported() ? `<button class="mode-chip ${AP.win && !AP.win.closed ? 'active' : ''}" id="apBtn" title="Une petite fenêtre toujours visible, même appli réduite">🪟 Lecteur flottant</button>` : ''}
           </div>
           <div id="trxBox" class="trx-box" ${TRX.on || (TRX.segs && TRX.segs.length) ? '' : 'hidden'}></div>`;
         now.querySelector('#trxBtn').addEventListener('click', () => trxToggle());
+        { const ab = now.querySelector('#apBtn'); if(ab) ab.addEventListener('click', () => { if(AP.win && !AP.win.closed) apClose(); else apOpen(); }); }
         now.querySelector('#audioPlayBtn').addEventListener('click', audioToggle);
         now.querySelector('#audioPrevBtn').addEventListener('click', () => { audioPrev(); audioRenderList(); });
         now.querySelector('#audioNextBtn').addEventListener('click', () => { audioNext(); audioRenderList(); });
@@ -51330,12 +51882,13 @@ function audioUpdateUI(rebuild){
   if(!mini){
     mini = document.createElement('div');
     mini.id = 'audioMini';
-    mini.innerHTML = `<button class="audio-mini-x" id="audioMiniPrev" title="Précédent" aria-label="Précédent">⏮</button><button class="audio-mini-play" id="audioMiniPlay" aria-label="Lecture / pause">▶</button><button class="audio-mini-x" id="audioMiniNext" title="Suivant" aria-label="Suivant">⏭</button><div class="audio-mini-txt" id="audioMiniTxt"></div><button class="audio-mini-x" id="audioMiniOpen" title="Ouvrir">🎵</button><button class="audio-mini-x" id="audioMiniClose" title="Arrêter" aria-label="Arrêter">✕</button><div class="audio-mini-bar"><span id="audioMiniBar"></span></div>`;
+    mini.innerHTML = `<button class="audio-mini-x" id="audioMiniPrev" title="Précédent" aria-label="Précédent">⏮</button><button class="audio-mini-play" id="audioMiniPlay" aria-label="Lecture / pause">▶</button><button class="audio-mini-x" id="audioMiniNext" title="Suivant" aria-label="Suivant">⏭</button><div class="audio-mini-txt" id="audioMiniTxt"></div>${apSupported() ? '<button class="audio-mini-x" id="audioMiniPip" title="Lecteur flottant (reste visible appli réduite)" aria-label="Lecteur flottant">🪟</button>' : ''}<button class="audio-mini-x" id="audioMiniOpen" title="Ouvrir">🎵</button><button class="audio-mini-x" id="audioMiniClose" title="Arrêter" aria-label="Arrêter">✕</button><div class="audio-mini-bar"><span id="audioMiniBar"></span></div>`;
     document.body.appendChild(mini);
     mini.querySelector('#audioMiniPlay').addEventListener('click', audioToggle);
     mini.querySelector('#audioMiniPrev').addEventListener('click', () => audioPrev());
     mini.querySelector('#audioMiniNext').addEventListener('click', () => audioNext());
     mini.querySelector('#audioMiniOpen').addEventListener('click', () => renderAudioLibrary());
+    { const pb = mini.querySelector('#audioMiniPip'); if(pb) pb.addEventListener('click', () => apOpen()); }
     mini.querySelector('#audioMiniTxt').addEventListener('click', () => renderAudioLibrary());
     mini.querySelector('#audioMiniClose').addEventListener('click', audioStop);
   }
