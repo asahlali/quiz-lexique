@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- 🏷️ Version de l'appli : augmentée automatiquement par publier-site.cmd à chaque publication -->
-<meta name="app-version" content="1.0.35" data-date="2026-10-29">
+<meta name="app-version" content="1.0.36" data-date="2026-10-29">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <title>VocabVISION — Vocabulaire Français ↔ Arabe</title>
 <script>
@@ -2450,6 +2450,68 @@
   .done-top-btn{ font-weight:800 !important; }
   .done-top-btn.on{ background:rgba(34,197,94,.12) !important; border-color:rgba(34,197,94,.55) !important; color:#16A34A !important; }
   /* 📇 1.0.26 : la fiche d'un mot en fenêtre, 🔖 le marque-page de la Tablette, 🎤 le micro de la Répétition */
+  /* 🖼️ 1.0.36 : les images des mots */
+  .wimg{ position:relative; overflow:hidden; }
+  .wimg[hidden]{ display:none !important; }
+  .wimg img{ display:block; width:100%; height:100%; object-fit:cover; opacity:0; transition:opacity .3s ease; }
+  .wimg.ok img{ opacity:1; }
+  .wimg.ld{ background:linear-gradient(100deg, rgba(124,58,237,.07) 30%, rgba(124,58,237,.16) 50%, rgba(124,58,237,.07) 70%); background-size:300% 100%; animation:wimgShim 1.2s linear infinite; }
+  @keyframes wimgShim{ from{ background-position:100% 0; } to{ background-position:-100% 0; } }
+  .wimg-card, .wimg-bubble, .wimg-sheet, .wimg-slide{ background:var(--surface-sunken, #F5F3FF); }
+  .wimg-card img, .wimg-bubble img, .wimg-sheet img, .wimg-slide img{ object-fit:contain; cursor:zoom-in; }
+  .wimg-card{ height:clamp(150px, 36vw, 210px); border-radius:16px; margin:10px 0 8px; }
+  .wimg-card.none{ height:auto; background:none; margin:8px 0 4px; overflow:visible; }
+  .wimg-bubble{ height:120px; border-radius:12px; margin:8px 0 2px; }
+  .wimg-sheet{ height:132px; border-radius:14px; margin:8px 0 6px; }
+  .wimg-slide{ width:min(280px, 78%); height:150px; border-radius:16px; margin:0 auto 12px; z-index:1; background:rgba(255,255,255,.14); }
+  .wimg-th{ float:right; width:78px; height:78px; border-radius:12px; margin:0 0 6px 12px; background:var(--surface); }
+  .wimg-fc{ width:72px; height:72px; border-radius:12px; margin:0 auto 6px; flex:none; }
+  .peek-card-grid .pk-fc:has(.wimg-fc:not([hidden])){ height:178px; }
+  .ss-r-img{ position:relative; }
+  .wimg-ic{ position:absolute; left:0; top:50%; width:30px; height:30px; margin-top:-15px; border-radius:8px; visibility:hidden; }
+  .wimg-ic.ok{ visibility:visible; }
+  .wimg-tile{ width:100%; aspect-ratio:1; border-radius:11px; background:var(--surface); display:flex; align-items:center; justify-content:center; }
+  .wimg-ph{ font-size:22px; opacity:.45; }
+  .wimg-ch{ position:absolute; right:8px; top:8px; width:34px; height:34px; border-radius:50%; border:0; background:rgba(15,10,40,.55); color:#fff; font-size:15px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+  .wimg-ch:hover{ background:rgba(15,10,40,.75); }
+  .wimg-cr{ position:absolute; left:8px; bottom:7px; max-width:calc(100% - 64px); box-sizing:border-box; padding:2px 8px; border-radius:8px; background:rgba(15,10,40,.58); font-size:10.5px; line-height:1.4; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-decoration:none; }
+  .wimg-add{ border:1px dashed rgba(124,58,237,.5); background:rgba(124,58,237,.06); color:var(--purple); border-radius:12px; padding:8px 12px; font:inherit; font-weight:800; font-size:13px; cursor:pointer; }
+  .wimg-zoom{ position:fixed; inset:0; z-index:10090; background:rgba(5,3,15,.88); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:18px; cursor:zoom-out; }
+  .wimg-zoom img{ max-width:100%; max-height:76vh; object-fit:contain; border-radius:12px; background:#fff; }
+  .wimg-zoom-t{ color:#fff; font-size:20px; text-align:center; } .wimg-zoom-c{ color:rgba(255,255,255,.7); font-size:12px; text-align:center; }
+  .wimg-zoom-x{ position:absolute; top:14px; right:14px; width:42px; height:42px; border-radius:50%; border:0; background:rgba(255,255,255,.15); color:#fff; font-size:18px; cursor:pointer; }
+  .wimg-pk-ov{ position:fixed; inset:0; z-index:10070; display:flex; align-items:flex-end; justify-content:center; background:rgba(15,10,40,.5); opacity:0; transition:opacity .2s; }
+  .wimg-pk-ov.show{ opacity:1; }
+  .wimg-pk{ width:min(580px, 100%); max-height:90vh; overflow-y:auto; background:var(--surface, #fff); color:var(--text); border-radius:22px 22px 0 0; padding:16px 16px 22px; box-sizing:border-box; box-shadow:0 -10px 40px rgba(0,0,0,.25); }
+  .wimg-pk-h{ display:flex; align-items:center; gap:10px; justify-content:space-between; font-size:16px; }
+  .wimg-pk-x{ border:0; background:var(--surface-sunken); color:var(--text); width:36px; height:36px; border-radius:50%; cursor:pointer; flex:none; }
+  .wimg-pk-ar{ font-size:18px; margin:4px 0 0; color:var(--text-dim); }
+  .wimg-pk-l{ font-size:13px; color:var(--text-dim); margin:10px 0 8px; }
+  .wimg-pk-g{ display:grid; grid-template-columns:repeat(auto-fill, minmax(96px, 1fr)); gap:8px; min-height:60px; }
+  .wimg-pk-wait{ grid-column:1 / -1; font-size:14px; color:var(--text-dim); padding:12px 4px; }
+  .wimg-pk-t{ position:relative; aspect-ratio:1; border-radius:12px; overflow:hidden; border:3px solid transparent; padding:0; background:var(--surface-sunken); cursor:pointer; }
+  .wimg-pk-t.on{ border-color:var(--purple); }
+  .wimg-pk-t img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .wimg-pk-t small{ position:absolute; left:0; right:0; bottom:0; font-size:9.5px; padding:2px 4px; background:rgba(0,0,0,.5); color:#fff; text-align:left; }
+  .wimg-pk-b{ display:flex; flex-wrap:wrap; gap:8px; margin:14px 0 8px; }
+  .wimg-pk-b button, .wimg-pk-b a, .wimg-pk-u button{ border:1px solid var(--border); background:var(--surface-sunken); color:var(--text); border-radius:12px; padding:9px 12px; font:inherit; font-size:13.5px; font-weight:700; cursor:pointer; text-decoration:none; }
+  .wimg-pk-u{ display:flex; gap:8px; margin:0 0 8px; } .wimg-pk-u[hidden]{ display:none; }
+  .wimg-pk-u input{ flex:1; min-width:0; border:1px solid var(--border); border-radius:12px; padding:9px 12px; font:inherit; background:var(--surface); color:var(--text); }
+  .wimg-pk-n{ font-size:11.5px; color:var(--text-dim); }
+  .wimg-on{ display:flex; gap:10px; align-items:flex-start; margin:12px 0; font-weight:700; font-size:14px; cursor:pointer; }
+  .wimg-on input{ width:20px; height:20px; flex:none; margin-top:1px; accent-color:var(--purple); }
+  .wimg-prog{ display:flex; height:10px; border-radius:10px; overflow:hidden; background:var(--surface-sunken); margin:6px 0 6px; }
+  .wimg-prog i{ display:block; height:100%; background:linear-gradient(90deg, #7C3AED, #EC4899); transition:width .3s; }
+  .wimg-prog i.n{ background:rgba(148,163,184,.55); }
+  .wimg-leg{ display:flex; flex-wrap:wrap; gap:12px; font-size:13px; color:var(--text-dim); font-weight:700; }
+  .wimg-acts{ display:flex; flex-wrap:wrap; gap:8px; margin:10px 0 0; align-items:center; }
+  .wimg-go{ background:linear-gradient(135deg, #7C3AED, #EC4899) !important; color:#fff !important; border:0 !important; }
+  .wimg-ok{ font-weight:800; color:#059669; }
+  .wimg-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(106px, 1fr)); gap:10px; }
+  .wimg-gt{ border:1px solid var(--border); background:var(--surface-sunken); border-radius:14px; padding:6px 6px 8px; cursor:pointer; display:flex; flex-direction:column; gap:6px; text-align:center; font:inherit; font-weight:800; font-size:12.5px; color:var(--text); overflow:hidden; }
+  .wimg-gt > span{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .wimg-more{ grid-column:1 / -1; border:1px dashed var(--border); background:none; color:var(--purple); border-radius:14px; padding:12px; font:inherit; font-weight:800; cursor:pointer; }
+  .dict-img-btn{ margin-left:4px; }
   .wcp-ov{ position:fixed; inset:0; z-index:10050; display:flex; align-items:flex-end; justify-content:center; background:rgba(15,10,40,.45); -webkit-backdrop-filter:blur(3px); backdrop-filter:blur(3px); opacity:0; transition:opacity .16s; padding:10px; }
   .wcp-ov.show{ opacity:1; }
   @media (min-width:640px){ .wcp-ov{ align-items:center; } }
@@ -3378,6 +3440,14 @@
   .trx-text{ max-height:300px; overflow-y:auto; padding:10px 12px; border-radius:14px; background:#0B0F1C; border:1px solid rgba(255,255,255,.08); font-size:16px; line-height:1.65; color:#F3F4F6; }
   .trx-seg{ margin:0 0 8px; padding:2px 4px; border-radius:8px; transition:background .2s; }
   .trx-seg.cur{ background:rgba(129,140,248,.18); }
+  /* 📄 1.0.36 : le texte suivi (sans les minutes) */
+  .trx-text.flow{ line-height:1.75; }
+  .trx-text.flow .trx-seg{ display:inline; margin:0; padding:2px 1px; border-radius:6px; -webkit-box-decoration-break:clone; box-decoration-break:clone; }
+  .trx-text.flow .trx-seg.fut{ display:none; }
+  .trx-text.flow .trx-t{ display:none; }
+  .trx-text.flow .trx-para{ margin:0 0 .75em; }
+  .trx-text.flow .trx-para:last-child{ margin-bottom:0; }
+  .trx-text.flow .trx-para:not(:has(.trx-seg:not(.fut))){ display:none; }
   .trx-t{ border:0; background:rgba(255,255,255,.08); color:#A5B4FC; border-radius:8px; padding:1px 7px; font:800 11px 'Inter',sans-serif; cursor:pointer; vertical-align:2px; }
   .trx-ph{ color:#9CA3AF; font-size:13.5px; }
   .trx-b{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-top:10px; }
@@ -4896,7 +4966,7 @@ const NAV_TITLES = {
   renderConjugueGame:'Conjugue !', renderTCFQuiz:'TCF', renderPracticalSheetDetail:'Fiche', renderBouquinageHome:'Bouquinage', renderBouquinageDetail:'Lecture', renderTabletteHome:'La Tablette', renderTabletteReader:'Tablette',
   renderLessonList:'Leçons', renderDailyLesson:'Leçon du jour', renderDailyReading:'Lecture du jour', renderTimeBreakdown:'Temps passé',
   renderSoundTest:'Test du son', renderWhatsNew:'Nouveautés', renderQcmSetManage:'Jeu de QCM', renderQcmSetBuilder:'Éditeur de QCM',
-  renderEntrepriseHub:'Entreprise', renderRedactionHub:'Rédaction', renderBescherelleHub:'Bescherelle', renderAudioLibrary:'Audiothèque', renderTrxLibrary:'Mes transcriptions', renderTrxView:'Transcription',
+  renderEntrepriseHub:'Entreprise', renderRedactionHub:'Rédaction', renderBescherelleHub:'Bescherelle', renderAudioLibrary:'Audiothèque', renderTrxLibrary:'Mes transcriptions', renderWordImages:'Images des mots', renderTrxView:'Transcription',
   renderAudioManager:'Gestion des audios', renderRecapView:'Récapitulatif', renderCustomBlockRecapView:'Récapitulatif',
   startSheetQuiz:'Quiz de la fiche', startCodCoiQuiz:'Quiz COD / COI', startSentenceTypeQuiz:'Quiz', startGenericRecoQuiz:'Quiz', startAccordQuiz:'Quiz des accords',
   startTenseChoiceQuiz:'Quiz des temps', startBesConj:'Quiz Bescherelle', startConjugationQuiz:'Quiz de conjugaison', startShadowGame:'Shadowing',
@@ -5669,7 +5739,7 @@ function renderBlockWordsPeek(words, title, onBack, src){
         <div class="peek-card-grid" id="peekResults">${L.map(x => `
           <div class="flip-card pk-fc" data-peek-idx="${x.i}" data-flip-idx="${x.i}" style="--pc:${PK_ST[x.s].c}">
             <div class="flip-card-inner">
-              <div class="flip-card-front"><div class="flip-fr">${escapeHtml(x.w.fr)}</div><div class="flip-cat">${PK_ST[x.s].e} ${escapeHtml(x.w.cat || '')}</div></div>
+              <div class="flip-card-front">${wimgSlot(x.w, 'fc')}<div class="flip-fr">${escapeHtml(x.w.fr)}</div><div class="flip-cat">${PK_ST[x.s].e} ${escapeHtml(x.w.cat || '')}</div></div>
               <div class="flip-card-back"><div class="flip-ar" lang="ar">${escapeHtml(x.w.ar || '')}</div><div class="flip-def">${escapeHtml(x.w.def || '')}</div></div>
             </div>
           </div>`).join('')}</div>`;
@@ -5684,6 +5754,7 @@ function renderBlockWordsPeek(words, title, onBack, src){
       wrap.innerHTML = `<div id="peekResults">
         <div class="pk-slide ${pk.dir ? 'in-' + pk.dir : ''}" id="pkSlide" data-peek-idx="${x.i}">
           <div class="pk-scount">${pk.slide + 1} / ${L.length}</div><div class="pk-spill">${pill(x.s)}</div>
+          ${wimgSlot(x.w, 'slide')}
           <div class="pk-sfr" lang="fr">${escapeHtml(x.w.fr)}</div>
           ${x.w.ar ? `<div class="pk-sar" lang="ar" dir="rtl">${escapeHtml(x.w.ar)}</div>` : ''}
           ${x.w.def ? `<div class="pk-sdef">${escapeHtml(x.w.def)}</div>` : ''}
@@ -16577,7 +16648,7 @@ const SPEAK_SVG_SMALL = `<svg viewBox="0 0 24 24" fill="none" stroke-width="2" s
 
 function buildWordCardHtml(w){
   return `
-    <div class="result-card">
+    <div class="result-card">${wimgSlot(w, 'th')}
       <div class="result-head">
         <div class="result-fr">${escapeHtml(w.fr)}
           <button class="speak-btn small" data-speak-fr="${escapeHtml(w.fr)}" title="Écouter">${SPEAK_SVG_SMALL}</button>
@@ -16591,6 +16662,481 @@ function buildWordCardHtml(w){
     </div>`;
 }
 
+/* ============ 🖼️ 1.0.36 : UNE IMAGE POUR CHAQUE MOT ============
+   Chaque mot — les nouveaux comme les anciens — reçoit une image qui le montre : dans sa fiche, dans la bulle d'un mot
+   touché (transcriptions, lectures), la Tablette, le dictionnaire, la recherche et « Voir les mots » (cartes, diaporama).
+   Les images sont des photos et dessins libres de Wikimedia Commons, cherchés dans cet ordre :
+     1. l'image du Wiktionnaire pour ce mot (le dictionnaire la met à côté du sens qu'elle montre) ;
+     2. Wikidata : la notion qui porte ce nom en français ET ta traduction en arabe (le bon sens, même pour « avocat ») ;
+     3. l'article Wikipédia du mot (jamais une page d'homonymie) ;
+     4. Wikidata d'après le français seul.
+   Rien de sûr (mots abstraits : « néanmoins »…) : pas d'image plutôt qu'une fausse. « 🔄 » / « 🖼️ Ajouter une image »
+   proposent d'autres images, ta propre photo ou un lien ; ton choix est gardé (et suit ton profil sur tes autres
+   appareils, sauf tes photos, qui restent sur celui-ci). « 🖼️ Images de mes mots » (Dictionnaire) les cherche toutes. */
+var WIMG = { mem:null, loading:null, q:[], run:0, max:3, pend:new Map(), db:null, cred:new Map(), io:null, scanQ:0, batch:null, ui:null };
+const WIMG_ON_KEY = 'vocabVision.wimgOn';
+const WIMG_PICK_KEY = 'lexiqueQuiz::wordImgPick';
+const WIMG_BAD = /^(sein|seins|penis|vagin|vulve|sexe|sexuel|sexuelle|nu|nue|nus|nues|nudite|fesse|fesses|testicule|testicules|anus|clitoris|scrotum|preservatif|erection|orgasme|pornographie|prostitue|prostituee|prostitution|cadavre|viol)$/;
+const WIMG_BAD_FILE = /\b(nude|naked|nudity|porn|penis|vulva|vagina|genitals?|erotic|topless|corpse|autopsy)\b/i;
+const WIMG_SKIP_DESC = /homonymie|disambiguation|prénom|nom de famille|patronyme|\bfilm\b|album|chanson|single|groupe de musique|série télévisée|jeu vidéo|commune|village|localité|lieu-dit|rivière|entreprise|journal|\broman\b|revue|magazine|logiciel|personnage|équipe|club |famille de|émission|épisode|catégorie wikimedia|page d['’]aide|modèle wikimedia|article scientifique|thèse|œuvre de|tableau de|sculpture de|bande dessinée|manga/i;
+function wimgEa(s){ return escapeHtml(s == null ? '' : s).replace(/"/g, '&quot;'); }
+function wimgOn(){ try{ return localStorage.getItem(WIMG_ON_KEY) !== '0'; }catch(e){ return true; } }
+function wimgSetOn(v){ try{ localStorage.setItem(WIMG_ON_KEY, v ? '1' : '0'); }catch(e){} wimgRefresh(null); }
+function wimgK(fr){ return String(fr || '').trim().toLowerCase(); }
+/* le mot à chercher : sans l'article, sans « se », sans ce qui est entre parenthèses */
+function wimgTerm(fr){
+  let s = String(fr || '').replace(/\([^)]*\)/g, ' ').replace(/\s+/g, ' ').trim();
+  s = s.replace(/^(?:(?:le|la|les|un|une|des|du|de la|se)\s+|(?:l|s|d|qu)['’]\s*)/i, '').trim();
+  return s;
+}
+function wimgArFold(s){ return String(s || '').replace(/[ً-ْٰـ]/g, '').replace(/[أإآٱ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه').replace(/\s+/g, ' ').trim(); }
+/* la traduction arabe à chercher : la première, sans voyelles (si c'est une courte expression) */
+function wimgArTerm(ar){
+  let s = (String(ar || '').replace(/\([^)]*\)/g, ' ').split(/[،,;؛/|]|\s+أو\s+/)[0] || '');
+  s = s.replace(/[ً-ْٰـ]/g, '').replace(/[^؀-ۿ\s]/g, ' ').replace(/\s+/g, ' ').trim();
+  return s && s.split(' ').length <= 3 ? s : '';
+}
+function wimgFileUrl(name, w){ return 'https://commons.wikimedia.org/wiki/Special:FilePath/' + encodeURIComponent(String(name).replace(/ /g, '_')) + '?width=' + (w || 500); }
+function wimgPageUrl(name){ return 'https://commons.wikimedia.org/wiki/File:' + encodeURIComponent(String(name).replace(/ /g, '_')); }
+function wimgOkFile(n){ return !!n && typeof n === 'string' && !/\.(ogg|oga|ogv|wav|mp3|webm|mid|midi|pdf|flac|opus|djvu|stl)$/i.test(n) && !WIMG_BAD_FILE.test(n.replace(/[_.-]/g, ' ')); }
+/* ton choix pour un mot (synchronisé avec ton profil) : { f } une image de Commons, { u } un lien, { own } ta photo, { no } pas d'image, { auto } automatique */
+function wimgPicks(){ try{ return JSON.parse(localStorage.getItem(nsKey(WIMG_PICK_KEY)) || '{}') || {}; }catch(e){ return {}; } }
+function wimgPickSet(fr, v){
+  try{ const m = wimgPicks(); m[wimgK(fr)] = Object.assign({}, v, { at:Date.now() }); localStorage.setItem(nsKey(WIMG_PICK_KEY), JSON.stringify(m)); }catch(e){}
+  try{ if(typeof syncSoon === 'function') syncSoon(); }catch(e){}
+}
+/* ---------- le cache des images trouvées (sur cet appareil) et tes photos ---------- */
+function wimgDb(){
+  if(WIMG.db) return Promise.resolve(WIMG.db);
+  return new Promise((res) => {
+    try{
+      const r = indexedDB.open('vocabVisionImg', 1);
+      r.onupgradeneeded = () => { const db = r.result; ['auto', 'own'].forEach(n => { if(!db.objectStoreNames.contains(n)) db.createObjectStore(n, { keyPath:'k' }); }); };
+      r.onsuccess = () => { WIMG.db = r.result; res(WIMG.db); };
+      r.onerror = () => res(null); r.onblocked = () => res(null);
+    }catch(e){ res(null); }
+  });
+}
+function wimgIdb(store, mode, fn){
+  return wimgDb().then(db => new Promise((res) => {
+    if(!db){ res(undefined); return; }
+    try{ const tx = db.transaction(store, mode); const rq = fn(tx.objectStore(store)); tx.oncomplete = () => res(rq ? rq.result : undefined); tx.onerror = tx.onabort = () => res(undefined); }
+    catch(e){ res(undefined); }
+  }));
+}
+function wimgLoad(){
+  if(WIMG.mem) return Promise.resolve(WIMG.mem);
+  if(!WIMG.loading) WIMG.loading = wimgIdb('auto', 'readonly', st => st.getAll()).then(l => {
+    const m = new Map(); (l || []).forEach(r => { if(r && r.k) m.set(r.k, r); });
+    if(WIMG.mem) WIMG.mem.forEach((v, k) => m.set(k, v));
+    WIMG.mem = m; return m;
+  });
+  return WIMG.loading;
+}
+function wimgPut(rec){ if(!WIMG.mem) WIMG.mem = new Map(); WIMG.mem.set(rec.k, rec); return wimgIdb('auto', 'readwrite', st => st.put(rec)); }
+function wimgForget(fr){ const k = wimgK(fr); if(WIMG.mem) WIMG.mem.delete(k); return wimgIdb('auto', 'readwrite', st => st.delete(k)); }
+/* ---------- le réseau : quelques requêtes à la fois (ce que tu regardes passe avant la recherche de tous les mots) ---------- */
+function wimgNet(fn, prio){ return new Promise((res) => { const j = { fn, res }; if(prio) WIMG.q.unshift(j); else WIMG.q.push(j); wimgPump(); }); }
+function wimgPump(){
+  while(WIMG.run < WIMG.max && WIMG.q.length){
+    const j = WIMG.q.shift(); WIMG.run++;
+    Promise.resolve().then(j.fn).catch(() => null).then(v => { WIMG.run--; j.res(v); wimgPump(); });
+  }
+}
+function wimgJson(url, st, prio){ return wimgNet(() => tbFetchJson(url, 9000), prio).then(j => { if(j == null && st) st.err++; return j; }); }
+/* ---------- les sources ---------- */
+async function wimgWikt(term, st, prio){
+  const j = await wimgJson('https://fr.wiktionary.org/w/api.php?action=parse&format=json&formatversion=2&prop=wikitext&redirects=1&section=1&origin=*&page=' + encodeURIComponent(term), st, prio);
+  const t = (j && j.parse && j.parse.wikitext) || '';
+  if(!/\{\{\s*langue\s*\|\s*fr\s*\}\}/.test(t)) return [];
+  const out = [], re = /\[\[\s*(?:Fichier|Image|File)\s*:\s*([^|\]]+?)\s*(?:\||\]\])/gi; let m;
+  while((m = re.exec(t)) && out.length < 8){ const n = m[1].trim(); if(wimgOkFile(n) && !out.includes(n)) out.push(n); }
+  return out;
+}
+async function wimgWdSearch(term, lang, st, prio){
+  if(!term) return [];
+  const j = await wimgJson('https://www.wikidata.org/w/api.php?action=wbsearchentities&format=json&type=item&limit=12&origin=*&language=' + lang + '&uselang=' + lang + '&search=' + encodeURIComponent(term), st, prio);
+  return (j && Array.isArray(j.search)) ? j.search : [];
+}
+async function wimgWdImage(id, st, prio){
+  const j = await wimgJson('https://www.wikidata.org/w/api.php?action=wbgetclaims&format=json&origin=*&property=P18&entity=' + encodeURIComponent(id), st, prio);
+  const c = j && j.claims && j.claims.P18;
+  if(!Array.isArray(c) || !c.length) return '';
+  const best = c.find(x => x && x.rank === 'preferred') || c.find(x => x && x.rank !== 'deprecated') || c[0];
+  const v = best && best.mainsnak && best.mainsnak.datavalue && best.mainsnak.datavalue.value;
+  return wimgOkFile(v) ? v : '';
+}
+function wimgWdExact(list, term){
+  const f = dxFold(term);
+  return (list || []).filter(r => r && r.id && (dxFold((r.match && r.match.text) || '') === f || dxFold(r.label || '') === f) && !WIMG_SKIP_DESC.test(r.description || ''));
+}
+function wimgWdExactAr(list, term){
+  const f = wimgArFold(term);
+  return (list || []).filter(r => r && r.id && (wimgArFold((r.match && r.match.text) || '') === f || wimgArFold(r.label || '') === f));
+}
+async function wimgWikipedia(term, st, prio){
+  const t = term.charAt(0).toUpperCase() + term.slice(1);
+  const j = await wimgJson('https://fr.wikipedia.org/w/api.php?action=query&format=json&formatversion=2&redirects=1&prop=pageimages|pageprops&piprop=name&ppprop=disambiguation&origin=*&titles=' + encodeURIComponent(t), st, prio);
+  const p = j && j.query && Array.isArray(j.query.pages) ? j.query.pages[0] : null;
+  if(!p || p.missing || p.invalid || (p.pageprops && Object.prototype.hasOwnProperty.call(p.pageprops, 'disambiguation'))) return '';
+  return wimgOkFile(p.pageimage) ? p.pageimage : '';
+}
+/* la meilleure image pour un mot ({ k, f, src } ou { k, none }) — temp : le réseau a manqué, on ne retient rien */
+async function wimgFind(w, prio){
+  const term = wimgTerm(w.fr), k = wimgK(w.fr), st = { err:0 };
+  const rec = { k, at:Date.now() }, set = (f, src) => { rec.f = f; rec.src = src; return rec; };
+  if(!term || term.length < 2 || term.split(' ').length > 4 || WIMG_BAD.test(dxFold(term))){ rec.none = 1; return rec; }
+  const wk = await wimgWikt(term, st, prio);
+  if(wk.length) return set(wk[0], 'wikt');
+  const art = wimgArTerm(w.ar);
+  const [fr, ar] = await Promise.all([wimgWdSearch(term, 'fr', st, prio), art ? wimgWdSearch(art, 'ar', st, prio) : Promise.resolve([])]);
+  const ex = wimgWdExact(fr, term), arIds = new Set(ar.map(r => r.id)), both = ex.filter(r => arIds.has(r.id));
+  for(const r of both.slice(0, 3)){ const f = await wimgWdImage(r.id, st, prio); if(f) return set(f, 'wd'); }
+  const wp = await wimgWikipedia(term, st, prio);
+  if(wp) return set(wp, 'wp');
+  for(const r of ex.filter(r => !both.includes(r)).slice(0, ar.length ? 1 : 2)){ const f = await wimgWdImage(r.id, st, prio); if(f) return set(f, 'wd'); }
+  if(st.err) rec.temp = 1;
+  rec.none = 1; return rec;
+}
+/* l'état d'un mot : 'img', 'none' (cherché, rien), 'todo' (pas encore cherché) */
+function wimgState(w, P){
+  const k = wimgK(w.fr), pk = (P || wimgPicks())[k];
+  if(pk && !pk.auto) return pk.no ? 'none' : 'img';
+  const r = WIMG.mem && WIMG.mem.get(k);
+  if(r && r.f) return 'img';
+  if(r && r.none && Date.now() - (r.at || 0) < 30 * 864e5) return 'none';
+  return 'todo';
+}
+/* l'image à montrer pour un mot : { src, name?, kind } ou null */
+async function wimgResolve(w, o){
+  o = o || {};
+  if(!w || !w.fr || !wimgOn()) return null;
+  const k = wimgK(w.fr), pk = wimgPicks()[k];
+  if(pk && !pk.auto){
+    if(pk.no) return null;
+    if(pk.own){ const r = await wimgIdb('own', 'readonly', st => st.get(k)); if(r && r.data) return { src:r.data, kind:'own' }; }
+    else if(pk.u) return { src:pk.u, kind:'url' };
+    else if(pk.f) return { src:wimgFileUrl(pk.f, o.w), name:pk.f, kind:'pick' };
+  }
+  const mem = await wimgLoad();
+  let rec = mem.get(k);
+  const fresh = rec && (rec.f || (rec.none && Date.now() - (rec.at || 0) < 30 * 864e5));
+  if(!fresh){
+    if(o.cacheOnly || (typeof navigator !== 'undefined' && navigator.onLine === false)) return null;
+    if(!WIMG.pend.has(k)) WIMG.pend.set(k, wimgFind(w, !o.batch).then(r => { WIMG.pend.delete(k); if(r && !r.temp) wimgPut(r); return r; }, () => { WIMG.pend.delete(k); return null; }));
+    rec = await WIMG.pend.get(k);
+  }
+  return rec && rec.f ? { src:wimgFileUrl(rec.f, o.w), name:rec.f, kind:'auto' } : null;
+}
+/* l'auteur et la licence (affichés sous l'image, comme le demandent les licences libres) */
+async function wimgCredit(name){
+  if(WIMG.cred.has(name)) return WIMG.cred.get(name);
+  const j = await wimgJson('https://commons.wikimedia.org/w/api.php?action=query&format=json&formatversion=2&origin=*&prop=imageinfo&iiprop=extmetadata&iiextmetadatafilter=Artist|LicenseShortName&titles=' + encodeURIComponent('File:' + name), null, true);
+  const pg = j && j.query && Array.isArray(j.query.pages) ? j.query.pages[0] : null;
+  const md = (pg && pg.imageinfo && pg.imageinfo[0] && pg.imageinfo[0].extmetadata) || {};
+  const txt = (h) => { try{ return (new DOMParser().parseFromString(String(h || ''), 'text/html').body.textContent || '').replace(/\s+/g, ' ').trim(); }catch(e){ return ''; } };
+  const c = { a:txt(md.Artist && md.Artist.value).slice(0, 48), l:txt(md.LicenseShortName && md.LicenseShortName.value).slice(0, 24) };
+  if(j) WIMG.cred.set(name, c);
+  return c;
+}
+/* ---------- l'emplacement d'une image dans une page ----------
+   tailles : card (fiche), bubble (bulle d'un mot), sheet (Tablette), slide (diaporama), th (dictionnaire), fc (carte),
+   ic (recherche), tile (écran « Images de mes mots ») */
+function wimgSlot(w, size){
+  if(!w || !w.fr || !wimgOn()) return '';
+  return `<div class="wimg wimg-${size}" data-size="${size}" data-wimg="${wimgEa(w.fr)}" data-wimg-ar="${wimgEa(w.ar || '')}"></div>`;
+}
+function wimgWordOf(el){
+  const fr = el.dataset.wimg || '', ar = el.dataset.wimgAr || '';
+  let w = null; try{ w = findLexWord(fr); }catch(e){}
+  return w || { fr, ar };
+}
+function wimgFill(el){
+  if(!el || el.dataset.wimgDone) return;
+  el.dataset.wimgDone = '1';
+  const size = el.dataset.size || 'card', big = /^(card|bubble|sheet|slide)$/.test(size);
+  if(!wimgOn()){ el.hidden = true; return; }
+  el.hidden = false; el.classList.remove('ok', 'none'); el.classList.add('ld');
+  const w = wimgWordOf(el);
+  wimgResolve(w, { w:big ? 500 : 250 }).then(r => {
+    el.classList.remove('ld');
+    if(!el.isConnected) return;
+    if(!r){
+      if(size === 'card'){ el.classList.add('none'); el.innerHTML = `<button type="button" class="wimg-add" data-wimg-act="pick">🖼️ Ajouter une image</button>`; }
+      else if(size === 'tile'){ el.classList.add('none'); el.innerHTML = `<span class="wimg-ph" aria-hidden="true">${wimgState(w) === 'todo' ? '⏳' : '∅'}</span>`; }
+      else { el.hidden = true; el.innerHTML = ''; }
+      return;
+    }
+    const alt = `Image : ${w.fr}`;
+    el.innerHTML = `<img src="${wimgEa(r.src)}" alt="${wimgEa(alt)}" loading="lazy" decoding="async" referrerpolicy="no-referrer"${big ? ' data-wimg-act="zoom"' : ''}>`
+      + (big ? `<button type="button" class="wimg-ch" data-wimg-act="pick" aria-label="Changer l'image de ${wimgEa(w.fr)}" title="Changer l'image">🔄</button>` : '')
+      + (size === 'card' && r.name ? `<a class="wimg-cr" href="${wimgEa(wimgPageUrl(r.name))}" target="_blank" rel="noopener">📷 Wikimedia Commons</a>` : '')
+      + (size === 'card' && r.kind === 'own' ? `<span class="wimg-cr">📷 Ta photo</span>` : '');
+    const img = el.querySelector('img');
+    img.addEventListener('load', () => el.classList.add('ok'), { once:true });
+    img.addEventListener('error', () => {
+      el.classList.remove('ok');
+      if(size === 'card'){ el.classList.add('none'); el.innerHTML = `<button type="button" class="wimg-add" data-wimg-act="pick">🖼️ Ajouter une image</button>`; }
+      else if(size === 'tile'){ el.classList.add('none'); el.innerHTML = '<span class="wimg-ph" aria-hidden="true">∅</span>'; }
+      else el.hidden = true;
+    }, { once:true });
+    if(img.complete && img.naturalWidth) el.classList.add('ok');
+    if(size === 'card' && r.name) wimgCredit(r.name).then(c => { const a = el.querySelector('a.wimg-cr'); if(a && (c.a || c.l)) a.textContent = '📷 ' + [c.a, c.l].filter(Boolean).join(' · ') + ' · Wikimedia Commons'; });
+  });
+}
+/* les emplacements qui apparaissent sont remplis tout seuls ; les petites images seulement quand on les voit */
+function wimgScan(root){
+  (root || document).querySelectorAll('.wimg:not([data-wimg-done])').forEach(el => {
+    if(/^(th|ic|fc|tile)$/.test(el.dataset.size || '') && typeof IntersectionObserver !== 'undefined'){
+      if(el.dataset.wimgObs) return;
+      if(!WIMG.io) WIMG.io = new IntersectionObserver(es => es.forEach(e => { if(e.isIntersecting){ WIMG.io.unobserve(e.target); delete e.target.dataset.wimgObs; wimgFill(e.target); } }), { rootMargin:'250px' });
+      el.dataset.wimgObs = '1'; WIMG.io.observe(el);
+    } else wimgFill(el);
+  });
+}
+function wimgWatch(){
+  if(WIMG.mo || typeof MutationObserver === 'undefined' || !document.body) return;
+  WIMG.mo = new MutationObserver(() => { if(WIMG.scanQ) return; WIMG.scanQ = requestAnimationFrame(() => { WIMG.scanQ = 0; wimgScan(document); }); });
+  WIMG.mo.observe(document.body, { childList:true, subtree:true });
+  wimgScan(document);
+}
+if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wimgWatch); else setTimeout(wimgWatch, 0);
+/* redessiner les images d'un mot (ou de tous : fr = null) */
+function wimgRefresh(fr){
+  const k = fr == null ? null : wimgK(fr);
+  document.querySelectorAll('.wimg[data-wimg]').forEach(el => {
+    if(k != null && wimgK(el.dataset.wimg) !== k) return;
+    delete el.dataset.wimgDone; delete el.dataset.wimgObs; el.innerHTML = ''; wimgFill(el);
+  });
+}
+/* ---------- 🔍 voir l'image en grand ---------- */
+function wimgZoom(slot){
+  const img = slot.querySelector('img'); if(!img) return;
+  const w = wimgWordOf(slot), cr = slot.querySelector('.wimg-cr');
+  let src = img.currentSrc || img.src;
+  if(/Special:FilePath/.test(src)) src = src.replace(/width=\d+/, 'width=960');
+  const ov = document.createElement('div');
+  ov.className = 'wimg-zoom'; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-label', 'Image de ' + w.fr);
+  ov.innerHTML = `<img src="${wimgEa(src)}" alt="${wimgEa('Image : ' + w.fr)}" referrerpolicy="no-referrer"><div class="wimg-zoom-t"><b lang="fr">${escapeHtml(w.fr)}</b>${w.ar ? ` · <span dir="rtl" lang="ar">${escapeHtml(w.ar)}</span>` : ''}</div>${cr ? `<div class="wimg-zoom-c">${escapeHtml(cr.textContent)}</div>` : ''}<button type="button" class="wimg-zoom-x" aria-label="Fermer">✕</button>`;
+  document.body.appendChild(ov);
+  const close = () => { bkPop('wimgzoom'); ov.remove(); document.removeEventListener('keydown', onKey, true); };
+  const onKey = (e) => { if(e.key === 'Escape'){ e.preventDefault(); e.stopPropagation(); close(); } };
+  document.addEventListener('keydown', onKey, true);
+  ov.addEventListener('click', (e) => { e.stopPropagation(); close(); });
+  bkPush('wimgzoom', close);
+}
+/* ---------- 🔄 choisir l'image d'un mot ---------- */
+async function wimgCands(w){
+  const term = wimgTerm(w.fr), art = wimgArTerm(w.ar), out = [];
+  const add = (f, src) => { f = String(f || '').trim(); if(f && wimgOkFile(f) && !out.some(x => x.f === f)) out.push({ f, src }); };
+  if(!term) return out;
+  const [wk, fr, ar, wps, cm] = await Promise.all([
+    wimgWikt(term, null, true),
+    wimgWdSearch(term, 'fr', null, true),
+    art ? wimgWdSearch(art, 'ar', null, true) : Promise.resolve([]),
+    wimgJson('https://fr.wikipedia.org/w/api.php?action=query&format=json&formatversion=2&generator=search&gsrlimit=8&prop=pageimages&piprop=name&origin=*&gsrsearch=' + encodeURIComponent(term), null, true),
+    wimgJson('https://commons.wikimedia.org/w/api.php?action=query&format=json&formatversion=2&list=search&srnamespace=6&srlimit=16&origin=*&srsearch=' + encodeURIComponent(term), null, true)
+  ]);
+  (wk || []).forEach(f => add(f, 'Wiktionnaire'));
+  const ex = wimgWdExact(fr, term), arIds = new Set((ar || []).map(r => r.id));
+  const ids = [...ex.filter(r => arIds.has(r.id)), ...ex.filter(r => !arIds.has(r.id)), ...wimgWdExactAr(ar, art).filter(r => !WIMG_SKIP_DESC.test(r.description || ''))]
+    .map(r => r.id).filter((x, i, a) => a.indexOf(x) === i).slice(0, 6);
+  (await Promise.all(ids.map(id => wimgWdImage(id, null, true)))).forEach(f => add(f, 'Wikidata'));
+  const pages = ((wps && wps.query && wps.query.pages) || []).slice().sort((a, b) => (a.index || 0) - (b.index || 0));
+  pages.forEach(p => add(p.pageimage, 'Wikipédia'));
+  ((cm && cm.query && cm.query.search) || []).forEach(p => add(String(p.title || '').replace(/^(File|Fichier):/i, ''), 'Commons'));
+  return out.slice(0, 24);
+}
+function wimgPicker(w){
+  if(!w || !w.fr) return;
+  document.querySelectorAll('.wimg-pk-ov').forEach(x => x.remove());
+  const k = wimgK(w.fr), term = wimgTerm(w.fr) || w.fr;
+  const pk = wimgPicks()[k] || {}, rec = WIMG.mem && WIMG.mem.get(k);
+  const hasPick = !!(pk.f || pk.u || pk.own || pk.no);
+  const curF = hasPick ? (pk.f || '') : ((rec && rec.f) || '');
+  const ov = document.createElement('div');
+  ov.className = 'wimg-pk-ov';
+  ov.innerHTML = `<div class="wimg-pk" role="dialog" aria-modal="true" aria-label="Choisir l'image de ${wimgEa(w.fr)}">
+    <div class="wimg-pk-h"><b>🖼️ Une image pour « <span lang="fr">${escapeHtml(w.fr)}</span> »</b><button type="button" class="wimg-pk-x" data-pk="x" aria-label="Fermer">✕</button></div>
+    ${w.ar ? `<div class="wimg-pk-ar" dir="rtl" lang="ar">${escapeHtml(w.ar)}</div>` : ''}
+    <div class="wimg-pk-l">Touche l'image qui montre le mieux ce mot :</div>
+    <div class="wimg-pk-g" id="wimgPkG"><div class="wimg-pk-wait">⏳ Je cherche des images…</div></div>
+    <div class="wimg-pk-b">
+      <button type="button" data-pk="own">📁 Ma photo</button>
+      <button type="button" data-pk="url">🔗 Coller un lien</button>
+      <a href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(term)}" target="_blank" rel="noopener">🔎 Google Images ↗</a>
+      <button type="button" data-pk="auto">↩ Image automatique</button>
+      <button type="button" data-pk="no">🚫 Pas d'image</button>
+    </div>
+    <div class="wimg-pk-u" id="wimgPkU" hidden><input type="url" id="wimgPkUi" placeholder="https://… (le lien d'une image)" aria-label="Lien de l'image"><button type="button" data-pk="url-go">OK</button></div>
+    <input type="file" id="wimgPkF" accept="image/*" hidden>
+    <div class="wimg-pk-n">Les images viennent de Wikimedia Commons (libres de droits, avec leur auteur). Ta photo reste sur cet appareil.</div>
+  </div>`;
+  document.body.appendChild(ov);
+  requestAnimationFrame(() => ov.classList.add('show'));
+  const close = () => { bkPop('wimgpk'); ov.remove(); document.removeEventListener('keydown', onKey, true); };
+  const onKey = (e) => { if(e.key === 'Escape'){ e.preventDefault(); e.stopPropagation(); close(); } };
+  document.addEventListener('keydown', onKey, true);
+  bkPush('wimgpk', close);
+  const done = (msg) => { close(); wimgRefresh(w.fr); if(msg) lexSnack(msg); try{ if(WIMG.ui && document.getElementById('wimgGrid')) wimgScreenDraw(); }catch(e){} };
+  const g = ov.querySelector('#wimgPkG');
+  wimgCands(w).then(L => {
+    if(!g.isConnected) return;
+    if(!L.length){ g.innerHTML = `<div class="wimg-pk-wait">Pas d'image trouvée${navigator.onLine === false ? ' (pas de connexion)' : ''}. Essaie « 🔎 Google Images », puis « 🔗 Coller un lien », ou « 📁 Ma photo ».</div>`; return; }
+    g.innerHTML = L.map((c, i) => `<button type="button" class="wimg-pk-t ${c.f === curF ? 'on' : ''}" data-pk="f" data-i="${i}" aria-label="Image ${i + 1} (${wimgEa(c.src)})"><img src="${wimgEa(wimgFileUrl(c.f, 250))}" alt="" loading="lazy" referrerpolicy="no-referrer"><small>${escapeHtml(c.src)}</small></button>`).join('');
+    g.querySelectorAll('img').forEach(im => im.addEventListener('error', () => { const b = im.closest('.wimg-pk-t'); if(b) b.remove(); }, { once:true }));
+    g._cands = L;
+  });
+  ov.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    if(e.target === ov){ close(); return; }
+    const b = e.target.closest('[data-pk]'); if(!b) return;
+    const a = b.dataset.pk;
+    if(a === 'x') close();
+    else if(a === 'f'){ const c = (g._cands || [])[+b.dataset.i]; if(c){ wimgPickSet(w.fr, { f:c.f }); done('🖼️ Image choisie'); } }
+    else if(a === 'no'){ wimgPickSet(w.fr, { no:1 }); done('🚫 Plus d\'image pour ce mot'); }
+    else if(a === 'auto'){ wimgPickSet(w.fr, { auto:1 }); await wimgForget(w.fr); done('↩ Image automatique'); }
+    else if(a === 'url'){ const u = ov.querySelector('#wimgPkU'); u.hidden = !u.hidden; if(!u.hidden) ov.querySelector('#wimgPkUi').focus(); }
+    else if(a === 'url-go'){
+      const v = String(ov.querySelector('#wimgPkUi').value || '').trim();
+      if(!/^https:\/\/\S+$/i.test(v)){ lexSnack('🔗 Colle le lien d\'une image (il commence par https://)'); return; }
+      wimgPickSet(w.fr, { u:v }); done('🖼️ Image choisie');
+    }
+    else if(a === 'own') ov.querySelector('#wimgPkF').click();
+  });
+  ov.querySelector('#wimgPkF').addEventListener('change', async (e) => {
+    const f = e.target.files && e.target.files[0]; if(!f) return;
+    try{
+      const data = await wimgShrink(f, 560);
+      await wimgIdb('own', 'readwrite', st => st.put({ k, data, at:Date.now() }));
+      wimgPickSet(w.fr, { own:1 }); done('📁 Ta photo est l\'image de ce mot');
+    }catch(err){ lexSnack('⚠️ Impossible de lire cette image.'); }
+  });
+}
+/* une photo réduite (pour garder peu de place) */
+function wimgShrink(file, max){
+  return new Promise((res, rej) => {
+    const url = URL.createObjectURL(file), im = new Image();
+    im.onload = () => {
+      try{
+        const s = Math.min(1, max / Math.max(im.naturalWidth, im.naturalHeight));
+        const c = document.createElement('canvas'); c.width = Math.max(1, Math.round(im.naturalWidth * s)); c.height = Math.max(1, Math.round(im.naturalHeight * s));
+        c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(url); res(c.toDataURL('image/jpeg', 0.8));
+      }catch(e){ URL.revokeObjectURL(url); rej(e); }
+    };
+    im.onerror = () => { URL.revokeObjectURL(url); rej(new Error('image')); };
+    im.src = url;
+  });
+}
+/* les boutons des images (🔄, 🖼️ Ajouter, toucher l'image pour l'agrandir) — avant les autres écouteurs */
+document.addEventListener('click', (e) => {
+  const b = e.target && e.target.closest && e.target.closest('[data-wimg-act]'); if(!b) return;
+  const slot = b.closest('.wimg'); if(!slot) return;
+  e.stopPropagation(); e.preventDefault();
+  if(b.dataset.wimgAct === 'pick') wimgPicker(wimgWordOf(slot));
+  else if(b.dataset.wimgAct === 'zoom') wimgZoom(slot);
+}, true);
+/* ---------- 🖼️ l'écran « Images de mes mots » : tout chercher d'un coup, voir, changer ---------- */
+function wimgBatchRun(){
+  if(WIMG.batch && WIMG.batch.on) return;
+  const B = WIMG.batch = { on:true, done:0, total:0, found:0 };
+  wimgLoad().then(() => {
+    const P = wimgPicks(), todo = WORDS.filter(w => wimgState(w, P) === 'todo');
+    B.total = todo.length; let i = 0;
+    const one = async () => {
+      while(B.on && i < todo.length){
+        const w = todo[i++];
+        let r = null; try{ r = await wimgResolve(w, { batch:true }); }catch(e){}
+        B.done++; if(r) B.found++;
+        wimgBatchUi();
+      }
+    };
+    wimgBatchUi();
+    Promise.all([one(), one()]).then(() => {
+      const fin = B.on && B.done >= B.total; B.on = false;
+      if(fin && B.total && !document.getElementById('wimgGrid')) lexSnack(`🖼️ Images trouvées pour ${B.found} mot${B.found > 1 ? 's' : ''} sur ${B.total}`);
+      wimgBatchUi(true);
+    });
+  });
+}
+function wimgBatchUi(force){
+  if(!document.getElementById('wimgSt')) return;
+  const now = Date.now();
+  if(!force && WIMG.lastUi && now - WIMG.lastUi < 400){ clearTimeout(WIMG.uiT); WIMG.uiT = setTimeout(() => wimgBatchUi(true), 420); return; }
+  WIMG.lastUi = now;
+  wimgStatusDraw();
+  if(force) wimgGridDraw();
+}
+function wimgStatusDraw(){
+  const box = document.getElementById('wimgSt'); if(!box) return;
+  const P = wimgPicks(), c = { img:0, none:0, todo:0 };
+  WORDS.forEach(w => { c[wimgState(w, P)]++; });
+  const n = WORDS.length || 1, B = WIMG.batch, run = !!(B && B.on);
+  box.innerHTML = `<div class="wimg-prog" role="img" aria-label="${c.img} mots avec image sur ${WORDS.length}"><i style="width:${(c.img / n * 100).toFixed(1)}%"></i><i class="n" style="width:${(c.none / n * 100).toFixed(1)}%"></i></div>
+    <div class="wimg-leg"><span>🖼️ ${c.img} avec image</span><span>∅ ${c.none} sans image</span><span>⏳ ${c.todo} pas encore cherché${c.todo > 1 ? 's' : ''}</span></div>
+    <div class="wimg-acts">
+      ${run ? `<button type="button" class="mode-chip active" data-wimgs="pause">⏸ Pause · ${B.done} / ${B.total}</button>`
+        : (c.todo ? `<button type="button" class="mode-chip wimg-go" data-wimgs="run">🔎 Chercher les images de ${c.todo} mot${c.todo > 1 ? 's' : ''}</button>` : `<span class="wimg-ok">✅ Tous tes mots ont été cherchés</span>`)}
+      ${!run && c.none ? `<button type="button" class="mode-chip" data-wimgs="retry">🔄 Chercher encore pour les ${c.none} mots sans image</button>` : ''}
+    </div>`;
+}
+function wimgGridDraw(){
+  const grid = document.getElementById('wimgGrid'); if(!grid) return;
+  const st = WIMG.ui, P = wimgPicks();
+  const L = WORDS.map((w, i) => ({ w, i, s:wimgState(w, P) })).filter(x => st.f === 'all' || x.s === st.f);
+  const fr = document.getElementById('wimgF');
+  if(fr){
+    const c = { all:WORDS.length, img:0, none:0, todo:0 }; WORDS.forEach(w => { c[wimgState(w, P)]++; });
+    fr.innerHTML = [['all', `Tous · ${c.all}`], ['img', `🖼️ Avec image · ${c.img}`], ['none', `∅ Sans image · ${c.none}`], ['todo', `⏳ Pas cherchés · ${c.todo}`]]
+      .map(x => `<button type="button" class="filter-chip ${st.f === x[0] ? 'active' : ''}" data-wimgf="${x[0]}">${x[1]}</button>`).join('');
+  }
+  if(!L.length){ grid.innerHTML = `<div class="no-results">Aucun mot ici.</div>`; return; }
+  const show = L.slice(0, st.n);
+  grid.innerHTML = show.map(x => `<button type="button" class="wimg-gt" data-wimgw="${x.i}">${wimgSlot(x.w, 'tile') || '<div class="wimg wimg-tile none"><span class="wimg-ph">🖼️</span></div>'}<span lang="fr">${escapeHtml(x.w.fr)}</span></button>`).join('')
+    + (L.length > show.length ? `<button type="button" class="wimg-more" data-wimgs="more">Voir plus · ${L.length - show.length} mots</button>` : '');
+  grid._list = L.map(x => x.w);
+}
+function wimgScreenDraw(){ wimgStatusDraw(); wimgGridDraw(); }
+function renderWordImages(){
+  try{ clearQuestionTimer(); }catch(e){}
+  document.body.classList.remove('quiz-active');
+  currentBlock = null; isHomeScreen = false;
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="wimgBack" style="cursor:pointer;">← Dictionnaire</button>`;
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('footerNote').textContent = '';
+  WIMG.ui = WIMG.ui || { f:'all', n:60 };
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `<div class="cat-tag">🖼️ Images de mes mots · ${WORDS.length} mots</div>
+    <div class="word-fr" style="font-size:clamp(22px,4.4vw,30px);">Une image pour chaque mot</div>
+    <div class="question-line">Des photos et des dessins libres (Wikimedia Commons), choisis pour le bon sens du mot grâce à sa traduction en arabe. Touche un mot pour voir sa fiche ; 🔄 sur l'image pour en choisir une autre, mettre ta photo, un lien, ou pas d'image.</div>
+    <label class="wimg-on"><input type="checkbox" id="wimgOnChk" ${wimgOn() ? 'checked' : ''}> <span>Montrer les images des mots (fiches, bulles, Tablette, dictionnaire, Voir les mots)</span></label>
+    <div id="wimgSt" aria-live="polite"></div>
+    <div class="filter-row" id="wimgF" style="justify-content:flex-start;margin:10px 0 10px;"></div>
+    <div class="wimg-grid" id="wimgGrid"></div>`;
+  document.getElementById('wimgBack').addEventListener('click', () => renderDictionaryView());
+  document.getElementById('wimgOnChk').addEventListener('change', (e) => { wimgSetOn(!!e.target.checked); wimgScreenDraw(); });
+  card.addEventListener('click', (e) => {
+    const f = e.target.closest('[data-wimgf]'); if(f){ WIMG.ui.f = f.dataset.wimgf; WIMG.ui.n = 60; wimgGridDraw(); return; }
+    const s = e.target.closest('[data-wimgs]');
+    if(s){
+      const a = s.dataset.wimgs;
+      if(a === 'run') wimgBatchRun();
+      else if(a === 'pause'){ if(WIMG.batch) WIMG.batch.on = false; setTimeout(() => wimgBatchUi(true), 50); }
+      else if(a === 'retry'){
+        const P = wimgPicks(), L = WORDS.filter(w => wimgState(w, P) === 'none' && !(P[wimgK(w.fr)] && P[wimgK(w.fr)].no));
+        Promise.all(L.map(w => { const r = WIMG.mem && WIMG.mem.get(wimgK(w.fr)); if(r){ r.at = 0; return wimgPut(r); } return null; })).then(() => wimgBatchRun());
+      }
+      else if(a === 'more'){ WIMG.ui.n += 120; wimgGridDraw(); }
+      wimgStatusDraw();
+      return;
+    }
+    const t = e.target.closest('[data-wimgw]');
+    if(t){ const w = WORDS[+t.dataset.wimgw], L = (document.getElementById('wimgGrid') || {})._list || [w]; if(w) wordCardPopup(w, { list:L, index:Math.max(0, L.indexOf(w)), onClose:() => { if(document.getElementById('wimgGrid')) wimgScreenDraw(); } }); }
+  });
+  wimgLoad().then(() => { if(document.getElementById('wimgGrid')) wimgScreenDraw(); });
+  wimgScreenDraw();
+}
 /* 📇 1.0.26 : la fiche complète d'un mot de ton lexique, en fenêtre (au-dessus de tout, même de la Tablette) :
    le mot, l'arabe, la définition, la phrase d'exemple (et sa traduction en arabe quand on est en ligne). */
 const WCP_AR_KEY = 'vocabVision.exAr';
@@ -16632,6 +17178,7 @@ function wordCardPopup(w, opts){
     ${opts.note ? `<div class="wcp-note">${escapeHtml(opts.note)}</div>` : ''}
     <div class="wcp-head"><div class="wcp-fr" lang="fr">${escapeHtml(w.fr)}</div><button type="button" class="wcp-x" data-wcp="x" aria-label="Fermer">✕</button></div>
     <div class="wcp-meta"><span>${escapeHtml(w.cat || '')}</span>${blk ? `<span>· Bloc ${blk}</span>` : ''}<span>${getWordBadge(w.fr)}</span></div>
+    ${wimgSlot(w, 'card')}
     ${w.ar ? `<div class="wcp-ar" dir="rtl" lang="ar">${escapeHtml(w.ar)}</div>` : ''}
     ${w.def ? `<div class="wcp-def">${escapeHtml(w.def)}</div>` : ''}
     ${full ? `<div class="wcp-ex" lang="fr">${exHtml}<div class="wcp-exar" dir="rtl" lang="ar" id="wcpExAr"></div></div>` : ''}
@@ -16982,7 +17529,7 @@ function wtShow(word, rect, ctx){
   const w0 = wtClean(word); if(w0.length < 2 || /^\d+$/.test(w0)) return;
   const el = document.createElement('div');
   el.className = 'wt'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', 'Définition de ' + w0);
-  el.innerHTML = `<div class="wt-h"><b class="wt-w" lang="fr">${escapeHtml(w0)}</b><button type="button" class="wt-ib" data-wt="say" aria-label="Écouter le mot">🔊</button><button type="button" class="wt-ib" data-wt="x" aria-label="Fermer">✕</button></div>
+  el.innerHTML = `<div class="wt-h"><b class="wt-w" lang="fr">${escapeHtml(w0)}</b>${ctx && typeof ctx.play === 'function' ? '<button type="button" class="wt-ib" data-wt="play" aria-label="Réentendre ce passage de l’audio" title="Réentendre ce passage">▶</button>' : ''}<button type="button" class="wt-ib" data-wt="say" aria-label="Écouter le mot">🔊</button><button type="button" class="wt-ib" data-wt="x" aria-label="Fermer">✕</button></div>
     <div class="wt-b" id="wtBody"><div class="wt-l">🔎 Je cherche le sens…</div></div><div class="wt-a" id="wtAct"></div>`;
   document.body.appendChild(el);
   WT.el = el; WT.ctx = Object.assign({ word:w0, rect }, ctx || {});
@@ -16993,7 +17540,7 @@ function wtShow(word, rect, ctx){
     WT.ctx.known = known;
     body.innerHTML = `<div class="wt-lemma known">✓ Dans tes mots${dxFold(known.fr) !== dxFold(w0) ? ` : <b>${escapeHtml(known.fr)}</b>` : ''}</div>
       ${known.ar ? `<div class="wt-ar" dir="rtl" lang="ar">${escapeHtml(known.ar)}</div>` : ''}
-      ${known.def ? `<div class="wt-def">${escapeHtml(known.def)}</div>` : ''}`;
+      ${known.def ? `<div class="wt-def">${escapeHtml(known.def)}</div>` : ''}${wimgSlot(known, 'bubble')}`;
     wtActions(true);
   } else {
     let vb = null; try{ const e = tbEntry(w0); if(e && e.verb) vb = e; }catch(err){}
@@ -17009,6 +17556,7 @@ function wtShow(word, rect, ctx){
       body.innerHTML = `${dxFold(lemma) !== dxFold(w0) ? `<div class="wt-lemma">forme de <b>${escapeHtml(lemma)}</b>${r && r.pos ? ` (${escapeHtml(r.pos)})` : ''}</div>` : (r && r.pos ? `<div class="wt-lemma">${escapeHtml(r.pos)}</div>` : '')}
         ${ar.length ? `<div class="wt-ar" dir="rtl" lang="ar">${escapeHtml(ar.join('، '))}</div>` : (vb && vb.ar ? `<div class="wt-ar" dir="rtl" lang="ar">${escapeHtml(vb.ar)}</div>` : '')}
         ${defs.length ? `<ol class="wt-defs">${defs.slice(0, 4).map(d => `<li>${escapeHtml(d)}</li>`).join('')}</ol>` : ''}
+        ${wimgSlot({ fr:lemma, ar:ar[0] || (vb && vb.ar) || '' }, 'bubble')}
         ${r && r.src ? `<div class="wt-src">${r.src === 'lexique' ? '✓ Dans ton lexique' : 'Source : ' + escapeHtml(r.src)}</div>` : ''}`;
       wtActions(false, r);
       wtPlace(rect);
@@ -17040,6 +17588,7 @@ document.addEventListener('click', (e) => {
     const a = b.dataset.wt, C = WT.ctx || {};
     if(a === 'x') wtClose();
     else if(a === 'say') speak(C.word, 'fr-FR');
+    else if(a === 'play'){ try{ C.play(); }catch(err){} }
     else if(a === 'see'){ const k = C.known; wtClose(); if(k) wordCardPopup(k, { note:'📇 Ce mot est déjà dans tes mots' }); }
     else if(a === 'edit'){ const k = C.known; wtClose(); if(k) wordEditPopup(k); }
     else if(a === 'add') wtAdd();
@@ -17057,7 +17606,8 @@ document.addEventListener('click', (e) => {
   if(!hit || wtClean(hit.word).length < 2){ if(WT.el) wtClose(); return; }
   e.stopPropagation(); e.preventDefault();
   const S = wtSentence(e, host, wtClean(hit.word));
-  wtShow(hit.word, hit.rect, { sentence:S.text, sentEl:S.el });
+  const xc = {}; try{ const sg = e.target && e.target.closest && e.target.closest('.trx-seg'); const fn = sg && typeof trxSegPlay === 'function' ? trxSegPlay(sg) : null; if(fn){ xc.play = fn; xc.cat = 'Mes audios'; } }catch(err){}
+  wtShow(hit.word, hit.rect, Object.assign({ sentence:S.text, sentEl:S.el }, xc));
   if(hit.el) hit.el.classList.add('wt-on');
   else if(hit.range){ try{ if(window.CSS && CSS.highlights && typeof Highlight !== 'undefined') CSS.highlights.set('wt', new Highlight(hit.range)); }catch(err){} }
 }, true);
@@ -17401,6 +17951,7 @@ function renderDictionaryView(){
       <div class="view-toggle">
         <button id="viewCardsBtn" class="view-toggle-btn ${dictView==='cards'?'active':''}">🃏 Cartes</button>
         <button id="viewListBtn" class="view-toggle-btn ${dictView==='list'?'active':''}">📋 Liste</button>
+        <button id="dictImgBtn" class="view-toggle-btn" title="Les images de tous tes mots">🖼️ Images</button>
       </div>
     </div>
     <div class="search-results" id="dictResults" style="max-height:560px;"></div>
@@ -17456,6 +18007,7 @@ function renderDictionaryView(){
   }
   document.getElementById('viewCardsBtn').addEventListener('click', () => setView('cards'));
   document.getElementById('viewListBtn').addEventListener('click', () => setView('list'));
+  document.getElementById('dictImgBtn').addEventListener('click', () => renderWordImages());
 
   document.getElementById('dictResults').addEventListener('click', (e) => {
     const btn = e.target.closest('[data-speak-fr]');
@@ -22033,6 +22585,9 @@ const COLOR_PRESETS = {
 /* ============ 🆕 NOUVEAUTÉS — pour que tout ce qui a été ajouté reste découvrable ============ */
 const WHATS_NEW_SECTIONS = [
   { icon:'🆕', title:'Nouveautés', items:[
+    { name:'🖼️ Une image pour chaque mot', desc:"Dans la fiche d'un mot, la bulle d'un mot touché, la Tablette, le dictionnaire, la recherche et 👁 Voir les mots (cartes, diaporama) : une photo ou un dessin libre (Wikimedia Commons), choisi pour le bon sens grâce à la traduction arabe. Touche l'image pour l'agrandir ; 🔄 pour en choisir une autre, mettre ta photo, un lien, ou pas d'image." },
+    { name:'🖼️ Images de mes mots', desc:"Dictionnaire → « 🖼️ Images » : cherche d'un coup les images de tous tes mots (les anciens aussi), montre ceux avec et sans image, et permet de tout couper." },
+    { name:'📄 La transcription comme un texte', desc:"Plus de « ▶ 1:52 » devant chaque morceau : le texte se lit d'un trait, en paragraphes. Touche un mot : ▶ dans la bulle réentend ce passage. « ⏱ Minutes » remet les heures si tu veux. Copier et télécharger donnent aussi le texte en paragraphes." },
     { name:'‹ › Feuilleter les mots un par un', desc:"Dans 👁 Voir les mots (Par statut, Liste, Tableau…), quand tu ouvres un mot : « ‹ Précédent · 3 / 30 · Suivant › » en bas de la fiche, ou glisse à gauche / à droite (← → au clavier)." },
     { name:'↩ Revenir au mot d\'avant', desc:"Tu cherches un mot depuis la fiche d'un autre mot ? « ↩ Revenir à « … » » te ramène au mot précédent, où que tu sois. Le bouton retour du téléphone fait pareil ; ✕ ferme tout." },
     { name:'🎮 Jouer avec ces mots', desc:"En bas de 👁 Voir les mots : les boutons des modes de jeu, pour jouer tout de suite avec les mots affichés (tous ceux du bloc, ou seulement ceux du filtre choisi)." },
@@ -41432,6 +41987,7 @@ const VA_DEST = [
   { id:'flashcards', icon:'🃏', label:'Flashcards', ar:'البطاقات', words:['flashcards', 'flashcard', 'cartes', 'carte'], go:() => renderFlashcardsIntro(), say:"Les flashcards : retourne les cartes ! 🃏" },
   { id:'tcf', icon:'🎓', label:'TCF', ar:'امتحان', words:['tcf', 'delf', 'examen', 'امتحان'], go:() => renderTCFQuiz('structures', 0), say:"Entraînement au TCF ! 🎓" },
   { id:'dictionnaire', icon:'🔍', label:'Dictionnaire', ar:'القاموس', words:['dictionnaire', 'definition', 'traduire', 'traduction', 'chercher un mot', 'قاموس', 'القاموس', 'ترجمه'], go:() => renderDictionaryView(), say:"Voici le dictionnaire ! 🔍" },
+  { id:'images', icon:'🖼️', label:'Images des mots', ar:'صور الكلمات', words:['images des mots', 'images de mes mots', 'les images', 'images', 'photos des mots', 'صور الكلمات', 'الصور'], go:() => renderWordImages(), say:"Voici les images de tes mots ! 🖼️" },
   { id:'badges', icon:'🏅', label:'Badges', ar:'الشارات', words:['badges', 'badge', 'recompenses', 'trophees'], go:() => renderBadgesScreen(), say:"Voici tes badges ! 🏅" },
   { id:'progres', icon:'📊', label:'Mes progrès', ar:'تقدمي', words:['progres', 'mes progres', 'statistiques', 'stats', 'profil', 'mon niveau', 'mon score', 'تقدم'], go:() => renderProfileView(), say:"Voici tes progrès ! 📊" },
   { id:'nouveautes', icon:'🆕', label:'Nouveautés', ar:'الجديد', words:['nouveautes', 'quoi de neuf', 'nouveau'], go:() => renderWhatsNew(), say:"Voici les nouveautés ! 🆕" },
@@ -44017,7 +44573,7 @@ function ssSearch(q, info, card){
 function ssRow(x, toks, i){
   const e = x.e;
   const snip = ((x.r >= 4 && x.r < 5) || x.r === 1.5) ? ssSnippet(e, toks) : '';
-  return `<button type="button" class="ss-row" data-ss-i="${i}"><span class="ss-r-ic" aria-hidden="true">${escapeHtml(e.icon || '▸')}</span><span class="ss-r-tx"><span class="ss-r-t">${ssMark(e.title, toks)}</span>${e.sub ? `<span class="ss-r-s">${escapeHtml(e.sub)}</span>` : ''}${snip ? `<span class="ss-r-x">${snip}</span>` : ''}</span><span class="ss-r-go" aria-hidden="true">›</span></button>`;
+  return `<button type="button" class="ss-row" data-ss-i="${i}"><span class="ss-r-ic${e.kind === 'word' ? ' ss-r-img' : ''}" aria-hidden="true">${escapeHtml(e.icon || '▸')}${e.kind === 'word' ? wimgSlot({ fr:e.title, ar:'' }, 'ic') : ''}</span><span class="ss-r-tx"><span class="ss-r-t">${ssMark(e.title, toks)}</span>${e.sub ? `<span class="ss-r-s">${escapeHtml(e.sub)}</span>` : ''}${snip ? `<span class="ss-r-x">${snip}</span>` : ''}</span><span class="ss-r-go" aria-hidden="true">›</span></button>`;
 }
 function ssRun(st){
   const q = st.input.value.trim();
@@ -49926,6 +50482,7 @@ function tbOpenSheet(k, k2){
     </div>
     <div class="tb-sh-say"><button type="button" class="tb-chip" data-tb="say">🔊 Écouter</button><button type="button" class="tb-chip" data-tb="slow">🐢 Lentement</button><button type="button" class="tb-chip" data-tb="say-sent">🗣️ La phrase</button>${tk.s < tbNS() ? `<button type="button" class="tb-chip" data-tb="mark-sent" title="Marquer cette phrase : c'est là que je m'arrête">🔖 Marque-page ici</button>` : ''}</div>
     <div class="tb-info" id="tbInfo">${tbInfoHtml(cached, tk)}</div>
+    <div id="tbImgW">${!multi && cached && ((cached.defs && cached.defs.length) || (cached.ar && cached.ar.length)) ? wimgSlot({ fr:cached.lemma || lemma, ar:(cached.ar || [])[0] || '' }, 'sheet') : ''}</div>
     <blockquote class="tb-ctx" lang="fr">${tbCtxHtml(tk, kz)}</blockquote>
     <div class="tb-tr-bar"><button type="button" class="tb-chip" data-tb="sent-ar" aria-expanded="false">🌐 Traduire toute la phrase</button>${all.length > 1 && !(ia === 0 && ib === all.length - 1) ? `<button type="button" class="tb-chip" data-tb="pick-all">↔ Prendre toute la phrase</button>` : ''}</div>
     <div class="tb-tr" id="tbSentAr" hidden></div>
@@ -49948,6 +50505,7 @@ function tbOpenSheet(k, k2){
       if(r) TB.look[lookK] = r;
       if(TB.sheetK !== k || !TB.pick || TB.pick.k2 !== kz) return;
       const info = document.getElementById('tbInfo'); if(info) info.innerHTML = tbInfoHtml(r || { ar:[], defs:[] }, tk);
+      const iw = document.getElementById('tbImgW'); if(iw && !multi && r && ((r.defs && r.defs.length) || (r.ar && r.ar.length))) iw.innerHTML = wimgSlot({ fr:r.lemma || form, ar:(r.ar || [])[0] || '' }, 'sheet');
       if(r && r.ipa && (!r.ipaOf || dxFold(r.ipaOf) === fk)){ const ip = document.getElementById('tbIpa'); if(ip) ip.textContent = '/' + r.ipa + '/'; }
       if(r && r.lemma && dxFold(r.lemma) !== fk){ const lm = document.getElementById('tbLemma'); if(lm) lm.innerHTML = `forme de <b>${escapeHtml(r.lemma)}</b>`; }
       if(r && r.lemma && tbIsKnown(r.lemma)){ const ab = sh.querySelector('[data-tb="add"]'); if(ab) ab.outerHTML = tbAddBtnHtml(true, [r.lemma, form]); }
@@ -50883,7 +51441,7 @@ var TRX = { on:false, worker:null, ready:false, loading:false, pct:0, err:'', ct
 const TRX_MODELS = { tiny:{ id:'onnx-community/whisper-tiny', l:'Rapide', mb:'≈ 40 Mo' }, base:{ id:'onnx-community/whisper-base', l:'Équilibré', mb:'≈ 80 Mo' }, small:{ id:'onnx-community/whisper-small', l:'Précis', mb:'≈ 250 Mo' } };
 const TRX_LANGS = { fr:['Français', 'french'], ar:['Arabe', 'arabic'], en:['Anglais', 'english'] };
 const TRX_CACHE = 'vocabVision.trx';
-function trxCfg(){ let c = null; try{ c = JSON.parse(localStorage.getItem('vocabVision.trxCfg') || 'null'); }catch(e){} c = c || {}; const mob = /Android|iPhone|iPad|Mobile/i.test(navigator.userAgent || ''); return { model:TRX_MODELS[c.model] ? c.model : (mob ? 'base' : (navigator.gpu ? 'small' : 'base')), lang:TRX_LANGS[c.lang] ? c.lang : 'fr' }; }
+function trxCfg(){ let c = null; try{ c = JSON.parse(localStorage.getItem('vocabVision.trxCfg') || 'null'); }catch(e){} c = c || {}; const mob = /Android|iPhone|iPad|Mobile/i.test(navigator.userAgent || ''); return { model:TRX_MODELS[c.model] ? c.model : (mob ? 'base' : (navigator.gpu ? 'small' : 'base')), lang:TRX_LANGS[c.lang] ? c.lang : 'fr', times:!!c.times }; }
 function trxCfgSave(patch){ try{ localStorage.setItem('vocabVision.trxCfg', JSON.stringify(Object.assign(trxCfg(), patch))); }catch(e){} }
 const TRX_WORKER_SRC = `
 import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.6/dist/transformers.min.js';
@@ -51041,10 +51599,42 @@ function trxAddText(m){
   TRX.segs.push({ t:Math.round((m.t0 || 0) * 10) / 10, x:t });
   trxSave(); trxsAutoSave(); if(TRX.hardOn) trxHardRefresh();
   const box = document.getElementById('trxText');
-  if(box){ box.insertAdjacentHTML('beforeend', trxSegHtml(TRX.segs[TRX.segs.length - 1], TRX.segs.length - 1)); const ph = box.querySelector('.trx-ph'); if(ph) ph.remove(); if(TRX.follow) box.scrollTop = box.scrollHeight; const bx = box.closest('.trx-box'); if(bx) bx.querySelectorAll('[data-trx]').forEach(x => { x.disabled = false; }); }
+  if(box){ trxAppendSeg(box, TRX.segs.length - 1); const ph = box.querySelector('.trx-ph'); if(ph) ph.remove(); if(TRX.follow) box.scrollTop = box.scrollHeight; const bx = box.closest('.trx-box'); if(bx) bx.querySelectorAll('[data-trx]').forEach(x => { x.disabled = false; }); }
   trxStatus();
 }
-function trxSegHtml(s, i){ const ah = TRX.mode === 'ahead'; return `<p class="trx-seg${ah && TRX.reveal !== 'all' ? ' fut' : ''}" data-i="${i}"${ah ? ` data-t="${s.t}" data-e="${s.e != null ? s.e : s.t + 3}"` : ''}><button type="button" class="trx-t" data-trx-seek="${s.t}" aria-label="Réentendre à ${audioFmt(s.t)}">▶ ${audioFmt(s.t)}</button> <span class="trx-x">${trxTextHtml(s.x, TRX.hardOn ? TRX.hardSets : null, '', ah)}</span></p>`; }
+/* 📄 1.0.36 : le texte suivi, sans les minutes — les morceaux se suivent comme dans un livre, en paragraphes
+   (un nouveau paragraphe après une fin de phrase suivie d'une pause, ou quand le paragraphe devient long).
+   « ⏱ Minutes » remet le ▶ 1:52 devant chaque morceau. */
+function trxParaStarts(segs){
+  const out = new Set(); let p0 = 0;
+  (segs || []).forEach((s, i) => {
+    if(i === 0){ out.add(0); return; }
+    const pv = segs[i - 1], end = /[.!?…»"”]\s*$/.test(String(pv.x || '').trim());
+    const gap = pv.e != null ? (+s.t || 0) - (+pv.e || 0) : 0, len = (+s.t || 0) - (+segs[p0].t || 0);
+    if((end && (gap >= 1.4 || len >= 40)) || len >= 150){ out.add(i); p0 = i; }
+  });
+  return out;
+}
+/* les morceaux, regroupés en vrais paragraphes (pour l'écran, la sélection et la lecture à voix haute) */
+function trxFlowJoin(H){
+  let out = '', open = false;
+  H.forEach(x => { if(!x.h) return; if(x.p || !open){ if(open) out += '</p>'; out += '<p class="trx-para">'; open = true; } else out += ' '; out += x.h; });
+  return open ? out + '</p>' : out;
+}
+function trxJoinSegs(L, PS, plain){ return plain ? L.join('') : trxFlowJoin(L.map((h, i) => ({ h, p:PS.has(i) }))); }
+function trxAppendSeg(box, i){
+  const pbr = i === 0 || trxParaStarts(TRX.segs).has(i), h = trxSegHtml(TRX.segs[i], i, pbr);
+  if(!box.classList.contains('flow')){ box.insertAdjacentHTML('beforeend', h); return; }
+  const last = box.lastElementChild;
+  if(pbr || !last || !last.classList.contains('trx-para')) box.insertAdjacentHTML('beforeend', '<p class="trx-para">' + h + '</p>');
+  else last.insertAdjacentHTML('beforeend', ' ' + h);
+}
+function trxPlain(segs){
+  const P = trxParaStarts(segs); let t = '';
+  (segs || []).forEach((s, i) => { const x = String(s.x || '').trim(); if(!x) return; t += (i && P.has(i) ? '\n\n' : (t ? ' ' : '')) + x; });
+  return t;
+}
+function trxSegHtml(s, i, pbr){ const ah = TRX.mode === 'ahead', tg = trxCfg().times ? 'p' : 'span'; if(pbr === undefined) pbr = i === 0 || trxParaStarts(TRX.segs).has(i); return `<${tg} class="trx-seg${ah && TRX.reveal !== 'all' ? ' fut' : ''}${pbr ? ' pbr' : ''}" data-i="${i}"${ah ? ` data-t="${s.t}" data-e="${s.e != null ? s.e : s.t + 3}"` : ''}><button type="button" class="trx-t" data-trx-seek="${s.t}" aria-label="Réentendre à ${audioFmt(s.t)}">▶ ${audioFmt(s.t)}</button> <span class="trx-x">${trxTextHtml(s.x, TRX.hardOn ? TRX.hardSets : null, '', ah)}</span></${tg}>`; }
 function trxLoadCache(file){ try{ const C = JSON.parse(localStorage.getItem(TRX_CACHE) || '{}') || {}; return (C[file] && C[file].segs) || []; }catch(e){ return []; } }
 function trxSave(){
   if(!TRX.file) return;
@@ -51105,10 +51695,11 @@ function trxRender(){
       <select id="trxLang" aria-label="Langue de l'audio">${Object.entries(TRX_LANGS).map(([k, l]) => `<option value="${k}" ${cfg.lang === k ? 'selected' : ''}>${l[0]}</option>`).join('')}</select></div>
     <div class="trx-st" id="trxSt" aria-live="polite"></div>
     <div id="trxHardP">${TRX.hardOn ? trxHardPanelHtml(trxHard(TRX.segs, cfg.lang), cfg.lang) : ''}</div>
-    <div class="trx-text reading-text" id="trxText" lang="${cfg.lang}" ${cfg.lang === 'ar' ? 'dir="rtl"' : ''}>${TRX.segs.length ? TRX.segs.map((s, i) => trxSegHtml(s, i)).join('') : '<p class="trx-ph">Le texte va s’écrire ici pendant l’écoute. Touche un mot pour sa définition, et l’ajouter à tes mots avec sa phrase.</p>'}</div>
+    <div class="trx-text reading-text${cfg.times ? '' : ' flow'}" id="trxText" lang="${cfg.lang}" ${cfg.lang === 'ar' ? 'dir="rtl"' : ''}>${TRX.segs.length ? (() => { const PS = trxParaStarts(TRX.segs), H = TRX.segs.map((s, i) => ({ h:trxSegHtml(s, i, PS.has(i)), p:PS.has(i) })); return cfg.times ? H.map(x => x.h).join('') : trxFlowJoin(H); })() : '<p class="trx-ph">Le texte va s’écrire ici pendant l’écoute. Touche un mot pour sa définition, et l’ajouter à tes mots avec sa phrase.</p>'}</div>
     <div class="trx-b">
       <button type="button" class="mode-chip" data-trx="tb" ${TRX.segs.length ? '' : 'disabled'}>📰 Dans la Tablette</button>
       <button type="button" class="mode-chip" data-trx="copy" ${TRX.segs.length ? '' : 'disabled'}>📋 Copier</button>
+      <button type="button" class="mode-chip ${cfg.times ? 'active' : ''}" data-trx="times" aria-pressed="${cfg.times}" title="Afficher l'heure de chaque passage (▶ pour le réentendre)">⏱ Minutes</button>
       ${TRX.mode === 'ahead' ? `<button type="button" class="mode-chip" data-trx="reveal">${TRX.reveal === 'all' ? '🎬 Au rythme de l’audio' : '📜 Tout le texte'}</button>` : ''}
       <button type="button" class="mode-chip ${saved ? 'active' : ''}" data-trx="save" ${TRX.segs.length ? '' : 'disabled'}>${saved ? '✅ Sauvegardée' : '💾 Sauvegarder'}</button>
       <button type="button" class="mode-chip ${TRX.hardOn ? 'active' : ''}" data-trx="hard" ${TRX.segs.length ? '' : 'disabled'} aria-pressed="${!!TRX.hardOn}">🔎 Mots difficiles</button>
@@ -51237,13 +51828,22 @@ function trxHardPanelHtml(H, lang){
   </div>`;
 }
 /* toucher un mot d'une liste : la bulle du mot (avec la phrase où il apparaît) */
-function trxWordPop(btn, segs){
-  const w = btn.dataset.trxW, s = (segs[+btn.dataset.si] || {}).x || '';
-  try{ wtShow(w, btn.getBoundingClientRect(), { sentence:s, cat:'Mes audios' }); }catch(e){}
+/* ▶ réentendre le passage d'un morceau de texte (transcription en direct ou sauvegardée) */
+function trxSegPlay(sg){
+  const box = sg.closest('.trx-text'); if(!box) return null;
+  if(box.id === 'trxText'){ const s = TRX.segs[+sg.dataset.i]; if(!s) return null; return () => { const el = audioLib.el; if(el){ el.currentTime = Math.max(0, (+s.t || 0) - 0.3); if(el.paused) el.play().catch(() => {}); } }; }
+  const f = box.dataset.trxFile, t = +sg.dataset.t;
+  return f && isFinite(t) ? () => trxsPlayAt(f, t) : null;
+}
+function trxWordPop(btn, segs, playAt){
+  const sg = segs[+btn.dataset.si] || {}, w = btn.dataset.trxW, s = sg.x || '';
+  const ctx = { sentence:s, cat:'Mes audios' };
+  if(playAt && sg.t != null) ctx.play = () => playAt(+sg.t);
+  try{ wtShow(w, btn.getBoundingClientRect(), ctx); }catch(e){}
 }
 function trxDownload(title, segs){
   try{
-    const txt = (title ? title + '\n\n' : '') + segs.map(s => `[${audioFmt(s.t)}] ${s.x}`).join('\n');
+    const txt = (title ? title + '\n\n' : '') + (trxCfg().times ? segs.map(s => `[${audioFmt(s.t)}] ${s.x}`).join('\n') : trxPlain(segs));
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([txt], { type:'text/plain;charset=utf-8' }));
     a.download = String(title || 'transcription').replace(/[\\/:*?"<>|]+/g, ' ').trim().slice(0, 80) + '.txt';
@@ -51335,6 +51935,7 @@ function renderTrxView(file, focus){
       const sets = st.hard ? trxHardSets(st.H) : null;
       const words = rec.segs.reduce((n, s) => n + (String(s.x).match(/\S+/g) || []).length, 0);
       const qf = dxFold(st.q.trim()), nHits = qf.length >= 2 ? rec.segs.filter(s => dxFold(s.x).includes(qf)).length : 0;
+      const PS = trxParaStarts(rec.segs), TG = trxCfg().times ? 'p' : 'span';
       card.innerHTML = `
         <div class="cat-tag">📝 Transcription</div>
         <div class="word-fr" style="font-size:clamp(20px,4.4vw,27px);">${escapeHtml(rec.title)}</div>
@@ -51344,13 +51945,14 @@ function renderTrxView(file, focus){
           <button type="button" class="mode-chip ${st.hard ? 'active' : ''}" data-trxv="hard" aria-pressed="${st.hard}">🔎 Mots difficiles${st.H.hard.length ? ` · ${st.H.hard.length}` : ''}</button>
           <button type="button" class="mode-chip" data-trxv="tb">📰 Dans la Tablette</button>
           <button type="button" class="mode-chip" data-trxv="copy">📋 Copier</button>
+          <button type="button" class="mode-chip ${trxCfg().times ? 'active' : ''}" data-trxv="times" aria-pressed="${trxCfg().times}">⏱ Minutes</button>
           <button type="button" class="mode-chip" data-trxv="dl">⬇️ Télécharger (.txt)</button>
           <button type="button" class="mode-chip trxv-del" data-trxv="del">${st.del ? '⚠️ Oui, supprimer' : '🗑 Supprimer'}</button>
         </div>
         <input type="search" class="pk-q" id="trxvQ" value="${escapeHtml(st.q).replace(/"/g, '&quot;')}" placeholder="🔍 Chercher dans ce texte" aria-label="Chercher dans ce texte" autocomplete="off">
         ${qf.length >= 2 ? `<div class="trxl-n">${nHits} phrase${nHits > 1 ? 's' : ''} avec « ${escapeHtml(st.q.trim())} »</div>` : ''}
         ${st.hard ? trxHardPanelHtml(st.H, rec.lang) : ''}
-        <div class="trx-text trxv-text reading-text" id="trxvText" lang="${rec.lang || 'fr'}" ${rec.lang === 'ar' ? 'dir="rtl"' : ''}>${rec.segs.map((s, i) => (qf.length >= 2 && !dxFold(s.x).includes(qf)) ? '' : `<p class="trx-seg ${i === focus ? 'cur' : ''}" data-i="${i}"><button type="button" class="trx-t" data-trxv-seek="${s.t}" aria-label="Réentendre à ${audioFmt(s.t)}">▶ ${audioFmt(s.t)}</button> <span class="trx-x">${trxTextHtml(s.x, sets, st.q)}</span></p>`).join('')}</div>`;
+        <div class="trx-text trxv-text reading-text${trxCfg().times ? '' : ' flow'}" id="trxvText" data-trx-file="${escapeHtml(rec.file).replace(/"/g, '&quot;')}" lang="${rec.lang || 'fr'}" ${rec.lang === 'ar' ? 'dir="rtl"' : ''}>${trxJoinSegs(rec.segs.map((s, i) => (qf.length >= 2 && !dxFold(s.x).includes(qf)) ? '' : `<${TG} class="trx-seg ${i === focus ? 'cur' : ''}${PS.has(i) ? ' pbr' : ''}" data-i="${i}" data-t="${s.t}"><button type="button" class="trx-t" data-trxv-seek="${s.t}" aria-label="Réentendre à ${audioFmt(s.t)}">▶ ${audioFmt(s.t)}</button> <span class="trx-x">${trxTextHtml(s.x, sets, st.q)}</span></${TG}>`), PS, TG === 'p')}</div>`;
       const q = card.querySelector('#trxvQ');
       q.addEventListener('input', () => { st.q = q.value; const pos = q.selectionStart; draw(); const q2 = document.getElementById('trxvQ'); if(q2){ q2.focus(); try{ q2.setSelectionRange(pos, pos); }catch(e){} } });
       if(focus != null){ const f = card.querySelector(`.trx-seg[data-i="${focus}"]`); if(f) setTimeout(() => f.scrollIntoView({ block:'center' }), 60); focus = null; }
@@ -51358,14 +51960,15 @@ function renderTrxView(file, focus){
     draw();
     card.addEventListener('click', (e) => {
       const sk = e.target.closest('[data-trxv-seek]'); if(sk){ e.stopPropagation(); trxsPlayAt(rec.file, +sk.dataset.trxvSeek); return; }
-      const w = e.target.closest('[data-trx-w]'); if(w){ e.stopPropagation(); trxWordPop(w, rec.segs); return; }
+      const w = e.target.closest('[data-trx-w]'); if(w){ e.stopPropagation(); trxWordPop(w, rec.segs, (t) => trxsPlayAt(rec.file, t)); return; }
       const b = e.target.closest('[data-trxv]'); if(!b) return;
       const a = b.dataset.trxv;
       if(a !== 'del') st.del = false;
       if(a === 'play') trxsPlayAt(rec.file, 0);
       else if(a === 'hard'){ st.hard = !st.hard; draw(); }
       else if(a === 'tb') trxSegsToTablette(rec.segs, rec.title);
-      else if(a === 'copy'){ try{ navigator.clipboard.writeText(rec.segs.map(s => s.x).join('\n')).then(() => lexSnack('📋 Texte copié')); }catch(err){} }
+      else if(a === 'copy'){ try{ navigator.clipboard.writeText(trxCfg().times ? rec.segs.map(s => s.x).join('\n') : trxPlain(rec.segs)).then(() => lexSnack('📋 Texte copié')); }catch(err){} }
+      else if(a === 'times'){ trxCfgSave({ times:!trxCfg().times }); draw(); }
       else if(a === 'dl') trxDownload(rec.title, rec.segs);
       else if(a === 'del'){
         if(!st.del){ st.del = true; draw(); return; }
@@ -51384,11 +51987,12 @@ function trxHardRefresh(){
 function trxBoxClick(e){
   const sk = e.target.closest('[data-trx-seek]');
   if(sk){ e.stopPropagation(); const el = audioLib.el; if(el){ el.currentTime = Math.max(0, +sk.dataset.trxSeek - 0.3); if(el.paused) el.play().catch(() => {}); } return; }
-  const w = e.target.closest('[data-trx-w]'); if(w){ e.stopPropagation(); trxWordPop(w, TRX.segs); return; }
+  const w = e.target.closest('[data-trx-w]'); if(w){ e.stopPropagation(); trxWordPop(w, TRX.segs, (t) => { const el = audioLib.el; if(el){ el.currentTime = Math.max(0, t - 0.3); if(el.paused) el.play().catch(() => {}); } }); return; }
   const b = e.target.closest('[data-trx]'); if(!b) return;
   const a = b.dataset.trx;
   if(a === 'clear'){ TRX.segs = []; trxSave(); trxRender(); }
-  else if(a === 'copy'){ const t = TRX.segs.map(s => s.x).join('\n'); try{ navigator.clipboard.writeText(t).then(() => lexSnack('📋 Texte copié')); }catch(err){} }
+  else if(a === 'copy'){ const t = trxCfg().times ? TRX.segs.map(s => s.x).join('\n') : trxPlain(TRX.segs); try{ navigator.clipboard.writeText(t).then(() => lexSnack('📋 Texte copié')); }catch(err){} }
+  else if(a === 'times'){ trxCfgSave({ times:!trxCfg().times }); trxRender(); }
   else if(a === 'tb') trxToTablette();
   else if(a === 'save') trxsSaveCurrent();
   else if(a === 'hard'){ TRX.hardOn = !TRX.hardOn; if(TRX.hardOn) trxHardRefresh(); trxRender(); }
