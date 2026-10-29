@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- 🏷️ Version de l'appli : augmentée automatiquement par publier-site.cmd à chaque publication -->
-<meta name="app-version" content="1.0.36" data-date="2026-10-29">
+<meta name="app-version" content="1.0.39" data-date="2026-10-29">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <title>VocabVISION — Vocabulaire Français ↔ Arabe</title>
 <script>
@@ -2450,6 +2450,79 @@
   .done-top-btn{ font-weight:800 !important; }
   .done-top-btn.on{ background:rgba(34,197,94,.12) !important; border-color:rgba(34,197,94,.55) !important; color:#16A34A !important; }
   /* 📇 1.0.26 : la fiche d'un mot en fenêtre, 🔖 le marque-page de la Tablette, 🎤 le micro de la Répétition */
+  /* ➕ 1.0.39 : les mots d'une fiche → mes blocs ; glisser pour sélectionner */
+  .ex-text, .result-ex, .def-text, .repeat-sentence, .wcp-ex, .wcp-def, .reading-text:not(.dsel-x), .bq-quote, .cq-sentence{ touch-action:pan-y pinch-zoom; }
+  .fsa-row{ display:flex; justify-content:center; margin:10px 0 0; }
+  .fsa-btn{ background:linear-gradient(135deg, #7C3AED, #EC4899) !important; color:#fff !important; border:0 !important; font-weight:800; }
+  .fsa{ max-height:90vh; overflow-y:auto; }
+  .fsa .wcp-head{ justify-content:space-between; align-items:flex-start; } .fsa .wcp-head > div{ flex:1; min-width:0; }
+  .fsa-sub{ font-size:13px; color:var(--text-dim); font-weight:700; }
+  .fsa-st{ font-size:12.5px; font-weight:800; color:var(--purple); margin:6px 0 8px; min-height:16px; }
+  .fsa-list{ display:flex; flex-direction:column; gap:8px; }
+  .fsa-it{ display:flex; gap:10px; align-items:flex-start; border:1px solid var(--border); background:var(--surface-sunken); border-radius:14px; padding:9px 10px; }
+  .fsa-it.off{ opacity:.5; } .fsa-it.known{ opacity:.65; }
+  .fsa-ck input{ width:22px; height:22px; accent-color:var(--purple); margin:4px 0 0; }
+  .fsa-main{ flex:1; min-width:0; display:flex; flex-direction:column; gap:5px; }
+  .fsa-l1{ display:flex; gap:6px; flex-wrap:wrap; }
+  .fsa-fr, .fsa-ar, .fsa-def{ border:1px solid var(--border); border-radius:10px; padding:6px 9px; font:inherit; font-size:14.5px; background:var(--surface); color:var(--text); min-width:0; box-sizing:border-box; }
+  .fsa-fr{ flex:1 1 150px; font-weight:800; } .fsa-ar{ flex:1 1 120px; font-size:16px; }
+  .fsa-def{ width:100%; resize:vertical; font-size:13px; } .fsa-def.need{ border-color:#F59E0B; }
+  .fsa-ex{ font-size:13px; color:var(--text-dim); font-style:italic; } .fsa-ex mark{ background:rgba(250,204,21,.45); color:inherit; border-radius:4px; padding:0 2px; }
+  .fsa-exar{ font-size:14.5px; color:var(--purple); text-align:right; }
+  .fsa-foot{ position:sticky; bottom:-16px; background:var(--surface, #fff); margin:10px -4px -16px; padding:4px 4px 14px; border-top:1px solid var(--border); z-index:2; }
+  .fsa-k{ font-size:12px; font-weight:800; color:#059669; }
+  .fsa-blk{ display:flex; gap:8px; align-items:flex-start; margin:12px 0 4px; font-weight:700; font-size:13.5px; cursor:pointer; }
+  .fsa-blk input{ width:20px; height:20px; flex:none; accent-color:var(--purple); }
+  /* 📄 1.0.38 : choisir les pages d'un PDF, lire les pages scannées */
+  .tbp-dlg{ max-height:92vh; overflow-y:auto; }
+  .tbp-mode{ display:flex; flex-wrap:wrap; gap:8px 14px; align-items:center; font-weight:700; font-size:14px; }
+  .tbp-mode label{ display:flex; gap:6px; align-items:center; cursor:pointer; }
+  .tbp-in{ flex:1; min-width:140px; margin:0 !important; }
+  .tbp-in.bad{ border-color:#EF4444 !important; box-shadow:0 0 0 2px rgba(239,68,68,.2); }
+  .tbp-n{ font-size:12.5px; font-weight:800; color:var(--purple); margin:6px 0; min-height:16px; }
+  .tbp-g{ display:grid; grid-template-columns:repeat(auto-fill, minmax(70px, 1fr)); gap:8px; max-height:min(38vh, 300px); overflow-y:auto; padding:4px; border-radius:12px; background:var(--surface-sunken); }
+  .tbp-t{ position:relative; border:2px solid transparent; border-radius:10px; padding:3px; background:var(--surface); cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:2px; opacity:.45; transition:opacity .15s, border-color .15s; }
+  .tbp-t.on{ border-color:var(--purple); opacity:1; }
+  .tbp-t.on::after{ content:'✓'; position:absolute; top:4px; right:4px; width:18px; height:18px; border-radius:50%; background:var(--purple); color:#fff; font-size:11px; font-weight:900; display:flex; align-items:center; justify-content:center; }
+  .tbp-t canvas{ width:100%; height:auto; aspect-ratio:3 / 4; object-fit:contain; background:#fff; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,.15); }
+  .tbp-t span{ font-size:11.5px; font-weight:800; color:var(--text); }
+  .tbp-x{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin:6px 0 4px; font-size:12px; color:var(--text-dim); }
+  .tbp-prog-ov{ z-index:10080; }
+  .tbp-prog .tbp-pl{ font-weight:800; font-size:14.5px; margin:6px 0 10px; }
+  .tbp-bar{ height:10px; border-radius:10px; background:var(--surface-sunken); overflow:hidden; }
+  .tbp-bar i{ display:block; height:100%; width:0; background:linear-gradient(90deg, #7C3AED, #EC4899); transition:width .3s; }
+  .tbp-sub{ font-size:12.5px; color:var(--text-dim); margin:8px 0 0; min-height:16px; }
+  /* 📌 1.0.37 : mes extraits, la bulle d'un passage, le 2e traducteur */
+  .tbx{ max-height:88vh; overflow-y:auto; }
+  .tbx .wcp-head{ justify-content:space-between; align-items:flex-start; } .tbx .wcp-head > div{ flex:1; min-width:0; }
+  .tbx .pk-q{ width:100%; box-sizing:border-box; margin:6px 0 0; }
+  .tbx-n{ font-size:13px; color:var(--text-dim); font-weight:700; }
+  .tbx-list{ display:flex; flex-direction:column; gap:10px; margin:10px 0; }
+  .tbx-it{ border:1px solid var(--border); background:var(--surface-sunken); border-radius:14px; padding:10px 12px; }
+  .tbx-it.flash{ animation:tbxFlash 1.6s ease; }
+  @keyframes tbxFlash{ 0%,60%{ box-shadow:0 0 0 3px rgba(124,58,237,.45); } 100%{ box-shadow:none; } }
+  .tbx-x{ margin:0; padding:0 0 0 10px; border-left:3px solid var(--purple); font-size:15.5px; line-height:1.55; }
+  .tbx-ar{ margin:8px 0 0; font-size:17px; line-height:1.6; color:var(--purple); }
+  .tbx-m{ font-size:11.5px; color:var(--text-dim); margin:6px 0 0; }
+  .tbx-b{ display:flex; flex-wrap:wrap; gap:6px; margin:8px 0 0; }
+  .tbx-b button, .tbx-foot button{ border:1px solid var(--border); background:var(--surface); color:var(--text); border-radius:10px; padding:6px 10px; font:inherit; font-size:13px; font-weight:700; cursor:pointer; }
+  .tbx-b button.del{ margin-left:auto; } .tbx-b button.warn{ background:#FEE2E2; color:#B91C1C; border-color:#FCA5A5; }
+  .tbx-foot{ display:flex; flex-wrap:wrap; gap:8px; } .tbx-foot[hidden]{ display:none; }
+  .tbx-empty{ font-size:14px; color:var(--text-dim); padding:14px 4px; }
+  .tbl-ext{ --cc:#7C3AED; }
+  .wt-selpill{ position:fixed; z-index:10055; }
+  .wt-selpill[hidden]{ display:none !important; }
+  .wt-ph .wt-pw{ font-size:15px; line-height:1.4; font-weight:800; }
+  .wt-mam{ margin:8px 0 0; display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+  .wt-mam-h{ width:100%; font-size:11.5px; font-weight:800; color:var(--text-dim); text-transform:uppercase; letter-spacing:.04em; }
+  .wt-mam-c{ display:inline-flex; gap:6px; align-items:baseline; border:1px solid var(--border); border-radius:10px; padding:3px 8px; font-size:13px; background:var(--surface-sunken); }
+  .wt-mam-c span{ font-size:15px; color:var(--purple); }
+  .wt-pf{ display:flex; flex-direction:column; gap:8px; width:100%; }
+  .wt-pf label{ display:flex; flex-direction:column; gap:3px; font-size:12px; font-weight:800; color:var(--text-dim); }
+  .wt-pin{ border:1px solid var(--border); border-radius:10px; padding:7px 9px; font:inherit; font-size:14px; background:var(--surface); color:var(--text); resize:vertical; }
+  .wt-pin.err{ border-color:#EF4444; }
+  .wt-pf-b{ display:flex; gap:8px; }
+  .tb-gtr{ display:inline-block; margin:6px 0 2px; font-weight:800; font-size:13.5px; color:var(--purple); text-decoration:none; }
   /* 🖼️ 1.0.36 : les images des mots */
   .wimg{ position:relative; overflow:hidden; }
   .wimg[hidden]{ display:none !important; }
@@ -17225,6 +17298,7 @@ function wordCardPopup(w, opts){
     box.addEventListener('pointerdown', (e) => { sx = e.clientX; sy = e.clientY; st0 = Date.now(); });
     box.addEventListener('pointerup', (e) => {
       if(sx == null) return; const dx = e.clientX - sx, dy = e.clientY - sy; sx = null;
+      if(typeof DSEL !== 'undefined' && DSEL.justEnded && Date.now() - DSEL.justEnded < 300) return;   // 👆 c'était une sélection de mots
       if(Math.abs(dx) > 60 && Math.abs(dy) < 60 && Math.abs(dx) > Math.abs(dy) * 1.5 && Date.now() - st0 < 800){ ov.__swiped = Date.now(); step(dx < 0 ? 1 : -1); }
     });
     box.addEventListener('pointercancel', () => { sx = null; });
@@ -17589,6 +17663,7 @@ document.addEventListener('click', (e) => {
     if(a === 'x') wtClose();
     else if(a === 'say') speak(C.word, 'fr-FR');
     else if(a === 'play'){ try{ C.play(); }catch(err){} }
+    else if(typeof wtPhraseAct === 'function' && wtPhraseAct(a, b)){ /* 🌐 la bulle d'un passage */ }
     else if(a === 'see'){ const k = C.known; wtClose(); if(k) wordCardPopup(k, { note:'📇 Ce mot est déjà dans tes mots' }); }
     else if(a === 'edit'){ const k = C.known; wtClose(); if(k) wordEditPopup(k); }
     else if(a === 'add') wtAdd();
@@ -22585,6 +22660,14 @@ const COLOR_PRESETS = {
 /* ============ 🆕 NOUVEAUTÉS — pour que tout ce qui a été ajouté reste découvrable ============ */
 const WHATS_NEW_SECTIONS = [
   { icon:'🆕', title:'Nouveautés', items:[
+    { name:'➕ Les mots d\'une fiche dans mes blocs, d\'un seul coup', desc:"Sur une fiche qui donne des mots (« Éviter / Préférer », « Expression / Sens », une liste de formules…) : « ➕ Ajouter ces mots à mes blocs ». Chaque mot arrive avec son arabe, sa définition (le sens donné par la fiche) et sa phrase d'exemple, traduite en arabe en entier. Tu relis, décoches, corriges, puis tout part dans tes blocs, et dans un bloc au nom de la fiche, à jouer tout de suite." },
+    { name:'👆 Appuyer sur un mot et glisser', desc:"Au doigt aussi : appuie sur un mot et glisse de côté pour sélectionner plusieurs mots (glisser vers le haut ou le bas fait toujours défiler). « 🌐 Traduire » : la traduction d'un coup, puis « ➕ Les mots un par un » pour les ajouter tous à tes blocs, ou « ➕ Ajouter l'expression »." },
+    { name:'📑 Choisir les pages d\'un PDF', desc:"À l'import d'un PDF, ses pages s'affichent en petit : garde-les toutes, touche celles que tu veux, ou écris-les (« 1-3, 6, 9 »). Seules ces pages arrivent dans la Tablette." },
+    { name:'🔎 Les PDF scannés et les photos de pages', desc:"Un PDF scanné (ou des pages scannées dans un PDF), et des photos de pages (.jpg, .png) : l'appli lit leur texte (reconnaissance de texte, sur ton appareil, quelques secondes par page). Le texte lu devient un texte normal : on le sélectionne, on y cherche, on touche ses mots. Option : garder aussi l'image de chaque page pour comparer. ⏹ arrête en gardant les pages déjà lues." },
+    { name:'🔎 Chercher dans tout le texte', desc:"La recherche de la bibliothèque de la Tablette cherche maintenant dans tout le texte de chaque document (avant : seulement le début)." },
+    { name:'📄 Des PDF et des documents Word dans la Tablette', desc:"Tablette → « 📥 Importer » : un PDF (avec du texte, pas scanné) ou un .docx arrive comme un texte de ta bibliothèque, remis en paragraphes, avec ses titres et ses images. Les lignes coupées sont recollées (« appren- dre » → « apprendre »), les en-têtes et numéros de page enlevés. Un long PDF devient plusieurs textes (ses chapitres). Touche un mot : sa définition, l'ajouter." },
+    { name:'📌 Mes extraits', desc:"Sélectionne un passage (dans un texte, un PDF, une transcription, une fiche…) puis « 💾 Garder l'extrait ». Tablette → « 📌 Mes extraits » : les relire, les écouter, les traduire, les copier, retourner à l'endroit du texte, ou en faire un nouveau texte." },
+    { name:'🌐 Traduire plusieurs mots, partout', desc:"Sélectionne plusieurs mots (à la souris, ou appui long au doigt) dans une transcription, une fiche, une phrase : « 🌐 Traduire » donne la traduction, le mot à mot, et permet d'ajouter l'expression à tes mots ou de la garder. Et quand le traducteur gratuit atteint sa limite du jour, un 2e traducteur prend le relais (sinon, un lien vers Google Traduction)." },
     { name:'🖼️ Une image pour chaque mot', desc:"Dans la fiche d'un mot, la bulle d'un mot touché, la Tablette, le dictionnaire, la recherche et 👁 Voir les mots (cartes, diaporama) : une photo ou un dessin libre (Wikimedia Commons), choisi pour le bon sens grâce à la traduction arabe. Touche l'image pour l'agrandir ; 🔄 pour en choisir une autre, mettre ta photo, un lien, ou pas d'image." },
     { name:'🖼️ Images de mes mots', desc:"Dictionnaire → « 🖼️ Images » : cherche d'un coup les images de tous tes mots (les anciens aussi), montre ceux avec et sans image, et permet de tout couper." },
     { name:'📄 La transcription comme un texte', desc:"Plus de « ▶ 1:52 » devant chaque morceau : le texte se lit d'un trait, en paragraphes. Touche un mot : ▶ dans la bulle réentend ce passage. « ⏱ Minutes » remet les heures si tu veux. Copier et télécharger donnent aussi le texte en paragraphes." },
@@ -37076,6 +37159,7 @@ function renderPracticalSheetDetail(id){
     <div class="word-fr" style="font-size:clamp(19px,4vw,25px);">${escapeHtml(sheet.title)}</div>
     <div class="word-def" style="margin-top:6px;">${escapeHtml(sheet.intro)}</div>
     <div class="done-top-row"><button type="button" class="mode-chip done-top-btn" id="sheetValidateTopBtn"></button></div>
+    ${(() => { let n = 0; try{ n = fsItems(sheet).length; }catch(e){} return n ? `<div class="fsa-row"><button type="button" class="mode-chip fsa-btn" id="sheetAddWordsBtn">➕ Ajouter ces ${n} mots à mes blocs</button></div>` : ''; })()}
     ${buildReadingToolbarHtml()}
     ${bodyHtml}
     ${sheet.note ? `<div style="margin-top:16px;text-align:left;font-size:12.5px;color:var(--text-dim);background:rgba(80,70,229,0.06);border:1px solid rgba(80,70,229,0.18);border-radius:12px;padding:12px 16px;">💡 ${escapeHtml(sheet.note)}</div>` : ''}
@@ -41987,6 +42071,7 @@ const VA_DEST = [
   { id:'flashcards', icon:'🃏', label:'Flashcards', ar:'البطاقات', words:['flashcards', 'flashcard', 'cartes', 'carte'], go:() => renderFlashcardsIntro(), say:"Les flashcards : retourne les cartes ! 🃏" },
   { id:'tcf', icon:'🎓', label:'TCF', ar:'امتحان', words:['tcf', 'delf', 'examen', 'امتحان'], go:() => renderTCFQuiz('structures', 0), say:"Entraînement au TCF ! 🎓" },
   { id:'dictionnaire', icon:'🔍', label:'Dictionnaire', ar:'القاموس', words:['dictionnaire', 'definition', 'traduire', 'traduction', 'chercher un mot', 'قاموس', 'القاموس', 'ترجمه'], go:() => renderDictionaryView(), say:"Voici le dictionnaire ! 🔍" },
+  { id:'extraits', icon:'📌', label:'Mes extraits', ar:'مقتطفاتي', words:['mes extraits', 'extraits', 'les extraits', 'passages gardes', 'مقتطفات'], go:() => tbExtOpen(), say:"Voici tes extraits ! 📌" },
   { id:'images', icon:'🖼️', label:'Images des mots', ar:'صور الكلمات', words:['images des mots', 'images de mes mots', 'les images', 'images', 'photos des mots', 'صور الكلمات', 'الصور'], go:() => renderWordImages(), say:"Voici les images de tes mots ! 🖼️" },
   { id:'badges', icon:'🏅', label:'Badges', ar:'الشارات', words:['badges', 'badge', 'recompenses', 'trophees'], go:() => renderBadgesScreen(), say:"Voici tes badges ! 🏅" },
   { id:'progres', icon:'📊', label:'Mes progrès', ar:'تقدمي', words:['progres', 'mes progres', 'statistiques', 'stats', 'profil', 'mon niveau', 'mon score', 'تقدم'], go:() => renderProfileView(), say:"Voici tes progrès ! 📊" },
@@ -46527,8 +46612,12 @@ async function tbMtWord(fr, o){
   o = o || {};
   const q = String(fr || '').trim(); if(!q) return [];
   if(typeof navigator !== 'undefined' && navigator.onLine === false) return [];
-  const j = await tbFetchJson('https://api.mymemory.translated.net/get?langpair=fr|ar&q=' + encodeURIComponent(q), 7000);
-  if(!j) return [];
+  const j = (TB.mtQuota && Date.now() - TB.mtQuota < 3 * 3600e3) ? null : await tbFetchJson('https://api.mymemory.translated.net/get?langpair=fr|ar&q=' + encodeURIComponent(q), 7000);
+  if(!j || /MYMEMORY WARNING|USED ALL AVAILABLE/i.test(String((j.responseData || {}).translatedText || ''))){   // 🌐 1.0.37 : le 2e traducteur
+    if(j) TB.mtQuota = Date.now();
+    const t = tbArTidy(await tbMtAlt(q));
+    return t && tbArOk(t) && t.split(/\s+/).length <= Math.max(3, q.split(/\s+/).length * 2 + 1) ? [t] : [];
+  }
   const words = q.split(/\s+/).length, maxW = Math.max(3, words * 2 + 1), qf = dxFold(q);
   const out = [];
   const add = (t, score) => { t = tbArTidy(t); if(!tbArOk(t) || t.split(/\s+/).length > maxW) return; const o = out.find(x => x.ar === t); if(o) o.score = Math.max(o.score, score); else out.push({ ar:t, score }); };
@@ -46548,11 +46637,16 @@ async function tbMtText(text){
   let C = {}; try{ C = JSON.parse(localStorage.getItem('vocabVision.exAr') || '{}') || {}; }catch(e){}
   if(C[q]) return C[q];
   if(typeof navigator !== 'undefined' && navigator.onLine === false) return '';
-  const j = await tbFetchJson('https://api.mymemory.translated.net/get?langpair=fr|ar&q=' + encodeURIComponent(q.slice(0, 480)), 8000);
-  const t = j && j.responseData && j.responseData.translatedText ? String(j.responseData.translatedText).trim() : '';
-  if(/MYMEMORY WARNING|USED ALL AVAILABLE/i.test(t)){ TB.mtQuota = Date.now(); return ''; }
-  if(!t || !/[\u0600-\u06FF]/.test(t) || /MYMEMORY|QUERY LENGTH|INVALID/i.test(t)) return '';
-  try{ C[q] = t; const ks = Object.keys(C); if(ks.length > 400) delete C[ks[0]]; localStorage.setItem('vocabVision.exAr', JSON.stringify(C)); }catch(e){}
+  let t = '';
+  if(!(TB.mtQuota && Date.now() - TB.mtQuota < 3 * 3600e3)){                       // 🌐 1.0.37 : limite du jour atteinte → directement le 2e traducteur
+    const j = await tbFetchJson('https://api.mymemory.translated.net/get?langpair=fr|ar&q=' + encodeURIComponent(q.slice(0, 480)), 8000);
+    t = j && j.responseData && j.responseData.translatedText ? String(j.responseData.translatedText).trim() : '';
+    if(/MYMEMORY WARNING|USED ALL AVAILABLE/i.test(t) || (j && +j.responseStatus === 429)){ TB.mtQuota = Date.now(); t = ''; }
+    if(t && (!/[\u0600-\u06FF]/.test(t) || /MYMEMORY|QUERY LENGTH|INVALID/i.test(t))) t = '';
+  }
+  if(!t) t = await tbMtAlt(q);
+  if(!t) return '';
+  try{ let C2 = {}; try{ C2 = JSON.parse(localStorage.getItem('vocabVision.exAr') || '{}') || {}; }catch(e){} C2[q] = t; const ks = Object.keys(C2); if(ks.length > 600) delete C2[ks[0]]; localStorage.setItem('vocabVision.exAr', JSON.stringify(C2)); }catch(e){}   // relu juste avant : deux traductions en même temps ne s'effacent plus
   return t;
 }
 async function tbLookup(form, o){
@@ -47706,7 +47800,7 @@ function tbLibShellHtml(){
         <select id="tbkLibSort" class="tbl-sort" aria-label="Trier les textes">
           <option value="recent" ${so === 'recent' ? 'selected' : ''}>Récents</option><option value="az" ${so === 'az' ? 'selected' : ''}>A → Z</option><option value="todo" ${so === 'todo' ? 'selected' : ''}>À finir</option>
         </select>
-        <button type="button" class="tbl-imp" data-tbl="import" title="Importer un fichier : .md (avec ses images ou en .zip), un livre .epub, une BD .cbz, un .txt">📥 Importer (.md, .epub, .cbz)</button>
+        <button type="button" class="tbl-imp" data-tbl="import" title="Importer un fichier : un PDF (avec du texte, ou scanné : son texte est lu), des photos de pages, un document Word .docx, un .md (avec ses images ou en .zip), un livre .epub, une BD .cbz, un .txt">📥 Importer (PDF, photos, Word, .md…)</button>
         <button type="button" class="tbl-new" data-tbl="new-text">＋ Nouveau texte</button>
         <input type="file" id="tbkMdFile" multiple hidden aria-hidden="true" tabindex="-1">
       </div>
@@ -47714,7 +47808,7 @@ function tbLibShellHtml(){
     <div id="tbkLibTop"></div>
     <div class="tbl-shelves tbk-list" id="tbkMine"></div>
     <div class="tbl-foot"><span class="tbk-sync" id="tbkSync">${getSyncUrl() ? '☁️ sur tous tes appareils' : ''}</span><span class="tbl-tip">Astuce : sur ordinateur, glisse un texte (ou un fichier .md) sur une catégorie pour l'y ranger.</span></div>
-    <div class="tbl-dropzone" aria-hidden="true"><span>📥 Lâche ton fichier ici (.md, .epub, .cbz)</span></div>
+    <div class="tbl-dropzone" aria-hidden="true"><span>📥 Lâche ton fichier ici (PDF, photos de pages, Word, .md, .epub, .cbz)</span></div>
     <div class="tbl-menu" id="tbkLibMenu" hidden role="menu"></div>
   </section>`;
 }
@@ -47748,12 +47842,19 @@ function tbLibShelf(c, rows, fold){
     <div class="tbl-sh-list">${rows.length ? rows.map(a => tbLibRow(a, c)).join('') : `<div class="tbl-empty">Aucun texte dans ce rayon. <button type="button" class="tbl-link" data-tbl="new-text" data-cat="${tbAttr(c.id)}">✍️ Ajouter un texte dans « ${escapeHtml(c.name)} »</button></div>`}</div>
   </section>`;
 }
+/* 🔎 1.0.38 : chercher dans tout le texte de chaque document (le texte replié est gardé en mémoire) */
+var TB_FOLD = new Map();
+function tbFoldText(a){
+  const t = String(a && a.text || ''), k = (a && a.id) + ':' + t.length + ':' + (a && a.at || 0);
+  let v = TB_FOLD.get(k); if(v == null){ v = dxFold(t); TB_FOLD.set(k, v); if(TB_FOLD.size > 400) TB_FOLD.delete(TB_FOLD.keys().next().value); }
+  return v;
+}
 function tbLibRefresh(){
   const top = document.getElementById('tbkLibTop'), box = document.getElementById('tbkMine'); if(!top || !box) return;
   const S = tbLibState(), C = tbCats(), all = tbLoad().filter(a => a.id !== 'sample');
   if(S.f !== 'all' && !C.some(c => c.id === S.f)) S.f = 'all';
   const q = dxFold(S.q || '').trim();
-  const hit = (a) => !q || dxFold(a.title || '').includes(q) || dxFold(String(a.text || '').slice(0, 6000)).includes(q);
+  const hit = (a) => !q || dxFold(a.title || '').includes(q) || tbFoldText(a).includes(q);
   const so = tbUi().libSort || 'recent';
   const sorter = so === 'az' ? ((x, y) => String(x.title || '').localeCompare(String(y.title || ''), 'fr'))
     : so === 'todo' ? ((x, y) => (x.done - y.done) || (tbPct(y) - tbPct(x)) || ((y.readAt || y.at || 0) - (x.readAt || x.at || 0)))
@@ -47769,6 +47870,7 @@ function tbLibRefresh(){
       <span class="tbl-hero-ring">${tbRing(tbPct(r), 58)}<b>${Math.round(tbPct(r) * 100)}%</b></span>
       <span class="tbl-hero-t"><small>Reprendre ta lecture, ${rc.icon} ${escapeHtml(rc.name)}</small><b>${escapeHtml(r.title || 'Sans titre')}</b><span>Encore ${Math.max(1, Math.round(tbWordsCount(r.text) * (1 - tbPct(r)) / 170))} min${r.mark ? ', 🔖 marque-page posé' : ''}</span></span>
       <span class="tbl-hero-go" aria-hidden="true">▶</span></button>` : ''}
+    ${tbExtList().length ? `<button type="button" class="tbl-arv tbl-ext" data-tbl="extracts"><span aria-hidden="true">📌</span><span><b>Mes extraits</b><small>${tbExtList().length} passage${tbExtList().length > 1 ? 's' : ''} gardé${tbExtList().length > 1 ? 's' : ''}</small></span></button>` : ''}
     ${tbArWords().length ? `<button type="button" class="tbl-arv" data-tbl="ar-review"><span aria-hidden="true">🔄</span><span><b>Revoir l'arabe de tes mots</b><small>${tbArWords().length} mot${tbArWords().length > 1 ? 's' : ''} ajouté${tbArWords().length > 1 ? 's' : ''} depuis la Tablette : je propose la bonne traduction</small></span><span class="tbl-arv-go" aria-hidden="true">›</span></button>` : ''}
     <div class="tbl-chips" role="group" aria-label="Catégories">${chip('all', '📚', 'Tout', all.length)}${C.map(c => chip(c.id, c.icon, c.name, by.get(c.id).length, c.color)).join('')}<button type="button" class="tbl-chip add" data-tbl="cat-new">＋ Catégorie</button></div>`;
   const fold = tbUi().libFold || {};
@@ -47887,6 +47989,7 @@ function tbLibWire(){
     if(act === 'fold'){ const u = tbUi(); u.libFold = u.libFold || {}; u.libFold[cat] = !u.libFold[cat]; tbSaveUi(); if(S.f !== 'all'){ S.f = 'all'; } tbLibRefresh(); return; }
     if(act === 'new-text'){ tbLibGoNew(cat); return; }
     if(act === 'ar-review'){ tbArReview(); return; }
+    if(act === 'extracts'){ tbExtOpen(); return; }
     if(act === 'import'){ const fi = document.getElementById('tbkMdFile'); TB.impCat = cat || null; fi.value = ''; fi.click(); return; }
     if(act === 'art-menu'){ const a = tbGet(id); if(a) tbLibMenu(b, tbArtMenuHtml(a)); return; }
     if(act === 'cat-menu'){ const c = tbCats().find(x => x.id === cat); if(c) tbLibMenu(b, tbCatMenuHtml(c)); return; }
@@ -48263,13 +48366,13 @@ function tbBookDialog(info, cat){
     ov.className = 'am-dlg-ov tbl-dlg-ov';
     const already = info.existing ? tbCatOf(info.existing) : null;
     ov.innerHTML = `<div class="am-dlg tbl-dlg tbl-imp-dlg" role="dialog" aria-modal="true" aria-label="Importer un livre">
-      <div class="am-dlg-t">${info.kind === 'cbz' ? '🖼 Importer une BD' : '📕 Importer un livre'}</div>
+      <div class="am-dlg-t">${info.kind === 'cbz' ? '🖼 Importer une BD' : info.kind === 'pdf' ? '📄 Importer un PDF' : info.kind === 'docx' ? '📝 Importer un document Word' : '📕 Importer un livre'}</div>
       <div class="tbl-book"><b>${escapeHtml(info.title)}</b>${info.author ? `<small>${escapeHtml(info.author)}</small>` : ''}
-        <span class="tbl-imp-m">${info.kind === 'cbz' ? `<span>🖼 ${info.pages} page${info.pages > 1 ? 's' : ''}</span>` : `<span>📑 ${info.chapters} chapitre${info.chapters > 1 ? 's' : ''}</span><span>${info.words.toLocaleString('fr-FR')} mots</span>${info.imgs ? `<span>🖼 ${info.imgs} image${info.imgs > 1 ? 's' : ''}</span>` : ''}`}</span></div>
-      ${info.kind === 'epub' ? `<div class="tbl-imp-hint">Chaque chapitre devient un texte de ta bibliothèque, dans l'ordre du livre. À la fin d'un chapitre, la Tablette te propose le suivant.</div>` : `<div class="tbl-imp-hint">Les pages restent sur cet appareil (trop lourdes pour la synchro) : importe aussi le .cbz sur ton autre appareil.</div>`}
+        <span class="tbl-imp-m">${info.kind === 'cbz' ? `<span>🖼 ${info.pages} page${info.pages > 1 ? 's' : ''}</span>` : `${info.kind === 'pdf' ? `<span>📄 ${info.pages} page${info.pages > 1 ? 's' : ''}</span>` : ''}${info.kind === 'epub' || info.chapters > 1 ? `<span>📑 ${info.chapters} ${info.kind === 'epub' ? 'chapitre' : 'texte'}${info.chapters > 1 ? 's' : ''}</span>` : ''}<span>${info.words.toLocaleString('fr-FR')} mots</span>${info.imgs ? `<span>🖼 ${info.imgs} image${info.imgs > 1 ? 's' : ''}</span>` : ''}`}</span></div>
+      ${(info.kind === 'pdf' || info.kind === 'docx') ? `<div class="tbl-imp-hint">${info.chapters > 1 ? `Le document devient ${info.chapters} textes (ses parties), dans l'ordre. ` : ''}Le texte est remis en paragraphes, avec ses titres et ses images. Touche un mot pour sa définition ; sélectionne un passage pour le traduire, l'ajouter ou le garder (📌 Mes extraits).</div>` : info.kind === 'epub' ? `<div class="tbl-imp-hint">Chaque chapitre devient un texte de ta bibliothèque, dans l'ordre du livre. À la fin d'un chapitre, la Tablette te propose le suivant.</div>` : `<div class="tbl-imp-hint">Les pages restent sur cet appareil (trop lourdes pour la synchro) : importe aussi le .cbz sur ton autre appareil.</div>`}
       <label class="tbl-dlg-l" for="tblBookCat">📂 Ranger dans</label>
       <select class="am-in" id="tblBookCat">
-        ${info.kind === 'epub' && !already ? `<option value="__new" selected>🆕 Un nouveau rayon : « ${escapeHtml(info.title.slice(0, 32))} »</option>` : ''}
+        ${(info.kind === 'epub' || info.chapters > 3) && !already ? `<option value="__new" ${info.kind === 'epub' || !cat ? 'selected' : ''}>🆕 Un nouveau rayon : « ${escapeHtml(info.title.slice(0, 32))} »</option>` : ''}
         ${C.map(c => `<option value="${tbAttr(c.id)}" ${(already ? already.id === c.id : (info.kind !== 'epub' && (cat ? c.id === cat : false))) ? 'selected' : ''}>${c.icon} ${escapeHtml(c.name)}</option>`).join('')}
       </select>
       ${info.existing ? `<label class="tbl-imp-rep"><input type="checkbox" id="tblBookRep" checked> Remplacer l'import précédent (ta lecture est gardée)</label>` : ''}
@@ -48291,15 +48394,16 @@ function tbBookDialog(info, cat){
 }
 function tbBookId(s){ let h = 0; String(s).split('').forEach(c => { h = (h * 31 + c.charCodeAt(0)) | 0; }); return 'b' + (h >>> 0).toString(36); }
 async function tbBookImport(file, cat){
-  const kind = /\.cbz$/i.test(file.name) ? 'cbz' : 'epub';
+  if(/\.pdf$/i.test(file.name)) return tbPdfImport(file, cat);   // 📄 1.0.38 : choisir ses pages, OCR des pages scannées
+  const kind = /\.cbz$/i.test(file.name) ? 'cbz' : /\.pdf$/i.test(file.name) ? 'pdf' : /\.docx$/i.test(file.name) ? 'docx' : 'epub';
   if(typeof DecompressionStream === 'undefined') throw new Error('ce navigateur ne sait pas ouvrir ce fichier (trop ancien)');
   setStatus(`📚 J'ouvre « ${file.name} »…`, 'ok');
-  const step = (i, n) => { try{ setStatus(`📚 ${kind === 'cbz' ? 'Page' : 'Chapitre'} ${i} / ${n}…`, 'ok'); }catch(e){} };
-  const bk = kind === 'cbz' ? await tbCbzParse(file, step) : await tbEpubParse(file, step);
+  const step = (i, n) => { try{ setStatus(kind === 'docx' ? `📝 Je lis le document…` : `${kind === 'pdf' ? '📄' : '📚'} ${kind === 'cbz' || kind === 'pdf' ? 'Page' : 'Chapitre'} ${i} / ${n}…`, 'ok'); }catch(e){} };
+  const bk = kind === 'cbz' ? await tbCbzParse(file, step) : kind === 'docx' ? await tbDocxParse(file, step) : await tbEpubParse(file, step);
   const bid = tbBookId(kind + '|' + (bk.title || '') + '|' + (bk.author || '') + '|' + file.name);
   const L = tbLoad(), olds = L.filter(a => a.book === bid);
-  const words = kind === 'epub' ? bk.chapters.reduce((t, c) => t + tbWordsCount(c.text), 0) : 0;
-  const v = await tbBookDialog({ kind, title:bk.title, author:bk.author, chapters:kind === 'epub' ? bk.chapters.length : 0, words, imgs:bk.imgs || 0, pages:bk.pages || 0, existing:olds[0] || null }, cat);
+  const words = kind !== 'cbz' ? bk.chapters.reduce((t, c) => t + tbWordsCount(c.text), 0) : 0;
+  const v = await tbBookDialog({ kind, title:bk.title, author:bk.author, chapters:kind !== 'cbz' ? bk.chapters.length : 0, words, imgs:bk.imgs || 0, pages:bk.pages || 0, existing:olds[0] || null }, cat);
   if(!v){ setStatus('📚 Import annulé.', 'ok'); return []; }
   let catId = v.cat;
   if(catId === '__new'){
@@ -48321,16 +48425,1186 @@ async function tbBookImport(file, cat){
   if(v.replace) olds.filter(a => !ids.includes(a.id)).forEach(a => tbDel(a.id));
   if(!ids.length){ setStatus('⚠️ Plus de place sur cet appareil pour ce livre.', 'err'); return []; }
   const c = tbCats().find(z => z.id === catId) || tbCatOf({});
-  setStatus(kind === 'cbz' ? `🖼 « ${bk.title} » : ${bk.pages} pages, dans ${c.icon} ${c.name}` : `📕 « ${bk.title} » : ${ids.length} chapitre${ids.length > 1 ? 's' : ''} dans ${c.icon} ${c.name}`, 'ok');
+  setStatus(kind === 'cbz' ? `🖼 « ${bk.title} » : ${bk.pages} pages, dans ${c.icon} ${c.name}` : (kind === 'pdf' || kind === 'docx') ? `${kind === 'pdf' ? '📄' : '📝'} « ${bk.title} »${ids.length > 1 ? ` : ${ids.length} textes` : ''} dans ${c.icon} ${c.name}${bk.imgs ? ` · 🖼 ${bk.imgs} image${bk.imgs > 1 ? 's' : ''}` : ''}` : `📕 « ${bk.title} » : ${ids.length} chapitre${ids.length > 1 ? 's' : ''} dans ${c.icon} ${c.name}`, 'ok');
   if(ids.length < chapters.length) setStatus(`⚠️ « ${bk.title} » : ${ids.length} chapitres sur ${chapters.length} (plus de place sur cet appareil).`, 'err');
   try{ playCorrectSound(); }catch(e){}
   TB.impOpen = ids[0];
   return ids;
 }
+/* ============ 📄 1.0.37 : IMPORTER UN PDF (avec du texte) OU UN DOCUMENT WORD (.docx) ============
+   Comme un .md ou un livre .epub : le texte du PDF arrive dans la Tablette, remis en paragraphes (les lignes coupées
+   sont recollées, « appren- dre » redevient « apprendre », les en-têtes et numéros de page répétés sont enlevés),
+   avec ses titres et ses images, à leur place. Un long PDF devient plusieurs textes (ses chapitres, d'après son
+   sommaire, ou par groupes de pages). Ensuite, comme pour tout texte : touche un mot pour sa définition et l'ajouter,
+   sélectionne un passage pour le traduire, l'ajouter ou le garder (📌 Mes extraits).
+   Un PDF « scanné » (des photos de pages, sans texte) ne peut pas être lu ainsi : l'appli le dit.
+   Le lecteur de PDF (pdf.js, Mozilla) se télécharge la première fois seulement. */
+const TB_PDFJS = [
+  ['https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js', 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'],
+  ['https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js', 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js']
+];
+function tbLoadScript(src){
+  return new Promise((res, rej) => {
+    const s = document.createElement('script'); s.src = src; s.async = true; s.crossOrigin = 'anonymous';
+    s.onload = () => res(); s.onerror = () => { s.remove(); rej(new Error('script')); };
+    document.head.appendChild(s);
+  });
+}
+async function tbPdfLib(){
+  if(window.pdfjsLib && window.pdfjsLib.getDocument) return window.pdfjsLib;
+  for(const [lib, wk] of TB_PDFJS){
+    try{ await tbLoadScript(lib); }catch(e){ continue; }
+    if(window.pdfjsLib && window.pdfjsLib.getDocument){ window.pdfjsLib.GlobalWorkerOptions.workerSrc = wk; return window.pdfjsLib; }
+  }
+  throw new Error(navigator.onLine === false ? 'il faut une connexion la première fois (pour le lecteur de PDF)' : 'le lecteur de PDF n’a pas pu se charger');
+}
+function tbPdfNorm(s){ return String(s || '').replace(/­/g, '').replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').replace(/ﬁ/g, 'fi').replace(/ﬂ/g, 'fl').replace(/ﬀ/g, 'ff').replace(/ﬃ/g, 'ffi').replace(/ﬄ/g, 'ffl'); }
+/* les morceaux de texte d'une page → des lignes (dans l'ordre de lecture du fichier) */
+function tbPdfLines(items){
+  const lines = []; let cur = null;
+  const close = () => { if(cur){ cur.text = cur.text.replace(/\s+/g, ' ').trim(); if(cur.text) lines.push(cur); } cur = null; };
+  for(const it of items || []){
+    if(!it || typeof it.str !== 'string') continue;
+    const tr = it.transform || [1, 0, 0, 1, 0, 0];
+    const size = Math.hypot(tr[2], tr[3]) || Math.abs(tr[3]) || it.height || 10, x = tr[4], y = tr[5];
+    const str = tbPdfNorm(it.str);
+    if(str.trim()){
+      if(cur && (Math.abs(y - cur.y) > Math.max(size, cur.size) * 0.55 || x < cur.xEnd - Math.max(size, cur.size) * 6)) close();
+      if(!cur) cur = { y, x, xEnd:x, size, text:'', n:0 };
+      else {
+        const gap = x - cur.xEnd;
+        if(gap > size * 0.12 && !/\s$/.test(cur.text) && !/^\s/.test(str)) cur.text += ' ';
+      }
+      cur.text += str; cur.n += str.length;
+      cur.xEnd = Math.max(cur.xEnd, x + (it.width || str.length * size * 0.5));
+      cur.size = Math.max(cur.size, size); cur.x = Math.min(cur.x, x);
+    } else if(cur && str && !/\s$/.test(cur.text)) cur.text += ' ';
+    if(it.hasEOL) close();
+  }
+  close();
+  return lines;
+}
+/* les images d'une page, avec leur hauteur sur la page (pour les remettre à leur place dans le texte) */
+async function tbPdfImages(page, lib, seen){
+  const out = [];
+  let ops = null; try{ ops = await page.getOperatorList(); }catch(e){ return out; }
+  const O = lib.OPS || {}, mul = (a, b) => [a[0] * b[0] + a[2] * b[1], a[1] * b[0] + a[3] * b[1], a[0] * b[2] + a[2] * b[3], a[1] * b[2] + a[3] * b[3], a[0] * b[4] + a[2] * b[5] + a[4], a[1] * b[4] + a[3] * b[5] + a[5]];
+  let m = [1, 0, 0, 1, 0, 0]; const st = [];
+  for(let i = 0; i < ops.fnArray.length; i++){
+    const fn = ops.fnArray[i], a = ops.argsArray[i];
+    if(fn === O.save) st.push(m);
+    else if(fn === O.restore){ if(st.length) m = st.pop(); }
+    else if(fn === O.transform && a) m = mul(m, a);
+    else if(fn === O.paintFormXObjectBegin){ st.push(m); if(a && Array.isArray(a[0]) && a[0].length === 6) m = mul(m, a[0]); }
+    else if(fn === O.paintFormXObjectEnd){ if(st.length) m = st.pop(); }
+    else if(fn === O.paintImageXObject || fn === O.paintInlineImageXObject || fn === O.paintJpegXObject){
+      const wU = Math.hypot(m[0], m[1]), hU = Math.hypot(m[2], m[3]);
+      if(wU < 40 || hU < 30) continue;                                    // une puce, un trait : on passe
+      const top = Math.max(m[5], m[5] + m[1] + m[3], m[5] + m[3], m[5] + m[1]);
+      out.push({ top, wU, hU, id:fn === O.paintInlineImageXObject ? null : a && a[0], inline:fn === O.paintInlineImageXObject ? a && a[0] : null });
+    }
+  }
+  for(const im of out){
+    if(im.id){ seen.set(im.id, (seen.get(im.id) || 0) + 1); }
+    let obj = im.inline;
+    if(!obj && im.id) obj = await new Promise((res) => {
+      const store = String(im.id).startsWith('g_') ? page.commonObjs : page.objs; let done = false;
+      const t = setTimeout(() => { if(!done){ done = true; res(null); } }, 4000);
+      try{ store.get(im.id, (v) => { if(!done){ done = true; clearTimeout(t); res(v); } }); }catch(e){ if(!done){ done = true; clearTimeout(t); res(null); } }
+    });
+    im.blob = await tbPdfImgBlob(obj);
+  }
+  return out.filter(x => x.blob);
+}
+async function tbPdfImgBlob(img){
+  if(!img) return null;
+  const w = img.width, h = img.height; if(!w || !h || w < 48 || h < 48) return null;
+  const sc = Math.min(1, 1400 / Math.max(w, h));
+  const c = document.createElement('canvas'); c.width = Math.max(1, Math.round(w * sc)); c.height = Math.max(1, Math.round(h * sc));
+  const ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height);
+  try{
+    if(img.bitmap) ctx.drawImage(img.bitmap, 0, 0, c.width, c.height);
+    else if(img.data){
+      const src = document.createElement('canvas'); src.width = w; src.height = h;
+      const sx = src.getContext('2d'), id = sx.createImageData(w, h), d = img.data, o = id.data, n = w * h;
+      if(d.length >= n * 4) o.set(d.subarray(0, n * 4));
+      else if(d.length >= n * 3){ for(let i = 0, j = 0; i < n; i++){ o[j++] = d[i * 3]; o[j++] = d[i * 3 + 1]; o[j++] = d[i * 3 + 2]; o[j++] = 255; } }
+      else if(d.length >= n){ for(let i = 0, j = 0; i < n; i++){ o[j++] = d[i]; o[j++] = d[i]; o[j++] = d[i]; o[j++] = 255; } }
+      else { const rb = (w + 7) >> 3; for(let y = 0; y < h; y++) for(let x = 0; x < w; x++){ const v = (d[y * rb + (x >> 3)] >> (7 - (x & 7))) & 1 ? 255 : 0, j = (y * w + x) * 4; o[j] = o[j + 1] = o[j + 2] = v; o[j + 3] = 255; } }
+      sx.putImageData(id, 0, 0); ctx.drawImage(src, 0, 0, c.width, c.height);
+    } else return null;
+  }catch(e){ return null; }
+  return await new Promise(res => c.toBlob(res, 'image/jpeg', 0.86));
+}
+/* une ligne qui revient en haut ou en bas de beaucoup de pages (titre courant, numéro de page) */
+function tbPdfSig(t){ return dxFold(t).replace(/\d+/g, '#').replace(/\s+/g, ' ').trim(); }
+/* les lignes d'une page → titres et paragraphes (HTML), avec les images à leur place */
+function tbPdfPageHtml(pg, B, G){
+  const parts = []; let para = null, prev = null;
+  const flush = () => { if(para && para.t.trim()) parts.push({ top:para.top, h:`<${para.tag}>${escapeHtml(para.t.replace(/\s+/g, ' ').trim())}</${para.tag}>` }); para = null; };
+  const right = Math.max(...pg.lines.map(l => l.xEnd), 0), left = Math.min(...pg.lines.map(l => l.x), 1e9);
+  pg.lines.forEach(l => {
+    const t = l.text;
+    const head = l.size >= B * 1.22 && t.length <= 140 && !/[.;,]$/.test(t);
+    const tag = head ? (l.size >= B * 1.55 ? 'h2' : 'h3') : 'p';
+    const bullet = /^([•●▪◦‣∙·\-–—*]|\d{1,2}[.)]|[a-z][.)])\s+/.test(t) && !head;
+    let brk = !para || para.tag !== tag || bullet;
+    if(!brk && prev){
+      const gap = prev.y - l.y;
+      if(gap < 0 || gap > (tag === 'p' ? G * 1.45 : G * 2.2)) brk = true;                   // un blanc, ou une autre colonne
+      else if(tag === 'p' && /[.!?:»"”…]$/.test(prev.text) && (prev.xEnd < right - B * 2.5 || l.x > left + B * 1.2)) brk = true;   // fin de phrase et ligne courte, ou alinéa
+    }
+    if(brk){ flush(); para = { tag, t:t, top:l.y + l.size }; }
+    else if(/[\p{L}]-$/u.test(para.t) && /^\p{Ll}/u.test(t)) para.t = para.t.slice(0, -1) + t;   // « appren- » + « dre »
+    else para.t += ' ' + t;
+    prev = l;
+  });
+  flush();
+  (pg.imgs || []).forEach(im => parts.push({ top:im.top + 0.01, h:im.html }));
+  // les images : avant le premier morceau qui est plus bas qu'elles (l'ordre des textes reste celui du fichier)
+  const txt = parts.filter(p => !/^<img/.test(p.h)), ims = parts.filter(p => /^<img/.test(p.h)).sort((a, b) => b.top - a.top);
+  ims.forEach(im => { const k = txt.findIndex(p => p.top < im.top); if(k < 0) txt.push(im); else txt.splice(k, 0, im); });
+  return txt.map(p => p.h).join('\n');
+}
+/* ============ 📄 1.0.38 : CHOISIR SES PAGES, ET LIRE LES PDF SCANNÉS (OCR) ============
+   À l'import d'un PDF, une fenêtre montre ses pages en petit : on garde toutes les pages, ou seulement celles qu'on
+   touche (ou qu'on écrit : « 1-3, 6, 9 »).
+   Les pages scannées (des photos de pages, sans texte) sont lues par la reconnaissance de texte (OCR, Tesseract) :
+   sur ton appareil, quelques secondes par page. Le texte lu devient un texte normal de la Tablette : on le
+   sélectionne, on y cherche, on touche ses mots. On peut garder aussi l'image de chaque page, pour comparer.
+   Même chose pour des photos de pages (.jpg, .png) importées seules. */
+const TB_TESS = ['https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js', 'https://unpkg.com/tesseract.js@5.1.1/dist/tesseract.min.js'];
+const TB_OCR_LANGS = [['fra', 'Français'], ['fra+eng', 'Français + anglais'], ['fra+ara', 'Français + arabe'], ['eng', 'Anglais']];
+async function tbPdfOpen(file){
+  const lib = await tbPdfLib();
+  const data = new Uint8Array(await file.arrayBuffer());
+  let doc;
+  try{ doc = await lib.getDocument({ data, isEvalSupported:false, useSystemFonts:true, standardFontDataUrl:'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/standard_fonts/', stopAtErrors:false }).promise; }   // les polices : pour dessiner les pages (petites images, OCR)
+  catch(e){ throw new Error(/password/i.test(String(e && (e.name || e.message))) ? 'ce PDF est protégé par un mot de passe' : 'ce PDF est abîmé ou illisible'); }
+  let title = String(file.name).replace(/\.[^.]+$/, '').replace(/[_]+/g, ' ').trim(), author = '';
+  try{ const md = await doc.getMetadata(); const T = md && md.info && String(md.info.Title || '').trim(); if(T && T.length > 2 && !/^(untitled|sans titre|microsoft word|document\d*)\b/i.test(T) && !/\.(docx?|pdf|tex)$/i.test(T)) title = T; author = md && md.info && String(md.info.Author || '').trim() || ''; }catch(e){}
+  const P = { kind:'pdf', lib, doc, N:doc.numPages, title, author, file, chars:[], scan:[], edge:new Map() };
+  P.thumb = async (p, cv) => { const page = await doc.getPage(p); const v1 = page.getViewport({ scale:1 }), sc = (cv.width || 92) / v1.width, vp = page.getViewport({ scale:sc }); cv.width = Math.floor(vp.width); cv.height = Math.floor(vp.height); const cx = cv.getContext('2d'); cx.fillStyle = '#fff'; cx.fillRect(0, 0, cv.width, cv.height); await page.render({ canvasContext:cx, viewport:vp }).promise; };
+  return P;
+}
+/* chaque page : a-t-elle du texte, ou est-ce une image (scannée) ? */
+async function tbPdfProbe(P, onStep){
+  const O = P.lib.OPS || {};
+  for(let p = 1; p <= P.N; p++){
+    if(onStep && (p % 5 === 0 || p === P.N)) onStep(p, P.N);
+    const page = await P.doc.getPage(p);
+    let n = 0;
+    try{
+      const tc = await page.getTextContent(); (tc.items || []).forEach(it => { if(it && typeof it.str === 'string') n += it.str.replace(/\s+/g, '').length; });
+      const vw = page.view || [0, 0, 600, 800], zone = (vw[3] - vw[1]) * 0.09, S = new Set();
+      tbPdfLines(tc.items).forEach(l => { if(l.y > vw[3] - zone || l.y < vw[1] + zone){ const s = tbPdfSig(l.text); if(s && !S.has(s)){ S.add(s); P.edge.set(s, (P.edge.get(s) || 0) + 1); } } });
+    }catch(e){}
+    let img = false;
+    if(n < 25){ try{ const ops = await page.getOperatorList(); img = ops.fnArray.some(f => f === O.paintImageXObject || f === O.paintInlineImageXObject || f === O.paintJpegXObject); }catch(e){} }
+    P.chars[p] = n; P.scan[p] = n < 25 && img;
+    try{ page.cleanup(); }catch(e){}
+  }
+}
+/* « 1-3, 6, 9- » → [1, 2, 3, 6, 9, 10, …] (null : mal écrit) */
+function tbPagesParse(s, N){
+  const t = String(s || '').replace(/\s+/g, '').replace(/[–—]/g, '-').replace(/à/gi, '-');
+  if(!t) return [];
+  const out = new Set();
+  for(const part of t.split(/[,;.]+/)){
+    if(!part) continue;
+    const m = /^(\d+)(?:-(\d*))?$/.exec(part); if(!m) return null;
+    let a = +m[1], b = m[2] ? +m[2] : (part.endsWith('-') ? N : a);
+    if(a > b){ const x = a; a = b; b = x; }
+    for(let i = Math.max(1, a); i <= Math.min(N, b); i++) out.add(i);
+  }
+  return [...out].sort((x, y) => x - y);
+}
+function tbPagesStr(L){
+  const out = []; let a = null, b = null;
+  (L || []).forEach(p => { if(a == null){ a = b = p; } else if(p === b + 1) b = p; else { out.push(a === b ? '' + a : a + '-' + b); a = b = p; } });
+  if(a != null) out.push(a === b ? '' + a : a + '-' + b);
+  return out.join(', ');
+}
+/* la fenêtre : les pages (en petit) à garder, la langue des pages scannées, le rayon */
+function tbPdfDialog(P, cat, existing){
+  return new Promise(res => {
+    const C = tbCats(), N = P.N, nScan = P.scan.filter(Boolean).length, isImg = P.kind === 'img';
+    const sel = new Set(Array.from({ length:N }, (_, i) => i + 1));
+    const already = existing ? tbCatOf(existing) : null;
+    const ov = document.createElement('div');
+    ov.className = 'am-dlg-ov tbl-dlg-ov';
+    ov.innerHTML = `<div class="am-dlg tbl-dlg tbl-imp-dlg tbp-dlg" role="dialog" aria-modal="true" aria-label="${isImg ? 'Lire le texte de ces photos' : 'Importer un PDF'}">
+      <div class="am-dlg-t">${isImg ? '📷 Lire le texte de ces photos' : '📄 Importer un PDF'}</div>
+      <div class="tbl-book"><b>${escapeHtml(P.title)}</b>${P.author ? `<small>${escapeHtml(P.author)}</small>` : ''}
+        <span class="tbl-imp-m"><span>${isImg ? '📷' : '📄'} ${N} ${isImg ? 'photo' : 'page'}${N > 1 ? 's' : ''}</span>${!isImg && nScan ? `<span>📷 ${nScan === N ? 'scanné' : nScan + ' page' + (nScan > 1 ? 's' : '') + ' scannée' + (nScan > 1 ? 's' : '')}</span>` : ''}</span></div>
+      ${nScan ? `<div class="tbl-imp-hint">🔎 ${isImg ? 'Le texte des photos' : (nScan === N ? 'Ce PDF est scanné : son texte' : 'Le texte des pages scannées')} sera lu par l'appli (reconnaissance de texte, sur ton appareil) : quelques secondes par page. La première fois, le lecteur de texte se télécharge (≈ 5 Mo).</div>` : ''}
+      <div class="tbl-dlg-l">📑 ${isImg ? 'Photos' : 'Pages'} à importer</div>
+      <div class="tbp-mode" role="radiogroup"><label><input type="radio" name="tbpM" value="all" checked> Toutes (${N})</label><label><input type="radio" name="tbpM" value="pick"> Seulement :</label>
+        <input class="am-in tbp-in" id="tbpIn" inputmode="numeric" placeholder="ex. 1-3, 6, 9" aria-label="Numéros des pages à garder" autocomplete="off"></div>
+      <div class="tbp-n" id="tbpN" aria-live="polite"></div>
+      <div class="tbp-g" id="tbpG">${Array.from({ length:N }, (_, i) => `<button type="button" class="tbp-t on" data-p="${i + 1}" aria-pressed="true" aria-label="${isImg ? 'Photo' : 'Page'} ${i + 1}"><canvas width="92" height="120"></canvas><span>${i + 1}${P.scan[i + 1] && !isImg ? ' 📷' : ''}</span></button>`).join('')}</div>
+      <div class="tbp-x"><button type="button" class="tbl-link" data-v="all">✓ Tout</button><button type="button" class="tbl-link" data-v="none">✗ Aucune</button><span>Touche une page pour la garder ou l'enlever.</span></div>
+      ${nScan ? `<label class="tbl-dlg-l" for="tbpLang">🔤 Langue du texte ${isImg ? 'des photos' : 'scanné'}</label>
+        <select class="am-in" id="tbpLang">${TB_OCR_LANGS.map(l => `<option value="${l[0]}">${l[1]}</option>`).join('')}</select>
+        <label class="tbl-imp-rep"><input type="checkbox" id="tbpImg" ${isImg ? 'checked' : ''}> Garder aussi l'image de chaque ${isImg ? 'photo' : 'page scannée'} (pour comparer)</label>` : ''}
+      <label class="tbl-dlg-l" for="tbpCat">📂 Ranger dans</label>
+      <select class="am-in" id="tbpCat">
+        ${N > 30 && !already ? `<option value="__new" ${!cat ? 'selected' : ''}>🆕 Un nouveau rayon : « ${escapeHtml(P.title.slice(0, 32))} »</option>` : ''}
+        ${C.map(c => `<option value="${tbAttr(c.id)}" ${(already ? already.id === c.id : (cat ? c.id === cat : false)) ? 'selected' : ''}>${c.icon} ${escapeHtml(c.name)}</option>`).join('')}
+      </select>
+      ${existing ? `<label class="tbl-imp-rep"><input type="checkbox" id="tbpRep" checked> Remplacer l'import précédent (ta lecture est gardée)</label>` : ''}
+      <div class="am-dlg-b"><button class="am-dlg-btn ghost" data-v="cancel">Annuler</button><button class="am-dlg-btn" data-v="ok"></button></div>
+    </div>`;
+    document.body.appendChild(ov);
+    requestAnimationFrame(() => ov.classList.add('show'));
+    const inp = ov.querySelector('#tbpIn'), okB = ov.querySelector('[data-v="ok"]'), nEl = ov.querySelector('#tbpN'), grid = ov.querySelector('#tbpG');
+    const mode = (m) => { const r = ov.querySelector(`input[name="tbpM"][value="${m}"]`); if(r) r.checked = true; };
+    const sync = (fromInput) => {
+      grid.querySelectorAll('.tbp-t').forEach(b => { const on = sel.has(+b.dataset.p); b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); });
+      if(!fromInput) inp.value = sel.size === N ? '' : tbPagesStr([...sel].sort((a, b) => a - b));
+      const nS = [...sel].filter(p => P.scan[p]).length;
+      nEl.textContent = sel.size ? `${sel.size} ${isImg ? 'photo' : 'page'}${sel.size > 1 ? 's' : ''} choisie${sel.size > 1 ? 's' : ''}${nS && !isImg ? ` · dont ${nS} à lire (OCR)` : ''}` : 'Aucune page choisie';
+      okB.disabled = !sel.size;
+      okB.textContent = sel.size === N ? (isImg ? 'Lire le texte' : 'Importer et lire') : `Importer ${sel.size} ${isImg ? 'photo' : 'page'}${sel.size > 1 ? 's' : ''}`;
+    };
+    sync();
+    inp.addEventListener('input', () => {
+      const L = tbPagesParse(inp.value, N);
+      inp.classList.toggle('bad', L === null);
+      if(L === null){ nEl.textContent = 'Écris des numéros de pages, par exemple : 1-3, 6, 9'; okB.disabled = true; return; }
+      mode(inp.value.trim() ? 'pick' : 'all');
+      sel.clear(); (inp.value.trim() ? L : Array.from({ length:N }, (_, i) => i + 1)).forEach(p => sel.add(p));
+      sync(true);
+    });
+    ov.querySelectorAll('input[name="tbpM"]').forEach(r => r.addEventListener('change', () => {
+      if(r.value === 'all' && r.checked){ inp.value = ''; inp.classList.remove('bad'); sel.clear(); for(let i = 1; i <= N; i++) sel.add(i); sync(); }
+      if(r.value === 'pick' && r.checked) inp.focus();
+    }));
+    // les pages en petit : dessinées quand on les voit, une à la fois
+    const q = [], drawn = new Set(); let busy = false;
+    const pump = async () => { if(busy) return; busy = true; while(q.length && ov.isConnected){ const b = q.shift(); const p = +b.dataset.p; if(drawn.has(p)) continue; drawn.add(p); try{ await P.thumb(p, b.querySelector('canvas')); }catch(e){} } busy = false; };
+    const io = typeof IntersectionObserver !== 'undefined' ? new IntersectionObserver(es => { es.forEach(e => { if(e.isIntersecting){ io.unobserve(e.target); q.push(e.target); } }); pump(); }, { root:grid, rootMargin:'120px' }) : null;
+    grid.querySelectorAll('.tbp-t').forEach(b => { if(io) io.observe(b); else q.push(b); });
+    if(!io) pump();
+    const close = (v) => { document.removeEventListener('keydown', onKey, true); if(io) io.disconnect(); ov.remove(); res(v); };
+    const onKey = (e) => { if(e.key === 'Escape'){ e.preventDefault(); close(null); } };
+    document.addEventListener('keydown', onKey, true);
+    ov.addEventListener('click', (e) => {
+      if(e.target === ov){ close(null); return; }
+      const t = e.target.closest('.tbp-t');
+      if(t){ const p = +t.dataset.p; if(sel.has(p)) sel.delete(p); else sel.add(p); inp.classList.remove('bad'); mode(sel.size === N ? 'all' : 'pick'); sync(); return; }
+      const b = e.target.closest('[data-v]'); if(!b) return;
+      const v = b.dataset.v;
+      if(v === 'all'){ for(let i = 1; i <= N; i++) sel.add(i); mode('all'); sync(); return; }
+      if(v === 'none'){ sel.clear(); mode('pick'); sync(); return; }
+      if(v !== 'ok'){ close(null); return; }
+      if(!sel.size) return;
+      const r = ov.querySelector('#tbpRep'), lg = ov.querySelector('#tbpLang'), ki = ov.querySelector('#tbpImg');
+      close({ pages:[...sel].sort((a, b) => a - b), cat:ov.querySelector('#tbpCat').value, replace:!!(r && r.checked), lang:lg ? lg.value : 'fra', keepImg:!!(ki && ki.checked) });
+    });
+  });
+}
+/* la petite fenêtre « où en est-on » (avec ⏹ pour s'arrêter en gardant ce qui est lu) */
+function tbProgOpen(title){
+  const ov = document.createElement('div');
+  ov.className = 'am-dlg-ov tbl-dlg-ov tbp-prog-ov show';
+  ov.innerHTML = `<div class="am-dlg tbp-prog" role="dialog" aria-modal="true" aria-label="Import en cours"><div class="am-dlg-t">${escapeHtml(title)}</div>
+    <div class="tbp-pl" aria-live="polite">⏳ Je prépare…</div><div class="tbp-bar"><i></i></div><div class="tbp-sub"></div>
+    <div class="am-dlg-b"><button class="am-dlg-btn ghost" data-v="stop">⏹ Arrêter (garder les pages déjà lues)</button></div></div>`;
+  document.body.appendChild(ov);
+  const st = { stop:false };
+  ov.querySelector('[data-v="stop"]').addEventListener('click', (e) => { st.stop = true; e.currentTarget.disabled = true; e.currentTarget.textContent = '⏳ J’arrête après cette page…'; });
+  return {
+    set(i, n, label){ ov.querySelector('.tbp-pl').textContent = label || ''; ov.querySelector('.tbp-bar i').style.width = (n ? Math.round(i / n * 100) : 0) + '%'; },
+    sub(t){ ov.querySelector('.tbp-sub').textContent = t || ''; },
+    stopped:() => st.stop,
+    close(){ ov.remove(); }
+  };
+}
+/* 🔎 la reconnaissance de texte (Tesseract.js, téléchargé la première fois) */
+async function tbOcrWorker(lang, onLog){
+  if(!(window.Tesseract && window.Tesseract.createWorker)){
+    for(const u of TB_TESS){ try{ await tbLoadScript(u); }catch(e){ continue; } if(window.Tesseract && window.Tesseract.createWorker) break; }
+  }
+  if(!(window.Tesseract && window.Tesseract.createWorker)) throw new Error(navigator.onLine === false ? 'il faut une connexion la première fois (pour le lecteur de texte)' : 'le lecteur de texte (OCR) n’a pas pu se charger');
+  return await window.Tesseract.createWorker(lang || 'fra', 1, { logger:(m) => { try{ if(onLog) onLog(m); }catch(e){} } });
+}
+function tbOcrStatus(m){
+  const s = String(m && m.status || '');
+  if(/recogniz/.test(s)) return `🔎 je lis… ${Math.round((m.progress || 0) * 100)} %`;
+  if(/traineddata|language/.test(s)) return `⬇️ la langue du texte… ${Math.round((m.progress || 0) * 100)} %`;
+  if(/core/.test(s)) return '⬇️ le lecteur de texte…';
+  if(/initializ/.test(s)) return '⚙️ je prépare le lecteur de texte…';
+  return '';
+}
+/* le résultat de l'OCR → des paragraphes (et des titres : les lignes nettement plus grandes) */
+function tbOcrHtml(d){
+  if(!d) return '';
+  const paras = Array.isArray(d.paragraphs) ? d.paragraphs : [];
+  const clean = (t) => { t = String(t || '').replace(/\s+/g, ' ').trim(); const L = (t.match(/\p{L}/gu) || []).length; return (t.length && L >= 2 && L / t.length >= 0.45) ? t : ''; };
+  if(!paras.length) return String(d.text || '').split(/\n\s*\n/).map(t => clean(t.replace(/(\p{L})-\s*\n\s*(\p{Ll})/gu, '$1$2').replace(/\s*\n\s*/g, ' '))).filter(Boolean).map(t => `<p>${escapeHtml(t)}</p>`).join('\n');
+  const hs = []; paras.forEach(p => (p.lines || []).forEach(l => { if(l && l.bbox) hs.push(l.bbox.y1 - l.bbox.y0); }));
+  hs.sort((a, b) => a - b);
+  const med = hs.length ? hs[Math.floor(hs.length / 2)] : 0;
+  return paras.map(p => {
+    if((p.confidence != null && p.confidence < 30)) return '';
+    const lines = (p.lines || []).map(l => String(l.text || '').replace(/\s+/g, ' ').trim()).filter(Boolean);
+    if(!lines.length) return '';
+    let t = lines[0];
+    for(let i = 1; i < lines.length; i++){ const x = lines[i]; if(/\p{L}-$/u.test(t) && /^\p{Ll}/u.test(x)) t = t.slice(0, -1) + x; else t += ' ' + x; }
+    t = clean(t); if(!t) return '';
+    const lh = (p.lines || []).reduce((s, l) => s + (l.bbox ? l.bbox.y1 - l.bbox.y0 : 0), 0) / Math.max(1, (p.lines || []).length);
+    const head = med && lines.length <= 2 && t.length < 90 && lh > med * 1.35 && !/[.;,]$/.test(t);
+    return head ? `<h3>${escapeHtml(t)}</h3>` : `<p>${escapeHtml(t)}</p>`;
+  }).filter(Boolean).join('\n');
+}
+async function tbPdfRender(page, targetW){
+  const v1 = page.getViewport({ scale:1 }), sc = Math.max(0.5, Math.min(3, targetW / v1.width)), vp = page.getViewport({ scale:sc });
+  const c = document.createElement('canvas'); c.width = Math.floor(vp.width); c.height = Math.floor(vp.height);
+  const cx = c.getContext('2d'); cx.fillStyle = '#fff'; cx.fillRect(0, 0, c.width, c.height);
+  await page.render({ canvasContext:cx, viewport:vp }).promise;
+  return c;
+}
+async function tbImgCanvas(file, maxW){
+  let bm = null; try{ bm = await createImageBitmap(file); }catch(e){}
+  let src = bm, w, h;
+  if(!bm){ const url = URL.createObjectURL(file); try{ src = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; }); }finally{ setTimeout(() => URL.revokeObjectURL(url), 2000); } }
+  w = src.width || src.naturalWidth; h = src.height || src.naturalHeight;
+  const sc = Math.min(1, maxW / Math.max(1, w)), c = document.createElement('canvas'); c.width = Math.max(1, Math.round(w * sc)); c.height = Math.max(1, Math.round(h * sc));
+  const cx = c.getContext('2d'); cx.fillStyle = '#fff'; cx.fillRect(0, 0, c.width, c.height); cx.drawImage(src, 0, 0, c.width, c.height);
+  try{ if(bm) bm.close(); }catch(e){}
+  return c;
+}
+function tbCanvasBlob(cv, maxW){
+  let c = cv;
+  if(cv.width > maxW){ c = document.createElement('canvas'); c.width = maxW; c.height = Math.round(cv.height * maxW / cv.width); c.getContext('2d').drawImage(cv, 0, 0, c.width, c.height); }
+  return new Promise(res => c.toBlob(res, 'image/jpeg', 0.84));
+}
+/* les pages choisies → un livre (ses textes) : texte du PDF, ou texte lu par l'OCR */
+async function tbPdfBuild(P, v, prog){
+  const sel = v.pages, seen = new Map(), pages = [];
+  let ocr = null, nOcr = 0, conf = 0;
+  try{
+    for(let k = 0; k < sel.length; k++){
+      if(prog.stopped()) break;
+      const p = sel[k], scan = P.kind === 'img' || !!P.scan[p];
+      prog.set(k, sel.length, scan ? `🔎 ${P.kind === 'img' ? 'Photo' : 'Page'} ${p} : je lis le texte de l'image (${k + 1} / ${sel.length})…` : `📄 Page ${p} (${k + 1} / ${sel.length})…`);
+      if(scan){
+        if(!ocr){ prog.sub('⬇️ Je prépare le lecteur de texte…'); ocr = await tbOcrWorker(v.lang, (m) => { const t = tbOcrStatus(m); if(t) prog.sub(t); }); }
+        let cv;
+        if(P.kind === 'img') cv = await tbImgCanvas(P.files[p - 1], 2200);
+        else { const page = await P.doc.getPage(p); cv = await tbPdfRender(page, 1800); try{ page.cleanup(); }catch(e){} }
+        const r = await ocr.recognize(cv);
+        prog.sub('');
+        let html = tbOcrHtml(r && r.data);
+        if(v.keepImg){
+          let id = null;
+          try{ const b = P.kind === 'img' ? P.files[p - 1] : await tbCanvasBlob(cv, 1400); id = b ? await tbImgAdd(b) : null; }catch(e){}
+          if(id) html = `<img data-img="${id}" alt="">\n` + html;
+        }
+        pages.push({ n:p, ocr:true, html });
+        nOcr++; conf += (r && r.data && r.data.confidence) || 0;
+        cv.width = cv.height = 0;
+      } else {
+        const page = await P.doc.getPage(p), vw = page.view || [0, 0, 600, 800];
+        let tc = null; try{ tc = await page.getTextContent(); }catch(e){}
+        const imgs = (await tbPdfImages(page, P.lib, seen)) || [];
+        pages.push({ n:p, lines:tbPdfLines(tc && tc.items), imgs, top:vw[3], bottom:vw[1], h:vw[3] - vw[1] });
+        try{ page.cleanup(); }catch(e){}
+      }
+    }
+  } finally { if(ocr){ try{ await ocr.terminate(); }catch(e){} } }
+  prog.set(1, 1, '✍️ Je mets le texte en forme…'); prog.sub('');
+  const tp = pages.filter(pg => !pg.ocr), NTall = P.chars ? P.chars.filter(n => n >= 25).length : 0, NT = Math.max(tp.length, NTall);
+  if(NT >= 3){
+    let cnt = P.edge && P.edge.size ? P.edge : null;                  // compté sur TOUT le document (même les pages pas choisies)
+    if(!cnt){ cnt = new Map(); tp.forEach(pg => { const zone = pg.h * 0.09; const S = new Set(); pg.lines.forEach(l => { if(l.y > pg.top - zone || l.y < pg.bottom + zone){ const s = tbPdfSig(l.text); if(s && !S.has(s)){ S.add(s); cnt.set(s, (cnt.get(s) || 0) + 1); } } }); }); }
+    tp.forEach(pg => { const zone = pg.h * 0.09; pg.lines = pg.lines.filter(l => !((l.y > pg.top - zone || l.y < pg.bottom + zone) && ((cnt.get(tbPdfSig(l.text)) || 0) >= Math.max(3, NT * 0.4) || /^[-–—\s]*(page\s*)?\d{1,4}(\s*(\/|sur|of)\s*\d{1,4})?[-–—\s]*$/i.test(l.text)))); });
+  } else tp.forEach(pg => { pg.lines = pg.lines.filter(l => !/^[-–—\s]*(page\s*)?\d{1,4}[-–—\s]*$/i.test(l.text)); });
+  const sz = new Map(); tp.forEach(pg => pg.lines.forEach(l => { const k = Math.round(l.size * 2) / 2; sz.set(k, (sz.get(k) || 0) + l.text.length); }));
+  const top1 = [...sz.entries()].sort((a, b) => b[1] - a[1])[0], B = top1 ? top1[0] : 11;
+  const gaps = []; tp.forEach(pg => { for(let i = 1; i < pg.lines.length; i++){ const g = pg.lines[i - 1].y - pg.lines[i].y; if(g > B * 0.8 && g < B * 2.6 && Math.abs(pg.lines[i].size - B) < 1) gaps.push(g); } });
+  gaps.sort((a, b) => a - b);
+  const G = gaps.length ? gaps[Math.floor(gaps.length / 2)] : B * 1.25;
+  let nImg = 0;
+  for(const pg of tp){
+    for(const im of pg.imgs){
+      if((im.id && (seen.get(im.id) || 0) >= 3) || nImg >= 60){ im.html = ''; continue; }
+      let id = null; try{ id = await tbImgAdd(im.blob); }catch(e){}
+      im.html = id ? `<img data-img="${id}" alt="">` : ''; if(id) nImg++;
+    }
+    pg.imgs = pg.imgs.filter(im => im.html);
+    pg.html = tbPdfPageHtml(pg, B, G);
+  }
+  // les parties : le sommaire du PDF (signets), limité aux pages choisies ; sinon un texte (ou des groupes de 10 pages)
+  const done = pages.map(pg => pg.n), all = done.length === P.N;
+  const chars = pages.reduce((t, pg) => t + String(pg.html || '').replace(/<[^>]+>/g, '').length, 0);
+  let starts = [];
+  if(P.doc){
+    try{
+      const ol = await P.doc.getOutline();
+      if(ol && ol.length >= 2) for(const o of ol.slice(0, 120)){
+        let d = o.dest;
+        try{ if(typeof d === 'string') d = await P.doc.getDestination(d); if(Array.isArray(d) && d[0] != null){ const pi = typeof d[0] === 'object' ? await P.doc.getPageIndex(d[0]) : +d[0]; if(isFinite(pi)) starts.push({ p:pi + 1, title:String(o.title || '').replace(/\s+/g, ' ').trim() }); } }catch(e){}
+      }
+    }catch(e){}
+  }
+  starts = starts.filter((s, i, a) => s.p >= 1 && s.p <= P.N && a.findIndex(z => z.p === s.p) === i).sort((a, b) => a.p - b.p);
+  const sub = all ? '' : ` · p. ${tbPagesStr(done)}`;
+  const groups = [];
+  if(starts.length >= 2){
+    const ranges = [];
+    if(starts[0].p > 1) ranges.push({ a:1, b:starts[0].p - 1, title:'Début' });
+    starts.forEach((s, i) => ranges.push({ a:s.p, b:i + 1 < starts.length ? starts[i + 1].p - 1 : P.N, title:s.title || ('Partie ' + (i + 1)) }));
+    ranges.forEach(r => { const ps = done.filter(n => n >= r.a && n <= r.b); if(ps.length) groups.push({ ps, title:r.title }); });
+  }
+  if(groups.length < 2){
+    groups.length = 0;
+    if(chars <= 45000 || done.length <= 12) groups.push({ ps:done, title:P.title + sub });
+    else for(let i = 0; i < done.length; i += 10){ const ps = done.slice(i, i + 10); groups.push({ ps, title:`${P.title} · pages ${ps[0]}–${ps[ps.length - 1]}` }); }
+  }
+  const byN = new Map(pages.map(pg => [pg.n, pg]));
+  const book = { title:P.title, author:P.author, chapters:[], imgs:nImg, pages:P.N, ocr:nOcr, conf:nOcr ? Math.round(conf / nOcr) : 0, stopped:done.length < sel.length };
+  groups.forEach(g => {
+    const html = g.ps.map(n => (byN.get(n) || {}).html || '').join('\n');
+    const body = new DOMParser().parseFromString('<body>' + html + '</body>', 'text/html').body;
+    let blocks = tbDomToBlocks(body, {});
+    if(blocks.length && /^h[23]$/.test(blocks[0].t) && dxFold(tbBlockText(blocks[0]).replace(/\s+/g, ' ').trim()) === dxFold(g.title)) blocks = blocks.slice(1);
+    if(tbWordsCount(tbBlocksText(blocks)) < 3 && !blocks.some(b => b.t === 'img')) return;
+    const ocrG = g.ps.some(n => (byN.get(n) || {}).ocr);
+    const parts = []; let cur = [], len = 0;
+    blocks.forEach(b => { const l = tbBlockText(b).length; if(len + l > 45000 && cur.length){ parts.push(cur); cur = []; len = 0; } cur.push(b); len += l; });
+    if(cur.length) parts.push(cur);
+    parts.forEach((bl, i) => book.chapters.push({ title:(g.title || P.title).slice(0, 150) + (parts.length > 1 ? ` (${i + 1}/${parts.length})` : ''), blocks:bl, text:tbBlocksText(bl), ocr:ocrG }));
+  });
+  return book;
+}
+/* ranger le livre dans la bibliothèque (comme un .epub) */
+function tbBookStore(file, kind, bid, bk, v, olds){
+  let catId = v.cat;
+  if(catId === '__new'){
+    const palette = ['#7C3AED', '#0EA5E9', '#EA580C', '#16A34A', '#DB2777', '#CA8A04'];
+    const c = tbCatPut({ id:'c' + Date.now().toString(36), name:bk.title.slice(0, 32), icon:kind === 'img' ? '📷' : '📄', color:palette[tbCats().length % palette.length] });
+    catId = c.id; try{ tbEdCatOptions(); }catch(e){}
+  }
+  const now = Date.now(), ids = [];
+  bk.chapters.forEach((c, i) => {
+    const old = v.replace ? (olds || []).find(a => (a.ord || 0) === i) : null;
+    const art = old ? Object.assign({}, old, { title:c.title, cat:catId }) : { id:'t' + (now + i).toString(36) + Math.random().toString(36).slice(2, 5), title:c.title, src:file ? file.name : (bk.src || ''), at:now - i, pos:0, pct:0, cat:catId, tags:[] };
+    art.text = c.text; art.blocks = c.blocks; art.book = bid; art.ord = i; art.fmt = 'md';
+    if(c.ocr) art.ocr = true; else delete art.ocr;
+    delete art.textOrig; delete art.blocksOrig;
+    if(tbPut(art)) ids.push(art.id);
+  });
+  if(v.replace) (olds || []).filter(a => !ids.includes(a.id)).forEach(a => tbDel(a.id));
+  if(!ids.length){ setStatus('⚠️ Plus de place sur cet appareil pour ce document.', 'err'); return []; }
+  const c = tbCats().find(z => z.id === catId) || tbCatOf({});
+  setStatus(`${kind === 'img' ? '📷' : '📄'} « ${bk.title} »${ids.length > 1 ? ` : ${ids.length} textes` : ''} dans ${c.icon} ${c.name}${bk.ocr ? ` · 🔎 ${bk.ocr} page${bk.ocr > 1 ? 's' : ''} lue${bk.ocr > 1 ? 's' : ''} par l'OCR (à relire : il peut se tromper)` : ''}${bk.imgs ? ` · 🖼 ${bk.imgs} image${bk.imgs > 1 ? 's' : ''}` : ''}${bk.stopped ? ' · ⏹ arrêté avant la fin' : ''}`, 'ok');
+  try{ playCorrectSound(); }catch(e){}
+  TB.impOpen = ids[0];
+  return ids;
+}
+async function tbPdfImport(file, cat){
+  setStatus(`📄 J'ouvre « ${file.name} »…`, 'ok');
+  const P = await tbPdfOpen(file);
+  try{
+    await tbPdfProbe(P, (i, n) => { try{ setStatus(`📄 Je regarde les pages : ${i} / ${n}…`, 'ok'); }catch(e){} });
+    const nText = P.chars.filter(n => n >= 25).length, nScan = P.scan.filter(Boolean).length;
+    if(!nText && !nScan) throw new Error('ce PDF n’a ni texte ni image à lire');
+    const bid = tbBookId('pdf|' + P.title + '|' + P.author + '|' + file.name), olds = tbLoad().filter(a => a.book === bid);
+    setStatus('', 'ok');
+    const v = await tbPdfDialog(P, cat, olds[0] || null);
+    if(!v){ setStatus('📄 Import annulé.', 'ok'); return []; }
+    const prog = tbProgOpen(`📄 « ${P.title} »`);
+    let bk; try{ bk = await tbPdfBuild(P, v, prog); } finally { prog.close(); }
+    if(!bk.chapters.length) throw new Error(bk.ocr ? 'aucun texte lisible sur ces pages (image trop floue ?)' : 'aucun texte sur ces pages');
+    return tbBookStore(file, 'pdf', bid, bk, v, olds);
+  } finally { try{ P.doc.destroy(); }catch(e){} }
+}
+/* 📷 des photos de pages (.jpg, .png) importées seules : on lit leur texte */
+async function tbImgsOcrImport(files, cat){
+  const coll = new Intl.Collator('fr', { numeric:true, sensitivity:'base' });
+  files = files.slice().sort((a, b) => coll.compare(a.relPath || a.name, b.relPath || b.name)).slice(0, 200);
+  const base = String(files[0].name || 'Photos').replace(/\.[^.]+$/, '').replace(/[_]+/g, ' ').trim();
+  const P = { kind:'img', N:files.length, files, title:files.length > 1 ? `📷 ${base} (+${files.length - 1})` : `📷 ${base}`, author:'', scan:[null].concat(files.map(() => true)) };
+  P.thumb = async (p, cv) => { const c = await tbImgCanvas(files[p - 1], 92); cv.width = c.width; cv.height = c.height; cv.getContext('2d').drawImage(c, 0, 0); };
+  const bid = tbBookId('img|' + files.map(f => f.name + ':' + f.size).join('|')), olds = tbLoad().filter(a => a.book === bid);
+  const v = await tbPdfDialog(P, cat, olds[0] || null);
+  if(!v){ setStatus('📷 Import annulé.', 'ok'); return []; }
+  const prog = tbProgOpen(P.title);
+  let bk; try{ bk = await tbPdfBuild(P, v, prog); } finally { prog.close(); }
+  if(!bk.chapters.length){ setStatus('📷 Aucun texte lisible sur ces photos (trop floues ? mal éclairées ?).', 'err'); return []; }
+  bk.src = files[0].name;
+  return tbBookStore(null, 'img', bid, bk, v, olds);
+}
+/* 📝 un document Word (.docx) : titres, gras / italique, listes, tableaux et images */
+async function tbDocxParse(file, onStep){
+  const files = await tbUnzip(file);
+  const byPath = new Map(files.map(f => [tbPathNorm(f.relPath || f.name), f]));
+  const get = (p) => byPath.get(tbPathNorm(p)) || null;
+  const docF = get('word/document.xml'); if(!docF) throw new Error('ce n’est pas un document Word (.docx) lisible');
+  if(onStep) onStep(1, 2);
+  const doc = tbXml(await docF.text());
+  const rels = new Map();
+  try{ const rf = get('word/_rels/document.xml.rels'); if(rf) tbXq(tbXml(await rf.text()), 'relationship').forEach(r => rels.set(r.getAttribute('Id'), r.getAttribute('Target') || '')); }catch(e){}
+  const styleName = new Map();
+  try{ const sf = get('word/styles.xml'); if(sf) tbXq(tbXml(await sf.text()), 'style').forEach(s => { const n = tbXq(s, 'name')[0]; styleName.set(s.getAttribute('w:styleId') || s.getAttribute('styleId'), n ? (n.getAttribute('w:val') || n.getAttribute('val') || '') : ''); }); }catch(e){}
+  let title = String(file.name).replace(/\.[^.]+$/, '').replace(/[_]+/g, ' ').trim(), author = '';
+  try{ const cf = get('docProps/core.xml'); if(cf){ const cd = tbXml(await cf.text()); const t = tbXq(cd, 'title')[0], a = tbXq(cd, 'creator')[0]; if(t && t.textContent.trim()) title = t.textContent.trim(); if(a) author = a.textContent.trim(); } }catch(e){}
+  const att = (el, n) => el ? (el.getAttribute('w:' + n) || el.getAttribute(n) || '') : '';
+  const kid = (el, n) => [...(el ? el.children : [])].find(c => (c.localName || '').toLowerCase() === n) || null;
+  const imgIds = new Map(); let nImg = 0;
+  const imgFor = async (rid) => {
+    if(!rid) return '';
+    let t = rels.get(rid) || ''; if(!t) return '';
+    const p = t.startsWith('/') ? t.slice(1) : 'word/' + t;
+    if(imgIds.has(p)) return imgIds.get(p);
+    const f = get(p); let id = '';
+    if(f && /\.(png|jpe?g|gif|webp|bmp)$/i.test(p) && nImg < 60){ try{ id = await tbImgAdd(f); }catch(e){} if(id) nImg++; }
+    imgIds.set(p, id || ''); return id || '';
+  };
+  const runs = async (p) => {
+    let h = '';
+    for(const r of tbXq(p, 'r')){
+      if(r.closest && r.parentElement && (r.parentElement.localName || '') === 'del') continue;
+      const rp = kid(r, 'rpr'), b = rp && kid(rp, 'b') && att(kid(rp, 'b'), 'val') !== '0', i = rp && kid(rp, 'i') && att(kid(rp, 'i'), 'val') !== '0';
+      let x = '';
+      for(const c of r.children){
+        const ln = (c.localName || '').toLowerCase();
+        if(ln === 't') x += escapeHtml(c.textContent);
+        else if(ln === 'tab') x += ' ';
+        else if(ln === 'br' || ln === 'cr') x += '<br>';
+        else if(ln === 'drawing' || ln === 'pict'){ const bl = tbXq(c, 'blip')[0], im = tbXq(c, 'imagedata')[0]; const rid = bl ? (bl.getAttribute('r:embed') || bl.getAttribute('embed')) : (im ? (im.getAttribute('r:id') || im.getAttribute('id')) : ''); const id = await imgFor(rid); if(id) x += `</p><img data-img="${id}" alt=""><p>`; }
+      }
+      if(!x) continue;
+      if(b) x = `<b>${x}</b>`; if(i) x = `<i>${x}</i>`;
+      h += x;
+    }
+    return h;
+  };
+  const body = tbXq(doc, 'body')[0]; if(!body) throw new Error('document vide');
+  let html = '';
+  for(const el of body.children){
+    const ln = (el.localName || '').toLowerCase();
+    if(ln === 'p'){
+      const pp = kid(el, 'ppr'), sid = att(kid(pp, 'pstyle'), 'val'), sn = (styleName.get(sid) || sid || '').toLowerCase();
+      const hm = /^(heading|titre|title)\s*([1-6])?$/.exec(sn.replace(/[^a-z0-9 ]/g, '').trim()) || /^(heading|titre)([1-6])$/i.exec(sid || '');
+      const list = !!(pp && kid(pp, 'numpr')) || /list|liste/.test(sn);
+      const inner = await runs(el);
+      const txt = inner.replace(/<[^>]+>/g, '').trim();
+      if(!txt && !/<img/.test(inner)) continue;
+      if(hm){ const lv = hm[1] === 'title' || !hm[2] ? 1 : +hm[2]; const tg = lv <= 1 ? 'h2' : 'h3'; html += `<${tg}>${inner.replace(/<\/?b>/g, '')}</${tg}>`; }
+      else if(list) html += `<ul><li>${inner}</li></ul>`;
+      else html += `<p>${inner}</p>`;
+    } else if(ln === 'tbl'){
+      for(const tr of tbXq(el, 'tr')){
+        const cells = [];
+        for(const tc of tbXq(tr, 'tc')){ let c = ''; for(const p of tbXq(tc, 'p')) c += ' ' + (await runs(p)); cells.push(c.trim()); }
+        if(cells.some(c => c.replace(/<[^>]+>/g, '').trim())) html += `<p>${cells.filter(c => c.replace(/<[^>]+>/g, '').trim()).join(' · ')}</p>`;
+      }
+    }
+  }
+  if(onStep) onStep(2, 2);
+  html = html.replace(/<p>\s*<\/p>/g, '').replace(/<\/ul><ul>/g, '');
+  const bodyEl = new DOMParser().parseFromString('<body>' + html + '</body>', 'text/html').body;
+  const blocks = tbDomToBlocks(bodyEl, {});
+  if(!blocks.length) throw new Error('aucun texte trouvé dans ce document');
+  // un long document : coupé à ses grands titres
+  const chapters = []; let cur = [], ct = title, len = 0;
+  const push = () => { if(cur.length && (tbWordsCount(tbBlocksText(cur)) >= 3 || cur.some(b => b.t === 'img'))) chapters.push({ title:ct.slice(0, 150), blocks:cur, text:tbBlocksText(cur) }); cur = []; len = 0; };
+  const total = blocks.reduce((t, b) => t + tbBlockText(b).length, 0);
+  blocks.forEach(b => {
+    const l = tbBlockText(b).length;
+    if(total > 45000 && b.t === 'h2' && len > 4000){ push(); ct = tbBlockText(b).trim() || ct; }
+    else if(len + l > 45000 && cur.length){ push(); }
+    cur.push(b); len += l;
+  });
+  push();
+  if(chapters.length === 1) chapters[0].title = title;
+  return { title, author, chapters, imgs:nImg, pages:0 };
+}
+/* ============ 🌐 1.0.37 : TRADUIRE PLUSIEURS MOTS PARTOUT, ET UN 2e TRADUCTEUR ============
+   1. Le traducteur gratuit (MyMemory) a une limite par jour : une fois atteinte, plus rien ne se traduisait
+      (« ça ne marche pas »). Maintenant, l'appli passe à un 2e traducteur (Lingva, qui s'appuie sur Google
+      Traduction) ; et si rien ne répond, un lien ouvre la phrase dans Google Traduction.
+   2. Sélectionner plusieurs mots (à la souris, ou en appuyant longuement au doigt) dans une transcription, une
+      fiche, une phrase d'exemple… : une pastille « 🌐 Traduire » donne la traduction du passage, le sens de
+      l'expression, mot à mot, et permet de l'ajouter à tes mots ou de le garder (📌 Mes extraits).
+   (Dans la Tablette, la sélection avait déjà sa pastille : elle propose aussi « 💾 Garder l'extrait ».) */
+const TB_LINGVA = ['https://lingva.ml', 'https://lingva.lunar.icu', 'https://translate.plausibility.cloud'];
+async function tbMtAlt(q, sl, tl){
+  sl = sl || 'fr'; tl = tl || 'ar';
+  q = String(q || '').replace(/\s+/g, ' ').trim(); if(!q) return '';
+  if(typeof navigator !== 'undefined' && navigator.onLine === false) return '';
+  TB.lingvaBad = TB.lingvaBad || {};
+  for(const h of TB_LINGVA){
+    if(TB.lingvaBad[h] && Date.now() - TB.lingvaBad[h] < 15 * 60e3) continue;
+    const j = await tbFetchJson(h + '/api/v1/' + sl + '/' + tl + '/' + encodeURIComponent(q.slice(0, 900)), 7000);
+    const t = j && typeof j.translation === 'string' ? j.translation.trim() : '';
+    if(t && (tl !== 'ar' || /[؀-ۿ]/.test(t))){ TB.mtAlt = h; return t; }
+    TB.lingvaBad[h] = Date.now();
+  }
+  return '';
+}
+function tbGtUrl(text){ return 'https://translate.google.com/?sl=fr&tl=ar&op=translate&text=' + encodeURIComponent(String(text || '').slice(0, 4000)); }
+function tbNoTrHtml(text){
+  return `<div class="tb-info-l">Pas de traduction${navigator.onLine === false ? ' (pas de connexion)' : (TB.mtQuota ? ' (les traducteurs gratuits ne répondent plus aujourd’hui)' : '')}.</div>`
+    + (navigator.onLine === false ? '' : `<a class="tb-gtr" href="${tbAttr(tbGtUrl(text))}" target="_blank" rel="noopener">↗ Ouvrir dans Google Traduction</a>`);
+}
+/* ============ 📌 MES EXTRAITS : les passages que tu gardes (d'un PDF, d'un texte, d'une transcription…) ============
+   Rangés avec ton profil (sur tous tes appareils). On les relit, les écoute, les traduit, les copie, on retourne
+   à l'endroit du texte, et « 📰 En faire un texte » les réunit dans la Tablette. */
+const TB_EXT_KEY = 'lexiqueQuiz::tbExtracts';
+function tbExtMap(){ try{ const m = JSON.parse(localStorage.getItem(nsKey(TB_EXT_KEY)) || '{}'); return m && typeof m === 'object' && !Array.isArray(m) ? m : {}; }catch(e){ return {}; } }
+function tbExtList(){ return Object.values(tbExtMap()).filter(x => x && !x.del && x.x).sort((a, b) => (b.t0 || 0) - (a.t0 || 0)); }
+function tbExtSave(m){
+  try{
+    const now = Date.now(); Object.keys(m).forEach(k => { const e = m[k]; if(e && e.del && now - (e.at || 0) > 90 * 864e5) delete m[k]; });
+    localStorage.setItem(nsKey(TB_EXT_KEY), JSON.stringify(m));
+  }catch(e){ return false; }
+  try{ if(typeof syncSoon === 'function') syncSoon(); }catch(e){}
+  return true;
+}
+function tbExtAdd(o){
+  const x = String(o && o.x || '').replace(/\s+/g, ' ').trim(); if(!x) return null;
+  const m = tbExtMap(), now = Date.now();
+  const dup = Object.values(m).find(e => e && !e.del && dxFold(e.x) === dxFold(x));
+  if(dup){ if(o.ar && !dup.ar){ dup.ar = o.ar; dup.at = now; tbExtSave(m); } return dup; }
+  const e = { id:'x' + now.toString(36) + Math.random().toString(36).slice(2, 5), x:x.slice(0, 5000), ar:String(o.ar || '').slice(0, 5000), src:String(o.src || '').slice(0, 140), aid:o.aid || '', s:o.s != null ? o.s : -1, t0:now, at:now };
+  m[e.id] = e;
+  return tbExtSave(m) ? e : null;
+}
+function tbExtPatch(id, p){ const m = tbExtMap(), e = m[id]; if(!e) return; Object.assign(e, p, { at:Date.now() }); tbExtSave(m); }
+function tbExtDel(id){ const m = tbExtMap(), e = m[id]; if(!e) return; m[id] = { id, del:1, at:Date.now(), t0:e.t0 || 0 }; tbExtSave(m); }
+function tbExtKept(e){
+  if(!e){ lexSnack('⚠️ Plus de place pour garder cet extrait.'); return; }
+  try{ playCorrectSound(); }catch(err){}
+  lexSnack('📌 Extrait gardé', '📌 Mes extraits', () => tbExtOpen(), 6000);
+}
+/* la fenêtre « 📌 Mes extraits » */
+function tbExtOpen(focusId){
+  document.querySelectorAll('.tbx-ov').forEach(x => x.remove());
+  try{ wtClose(); }catch(e){}
+  const ov = document.createElement('div');
+  ov.className = 'wcp-ov tbx-ov';
+  const st = { q:'' };
+  const draw = () => {
+    const L = tbExtList(), q = dxFold(st.q.trim());
+    const S = q ? L.filter(e => dxFold(e.x).includes(q) || dxFold(e.src).includes(q) || String(e.ar || '').includes(st.q.trim())) : L;
+    const arts = (typeof tbLoad === 'function') ? new Set(tbLoad().map(a => a.id)) : new Set();
+    const box = ov.querySelector('#tbxList');
+    box.innerHTML = S.length ? S.map(e => `<div class="tbx-it" data-id="${tbAttr(e.id)}">
+        <blockquote class="tbx-x reading-text" lang="fr">${escapeHtml(e.x)}</blockquote>
+        ${e.ar ? `<div class="tbx-ar" dir="rtl" lang="ar">${escapeHtml(e.ar)}</div>` : `<div class="tbx-ar" dir="rtl" lang="ar" hidden></div>`}
+        <div class="tbx-m">${e.src ? escapeHtml(e.src) + ' · ' : ''}${new Date(e.t0 || e.at || Date.now()).toLocaleDateString('fr-FR', { day:'numeric', month:'short' })}</div>
+        <div class="tbx-b">
+          <button type="button" data-tbx="say" aria-label="Écouter">🔊</button>
+          ${e.ar ? `<button type="button" data-tbx="say-ar">🔊 عربي</button>` : `<button type="button" data-tbx="tr">🌐 Traduire</button>`}
+          <button type="button" data-tbx="copy">📋 Copier</button>
+          ${e.aid && arts.has(e.aid) ? `<button type="button" data-tbx="go">↗ Dans le texte</button>` : ''}
+          <button type="button" class="del" data-tbx="del" aria-label="Supprimer cet extrait">🗑</button>
+        </div></div>`).join('') : `<div class="tbx-empty">${L.length ? 'Aucun extrait ne contient « ' + escapeHtml(st.q.trim()) + ' ».' : 'Aucun extrait pour l’instant. Sélectionne un passage (dans un texte de la Tablette, un PDF importé, une transcription…), puis « 💾 Garder l’extrait ».'}</div>`;
+    ov.querySelector('#tbxN').textContent = L.length ? `${L.length} passage${L.length > 1 ? 's' : ''} gardé${L.length > 1 ? 's' : ''}` : '';
+    ov.querySelector('#tbxFoot').hidden = !L.length;
+    if(focusId){ const f = box.querySelector(`.tbx-it[data-id="${focusId}"]`); if(f){ f.classList.add('flash'); setTimeout(() => f.scrollIntoView({ block:'center' }), 60); } focusId = null; }
+  };
+  ov.innerHTML = `<div class="wcp tbx" role="dialog" aria-modal="true" aria-label="Mes extraits">
+    <div class="wcp-head"><div><div class="wcp-fr">📌 Mes extraits</div><div class="tbx-n" id="tbxN"></div></div><button type="button" class="wcp-x" data-tbx="x" aria-label="Fermer">✕</button></div>
+    <input type="search" class="pk-q" id="tbxQ" placeholder="🔍 Chercher dans mes extraits" aria-label="Chercher dans mes extraits" autocomplete="off">
+    <div class="tbx-list" id="tbxList"></div>
+    <div class="tbx-foot" id="tbxFoot"><button type="button" data-tbx="to-text">📰 En faire un texte de la Tablette</button><button type="button" data-tbx="copy-all">📋 Tout copier</button></div>
+  </div>`;
+  document.body.appendChild(ov);
+  requestAnimationFrame(() => ov.classList.add('show'));
+  const close = () => { bkPop('tbx'); ov.remove(); document.removeEventListener('keydown', onKey, true); };
+  const onKey = (e) => { if(e.key === 'Escape'){ e.preventDefault(); e.stopPropagation(); close(); } };
+  document.addEventListener('keydown', onKey, true);
+  bkPush('tbx', close);
+  ov.querySelector('#tbxQ').addEventListener('input', (e) => { st.q = e.target.value; draw(); });
+  ov.addEventListener('click', (e) => {
+    if(e.target === ov){ close(); return; }
+    const b = e.target.closest('[data-tbx]'); if(!b) return;
+    e.stopPropagation();
+    const a = b.dataset.tbx, it = b.closest('.tbx-it'), id = it && it.dataset.id, ex = id ? tbExtMap()[id] : null;
+    if(a === 'x') close();
+    else if(a === 'say' && ex) speak(ex.x, 'fr-FR');
+    else if(a === 'say-ar' && ex && ex.ar) speak(ex.ar, 'ar-SA');
+    else if(a === 'tr' && ex){
+      b.disabled = true; b.textContent = '⏳';
+      tbMtText(ex.x).then(t => {
+        const arEl = it.querySelector('.tbx-ar');
+        if(t){ tbExtPatch(id, { ar:t }); draw(); }
+        else if(arEl){ arEl.hidden = false; arEl.removeAttribute('dir'); arEl.innerHTML = tbNoTrHtml(ex.x); b.remove(); }
+      });
+    }
+    else if(a === 'copy' && ex){ try{ navigator.clipboard.writeText(ex.x + (ex.ar ? '\n' + ex.ar : '')).then(() => lexSnack('📋 Copié')); }catch(err){} }
+    else if(a === 'del' && ex){
+      if(!b.classList.contains('warn')){ b.classList.add('warn'); b.textContent = '🗑 Sûr ?'; return; }
+      tbExtDel(id); draw(); lexSnack('🗑 Extrait supprimé');
+    }
+    else if(a === 'go' && ex){ close(); tbExtGo(ex); }
+    else if(a === 'copy-all'){ const t = tbExtList().map(z => z.x + (z.ar ? '\n' + z.ar : '') + (z.src ? '\n— ' + z.src : '')).join('\n\n'); try{ navigator.clipboard.writeText(t).then(() => lexSnack('📋 Tous tes extraits sont copiés')); }catch(err){} }
+    else if(a === 'to-text'){
+      const L = tbExtList(); if(!L.length) return;
+      const d = new Date().toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric' });
+      const art = { id:'t' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), title:'📌 Mes extraits · ' + d, text:L.slice().reverse().map(z => z.x).join('\n'), src:'Mes extraits', at:Date.now(), pos:0, pct:0, tags:[] };
+      if(typeof tbPut === 'function' && tbPut(art)){ close(); renderTabletteReader(art.id); }
+      else lexSnack('⚠️ Plus de place sur cet appareil.');
+    }
+  });
+  draw();
+}
+/* ↗ retrouver l'extrait dans son texte de la Tablette */
+function tbExtGo(ex){
+  try{ renderTabletteReader(ex.aid); }catch(e){ return; }
+  setTimeout(() => {
+    try{
+      const k = TB.toks.findIndex(t => t.s === ex.s); if(k < 0 || !TB.spans[k]) return;
+      TB.spans[k].scrollIntoView({ block:'center', behavior:'smooth' });
+      const s = TB.spans[k].closest('.tb-s'); if(s){ s.classList.remove('flash'); void s.offsetWidth; s.classList.add('flash'); }
+    }catch(e){}
+  }, 350);
+}
+/* 💾 dans la Tablette : garder la sélection (plusieurs mots, ou un passage traduit) */
+function tbKeepSel(){
+  let x = '', ar = '', s = -1;
+  if(TB.sheetK === -8){ x = TB.trText || ''; ar = TB.trAr || ''; const k = (TB.selPick && TB.selPick.ks) ? TB.selPick.ks[0] : -1; s = k >= 0 && TB.toks[k] ? TB.toks[k].s : -1; }
+  else {
+    const P = TB.pick || { k1:TB.sheetK, k2:TB.sheetK }; if(!TB.toks[P.k1]) return;
+    x = tbPickText(P.k1, P.k2); s = TB.toks[P.k1].s;
+    const r = TB.look[dxFold(x)]; ar = (r && r.ar && r.ar[0]) || '';
+  }
+  if(!x) return;
+  const e = tbExtAdd({ x, ar, src:(TB.art && TB.art.title) || 'Tablette', aid:TB.art && TB.art.id, s });
+  const b = document.querySelector('#tbSheet [data-tb="keep"]'); if(b && e){ b.textContent = '📌 Gardé'; b.disabled = true; }
+  tbExtKept(e);
+}
+/* ---------- 🌐 sélectionner plusieurs mots ailleurs que dans la Tablette ---------- */
+function wtSelInfo(){
+  const s = window.getSelection(); if(!s || !s.rangeCount || s.isCollapsed) return null;
+  const r = s.getRangeAt(0), n = r.commonAncestorContainer, el = n.nodeType === 1 ? n : n.parentElement;
+  if(!el || !el.closest || !el.closest(WT_SEL) || el.closest('input, textarea, [contenteditable="true"], .wt, #tbReader, .tbx')) return null;
+  const x = String(s).replace(/\s+/g, ' ').trim();
+  if(!x || x.length < 2 || !/\p{L}/u.test(x)) return null;
+  const rects = r.getClientRects(), rr = rects.length ? rects[rects.length - 1] : r.getBoundingClientRect();
+  return { x:x.slice(0, 2000), rect:rr, all:r.getBoundingClientRect(), el };
+}
+function wtSrcOf(el){
+  try{
+    if(el.closest('#trxText')){ const c = audioCurrent(); return '📝 ' + ((c && c.t && c.t.title) || 'Transcription'); }
+    if(el.closest('#trxvText')){ const h = document.querySelector('#quizCard .word-fr'); return '📝 ' + ((h && h.textContent) || 'Transcription'); }
+    const wc = el.closest('.wcp'); if(wc){ const f = wc.querySelector('.wcp-fr'); return '📇 ' + ((f && f.textContent) || 'Fiche'); }
+    const h = document.querySelector('#quizCard .cat-tag'); if(h) return h.textContent.trim().slice(0, 80);
+  }catch(e){}
+  return '';
+}
+function wtSentOf(el, x){
+  try{
+    const host = el.closest('.trx-seg, td, li, p, .wcp-ex, .wcp-def, .tbx-x') || el.closest(WT_SEL); const t = host ? host.textContent.replace(/\s+/g, ' ').trim() : '';
+    if(!t || !dxFold(t).includes(dxFold(x))) return '';
+    const S = t.split(/(?<=[.!?…])\s+/).find(s => dxFold(s).includes(dxFold(x)));   // la phrase qui contient la sélection
+    return S && S.length <= 400 ? S : (t.length <= 400 ? t : '');
+  }catch(e){ return ''; }
+}
+/* les mots pleins d'une sélection (pas « le », « de », « c'est »…), chacun une fois */
+function wtManyWords(words){
+  const seen = new Set();
+  return (words || []).map(w => wtClean(w)).filter(w => {
+    if(!w || w.length < 2 || /^\d+$/.test(w)) return false;
+    const f = dxFold(w); if(seen.has(f)) return false;
+    if(typeof wtFunctionWord === 'function' && wtFunctionWord(f)) return false;
+    if(/^(c|d|j|l|m|n|s|t|qu)'/i.test(w) && typeof wtFunctionWord === 'function' && wtFunctionWord(f.replace(/^\w+'/, ''))) return false;
+    seen.add(f); return true;
+  }).slice(0, 30);
+}
+function wtSelCheck(){
+  let pill = document.getElementById('wtSelPill');
+  const I = document.getElementById('tbReader') ? null : wtSelInfo();
+  if(!I){ if(pill) pill.hidden = true; WT.sel = null; return; }
+  WT.sel = I;
+  if(!pill){
+    pill = document.createElement('button'); pill.type = 'button'; pill.id = 'wtSelPill'; pill.className = 'tb-pickpill wt-selpill';
+    pill.addEventListener('pointerdown', (e) => e.preventDefault());
+    pill.addEventListener('click', (e) => {
+      e.stopPropagation(); e.preventDefault();
+      const S = WT.sel; pill.hidden = true; if(!S) return;
+      try{ window.getSelection().removeAllRanges(); }catch(err){}
+      const n = S.x.split(' ').length, ctx = { sentence:wtSentOf(S.el, S.x), src:wtSrcOf(S.el) };
+      const sg = S.el.closest && S.el.closest('.trx-seg'); if(sg && typeof trxSegPlay === 'function'){ const f = trxSegPlay(sg); if(f) ctx.play = f; }
+      if(n === 1) wtShow(S.x, S.all, Object.assign({ cat:/^📝/.test(ctx.src) ? 'Mes audios' : undefined }, ctx));
+      else wtPhrase(S.x, S.all, ctx);
+    });
+    document.body.appendChild(pill);
+  }
+  const n = I.x.split(' ').length;
+  pill.innerHTML = n === 1 ? `🔎 <b>${escapeHtml(I.x.slice(0, 40))}</b><span>Définition</span>` : `🌐 <b>Traduire</b><span>${n} mots</span>`;
+  pill.hidden = false;
+  const w = pill.offsetWidth, h = pill.offsetHeight, rr = I.all;
+  let top = WT.selTouch ? rr.bottom + 12 : rr.top - h - 10;
+  if(top < 56) top = rr.bottom + 12;
+  if(top + h > window.innerHeight - 70) top = Math.max(56, rr.top - h - 10);
+  pill.style.left = Math.round(Math.max(8, Math.min(window.innerWidth - w - 8, (rr.left + rr.right) / 2 - w / 2))) + 'px';
+  pill.style.top = Math.round(top) + 'px';
+}
+document.addEventListener('selectionchange', () => { clearTimeout(WT.selT); WT.selT = setTimeout(wtSelCheck, 280); });
+document.addEventListener('pointerdown', (e) => { WT.selTouch = e.pointerType === 'touch'; }, true);
+window.addEventListener('scroll', () => { const p = document.getElementById('wtSelPill'); if(p && !p.hidden) wtSelCheck(); }, true);
+/* la bulle d'un passage : sa traduction, le sens de l'expression, mot à mot, l'ajouter, le garder */
+function wtPhrase(text, rect, ctx){
+  wtClose();
+  const x = String(text || '').replace(/\s+/g, ' ').trim(); if(!x) return;
+  const words = x.split(' '), nW = words.length, short = nW <= 8;
+  const el = document.createElement('div');
+  el.className = 'wt wt-ph'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', 'Traduction de la sélection');
+  el.innerHTML = `<div class="wt-h"><b class="wt-w wt-pw" lang="fr">${escapeHtml(x.length > 160 ? x.slice(0, 157) + '…' : x)}</b>${ctx && typeof ctx.play === 'function' ? '<button type="button" class="wt-ib" data-wt="play" aria-label="Réentendre ce passage de l’audio">▶</button>' : ''}<button type="button" class="wt-ib" data-wt="psay" aria-label="Écouter en français">🔊</button><button type="button" class="wt-ib" data-wt="x" aria-label="Fermer">✕</button></div>
+    <div class="wt-b" id="wtBody"><div class="wt-l">🌐 Je traduis…</div></div><div class="wt-a" id="wtAct"></div>`;
+  document.body.appendChild(el);
+  WT.el = el; WT.ctx = Object.assign({ word:x, rect, phrase:true }, ctx || {});
+  const tok = WT.tok, body = el.querySelector('#wtBody');
+  const acts = (o) => {
+    const a = el.querySelector('#wtAct'); if(!a) return;
+    const many = wtManyWords(words);
+    a.innerHTML = `${many.length >= 2 ? `<button type="button" class="pri" data-wt="pmany">➕ Les ${many.length} mots un par un</button>` : ''}${short ? (o.known ? `<button type="button" disabled>✓ Dans tes mots</button>` : `<button type="button" class="${many.length >= 2 ? '' : 'pri'}" data-wt="padd">${nW > 1 ? '➕ Ajouter l’expression' : '➕ Ajouter à mes mots'}</button>`) : ''}
+      <button type="button" data-wt="pkeep">💾 Garder l’extrait</button>
+      ${o.ar ? `<button type="button" data-wt="psay-ar">🔊 En arabe</button>` : ''}
+      <button type="button" data-wt="pcopy">📋 Copier</button>`;
+  };
+  const known = short && typeof tbLexWord === 'function' ? tbLexWord(x) : null;
+  WT.ctx.known = known;
+  acts({ known });
+  wtPlace(rect);
+  const look = short && !known && typeof tbLookup === 'function' ? tbLookup(x).catch(() => null) : Promise.resolve(null);
+  Promise.all([tbMtText(x).catch(() => ''), look]).then(([t, r]) => {
+    if(WT.tok !== tok || !WT.el) return;
+    const defs = ((r && r.defs) || []).filter(Boolean), ar = t || ((r && r.ar) || [])[0] || (known && known.ar) || '';
+    WT.ctx.ar = ar; WT.ctx.look = r; WT.ctx.defs = defs.length ? defs : (known && known.def ? [known.def] : []);
+    body.innerHTML = (ar ? `<div class="wt-ar" dir="rtl" lang="ar">${escapeHtml(ar)}</div>${!t ? '' : `<div class="wt-src">🌐 traduction automatique${TB.mtAlt && TB.mtQuota ? ' (2e traducteur)' : ''} : à vérifier</div>`}` : tbNoTrHtml(x))
+      + (WT.ctx.defs.length ? `<ol class="wt-defs">${WT.ctx.defs.slice(0, 3).map(d => `<li>${escapeHtml(d)}</li>`).join('')}</ol>` : '')
+      + (nW >= 2 && nW <= 6 ? `<div class="wt-mam" id="wtMam"><div class="wt-l">Mot à mot…</div></div>` : '');
+    acts({ known, ar });
+    wtPlace(rect);
+    if(nW >= 2 && nW <= 6) wtGloss(words, tok);
+  });
+}
+/* 🔤 mot à mot : chaque mot plein (pas « le », « de »…) et sa traduction */
+async function wtGloss(words, tok){
+  const W = words.map(w => wtClean(w)).filter(w => w && w.length > 1 && !(typeof wtFunctionWord === 'function' && wtFunctionWord(dxFold(w))));
+  const out = [];
+  for(const w of W.slice(0, 6)){
+    if(WT.tok !== tok) return;
+    let ar = '';
+    try{ const k = typeof tbLexWord === 'function' ? tbLexWord(w) : null; if(k && k.ar) ar = k.ar; else { const r = await tbLookup(w); ar = (r && r.ar && r.ar[0]) || ''; } }catch(e){}
+    out.push({ w, ar });
+  }
+  const box = document.getElementById('wtMam'); if(!box || WT.tok !== tok) return;
+  const L = out.filter(o => o.ar);
+  box.innerHTML = L.length ? `<div class="wt-mam-h">Mot à mot</div>${L.map(o => `<span class="wt-mam-c"><b lang="fr">${escapeHtml(o.w)}</b><span dir="rtl" lang="ar">${escapeHtml(o.ar)}</span></span>`).join('')}` : '';
+  if(WT.ctx && WT.ctx.rect) wtPlace(WT.ctx.rect);
+}
+function wtPhraseAct(a, b){
+  const C = WT.ctx || {}; if(!C.phrase) return false;
+  if(a === 'psay'){ speak(C.word, 'fr-FR'); return true; }
+  if(a === 'psay-ar'){ if(C.ar) speak(C.ar, 'ar-SA'); return true; }
+  if(a === 'pcopy'){ try{ navigator.clipboard.writeText(C.word + (C.ar ? '\n' + C.ar : '')).then(() => lexSnack('📋 Copié')); }catch(e){} return true; }
+  if(a === 'pmany'){
+    const W = wtManyWords(C.word.split(' '));
+    const src = String(C.src || '').replace(/^[\u{1F4DD}\u{1F4C7}]\s*/u, '');
+    fsAddDialog(W.map(w => ({ fr:w, form:w, sent:C.sentence || '' })), { title:src ? 'Ma sélection · ' + src : 'Ma sélection', cat:C.cat || (/^\u{1F4DD}/u.test(C.src || '') ? 'Mes audios' : 'Mes lectures'), lemma:true, block:false, blockTitle:'🖍 ' + (C.word.length > 40 ? C.word.slice(0, 38) + '…' : C.word) });
+    return true;
+  }
+  if(a === 'pkeep'){ const e = tbExtAdd({ x:C.word, ar:C.ar || '', src:C.src || '' }); if(e){ b.textContent = '📌 Gardé'; b.disabled = true; } tbExtKept(e); return true; }
+  if(a === 'padd'){
+    const box = WT.el.querySelector('#wtAct'); if(!box) return true;
+    box.innerHTML = `<div class="wt-pf">
+      <label>En arabe<input class="wt-pin" id="wtPAr" dir="rtl" lang="ar" value="${tbAttr(C.ar || '')}"></label>
+      <label>Définition (en français)<textarea class="wt-pin" id="wtPDef" rows="2">${escapeHtml((C.defs || [])[0] || '')}</textarea></label>
+      <div class="wt-pf-b"><button type="button" class="pri" data-wt="padd-go">➕ Ajouter</button><button type="button" data-wt="padd-x">Annuler</button></div></div>`;
+    wtPlace(C.rect); const d = WT.el.querySelector('#wtPDef'); if(d && !d.value) d.focus();
+    return true;
+  }
+  if(a === 'padd-x'){ const box = WT.el.querySelector('#wtAct'); if(box) box.innerHTML = `<button type="button" class="pri" data-wt="padd">➕ Ajouter à mes mots</button><button type="button" data-wt="pkeep">💾 Garder l’extrait</button>`; return true; }
+  if(a === 'padd-go'){
+    const ar = String((WT.el.querySelector('#wtPAr') || {}).value || '').trim(), def = String((WT.el.querySelector('#wtPDef') || {}).value || '').trim();
+    if(!def){ const d = WT.el.querySelector('#wtPDef'); if(d){ d.classList.add('err'); d.placeholder = 'Écris le sens en quelques mots'; d.focus(); } return true; }
+    let fr = C.word.replace(/^[«"“(\s]+|[»"”),.;:!?\s]+$/g, '');
+    if(/^\p{Lu}\p{Ll}/u.test(fr) && !/^\p{Lu}\p{Ll}+\s\p{Lu}/u.test(fr)) fr = fr.charAt(0).toLowerCase() + fr.slice(1);
+    let ex = { ex:'~' };
+    try{ if(C.sentence && typeof tbExFor === 'function'){ const z = tbExFor({ sent:C.sentence, w:fr, lemma:fr }); if(!z.missing) ex = z; } }catch(e){}
+    const w = { fr, ar, def, ex:ex.ex, cat:C.cat || (/^📝/.test(C.src || '') ? 'Mes audios' : 'Mes lectures') }; if(ex.exForm) w.exForm = ex.exForm;
+    let n = 0; try{ n = commitImport([w], true); }catch(e){ console.error(e); }
+    try{ if(typeof exFullCache !== 'undefined' && exFullCache) exFullCache.clear(); }catch(e){}
+    try{ if(typeof TB !== 'undefined') TB.idx = null; }catch(e){}
+    const box = WT.el.querySelector('#wtAct');
+    if(box) box.innerHTML = `<button type="button" disabled>${n ? '✓ Ajouté à tes mots' : '✓ Déjà dans tes mots'}</button><button type="button" data-wt="pkeep">💾 Garder l’extrait</button>`;
+    if(n){ try{ playCorrectSound(); }catch(e){} lexSnack(`➕ « ${fr} » ajouté à tes mots`); }
+    return true;
+  }
+  return false;
+}
+/* ============ ➕ 1.0.39 : LES MOTS D'UNE FICHE → MES BLOCS, D'UN SEUL COUP ============
+   Sur une fiche (cours) qui donne des mots ou des expressions — un tableau « Éviter / Préférer », « Expression / Sens »,
+   « Connecteur / Exemple », une liste de formules… — le bouton « ➕ Ajouter ces mots à mes blocs » les prépare tous :
+   le mot ou l'expression, sa traduction en arabe (Wiktionnaire, sinon traduction automatique), une définition
+   (le sens donné par la fiche, ou celui du dictionnaire), et la phrase d'exemple avec SA traduction arabe (la phrase
+   entière, gardée pour la fiche du mot). On relit, on décoche, on corrige, puis tout part dans tes mots (les blocs),
+   et, si tu veux, dans un bloc à ton nom, à jouer tout de suite. */
+function fsClean(s){ return String(s == null ? '' : s).replace(/\s+/g, ' ').trim(); }
+function fsLowerFirst(s){ s = fsClean(s); return /^\p{Lu}(?=['’\p{Ll}\s-]|$)/u.test(s) && !/^\p{Lu}\p{Ll}+\s+\p{Lu}\p{Ll}/u.test(s) ? s.charAt(0).toLowerCase() + s.slice(1) : s; }
+/* « C'est fini. » → « C'est terminé. » : le morceau qui change (« terminé ») */
+function fsDiff(a, b){
+  const ta = fsClean(a).replace(/[.!?…]+$/, '').split(' '), tb = fsClean(b).replace(/[.!?…]+$/, '').split(' ');
+  let i = 0; while(i < ta.length - 1 && i < tb.length - 1 && ta[i].toLowerCase() === tb[i].toLowerCase()) i++;
+  let j = 0; while(j < ta.length - 1 - i && j < tb.length - 1 - i && ta[ta.length - 1 - j].toLowerCase() === tb[tb.length - 1 - j].toLowerCase()) j++;
+  const d = tb.slice(i, tb.length - j).join(' ');
+  return d && d.split(' ').length <= 6 ? d : fsClean(b).replace(/[.!?…]+$/, '');
+}
+function fsTerm(s){
+  let x = fsClean(s).replace(/^(?:[A-C][12]|[A-C][12]-[A-C][12])\s*[·:\-–]\s*/, '').replace(/^(?:Registre\s*)?(?:familier|courant|soutenu|soutenue)\s*[·:]\s*/i, '');
+  x = x.replace(/^[«"“]\s*|\s*[»"”]$/g, '').replace(/\s*\((?:fam\.|familier|soutenu|courant|pop\.)\)\s*$/i, '');
+  if(/^[\p{Lu}\s'’-]+$/u.test(x) && x.length > 2) x = x.toLowerCase();
+  x = x.replace(/[.;]+$/, '');
+  return fsLowerFirst(x);
+}
+function fsParen(s){ const m = /^(.*?)\s*\(([^)]{2,80})\)\s*([.!?…]?)$/.exec(fsClean(s)); return m ? { x:(m[1] + m[3]).trim(), note:m[2].trim() } : { x:fsClean(s), note:'' }; }
+const FS_IMP_L = /^(éviter|évitez|à éviter|simple|familier|verbe familier|expression familière|très \+ adjectif|expression|courant)$/i;
+const FS_IMP_R = /^(préférer|préférez|dire plutôt|à dire plutôt|dites plutôt|soutenu|mot précis|verbe précis|équivalent standard|plus soutenu|alternative soutenue|synonyme|c1|c2|b2|niveau intermédiaire|niveau avancé|niveau soutenu)$/i;
+const FS_MEAN = /^(sens|signification|définition|équivalent simple|équivalent|traduction|explication)$/i;
+const FS_EX = /exemple/i;
+const FS_SKIP_COL = /(incorrect|erreur|mauvaise|correct|correction|singulier|pluriel|pronom|présent|imparfait|futur|subjonctif|passé|temps|formation|^je$|^nous$|^ils$|que je|discours|masculin|féminin|écrivez)/i;
+const FS_VOCAB_CAT = /(vocabulaire|expression|locution|connecteur|registre|paronyme|style|affaires|situation|interaction|relation|travail|culture|bonheur|citoyennet|nature|passage du temps|raisonnement|parole|monde|scène|connexion|études|thématique|politesse)/i;
+function fsTableItems(cols, rows, sheet){
+  const out = [];
+  if(!Array.isArray(cols) || cols.length !== 2 || !Array.isArray(rows)) return out;
+  const [h0, h1] = cols.map(c => fsClean(c).replace(/^[❌✅]\s*/, '').replace(/\s*(\.\.\.|…)\s*$/, ''));
+  if(FS_SKIP_COL.test(h0) || FS_SKIP_COL.test(h1)) return out;
+  rows.forEach(r => {
+    if(!Array.isArray(r) || r.length < 2) return;
+    const a = fsClean(r[0]), b = fsClean(r[1]); if(!a || !b) return;
+    if(FS_IMP_R.test(h1) && !FS_MEAN.test(h0)){
+      b.split(/\s+\/\s+/).forEach(bb => {
+        const fr = fsTerm(fsDiff(a, bb)), sent = /\s/.test(bb) && /[.!?…]$/.test(bb) ? bb : '';
+        out.push({ fr, def:/très \+/i.test(h0) ? `= ${a.replace(/[.!?]+$/, '')} (plus précis)` : `${/synonyme/i.test(h1) ? 'Synonyme plus riche de' : /c1|c2|b2|intermédiaire|avancé|soutenu|alternative/i.test(h1) ? 'Plus soutenu que' : 'Plus précis que'} « ${a.replace(/[.!?]+$/, '')} »`, sent });
+      });
+    } else if(/situation/i.test(h0)){
+      b.split(/\s+\/\s+/).forEach(bb => { const p = fsParen(bb); out.push({ fr:fsLowerFirst(p.x.replace(/[.!?]+$/, '').replace(/\.\.\.$/, '…')), def:`Pour : ${fsLowerFirst(a).replace(/[.!?]+$/, '')}${p.note ? ' (' + p.note + ')' : ''}`, sent:/[.!?]$/.test(p.x) ? p.x : '' }); });
+    } else if(FS_MEAN.test(h1) || /(sens|signification)/i.test(h1)){
+      const p = fsParen(a), ar = /[؀-ۿ]/.test(b) ? b : '';
+      out.push({ fr:fsTerm(p.x), def:ar ? (p.note || '') : b + (p.note ? ` (${p.note})` : ''), ar, needDef:!!ar && !p.note, en:/traduction/i.test(h1) && !ar ? b : '' });
+    } else if(FS_EX.test(h1)){
+      out.push({ fr:fsTerm(a), def:'', sent:b, needDef:true });
+    } else {
+      out.push({ fr:fsTerm(a), def:`${h1} : ${b}`, sent:'' });
+    }
+  });
+  return out;
+}
+function fsRuleItems(sheet){
+  const out = [];
+  if(!FS_VOCAB_CAT.test(sheet.category || '') || /grammaire|conjugaison|orthographe|phonétique|lecture/i.test(sheet.category || '')) return out;
+  const ctx = fsClean(sheet.title).replace(/^(\d+\s+)?(façons|phrases|formules|expressions|alternatives)\s+(de|pour)\s+/i, '').replace(/^au lieu de dire\s+/i, 'au lieu de ');
+  (sheet.blocks || []).forEach(b => {
+    const head = fsClean(b.heading), text = fsClean(b.text), exs = (b.examples || []).map(fsClean).filter(Boolean);
+    const isList = !text || /^(les \d+|\d+ |a1|a2|b1|b2|c1|c2)/i.test(head);
+    // a) une liste de formules (exemples courts)
+    if(exs.length && isList){
+      exs.forEach(e => {
+        if(/[❌✅→≠]/.test(e) || e.split(' ').length > 14) return;
+        let x = e, lab = '';
+        const m = /^([^:—–]{2,30})\s*[:—–]\s+(.{3,})$/.exec(e); if(m && /^\p{Lu}/u.test(m[2])){ lab = m[1]; x = m[2]; }
+        const p = fsParen(x);
+        out.push({ fr:fsLowerFirst(p.x.replace(/[.]+$/, '')), def:`${/^(les \d+|\d+ )/i.test(head) || !head ? fsLowerFirst(ctx) : head + (ctx ? ' — ' + fsLowerFirst(ctx) : '')}${lab ? ' · ' + fsLowerFirst(lab) : ''}${p.note ? ' (' + p.note + ')' : ''}`.replace(/^./, c => c.toUpperCase()), sent:'' });
+      });
+      return;
+    }
+    // b) des formules dans le texte : « Je suis d'accord. · Tu as raison. · … » ou « par moments (parfois) ; pour le moment (en attendant) »
+    if(text && /\s[·;]\s/.test(text) && !exs.length){
+      text.split(/\s[·;]\s/).map(fsClean).filter(Boolean).forEach(t => {
+        if(t.split(' ').length > 10 || /[=:]/.test(t) && !/\(/.test(t)) return;
+        const p = fsParen(t);
+        out.push({ fr:fsLowerFirst(p.x.replace(/[.]+$/, '')), def:(p.note ? p.note.charAt(0).toUpperCase() + p.note.slice(1) : head), sent:'' });
+      });
+      return;
+    }
+    // c) « Avoir du bol = avoir de la chance. »
+    const eq = /^(.{2,40}?)\s=\s(.{3,140})$/.exec(text);
+    if(eq && !/[;·]/.test(eq[1])){ out.push({ fr:fsTerm(eq[1]), def:eq[2].replace(/\.$/, ''), sent:exs[0] || '' }); return; }
+    // d) le titre est le mot (« SE PROMENER »), le texte son sens
+    if(head && head.split(' ').length <= 4 && !/\bvs\b|[:?]|^(les|pourquoi|comment|quand|sens|exemple|texte|questions?)\b/i.test(head) && text && text.length <= 220 && exs.length){
+      out.push({ fr:fsTerm(head), def:text.replace(/\.$/, ''), sent:exs[0] || '' });
+    }
+  });
+  return out;
+}
+function fsItems(sheet){
+  if(!sheet) return [];
+  let L = [];
+  if(sheet.type === 'table') L = fsTableItems(sheet.columns, sheet.rows, sheet);
+  else if(sheet.type === 'rule'){ L = fsRuleItems(sheet); if(sheet.table) L = L.concat(fsTableItems(sheet.table.columns, sheet.table.rows, sheet)); }
+  const seen = new Set();
+  return L.filter(x => {
+    if(!x || !x.fr || x.fr.length < 2 || x.fr.length > 90 || x.fr.split(' ').length > 10 || /[❌✅→]/.test(x.fr)) return false;
+    const k = x.fr.toLowerCase(); if(seen.has(k)) return false; seen.add(k); return true;
+  }).slice(0, 80);
+}
+
+/* ---------- la fenêtre « ➕ Ajouter à mes blocs » : on relit, on décoche, on corrige ----------
+   items : [{ fr, ar?, def?, sent?, form?, needDef? }] · o : { title, cat, lemma (chercher la forme de base), block (bloc perso coché) } */
+function fsAddDialog(items, o){
+  o = o || {};
+  document.querySelectorAll('.fsa-ov').forEach(x => x.remove());
+  try{ wtClose(); }catch(e){}
+  const L = (items || []).map(x => Object.assign({ ar:'', def:'', sent:'', form:'', exAr:'', busy:true }, x, { fr:fsClean(x.fr) }));
+  L.forEach(x => { const k = typeof tbLexWord === 'function' ? tbLexWord(x.fr) : findLexWord(x.fr); x.known = k || null; x.on = !k; if(k){ x.busy = false; x.ar = x.ar || k.ar || ''; x.def = x.def || k.def || ''; } });
+  const ov = document.createElement('div');
+  ov.className = 'wcp-ov fsa-ov';
+  ov.innerHTML = `<div class="wcp fsa" role="dialog" aria-modal="true" aria-label="Ajouter à mes blocs">
+    <div class="wcp-head"><div><div class="wcp-fr">➕ Ajouter à mes blocs</div><div class="fsa-sub">${escapeHtml(o.title || '')}</div></div><button type="button" class="wcp-x" data-fsa="x" aria-label="Fermer">✕</button></div>
+    <div class="fsa-st" id="fsaSt" aria-live="polite"></div>
+    <div class="fsa-list" id="fsaList"></div>
+    <div class="fsa-foot"><label class="fsa-blk"><input type="checkbox" id="fsaBlk" ${o.block ? 'checked' : ''}> 📦 Les mettre aussi dans un bloc « ${escapeHtml(String(o.blockTitle || o.title || 'Mes mots').slice(0, 60))} », à jouer tout de suite</label>
+    <div class="wcp-b"><button type="button" data-fsa="x">Annuler</button><button type="button" class="pri" data-fsa="go" id="fsaGo"></button></div></div>
+  </div>`;
+  document.body.appendChild(ov);
+  requestAnimationFrame(() => ov.classList.add('show'));
+  const list = ov.querySelector('#fsaList');
+  const exHtml = (x) => { if(!x.sent) return ''; const f = x.exForm || x.form || x.fr; const i = x.sent.toLowerCase().indexOf(String(f).toLowerCase()); return i < 0 ? escapeHtml(x.sent) : escapeHtml(x.sent.slice(0, i)) + '<mark>' + escapeHtml(x.sent.slice(i, i + f.length)) + '</mark>' + escapeHtml(x.sent.slice(i + f.length)); };
+  const row = (x, i) => `<div class="fsa-it ${x.known ? 'known' : ''} ${x.on ? '' : 'off'}" data-i="${i}">
+      <label class="fsa-ck"><input type="checkbox" data-fsa="on" ${x.on ? 'checked' : ''} ${x.known ? 'disabled' : ''} aria-label="Ajouter ${tbAttr(x.fr)}"></label>
+      <div class="fsa-main">
+        <div class="fsa-l1"><input class="fsa-fr" data-f="fr" lang="fr" value="${tbAttr(x.fr)}" aria-label="Le mot" ${x.known ? 'disabled' : ''}><input class="fsa-ar" data-f="ar" dir="rtl" lang="ar" value="${tbAttr(x.ar)}" placeholder="${x.busy ? '⏳' : 'بالعربية'}" aria-label="En arabe" ${x.known ? 'disabled' : ''}></div>
+        ${x.known ? `<div class="fsa-k">✓ Déjà dans tes mots${x.known.fr !== x.fr ? ' : « ' + escapeHtml(x.known.fr) + ' »' : ''}</div>` : `<textarea class="fsa-def ${!x.busy && !x.def ? 'need' : ''}" data-f="def" rows="1" placeholder="${x.busy ? '⏳ je cherche le sens…' : 'Définition (en français)'}" aria-label="Définition">${escapeHtml(x.def)}</textarea>`}
+        ${x.sent ? `<div class="fsa-ex" lang="fr">${exHtml(x)}</div>${x.exAr ? `<div class="fsa-exar" dir="rtl" lang="ar">${escapeHtml(x.exAr)}</div>` : ''}` : ''}
+      </div></div>`;
+  const nOn = () => L.filter(x => x.on && !x.known && x.fr).length;
+  const foot = () => { const n = nOn(), b = ov.querySelector('#fsaGo'); b.disabled = !n && !ov.querySelector('#fsaBlk').checked; b.textContent = n ? `➕ Ajouter ${n} mot${n > 1 ? 's' : ''}` : (L.some(x => x.known) ? '📦 Faire le bloc' : '➕ Ajouter'); };
+  const draw = () => { list.innerHTML = L.map(row).join(''); foot(); };
+  const redraw = (i) => { const el = list.querySelector(`.fsa-it[data-i="${i}"]`); if(!el) return; const a = document.activeElement; if(a && el.contains(a)) return; el.outerHTML = row(L[i], i); };
+  draw();
+  list.addEventListener('input', (e) => { const it = e.target.closest('.fsa-it'), f = e.target.dataset.f; if(!it || !f) return; const x = L[+it.dataset.i]; x[f] = e.target.value; if(f === 'def') e.target.classList.toggle('need', !e.target.value.trim()); if(f === 'fr') foot(); });
+  list.addEventListener('change', (e) => { if(e.target.dataset.fsa !== 'on') return; const it = e.target.closest('.fsa-it'), x = L[+it.dataset.i]; x.on = e.target.checked; it.classList.toggle('off', !x.on); foot(); });
+  ov.querySelector('#fsaBlk').addEventListener('change', foot);
+  // 🌐 les traductions (le mot, puis la phrase entière), deux à la fois
+  const st = ov.querySelector('#fsaSt'); let done = 0;
+  const todo = L.filter(x => x.busy);
+  const prep = async (x) => {
+    try{
+      if(o.lemma){
+        const r = await tbLookup(x.form || x.fr).catch(() => null);
+        if(r){ if(r.lemma) x.fr = fsClean(r.lemma); if(!x.ar && r.ar && r.ar[0]) x.ar = r.ar[0]; if(!x.def && r.defs && r.defs.length) x.def = typeof tbDefsJoin === 'function' ? tbDefsJoin(r.defs) : r.defs[0]; }
+        const k = typeof tbLexWord === 'function' ? tbLexWord(x.fr) : null; if(k){ x.known = k; x.on = false; }
+      } else {
+        const multi = /\s/.test(x.fr);
+        if(!x.ar || (x.needDef && !x.def)){
+          const r = await tbLookup(x.fr).catch(() => null);
+          if(r){ if(!x.ar && r.ar && r.ar[0]) x.ar = r.ar[0]; if(!x.def && r.defs && r.defs.length) x.def = typeof tbDefsJoin === 'function' ? tbDefsJoin(r.defs) : r.defs[0]; }
+          if(!x.ar && multi) x.ar = await tbMtText(x.fr.replace(/…$/, '')).catch(() => '') || '';
+        }
+      }
+      if(x.sent){
+        try{ const z = tbExFor({ sent:x.sent, w:x.form || x.fr, lemma:x.fr }); if(!z.missing){ x.ex = z.ex; if(z.exForm) x.exForm = z.exForm; } }catch(e){}
+        x.exAr = await tbMtText(x.sent).catch(() => '') || '';
+      }
+    }catch(e){}
+    x.busy = false; done++;
+    st.textContent = done < todo.length ? `🌐 Je prépare les traductions… ${done} / ${todo.length}` : (todo.length ? '✓ Prêt : relis, corrige si besoin, décoche ce que tu ne veux pas.' : '');
+    redraw(L.indexOf(x));
+    foot();
+  };
+  st.textContent = todo.length ? `🌐 Je prépare les traductions… 0 / ${todo.length}` : '';
+  (async () => { let k = 0; const worker = async () => { while(k < todo.length && ov.isConnected){ await prep(todo[k++]); } }; await Promise.all([worker(), worker()]); })();
+  const close = () => { bkPop('fsa'); ov.remove(); document.removeEventListener('keydown', onKey, true); };
+  const onKey = (e) => { if(e.key === 'Escape' && !/input|textarea/i.test((e.target && e.target.tagName) || '')){ e.preventDefault(); e.stopPropagation(); close(); } };
+  document.addEventListener('keydown', onKey, true);
+  bkPush('fsa', close);
+  ov.addEventListener('click', (e) => {
+    if(e.target === ov){ close(); return; }
+    const b = e.target.closest('[data-fsa]'); if(!b || b.dataset.fsa === 'on') return;
+    if(b.dataset.fsa === 'x'){ close(); return; }
+    if(b.dataset.fsa !== 'go') return;
+    const fall = o.title ? `(${String(o.title).slice(0, 80)})` : '';
+    const words = L.filter(x => x.on && !x.known && x.fr).map(x => {
+      const w = { fr:x.fr, ar:fsClean(x.ar), def:fsClean(x.def) || fall, ex:x.ex || '~', cat:o.cat || 'Mes fiches' };
+      if(x.exForm) w.exForm = x.exForm;
+      return w;
+    });
+    let n = 0; if(words.length){ try{ n = commitImport(words, true); }catch(err){ console.error(err); } }
+    try{ if(typeof exFullCache !== 'undefined' && exFullCache) exFullCache.clear(); }catch(err){}
+    let blk = null;
+    if(ov.querySelector('#fsaBlk').checked){
+      const objs = L.filter(x => (x.on || x.known) && x.fr).map(x => findLexWord(x.fr) || x.known).filter(Boolean).filter((w, i, a) => a.indexOf(w) === i);
+      if(objs.length){ try{ blk = createCustomBlock(String(o.blockTitle || o.title || 'Mes mots').slice(0, 60), objs, getMaxCustomBlockPosition()); }catch(err){ console.error(err); } }
+    }
+    close();
+    try{ playCorrectSound(); }catch(err){}
+    lexSnack(`➕ ${n} mot${n > 1 ? 's' : ''} ajouté${n > 1 ? 's' : ''} à tes blocs${blk ? ` · 📦 bloc « ${blk.title} »` : ''}`, '🧩 Mes blocs', () => renderBlockSelect(), 8000);
+  });
+}
+/* ➕ sur une fiche : le bouton, et la fenêtre avec les mots de la fiche */
+function fsSheetAdd(sheet){
+  const items = fsItems(sheet); if(!items.length) return;
+  fsAddDialog(items, { title:sheet.title, blockTitle:(sheet.icon ? sheet.icon + ' ' : '') + sheet.title, cat:sheet.category || 'Mes fiches', block:true });
+}
+document.addEventListener('click', (e) => {
+  const b = e.target && e.target.closest && e.target.closest('#sheetAddWordsBtn'); if(!b) return;
+  const s = (typeof PRACTICAL_SHEETS !== 'undefined') ? PRACTICAL_SHEETS.find(x => x.id === window.__currentSheetDetailId) : null;
+  if(s) fsSheetAdd(s);
+});
+/* ---------- 👆 appuyer sur un mot et glisser : plusieurs mots sélectionnés (au doigt, comme à la souris) ----------
+   Le glissement commence de côté (un glissement vers le haut ou le bas fait toujours défiler la page). Ensuite,
+   la pastille « 🌐 Traduire » : la traduction, et « ➕ Les mots un par un » pour les ajouter tous à tes blocs. */
+var DSEL = { st:null, justEnded:0 };
+const DSEL_SKIP = '.swipe-zone, .swipe-card, .chrono-statement, .flip-card, .pk-slide, #wsGrid, .tbk-grip, button, a, input, textarea, select, [contenteditable="true"], .wt, .fsa, .wimg';
+function dselHost(t){ return t && t.closest ? t.closest(WT_SEL + ', #tbBody') : null; }
+function dselCaret(x, y){
+  let node = null, off = 0;
+  try{
+    if(document.caretRangeFromPoint){ const r = document.caretRangeFromPoint(x, y); if(r){ node = r.startContainer; off = r.startOffset; } }
+    else if(document.caretPositionFromPoint){ const p = document.caretPositionFromPoint(x, y); if(p){ node = p.offsetNode; off = p.offset; } }
+  }catch(e){}
+  if(!node || node.nodeType !== 3) return null;
+  const t = node.data, isW = (c) => !!c && /[\p{L}\p{N}'’-]/u.test(c);
+  let a = off, b = off;
+  if(!isW(t[a]) && isW(t[a - 1])){ a--; b = a; }
+  while(a > 0 && isW(t[a - 1])) a--;
+  while(b < t.length && isW(t[b])) b++;
+  return a < b ? { node, a, b } : null;
+}
+document.addEventListener('pointerdown', (e) => {
+  DSEL.st = null;
+  if(e.pointerType === 'mouse' || e.button > 0) return;                 // à la souris : la sélection normale du navigateur
+  if(document.body.classList.contains('quiz-active')) return;
+  const host = dselHost(e.target); if(!host || e.target.closest(DSEL_SKIP)) return;
+  const c = dselCaret(e.clientX, e.clientY); if(!c) return;
+  DSEL.st = { x:e.clientX, y:e.clientY, c, host, id:e.pointerId, active:false };
+}, true);
+document.addEventListener('pointermove', (e) => {
+  const S = DSEL.st; if(!S || e.pointerId !== S.id) return;
+  const dx = e.clientX - S.x, dy = e.clientY - S.y;
+  if(!S.active){
+    if(Math.abs(dy) > 12 && Math.abs(dy) > Math.abs(dx)){ DSEL.st = null; return; }   // vers le haut / le bas : on défile
+    if(Math.abs(dx) < 10) return;
+    S.active = true; try{ wtClose(); }catch(err){}
+  }
+  const c = dselCaret(e.clientX, e.clientY); if(!c || !S.host.contains(c.node)) return;
+  const fwd = S.c.node === c.node ? c.a >= S.c.a : !!(S.c.node.compareDocumentPosition(c.node) & Node.DOCUMENT_POSITION_FOLLOWING);
+  const r = document.createRange();
+  try{ if(fwd){ r.setStart(S.c.node, S.c.a); r.setEnd(c.node, c.b); } else { r.setStart(c.node, c.a); r.setEnd(S.c.node, S.c.b); } }catch(err){ return; }
+  const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+  if(e.cancelable) e.preventDefault();
+}, { capture:true, passive:false });
+const dselEnd = (e) => { const S = DSEL.st; if(!S || (e && e.pointerId !== S.id)) return; DSEL.st = null; if(S.active){ DSEL.justEnded = Date.now(); WT.selTouch = true; } };
+document.addEventListener('pointerup', dselEnd, true);
+document.addEventListener('pointercancel', dselEnd, true);
+document.addEventListener('click', (e) => { if(DSEL.justEnded && Date.now() - DSEL.justEnded < 450){ DSEL.justEnded = 0; e.stopPropagation(); e.preventDefault(); } }, true);
+/* les grands tableaux qui défilent de côté gardent leur défilement : pas de sélection en glissant dedans */
+function dselMarkWide(){ document.querySelectorAll('.reading-text').forEach(el => { el.classList.toggle('dsel-x', el.scrollWidth > el.clientWidth + 4); }); }
+(function(){ let q = 0; const go = () => { if(q) return; q = requestAnimationFrame(() => { q = 0; dselMarkWide(); }); };
+  const start = () => { try{ new MutationObserver(go).observe(document.body, { childList:true, subtree:true }); }catch(e){} window.addEventListener('resize', go); go(); };
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else setTimeout(start, 0); })();
 /* 📥 choisir des fichiers → aperçu → ranger dans une catégorie */
 async function tbMdImport(fileList, cat){
   const all0 = [...(fileList || [])];
-  const books = all0.filter(f => /\.(epub|cbz)$/i.test(String(f.name || '')));
+  const books = all0.filter(f => /\.(epub|cbz|pdf|docx)$/i.test(String(f.name || '')));
   if(books.length){
     let ids = [];
     for(const f of books){ try{ ids = ids.concat(await tbBookImport(f, cat)); }catch(e){ console.warn('livre', e); setStatus(`📚 Impossible d'ouvrir « ${f.name} » : ${e && e.message || 'fichier abîmé'}.`, 'err'); } }
@@ -48345,7 +49619,11 @@ async function tbMdImport(fileList, cat){
     } else pool.push(f);
   }
   const docs = pool.filter(f => ['md', 'html', 'txt'].includes(tbMdKind(f)));
-  if(!docs.length){ setStatus(pool.some(f => tbMdKind(f) === 'img') ? "🖼 Choisis aussi le fichier .md qui va avec ces images (ou un .zip qui contient tout)." : "📥 Choisis un fichier .md (Markdown), un .zip, ou un .txt.", 'err'); return []; }
+  if(!docs.length){
+    const ims = pool.filter(f => tbMdKind(f) === 'img');
+    if(ims.length) return tbImgsOcrImport(ims, cat);                // 📷 1.0.38 : des photos de pages → leur texte (OCR)
+    setStatus("📥 Choisis un PDF (même scanné), des photos de pages, un document Word (.docx), un fichier .md (Markdown), un .zip, un livre .epub ou un .txt.", 'err'); return [];
+  }
   setStatus(`📥 Je prépare ${docs.length > 1 ? docs.length + ' fichiers' : '« ' + docs[0].name + ' »'}…`, 'ok');
   const imgs = pool.filter(f => tbMdKind(f) === 'img'), parsed = [];
   for(const d of docs){ try{ parsed.push(await tbMdParseFile(d, imgs)); }catch(e){ console.warn('md', e); parsed.push({ file:d.name, err:true }); } }
@@ -50427,12 +51705,13 @@ function tbTransSheet(ks){
     <blockquote class="tb-ctx" lang="fr">${escapeHtml(text)}</blockquote>
     <div class="tb-tr" id="tbTrAr"><div class="tb-info-l">🌐 Je traduis…</div></div>
     <div class="tb-sh-say"><button type="button" class="tb-chip" data-tb="tr-say">🔊 En français</button><button type="button" class="tb-chip" data-tb="tr-say-ar">🔊 En arabe</button></div>
+    <div class="tb-sh-act"><button type="button" class="tb-btn" data-tb="keep">💾 Garder l'extrait</button></div>
   </div>`;
   tbSheetShow(sh);
   tbMtText(text).then(t => {
     const box = document.getElementById('tbTrAr'); if(!box || TB.sheetK !== -8 || TB.trText !== text) return;
     TB.trAr = t || '';
-    box.innerHTML = t ? tbTrBlockHtml(t, 'tbTrAr') : `<div class="tb-info-l">Pas de traduction${navigator.onLine === false ? ' (pas de connexion)' : (TB.mtQuota ? ' (limite de traductions gratuites du jour atteinte)' : '')}.</div>`;
+    box.innerHTML = t ? tbTrBlockHtml(t, 'tbTrAr') : tbNoTrHtml(text);
     if(t) tbTrBlockWire(box, 'tbTrAr', text, t, (v) => { TB.trAr = v; });
   });
 }
@@ -50445,7 +51724,7 @@ function tbSentAr(btn){
   box.innerHTML = '<div class="tb-info-l">🌐 Je traduis la phrase…</div>';
   tbMtText(s).then(t => {
     if(!box.isConnected || TB.toks[TB.sheetK] !== tk) return;
-    box.innerHTML = t ? tbTrBlockHtml(t, 'tbSentAr') : `<div class="tb-info-l">Pas de traduction${navigator.onLine === false ? ' (pas de connexion)' : (TB.mtQuota ? ' (limite de traductions gratuites du jour atteinte)' : '')}.</div>`;
+    box.innerHTML = t ? tbTrBlockHtml(t, 'tbSentAr') : tbNoTrHtml(s);
     box.dataset.ar = t || '';
     if(t) tbTrBlockWire(box, 'tbSentAr', s, t, (v) => { box.dataset.ar = v; });
   });
@@ -50487,10 +51766,11 @@ function tbOpenSheet(k, k2){
     <div class="tb-tr-bar"><button type="button" class="tb-chip" data-tb="sent-ar" aria-expanded="false">🌐 Traduire toute la phrase</button>${all.length > 1 && !(ia === 0 && ib === all.length - 1) ? `<button type="button" class="tb-chip" data-tb="pick-all">↔ Prendre toute la phrase</button>` : ''}</div>
     <div class="tb-tr" id="tbSentAr" hidden></div>
     <div class="tb-pick-h">👆 Touche les mots de la phrase pour en prendre plus ou moins (ex. « tandis » → « tandis que »).</div>
-    ${ks.length > 8 ? `<div class="tb-pop-hint tb-long">✂️ ${ks.length} mots : c'est pour traduire. Pour l'ajouter à tes mots ou le taguer, garde 8 mots au plus.</div>` : `<div class="tb-sh-act">
+    ${ks.length > 8 ? `<div class="tb-pop-hint tb-long">✂️ ${ks.length} mots : c'est pour traduire ou le garder. Pour l'ajouter à tes mots ou le taguer, garde 8 mots au plus.</div><div class="tb-sh-act"><button type="button" class="tb-btn" data-tb="keep">💾 Garder l'extrait</button></div>` : `<div class="tb-sh-act">
       <button type="button" class="tb-btn hl" data-tb="tag" id="tbTagBtn">${tagLbl(tagged)}</button>
       ${tbAddBtnHtml(known, [lemma, lemma0, form])}
       ${tbOtherCands(tk.s, ks).length ? `<button type="button" class="tb-btn" data-tb="others">➕ D'autres mots de la phrase</button>` : ''}
+      ${multi ? `<button type="button" class="tb-btn" data-tb="keep">💾 Garder l'extrait</button>` : ''}
     </div>`}
     <div class="tb-addf" id="tbAddF" hidden></div>
     ${rules ? `<div class="tb-rules">${rules}</div>` : ''}
@@ -51079,6 +52359,7 @@ function tbAction(id, btn, e){
     }
     case 'sent-ar-say': { const b = document.getElementById('tbSentAr'); if(b && b.dataset.ar) speak(b.dataset.ar, 'ar-SA'); return; }
     case 'tr-say': if(TB.trText) tbNarrFr(TB.trText, 'fr-FR', null, readingRate); return;
+    case 'keep': tbKeepSel(); return;
     case 'tr-say-ar': if(TB.trAr) speak(TB.trAr, 'ar-SA'); return;
     case 'pick-l': case 'pick-r': case 'pick-l-': case 'pick-r-': {
       const P = TB.pick; if(!P) return;
