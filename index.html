@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- 🏷️ Version de l'appli : augmentée automatiquement par publier-site.cmd à chaque publication -->
-<meta name="app-version" content="1.0.40" data-date="2026-10-30">
+<meta name="app-version" content="1.0.41" data-date="2026-11-03">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <title>VocabVISION — Vocabulaire Français ↔ Arabe</title>
 <script>
@@ -217,6 +217,21 @@
   }
   .home-nav-arrow:active{ transform:scale(.92); }
   .jump-highlight{ animation:jumpFlash 1.6s ease; }
+  /* 🎯 1.0.41 : en arrivant par un objectif */
+  .gls-ov{ position:fixed; inset:0; z-index:10050; display:flex; align-items:center; justify-content:center; padding:20px; background:rgba(15,10,40,.42); backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px); opacity:0; transition:opacity .2s; }
+  .gls-ov.show{ opacity:1; }
+  .gls{ width:min(100%, 380px); background:var(--surface, #fff); color:var(--text); border-radius:26px; padding:22px 22px 18px; text-align:center; box-shadow:0 30px 70px -20px rgba(0,0,0,.6); transform:scale(.92) translateY(10px); transition:transform .25s cubic-bezier(.2,.9,.3,1.2); }
+  .gls-ov.show .gls{ transform:none; }
+  .gls-k{ font-size:12px; font-weight:800; letter-spacing:.04em; text-transform:uppercase; color:var(--purple, #7C3AED); }
+  .gls-i{ font-size:46px; line-height:1; margin:12px 0 6px; animation:glsPop .5s ease; }
+  .gls-t{ font-size:21px; font-weight:900; line-height:1.25; margin:0 0 10px; }
+  .gls-c{ font-size:13.5px; color:var(--text-dim); } .gls-c b{ color:var(--text); }
+  .gls-bar{ height:6px; border-radius:99px; background:rgba(124,58,237,.14); margin:10px 0 14px; overflow:hidden; } .gls-bar i{ display:block; height:100%; width:0; border-radius:inherit; background:linear-gradient(90deg, #7C3AED, #EC4899); }
+  .gls-b{ display:flex; gap:10px; } .gls-b button{ flex:1; border-radius:14px; padding:11px; font:inherit; font-weight:800; cursor:pointer; border:1px solid var(--border, #e5e7eb); background:var(--surface, #fff); color:var(--text); }
+  .gls-b .gls-go{ background:linear-gradient(135deg, #7C3AED, #EC4899); color:#fff; border:0; }
+  @keyframes glsPop{ 0%{ transform:scale(.4); opacity:0; } 70%{ transform:scale(1.15); } 100%{ transform:scale(1); opacity:1; } }
+  @media (prefers-reduced-motion:reduce){ .gls, .gls-i{ animation:none; transition:none; } }
+
   @keyframes jumpFlash{
     0%,100%{ box-shadow:none; }
     15%,45%{ box-shadow:0 0 0 4px rgba(80,70,229,0.5); }
@@ -2446,10 +2461,17 @@
     .tbk-studio .tbk-tools > .tbk-fsize{ width:96px; }
   }
   /* ✅ 1.0.25 : « Marquer comme faite / lu » aussi en haut de la fiche */
-  .done-top-row{ display:flex; justify-content:center; margin:10px 0 2px; }
+  .done-top-row{ display:flex; justify-content:center; margin:10px 0 2px; flex-wrap:wrap; gap:8px; }
+  .tb-echo-btn{ background:linear-gradient(135deg, rgba(124,58,237,.12), rgba(236,72,153,.12)) !important; border-color:rgba(124,58,237,.35) !important; color:var(--purple, #7C3AED) !important; font-weight:800; }
   .done-top-btn{ font-weight:800 !important; }
   .done-top-btn.on{ background:rgba(34,197,94,.12) !important; border-color:rgba(34,197,94,.55) !important; color:#16A34A !important; }
   /* 📇 1.0.26 : la fiche d'un mot en fenêtre, 🔖 le marque-page de la Tablette, 🎤 le micro de la Répétition */
+  /* 🎮 1.0.41 : la fin de la liste dans la fiche d'un mot */
+  .wcp-endb{ background:linear-gradient(135deg, #7C3AED, #EC4899) !important; color:#fff !important; border:0 !important; }
+  .wcp-end{ margin:12px 0 0; padding:14px; border-radius:16px; background:linear-gradient(135deg, rgba(124,58,237,.1), rgba(236,72,153,.1)); border:1px solid rgba(124,58,237,.25); animation:wcpInR .3s ease; }
+  .wcp-end-h{ font-weight:900; font-size:18px; } .wcp-end-s{ font-size:13.5px; color:var(--text-dim); margin:2px 0 10px; }
+  .wcp-end-g{ display:grid; grid-template-columns:repeat(auto-fill, minmax(130px, 1fr)); gap:8px; margin:0 0 10px; }
+  .wcp-end-g .opt{ margin:0; padding:10px; font-size:14px; }
   /* ➕ 1.0.39 : les mots d'une fiche → mes blocs ; glisser pour sélectionner */
   .ex-text, .result-ex, .def-text, .repeat-sentence, .wcp-ex, .wcp-def, .reading-text:not(.dsel-x), .bq-quote, .cq-sentence{ touch-action:pan-y pinch-zoom; }
   .fsa-row{ display:flex; justify-content:center; margin:10px 0 0; }
@@ -2469,6 +2491,17 @@
   .fsa-def{ width:100%; resize:vertical; font-size:13px; } .fsa-def.need{ border-color:#F59E0B; }
   .fsa-ex{ font-size:13px; color:var(--text-dim); font-style:italic; } .fsa-ex mark{ background:rgba(250,204,21,.45); color:inherit; border-radius:4px; padding:0 2px; }
   .fsa-exar{ font-size:14.5px; color:var(--purple); text-align:right; }
+  /* ✨ 1.0.41 : un nouveau mot */
+  .nw-go{ display:flex; align-items:center; gap:10px; width:100%; text-align:left; margin:0 0 10px; padding:10px 14px; border-radius:14px; border:1.5px dashed rgba(124,58,237,.45); background:rgba(124,58,237,.06); color:var(--text); font:inherit; font-size:14px; cursor:pointer; grid-column:1 / -1; }
+  .nw-go b{ display:block; color:var(--purple, #7C3AED); } .nw-go .nw-i{ font-size:22px; }
+  .nw-go.big{ margin-top:12px; padding:16px; border-style:solid; background:linear-gradient(135deg, rgba(124,58,237,.12), rgba(236,72,153,.1)); font-size:15px; }
+  .nw-go:hover{ background:rgba(124,58,237,.12); }
+  .fsa-nw{ margin-top:6px; padding:8px 10px; border-radius:12px; background:var(--bg-soft, rgba(0,0,0,.03)); }
+  .fsa-tl{ font-size:12px; color:var(--text-dim); font-weight:700; } .fsa-tl small{ font-weight:500; }
+  .fsa-tilde{ font-size:14px; margin:2px 0 6px; font-family:ui-monospace, Menlo, monospace; word-break:break-word; } .fsa-tilde.bad{ color:#B45309; font-family:inherit; }
+  .fsa-nwb{ display:flex; flex-wrap:wrap; gap:6px; } .fsa-nwb button{ border:1px solid var(--border, #e5e7eb); background:var(--surface, #fff); color:var(--text); border-radius:999px; padding:4px 10px; font:inherit; font-size:12.5px; font-weight:700; cursor:pointer; }
+  .fsa-sent{ width:100%; margin-top:6px; box-sizing:border-box; border-radius:10px; border:1px solid var(--border, #e5e7eb); padding:6px 8px; font:inherit; font-size:14px; background:var(--surface, #fff); color:var(--text); }
+
   .fsa-foot{ position:sticky; bottom:-16px; background:var(--surface, #fff); margin:10px -4px -16px; padding:4px 4px 14px; border-top:1px solid var(--border); z-index:2; }
   .fsa-k{ font-size:12px; font-weight:800; color:#059669; }
   .fsa-blk{ display:flex; gap:8px; align-items:flex-start; margin:12px 0 4px; font-weight:700; font-size:13.5px; cursor:pointer; }
@@ -3021,6 +3054,47 @@
   /* l'accueil de la Tablette (dans l'appli) */
   .tbk-h{ font-family:'Literata',Georgia,serif; font-weight:800; font-size:clamp(21px, 4.6vw, 27px); line-height:1.2; color:var(--text); margin:10px 0 6px; text-wrap:balance; }
   .tbk-sub{ font-size:14px; line-height:1.5; color:var(--text-dim); max-width:36em; margin:0 auto; }
+  /* 📖 1.0.41 : lire un PDF tel quel */
+  .tbp-how{ display:grid; gap:8px; margin:10px 0 4px; }
+  .tbp-hw{ display:flex; gap:10px; align-items:flex-start; padding:10px 12px; border-radius:14px; border:1.5px solid var(--border, #e5e7eb); cursor:pointer; background:var(--surface, #fff); }
+  .tbp-hw.on{ border-color:var(--purple, #7C3AED); background:rgba(124,58,237,.07); }
+  .tbp-hw input{ margin-top:3px; accent-color:var(--purple, #7C3AED); } .tbp-hw b{ display:block; font-size:14.5px; } .tbp-hw small{ display:block; font-size:12.5px; color:var(--text-dim); }
+  .tbp-view .tbp-txt{ display:none !important; }
+  .pdv-shelf{ margin:10px 0 12px; padding:10px 12px; border-radius:16px; background:rgba(124,58,237,.06); border:1px solid rgba(124,58,237,.2); }
+  .pdv-sh-h{ font-weight:900; font-size:14px; margin:0 0 8px; } .pdv-sh-h small{ font-weight:600; color:var(--text-dim); font-size:12px; }
+  .pdv-sh-l{ display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:8px; }
+  .pdv-sh-it{ display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:12px; background:var(--surface, #fff); border:1px solid var(--border, #e5e7eb); cursor:pointer; text-align:left; }
+  .pdv-sh-it:hover{ border-color:var(--purple, #7C3AED); } .pdv-sh-i{ font-size:22px; } .pdv-sh-m{ flex:1; min-width:0; } .pdv-sh-m b{ display:block; font-size:14px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .pdv-sh-m small{ color:var(--text-dim); font-size:12px; }
+  .pdv-sh-x{ border:0; background:transparent; cursor:pointer; font-size:15px; padding:4px 6px; border-radius:8px; color:var(--text-dim); } .pdv-sh-x.sure{ background:#DC2626; color:#fff; font-size:12px; font-weight:800; }
+  body.pdv-on{ overflow:hidden; }
+  .pdv-ov{ position:fixed; inset:0; z-index:10040; display:flex; flex-direction:column; background:#3A3F4B; color:#fff; }
+  .pdv-top{ display:flex; align-items:center; gap:8px; padding:8px 10px; padding-top:max(8px, env(safe-area-inset-top)); background:#1F232B; box-shadow:0 2px 10px rgba(0,0,0,.3); flex-wrap:wrap; }
+  .pdv-tt{ flex:1; min-width:120px; } .pdv-tt b{ display:block; font-size:14.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .pdv-tt small{ display:block; font-size:11.5px; color:#C9CED8; }
+  .pdv-nav, .pdv-zm{ display:flex; align-items:center; gap:4px; }
+  .pdv-ib{ min-width:36px; height:36px; border-radius:10px; border:1px solid rgba(255,255,255,.18); background:rgba(255,255,255,.08); color:#fff; font:inherit; font-size:18px; font-weight:800; cursor:pointer; }
+  .pdv-pn{ height:36px; padding:0 10px; border-radius:10px; border:1px solid rgba(255,255,255,.18); background:rgba(255,255,255,.14); color:#fff; font:inherit; font-weight:800; font-size:14px; cursor:pointer; min-width:70px; }
+  .pdv-body{ flex:1; overflow:auto; -webkit-overflow-scrolling:touch; padding:10px 8px 40px; }
+  .pdv-load{ text-align:center; padding:40px 12px; font-weight:700; } .pdv-load.err{ color:#FCA5A5; }
+  .pdv-pg{ margin:0 auto 14px; width:max-content; max-width:none; }
+  .pdv-pl{ font-size:11.5px; color:#C9CED8; margin:0 0 4px 2px; font-weight:700; }
+  .pdv-sheet{ position:relative; background:#fff; box-shadow:0 6px 24px rgba(0,0,0,.35); overflow:hidden; }
+  .pdv-sheet canvas{ position:absolute; inset:0; width:100%; height:100%; display:block; }
+  .pdv-tl{ position:absolute; inset:0; line-height:1; overflow:hidden; touch-action:pan-y pinch-zoom; -webkit-text-size-adjust:none; text-size-adjust:none; }
+  .pdv-zoomed .pdv-tl{ touch-action:auto; }
+  .pdv-tl span{ position:absolute; white-space:pre; color:transparent; font-family:sans-serif !important; font-weight:400 !important; font-style:normal !important; letter-spacing:0 !important; word-spacing:0 !important; text-transform:none !important; transform-origin:0 0; cursor:text; margin:0; padding:0; border:0; line-height:1; }
+  .pdv-tl ::selection{ background:rgba(37,99,235,.32); color:transparent; }
+  .pdv-chip{ position:absolute; left:8px; top:8px; z-index:2; padding:5px 10px; border-radius:999px; background:rgba(17,24,39,.82); color:#fff; font-size:12.5px; font-weight:700; pointer-events:none; }
+  .pdv-pick{ position:absolute; inset:56px 0 0; z-index:3; background:rgba(31,35,43,.97); display:flex; flex-direction:column; }
+  .pdv-pick-h{ display:flex; align-items:center; justify-content:space-between; padding:10px 14px; }
+  .pdv-pick-g{ flex:1; overflow:auto; display:grid; grid-template-columns:repeat(auto-fill, minmax(96px, 1fr)); gap:10px; padding:4px 14px 30px; align-content:start; }
+  .pdv-pt{ display:flex; flex-direction:column; align-items:center; gap:4px; padding:6px; border-radius:12px; border:2px solid transparent; background:rgba(255,255,255,.06); color:#fff; font:inherit; font-weight:800; cursor:pointer; }
+  .pdv-pt.on{ border-color:#A78BFA; } .pdv-pt canvas{ width:84px; height:auto; background:#fff; border-radius:4px; }
+
+  .tbk-draft{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:center; max-width:40em; margin:10px auto 0; padding:8px 12px; border-radius:12px; font-size:13.5px; background:rgba(16,185,129,.1); border:1px solid rgba(16,185,129,.3); color:var(--text); }
+  .tbk-draft[hidden]{ display:none; }
+  .tbk-draft-x{ border:1px solid rgba(220,38,38,.35); background:var(--surface, #fff); color:#B91C1C; border-radius:999px; padding:4px 12px; font:inherit; font-weight:700; cursor:pointer; }
+  .tbk-draft-x.sure{ background:#DC2626; color:#fff; border-color:#DC2626; }
+
   .tbk-device{ position:relative; max-width:600px; margin:16px auto 4px; padding:16px 12px 14px; border-radius:30px; background:linear-gradient(160deg, #2B3242, #151A23); box-shadow:inset 0 1px 0 rgba(255,255,255,.09), 0 24px 40px -24px rgba(15,23,42,.7); }
   .tbk-cam{ position:absolute; top:6px; left:50%; width:6px; height:6px; margin-left:-3px; border-radius:50%; background:#465066; }
   .tbk-screen{ background:#EDF0EC; border-radius:18px; padding:12px 14px; text-align:left; color:#1B1F27; }
@@ -3923,6 +3997,53 @@
   html body .ha-play{ color:#111827 !important; box-shadow:none !important; }
   html body .home-hero #resumeSessionSlot .result-card{ background:rgba(255,255,255,.07) !important; border-color:rgba(255,255,255,.14) !important; }
 
+  /* 🏠 1.0.41 : le haut de l'accueil, refait (encre bleu nuit, un motif d'étoiles à huit branches, une fiche de mot) */
+  html body .home-hero.hh2{ --hh-ink:#141A33; --hh-ink2:#232B5C; --hh-saf:#F2B544; --hh-paper:#FFF9EE; --hh-txt:#1B1F3B; --hh-ar:#2E3192;
+    display:block !important; text-align:left !important; padding:22px 20px 18px !important; border-radius:24px !important;
+    background:radial-gradient(520px 260px at 100% 0%, rgba(242,181,68,.16), rgba(242,181,68,0) 60%), radial-gradient(480px 300px at 0% 100%, rgba(99,102,241,.22), rgba(99,102,241,0) 62%), linear-gradient(160deg, var(--hh-ink2) 0%, var(--hh-ink) 70%) !important;
+    border:1px solid rgba(255,255,255,.07); box-shadow:0 26px 50px -30px rgba(20,26,51,.85) !important; }
+  html body .home-hero.hh2::before{ opacity:.16; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Cg fill='none' stroke='%23F2B544' stroke-width='1'%3E%3Crect x='21' y='21' width='22' height='22'/%3E%3Crect x='21' y='21' width='22' height='22' transform='rotate(45 32 32)'/%3E%3Cpath d='M0 32h10.5M53.5 32H64M32 0v10.5M32 53.5V64'/%3E%3C/g%3E%3C/svg%3E"); background-size:64px 64px;
+    -webkit-mask-image:radial-gradient(ellipse 70% 80% at 100% 0%, #000 0%, transparent 72%); mask-image:radial-gradient(ellipse 70% 80% at 100% 0%, #000 0%, transparent 72%); }
+  .hh2-grid{ display:grid; grid-template-columns:minmax(0, 1fr) auto; grid-template-areas:"copy fox" "act act" "deck deck" "slots slots"; column-gap:8px; row-gap:16px; align-items:start; }
+  .hh2-copy{ grid-area:copy; min-width:0; padding-top:2px; } .hh2-fox{ grid-area:fox; } .hh2-act{ grid-area:act; } .hh2-deck{ grid-area:deck; min-width:0; } .hh2-slots{ grid-area:slots; min-width:0; }
+  html body .home-hero.hh2 .hero-badge{ display:inline-block; text-transform:none !important; letter-spacing:0 !important; font-size:12.5px !important; font-weight:600 !important; padding:4px 10px !important; border-radius:999px !important; margin:0 0 10px !important; background:rgba(242,181,68,.12) !important; border:1px solid rgba(242,181,68,.32) !important; color:#F8D88E !important; }
+  html body .home-hero.hh2 .hero-title{ font-size:clamp(27px, 7.4vw, 44px) !important; line-height:1.08 !important; letter-spacing:-0.035em; margin:0 0 10px !important; text-align:left !important; overflow-wrap:anywhere; }
+  html body .home-hero.hh2 .hero-title .grad{ background:linear-gradient(90deg, #FFE3A3, #F2B544) !important; -webkit-background-clip:text !important; background-clip:text !important; }
+  html body .home-hero.hh2 .type-cursor{ background:var(--hh-saf) !important; }
+  html body .home-hero.hh2 .hero-sub{ margin:0 !important; max-width:34em; font-size:15px !important; line-height:1.45; text-align:left !important; color:rgba(255,255,255,.72) !important; }
+  html body .home-hero.hh2 #heroMascotContainer{ width:104px !important; height:104px !important; margin:0 !important; }
+  html body .home-hero.hh2 .va-hero-pill{ bottom:-4px; font-size:12px; padding:5px 10px; }
+  html body .home-hero.hh2 .hero-cta{ display:flex !important; width:100%; align-items:flex-start; text-align:left; gap:3px; background:var(--hh-saf) !important; color:var(--hh-txt) !important; font-weight:800 !important; font-size:17px !important; border-radius:14px !important; padding:13px 18px !important; margin:0 !important;
+    box-shadow:0 1px 0 rgba(255,255,255,.35) inset, 0 10px 26px -12px rgba(242,181,68,.75) !important; }
+  html body .home-hero.hh2 .hero-cta:hover{ background:#F5C25F !important; }
+  html body .home-hero.hh2 .hero-cta small{ color:rgba(27,31,59,.72) !important; font-weight:600 !important; font-size:12.5px; }
+  html body .home-hero.hh2 .hero-cta:focus-visible, .hw-bar button:focus-visible, .hw-card:focus-visible{ outline:3px solid #FFE3A3 !important; outline-offset:3px; }
+  /* la fiche de mot : du papier, un peu de biais, une autre derrière */
+  .hh2-deck{ position:relative; padding:6px 6px 0; }
+  .hw-stack{ position:relative; }
+  .hw-stack::before{ content:''; position:absolute; inset:8px -2px -8px 10px; border-radius:16px; background:rgba(255,249,238,.16); border:1px solid rgba(255,249,238,.12); transform:rotate(2.4deg); pointer-events:none; }
+  .hw-card{ position:relative; display:block; background:var(--hh-paper, #FFF9EE); color:var(--hh-txt, #1B1F3B); border-radius:16px; padding:14px 16px 14px; transform:rotate(-1.2deg); box-shadow:0 14px 30px -16px rgba(0,0,0,.65); cursor:pointer; text-align:left; }
+  .hw-card.hw-in{ animation:hwIn .32s cubic-bezier(.2,.8,.2,1); }
+  @keyframes hwIn{ from{ transform:rotate(-1.2deg) translateX(26px); opacity:0; } to{ transform:rotate(-1.2deg); opacity:1; } }
+  .hw-why{ display:flex; justify-content:space-between; gap:8px; font-size:12.5px; font-weight:700; color:#6B6A86; margin:0 0 4px; } .hw-why span{ font-weight:600; color:#9A99B0; font-variant-numeric:tabular-nums; }
+  .hw-fr{ font-family:'Literata', Georgia, serif; font-weight:800; font-size:clamp(25px, 7vw, 32px); line-height:1.12; letter-spacing:-0.01em; overflow-wrap:anywhere; }
+  .hw-ar{ font-family:'IBM Plex Sans Arabic', 'Noto Naskh Arabic', sans-serif; font-weight:600; font-size:clamp(24px, 6.6vw, 30px); line-height:1.45; color:var(--hh-ar, #2E3192); text-align:right; margin:2px 0 0; }
+  .hw-ex{ font-family:'Literata', Georgia, serif; font-style:italic; font-size:14px; line-height:1.5; color:#4A4A63; border-top:1px dashed rgba(27,31,59,.18); margin-top:8px; padding-top:8px; }
+  .hw-ex b{ font-style:normal; font-weight:700; color:var(--hh-txt, #1B1F3B); background:rgba(242,181,68,.38); border-radius:4px; padding:0 2px; }
+  .hw-bar{ display:flex; flex-wrap:wrap; gap:8px; margin:16px 0 0; }
+  .hw-bar button{ border:1px solid rgba(255,255,255,.18); background:rgba(255,255,255,.07); color:#fff; border-radius:999px; padding:7px 12px; font:inherit; font-size:13.5px; font-weight:700; cursor:pointer; white-space:nowrap; }
+  .hw-bar button:hover{ background:rgba(255,255,255,.14); }
+  .hw-bar .hw-next{ margin-left:auto; border-color:rgba(242,181,68,.5); color:#FFE3A3; }
+  html body .home-hero.hh2 .hh2-slots{ display:block; margin:0; }
+  html body .home-hero.hh2 .hh2-slots:empty, html body .home-hero.hh2 .hh2-slots > div:empty{ display:none; }
+  @media (min-width:720px){
+    html body .home-hero.hh2{ padding:30px 34px 24px !important; }
+    .hh2-grid{ grid-template-columns:minmax(0, 1fr) minmax(0, 1fr); grid-template-areas:"copy fox" "act deck" "slots deck"; column-gap:40px; row-gap:14px; grid-template-rows:auto auto 1fr; }
+    .hh2-fox{ justify-self:center; align-self:end; margin-bottom:4px; }
+    html body .home-hero.hh2 #heroMascotContainer{ width:120px !important; height:120px !important; }
+    .hh2-act{ align-self:start; } html body .home-hero.hh2 .hero-cta{ width:auto; min-width:280px; display:inline-flex !important; }
+  }
+  @media (prefers-reduced-motion:reduce){ .hw-card.hw-in{ animation:none; } }
   html body .home-stats .stat-box{ background:var(--surface) !important; border:1px solid var(--border) !important; box-shadow:var(--shadow-sm) !important; border-radius:14px !important; animation:none !important; }
   html body .home-stats .stat-box:hover{ border-color:var(--border-strong) !important; transform:none !important; }
   html body .stat-ic{ width:34px !important; height:34px !important; border-radius:10px !important; display:flex !important; align-items:center; justify-content:center; font-size:0 !important;
@@ -5774,7 +5895,13 @@ function renderBlockWordsPeek(words, title, onBack, src){
     const w = words[i]; if(!w) return;
     stopAuto();
     const order = shownOrder(), list = order.map(x => x.w), idx = order.findIndex(x => x.i === i);
-    wordCardPopup(w, { list, index:idx, onClose:() => { words.forEach((x, j) => { if(!WORDS.includes(x)) pk.gone.add(j); }); if(document.getElementById('peekResultsWrap')) render(); } });
+    const endPlay = { modes:PEEK_SUGGEST_MODES, start:(mode) => {
+      const L2 = items(), filtered = L2.length !== all().length;
+      stopPeekPlay(); stopAuto(); window.__pkOnPlay = null;
+      if(filtered) startModeWithWords(L2.map(x => x.w), mode, { title:title + (pk.st !== 'all' ? ' · ' + PK_ST[pk.st].l : ' · recherche'), back:onBack || null });
+      else startListMode(words, mode, src0);
+    } };
+    wordCardPopup(w, { list, index:idx, endPlay, onClose:() => { words.forEach((x, j) => { if(!WORDS.includes(x)) pk.gone.add(j); }); if(document.getElementById('peekResultsWrap')) render(); } });
   }
   function slideTo(k, dir){
     const L = items(); if(!L.length) return;
@@ -17228,7 +17355,7 @@ function wordCardPopup(w, opts){
   if(opts._nav || opts._back){ /* même chemin */ }
   else if(had && WCP.cur && WCP.cur.w !== w) WCP.stack.push(WCP.cur);
   else if(!had) WCP.stack = [];
-  const dir = opts._dir || '';
+  const dir = opts._dir || '', navd = !!opts._nav;
   opts = Object.assign({}, opts); delete opts._nav; delete opts._back; delete opts._dir;
   WCP.cur = { w, opts };
   const L = Array.isArray(opts.list) && opts.list.length > 1 ? opts.list : null;
@@ -17247,7 +17374,7 @@ function wordCardPopup(w, opts){
   ov.className = 'wcp-ov' + (had ? ' instant' : '');
   ov.innerHTML = `<div class="wcp ${dir ? 'nav-in-' + dir : ''}" role="dialog" aria-modal="true" aria-label="Fiche du mot ${escapeHtml(w.fr)}">
     ${prevW ? `<button type="button" class="wcp-back" data-wcp="back">↩ Revenir à « ${escapeHtml(prevW.fr)} »</button>` : ''}
-    ${L ? `<div class="wcp-nav"><button type="button" data-wcp="prev" ${li <= 0 ? 'disabled' : ''} aria-label="Mot précédent">‹ Précédent</button><span>${li + 1} / ${L.length}</span><button type="button" data-wcp="next" ${li >= L.length - 1 ? 'disabled' : ''} aria-label="Mot suivant">Suivant ›</button></div>` : ''}
+    ${L ? `<div class="wcp-nav"><button type="button" data-wcp="prev" ${li <= 0 ? 'disabled' : ''} aria-label="Mot précédent">‹ Précédent</button><span>${li + 1} / ${L.length}</span>${li >= L.length - 1 && opts.endPlay ? `<button type="button" class="wcp-endb" data-wcp="endplay" aria-label="Fin de la liste : jouer avec ces mots">🎮 Jouer ›</button>` : `<button type="button" data-wcp="next" ${li >= L.length - 1 ? 'disabled' : ''} aria-label="Mot suivant">Suivant ›</button>`}</div>` : ''}
     ${opts.note ? `<div class="wcp-note">${escapeHtml(opts.note)}</div>` : ''}
     <div class="wcp-head"><div class="wcp-fr" lang="fr">${escapeHtml(w.fr)}</div><button type="button" class="wcp-x" data-wcp="x" aria-label="Fermer">✕</button></div>
     <div class="wcp-meta"><span>${escapeHtml(w.cat || '')}</span>${blk ? `<span>· Bloc ${blk}</span>` : ''}<span>${getWordBadge(w.fr)}</span></div>
@@ -17279,9 +17406,22 @@ function wordCardPopup(w, opts){
     document.removeEventListener('keydown', onKey, true); ov.remove();
     wordCardPopup(pv.w, Object.assign({}, pv.opts, { _back:true, _dir:'l' }));
   };
+  const endPlay = () => {
+    const E = opts.endPlay; if(!E || !E.modes) return;
+    const box = ov.querySelector('.wcp'); if(!box || box.querySelector('.wcp-end')) return;
+    const el = document.createElement('div'); el.className = 'wcp-end'; el.setAttribute('role', 'group'); el.setAttribute('aria-label', 'Jouer avec ces mots');
+    el.innerHTML = `<div class="wcp-end-h">🎉 Tu as vu les ${L.length} mots !</div><div class="wcp-end-s">Joue avec eux maintenant :</div>
+      <div class="wcp-end-g">${E.modes.map(m => `<button type="button" class="opt" data-wcp="mode" data-mode="${escapeHtml(m.mode)}">${m.label}</button>`).join('')}</div>
+      <div class="wcp-b"><button type="button" data-wcp="restart">↺ Revoir depuis le début</button><button type="button" data-wcp="x">Fermer</button></div>`;
+    box.appendChild(el);
+    setTimeout(() => el.scrollIntoView({ block:'nearest', behavior:'smooth' }), 30);
+    try{ speak(`Bravo, tu as vu les ${L.length} mots. Choisis un mode de jeu.`, 'fr-FR'); }catch(e){}
+  };
   const step = (d) => {
     if(!L) return;
-    const j = li + d; if(j < 0 || j >= L.length) return;
+    const j = li + d;
+    if(j >= L.length && opts.endPlay){ endPlay(); return; }
+    if(j < 0 || j >= L.length) return;
     document.removeEventListener('keydown', onKey, true); ov.remove();
     wordCardPopup(L[j], Object.assign({}, opts, { index:j, _nav:true, _dir:d > 0 ? 'r' : 'l' }));
     try{ haptic('tap'); }catch(e){}
@@ -17312,6 +17452,9 @@ function wordCardPopup(w, opts){
     else if(a === 'back') goBack();
     else if(a === 'prev') step(-1);
     else if(a === 'next') step(1);
+    else if(a === 'endplay') endPlay();
+    else if(a === 'restart'){ document.removeEventListener('keydown', onKey, true); ov.remove(); wordCardPopup(L[0], Object.assign({}, opts, { index:0, _nav:true, _dir:'l' })); }
+    else if(a === 'mode'){ const E = opts.endPlay, m = b.dataset.mode; close(); if(E && E.start) setTimeout(() => E.start(m), 30); }
     else if(a === 'say') speak(w.fr, 'fr-FR');
     else if(a === 'ar') speak(w.ar, 'ar-SA');
     else if(a === 'ex') speak(full, 'fr-FR');
@@ -17321,6 +17464,19 @@ function wordCardPopup(w, opts){
     else if(a === 'del-go'){ close(); lexDeleteUi(w); }
   });
   setTimeout(() => { const x = ov.querySelector('.wcp-b .pri'); if(x) try{ x.focus({ preventScroll:true }); }catch(e){} }, 60);
+  if(navd && !opts.noAutoSay) setTimeout(() => { if(ov.isConnected) try{ speak(w.fr, 'fr-FR'); }catch(e){} }, 160);   // 🔊 1.0.41 : en glissant, on entend le mot
+  {
+    const card = ov.querySelector('.wcp'); let lt = 0, lx = 0, ly = 0, dn = 0;
+    const back2 = (e) => { if(!WCP.stack.length) return false; if(e){ e.preventDefault(); e.stopPropagation(); } try{ wtClose(); }catch(err){} try{ window.getSelection().removeAllRanges(); }catch(err){} goBack(); return true; };
+    card.addEventListener('pointerdown', () => { dn = Date.now(); });
+    card.addEventListener('pointerup', (e) => {
+      if(e.pointerType === 'mouse' || e.target.closest('button, a, input, textarea, select')) return;
+      const now = Date.now(); if(now - dn > 280){ lt = 0; return; }
+      if(lt && now - lt < 340 && Math.hypot(e.clientX - lx, e.clientY - ly) < 36){ lt = 0; back2(e); return; }
+      lt = now; lx = e.clientX; ly = e.clientY;
+    });
+    card.addEventListener('dblclick', (e) => { if(e.target.closest('button, a, input, textarea, select')) return; back2(e); });
+  }
   // 🌐 la phrase en arabe (traduction automatique, gardée sur l'appareil)
   const box = ov.querySelector('#wcpExAr');
   if(box && full){
@@ -17487,7 +17643,7 @@ function wceSuggest(ov, w){
    Dans les phrases d'exemple, la Répétition, les fiches (Art oratoire, Grammaire…), le Bouquinage : touche un mot
    difficile, une bulle s'ouvre avec sa traduction et sa définition (ton lexique d'abord, sinon le dictionnaire en ligne),
    et tu peux l'écouter, l'ajouter à tes mots, ou réentendre la phrase. */
-var WT_SEL = '.ex-text, .result-ex, .def-text, .repeat-sentence, .wcp-ex, .wcp-def, .reading-text, .bq-quote, .cq-sentence';
+var WT_SEL = '.ex-text, .result-ex, .def-text, .repeat-sentence, .wcp-ex, .wcp-def, .reading-text, .bq-quote, .cq-sentence, .pdv-tl';
 var WT = { el:null, bypass:false, ctx:null, tok:0 };
 function wtClose(){
   if(WT.el){ WT.el.remove(); WT.el = null; }
@@ -17738,15 +17894,18 @@ function renderDictResults(){
     countEl.appendChild(document.createTextNode(' ')); countEl.appendChild(x);
   }
 
+  const q0 = String(dictQuery || '').replace(/\s+/g, ' ').trim();
+  const nwOk = q0.length >= 2 && q0.length <= 60 && /\p{L}/u.test(q0) && !/[\u0600-\u06FF]/.test(q0) && !findLexWord(q0);
+  const nwBtn = nwOk ? `<button type="button" class="nw-go ${matches.length ? '' : 'big'}" data-nw="${tbAttr(q0)}"><span class="nw-i" aria-hidden="true">✨</span><span><b>${matches.length ? 'Un nouveau mot ?' : 'Pas encore dans tes mots'}</b> Chercher « ${escapeHtml(q0)} » : l'arabe, le sens et une phrase, puis l'ajouter</span></button>` : '';
   if(matches.length === 0){
-    resultsEl.innerHTML = `<div class="no-results">Aucun mot trouvé${dictQuery ? ' pour « ' + escapeHtml(dictQuery.trim()) + ' »' : ''}.</div>`;
+    resultsEl.innerHTML = `<div class="no-results">Aucun mot trouvé${dictQuery ? ' pour « ' + escapeHtml(dictQuery.trim()) + ' »' : ''}.</div>` + nwBtn;
     return;
   }
 
   if(dictView === 'list'){
-    resultsEl.innerHTML = `<div class="dict-list">` + shown.map(buildWordRowHtml).join('') + `</div>`;
+    resultsEl.innerHTML = nwBtn + `<div class="dict-list">` + shown.map(buildWordRowHtml).join('') + `</div>`;
   } else {
-    resultsEl.innerHTML = shown.map(buildWordCardHtml).join('');
+    resultsEl.innerHTML = nwBtn + shown.map(buildWordCardHtml).join('');
   }
 }
 
@@ -18053,6 +18212,7 @@ function renderDictionaryView(){
   syncCatRow();
   const input = document.getElementById('dictInput');
   input.addEventListener('input', () => { dictQuery = input.value; syncCatRow(); renderDictResults(); });
+  input.addEventListener('keydown', (e) => { if(e.key !== 'Enter') return; const nb = document.querySelector('#dictResults .nw-go.big'); if(nb){ e.preventDefault(); try{ input.blur(); }catch(err){} nwSearch(nb.dataset.nw); } });
   // 🗣️ chercher en disant le mot : « maison », « que veut dire opportunité »… puis on t'en lit la traduction
   const dSay = document.getElementById('dictSayBtn');
   if(dSay) dSay.addEventListener('click', () => {
@@ -18509,6 +18669,53 @@ function hqTileHtml(id, inDlg, num){
   return `<button type="button" class="hq-ic" ${inDlg ? `data-hqp="${id}" aria-pressed="${!!num}"` : `data-hq="${id}"`} style="--g1:${d.g[0]};--g2:${d.g[1]}" title="${escapeHtml(d.l)}">
     <span class="hq-ic-i">${proIcon(d.i, 24, 2) || '•'}${num ? `<em class="hq-n">${num}</em>` : ''}</span><span class="hq-ic-l">${escapeHtml(d.l)}</span></button>`;
 }
+/* 🃏 1.0.41 : en haut de l'accueil, un de tes mots comme une fiche : le français, l'arabe, sa phrase.
+   On l'écoute, on passe au suivant, on ouvre sa fiche. Les mots à revoir d'abord, sinon ceux du prochain bloc. */
+function heroWordPool(ctaIdx){
+  let why = 'next', L = [];
+  try{
+    const rv = Object.keys(wordStats || {}).filter(k => wordStats[k] && wordStats[k].wrong > 0 && (wordStats[k].streak || 0) < MASTERY_STREAK).map(k => findLexWord(k)).filter(w => w && w.ar);
+    if(rv.length >= 3){ L = rv; why = 'review'; }
+  }catch(e){}
+  if(!L.length){ const B = ctaIdx !== null && ctaIdx !== undefined ? BLOCKS[ctaIdx] : null; L = (B || WORDS).filter(w => w && w.fr && w.ar); why = B ? 'next' : 'any'; }
+  if(!L.length){ L = WORDS.filter(w => w && w.fr && w.ar); why = 'any'; }
+  L = L.slice(); for(let i = L.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); const t = L[i]; L[i] = L[j]; L[j] = t; }
+  return { why, L:L.slice(0, 40), i:0 };
+}
+function heroWordEx(w){
+  let s = ''; try{ s = typeof exFull === 'function' ? exFull(w) : ''; }catch(e){}
+  s = String(s || '').replace(/\s+/g, ' ').trim(); if(!s || s === '~') return '';
+  let f = ''; try{ f = (typeof exFullForm === 'function' && exFullForm(w)) || w.fr; }catch(e){ f = w.fr; }
+  if(s.length > 150){ const k = s.toLowerCase().indexOf(String(f).toLowerCase()); const a = Math.max(0, Math.min(k < 0 ? 0 : k - 60, s.length - 150)); s = (a > 0 ? '… ' : '') + s.slice(a, a + 150).trim() + (a + 150 < s.length ? ' …' : ''); }
+  const i = s.toLowerCase().indexOf(String(f).toLowerCase());
+  return i < 0 ? escapeHtml(s) : escapeHtml(s.slice(0, i)) + '<b>' + escapeHtml(s.slice(i, i + f.length)) + '</b>' + escapeHtml(s.slice(i + f.length));
+}
+function heroWordCardHtml(H, dir){
+  const w = H && H.L.length ? H.L[H.i % H.L.length] : null; if(!w) return '';
+  const why = H.why === 'review' ? 'Un mot à revoir' : H.why === 'next' ? 'Un mot de ton prochain bloc' : 'Un mot de ton lexique';
+  const ex = heroWordEx(w);
+  return `<div class="hw-stack"><article class="hw-card ${dir ? 'hw-in' : ''}" data-hw="open" tabindex="0" role="button" aria-label="${tbAttr(w.fr)}, en arabe ${tbAttr(w.ar)} : ouvrir sa fiche">
+      <div class="hw-why">${why}${H.L.length > 1 ? ` <span>${(H.i % H.L.length) + 1} / ${H.L.length}</span>` : ''}</div>
+      <div class="hw-fr" lang="fr">${escapeHtml(w.fr)}</div>
+      <div class="hw-ar" lang="ar" dir="rtl">${escapeHtml(w.ar)}</div>
+      ${ex ? `<div class="hw-ex" lang="fr">${ex}</div>` : ''}
+    </article></div>
+    <div class="hw-bar" role="group" aria-label="Ce mot">
+      <button type="button" data-hw="fr" aria-label="Écouter « ${tbAttr(w.fr)} »">🔊 Écouter</button>
+      <button type="button" data-hw="ar" aria-label="Écouter en arabe">🔊 <span lang="ar" dir="rtl">عربي</span></button>
+      ${H.L.length > 1 ? `<button type="button" class="hw-next" data-hw="next">Mot suivant ›</button>` : ''}
+    </div>`;
+}
+document.addEventListener('click', (e) => {
+  const b = e.target && e.target.closest && e.target.closest('#heroWord [data-hw]'); if(!b) return;
+  const H = window.__hw, w = H && H.L.length ? H.L[H.i % H.L.length] : null; if(!w) return;
+  const a = b.dataset.hw;
+  if(a === 'fr'){ try{ speak(w.fr, 'fr-FR'); }catch(err){} }
+  else if(a === 'ar'){ try{ speak(w.ar, 'ar-SA'); }catch(err){} }
+  else if(a === 'next'){ H.i = (H.i + 1) % H.L.length; const box = document.getElementById('heroWord'); if(box){ box.innerHTML = heroWordCardHtml(H, 1); const nb = box.querySelector('.hw-next'); if(nb) try{ nb.focus({ preventScroll:true }); }catch(err){} } }
+  else if(a === 'open'){ try{ wordCardPopup(w); }catch(err){} }
+});
+document.addEventListener('keydown', (e) => { if((e.key === 'Enter' || e.key === ' ') && e.target && e.target.matches && e.target.matches('#heroWord .hw-card')){ e.preventDefault(); e.target.click(); } });
 function hqHtml(){
   return `<div class="hq" id="heroQuick">
     ${hqTabHtml()}
@@ -18642,8 +18849,14 @@ function renderBlockSelect(){
     </div>
 
     ${(typeof conjResumeBannerHtml === 'function') ? conjResumeBannerHtml() : ''}
-    <section class="home-hero">
-      <span class="hh-deco hh-d1"></span><span class="hh-deco hh-d2"></span><span class="hh-deco hh-d3">✦</span><span class="hh-deco hh-d4">✧</span><span class="hh-deco hh-d5">●</span>
+    <section class="home-hero hh2">
+      <div class="hh2-grid">
+        <div class="hh2-copy">
+          <div class="hero-badge">${WORDS.length.toLocaleString('fr-FR')} mots, du français à l'arabe</div>
+          <div class="hero-title" id="heroTitle">Apprends avec <span class="grad" id="heroNameMale" style="transition:opacity .6s ease;">Souky</span> <span class="grad" style="opacity:0.5;">&amp;</span> <span class="grad" id="heroNameFemale" style="opacity:0.4;transition:opacity .6s ease;">Abdel</span></div>
+          <div class="hero-sub">${motto}</div>
+        </div>
+        <div class="hh2-fox">
       <div class="hero-mascot" id="heroMascotContainer" title="Touche-moi pour me parler" style="position:relative;width:96px;height:96px;margin:0 auto;">
         <button type="button" class="va-hero-pill" aria-label="Parler avec le renard">💬 Parle-moi</button>
         <div class="hero-mascot-glow"></div>
@@ -18696,13 +18909,15 @@ function renderBlockSelect(){
         </svg>
         </div>
       </div>
-      <div class="hero-content">
-        <div class="hero-badge">Français ↔ Arabe · ${WORDS.length} mots</div>
-        <div class="hero-title" id="heroTitle">Apprends avec <span class="grad" id="heroNameMale" style="transition:opacity .6s ease;">Souky</span> <span class="grad" style="opacity:0.5;">&amp;</span> <span class="grad" id="heroNameFemale" style="opacity:0.4;transition:opacity .6s ease;">Abdel</span></div>
-        <div class="hero-sub">${motto}</div>
-        <button class="restart-btn hero-cta" id="startNextBlockBtn"><span>${ctaLabel}</span>${ctaSub ? `<small>${ctaSub}</small>` : ''}</button>
-        <div id="resumeSessionSlot"></div>
-        <div id="heroAudioSlot"></div>
+        </div>
+        <div class="hh2-act">
+          <button class="restart-btn hero-cta" id="startNextBlockBtn"><span>${ctaLabel}</span>${ctaSub ? `<small>${ctaSub}</small>` : ''}</button>
+        </div>
+        <div class="hh2-deck" id="heroWord">${heroWordCardHtml(window.__hw = heroWordPool(ctaIdx))}</div>
+        <div class="hero-content hh2-slots">
+          <div id="resumeSessionSlot"></div>
+          <div id="heroAudioSlot"></div>
+        </div>
       </div>
       ${hqHtml()}
     </section>
@@ -22660,6 +22875,13 @@ const COLOR_PRESETS = {
 /* ============ 🆕 NOUVEAUTÉS — pour que tout ce qui a été ajouté reste découvrable ============ */
 const WHATS_NEW_SECTIONS = [
   { icon:'🆕', title:'Nouveautés', items:[
+    { name:'📖 Lire un PDF tel quel', desc:"À l'import d'un PDF (ou de photos de pages) : « 📰 En texte, sur la Tablette » comme avant, ou « 📖 Tel quel » — les vraies pages, sans conversion. Tu choisis les pages, tu vas de l'une à l'autre (‹ ›, ou « 3 / 12 » pour les voir en petit), tu zoomes. Touche un mot sur la page : sa définition et son arabe ; glisse sur plusieurs mots : « 🌐 Traduire ». Même sur une page scannée : son texte est lu par l'appli et posé sur l'image (gardé pour la prochaine fois). Tes PDF sont dans la bibliothèque, « 📖 Mes PDF, tels quels », et reprennent à la bonne page." },
+    { name:'👉 Voir les mots : glisser, entendre, jouer', desc:"Dans la fiche d'un mot (Par statut, Liste…), glisse à gauche ou à droite, même sur le texte : le mot suivant s'affiche et se dit tout seul. Après le dernier, « 🎉 Tu as vu les 30 mots ! » et le choix du mode de jeu (ou « ↺ Revoir depuis le début »). Un mot ouvert depuis la fiche : un double appui (ou double clic) ramène au mot d'avant. Pour sélectionner des mots dans la fiche : appuie un instant, puis glisse." },
+    { name:'✨ Chercher un nouveau mot', desc:"Dans Mots & recherche, écris un mot ou une expression qui n'est pas encore dans tes mots : « ✨ Chercher « … » » te donne le mot, son arabe, son sens et une vraie phrase avec ~ (du dictionnaire, sinon trouvée sur Wikipédia), avec sa traduction. « 🔁 Autre phrase », « ✏️ Changer la phrase » (le mot est retrouvé même conjugué), puis « ➕ Ajouter »." },
+    { name:'🔁 Écoute puis répète, phrase par phrase', desc:"Sur la Tablette (« Lire à voix haute »), et avec le bouton « 🔁 Écoute et répète » du Bouquinage et des fiches d'Art oratoire : la voix lit une phrase, puis c'est à toi — les mots s'allument en vert quand tu les dis, comme en Répétition. Phrase bien dite : on passe à la suivante ; ⏭ pour passer, 🔊 pour réécouter." },
+    { name:'💾 Le brouillon de la Tablette est gardé', desc:"Un nouveau texte commencé reste sur l'appareil, même si tu fermes l'appli ou glisses pour revenir en arrière : tu le retrouves en revenant (« 💾 Brouillon gardé · 🗑 Effacer »)." },
+    { name:'🎯 Un objectif, et on y est', desc:"Touche un objectif du jour (Art oratoire, Bouquinage, fiches…) : on arrive dans la rubrique, le titre de la fiche ou du texte à faire s'affiche 3 secondes, puis on y entre (ou « Rester ici »)." },
+    { name:'🏠 Un nouvel accueil', desc:"Le haut de l'accueil est refait : le titre et le renard, le bouton pour continuer ton bloc, et une fiche de mot en français et en arabe — un mot à revoir, ou de ton prochain bloc — à écouter, à feuilleter (« Mot suivant »), à ouvrir d'un toucher." },
     { name:'📄 Des PDF bien mis en page', desc:"L'import des PDF retrouve l'ordre de lecture d'après la page (deux colonnes, un titre au-dessus, une image à côté du texte), reconnaît les titres (plus grands ou en gras), les listes à puces, les lignes de tableau (« mot · sens »), l'italique et le gras. Les images gardent leur taille et leur place (à gauche, à droite ou au centre) avec leur légende ; les images de fond et les logos répétés sont laissés de côté. Une phrase coupée en bas d'une colonne ou d'une page continue au même paragraphe. Pour un PDF déjà importé : réimporte-le (« Remplacer l'import précédent »)." },
     { name:'➕ Les mots d\'une fiche dans mes blocs, d\'un seul coup', desc:"Sur une fiche qui donne des mots (« Éviter / Préférer », « Expression / Sens », une liste de formules…) : « ➕ Ajouter ces mots à mes blocs ». Chaque mot arrive avec son arabe, sa définition (le sens donné par la fiche) et sa phrase d'exemple, traduite en arabe en entier. Tu relis, décoches, corriges, puis tout part dans tes blocs, et dans un bloc au nom de la fiche, à jouer tout de suite." },
     { name:'👆 Appuyer sur un mot et glisser', desc:"Au doigt aussi : appuie sur un mot et glisse de côté pour sélectionner plusieurs mots (glisser vers le haut ou le bas fait toujours défiler). « 🌐 Traduire » : la traduction d'un coup, puis « ➕ Les mots un par un » pour les ajouter tous à tes blocs, ou « ➕ Ajouter l'expression »." },
@@ -37159,7 +37381,7 @@ function renderPracticalSheetDetail(id){
     <div class="cat-tag">${sheet.icon} ${escapeHtml(sheet.category)}<span id="sheetValidatedTag">${isSheetPassed(sheet.id) ? ' · ✅ Validée' : ''}</span></div>
     <div class="word-fr" style="font-size:clamp(19px,4vw,25px);">${escapeHtml(sheet.title)}</div>
     <div class="word-def" style="margin-top:6px;">${escapeHtml(sheet.intro)}</div>
-    <div class="done-top-row"><button type="button" class="mode-chip done-top-btn" id="sheetValidateTopBtn"></button></div>
+    <div class="done-top-row"><button type="button" class="mode-chip done-top-btn" id="sheetValidateTopBtn"></button>${sheet.section === 'oratoire' && sheet.type !== 'table' ? `<button type="button" class="mode-chip done-top-btn tb-echo-btn" id="sheetEchoBtn" title="La voix lit une phrase, tu la répètes : les mots s'allument en vert">🔁 Écoute et répète</button>` : ''}</div>
     ${(() => { let n = 0; try{ n = fsItems(sheet).length; }catch(e){} return n ? `<div class="fsa-row"><button type="button" class="mode-chip fsa-btn" id="sheetAddWordsBtn">➕ Ajouter ces ${n} mots à mes blocs</button></div>` : ''; })()}
     ${buildReadingToolbarHtml()}
     ${bodyHtml}
@@ -37664,7 +37886,7 @@ function renderBouquinageDetail(idx, opts){
   card.innerHTML = `
     <div class="cat-tag">📖 Bouquinage${read ? ' · ✅ Lu' : ''}</div>
     <div class="word-fr" style="font-size:clamp(19px,4vw,24px);">${escapeHtml(t.title)}</div>
-    <div class="done-top-row"><button type="button" class="mode-chip done-top-btn ${read ? 'on' : 'active'}" id="markReadTopBtn">${read ? '✅ Lu · annuler' : '☐ Marquer comme lu'}</button></div>
+    <div class="done-top-row"><button type="button" class="mode-chip done-top-btn ${read ? 'on' : 'active'}" id="markReadTopBtn">${read ? '✅ Lu · annuler' : '☐ Marquer comme lu'}</button><button type="button" class="mode-chip done-top-btn tb-echo-btn" id="bqEchoBtn" title="La voix lit une phrase, tu la répètes : les mots s'allument en vert">🔁 Écoute et répète</button></div>
     ${bqCoachHtml(idx)}
     ${buildReadingToolbarHtml()}
     <div class="bq-dx">${dxChipHtml('bqDxChip')}${dxOn() ? dxLegendHtml() : ''}</div>
@@ -37687,6 +37909,7 @@ function renderBouquinageDetail(idx, opts){
     renderBouquinageDetail(idx);
   };
   ['markReadBtn', 'markReadTopBtn'].forEach(id => { const b = document.getElementById(id); if(b) b.addEventListener('click', bqToggleRead); });
+  { const eb = document.getElementById('bqEchoBtn'); if(eb) eb.addEventListener('click', () => tbEchoOpen(bqEchoArt(idx))); }
   if(idx > 0){ document.getElementById('bouquinagePrevBtn').addEventListener('click', () => renderBouquinageDetail(idx - 1)); }
   if(idx < BOUQUINAGE_TEXTS.length - 1){ document.getElementById('bouquinageNextBtn').addEventListener('click', () => renderBouquinageDetail(idx + 1)); }
   document.getElementById('bouquinageRandomDetailBtn').addEventListener('click', () => renderBouquinageDetail(Math.floor(Math.random() * BOUQUINAGE_TEXTS.length)));
@@ -47263,6 +47486,7 @@ async function tbImgCleanup(){
   try{
     const used = new Set(); tbLoad().forEach(a => tbArtImgIds(a).forEach(id => used.add(id)));
     (TB.edUsed || []).forEach(id => used.add(id));
+    { const d = tbDraftLoad(); if(d) d.blocks.forEach(x => { if(x && x.t === 'img' && x.id) used.add(x.id); }); }   // 💾 les images du brouillon
     const prefix = nsKey('tbimg') + '|';
     const keys = await tbStore('img', 'readonly', os => os.getAllKeys());
     (keys || []).forEach(k => { if(typeof k === 'string' && k.startsWith(prefix)){ const id = k.slice(prefix.length); const t = parseInt(id.slice(1, 9), 36); if(!used.has(id) && t && Date.now() - t > 6 * 3600000) tbImgDel(id); } });
@@ -47807,6 +48031,7 @@ function tbLibShellHtml(){
       </div>
     </div>
     <div id="tbkLibTop"></div>
+    ${typeof pdvShelfHtml === 'function' ? pdvShelfHtml() : ''}
     <div class="tbl-shelves tbk-list" id="tbkMine"></div>
     <div class="tbl-foot"><span class="tbk-sync" id="tbkSync">${getSyncUrl() ? '☁️ sur tous tes appareils' : ''}</span><span class="tbl-tip">Astuce : sur ordinateur, glisse un texte (ou un fichier .md) sur une catégorie pour l'y ranger.</span></div>
     <div class="tbl-dropzone" aria-hidden="true"><span>📥 Lâche ton fichier ici (PDF, photos de pages, Word, .md, .epub, .cbz)</span></div>
@@ -48769,6 +48994,10 @@ function tbPdfDialog(P, cat, existing){
       <div class="tbl-book"><b>${escapeHtml(P.title)}</b>${P.author ? `<small>${escapeHtml(P.author)}</small>` : ''}
         <span class="tbl-imp-m"><span>${isImg ? '📷' : '📄'} ${N} ${isImg ? 'photo' : 'page'}${N > 1 ? 's' : ''}</span>${!isImg && nScan ? `<span>📷 ${nScan === N ? 'scanné' : nScan + ' page' + (nScan > 1 ? 's' : '') + ' scannée' + (nScan > 1 ? 's' : '')}</span>` : ''}</span></div>
       ${nScan ? `<div class="tbl-imp-hint">🔎 ${isImg ? 'Le texte des photos' : (nScan === N ? 'Ce PDF est scanné : son texte' : 'Le texte des pages scannées')} sera lu par l'appli (reconnaissance de texte, sur ton appareil) : quelques secondes par page. La première fois, le lecteur de texte se télécharge (≈ 5 Mo).</div>` : ''}
+      <div class="tbp-how" role="radiogroup" aria-label="Comment l'ouvrir">
+        <label class="tbp-hw"><input type="radio" name="tbpH" value="text" checked><span><b>📰 En texte, sur la Tablette</b><small>remis en page comme un article : liaisons, recherche, marque-page</small></span></label>
+        <label class="tbp-hw"><input type="radio" name="tbpH" value="view"><span><b>📖 Tel quel : ${isImg ? 'les photos' : 'les vraies pages du PDF'}</b><small>sans conversion : touche un mot sur la page pour sa définition${nScan ? ', même scannée' : ''}</small></span></label>
+      </div>
       <div class="tbl-dlg-l">📑 ${isImg ? 'Photos' : 'Pages'} à importer</div>
       <div class="tbp-mode" role="radiogroup"><label><input type="radio" name="tbpM" value="all" checked> Toutes (${N})</label><label><input type="radio" name="tbpM" value="pick"> Seulement :</label>
         <input class="am-in tbp-in" id="tbpIn" inputmode="numeric" placeholder="ex. 1-3, 6, 9" aria-label="Numéros des pages à garder" autocomplete="off"></div>
@@ -48777,13 +49006,13 @@ function tbPdfDialog(P, cat, existing){
       <div class="tbp-x"><button type="button" class="tbl-link" data-v="all">✓ Tout</button><button type="button" class="tbl-link" data-v="none">✗ Aucune</button><span>Touche une page pour la garder ou l'enlever.</span></div>
       ${nScan ? `<label class="tbl-dlg-l" for="tbpLang">🔤 Langue du texte ${isImg ? 'des photos' : 'scanné'}</label>
         <select class="am-in" id="tbpLang">${TB_OCR_LANGS.map(l => `<option value="${l[0]}">${l[1]}</option>`).join('')}</select>
-        <label class="tbl-imp-rep"><input type="checkbox" id="tbpImg" ${isImg ? 'checked' : ''}> Garder aussi l'image de chaque ${isImg ? 'photo' : 'page scannée'} (pour comparer)</label>` : ''}
-      <label class="tbl-dlg-l" for="tbpCat">📂 Ranger dans</label>
-      <select class="am-in" id="tbpCat">
+        <label class="tbl-imp-rep tbp-txt"><input type="checkbox" id="tbpImg" ${isImg ? 'checked' : ''}> Garder aussi l'image de chaque ${isImg ? 'photo' : 'page scannée'} (pour comparer)</label>` : ''}
+      <label class="tbl-dlg-l tbp-txt" for="tbpCat">📂 Ranger dans</label>
+      <select class="am-in tbp-txt" id="tbpCat">
         ${N > 30 && !already ? `<option value="__new" ${!cat ? 'selected' : ''}>🆕 Un nouveau rayon : « ${escapeHtml(P.title.slice(0, 32))} »</option>` : ''}
         ${C.map(c => `<option value="${tbAttr(c.id)}" ${(already ? already.id === c.id : (cat ? c.id === cat : false)) ? 'selected' : ''}>${c.icon} ${escapeHtml(c.name)}</option>`).join('')}
       </select>
-      ${existing ? `<label class="tbl-imp-rep"><input type="checkbox" id="tbpRep" checked> Remplacer l'import précédent (ta lecture est gardée)</label>` : ''}
+      ${existing ? `<label class="tbl-imp-rep tbp-txt"><input type="checkbox" id="tbpRep" checked> Remplacer l'import précédent (ta lecture est gardée)</label>` : ''}
       <div class="am-dlg-b"><button class="am-dlg-btn ghost" data-v="cancel">Annuler</button><button class="am-dlg-btn" data-v="ok"></button></div>
     </div>`;
     document.body.appendChild(ov);
@@ -48797,6 +49026,7 @@ function tbPdfDialog(P, cat, existing){
       nEl.textContent = sel.size ? `${sel.size} ${isImg ? 'photo' : 'page'}${sel.size > 1 ? 's' : ''} choisie${sel.size > 1 ? 's' : ''}${nS && !isImg ? ` · dont ${nS} à lire (OCR)` : ''}` : 'Aucune page choisie';
       okB.disabled = !sel.size;
       okB.textContent = sel.size === N ? (isImg ? 'Lire le texte' : 'Importer et lire') : `Importer ${sel.size} ${isImg ? 'photo' : 'page'}${sel.size > 1 ? 's' : ''}`;
+      if(ov.classList.contains('tbp-view')) okB.textContent = '📖 ' + (sel.size === N ? (isImg ? 'Ouvrir les photos' : 'Ouvrir le PDF') : `Ouvrir ${sel.size} ${isImg ? 'photo' : 'page'}${sel.size > 1 ? 's' : ''}`);
     };
     sync();
     inp.addEventListener('input', () => {
@@ -48807,6 +49037,8 @@ function tbPdfDialog(P, cat, existing){
       sel.clear(); (inp.value.trim() ? L : Array.from({ length:N }, (_, i) => i + 1)).forEach(p => sel.add(p));
       sync(true);
     });
+    ov.querySelectorAll('input[name="tbpH"]').forEach(r => r.addEventListener('change', () => { ov.classList.toggle('tbp-view', r.value === 'view' && r.checked); ov.querySelectorAll('.tbp-hw').forEach(l => l.classList.toggle('on', l.querySelector('input').checked)); sync(); }));
+    ov.querySelectorAll('.tbp-hw').forEach(l => l.classList.toggle('on', l.querySelector('input').checked));
     ov.querySelectorAll('input[name="tbpM"]').forEach(r => r.addEventListener('change', () => {
       if(r.value === 'all' && r.checked){ inp.value = ''; inp.classList.remove('bad'); sel.clear(); for(let i = 1; i <= N; i++) sel.add(i); sync(); }
       if(r.value === 'pick' && r.checked) inp.focus();
@@ -48831,7 +49063,7 @@ function tbPdfDialog(P, cat, existing){
       if(v !== 'ok'){ close(null); return; }
       if(!sel.size) return;
       const r = ov.querySelector('#tbpRep'), lg = ov.querySelector('#tbpLang'), ki = ov.querySelector('#tbpImg');
-      close({ pages:[...sel].sort((a, b) => a - b), cat:ov.querySelector('#tbpCat').value, replace:!!(r && r.checked), lang:lg ? lg.value : 'fra', keepImg:!!(ki && ki.checked) });
+      close({ view:ov.classList.contains('tbp-view'), pages:[...sel].sort((a, b) => a - b), cat:ov.querySelector('#tbpCat').value, replace:!!(r && r.checked), lang:lg ? lg.value : 'fra', keepImg:!!(ki && ki.checked) });
     });
   });
 }
@@ -49056,11 +49288,382 @@ async function tbPdfImport(file, cat){
     setStatus('', 'ok');
     const v = await tbPdfDialog(P, cat, olds[0] || null);
     if(!v){ setStatus('📄 Import annulé.', 'ok'); return []; }
+    if(v.view){ const pid = await pdvSave(P, v); pdvShelfRefresh(); pdvOpen(pid); return []; }     // 📖 1.0.41 : tel quel
     const prog = tbProgOpen(`📄 « ${P.title} »`);
     let bk; try{ bk = await tbPdfBuild(P, v, prog); } finally { prog.close(); }
     if(!bk.chapters.length) throw new Error(bk.ocr ? 'aucun texte lisible sur ces pages (image trop floue ?)' : 'aucun texte sur ces pages');
     return tbBookStore(file, 'pdf', bid, bk, v, olds);
   } finally { try{ P.doc.destroy(); }catch(e){} }
+}
+/* ============ 📖 1.0.41 : LIRE UN PDF (OU DES PHOTOS DE PAGES) TEL QUEL ============
+   Le PDF n'est pas converti : on voit ses vraies pages. Par-dessus chaque page, une couche de texte invisible, posée
+   exactement sur les mots (le texte du PDF, ou celui lu par la reconnaissance de texte sur une page scannée) :
+   on touche un mot → sa définition (la bulle habituelle) ; on glisse → plusieurs mots → « 🌐 Traduire ».
+   Le fichier reste sur l'appareil (IndexedDB) ; la lecture des pages scannées aussi, une fois faite. */
+var PDV_KEY = 'vocabVision.pdv';
+var PDV = null;
+function pdvList(){ try{ const L = JSON.parse(localStorage.getItem(nsKey(PDV_KEY)) || '[]'); return Array.isArray(L) ? L.filter(x => x && x.id) : []; }catch(e){ return []; } }
+function pdvSaveList(L){ try{ localStorage.setItem(nsKey(PDV_KEY), JSON.stringify(L.slice(0, 80))); return true; }catch(e){ return false; } }
+function pdvMeta(id){ return pdvList().find(x => x.id === id) || null; }
+function pdvPatch(id, p){ const L = pdvList(), m = L.find(x => x.id === id); if(!m) return; Object.assign(m, p); pdvSaveList(L); }
+function pdvBlobKey(id, p){ return nsKey('tbpdf') + '|' + id + (p ? '|' + p : ''); }
+function pdvOcrKey(id, p){ return nsKey('tbpdfocr') + '|' + id + '|' + p; }
+async function pdvPut(key, val){ try{ await tbStore('img', 'readwrite', os => { os.put(val, key); }); return true; }catch(e){ console.warn('pdv', e); return false; } }
+async function pdvGet(key){ try{ return await tbStore('img', 'readonly', os => os.get(key)) || null; }catch(e){ return null; } }
+async function pdvDelKey(key){ try{ await tbStore('img', 'readwrite', os => { os.delete(key); }); }catch(e){} }
+/* ranger le PDF (ou les photos) sur l'appareil */
+async function pdvSave(P, v){
+  const id = 'pd' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), img = P.kind === 'img';
+  const name = img ? String((P.files[0] || {}).name || '') : String((P.file || {}).name || '');
+  const old = pdvList().find(x => x.kind === P.kind && x.name === name && x.title === P.title && (img || x.n === P.N));
+  let ok = true;
+  if(img){ for(let k = 0; k < v.pages.length; k++){ if(!await pdvPut(pdvBlobKey(id, k + 1), P.files[v.pages[k] - 1])) ok = false; } }
+  else ok = await pdvPut(pdvBlobKey(id), P.file);
+  if(!ok){ await pdvRemoveKeys(id, img ? v.pages.length : 0); throw new Error("plus de place sur l'appareil pour ce fichier"); }
+  if(old) await pdvRemove(old.id);
+  const meta = { id, kind:P.kind, title:P.title, name, n:img ? v.pages.length : P.N, pages:img ? v.pages.map((_, k) => k + 1) : v.pages.slice(),
+    scan:img ? null : v.pages.filter(p => P.scan && P.scan[p]), lang:v.lang || 'fra', at:Date.now(), last:old && old.last || 0 };
+  const L = pdvList(); L.unshift(meta); pdvSaveList(L);
+  return id;
+}
+async function pdvRemoveKeys(id, nImg){
+  if(nImg) for(let k = 1; k <= nImg; k++) await pdvDelKey(pdvBlobKey(id, k)); else await pdvDelKey(pdvBlobKey(id));
+  try{ const pre = nsKey('tbpdfocr') + '|' + id + '|', keys = await tbStore('img', 'readonly', os => os.getAllKeys()); for(const k of keys || []) if(typeof k === 'string' && k.startsWith(pre)) await pdvDelKey(k); }catch(e){}
+}
+async function pdvRemove(id){
+  const m = pdvMeta(id); if(!m) return;
+  pdvSaveList(pdvList().filter(x => x.id !== id));
+  await pdvRemoveKeys(id, m.kind === 'img' ? m.n : 0);
+}
+/* 📚 dans la bibliothèque : « Mes PDF, tels quels » */
+function pdvShelfHtml(){
+  const L = pdvList(); if(!L.length) return '';
+  return `<div class="pdv-shelf" id="pdvShelf"><div class="pdv-sh-h">📖 Mes PDF, tels quels <small>· sur cet appareil · touche un mot de la page pour sa définition</small></div>
+    <div class="pdv-sh-l">${L.map(m => { const n = (m.pages || []).length || m.n; return `<div class="pdv-sh-it" data-pdv-open="${tbAttr(m.id)}" role="button" tabindex="0" aria-label="Ouvrir « ${tbAttr(m.title)} »">
+      <span class="pdv-sh-i" aria-hidden="true">${m.kind === 'img' ? '📷' : '📄'}</span><span class="pdv-sh-m"><b>${escapeHtml(m.title)}</b><small>${n} page${n > 1 ? 's' : ''}${(m.scan || []).length || m.kind === 'img' ? ' · 🔎 scanné' : ''}${m.last ? ` · reprendre p. ${m.last}` : ''}</small></span>
+      <button type="button" class="pdv-sh-x" data-pdv-del="${tbAttr(m.id)}" aria-label="Retirer « ${tbAttr(m.title)} » de l'appareil">🗑</button></div>`; }).join('')}</div></div>`;
+}
+function pdvShelfRefresh(){
+  const lib = document.getElementById('tbkLib'); if(!lib) return;
+  const old = document.getElementById('pdvShelf'), html = pdvShelfHtml();
+  if(old){ if(html) old.outerHTML = html; else old.remove(); return; }
+  const top = document.getElementById('tbkLibTop'); if(top && html) top.insertAdjacentHTML('afterend', html);
+}
+document.addEventListener('click', (e) => {
+  const t = e.target; if(!t || !t.closest) return;
+  const del = t.closest('[data-pdv-del]');
+  if(del){
+    e.preventDefault(); e.stopPropagation();
+    if(!del.classList.contains('sure')){ del.classList.add('sure'); del.textContent = 'Sûr ?'; clearTimeout(del.__t); del.__t = setTimeout(() => { del.classList.remove('sure'); del.textContent = '🗑'; }, 3200); return; }
+    pdvRemove(del.dataset.pdvDel).then(pdvShelfRefresh); return;
+  }
+  const it = t.closest('[data-pdv-open]'); if(it){ e.preventDefault(); pdvOpen(it.dataset.pdvOpen); }
+});
+document.addEventListener('keydown', (e) => { if(e.key !== 'Enter' || !e.target || !e.target.matches || !e.target.matches('[data-pdv-open]')) return; e.preventDefault(); pdvOpen(e.target.dataset.pdvOpen); });
+/* ---------- la liseuse ---------- */
+function pdvMeasure(){ if(!pdvMeasure.cx){ pdvMeasure.cx = document.createElement('canvas').getContext('2d'); } return pdvMeasure.cx; }
+var PDV_ZOOMS = [0.6, 0.8, 1, 1.25, 1.5, 2, 2.5];
+async function pdvOpen(id, at){
+  const m = pdvMeta(id); if(!m){ setStatus("📖 Ce fichier n'est plus sur cet appareil.", 'err'); pdvShelfRefresh(); return; }
+  pdvClose(true);
+  try{ wtClose(); }catch(e){}
+  const N = (m.pages || []).length || m.n;
+  const ov = document.createElement('div');
+  ov.className = 'pdv-ov'; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-label', 'Lire « ' + m.title + ' »');
+  ov.innerHTML = `<div class="pdv-top">
+      <button type="button" class="pdv-ib" data-pdv="x" aria-label="Fermer">✕</button>
+      <div class="pdv-tt"><b>${escapeHtml(m.title)}</b><small id="pdvSt">👆 Touche un mot : sa définition · glisse pour en prendre plusieurs</small></div>
+      <div class="pdv-nav"><button type="button" class="pdv-ib" data-pdv="prev" aria-label="Page précédente">‹</button><button type="button" class="pdv-pn" data-pdv="pick" id="pdvPn" aria-label="Choisir la page" title="Choisir la page">1 / ${N}</button><button type="button" class="pdv-ib" data-pdv="next" aria-label="Page suivante">›</button></div>
+      <div class="pdv-zm"><button type="button" class="pdv-ib" data-pdv="zm-" aria-label="Plus petit">−</button><button type="button" class="pdv-ib" data-pdv="zm+" aria-label="Plus grand">+</button></div>
+    </div>
+    <div class="pdv-body" id="pdvBody"><div class="pdv-load">⏳ J'ouvre « ${escapeHtml(m.title)} »…</div></div>`;
+  document.body.appendChild(ov);
+  document.body.classList.add('pdv-on');
+  const z0 = +(tbUi().pdvZoom || 1);
+  const S = PDV = { id, m, ov, body:ov.querySelector('#pdvBody'), zi:Math.max(0, PDV_ZOOMS.indexOf(PDV_ZOOMS.includes(z0) ? z0 : 1)), pages:[], live:new Set(), doc:null, lib:null, ocr:null, ocrQ:[], tok:0, cur:0, W:0 };
+  S.onKey = (e) => {
+    if(PDV !== S || document.querySelector('.wcp-ov, .fsa-ov, .am-dlg-ov')) return;
+    if(e.key === 'Escape'){ if(S.ov.querySelector('.pdv-pick')){ S.ov.querySelector('.pdv-pick').remove(); } else pdvClose(); e.preventDefault(); e.stopPropagation(); }
+    else if((e.key === 'ArrowRight' || e.key === 'PageDown') && !/input|textarea|select/i.test((e.target && e.target.tagName) || '')){ e.preventDefault(); pdvGo(S, S.cur + 1); }
+    else if((e.key === 'ArrowLeft' || e.key === 'PageUp') && !/input|textarea|select/i.test((e.target && e.target.tagName) || '')){ e.preventDefault(); pdvGo(S, S.cur - 1); }
+  };
+  document.addEventListener('keydown', S.onKey, true);
+  try{ bkPush('pdv', () => pdvClose()); }catch(e){}
+  ov.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-pdv]'); if(!b) return;
+    const a = b.dataset.pdv;
+    if(a === 'x') pdvClose();
+    else if(a === 'prev') pdvGo(S, S.cur - 1);
+    else if(a === 'next') pdvGo(S, S.cur + 1);
+    else if(a === 'zm-' || a === 'zm+') pdvZoom(S, a === 'zm+' ? 1 : -1);
+    else if(a === 'pick') pdvPicker(S);
+    else if(a === 'pg'){ const k = +b.dataset.k; const pk = S.ov.querySelector('.pdv-pick'); if(pk) pk.remove(); pdvGo(S, k); }
+    else if(a === 'pick-x'){ const pk = S.ov.querySelector('.pdv-pick'); if(pk) pk.remove(); }
+  });
+  let rq = 0;
+  S.body.addEventListener('scroll', () => {
+    if(WT.el){ if(S.sy == null) S.sy = S.body.scrollTop; if(Math.abs(S.body.scrollTop - S.sy) > 40){ wtClose(); S.sy = null; } } else S.sy = null;
+    if(rq) return; rq = requestAnimationFrame(() => { rq = 0; pdvSeen(S); });
+  }, { passive:true });
+  S.onResize = () => { if(PDV !== S) return; clearTimeout(S.rzT); S.rzT = setTimeout(() => pdvLayoutAll(S), 200); };
+  window.addEventListener('resize', S.onResize);
+  try{
+    if(m.kind === 'pdf'){
+      const blob = await pdvGet(pdvBlobKey(id)); if(!blob) throw new Error("le fichier n'est plus sur cet appareil");
+      S.lib = await tbPdfLib();
+      S.doc = await S.lib.getDocument({ data:new Uint8Array(await blob.arrayBuffer()), isEvalSupported:false, useSystemFonts:true, standardFontDataUrl:'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/standard_fonts/', stopAtErrors:false }).promise;
+    }
+  }catch(e){ if(PDV === S) S.body.innerHTML = `<div class="pdv-load err">⚠️ Impossible d'ouvrir ce fichier : ${escapeHtml(e && e.message || 'il est abîmé')}.</div>`; return; }
+  if(PDV !== S) return;
+  const list = (m.pages && m.pages.length) ? m.pages : Array.from({ length:m.n }, (_, i) => i + 1);
+  let ar0 = 1.414;
+  try{ if(S.doc){ const pg1 = await S.doc.getPage(list[0]); const v = pg1.getViewport({ scale:1 }); ar0 = v.height / v.width; } }catch(e){}
+  S.pages = list.map((p, k) => ({ p, k, scan:m.kind === 'img' || (m.scan || []).includes(p), ar:ar0, el:null, st:'', tl:null }));
+  S.body.innerHTML = S.pages.map(pg => `<section class="pdv-pg" data-k="${pg.k}" aria-label="Page ${pg.p}">
+      <div class="pdv-pl">${m.kind === 'img' ? 'Photo' : 'Page'} ${pg.p}${pg.scan ? ' · 🔎 scannée' : ''}</div>
+      <div class="pdv-sheet"><canvas aria-hidden="true"></canvas><div class="pdv-tl" lang="fr"></div><div class="pdv-chip" hidden></div></div>
+    </section>`).join('');
+  S.pages.forEach(pg => { pg.el = S.body.querySelector(`.pdv-pg[data-k="${pg.k}"]`); });
+  pdvSizes(S);
+  let k0 = 0;
+  const want = at != null ? at : m.last;
+  if(want){ const j = S.pages.findIndex(pg => pg.p === want); if(j > 0) k0 = j; }
+  if(k0) pdvGo(S, k0, true); else pdvSeen(S);
+  pdvPatch(id, { at:Date.now() });
+}
+function pdvClose(quiet){
+  const S = PDV; if(!S) return;
+  PDV = null; S.tok++;
+  try{ bkPop('pdv'); }catch(e){}
+  document.removeEventListener('keydown', S.onKey, true);
+  window.removeEventListener('resize', S.onResize);
+  try{ wtClose(); }catch(e){}
+  try{ window.getSelection().removeAllRanges(); }catch(e){}
+  const pl = document.getElementById('wtSelPill'); if(pl) pl.hidden = true;
+  if(S.pages[S.cur]) pdvPatch(S.id, { last:S.pages[S.cur].p });
+  S.ov.remove(); document.body.classList.remove('pdv-on');
+  try{ if(S.ocr) S.ocr.terminate(); }catch(e){}
+  try{ if(S.doc) S.doc.destroy(); }catch(e){}
+  if(!quiet) pdvShelfRefresh();
+}
+/* la largeur des pages (zoom) et leur hauteur */
+function pdvSizes(S){
+  const cw = Math.max(200, S.body.clientWidth - 16);
+  S.W = Math.round(Math.min(cw, 980) * PDV_ZOOMS[S.zi]);
+  S.ov.classList.toggle('pdv-zoomed', PDV_ZOOMS[S.zi] > 1);
+  S.pages.forEach(pg => { const sh = pg.el.querySelector('.pdv-sheet'); sh.style.width = S.W + 'px'; sh.style.height = Math.round(S.W * pg.ar) + 'px'; });
+}
+function pdvLayoutAll(S){
+  const k = S.cur, pg = S.pages[k], off = pg ? (S.body.scrollTop - pg.el.offsetTop) / Math.max(1, pg.el.offsetHeight) : 0;
+  S.tok++;
+  S.pages.forEach(x => { if(x.st){ const cv = x.el.querySelector('canvas'); cv.width = cv.height = 0; } x.st = ''; });
+  S.live.clear();
+  pdvSizes(S);
+  S.pages.forEach(x => { if(x.tl) pdvLayout(S, x); });
+  if(pg) S.body.scrollTop = pg.el.offsetTop + off * pg.el.offsetHeight;
+  pdvSeen(S);
+}
+function pdvZoom(S, d){
+  const j = Math.max(0, Math.min(PDV_ZOOMS.length - 1, S.zi + d)); if(j === S.zi) return;
+  S.zi = j; tbUi().pdvZoom = PDV_ZOOMS[j]; tbSaveUi();
+  try{ wtClose(); }catch(e){}
+  pdvLayoutAll(S);
+}
+function pdvGo(S, k, instant){
+  k = Math.max(0, Math.min(S.pages.length - 1, k)); const pg = S.pages[k]; if(!pg) return;
+  S.body.scrollTo({ top:pg.el.offsetTop - 6, behavior:instant ? 'auto' : 'smooth' });
+  S.cur = k; pdvHead(S);
+  setTimeout(() => pdvSeen(S), instant ? 0 : 420);
+}
+function pdvHead(S){ const b = S.ov.querySelector('#pdvPn'); if(b) b.textContent = `${S.cur + 1} / ${S.pages.length}`; }
+/* ce qui est à l'écran (et autour) : dessiné ; le reste est libéré */
+function pdvSeen(S){
+  if(PDV !== S || !S.pages.length) return;
+  const top = S.body.scrollTop, h = S.body.clientHeight, mid = top + h * 0.35;
+  let cur = 0;
+  S.pages.forEach((pg, k) => { if(pg.el.offsetTop <= mid) cur = k; });
+  if(cur !== S.cur){ S.cur = cur; pdvHead(S); clearTimeout(S.lastT); S.lastT = setTimeout(() => { if(PDV === S && S.pages[S.cur]) pdvPatch(S.id, { last:S.pages[S.cur].p }); }, 800); }
+  S.pages.forEach(pg => { const y = pg.el.offsetTop, H = pg.el.offsetHeight; if(y + H > top - h * 0.8 && y < top + h * 1.8) pdvRender(S, pg); });
+}
+function pdvTrim(S){
+  if(S.live.size <= 6) return;
+  const far = [...S.live].sort((a, b) => Math.abs(b - S.cur) - Math.abs(a - S.cur));
+  while(S.live.size > 6 && far.length){ const k = far.shift(); if(Math.abs(k - S.cur) <= 2) break; const pg = S.pages[k]; const cv = pg.el.querySelector('canvas'); cv.width = cv.height = 0; pg.st = ''; S.live.delete(k); }
+}
+async function pdvRender(S, pg){
+  if(pg.st) return;
+  pg.st = 'busy'; const my = S.tok;
+  try{
+    const sheet = pg.el.querySelector('.pdv-sheet'), cv = sheet.querySelector('canvas');
+    let page = null, vp1 = null, bm = null;
+    if(S.m.kind === 'pdf'){ page = await S.doc.getPage(pg.p); vp1 = page.getViewport({ scale:1 }); pg.ar = vp1.height / vp1.width; }
+    else { const b = await pdvGet(pdvBlobKey(S.id, pg.p)); if(!b) throw new Error('photo absente'); bm = await createImageBitmap(b); pg.ar = bm.height / bm.width; }
+    if(my !== S.tok || PDV !== S){ pg.st = my === S.tok ? '' : pg.st; return; }
+    const W = S.W, dpr = Math.min(2, window.devicePixelRatio || 1);
+    sheet.style.height = Math.round(W * pg.ar) + 'px';
+    let px = Math.round(W * dpr); if(px * px * pg.ar > 7e6) px = Math.floor(Math.sqrt(7e6 / pg.ar));
+    const c2 = document.createElement('canvas'); c2.width = px; c2.height = Math.round(px * pg.ar);
+    const cx = c2.getContext('2d'); cx.fillStyle = '#fff'; cx.fillRect(0, 0, c2.width, c2.height);
+    if(page) await page.render({ canvasContext:cx, viewport:page.getViewport({ scale:c2.width / vp1.width }) }).promise;
+    else { cx.drawImage(bm, 0, 0, c2.width, c2.height); try{ bm.close(); }catch(e){} }
+    if(my !== S.tok || PDV !== S) return;
+    if(!pg.tl && page && !pg.scan){                 // le texte de la page, mot par mot, calé sur l'encre du dessin
+      const items = await pdvTextItems(S, page, vp1);
+      if(items.length) pg.tl = pdvSplitWords(items, c2); else pg.scan = true;
+      if(my !== S.tok || PDV !== S) return;
+    }
+    cv.width = c2.width; cv.height = c2.height; cv.getContext('2d').drawImage(c2, 0, 0); c2.width = c2.height = 0;
+    pg.st = 'done'; S.live.add(pg.k);
+    if(!pg.tl) pdvOcrQueue(S, pg);
+    if(pg.tl && !pg.laid) pdvLayout(S, pg);
+    pdvTrim(S);
+  }catch(e){ if(my === S.tok) pg.st = ''; console.warn('pdv page', e); }
+}
+/* le texte d'une page de PDF → des morceaux posés sur la page (en fraction de sa largeur) */
+async function pdvTextItems(S, page, vp1){
+  let tc = null; try{ tc = await page.getTextContent(); }catch(e){ return []; }
+  const st = (tc && tc.styles) || {}, W0 = vp1.width, out = [];
+  const U = S.lib.Util;
+  (tc.items || []).forEach(it => {
+    if(!it || typeof it.str !== 'string') return;
+    const t = tbPdfNorm(it.str);
+    if(!t.trim()){ if(out.length) out[out.length - 1].sp = true; return; }
+    const tx = U.transform(vp1.transform, it.transform), fh = Math.hypot(tx[2], tx[3]); if(!fh || fh > W0) return;
+    const a = Math.atan2(tx[1], tx[0]), asc = (st[it.fontName] && st[it.fontName].ascent) || 0.8;
+    const x = a ? tx[4] + fh * asc * Math.sin(a) : tx[4], y = a ? tx[5] - fh * asc * Math.cos(a) : tx[5] - fh * asc;
+    const w = (st[it.fontName] && st[it.fontName].vertical ? it.height : it.width) || 0;
+    out.push({ x:x / W0, y:y / W0, h:fh / W0, w:w / W0, a:Math.abs(a) > 0.01 ? a : 0, t, sp:!!it.hasEOL || /\s$/.test(t) });
+  });
+  for(let i = 0; i < out.length - 1; i++){        // un blanc entre deux morceaux, sauf s'ils se touchent (un mot coupé en deux morceaux)
+    const A = out[i], B = out[i + 1]; if(A.sp || /\s$/.test(A.t) || /^\s/.test(B.t)) continue;
+    const same = Math.abs(A.y - B.y) < A.h * 0.4, gap = B.x - (A.x + A.w);
+    if(!same || gap > A.h * 0.1) A.sp = true;
+  }
+  return out;
+}
+/* chaque morceau de texte → ses mots, posés exactement sur l'encre de la page dessinée : on cherche les blancs entre
+   les mots dans le dessin (les polices de l'appareil ne sont pas celles du PDF : sans ça, les mots glisseraient) */
+function pdvSplitWords(items, cv){
+  const cx = cv.getContext('2d', { willReadFrequently:true }), Wc = cv.width, Hc = cv.height, M = pdvMeasure(), out = [];
+  for(const it of items){
+    const words = []; { let off = 0; it.t.split(/(\s+)/).forEach(s => { if(!s) return; if(!/^\s+$/.test(s)) words.push(s); off += s.length; }); }
+    if(words.length <= 1 || it.a){ out.push(it); continue; }
+    const fs = it.h * Wc, X0 = Math.max(0, Math.floor(it.x * Wc) - 1), X1 = Math.min(Wc, Math.ceil((it.x + it.w) * Wc) + 1), Y0 = Math.max(0, Math.floor(it.y * Wc + fs * 0.08)), Y1 = Math.min(Hc, Math.ceil(it.y * Wc + fs * 0.98));
+    let segs = null;
+    try{
+      if(X1 - X0 > 4 && Y1 - Y0 > 2 && fs >= 5){
+        const w = X1 - X0, h = Y1 - Y0, d = cx.getImageData(X0, Y0, w, h).data, col = new Uint8Array(w);
+        for(let x = 0; x < w; x++) for(let y = 0; y < h; y++){ const j = (y * w + x) * 4; if(d[j] + d[j + 1] + d[j + 2] < 500){ col[x] = 1; break; } }
+        const runs = []; let s0 = -1;
+        for(let x = 0; x <= w; x++){ const on = x < w && col[x]; if(on && s0 < 0) s0 = x; if(!on && s0 >= 0){ runs.push([s0, x]); s0 = -1; } }
+        if(runs.length >= words.length){
+          while(runs.length > words.length){ let bi = 0, bg = Infinity; for(let k = 0; k < runs.length - 1; k++){ const g = runs[k + 1][0] - runs[k][1]; if(g < bg){ bg = g; bi = k; } } runs.splice(bi, 2, [runs[bi][0], runs[bi + 1][1]]); }
+          M.font = fs + 'px sans-serif';
+          const nat = words.map(x => M.measureText(x).width), tot = nat.reduce((a, b) => a + b, 0), rw = runs.reduce((a, r) => a + r[1] - r[0], 0);
+          let ok = rw > 0 && tot > 0;
+          for(let k = 0; ok && k < words.length; k++){ const q = ((runs[k][1] - runs[k][0]) / rw) / (nat[k] / tot); if(q < 0.4 || q > 2.5) ok = false; }
+          for(let k = 0; ok && k < runs.length - 1; k++) if(runs[k + 1][0] - runs[k][1] < Math.max(1, fs * 0.1)) ok = false;
+          if(ok) segs = runs;
+        }
+      }
+    }catch(e){ segs = null; }
+    if(segs) words.forEach((t, k) => { const a = (X0 + segs[k][0]) / Wc, z = (X0 + segs[k][1]) / Wc; out.push({ x:a, y:it.y, h:it.h, w:z - a, a:0, t, sp:k < words.length - 1 ? true : it.sp }); });
+    else out.push(it);
+  }
+  return out;
+}
+/* les mots lus par l'OCR → posés sur la page (toute la hauteur de leur ligne) */
+function pdvOcrWords(d, Wc){
+  const out = [], lines = [];
+  (d && d.paragraphs || []).forEach(p => (p.lines || []).forEach(l => lines.push(l)));
+  if(!lines.length && d && Array.isArray(d.lines)) d.lines.forEach(l => lines.push(l));
+  if(lines.length) lines.forEach(l => {
+    const ws = (l.words || []).filter(w => w && w.bbox && String(w.text || '').trim() && !(w.confidence != null && w.confidence < 15));
+    const ly0 = l.bbox ? l.bbox.y0 : null, ly1 = l.bbox ? l.bbox.y1 : null;
+    ws.forEach(w => { const b = w.bbox, y0 = ly0 != null ? Math.min(ly0, b.y0) : b.y0, y1 = ly1 != null ? Math.max(ly1, b.y1) : b.y1; out.push({ x:b.x0 / Wc, y:y0 / Wc, h:(y1 - y0) / Wc, w:(b.x1 - b.x0) / Wc, a:0, t:String(w.text).trim(), sp:true, o:1 }); });
+  });
+  else (d && d.words || []).forEach(w => { if(!w || !w.bbox || !String(w.text || '').trim()) return; const b = w.bbox; out.push({ x:b.x0 / Wc, y:b.y0 / Wc, h:(b.y1 - b.y0) / Wc, w:(b.x1 - b.x0) / Wc, a:0, t:String(w.text).trim(), sp:true, o:1 }); });
+  return out;
+}
+/* la couche de texte invisible, exactement sur les mots de la page */
+function pdvLayout(S, pg){
+  const tl = pg.el.querySelector('.pdv-tl'), W = S.W, cx = pdvMeasure();
+  tl.textContent = '';
+  if(!S.fam){ const pr = document.createElement('span'); pr.textContent = 'x'; tl.appendChild(pr); const cs = getComputedStyle(pr); S.fam = cs.fontFamily || 'sans-serif'; S.fw = cs.fontWeight || '400'; pr.remove(); }
+  const frag = document.createDocumentFragment();
+  (pg.tl || []).forEach(it => {
+    const fs = it.h * W * (it.o ? 0.86 : 1); if(fs < 1.5) return;
+    const sp = document.createElement('span');
+    sp.textContent = it.t + (it.sp ? ' ' : '');
+    sp.style.left = (it.x * W).toFixed(1) + 'px';
+    sp.style.top = (it.y * W + (it.o ? it.h * W * 0.07 : 0)).toFixed(1) + 'px';
+    sp.style.fontSize = fs.toFixed(2) + 'px';
+    cx.font = `${S.fw} ${fs}px ${S.fam}`;
+    const nat = cx.measureText(it.t).width, k = nat > 0 && it.w > 0 ? it.w * W / nat : 1;
+    let tf = it.a ? `rotate(${it.a.toFixed(4)}rad) ` : '';
+    if(Math.abs(k - 1) > 0.01) tf += `scaleX(${k.toFixed(4)})`;
+    if(tf) sp.style.transform = tf.trim();
+    frag.appendChild(sp);
+  });
+  tl.appendChild(frag);
+  pg.laid = true;
+}
+function pdvChip(pg, t){ const c = pg.el && pg.el.querySelector('.pdv-chip'); if(!c) return; c.textContent = t || ''; c.hidden = !t; }
+/* 🔎 les pages scannées : lues par la reconnaissance de texte (la plus proche d'abord), gardées pour la prochaine fois */
+function pdvOcrQueue(S, pg){ if(pg.oq || pg.tl) return; pg.oq = true; S.ocrQ.push(pg); pdvChip(pg, '🔎 Je vais lire le texte de cette page…'); pdvOcrPump(S); }
+async function pdvOcrPump(S){
+  if(S.ocrBusy) return; S.ocrBusy = true;
+  try{
+    while(S.ocrQ.length && PDV === S){
+      S.ocrQ.sort((a, b) => Math.abs(a.k - S.cur) - Math.abs(b.k - S.cur));
+      const pg = S.ocrQ.shift(); if(pg.tl) continue;
+      const cached = await pdvGet(pdvOcrKey(S.id, pg.p));
+      if(cached && Array.isArray(cached.w)){ pg.tl = cached.w; pdvChip(pg, ''); if(pg.st === 'done') pdvLayout(S, pg); continue; }
+      if(Math.abs(pg.k - S.cur) > 3){ pg.oq = false; pdvChip(pg, ''); continue; }     // trop loin : quand on y arrivera
+      pdvChip(pg, '🔎 Je lis le texte de cette page…');
+      if(!S.ocr){
+        try{ S.ocr = await tbOcrWorker(S.m.lang || 'fra', (m) => { const t = tbOcrStatus(m); if(t && S.ocrPg) pdvChip(S.ocrPg, t); }); }
+        catch(e){ pdvChip(pg, '⚠️ ' + ((e && e.message) || "le lecteur de texte n'a pas pu se charger")); pg.oq = false; break; }
+        if(PDV !== S){ try{ S.ocr.terminate(); }catch(e){} break; }
+      }
+      S.ocrPg = pg;
+      let cv = null;
+      try{
+        if(S.m.kind === 'pdf'){ const page = await S.doc.getPage(pg.p); cv = await tbPdfRender(page, 1800); }
+        else { const b = await pdvGet(pdvBlobKey(S.id, pg.p)); cv = await tbImgCanvas(b, 2200); }
+        if(PDV !== S) break;
+        const r = await S.ocr.recognize(cv);
+        if(PDV !== S) break;
+        const words = pdvOcrWords(r && r.data, cv.width);
+        pg.tl = words; pdvPut(pdvOcrKey(S.id, pg.p), { w:words, at:Date.now() });
+        pdvChip(pg, words.length ? '✓ Texte lu : touche un mot' : '⚠️ Pas de texte lisible sur cette page');
+        if(words.length) setTimeout(() => { if(pg.tl === words) pdvChip(pg, ''); }, 2500);
+        if(pg.st === 'done') pdvLayout(S, pg);
+      }catch(e){ console.warn('pdv ocr', e); pdvChip(pg, '⚠️ La page n’a pas pu être lue'); }
+      finally{ if(cv){ cv.width = cv.height = 0; } S.ocrPg = null; }
+    }
+  } finally { S.ocrBusy = false; }
+}
+/* 📑 choisir la page */
+function pdvPicker(S){
+  const old = S.ov.querySelector('.pdv-pick'); if(old){ old.remove(); return; }
+  const el = document.createElement('div'); el.className = 'pdv-pick'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', 'Choisir la page');
+  el.innerHTML = `<div class="pdv-pick-h"><b>📑 Aller à la page</b><button type="button" class="pdv-ib" data-pdv="pick-x" aria-label="Fermer">✕</button></div>
+    <div class="pdv-pick-g">${S.pages.map(pg => `<button type="button" class="pdv-pt ${pg.k === S.cur ? 'on' : ''}" data-pdv="pg" data-k="${pg.k}" aria-label="Page ${pg.p}"><canvas width="84" height="112"></canvas><span>${pg.p}</span></button>`).join('')}</div>`;
+  S.ov.appendChild(el);
+  const btns = [...el.querySelectorAll('.pdv-pt')];
+  const cur = btns[S.cur]; if(cur) setTimeout(() => cur.scrollIntoView({ block:'center' }), 30);
+  (async () => {                                     // les pages en petit, une à une
+    const order = S.pages.map(pg => pg.k).sort((a, b) => Math.abs(a - S.cur) - Math.abs(b - S.cur)).slice(0, 80);
+    for(const k of order){
+      if(!el.isConnected || PDV !== S) return;
+      const pg = S.pages[k], cv = btns[k] && btns[k].querySelector('canvas'); if(!cv) continue;
+      try{
+        if(S.m.kind === 'pdf'){ const page = await S.doc.getPage(pg.p); const v1 = page.getViewport({ scale:1 }), vp = page.getViewport({ scale:84 / v1.width }); cv.width = Math.floor(vp.width); cv.height = Math.floor(vp.height); const cx = cv.getContext('2d'); cx.fillStyle = '#fff'; cx.fillRect(0, 0, cv.width, cv.height); await page.render({ canvasContext:cx, viewport:vp }).promise; }
+        else { const b = await pdvGet(pdvBlobKey(S.id, pg.p)); const c = await tbImgCanvas(b, 84); cv.width = c.width; cv.height = c.height; cv.getContext('2d').drawImage(c, 0, 0); }
+      }catch(e){}
+    }
+  })();
 }
 /* 📷 des photos de pages (.jpg, .png) importées seules : on lit leur texte */
 async function tbImgsOcrImport(files, cat){
@@ -49072,6 +49675,7 @@ async function tbImgsOcrImport(files, cat){
   const bid = tbBookId('img|' + files.map(f => f.name + ':' + f.size).join('|')), olds = tbLoad().filter(a => a.book === bid);
   const v = await tbPdfDialog(P, cat, olds[0] || null);
   if(!v){ setStatus('📷 Import annulé.', 'ok'); return []; }
+  if(v.view){ try{ const pid = await pdvSave(P, v); pdvShelfRefresh(); pdvOpen(pid); }catch(e){ setStatus('📷 ' + (e && e.message || 'impossible de garder ces photos'), 'err'); } return []; }
   const prog = tbProgOpen(P.title);
   let bk; try{ bk = await tbPdfBuild(P, v, prog); } finally { prog.close(); }
   if(!bk.chapters.length){ setStatus('📷 Aucun texte lisible sur ces photos (trop floues ? mal éclairées ?).', 'err'); return []; }
@@ -49334,6 +49938,7 @@ function wtSrcOf(el){
   try{
     if(el.closest('#trxText')){ const c = audioCurrent(); return '📝 ' + ((c && c.t && c.t.title) || 'Transcription'); }
     if(el.closest('#trxvText')){ const h = document.querySelector('#quizCard .word-fr'); return '📝 ' + ((h && h.textContent) || 'Transcription'); }
+    if(el.closest('.pdv-ov') && PDV){ return '📄 ' + PDV.m.title + (PDV.pages[PDV.cur] ? ' · p. ' + PDV.pages[PDV.cur].p : ''); }
     const wc = el.closest('.wcp'); if(wc){ const f = wc.querySelector('.wcp-fr'); return '📇 ' + ((f && f.textContent) || 'Fiche'); }
     const h = document.querySelector('#quizCard .cat-tag'); if(h) return h.textContent.trim().slice(0, 80);
   }catch(e){}
@@ -49615,13 +50220,23 @@ function fsAddDialog(items, o){
         <div class="fsa-l1"><input class="fsa-fr" data-f="fr" lang="fr" value="${tbAttr(x.fr)}" aria-label="Le mot" ${x.known ? 'disabled' : ''}><input class="fsa-ar" data-f="ar" dir="rtl" lang="ar" value="${tbAttr(x.ar)}" placeholder="${x.busy ? '⏳' : 'بالعربية'}" aria-label="En arabe" ${x.known ? 'disabled' : ''}></div>
         ${x.known ? `<div class="fsa-k">✓ Déjà dans tes mots${x.known.fr !== x.fr ? ' : « ' + escapeHtml(x.known.fr) + ' »' : ''}</div>` : `<textarea class="fsa-def ${!x.busy && !x.def ? 'need' : ''}" data-f="def" rows="1" placeholder="${x.busy ? '⏳ je cherche le sens…' : 'Définition (en français)'}" aria-label="Définition">${escapeHtml(x.def)}</textarea>`}
         ${x.sent ? `<div class="fsa-ex" lang="fr">${exHtml(x)}</div>${x.exAr ? `<div class="fsa-exar" dir="rtl" lang="ar">${escapeHtml(x.exAr)}</div>` : ''}` : ''}
+        ${o.nw && !x.known && !x.busy ? `<div class="fsa-nw">
+          ${x.sent ? `<div class="fsa-tl">📝 La phrase de tes mots (~ à la place du mot)${x.exSrc ? ` · <small>${escapeHtml(x.exSrc)}</small>` : ''}</div><div class="fsa-tilde ${x.ex && x.ex !== '~' ? '' : 'bad'}" lang="fr">${x.ex && x.ex !== '~' ? escapeHtml(x.ex) : `⚠️ Le mot « ${escapeHtml(x.fr)} » n'est pas dans la phrase`}</div>` : `<div class="fsa-tl">📝 Pas de phrase trouvée : écris la tienne, avec le mot dedans.</div>`}
+          <div class="fsa-nwb">${(x.exs || []).length > 1 ? `<button type="button" data-fsa="nex">🔁 Autre phrase</button>` : ''}<button type="button" data-fsa="esent">✏️ ${x.sent ? 'Changer la phrase' : 'Écrire une phrase'}</button><button type="button" data-fsa="say" aria-label="Écouter le mot et la phrase">🔊 Écouter</button></div>
+          ${x.editS ? `<textarea class="fsa-sent" data-f="sent" rows="2" lang="fr" placeholder="Ex. : une phrase avec « ${tbAttr(x.fr)} »">${escapeHtml(x.sent || '')}</textarea>` : ''}
+        </div>` : ''}
       </div></div>`;
   const nOn = () => L.filter(x => x.on && !x.known && x.fr).length;
   const foot = () => { const n = nOn(), b = ov.querySelector('#fsaGo'); b.disabled = !n && !ov.querySelector('#fsaBlk').checked; b.textContent = n ? `➕ Ajouter ${n} mot${n > 1 ? 's' : ''}` : (L.some(x => x.known) ? '📦 Faire le bloc' : '➕ Ajouter'); };
   const draw = () => { list.innerHTML = L.map(row).join(''); foot(); };
   const redraw = (i) => { const el = list.querySelector(`.fsa-it[data-i="${i}"]`); if(!el) return; const a = document.activeElement; if(a && el.contains(a)) return; el.outerHTML = row(L[i], i); };
   draw();
-  list.addEventListener('input', (e) => { const it = e.target.closest('.fsa-it'), f = e.target.dataset.f; if(!it || !f) return; const x = L[+it.dataset.i]; x[f] = e.target.value; if(f === 'def') e.target.classList.toggle('need', !e.target.value.trim()); if(f === 'fr') foot(); });
+  list.addEventListener('input', (e) => { const it = e.target.closest('.fsa-it'), f = e.target.dataset.f; if(!it || !f) return; const x = L[+it.dataset.i]; x[f] = e.target.value; if(f === 'def') e.target.classList.toggle('need', !e.target.value.trim()); if(f === 'fr') foot();
+    if(f === 'sent' || (f === 'fr' && x.sent && o.nw)){ fsExOf(x); x.exAr = ''; const tl = it.querySelector('.fsa-tilde'), ex = it.querySelector('.fsa-ex'); if(ex) ex.innerHTML = exHtml(x); if(tl){ const ok = x.ex && x.ex !== '~'; tl.classList.toggle('bad', !ok); tl.textContent = ok ? x.ex : `⚠️ Le mot « ${x.fr} » n'est pas dans la phrase`; } const xa = it.querySelector('.fsa-exar'); if(xa) xa.textContent = ''; }
+  });
+  // la phrase changée : on la traduit en sortant de la case
+  list.addEventListener('change', (e) => { if(e.target.dataset.f !== 'sent') return; const it = e.target.closest('.fsa-it'), i = +it.dataset.i, x = L[i]; const s = x.sent.trim(); if(!s) return;
+    tbMtText(s).then(t => { if(x.sent.trim() !== s) return; x.exAr = t || ''; x.editS = false; redraw(i); }).catch(() => {}); });
   list.addEventListener('change', (e) => { if(e.target.dataset.fsa !== 'on') return; const it = e.target.closest('.fsa-it'), x = L[+it.dataset.i]; x.on = e.target.checked; it.classList.toggle('off', !x.on); foot(); });
   ov.querySelector('#fsaBlk').addEventListener('change', foot);
   // 🌐 les traductions (le mot, puis la phrase entière), deux à la fois
@@ -49633,6 +50248,16 @@ function fsAddDialog(items, o){
         const r = await tbLookup(x.form || x.fr).catch(() => null);
         if(r){ if(r.lemma) x.fr = fsClean(r.lemma); if(!x.ar && r.ar && r.ar[0]) x.ar = r.ar[0]; if(!x.def && r.defs && r.defs.length) x.def = typeof tbDefsJoin === 'function' ? tbDefsJoin(r.defs) : r.defs[0]; }
         const k = typeof tbLexWord === 'function' ? tbLexWord(x.fr) : null; if(k){ x.known = k; x.on = false; }
+        if(o.nw && !x.known){
+          // ✨ une phrase d'exemple : celles du dictionnaire, sinon une phrase trouvée sur Wikipédia
+          if(!x.cat) x.cat = (typeof AW_CAT !== 'undefined' && r && AW_CAT[String(r.pos || '').toLowerCase()]) || (/\s/.test(x.fr) ? 'Expression' : 'Personnalisé');
+          if(!x.sent){
+            x.exs = ((r && r.exs) || []).filter(z => z && z.t && lexExFrom(z.t, [z.f, x.form, x.fr]));
+            if(!x.exs.length){ const wx = await nwWebEx(x.fr).catch(() => null) || (x.form && x.form !== x.fr ? await nwWebEx(x.form).catch(() => null) : null); if(wx){ x.exs = [wx]; x.exSrc = 'phrase trouvée sur Wikipédia'; } }
+            else x.exSrc = r && r.src && r.src !== 'lexique' ? r.src : '';
+            if(x.exs.length){ x.exI = 0; x.sent = x.exs[0].t; x.form = x.exs[0].f || x.form; }
+          }
+        }
       } else {
         const multi = /\s/.test(x.fr);
         if(!x.ar || (x.needDef && !x.def)){
@@ -49661,10 +50286,20 @@ function fsAddDialog(items, o){
     if(e.target === ov){ close(); return; }
     const b = e.target.closest('[data-fsa]'); if(!b || b.dataset.fsa === 'on') return;
     if(b.dataset.fsa === 'x'){ close(); return; }
+    { const it = b.closest('.fsa-it'), i = it ? +it.dataset.i : -1, x = L[i], a = b.dataset.fsa;
+      if(x && /^(nex|esent|say)$/.test(a)) try{ b.blur(); }catch(err){}
+      if(x && a === 'nex' && (x.exs || []).length > 1){
+        x.exI = ((x.exI || 0) + 1) % x.exs.length; x.sent = x.exs[x.exI].t; x.form = x.exs[x.exI].f || x.form; fsExOf(x); x.exAr = ''; x.editS = false; redraw(i);
+        const s = x.sent; tbMtText(s).then(t => { if(x.sent === s){ x.exAr = t || ''; redraw(i); } }).catch(() => {}); return;
+      }
+      if(x && a === 'esent'){ x.editS = !x.editS; redraw(i); const ta = list.querySelector(`.fsa-it[data-i="${i}"] .fsa-sent`); if(ta) try{ ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }catch(err){} return; }
+      if(x && a === 'say'){ try{ speak(x.fr, 'fr-FR', () => { if(x.sent) setTimeout(() => speak(x.sent, 'fr-FR'), 250); }); }catch(err){} return; }
+    }
     if(b.dataset.fsa !== 'go') return;
     const fall = o.title ? `(${String(o.title).slice(0, 80)})` : '';
     const words = L.filter(x => x.on && !x.known && x.fr).map(x => {
-      const w = { fr:x.fr, ar:fsClean(x.ar), def:fsClean(x.def) || fall, ex:x.ex || '~', cat:o.cat || 'Mes fiches' };
+      if(o.nw && x.sent) fsExOf(x);
+      const w = { fr:x.fr, ar:fsClean(x.ar), def:fsClean(x.def) || fall, ex:x.ex || '~', cat:x.cat || o.cat || 'Mes fiches' };
       if(x.exForm) w.exForm = x.exForm;
       return w;
     });
@@ -49680,11 +50315,60 @@ function fsAddDialog(items, o){
     lexSnack(`➕ ${n} mot${n > 1 ? 's' : ''} ajouté${n > 1 ? 's' : ''} à tes blocs${blk ? ` · 📦 bloc « ${blk.title} »` : ''}`, '🧩 Mes blocs', () => renderBlockSelect(), 8000);
   });
 }
+/* ✨ 1.0.41 : un nouveau mot cherché en l'écrivant */
+/* le mot dans une phrase écrite à la main, même conjugué : « avoir beau » → « as beau », « tergiverser » → « tergiverse » */
+function fsFuzzyForm(s, fr){
+  s = String(s || ''); const ws = String(fr || '').trim().split(/\s+/).filter(Boolean); if(!ws.length) return '';
+  const esc = (w) => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/'/g, "['’ʼ]");
+  let re = null;
+  if(ws.length >= 2 && /(er|ir|re|oir)$/i.test(ws[0])) re = new RegExp('(^|[^\\p{L}])(\\p{L}+[\\s\\u00a0]+' + ws.slice(1).map(esc).join('[\\s\\u00a0]+') + ')(?![\\p{L}])', 'iu');
+  else if(ws.length === 1 && ws[0].length >= 5){ const st = ws[0].replace(/(er|ir|re|oir|e|s|x)$/i, ''); if(st.length >= 4) re = new RegExp('(^|[^\\p{L}])(' + esc(st) + '\\p{L}{0,5})(?![\\p{L}])', 'iu'); }
+  const m = re && s.match(re);
+  return m ? m[2] : '';
+}
+function fsExOf(x){
+  try{ const z = tbExFor({ sent:x.sent, w:x.form || x.fr, lemma:x.fr }); if(z.missing){ const fz = fsFuzzyForm(x.sent, x.fr); const y = lexExFrom(x.sent, [x.form, x.fr, fz].filter(Boolean)); if(y){ x.ex = y.ex; x.exForm = dxFold(y.form) === dxFold(x.fr) ? '' : y.form; } else { x.ex = '~'; x.exForm = ''; } } else { x.ex = z.ex; x.exForm = z.exForm || ''; } }catch(e){}
+  if(!x.exForm) delete x.exForm;
+}
+/* une vraie phrase avec le mot ou l'expression, prise dans Wikipédia (quand le dictionnaire n'a pas d'exemple) */
+async function nwWebEx(q){
+  q = String(q || '').replace(/\s+/g, ' ').trim(); if(q.length < 2 || (typeof navigator !== 'undefined' && navigator.onLine === false)) return null;
+  const j = await tbFetchJson('https://fr.wikipedia.org/w/api.php?action=query&list=search&format=json&formatversion=2&srlimit=12&srprop=snippet&origin=*&srsearch=' + encodeURIComponent('"' + q + '"'), 9000);
+  const L = (j && j.query && j.query.search) || [];
+  const ent = (s) => s.replace(/&quot;/g, '"').replace(/&#0?39;|&apos;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&');
+  let best = null;
+  for(const it of L){
+    const raw = ent(String(it.snippet || '').replace(/<[^>]+>/g, '')).replace(/\s+/g, ' ').trim();
+    const m = lexExFrom(raw, [q]); if(!m) continue;
+    const at = m.ex.indexOf('~'), end0 = at + m.form.length;
+    let a = 0; for(let k = at - 1; k > 0; k--){ if(/[.!?»]/.test(raw[k - 1]) && raw[k] === ' '){ a = k + 1; break; } }
+    let z = raw.length, closed = false; { const mm = /[.!?](?=\s|$)/.exec(raw.slice(end0)); if(mm){ z = end0 + mm.index + 1; closed = true; } }
+    let s = raw.slice(a, z).trim();
+    if(/[|{}=\[\]<>#*_]|https?:/.test(s) || s.length < 25 || s.length > 230) continue;
+    const words = s.split(' ').length; if(words < 5) continue;
+    const startOk = /^[«"“]?\p{Lu}/u.test(s);
+    const sc = (startOk ? 3 : 0) + (closed ? 3 : 0) + (s.length >= 40 && s.length <= 160 ? 1 : 0) - (/\d{3,}/.test(s) ? 1 : 0);
+    if(!startOk) s = '… ' + s; if(!closed) s += ' …';
+    if(!best || sc > best.sc) best = { t:s, f:m.form, sc };
+    if(sc >= 7) break;
+  }
+  return best ? { t:best.t, f:best.f } : null;
+}
+function nwSearch(q){
+  q = String(q || '').replace(/\s+/g, ' ').trim(); if(!q) return;
+  fsAddDialog([{ fr:q, form:q }], { lemma:true, nw:true, title:'✨ Nouveau mot : « ' + q + ' »', blockTitle:'Mes nouveaux mots', cat:'Personnalisé' });
+}
+document.addEventListener('click', (e) => { const b = e.target && e.target.closest && e.target.closest('[data-nw]'); if(!b) return; e.preventDefault(); nwSearch(b.dataset.nw); });
 /* ➕ sur une fiche : le bouton, et la fenêtre avec les mots de la fiche */
 function fsSheetAdd(sheet){
   const items = fsItems(sheet); if(!items.length) return;
   fsAddDialog(items, { title:sheet.title, blockTitle:(sheet.icon ? sheet.icon + ' ' : '') + sheet.title, cat:sheet.category || 'Mes fiches', block:true });
 }
+document.addEventListener('click', (e) => {
+  const b = e.target && e.target.closest && e.target.closest('#sheetEchoBtn'); if(!b) return;
+  const s = (typeof PRACTICAL_SHEETS !== 'undefined') ? PRACTICAL_SHEETS.find(x => x.id === window.__currentSheetDetailId) : null;
+  if(s) tbEchoOpen(sheetEchoArt(s));
+});
 document.addEventListener('click', (e) => {
   const b = e.target && e.target.closest && e.target.closest('#sheetAddWordsBtn'); if(!b) return;
   const s = (typeof PRACTICAL_SHEETS !== 'undefined') ? PRACTICAL_SHEETS.find(x => x.id === window.__currentSheetDetailId) : null;
@@ -49716,13 +50400,14 @@ document.addEventListener('pointerdown', (e) => {
   if(document.body.classList.contains('quiz-active')) return;
   const host = dselHost(e.target); if(!host || e.target.closest(DSEL_SKIP)) return;
   const c = dselCaret(e.clientX, e.clientY); if(!c) return;
-  DSEL.st = { x:e.clientX, y:e.clientY, c, host, id:e.pointerId, active:false };
+  DSEL.st = { x:e.clientX, y:e.clientY, c, host, id:e.pointerId, active:false, t0:Date.now(), hold:!!e.target.closest('.wcp, .pk-slide') };
 }, true);
 document.addEventListener('pointermove', (e) => {
   const S = DSEL.st; if(!S || e.pointerId !== S.id) return;
   const dx = e.clientX - S.x, dy = e.clientY - S.y;
   if(!S.active){
-    if(Math.abs(dy) > 12 && Math.abs(dy) > Math.abs(dx)){ DSEL.st = null; return; }   // vers le haut / le bas : on défile
+    if(Math.abs(dy) > 12 && Math.abs(dy) > Math.abs(dx)){ DSEL.st = null; return; }
+    if(S.hold && Date.now() - S.t0 < 320){ if(Math.hypot(dx, dy) > 8) DSEL.st = null; return; }   // un glissement rapide : la fiche passe au mot suivant   // vers le haut / le bas : on défile
     if(Math.abs(dx) < 10) return;
     S.active = true; try{ wtClose(); }catch(err){}
   }
@@ -49835,6 +50520,23 @@ function tbEdCatOptions(){
   sel.innerHTML = tbCats().map(c => `<option value="${tbAttr(c.id)}">${c.icon} ${escapeHtml(c.name)}</option>`).join('');
   if([...sel.options].some(o => o.value === v)) sel.value = v;
 }
+/* 💾 1.0.41 : le brouillon d'un nouveau texte (titre + contenu, en blocs propres) reste sur l'appareil :
+   on le retrouve en revenant, même après avoir fermé l'appli ou glissé pour revenir en arrière. */
+function tbDraftKey(){ return nsKey('vocabVision.tbDraft'); }
+function tbDraftLoad(){ try{ const d = JSON.parse(localStorage.getItem(tbDraftKey()) || 'null'); return d && Array.isArray(d.blocks) ? d : null; }catch(e){ return null; } }
+function tbDraftClear(){ clearTimeout(TB.draftT); TB.draftQ = null; try{ localStorage.removeItem(tbDraftKey()); }catch(e){} }
+function tbDraftWrite(title, blocks){
+  const has = String(title || '').trim() || tbBlocksText(blocks || []).trim() || (blocks || []).some(x => x.t === 'img');
+  try{ if(!has) localStorage.removeItem(tbDraftKey()); else localStorage.setItem(tbDraftKey(), JSON.stringify({ title:String(title || ''), blocks, at:Date.now() })); }catch(e){}
+}
+function tbDraftQueue(title, blocks){ TB.draftQ = { title, blocks }; clearTimeout(TB.draftT); TB.draftT = setTimeout(tbDraftFlush, 500); }
+function tbDraftFlush(){ clearTimeout(TB.draftT); const q = TB.draftQ; TB.draftQ = null; if(q) tbDraftWrite(q.title, q.blocks); }
+function tbDraftRestore(){
+  const d = tbDraftLoad(); if(!d) return null;
+  try{ TB.draft = { title:d.title || '', html:tbBlocksToEdHtml(d.blocks), at:d.at }; return TB.draft; }catch(e){ return null; }
+}
+window.addEventListener('pagehide', () => { try{ tbDraftFlush(); }catch(e){} });
+document.addEventListener('visibilitychange', () => { if(document.hidden) try{ tbDraftFlush(); }catch(e){} });
 function renderTabletteHome(){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
@@ -49848,7 +50550,7 @@ function renderTabletteHome(){
   const card = document.getElementById('quizCard');
   const L = tbLoad().filter(a => a.id !== 'sample');
   const editing = TB.edit ? tbGet(TB.edit) : null;
-  const draft = editing ? { title:editing.title, html:tbBlocksToEdHtml(tbBlocksOf(editing)) } : (TB.draft || { title:'', html:'' });
+  const draft = editing ? { title:editing.title, html:tbBlocksToEdHtml(tbBlocksOf(editing)) } : (TB.draft || tbDraftRestore() || { title:'', html:'' });
   const item = (a) => {
     const n = tbWordsCount(a.text), tags = (a.tags || []).length, pct = Math.round(Math.min(1, a.pct || 0) * 100);
     const img = tbArtImgIds(a)[0];
@@ -49870,6 +50572,7 @@ function renderTabletteHome(){
     ${tbLibShellHtml()}
     <div class="tbk-h" id="tbkNewH">✍️ ${editing ? 'Modifier le texte' : 'Nouveau texte'} : colle-le, lis‑le comme un pro</div>
     <div class="tbk-sub">Mets-le en page comme un journal (titres, images…) : les liaisons et les pauses s'affichent, chaque mot se touche pour l'entendre, et tu chasses les mots difficiles.</div>
+    ${editing ? '' : `<div class="tbk-draft" id="tbkDraft" hidden role="status"><span class="tbk-draft-t">💾 <b>Brouillon gardé</b> sur l'appareil : tu le retrouves même si tu fermes l'appli.</span><button type="button" class="tbk-draft-x" id="tbkDraftDel">🗑 Effacer</button></div>`}
     <div class="tbk-studio" id="tbkDevice" style="--efs:${efs}px;">
       <div class="tbk-tools" id="tbkTools" role="toolbar" aria-label="Mise en page">
         <select class="tbk-style" id="tbkStyle" data-style aria-label="Style du paragraphe" title="Style du paragraphe">${STY}</select>
@@ -50068,7 +50771,11 @@ function renderTabletteHome(){
     fixB.classList.toggle('hot', need); hint.hidden = !need;
     ed.classList.toggle('empty', !ed.textContent.trim() && !ed.querySelector('img, hr'));
     TB.edUsed = b.filter(x => x.t === 'img' && x.id).map(x => x.id);
-    if(!TB.edit) TB.draft = { title:ti.value, html:ed.innerHTML };
+    if(!TB.edit){
+      TB.draft = { title:ti.value, html:ed.innerHTML };
+      tbDraftQueue(ti.value, b);
+      const dB = document.getElementById('tbkDraft'); if(dB) dB.hidden = !(ti.value.trim() || text.trim() || imgs);
+    }
   };
   const insertHtml = (html) => {
     putSel();
@@ -50179,6 +50886,14 @@ function renderTabletteHome(){
   });
   ed.addEventListener('keyup', keepSel); ed.addEventListener('pointerup', keepSel);
   ti.addEventListener('input', () => sync());
+  { const dx = document.getElementById('tbkDraftDel');
+    if(dx) dx.addEventListener('click', () => {
+      if(!dx.classList.contains('sure')){ dx.classList.add('sure'); dx.textContent = '🗑 Oui, tout effacer'; clearTimeout(dx.__t); dx.__t = setTimeout(() => { dx.classList.remove('sure'); dx.textContent = '🗑 Effacer'; }, 3500); return; }
+      clearTimeout(dx.__t); dx.classList.remove('sure'); dx.textContent = '🗑 Effacer';
+      ed.innerHTML = ''; ti.value = ''; TB.draft = null; TB.edUsed = []; tbDraftClear();
+      try{ ensureP(); }catch(e){} sync(); tbDraftClear();
+      try{ ed.focus({ preventScroll:true }); }catch(e){}
+    }); }
   ed.addEventListener('keydown', (e) => {
     const k = e.key.toLowerCase(), mod = e.ctrlKey || e.metaKey;
     if(mod && e.shiftKey && k === 'v'){ plainNext = true; return; }          // Ctrl+Maj+V : coller le texte seul
@@ -50632,6 +51347,7 @@ function renderTabletteHome(){
     }
     { const cs = document.getElementById('tbkCat'); if(cs && cs.value) art.cat = cs.value; }
     if(!tbPut(art)) setStatus("⚠️ Plus de place pour garder ce texte sur l'appareil : il s'ouvre quand même.", 'err');
+    if(!editing) tbDraftClear();                                      // 💾 le texte est rangé : plus besoin du brouillon
     TB.edit = null; TB.draft = null; TB.mem = art; TB.edUsed = []; TB.newCat = null;
     document.body.classList.remove('tbk-full-on');
     renderTabletteReader(art.id);
@@ -50673,6 +51389,31 @@ function tbHomeCardHtml(){
     <span class="home-tb-t"><b>La Tablette</b><small>${r ? `Reprendre « ${escapeHtml(r.title)} »` : 'Colle un texte et lis-le comme un pro'}</small></span>
     <span class="home-tb-go">${r ? '▶ Reprendre' : 'Ouvrir'}</span>
   </button>`;
+}
+/* 🔁 1.0.41 : un texte (Bouquinage, Art oratoire) ouvert sur la Tablette, prêt pour « écoute puis répète » */
+function tbEchoOpen(art){
+  if(!art || !art.id) return;
+  const old = tbGet(art.id);
+  if(!old || tbBlocksText(tbBlocksOf(old)) !== tbBlocksText(tbBlocksOf(art)) || old.title !== art.title){
+    const a = Object.assign({ at:Date.now(), pos:0, pct:0, tags:[] }, old || {}, art);
+    if(!art.blocks) delete a.blocks;
+    tbPut(a);
+  }
+  tbUi().selfMode = 'echo'; tbSaveUi();
+  renderTabletteReader(art.id);
+  setTimeout(() => { if(document.getElementById('tbSheet')) tbSelfOpen(); }, 450);
+}
+function bqEchoArt(i){ const t = BOUQUINAGE_TEXTS[i]; return t ? { id:'bq' + i, title:t.title, text:String(t.body || '') + (t.quote ? '\n« ' + t.quote + ' »' : ''), src:'Bouquinage' } : null; }
+function sheetEchoArt(s){
+  if(!s) return null;
+  const P = (t, x) => ({ t, r:[{ x:String(x || '').replace(/\s+/g, ' ').trim(), s:'' }] });
+  const bl = [];
+  if(s.intro) bl.push(P('p', s.intro));
+  (s.blocks || []).forEach(b => { if(b.heading) bl.push(P('h3', b.heading)); if(b.text) bl.push(P('p', b.text)); (b.examples || []).forEach(x => bl.push(P('p', x))); });
+  (s.body || []).forEach(x => bl.push(P('p', x)));
+  if(s.note) bl.push(P('p', s.note));
+  const blocks = bl.filter(b => b.r[0].x);
+  return blocks.length ? { id:'or-' + s.id, title:s.title, text:tbBlocksText(blocks), blocks, src:'Art oratoire' } : null;
 }
 function tbFromBouquinage(){
   const i = Math.floor(Math.random() * BOUQUINAGE_TEXTS.length), t = BOUQUINAGE_TEXTS[i], id = 'bq' + i;
@@ -51106,8 +51847,8 @@ function tbPause(){ TB.playing = false; tbHush(); tbDock(); }
 function tbResume(){ TB.playing = true; tbDock(); tbSpeak(TB.cur); }
 function tbStopModes(quiet){
   const was = TB.mode;
-  TB.mode = ''; TB.playing = false; TB.selfPaused = false; TB.selfMsg = '';
-  clearInterval(TB.selfTick);
+  TB.mode = ''; TB.playing = false; TB.selfPaused = false; TB.selfMsg = ''; TB.selfEchoTalk = false;
+  clearInterval(TB.selfTick); clearTimeout(TB.echoT);
   tbHush();
   tbSRStop();
   try{ vvHearStop(); }catch(e){}
@@ -51134,9 +51875,11 @@ function tbSelfOpen(){
   tbStopModes(true);
   TB.sheetK = -3;
   const u = tbUi(), from = tbFirstVisibleSent(), canSR = tbCanSR(), canRec = tbRecSupported();
-  const mode = (!canSR || u.selfMode === 'rec') && canRec ? 'rec' : 'sr';
+  const mode = (!canSR || u.selfMode === 'rec') && canRec ? 'rec' : (u.selfMode === 'echo' && canSR ? 'echo' : 'sr');
   const how = mode === 'rec'
     ? "Lis la phrase surlignée à voix haute, puis touche <b>⏭</b> pour passer à la suivante. Ta voix est enregistrée : tu pourras la réécouter, phrase par phrase."
+    : mode === 'echo'
+    ? "🔁 <b>Phrase par phrase</b> : la voix lit la phrase surlignée, puis c'est à toi — répète-la à voix haute, les mots s'allument en vert quand tu les dis. Phrase bien dite : on passe tout seul à la suivante (⏭ pour passer, 🔊 pour réécouter)."
     : "Lis la phrase surlignée à voix haute : les mots s'allument en vert quand tu les dis, et on passe tout seul à la suivante. Tu peux respirer au milieu d'une phrase, rien n'est perdu.";
   sh.innerHTML = `<div class="tb-sh-in">
     <div class="tb-grab" aria-hidden="true"></div>
@@ -51144,9 +51887,10 @@ function tbSelfOpen(){
     <div class="tb-info-l">${how}</div>
     <div class="tb-pop-row"><span class="tb-pop-l">Mode</span><div class="tb-seg">
       <button type="button" data-tb="self-mode" data-v="sr" class="${mode === 'sr' ? 'on' : ''}" ${canSR ? '' : 'disabled'}>🔤 Les mots s'allument</button>
+      <button type="button" data-tb="self-mode" data-v="echo" class="${mode === 'echo' ? 'on' : ''}" ${canSR ? '' : 'disabled'}>🔁 Écoute puis répète</button>
       <button type="button" data-tb="self-mode" data-v="rec" class="${mode === 'rec' ? 'on' : ''}" ${canRec ? '' : 'disabled'}>🎙️ M'enregistrer</button></div></div>
     ${!canSR ? `<div class="tb-pop-hint">Ce navigateur ne sait pas reconnaître la voix : essaie Chrome (Android, ordinateur) ou Safari (iPhone).</div>` : ''}
-    ${mode === 'sr' && canRec ? `<label class="tb-check"><input type="checkbox" id="tbKeep" ${u.keepVoice ? 'checked' : ''}><span>🎙️ Garder aussi ma voix pour la réécouter</span></label>` : ''}
+    ${mode !== 'rec' && canRec ? `<label class="tb-check"><input type="checkbox" id="tbKeep" ${u.keepVoice ? 'checked' : ''}><span>🎙️ Garder aussi ma voix pour la réécouter</span></label>` : ''}
     <div class="tb-sh-act">
       <button type="button" class="tb-btn pri" data-tb="self-go-at" data-s="0">▶ Depuis le début</button>
       ${from > 0 ? `<button type="button" class="tb-btn" data-tb="self-go-at" data-s="${from}">▶ Ici (phrase ${from + 1})</button>` : ''}
@@ -51161,6 +51905,7 @@ async function tbSelfStart(from){
   if(TB.hunt) tbHuntToggle(false);
   const u = tbUi(), canSR = tbCanSR(), canRec = tbRecSupported();
   TB.selfKind = ((u.selfMode === 'rec' && canRec) || (!canSR && canRec)) ? 'rec' : 'sr';
+  TB.selfEcho = TB.selfKind === 'sr' && u.selfMode === 'echo'; TB.selfEchoTalk = false; clearTimeout(TB.echoT);
   if(TB.selfKind === 'sr' && !canSR){ tbToast("🎤 Ce navigateur ne sait pas reconnaître la voix : essaie Chrome ou Safari.", 3600); return; }
   TB.mode = 'self'; TB.selfScores = {}; TB.selfPaused = false; TB.selfAcc = []; TB.selfRatio = 0; TB.selfStall = false; TB.selfLastHeard = Date.now(); TB.selfDone = false;
   TB.selfStart = Date.now();
@@ -51175,7 +51920,7 @@ async function tbSelfStart(from){
     }
   }
   tbSelfSent(Math.max(0, Math.min(from || 0, tbNS() - 1)));
-  if(TB.selfKind === 'sr') tbSRStart();
+  if(TB.selfKind === 'sr' && !TB.selfEcho) tbSRStart();          // 🔁 en « écoute puis répète », le micro s'ouvre après la voix
   clearInterval(TB.selfTick); TB.selfTick = setInterval(tbSelfTickFn, 500);
 }
 function tbSelfSay(msg){ TB.selfMsg = msg; const m = document.getElementById('tbSelfMsg'); if(m) m.textContent = msg; }
@@ -51192,7 +51937,22 @@ function tbSelfSent(i){
   tbRecMark(i);
   tbSelfHead();
   tbSelfSay(TB.selfKind === 'rec' ? 'Lis la phrase, puis touche ⏭' : 'Lis la phrase surlignée');
-  if(TB.selfKind === 'sr' && tbSelfToks().length) tbSelfEval(false);   // les mots de cette phrase déjà dits (en lisant d'une traite)
+  if(TB.selfEcho) tbSelfEchoSay(i);
+  else if(TB.selfKind === 'sr' && tbSelfToks().length) tbSelfEval(false);   // les mots de cette phrase déjà dits (en lisant d'une traite)
+}
+/* 🔁 la voix lit la phrase (micro coupé), puis le micro s'ouvre : à toi de la répéter */
+function tbSelfEchoSay(i){
+  if(TB.mode !== 'self' || !TB.selfEcho) return;
+  clearTimeout(TB.echoT);
+  const S = TB.sr; TB.selfAcc = []; if(S) S.consumed = tbSessionToks(S).length;     // ce qui a été dit avant ne compte pas : tu n'as pas encore entendu la phrase
+  tbSRHold(); TB.selfAcc = [];
+  TB.selfEchoTalk = true;
+  tbSelfSay('🔊 Écoute la phrase…');
+  TB.echoT = setTimeout(() => {
+    if(TB.mode !== 'self' || TB.cur !== i) return;
+    const s0 = TB.sents[i] || '';
+    tbSelfSpeak(dxOn() ? dxSpeakText(s0) : s0, readingRate, () => { TB.selfLastHeard = Date.now(); if(TB.mode === 'self' && TB.cur === i) tbSelfSay('🗣️ À toi : répète la phrase'); });
+  }, 380);
 }
 /* aligner ce qui a été dit sur les mots de la phrase (comme spAlign, mais on retient le dernier morceau utilisé) */
 function tbAlign(norms, sp){
@@ -51312,7 +52072,7 @@ function tbSRFail(reason){
 function tbSelfTickFn(){
   if(TB.mode !== 'self'){ clearInterval(TB.selfTick); return; }
   tbRecLevel(); tbSelfHead();
-  if(TB.selfKind !== 'sr' || TB.selfPaused) return;
+  if(TB.selfKind !== 'sr' || TB.selfPaused || TB.selfEchoTalk) return;
   const idle = Date.now() - TB.selfLastHeard;
   if(idle > 4500 && TB.selfRatio > 0 && TB.selfRatio < TB_SR_OK && !TB.selfStall){
     TB.selfStall = true;
@@ -51331,18 +52091,22 @@ function tbSelfResume(){
   TB.selfPaused = false; TB.selfLastHeard = Date.now(); TB.selfStall = false;
   tbRecResume(); tbDock(); tbSelfHead();
   tbSelfSay(TB.selfKind === 'rec' ? 'Lis la phrase, puis touche ⏭' : 'Je t\'écoute');
+  if(TB.selfEcho){ tbSelfEchoSay(TB.cur); return; }              // 🔁 on réécoute la phrase, puis à toi
   if(TB.selfKind === 'sr') tbSRStart();
 }
 /* 🔊 la voix dit un mot ou la phrase : on coupe le micro (et l'enregistrement) le temps qu'elle parle */
-function tbSelfSpeak(text, rate){
+function tbSelfSpeak(text, rate, after){
   if(TB.mode !== 'self'){ tbNarrFr(text, 'fr-FR', null, rate); return; }
   const wasPaused = TB.selfPaused;
   tbSRHold(); tbRecPause();
   const tok = ++TB.token;
+  TB.selfEchoTalk = true;           // la voix parle : on n'attend pas que tu lises
   tbNarrFr(text, 'fr-FR', () => {
     if(tok !== TB.token || TB.mode !== 'self') return;
+    TB.selfEchoTalk = false;
     TB.selfLastHeard = Date.now();
     if(!wasPaused && !TB.selfPaused){ tbRecResume(); if(TB.selfKind === 'sr') tbSRStart(); }
+    if(after) try{ after(); }catch(e){}
   }, rate || readingRate);
 }
 function tbSelfSkip(){
@@ -52444,7 +53208,7 @@ function tbAction(id, btn, e){
     case 'pl-stop': tbStopModes(); return;
     case 'self': case 'self-0': tbSelfOpen(); return;
     case 'self-go-at': tbSelfStart(+btn.dataset.s || 0); return;
-    case 'self-mode': tbUi().selfMode = btn.dataset.v === 'rec' ? 'rec' : 'sr'; tbSaveUi(); tbSelfOpen(); return;
+    case 'self-mode': tbUi().selfMode = ['rec', 'echo'].includes(btn.dataset.v) ? btn.dataset.v : 'sr'; tbSaveUi(); tbSelfOpen(); return;
     case 'self-go': tbSelfResume(); return;
     case 'self-pause': tbSelfPause(); return;
     case 'self-hear': { const s0 = TB.sents[TB.cur] || ''; tbSelfSay('Écoute bien, puis lis à ton tour…'); tbSelfSpeak(dxOn() ? dxSpeakText(s0) : s0, readingRate); return; }
@@ -55146,6 +55910,48 @@ function startNextBlockInMode(mode){
   renderScoreboard();
   renderCard();
 }
+/* 🎯 1.0.41 : en arrivant par un objectif, le titre de ce qu'on va faire, 3 secondes, puis on entre (ou on reste) */
+function goalItemInfo(el){
+  let icon = '', title = '', kind = '';
+  try{
+    if(el.dataset.sheet || el.dataset.entSheet){ const id = el.dataset.sheet || el.dataset.entSheet; const s = (typeof PRACTICAL_SHEETS !== 'undefined' ? PRACTICAL_SHEETS : []).find(x => x.id === id); if(s){ icon = s.icon || ''; title = s.title || ''; kind = s.category || 'Fiche'; } }
+    else if(el.dataset.bouq != null && typeof BOUQUINAGE_TEXTS !== 'undefined'){ const t = BOUQUINAGE_TEXTS[parseInt(el.dataset.bouq, 10)]; if(t){ icon = '📖'; title = t.title || ''; kind = 'Bouquinage'; } }
+  }catch(e){}
+  if(!title){ const b = el.querySelector('[style*="font-weight:800"], b, strong'); title = ((b && b.textContent) || el.textContent || '').replace(/\s+/g, ' ').replace(/✅/g, '').trim().slice(0, 120); }
+  return { icon, title, kind };
+}
+function goalEnterSplash(el, sec){
+  document.querySelectorAll('.gls-ov').forEach(x => x.remove());
+  if(!el || !el.isConnected) return;
+  const info = goalItemInfo(el); if(!info.title) return;
+  const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const ov = document.createElement('div'); ov.className = 'gls-ov';
+  ov.innerHTML = `<div class="gls" role="dialog" aria-modal="true" aria-labelledby="glsT">
+    <div class="gls-k">🎯 Objectif du jour${info.kind ? ' · ' + escapeHtml(info.kind) : ''}</div>
+    <div class="gls-i" aria-hidden="true">${escapeHtml(info.icon || (sec && sec.icon) || '✨')}</div>
+    <div class="gls-t" id="glsT">${escapeHtml(info.title)}</div>
+    <div class="gls-c" aria-live="polite">On y entre dans <b id="glsN">3</b>…</div>
+    <div class="gls-bar"><i id="glsBar"></i></div>
+    <div class="gls-b"><button type="button" class="gls-stay" data-gls="stay">Rester ici</button><button type="button" class="gls-go" data-gls="go">▶ Entrer</button></div>
+  </div>`;
+  document.body.appendChild(ov);
+  requestAnimationFrame(() => { ov.classList.add('show'); const bar = ov.querySelector('#glsBar'); if(bar && !reduce){ bar.style.transition = 'width 3s linear'; bar.style.width = '100%'; } else if(bar) bar.style.width = '100%'; });
+  let n = 3, done = false;
+  const end = (go) => {
+    if(done) return; done = true; clearInterval(tk); clearTimeout(t3); try{ bkPop('gls'); }catch(e){}
+    document.removeEventListener('keydown', onKey, true);
+    ov.classList.remove('show'); setTimeout(() => ov.remove(), 200);
+    if(go && el.isConnected) setTimeout(() => el.click(), 60);
+  };
+  const tk = setInterval(() => { n--; const x = ov.querySelector('#glsN'); if(x && n > 0) x.textContent = n; }, 1000);
+  const t3 = setTimeout(() => end(true), 3000);
+  const onKey = (e) => { if(e.key === 'Escape'){ e.preventDefault(); e.stopPropagation(); end(false); } else if(e.key === 'Enter'){ e.preventDefault(); e.stopPropagation(); end(true); } };
+  document.addEventListener('keydown', onKey, true);
+  try{ bkPush('gls', () => end(false)); }catch(e){}
+  ov.addEventListener('click', (e) => { const b = e.target.closest('[data-gls]'); if(b) end(b.dataset.gls === 'go'); else if(e.target === ov) end(false); });
+  setTimeout(() => { const g = ov.querySelector('.gls-go'); if(g) try{ g.focus({ preventScroll:true }); }catch(e){} }, 50);
+  window.__glsEnd = end;
+}
 function goToQuest(key){
   // on quitte proprement la consultation (le chrono de question ne doit pas reprendre)
   questPeekPausedTimer = false;
@@ -55157,8 +55963,8 @@ function goToQuest(key){
     const sec = SHEET_SECTIONS.find(x => x.key === secKey);
     if(sec && sec.open){ sec.open(); }
     else { renderSheetsHomeBySection(secKey, '📎 Fiches', 'Fiches', ''); }
-    // descend directement à la prochaine fiche / au prochain texte à faire
-    setTimeout(() => { if(quickNavFinder){ const el = quickNavFinder(); if(el) quickNavJumpTo(el); } }, 350);
+    // descend directement à la prochaine fiche / au prochain texte à faire, montre son titre 3 s, puis y entre
+    setTimeout(() => { if(quickNavFinder){ const el = quickNavFinder(); if(el){ quickNavJumpTo(el); goalEnterSplash(el, sec); } else quickNavJumpTo(null); } }, 350);
     return;
   }
   if(key === 'subjects'){
