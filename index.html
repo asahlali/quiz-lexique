@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- 🏷️ Version de l'appli : augmentée automatiquement par publier-site.cmd à chaque publication -->
-<meta name="app-version" content="1.0.44" data-date="2026-11-04">
+<meta name="app-version" content="1.0.46" data-date="2026-11-04">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <title>VocabVISION — Vocabulaire Français ↔ Arabe</title>
 <script>
@@ -2202,6 +2202,16 @@
   .tb-st.st-u{ text-decoration:underline; text-decoration-thickness:.07em; text-underline-offset:.2em; }
   .tb-drop::first-letter{ float:left; font-family:'Literata',Georgia,serif; font-size:3.25em; line-height:.84; font-weight:800; margin:.06em .1em 0 0; color:var(--tb-acc); }
   .tb-fig{ position:relative; margin:.5em auto 1.1em; max-width:100%; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+  /* 🖼️🔎 1.0.46 : les mots lus dans une image de la Tablette */
+  .tb-ocr{ position:absolute; left:0; top:0; width:100%; height:auto; pointer-events:none; z-index:1; }
+  .tb-ocr .tb-ow{ position:absolute; border-radius:3px; pointer-events:auto; cursor:pointer; }
+  .tb-ocr .tb-ow-p{ pointer-events:none; }
+  .tb-ocr .tbw.hov{ background-color:rgba(96,165,250,.28); box-shadow:none; }
+  .tb-ocr .tbw.sel{ background-color:rgba(124,58,237,.32); box-shadow:0 0 0 2px rgba(124,58,237,.55); }
+  .tb-ocr .tbw.tag{ background-image:none; background-color:rgba(250,204,21,.4); box-shadow:inset 0 -3px 0 #EAB308; }
+  .tb-ocr .tbw.kn{ box-shadow:inset 0 -2px 0 rgba(34,197,94,.75); }
+  .tb-fig-chip{ position:absolute; left:8px; top:8px; z-index:2; padding:5px 10px; border-radius:99px; background:rgba(17,24,39,.86); color:#fff; font:800 12px 'Nunito','Inter',sans-serif; pointer-events:none; }
+
   .tb-fig img{ display:block; width:100%; height:auto; min-height:40px; border-radius:6px; background:var(--tb-rule); user-select:none; -webkit-user-drag:none; }
   .tb-fig.al-l{ float:left; margin:.3em 1em .6em 0; }
   .tb-fig.al-r{ float:right; margin:.3em 0 .6em 1em; }
@@ -3090,6 +3100,24 @@
   .pdv-sh-l{ display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:8px; }
   .pdv-sh-it{ display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:12px; background:var(--surface, #fff); border:1px solid var(--border, #e5e7eb); cursor:pointer; text-align:left; }
   .pdv-sh-it:hover{ border-color:var(--purple, #7C3AED); } .pdv-sh-i{ font-size:22px; } .pdv-sh-m{ flex:1; min-width:0; } .pdv-sh-m b{ display:block; font-size:14px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .pdv-sh-m small{ color:var(--text-dim); font-size:12px; }
+  /* 📁 1.0.46 : les dossiers de « Mes PDF, tels quels » */
+  .pdv-sh-h{ display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; }
+  .pdv-sh-nd{ border:1px dashed rgba(124,58,237,.45); background:transparent; color:var(--purple, #7C3AED); border-radius:99px; padding:5px 11px; font:800 12px 'Nunito','Inter',sans-serif; cursor:pointer; }
+  .pdv-sh-nd:hover{ background:rgba(124,58,237,.08); }
+  .pdv-dir{ margin:0 0 8px; border-radius:12px; border:1px solid rgba(124,58,237,.16); background:rgba(255,255,255,.35); }
+  [data-theme="dark"] .pdv-dir{ background:rgba(255,255,255,.03); }
+  .pdv-dir-h{ display:flex; align-items:center; gap:7px; padding:7px 8px 7px 10px; cursor:pointer; user-select:none; border-radius:12px; }
+  .pdv-dir-h:hover{ background:rgba(124,58,237,.06); }
+  .pdv-dir-h b{ font-size:14px; } .pdv-dir-h small{ flex:1; color:var(--text-dim); font-size:12px; font-weight:700; }
+  .pdv-dir-c{ display:inline-block; transition:transform .15s; font-size:11px; color:var(--text-dim); } .pdv-dir.open .pdv-dir-c{ transform:rotate(90deg); }
+  .pdv-dir > .pdv-sh-l{ display:none; padding:0 8px 8px; } .pdv-dir.open > .pdv-sh-l{ display:grid; }
+  .pdv-dir-e{ padding:8px; color:var(--text-dim); font-size:12.5px; font-weight:700; }
+  .pdv-dir.over, .pdv-sh-loose.over{ outline:2px dashed var(--purple, #7C3AED); outline-offset:2px; background:rgba(124,58,237,.08); border-radius:12px; }
+  .pdv-sh-it.drag{ opacity:.45; }
+  .pdv-menu{ position:fixed; z-index:10060; min-width:220px; max-width:min(320px, calc(100vw - 16px)); max-height:60vh; overflow:auto; padding:6px; border-radius:14px; background:var(--surface, #fff); color:var(--text, #111); border:1px solid var(--border, #e5e7eb); box-shadow:0 18px 40px -16px rgba(0,0,0,.45); }
+  .pdv-menu-h{ padding:6px 8px; font:800 12px 'Nunito','Inter',sans-serif; color:var(--text-dim); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .pdv-menu button{ display:block; width:100%; text-align:left; padding:9px 10px; border:0; border-radius:10px; background:transparent; color:inherit; font:700 14px 'Nunito','Inter',sans-serif; cursor:pointer; }
+  .pdv-menu button:hover, .pdv-menu button.on{ background:rgba(124,58,237,.1); }
   .pdv-sh-x{ border:0; background:transparent; cursor:pointer; font-size:15px; padding:4px 6px; border-radius:8px; color:var(--text-dim); } .pdv-sh-x.sure{ background:#DC2626; color:#fff; font-size:12px; font-weight:800; }
   body.pdv-on{ overflow:hidden; }
   .pdv-ov{ position:fixed; inset:0; z-index:10040; display:flex; flex-direction:column; background:#525659; color:#fff; font-family:'Inter', system-ui, sans-serif; }
@@ -3165,6 +3193,58 @@
     .pdv-pg{ padding:0 8px; }
   }
   @media (pointer:coarse){ .pdv-tools, .pdv-helpb{ display:none !important; } }
+  /* ‿ 1.0.46 : les liaisons sur la page du PDF */
+  .pdv-lz{ position:absolute; inset:0; pointer-events:none; z-index:1; overflow:hidden; }
+  .pdv-lz i{ position:absolute; height:.42em; box-sizing:border-box; border:max(1.5px, .08em) solid var(--dx-ob, #EA580C); border-top:0; border-radius:0 0 50% 50% / 0 0 100% 100%; }
+  .pdv-lz i.k-fa{ opacity:.55; border-style:dashed; }
+  .pdv-lz i.k-en{ border-color:var(--dx-en, #94A3B8); }
+  .pdv-lz i b{ position:absolute; left:50%; top:.5em; transform:translateX(-50%); font:900 .5em/1 'Nunito','Inter',sans-serif; color:var(--dx-ob, #EA580C); }
+  .pdv-lz-off .pdv-lz{ display:none; }
+  .pdv-ib.pdv-lzb{ font-weight:900; font-size:20px; }
+  /* 🌙 1.0.46 : le mode nuit du PDF */
+  .pdv-ov.pdv-night{ background:#1c1d20; }
+  .pdv-night .pdv-sheet{ background:#121212; box-shadow:0 2px 12px rgba(0,0,0,.8); }
+  .pdv-night .pdv-sheet canvas, .pdv-night .pdv-pt canvas{ filter:invert(.93) hue-rotate(180deg) contrast(.92); }
+  .pdv-night .pdv-hls i{ mix-blend-mode:screen; background:rgba(255,213,0,.32); }
+  .pdv-night .pdv-tl span.sel{ background:rgba(167,139,250,.38); }
+  .pdv-night .pdv-tl span.tag{ background:rgba(250,204,21,.26); box-shadow:inset 0 -2px 0 #CA8A04; }
+  .pdv-night .pdv-lz i{ border-color:#FDBA74; } .pdv-night .pdv-lz i b{ color:#FDBA74; } .pdv-night .pdv-lz i.k-en{ border-color:#94A3B8; }
+  /* 📖 1.0.46 : le mode liseuse (comme une Kindle) */
+  .pdk{ position:absolute; inset:0; z-index:6; display:none; flex-direction:column; background:var(--pdk-bg); color:var(--pdk-ink); font-family:'Inter', system-ui, sans-serif; }
+  .pdk-on .pdk{ display:flex; }
+  .pdk.th-paper{ --pdk-bg:#FBFAF7; --pdk-ink:#1C1B19; --pdk-dim:#77736B; --pdk-line:rgba(0,0,0,.09); --pdk-acc:#7C3AED; }
+  .pdk.th-sepia{ --pdk-bg:#F3EAD3; --pdk-ink:#4E3B28; --pdk-dim:#8A7458; --pdk-line:rgba(78,59,40,.14); --pdk-acc:#9A5B13; }
+  .pdk.th-night{ --pdk-bg:#111214; --pdk-ink:#CFCBC3; --pdk-dim:#7E7A73; --pdk-line:rgba(255,255,255,.1); --pdk-acc:#A78BFA; }
+  .pdk-top{ display:flex; align-items:center; gap:6px; padding:8px 10px; padding-top:max(8px, env(safe-area-inset-top)); border-bottom:1px solid var(--pdk-line); transition:opacity .2s; }
+  .pdk-tt{ flex:1; min-width:0; text-align:center; } .pdk-tt b{ display:block; font-size:14px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .pdk-tt small{ font-size:11.5px; color:var(--pdk-dim); }
+  .pdk-ib{ min-width:38px; height:38px; border:0; border-radius:10px; background:transparent; color:var(--pdk-ink); font:700 17px 'Inter', sans-serif; cursor:pointer; }
+  .pdk-ib:hover{ background:var(--pdk-line); }
+  .pdk-aa{ position:absolute; right:10px; top:56px; z-index:3; width:min(360px, calc(100% - 20px)); padding:12px; border-radius:16px; background:var(--pdk-bg); border:1px solid var(--pdk-line); box-shadow:0 18px 40px -18px rgba(0,0,0,.5); }
+  .pdk-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:6px 0; } .pdk-row > span{ font:800 12.5px 'Nunito','Inter',sans-serif; color:var(--pdk-dim); }
+  .pdk-seg{ display:flex; gap:4px; align-items:center; } .pdk-seg button{ border:1px solid var(--pdk-line); background:transparent; color:var(--pdk-ink); border-radius:10px; padding:6px 9px; font:700 13px 'Inter', sans-serif; cursor:pointer; }
+  .pdk-seg button.on{ border-color:var(--pdk-acc); color:var(--pdk-acc); box-shadow:inset 0 0 0 1px var(--pdk-acc); } .pdk-seg output{ min-width:48px; text-align:center; font:700 12.5px 'Inter', sans-serif; }
+  .pdk-seg .pdk-serif{ font-family:'Literata', Georgia, serif; }
+  .pdk-view{ position:relative; flex:1; min-height:0; overflow:hidden; padding:clamp(14px, 3vh, 34px) 0; touch-action:pan-y; }
+  .pdk-clip{ height:100%; margin:0 var(--pdk-mg); overflow:hidden; }
+  .pdk-flow{ font-family:var(--pdk-ff); font-size:var(--pdk-fs); line-height:var(--pdk-lh); text-align:justify; hyphens:auto; -webkit-hyphens:auto; column-fill:auto; transition:transform .28s cubic-bezier(.3,.7,.3,1); overflow-wrap:break-word; }
+  .pdk-flow, .pdk-flow .tb-s, .pdk-flow .tbw{ font-family:var(--pdk-ff) !important; letter-spacing:normal !important; }
+  .pdk-flow .tb-s{ cursor:text; }
+  .pdk-hf{ display:none !important; }
+  .pdk-flow .tbw{ border-radius:3px; cursor:pointer; }
+  .pdk-flow .tbw.sel{ background:rgba(124,58,237,.28); box-shadow:0 0 0 .1em rgba(124,58,237,.28); }
+  .th-night .pdk-flow .tbw.sel{ background:rgba(167,139,250,.32); }
+  .pdk-flow .tbw.tag{ background-color:rgba(250,204,21,.35); box-shadow:inset 0 -2px 0 #EAB308; }
+  .pdk-br{ display:block; height:.55em; } .pdk-br.hd{ height:.9em; }
+  .pdk-hd{ font-weight:800; font-size:1.18em; }
+  .pdk-pn{ display:inline-block; margin-right:.4em; padding:0 .4em; border-radius:99px; font:700 .55em/1.6 'Inter', sans-serif; color:var(--pdk-dim); border:1px solid var(--pdk-line); vertical-align:.2em; }
+  .pdk-miss{ margin:.6em 0; padding:.8em 1em; border-radius:12px; border:1px dashed var(--pdk-line); color:var(--pdk-dim); font:700 .8em 'Nunito','Inter',sans-serif; break-inside:avoid; }
+  .pdk-load{ padding:2em 0; text-align:center; color:var(--pdk-dim); font:700 15px 'Nunito','Inter',sans-serif; }
+  .pdk-edge{ position:absolute; top:0; bottom:0; width:min(56px, 9%); border:0; background:transparent; color:var(--pdk-dim); font-size:30px; cursor:pointer; opacity:0; transition:opacity .2s; }
+  .pdk-edge.l{ left:0; } .pdk-edge.r{ right:0; } .pdk-edge:hover:not(:disabled){ opacity:.7; } .pdk-edge:disabled{ cursor:default; }
+  .pdk-bot{ padding:6px var(--pdk-mg) max(10px, env(safe-area-inset-bottom)); font:700 12px 'Inter', sans-serif; color:var(--pdk-dim); text-align:center; transition:opacity .2s; }
+  .pdk-bar{ height:3px; border-radius:3px; background:var(--pdk-line); margin:0 0 6px; overflow:hidden; } .pdk-bar i{ display:block; height:100%; width:0; background:var(--pdk-acc); transition:width .3s; }
+  .pdk.chrome-off .pdk-top, .pdk.chrome-off .pdk-bot{ opacity:0; pointer-events:none; }
+  @media (prefers-reduced-motion:reduce){ .pdk-flow{ transition:none; } }
   /* 📇 1.0.44 : la fiche de la Tablette sur les pages du PDF */
   .pdv-tb.tb{ position:absolute; inset:0; z-index:9; background:transparent; pointer-events:none; overflow:hidden; display:block; }
   .pdv-tb .tb-sheet, .pdv-tb .tb-mkgo{ pointer-events:auto; }
@@ -4828,6 +4908,131 @@
     html body .cs-title{ margin:12px 0 6px; }
   }
 
+
+  /* ============ 📐 1.0.45 : mise en page responsive — téléphone · tablette · portable · écran externe ============
+     Mobile first : les règles de base visent le téléphone ; chaque palier « min-width » donne plus d'espace.
+     Paliers (largeur CSS) : 480 grand téléphone · 768 tablette · 1024 tablette à l'horizontale / petit portable
+                             · 1280 portable · 1600 écran externe · 2200 écran 2K / 4K.
+     Unités relatives et fluides : clamp(), vw, vh, rem, cqi (largeur de la carte) — pas de saut brutal entre deux paliers.
+     La largeur utile suit le type de page (attribut data-lay sur <html>, posé à chaque changement de page). */
+  :root{
+    --rsp-gut: clamp(10px, 2.2vw + 2px, 30px);          /* marge latérale fluide */
+    --rsp-pad-y: clamp(26px, 1.6vw + 20px, 42px);       /* rembourrage des cartes */
+    --rsp-pad-x: clamp(16px, 1.8vw + 11px, 34px);
+    --rsp-wrap: 820px;                                  /* largeur de la colonne (téléphone → portable) */
+    --rsp-wide: 820px; --rsp-read: 820px; --rsp-focus: 820px; --rsp-form: 820px;
+  }
+  html body{ padding-left:max(var(--rsp-gut), env(safe-area-inset-left, 0px)); padding-right:max(var(--rsp-gut), env(safe-area-inset-right, 0px)); }
+  .wrap{ max-width:var(--rsp-wrap); }
+  .card{ padding:var(--rsp-pad-y) var(--rsp-pad-x); }
+
+  /* les panneaux « pleine carte » (Language Lab) suivent le rembourrage fluide de la carte */
+  html body .lesson-lab{ margin:calc(2px - var(--rsp-pad-y)) calc(-1 * var(--rsp-pad-x)); }
+  html body #quizCard > .ss-wrap + .lesson-lab{ margin-top:14px; }   /* la barre de recherche n'est plus cachée sous le panneau */
+
+  /* 💻 tablette à l'horizontale, portable (≥ 1024 px) : la colonne s'élargit selon le type de page (en douceur) */
+  @media (min-width:1024px){
+    :root{
+      --rsp-wide:  clamp(820px, 58vw + 120px, 1360px);   /* 1280 → 862 · 1366 → 912 · 1440 → 955 · 1920 → 1234 */
+      --rsp-read:  clamp(820px, 20vw + 580px, 980px);
+      --rsp-focus: clamp(820px, 16vw + 620px, 960px);
+      --rsp-form:  clamp(820px, 20vw + 560px, 940px);
+      --rsp-wrap: var(--rsp-form);
+    }
+    html[data-lay="wide"]{ --rsp-wrap:var(--rsp-wide); }
+    html[data-lay="read"]{ --rsp-wrap:var(--rsp-read); }
+    html[data-lay="focus"], html body.quiz-active{ --rsp-wrap:var(--rsp-focus); }
+  }
+  /* 🖥️ écran 2K / 4K (≥ 2200 px) : encore un peu plus large */
+  @media (min-width:2200px){
+    :root{ --rsp-wide:clamp(1360px, 40vw + 500px, 1480px); --rsp-read:1020px; --rsp-focus:1000px; --rsp-form:980px; }
+  }
+
+  /* 🖥️ écran externe (≥ 1600 px) : police un peu plus grande pour les exercices et la lecture */
+  @media (min-width:1600px){
+    html body.quiz-active #quizCard .opt{ font-size:16.5px; }
+    html body.quiz-active #quizCard .word-fr{ font-size:clamp(46px, 2.2vw + 14px, 60px); }
+    html body.quiz-active #quizCard .question-line{ font-size:16.5px; }
+    html[data-lay="read"] #quizCard{ font-size:17px; line-height:1.6; }
+  }
+
+  /* 💻 portable à écran bas (1366 × 768, 1280 × 720) et tablette à l'horizontale : la question tient sans défiler */
+  @media (min-width:900px) and (max-height:820px){
+    html body.quiz-active{ padding-top:8px; }
+    html body.quiz-active .navbar{ margin-bottom:6px; }
+    html body.quiz-active .scoreboard{ margin-top:2px; margin-bottom:4px; }
+    html body.quiz-active .progress-track{ margin-top:6px; margin-bottom:8px; }
+    html body.quiz-active .mascot-zone{ transform:scale(.74); transform-origin:center bottom; margin-top:-22px; }
+    html body.quiz-active #quizCard{ padding-top:26px; padding-bottom:22px; }
+    html body.quiz-active #quizCard .word-fr{ font-size:40px; }
+    html body.quiz-active #quizCard .question-line{ margin-bottom:12px; }
+    html body.quiz-active #quizCard #optionsWrap{ gap:10px; }
+    html body.quiz-active #quizCard #optionsWrap .opt{ padding-top:13px; padding-bottom:13px; }
+  }
+
+  /* 📱 tablette (768 → 1279 px) : un peu plus d'air autour des listes et des tuiles */
+  @media (min-width:768px) and (max-width:1279px){
+    .tile-grid{ gap:14px; }
+  }
+
+  /* 🧩 @container : les listes passent en colonnes quand la CARTE est large (portable, écran externe, Tablette élargie)
+     — c'est la largeur de la carte qui compte, pas celle de l'écran. */
+  @supports (container-type:inline-size) and selector(:has(*)){
+    #quizCard{ container:qcard / inline-size; }
+    @container qcard (min-width:720px){
+      html[data-lay="wide"] #quizCard div[style*="flex-direction:column"]:has(> .opt ~ .opt ~ .opt ~ .opt),
+      html[data-lay="wide"] #quizCard div[style*="flex-direction:column"]:has(> .restart-btn ~ .restart-btn ~ .restart-btn ~ .restart-btn),
+      html[data-lay="wide"] #quizCard div[style*="flex-direction:column"]:has(> .ent-unit-card ~ .ent-unit-card ~ .ent-unit-card),
+      html[data-lay="wide"] #quizCard .lab-lesson-list,
+      html[data-lay="wide"] #quizCard .search-results:has(> .result-card ~ .result-card){
+        display:grid !important; grid-template-columns:repeat(auto-fill, minmax(min(100%, 360px), 1fr)); align-content:start;
+      }
+    }
+    /* la Tablette : la barre d'outils de la bibliothèque se range selon la place dans la carte */
+    @container qcard (max-width:1000px){ .tbl-imp-x{ display:none; } }
+    @container qcard (max-width:860px){ .tbl-head > .tbl-tools{ flex-basis:100%; justify-content:flex-start; } .tbl-head .tbl-search{ max-width:none; } }
+    @container qcard (min-width:1200px){
+      html[data-lay="wide"] #quizCard div[style*="flex-direction:column"]:has(> .opt ~ .opt ~ .opt ~ .opt){ grid-template-columns:repeat(auto-fill, minmax(340px, 1fr)); }
+    }
+  }
+  /* repli pour les anciens navigateurs (sans @container) : la même chose, d'après la largeur de l'écran */
+  @supports not (container-type:inline-size){
+    @media (min-width:1500px){
+      html[data-lay="wide"] #quizCard .lab-lesson-list{ display:grid; grid-template-columns:repeat(2, 1fr); }
+    }
+  }
+
+  /* 📱 téléphone (360 → 440 px) : le mot « VocabVISION » rétrécit en douceur pour ne jamais passer sous les boutons */
+  @media (min-width:360px) and (max-width:440px){
+    html body.nav-has-history .navbar .brand-word{ font-size:clamp(15px, calc((100vw - 262px) / 6.4), 20px); }
+  }
+  /* 📱 très petit téléphone (≤ 359 px : Galaxy Fold plié, iPhone SE 1re génération…) : la barre du haut se compacte */
+  @media (max-width:359px){
+    html body .navbar .theme-toggle, html body .navbar .menu-toggle{ width:34px; height:34px; }
+    html body.nav-has-history .navbar{ gap:4px; padding-left:6px; padding-right:6px; }
+  }
+  @media (max-width:349px){   /* la place manque pour le mot « VocabVISION » : le petit logo le remplace */
+    html body.nav-has-history .navbar .brand-word{ display:none; }
+    html body.nav-has-history .navbar .brand-logo{ display:flex; }
+  }
+
+  /* 📱 la Tablette (bibliothèque) sur téléphone : boutons sur une ligne, sans texte qui déborde */
+  .tbl-imp, .tbl-new{ white-space:nowrap; }
+  @media (max-width:560px){
+    .tbl-imp-x{ display:none; }
+    .tbl-tools > .tbl-sort, .tbl-tools > .tbl-imp, .tbl-tools > .tbl-new{ flex:1 1 auto; padding-left:10px; padding-right:10px; }
+  }
+
+  /* 👆 écran tactile : des cibles assez grandes pour le doigt */
+  @media (pointer:coarse){
+    .nav-hist-btn{ min-width:36px; min-height:36px; }
+  }
+  /* 🖨️ impression : seulement le contenu */
+  @media print{
+    html body{ padding:0 !important; background:#fff !important; }
+    .navbar, .footer-note, .mascot-zone, #questPeekFab, .home-nav-arrows{ display:none !important; }
+    .wrap{ max-width:none !important; }
+  }
 </style>
 </head>
 <body>
@@ -5301,12 +5506,25 @@ const NAV_QUIZ_RECORDERS = { setupDeckFromWords:1, resumeInProgressSession:1 }; 
 let navBooting = true, navRestoring = false, navDepth = 0, navBootEntry = null;
 let navStack = [], navIdx = 0, navGen = '', navPending = null, navQueued = null, navPendingT = null;
 
+/* 📐 1.0.45 : le type de page décide de la largeur utile sur portable et grand écran
+   wide = accueils, listes, dictionnaire (s'étalent en colonnes) · read = fiches, textes, leçons
+   focus = exercices et jeux (centrés) · form = réglages et formulaires */
+function rspLayOf(n){
+  n = String(n || '');
+  if(n === '__quiz' || /^start/.test(n) || /(Intro|Game|Practice|Quiz)$/.test(n)
+     || /^render(MotsMeles|MotMystere|TexteATrous|QCMFinal|SoundTest|ConjPracticeSetup|ConjListenSetup|DailyChallenge)$/.test(n)) return 'focus';
+  if(/^render(PracticalSheetDetail|BouquinageDetail|OrthoLesson|DailyLesson|DailyReading|ConjRules|ConjTraps|WhatsNew|TrxView|RecapView|CustomBlockRecapView)$/.test(n)) return 'read';
+  if(/^render(SoundSettings|FoxSettings|VoiceSettings|ColorSettings|QuestSettings|RadioSetup|SyncView|ProfileView|AppSwitcher|AddWordsScreen|AddVerbScreen|CustomBlockBuilder|QcmSetBuilder|TimeBreakdown)$/.test(n)) return 'form';
+  return 'wide';
+}
+function rspLay(n){ try{ const v = rspLayOf(n), h = document.documentElement; if(h.getAttribute('data-lay') !== v) h.setAttribute('data-lay', v); }catch(e){} }
 (function navWrapAll(){
   const wrap = (name, as) => {
     const orig = window[name];
     if(typeof orig !== 'function' || orig.__navWrapped) return;
     const w = function(){
       const args = Array.prototype.slice.call(arguments);
+      if(navDepth === 0) rspLay(as || name);
       navDepth++;
       let r;
       try{ r = orig.apply(this, arguments); }
@@ -22965,6 +23183,15 @@ const COLOR_PRESETS = {
 /* ============ 🆕 NOUVEAUTÉS — pour que tout ce qui a été ajouté reste découvrable ============ */
 const WHATS_NEW_SECTIONS = [
   { icon:'🆕', title:'Nouveautés', items:[
+    { name:'🎯 Un meilleur lecteur de texte (OCR)', desc:"Les pages scannées et les photos de pages sont maintenant lues par PaddleOCR (PP-OCRv5, modèle « latin » : le français avec ses accents) : bien plus juste que Tesseract sur les magazines (colonnes, gros titres, fonds colorés). Tout se passe dans le navigateur, rien n'est envoyé sur un serveur ; le lecteur est téléchargé une seule fois. Tesseract reste au choix (« Lecteur de texte » à l'import) et sert pour l'arabe. Les pages déjà lues sont relues avec le nouveau lecteur." },
+    { name:'🖼️ Le texte des images de la Tablette', desc:"Une caricature, une BD, un scan collé dans un texte : touche un mot de l'image. Elle est lue une fois (OCR), puis chaque mot de l'image a sa fiche, comme un mot du texte : 🖍 Taguer, ➕ Ajouter à mes mots… Touche l'image hors des mots : ses réglages (et 🔁 Relire le texte de l'image)." },
+    { name:'📖 Mode liseuse, comme une Kindle', desc:"Dans un PDF, le bouton 📖 (ou K) remet le texte en page pour lire : on tourne les pages (bords de l'écran, glisser, ← →, espace), thème Papier, Sépia ou Nuit, taille, police, interligne, marges. En bas : la page, le % lu et le temps qu'il reste. Les en-têtes répétés sont cachés, les titres ressortent. Toucher un mot : sa fiche." },
+    { name:'🌙 Mode nuit sur les PDF', desc:"Le bouton 🌙 (ou N) met les pages en sombre, sans perdre les couleurs." },
+    { name:'📁 Des dossiers pour « Mes PDF, tels quels »', desc:"＋ Nouveau dossier, ✏️ renommer, 🗑 supprimer (les PDF restent). Range un PDF avec 📁, ou glisse-le sur un dossier (ordinateur)." },
+    { name:'✂️ Les mots coupés en fin de ligne', desc:"Sur un PDF, « che- » + « vronné » redevient « chevronné » (les deux morceaux en violet, la phrase entière dans la fiche) ; « peut- » + « être » garde son tiret. Les lettres espacées des titres et des lignes justifiées (« j e u n e s p i l l e u r s ») redeviennent des mots, aussi à l'import en texte." },
+    { name:'🪞 Les verbes pronominaux', desc:"« s'engouffrent », « ils se sont engouffrés », « je me lève » : la fiche montre « s'engouffrer » (verbe pronominal), ses sens pronominaux d'abord, et c'est lui qu'on ajoute à tes mots. « il me regarde » reste « regarder »." },
+    { name:'‿ Les liaisons sur les pages du PDF', desc:"De petits arcs sous les blancs : orange = liaison obligatoire, orange pâle = facultative, gris = enchaînement, avec le son qu'on entend (z, t, n). Bouton ‿ ou touche L pour les cacher." },
+    { name:'📐 Le site s\'adapte à chaque écran', desc:"Téléphone, tablette, portable, écran externe : la page prend la bonne largeur. Sur un grand écran, les accueils et les listes s'étalent (fiches, textes, dictionnaire, leçons, jeux en 2 ou 3 colonnes) ; les exercices restent centrés, avec une police un peu plus grande ; les fiches et les textes gardent une largeur de lecture confortable. Sur un portable à écran bas (1366 × 768) ou une tablette à l'horizontale, la question et ses 4 réponses tiennent sans défiler. Sur les tout petits téléphones, la barre du haut se compacte. Marges et rembourrages fluides (plus de saut d'un palier à l'autre)." },
     { name:'📇 Sur un PDF, la fiche de la Tablette', desc:"Dans un PDF ouvert « tel quel », toucher un mot ouvre la même fiche que sur la Tablette : ＋ mot avant / après, Écouter, Lentement, La phrase, Marque-page, la définition, « Pas convaincu ? D'autres traductions », la phrase de la page (Traduire / Prendre toute la phrase), 🖍 Taguer, ➕ Ajouter à mes mots (Mot, En arabe avec ses choix, Définition, Phrase d'exemple avec ＋ phrase d'avant / d'après), ➕ D'autres mots de la phrase. Plusieurs mots choisis d'un glissé : la fiche de l'expression. 🏷️ le carnet du PDF : tes mots tagués, gardés et surlignés sur la page." },
     { name:'📖 La liseuse de PDF, comme Acrobat', desc:"Les PDF ouverts « tel quel » : ✋ la main pour glisser la page à la souris (avec de l'élan), le doigt au téléphone ; le zoom en pinçant ou avec Ctrl + molette, autour de l'endroit visé, avec « Largeur de la page », « Page entière » ou un pourcentage (100 % = la taille réelle) ; ▦ les pages en petit à gauche ; I la sélection pour choisir des mots à traduire." },
     { name:'🔍 Chercher dans un PDF', desc:"🔍 (ou Ctrl F) : écris un mot ou une expression — sans souci des accents ni des majuscules. Chaque résultat montre sa phrase et sa page ; on y va tout de suite : la page zoome sur le mot, surligné. Entrée / Maj + Entrée : suivant / précédent. Un mot sélectionné puis Ctrl F : il est cherché. Les pages scannées sont cherchées aussi (une fois lues)." },
@@ -46829,6 +47056,74 @@ function tbLemmaOf(tk){
   return f.toLowerCase();
 }
 
+/* 🪞 1.0.46 : les verbes pronominaux. « s'engouffrent », « ils se sont engouffrés », « je me lève » : la fiche montre le verbe
+   avec son pronom (« s'engouffrer »), ses sens pronominaux d'abord, et c'est lui qu'on ajoute à tes mots.
+   « il me regarde » (me = complément) ou « nous engouffrons » restent des verbes simples. */
+var TB_ETRE = /^(suis|es|est|sommes|etes|sont|etais|etait|etions|etiez|etaient|serai|seras|sera|serons|serez|seront|serais|serait|serions|seriez|seraient|sois|soit|soyons|soyez|soient|fus|fut|furent|etre|etant|ete)$/;
+var TB_HASP_V = /^h(?:air|ater|asarder|ausser|eurter|erisser|isser|urler|ennir|ocher|ouspiller|uer|acher|anter|arceler|aleter)/;
+function tbRawF(k){ const t = TB.toks[k]; return t ? dxFold(String(t.raw || '').replace(/[^\p{L}'’-]+/gu, '')) : ''; }
+function tbIsInf(w){ const s = String(w || '').trim().replace(/^(se |s['’])/i, ''); return !!s && !/\s/.test(s) && /\p{L}(er|ir|re|oir|ïr)$/iu.test(s); }
+function tbPronInf(base){
+  const b = String(base || '').trim(); if(!b) return '';
+  if(/^(se |s['’])/i.test(b)) return b.replace(/^s’/i, "s'");
+  const f = dxFold(b), v = /^[aeiouy]/.test(f) || (/^h/.test(f) && !TB_HASP_V.test(f));
+  return (v ? "s'" : 'se ') + b;
+}
+function tbPronCtx(k){
+  const tk = TB.toks[k]; if(!tk) return null;
+  const L = TB.sentToks[tk.s] || [], i = L.indexOf(k); if(i < 0) return null;
+  const rawF = tbRawF(k), prevF = (n) => i - n >= 0 ? tbRawF(L[i - n]) : '';
+  // me, te, nous, vous : réfléchis seulement avec leur sujet (« je me lève », « tu t'assois », « nous nous levons »)
+  const subjOk = (pr, n) => {
+    if(pr === 's') return true;
+    const want = { m:'je', t:'tu', nous:'nous', vous:'vous' }[pr];
+    for(let q = n + 1; q <= n + 3; q++){ const w = prevF(q); if(!w) break; if(w === want || (want === 'je' && w === "j'")) return true; if(!/^(ne|n'|y|en)$/.test(w)) break; }
+    return false;
+  };
+  let pro = '';
+  const el = rawF.match(/^([smt])'(?=\p{L})/u);
+  if(el){                                   // collé au verbe : s'engouffrent, m'assois, t'appelles
+    if(/^s'(il|ils)$/.test(rawF)) return null;
+    if(subjOk(el[1], 0)) pro = el[1];
+  } else {
+    let n = 1, w = prevF(1);
+    if(TB_ETRE.test(w.replace(/^.*'/, ''))){  // un auxiliaire « être » entre les deux : se sont engouffrés, s'est levée
+      const m2 = w.match(/^([smt])'/);
+      if(m2){ if(subjOk(m2[1], 1)) pro = m2[1]; } else { n = 2; w = prevF(2); }
+    }
+    if(!pro){
+      if(/^(se|s'y|s'en)$/.test(w)) pro = 's';
+      else if(/^(me|te|m'y|t'y|m'en|t'en)$/.test(w)){ const pr = w[0]; if(subjOk(pr, n)) pro = pr; }
+      else if(/^(nous|vous)$/.test(w) && prevF(n + 1) === w) pro = w;
+    }
+  }
+  return pro ? { pro } : null;
+}
+function tbLemmaLine(lemma, form, pro){
+  if(pro && /^(se |s')/i.test(String(lemma || '')) && tbIsInf(lemma)) return `🪞 verbe pronominal : <b>${escapeHtml(lemma)}</b>`;
+  return dxFold(lemma) !== dxFold(form) ? `forme de <b>${escapeHtml(lemma)}</b>` : '';
+}
+/* les sens pronominaux du verbe (Wiktionnaire « (pronl) ») d'abord, et l'arabe du verbe pronominal */
+async function tbPronLook(r, pro){
+  const base = String((r && r.lemma) || '').trim().replace(/^(se |s['’])/i, '');
+  if(!tbIsInf(base)) return r;                                   // pas un verbe : on laisse
+  const P0 = tbPronInf(base), ck = 'p|' + dxFold(P0), d = tbDictLoad();
+  if(d[ck] && ((d[ck].defs || []).length || (d[ck].ar || []).length)) return d[ck];
+  let defs = r.src === 'lexique' ? [] : (r.defs || []).slice(), exs = r.exs || [], ipa = r.ipa, ipaOf = r.ipaOf;
+  if(navigator.onLine !== false){
+    try{ const w = await tbWikt(base, { verb:true, max:12 }); if(w && w.defs && w.defs.length){ defs = w.defs; exs = w.exs || exs; if(!ipa && w.ipa){ ipa = w.ipa; ipaOf = base; } } }catch(e){}
+  }
+  const isP = (x) => /^\((?:pronl|pronominal|pronominal réfléchi|pronominal réciproque|réfléchi|réciproque)\)/i.test(String(x || ''));
+  const pd = defs.filter(isP).map(x => String(x).replace(/^\((?:pronl|pronominal)\)\s*/i, '').replace(/^./, c => c.toUpperCase()));
+  let ar = [], arAuto = false;
+  try{ const vb = (getAllVerbs() || []).find(v => dxFold(String(v.inf || '').replace(/’/g, "'")) === dxFold(P0)); if(vb && vb.ar) ar = [vb.ar]; }catch(e){}
+  if(!ar.length && navigator.onLine !== false){ try{ const L = /\s/.test(P0) ? [await tbMtText(P0)].filter(Boolean) : await tbMtWord(P0); if(L.length){ ar = L.slice(0, 2); arAuto = true; } }catch(e){} }
+  if(!ar.length){ ar = (r.ar || []).slice(); arAuto = !!r.arAuto; }
+  const res = { lemma:P0, base, pron:true, defs:pd.length ? pd.slice(0, 4) : defs.slice(0, 4), ar, arAuto, pos:'', exs, ipa, ipaOf,
+    src:pd.length ? 'Wiktionnaire (sens pronominal)' : (r.src === 'lexique' ? 'Wiktionnaire' : (r.src || '')) };
+  if(res.defs.length || res.ar.length) tbDictPut(ck, res);
+  return res;
+}
 /* ---------- 📖 dictionnaire : ton lexique, sinon le Wiktionnaire (+ traduction arabe) ---------- */
 function tbDictLoad(){
   if(!TB.dict){
@@ -46910,7 +47205,7 @@ function tbParseWikt(wt, o){
     if(o.verb && !flex && !/verbe/i.test(pos) && /verbe/.test(fr)) continue;
     if(flex){ if(!out.lemma){ const L = lines[0].match(/\[\[([^\]|#]+)/); if(L) out.lemma = L[1].trim(); } continue; }
     if(!out.pos) out.pos = pos;
-    lines.forEach(l => { const c = tbWikiClean(l); if(c && c.length > 2 && out.defs.length < 4) out.defs.push(c.length > 220 ? c.slice(0, 217) + '…' : c); });
+    lines.forEach(l => { const c = tbWikiClean(l); if(c && c.length > 2 && out.defs.length < (o.max || 4)) out.defs.push(c.length > 220 ? c.slice(0, 217) + '…' : c); });
     if(out.defs.length){ out.ar = tbWiktAr(m[3]); out.exs = tbWiktEx(m[3]); break; }
   }
   out.arAll = tbWiktArAll(fr);
@@ -47832,6 +48127,149 @@ function tbVoiceSheet(){
 }
 try{ if(window.speechSynthesis) window.speechSynthesis.addEventListener('voiceschanged', () => { TB.pinVoice = null; if(TB.sheetK === -6) tbVoiceSheet(); }); }catch(e){}
 /* ---------- 🖼 régler une image dans la Tablette : taille (curseur ou poignée), position, légende ---------- */
+/* 🖼️🔎 1.0.46 : le texte des images de la Tablette (caricatures, BD, pages scannées collées dans un texte).
+   On touche l'image : son texte est lu une fois (OCR, gardé sur l'appareil), puis chaque mot de l'image se touche
+   comme un mot du texte (sa fiche, Taguer, Ajouter à mes mots…). Toucher l'image hors des mots : ses réglages. */
+var TB_IMG_S0 = 700000;                     // les phrases des images viennent après celles du texte (et du titre)
+function tbImgOcrKey(b){
+  if(!b) return '';
+  if(b.id) return 'id:' + b.id;
+  if(b.src){ let h = 0; const s = String(b.src); for(let i = 0; i < s.length; i += Math.max(1, Math.floor(s.length / 4000))) h = (h * 31 + s.charCodeAt(i)) | 0; return 'src:' + s.length + ':' + (h >>> 0).toString(36); }
+  return '';
+}
+function tbImgOcrDb(key){ return nsKey('tbimgocr') + '|' + key; }
+async function tbImgOcrLoad(key){
+  TB.imgOcr = TB.imgOcr || {};
+  if(key in TB.imgOcr) return TB.imgOcr[key];
+  let d = null; try{ d = await pdvGet(tbImgOcrDb(key)); }catch(e){}
+  TB.imgOcr[key] = d || null;
+  return d || null;
+}
+/* le résultat de l'OCR → ce qu'on garde : les paragraphes, leurs lignes, leurs mots (en fraction de l'image) */
+function tbImgOcrPack(d, W, H){
+  const paras = [];
+  (d && d.paragraphs || []).forEach(pq => {
+    if(pq.confidence != null && pq.confidence < 35) return;
+    const lines = [];
+    (pq.lines || []).forEach(l => {
+      const ws = (l.words || []).filter(w => w && w.bbox && String(w.text || '').trim() && !(w.confidence != null && w.confidence < 30))
+        .map(w => ({ t:String(w.text).trim(), x:w.bbox.x0 / W, y:Math.min(w.bbox.y0, l.bbox ? l.bbox.y0 : w.bbox.y0) / H, w:(w.bbox.x1 - w.bbox.x0) / W, h:(Math.max(w.bbox.y1, l.bbox ? l.bbox.y1 : w.bbox.y1) - Math.min(w.bbox.y0, l.bbox ? l.bbox.y0 : w.bbox.y0)) / H }));
+      if(ws.length) lines.push(ws);
+    });
+    const L = lines.reduce((n, l) => n + l.filter(w => /\p{L}{2,}/u.test(w.t)).length, 0);
+    if(L) paras.push(lines);
+  });
+  return { v:1, W, H, paras, n:paras.reduce((n, pq) => n + pq.reduce((m, l) => m + l.length, 0), 0), at:Date.now() };
+}
+/* lire l'image (une fois) */
+async function tbImgOcrRun(fig, img, key){
+  TB.imgOcr = TB.imgOcr || {};
+  const chip = document.createElement('div'); chip.className = 'tb-fig-chip'; chip.textContent = '🔎 Je lis le texte de l’image…';
+  fig.appendChild(chip); fig.dataset.ocr = 'busy';
+  let eng = null;
+  try{
+    const w0 = img.naturalWidth, h0 = img.naturalHeight, k = Math.max(1, Math.min(2, 1100 / Math.max(w0, h0)));      // un peu agrandie (pas trop : les lettres dessinées se lisent mieux ainsi)
+    const cv = document.createElement('canvas'); cv.width = Math.round(w0 * k); cv.height = Math.round(h0 * k);
+    const cx = cv.getContext('2d', { willReadFrequently:true }); cx.fillStyle = '#fff'; cx.fillRect(0, 0, cv.width, cv.height); cx.drawImage(img, 0, 0, cv.width, cv.height);
+    try{ cx.getImageData(0, 0, 1, 1); }catch(e){ throw new Error('Cette image vient d’un autre site : je ne peux pas lire son texte.'); }
+    eng = await tbOcrWorker((TB.art && TB.art.lang) || 'fra', (m) => { const t = tbOcrStatus(m); if(t) chip.textContent = t; });
+    const r = await eng.recognize(cv);
+    cv.width = cv.height = 0;
+    const d = tbImgOcrPack(r && r.data, Math.round(w0 * k), Math.round(h0 * k));
+    TB.imgOcr[key] = d;
+    try{ await pdvPut(tbImgOcrDb(key), d); }catch(e){}
+    return d;
+  }catch(e){ tbToast('⚠️ ' + ((e && e.message) || 'Le texte de l’image n’a pas pu être lu'), 3600); return null; }
+  finally{ chip.remove(); delete fig.dataset.ocr; try{ if(eng) eng.terminate(); }catch(e){} }
+}
+/* les mots de l'image deviennent des mots de la Tablette (phrases à part, après le texte) */
+function tbImgOcrMount(fig, bi, d){
+  if(!fig || !d || !d.paras || !d.paras.length) return 0;
+  if(fig.querySelector('.tb-ocr') && fig._ocrT === TB.toks) return 1;        // déjà posés pour ce dessin du texte
+  const old = fig.querySelector('.tb-ocr'); if(old) old.remove();
+  const ov = document.createElement('div'); ov.className = 'tb-ocr'; ov.style.aspectRatio = d.W + ' / ' + d.H;
+  const base = TB_IMG_S0 + bi * 1000; let s = base;
+  const pct = (v) => (v * 100).toFixed(3) + '%';
+  d.paras.forEach(pq => {
+    // les mots → des « unités » (un mot coupé en fin de ligne : ses deux morceaux font un seul mot)
+    const units = [];
+    pq.forEach((line, li) => line.forEach((w, wi) => {
+      const prev = units[units.length - 1];
+      if(prev && wi === 0 && li > 0 && prev.end){ const hj = tbHyJoin(prev.t, w.t); if(hj){ prev.t = hj === 'join' ? prev.t.replace(/[-‐‑]$/, '') + w.t : prev.t + w.t; prev.ws.push(w); prev.end = false; return; } }
+      units.push({ t:w.t, ws:[w], end:false });
+      if(wi === line.length - 1) units[units.length - 1].end = true;
+    }));
+    let text = units.map(u => u.t).join(' ');
+    const letters = (text.match(/\p{L}/gu) || []), up = letters.filter(c => c === c.toUpperCase() && c !== c.toLowerCase()).length;
+    const caps = letters.length >= 6 && up / letters.length > 0.75;      // une bulle de BD en capitales : on écrit le texte en minuscules
+    if(caps){ units.forEach(u => { u.t = u.t.toLowerCase(); }); text = units.map(u => u.t).join(' '); }
+    let pos = 0, ui = 0;
+    bqSplit(text).forEach(sent0 => {
+      let b0 = text.indexOf(sent0, pos); if(b0 < 0) b0 = pos; pos = b0 + sent0.length;
+      const parts = sent0.split(/\s+/).filter(Boolean);
+      let sent = sent0; if(caps) sent = sent.replace(/^(\P{L}*)(\p{L})/u, (m, a, c) => a + c.toUpperCase());
+      TB.sents[s] = sent; TB.sentToks[s] = [];
+      parts.forEach((raw, t) => {
+        const u = units[ui++]; if(!u) return;
+        const raw2 = t === 0 && caps ? raw.replace(/^(\P{L}*)(\p{L})/u, (m, a, c) => a + c.toUpperCase()) : raw;
+        const form = tbClean(raw2);
+        const spans = u.ws.map(w => { const sp = document.createElement('span'); sp.className = 'tbw tb-ow'; sp.style.left = pct(w.x); sp.style.top = pct(w.y); sp.style.width = pct(w.w); sp.style.height = pct(w.h); ov.appendChild(sp); return sp; });
+        if(!form){ spans.forEach(sp => { sp.className = 'tb-ow tb-ow-p'; }); return; }
+        const k = TB.toks.push({ s, t, raw:raw2, form, ocr:bi }) - 1;
+        TB.sentToks[s].push(k);
+        spans.forEach(sp => { sp.dataset.k = k; sp.dataset.n = form; });
+        TB.spans[k] = spans[0];
+        if(spans.length > 1) pdvTwin(TB, spans[0], spans.slice(1));
+      });
+      s++;
+    });
+  });
+  fig.insertBefore(ov, fig.querySelector('figcaption'));
+  fig.classList.add('has-ocr'); fig._ocrT = TB.toks;
+  return 1;
+}
+/* le mot de l'image sous le doigt (ou tout près) */
+function tbImgOcrAt(fig, x, y){
+  let best = -1, bd = 14 * 14;
+  fig.querySelectorAll('.tb-ocr .tbw[data-k]').forEach(sp => {
+    const r = sp.getBoundingClientRect();
+    const dx = x < r.left ? r.left - x : (x > r.right ? x - r.right : 0), dy = y < r.top ? r.top - y : (y > r.bottom ? y - r.bottom : 0), dd = dx * dx + dy * dy;
+    if(dd < bd){ bd = dd; best = +sp.dataset.k; }
+  });
+  return best;
+}
+async function tbFigTap(fig, e){
+  const bi = +fig.dataset.b, b = TB.art && TB.art.blocks && TB.art.blocks[bi]; if(!b) return;
+  const img = fig.querySelector('img'), key = tbImgOcrKey(b);
+  if(fig.dataset.ocr === 'busy') return;
+  if(!key || !img || !img.naturalWidth){ tbImgSheet(bi); return; }
+  const x = e.clientX, y = e.clientY;
+  let d = await tbImgOcrLoad(key);
+  if(d && !d.n){ tbImgSheet(bi); return; }                          // déjà lue : pas de texte → ses réglages
+  if(!d){
+    d = await tbImgOcrRun(fig, img, key); if(!d) return;
+    if(!d.n){ tbToast('Pas de texte lisible dans cette image.'); tbImgSheet(bi); return; }
+    tbImgOcrMount(fig, bi, d); try{ tbPaintTags(); tbPaintKnown(); }catch(err){}
+    const k = tbImgOcrAt(fig, x, y);
+    if(k >= 0) tbTapWord(k); else tbToast(`📝 ${d.n} mot${d.n > 1 ? 's' : ''} lu${d.n > 1 ? 's' : ''} dans l’image : touche un mot`, 3000);
+    return;
+  }
+  if(!fig.querySelector('.tb-ocr')){ tbImgOcrMount(fig, bi, d); try{ tbPaintTags(); tbPaintKnown(); }catch(err){} }
+  const k = tbImgOcrAt(fig, x, y);
+  if(k >= 0) tbTapWord(k); else tbImgSheet(bi);
+}
+/* à l'ouverture d'un texte : les images déjà lues retrouvent leurs mots (et leurs mots tagués) */
+async function tbImgOcrRestore(){
+  const body = document.getElementById('tbBody'); if(!body || !TB.art) return;
+  const T0 = TB.toks; let n = 0;
+  for(const fig of body.querySelectorAll('.tb-fig[data-b]')){
+    const bi = +fig.dataset.b, b = (TB.art.blocks || [])[bi], key = tbImgOcrKey(b); if(!key) continue;
+    const d = await tbImgOcrLoad(key);
+    if(TB.toks !== T0 || !fig.isConnected) return;                 // le texte a été redessiné entre-temps
+    if(d && d.n){ tbImgOcrMount(fig, bi, d); n++; }
+  }
+  if(n){ try{ tbPaintTags(); tbPaintKnown(); }catch(e){} }
+}
 function tbImgSheet(bi){
   const b = TB.art && TB.art.blocks && TB.art.blocks[bi]; if(!b || b.t !== 'img') return;
   const sh = document.getElementById('tbSheet'); if(!sh) return;
@@ -47850,6 +48288,7 @@ function tbImgSheet(bi){
       <button type="button" data-tb="img-al" data-v="r" class="${al === 'r' ? 'on' : ''}">À droite ➡</button></div></div>
     <div class="tb-pop-hint">À gauche ou à droite, le texte coule à côté de l'image, comme dans un journal.</div>
     <label class="tb-lbl">Légende<input class="tb-in" id="tbImgCap" maxlength="300" value="${escapeHtml(b.cap || '')}" placeholder="Ce que montre l'image (facultatif)"></label>
+    ${(() => { const d = (TB.imgOcr || {})[tbImgOcrKey(b)]; return d ? `<div class="tb-pop-hint">🔎 ${d.n ? `${d.n} mot${d.n > 1 ? 's' : ''} lu${d.n > 1 ? 's' : ''} dans l'image : touche un mot de l'image pour sa fiche.` : 'Aucun texte lu dans cette image.'} <button type="button" class="tb-link" data-tb="img-ocr">🔁 Relire le texte de l'image</button></div>` : ''; })()}
     <button type="button" class="tb-link" data-tb="img-del">🗑 Retirer l'image du texte</button>
   </div>`;
   tbSheetShow(sh);
@@ -48125,7 +48564,7 @@ function tbLibShellHtml(){
         <select id="tbkLibSort" class="tbl-sort" aria-label="Trier les textes">
           <option value="recent" ${so === 'recent' ? 'selected' : ''}>Récents</option><option value="az" ${so === 'az' ? 'selected' : ''}>A → Z</option><option value="todo" ${so === 'todo' ? 'selected' : ''}>À finir</option>
         </select>
-        <button type="button" class="tbl-imp" data-tbl="import" title="Importer un fichier : un PDF (avec du texte, ou scanné : son texte est lu), des photos de pages, un document Word .docx, un .md (avec ses images ou en .zip), un livre .epub, une BD .cbz, un .txt">📥 Importer (PDF, photos, Word, .md…)</button>
+        <button type="button" class="tbl-imp" data-tbl="import" title="Importer un fichier : un PDF (avec du texte, ou scanné : son texte est lu), des photos de pages, un document Word .docx, un .md (avec ses images ou en .zip), un livre .epub, une BD .cbz, un .txt">📥 Importer<span class="tbl-imp-x"> (PDF, photos, Word, .md…)</span></button>
         <button type="button" class="tbl-new" data-tbl="new-text">＋ Nouveau texte</button>
         <input type="file" id="tbkMdFile" multiple hidden aria-hidden="true" tabindex="-1">
       </div>
@@ -49197,7 +49636,9 @@ function tbPdfPageHtml(pg, B, G){
     if(brk){ flush(); para = { tag, t:bm ? t.slice(bm[0].length) : t, top:l.top, x0:l.x, ital:!!l.ital && tag === 'p', bold:!!l.bold }; }
     else {
       if(!l.bold) para.bold = false;
-      if(/[\p{L}]-$/u.test(para.t) && /^\p{Ll}/u.test(t)) para.t = para.t.slice(0, -1) + t;      // « appren- » + « dre »
+      const hj = tbHyJoin(para.t, t);
+      if(hj === 'join') para.t = para.t.slice(0, -1) + t;      // « appren- » + « dre »
+      else if(hj === 'keep') para.t += t;                     // « peut- » + « être »
       else para.t += ' ' + t;
     }
     prev = l;
@@ -49292,6 +49733,8 @@ function tbPdfDialog(P, cat, existing){
       ${isImg ? '' : `<label class="tbl-imp-rep tbp-txt tbp-per" id="tbpPerL" hidden><input type="checkbox" id="tbpPer"> 📄 Un texte par page choisie, chacun avec le titre de sa page</label>`}
       ${nScan ? `<label class="tbl-dlg-l" for="tbpLang">🔤 Langue du texte ${isImg ? 'des photos' : 'scanné'}</label>
         <select class="am-in" id="tbpLang">${TB_OCR_LANGS.map(l => `<option value="${l[0]}">${l[1]}</option>`).join('')}</select>
+        <label class="tbl-dlg-l" for="tbpEng">🎯 Lecteur de texte (OCR)</label>
+        <select class="am-in" id="tbpEng"><option value="paddle" ${tbOcrEng() === 'paddle' ? 'selected' : ''}>PaddleOCR — le plus précis (magazines, colonnes, titres)</option><option value="tess" ${tbOcrEng() === 'tess' ? 'selected' : ''}>Tesseract — plus léger, plus rapide</option></select>
         <label class="tbl-imp-rep tbp-txt"><input type="checkbox" id="tbpImg" ${isImg ? 'checked' : ''}> Garder aussi l'image de chaque ${isImg ? 'photo' : 'page scannée'} (pour comparer)</label>` : ''}
       <label class="tbl-dlg-l tbp-txt" for="tbpCat">📂 Ranger dans</label>
       <select class="am-in tbp-txt" id="tbpCat">
@@ -49368,7 +49811,7 @@ function tbPdfDialog(P, cat, existing){
       if(!sel.size) return;
       const r = ov.querySelector('#tbpRep'), lg = ov.querySelector('#tbpLang'), ki = ov.querySelector('#tbpImg');
       const tv = tIn.value.replace(/\s+/g, ' ').trim(), per = ov.querySelector('#tbpPer');
-      close({ view:ov.classList.contains('tbp-view'), title:tv || P.title, titleSet:!!tv && tv !== P.title, autoTitle:tAuto && !tIn.dataset.user, perPage:!!(per && per.checked && !ov.classList.contains('tbp-view') && !ov.querySelector('#tbpPerL').hidden), pages:[...sel].sort((a, b) => a - b), cat:ov.querySelector('#tbpCat').value, replace:!!(r && r.checked), lang:lg ? lg.value : 'fra', keepImg:!!(ki && ki.checked) });
+      close({ view:ov.classList.contains('tbp-view'), title:tv || P.title, titleSet:!!tv && tv !== P.title, autoTitle:tAuto && !tIn.dataset.user, perPage:!!(per && per.checked && !ov.classList.contains('tbp-view') && !ov.querySelector('#tbpPerL').hidden), pages:[...sel].sort((a, b) => a - b), cat:ov.querySelector('#tbpCat').value, replace:!!(r && r.checked), lang:lg ? lg.value : 'fra', eng:(() => { const eg = ov.querySelector('#tbpEng'); if(eg){ tbUi().ocrEng = eg.value; tbSaveUi(); return eg.value; } return tbOcrEng(); })(), keepImg:!!(ki && ki.checked) });
     });
   });
 }
@@ -49390,7 +49833,262 @@ function tbProgOpen(title){
   };
 }
 /* 🔎 la reconnaissance de texte (Tesseract.js, téléchargé la première fois) */
-async function tbOcrWorker(lang, onLog){
+/* 🎯 1.0.46 : un meilleur lecteur de texte (OCR) — PaddleOCR (PP-OCRv5, modèle « latin » : français avec ses accents),
+   qui lit bien mieux que Tesseract les pages de magazine (colonnes, gros titres, fonds colorés, photos de pages).
+   Il tourne dans le navigateur (onnxruntime-web, dans un Web Worker) : rien n'est envoyé sur un serveur.
+   Le modèle (≈ 13 Mo) est téléchargé la première fois puis gardé sur l'appareil. Tesseract reste en secours (et pour l'arabe). */
+var TB_PDL = {
+  ort:'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/dist/ort.wasm.min.js', wasm:'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/dist/',
+  bases:['https://huggingface.co/snowfluke/ppu-paddle-ocr-models/resolve/main', 'https://media.githubusercontent.com/media/PT-Perkasa-Pilar-Utama/ppu-paddle-ocr-models/main'],
+  dictBases:['https://huggingface.co/snowfluke/ppu-paddle-ocr-models/resolve/main', 'https://raw.githubusercontent.com/PT-Perkasa-Pilar-Utama/ppu-paddle-ocr-models/main'],
+  det:'/detection/PP-OCRv5_mobile_det_infer.onnx', rec:'/recognition/multi/latin/v5/latin_PP-OCRv5_mobile_rec_infer.onnx', dict:'/recognition/multi/latin/v5/ppocrv5_latin_dict.txt'
+};
+function tbOcrEng(){ const e = tbUi().ocrEng; return e === 'tess' ? 'tess' : 'paddle'; }
+function tbOcrLatin(lang){ return /^(fra|eng|fra\+eng|eng\+fra|spa|deu|ita|por)$/.test(String(lang || 'fra')); }
+async function pdlFetch(path, bases, key, onProg, asText){
+  const k = 'vv.pdl|' + key;
+  try{ const c = await pdvGet(k); if(c) return c; }catch(e){}
+  let err = null;
+  for(const b of bases){
+    try{
+      const r = await fetch(b + path); if(!r.ok) throw new Error('HTTP ' + r.status);
+      const n = +r.headers.get('content-length') || 0; let buf;
+      if(n && r.body && r.body.getReader){
+        const rd = r.body.getReader(), parts = []; let got = 0;
+        for(;;){ const x = await rd.read(); if(x.done) break; parts.push(x.value); got += x.value.length; if(onProg) onProg(Math.min(1, got / n)); }
+        const u = new Uint8Array(got); let o = 0; parts.forEach(q => { u.set(q, o); o += q.length; }); buf = u.buffer;
+      } else buf = await r.arrayBuffer();
+      const v = asText ? new TextDecoder('utf-8').decode(buf) : buf;
+      try{ await pdvPut(k, v); }catch(e){}
+      return v;
+    }catch(e){ err = e; }
+  }
+  throw err || new Error('modèle introuvable');
+}
+/* le moteur, gardé prêt pendant qu'on lit (il se libère tout seul après 3 minutes sans servir) */
+var PDL = null;
+async function pdlEngine(onLog){
+  if(PDL && PDL.ready){ PDL.onLog = onLog; clearTimeout(PDL.idleT); return PDL.api; }
+  if(PDL && PDL.boot){ PDL.onLog = onLog; await PDL.boot; return PDL.api; }
+  const E = PDL = { onLog, ready:false, q:Promise.resolve(), wk:null, calls:new Map(), n:0 };
+  const log = (status, progress) => { try{ if(E.onLog) E.onLog({ status, progress }); }catch(e){} };
+  E.boot = (async () => {
+    let pDet = 0, pRec = 0; const dl = () => log('pdl:dl', (pDet * 4.7 + pRec * 8.1) / 12.8);
+    log('pdl:dl', 0);
+    const [det, rec, dict] = await Promise.all([
+      pdlFetch(TB_PDL.det, TB_PDL.bases, 'det5m', (x) => { pDet = x; dl(); }),
+      pdlFetch(TB_PDL.rec, TB_PDL.bases, 'latin5m', (x) => { pRec = x; dl(); }),
+      pdlFetch(TB_PDL.dict, TB_PDL.dictBases, 'latin5d', null, true)]);
+    log('pdl:init', 0);
+    const src = '(' + pdlWorkerMain.toString() + ')();';
+    E.wk = new Worker(URL.createObjectURL(new Blob([src], { type:'text/javascript' })));
+    E.wk.onmessage = (e) => { const m = e.data || {}, c = E.calls.get(m.id); if(!c) return; if(m.type === 'prog'){ log('recognizing text', m.p); return; } E.calls.delete(m.id); if(m.type === 'err') c.rej(new Error(m.msg)); else c.res(m); };
+    E.wk.onerror = (e) => { E.calls.forEach(c => c.rej(new Error((e && e.message) || 'OCR'))); E.calls.clear(); };
+    E.call = (msg, tr) => new Promise((res, rej) => { const id = ++E.n; msg.id = id; E.calls.set(id, { res, rej }); E.wk.postMessage(msg, tr || []); });
+    const d2 = det.slice(0), r2 = rec.slice(0);          // des copies : les originaux restent gardés sur l'appareil
+    await E.call({ type:'init', ort:TB_PDL.ort, wasmBase:TB_PDL.wasm, det:d2, rec:r2, dict }, [d2, r2]);
+    E.ready = true;
+  })();
+  E.api = {
+    engine:'paddle',
+    recognize:(cv) => { const run = E.q.then(async () => {
+      clearTimeout(E.idleT);
+      const cx = cv.getContext('2d', { willReadFrequently:true }), d = cx.getImageData(0, 0, cv.width, cv.height);
+      const r = await E.call({ type:'run', w:cv.width, h:cv.height, data:d.data.buffer }, [d.data.buffer]);
+      return { data:pdlToTess(r.out) };
+    }); E.q = run.catch(() => {}); return run; },
+    terminate:() => { clearTimeout(E.idleT); E.idleT = setTimeout(() => { if(PDL === E){ try{ E.wk.terminate(); }catch(e){} PDL = null; } }, 180000); }
+  };
+  try{ await E.boot; }catch(e){ if(PDL === E) PDL = null; try{ E.wk && E.wk.terminate(); }catch(x){} throw e; }
+  return E.api;
+}
+/* les lignes lues → l'ordre de lecture (colonnes, titres : découpe « XY ») et des paragraphes, au format de Tesseract */
+function pdlToTess(out){
+  let L = (out && out.lines || []).filter(l => l && l.text && l.bbox).map(l => Object.assign({}, l, { bbox:Object.assign({}, l.bbox), words:(l.words || []).slice() }));
+  if(!L.length) return { text:'', confidence:0, paragraphs:[], lines:[], words:[] };
+  const H = (b) => b.y1 - b.y0;
+  // les morceaux d'une même ligne (les mots d'un gros titre arrivent séparés) : recollés
+  L.sort((a, b) => a.bbox.x0 - b.bbox.x0);
+  const rows = [];
+  for(const l of L){
+    const b = l.bbox, h = H(b);
+    const m = rows.find(r => { const q = r.bbox, qh = H(q), ov = Math.min(b.y1, q.y1) - Math.max(b.y0, q.y0); return ov > 0.6 * Math.min(h, qh) && Math.max(h, qh) / Math.min(h, qh) < 1.5 && b.x0 - q.x1 < 1.1 * Math.max(h, qh) && b.x0 - q.x1 > -0.3 * h; });
+    if(m){ m.text += ' ' + l.text; m.words = m.words.concat(l.words); m.confidence = Math.round((m.confidence + l.confidence) / 2); m.bbox = { x0:Math.min(m.bbox.x0, b.x0), y0:Math.min(m.bbox.y0, b.y0), x1:Math.max(m.bbox.x1, b.x1), y1:Math.max(m.bbox.y1, b.y1) }; }
+    else rows.push(l);
+  }
+  L = rows;
+  const hs = L.map(l => H(l.bbox)).sort((a, b) => a - b), mh = hs[Math.floor(hs.length / 2)] || 10;
+  // les blocs : des lignes l'une sous l'autre, de même taille, qui se chevauchent en largeur
+  const blocks = [];
+  L.slice().sort((a, b) => a.bbox.y0 - b.bbox.y0 || a.bbox.x0 - b.bbox.x0).forEach(l => {
+    const b = l.bbox, h = H(b); let best = null, bg = Infinity;
+    blocks.forEach(B => {
+      const q = B.last.bbox, qh = H(q), ov = Math.min(b.x1, q.x1) - Math.max(b.x0, q.x0), gap = b.y0 - q.y1;
+      if(ov < 0.4 * Math.min(b.x1 - b.x0, q.x1 - q.x0) || gap < -0.5 * Math.min(h, qh) || gap > 1.25 * Math.max(h, qh) || Math.max(h, qh) / Math.min(h, qh) > 1.6) return;
+      if(gap < bg){ bg = gap; best = B; }
+    });
+    if(best){ best.lines.push(l); best.last = l; const z = best.box; z.x0 = Math.min(z.x0, b.x0); z.y0 = Math.min(z.y0, b.y0); z.x1 = Math.max(z.x1, b.x1); z.y1 = Math.max(z.y1, b.y1); }
+    else blocks.push({ lines:[l], last:l, box:Object.assign({}, b) });
+  });
+  const order = (bs) => {
+    if(bs.length <= 1) return bs;
+    const xs = bs.map(B => [B.box.x0, B.box.x1]).sort((a, b) => a[0] - b[0]); let reach = xs[0][1];
+    for(let i = 1; i < xs.length; i++){
+      if(xs[i][0] > reach + mh * 0.4){ const cut = (reach + xs[i][0]) / 2, A = bs.filter(B => B.box.x1 <= cut), Z = bs.filter(B => B.box.x0 >= cut); if(A.length && Z.length && A.length + Z.length === bs.length) return order(A).concat(order(Z)); }
+      reach = Math.max(reach, xs[i][1]);
+    }
+    const ys = bs.map(B => [B.box.y0, B.box.y1]).sort((a, b) => a[0] - b[0]); let ry = ys[0][1];
+    for(let i = 1; i < ys.length; i++){
+      if(ys[i][0] > ry){ const cut = (ry + ys[i][0]) / 2, A = bs.filter(B => B.box.y1 <= cut), Z = bs.filter(B => B.box.y0 >= cut); if(A.length && Z.length && A.length + Z.length === bs.length) return order(A).concat(order(Z)); }
+      ry = Math.max(ry, ys[i][1]);
+    }
+    return bs.slice().sort((a, b) => a.box.y0 - b.box.y0 || a.box.x0 - b.box.x0);
+  };
+  const paragraphs = [];
+  order(blocks).forEach(B => {
+    let cur = null;
+    B.lines.forEach((l, i) => {
+      const prev = B.lines[i - 1];
+      if(!cur || (prev && l.bbox.y0 - prev.bbox.y1 > 0.75 * Math.max(H(l.bbox), H(prev.bbox)))){ cur = { lines:[] }; paragraphs.push(cur); }
+      cur.lines.push(l);
+    });
+  });
+  paragraphs.forEach(pq => { pq.confidence = Math.round(pq.lines.reduce((s, l) => s + l.confidence, 0) / pq.lines.length); pq.text = pq.lines.map(l => l.text).join('\n'); const b = pq.lines.map(l => l.bbox); pq.bbox = { x0:Math.min(...b.map(x => x.x0)), y0:Math.min(...b.map(x => x.y0)), x1:Math.max(...b.map(x => x.x1)), y1:Math.max(...b.map(x => x.y1)) }; });
+  const lines = [].concat(...paragraphs.map(pq => pq.lines));
+  return { text:paragraphs.map(pq => pq.text).join('\n\n'), confidence:Math.round(lines.reduce((s, l) => s + l.confidence, 0) / lines.length), paragraphs, lines, words:[].concat(...lines.map(l => l.words)), engine:'paddle' };
+}
+/* (le code du Web Worker : il est envoyé tel quel dans un Blob) */
+function pdlWorkerMain(){
+  var det = null, rec = null, dict = null;
+  function post(o, tr){ self.postMessage(o, tr || []); }
+  self.onmessage = async (e) => {
+    const m = e.data || {};
+    try{
+      if(m.type === 'init'){
+        importScripts(m.ort);
+        ort.env.wasm.wasmPaths = m.wasmBase; ort.env.wasm.numThreads = 1; ort.env.wasm.proxy = false;
+        const o = { executionProviders:['wasm'], graphOptimizationLevel:'all' };
+        det = await ort.InferenceSession.create(new Uint8Array(m.det), o);
+        rec = await ort.InferenceSession.create(new Uint8Array(m.rec), o);
+        dict = String(m.dict || '').split(/\r?\n/);
+        while(dict.length && dict[dict.length - 1] === '') dict.pop();
+        post({ type:'ready', id:m.id });
+        return;
+      }
+      if(m.type === 'run'){
+        const out = await ocrRun(m.w, m.h, new Uint8ClampedArray(m.data), (p) => post({ type:'prog', id:m.id, p }));
+        post({ type:'done', id:m.id, out });
+      }
+    }catch(err){ post({ type:'err', id:m.id, msg:String(err && err.message || err) }); }
+  };
+  function gapSpaces(ch, pos, pr){
+    if(ch.length < 4) return;
+    const d = []; for(let i = 1; i < pos.length; i++) d.push(pos[i] - pos[i - 1]);
+    const srt = d.slice().sort((a, b) => a - b), med = srt[Math.floor(srt.length / 2)] || 0; if(med <= 0) return;
+    const q = srt.find(x => x > 0) || 0; if(q <= 0) return;
+    const cls = (c) => /\p{L}/u.test(c) ? 0 : (/\p{N}/u.test(c) ? 1 : 2);
+    for(let i = ch.length - 1; i >= 1; i--){
+      const k = cls(ch[i]) === cls(ch[i - 1]) ? 2.5 : 1.5;
+      if(pos[i] - pos[i - 1] > med + k * q && !/\s/.test(ch[i]) && !/\s/.test(ch[i - 1]) && ch[i] !== ch[i - 1]){ ch.splice(i, 0, ' '); pos.splice(i, 0, (pos[i - 1] + pos[i]) / 2); pr.splice(i, 0, 1); }
+    }
+  }
+  function gray(d, i){ return 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2]; }
+  async function ocrRun(W, H, px, prog){
+    // 1) détection : l'image réduite (côté le plus long ≤ 1536, multiple de 32)
+    const lim = Math.min(1536, Math.max(960, Math.round(Math.max(W, H) * 0.75 / 32) * 32));
+    const r = Math.max(W, H) > lim ? lim / Math.max(W, H) : 1;
+    const rw = Math.max(32, Math.round(W * r)), rh = Math.max(32, Math.round(H * r));
+    const dw = Math.ceil(rw / 32) * 32, dh = Math.ceil(rh / 32) * 32;
+    const src = new OffscreenCanvas(W, H); src.getContext('2d').putImageData(new ImageData(px, W, H), 0, 0);
+    const dc = new OffscreenCanvas(dw, dh), dx = dc.getContext('2d', { willReadFrequently:true });
+    dx.fillStyle = '#fff'; dx.fillRect(0, 0, dw, dh); dx.drawImage(src, 0, 0, W, H, 0, 0, rw, rh);
+    const dd = dx.getImageData(0, 0, dw, dh).data, N = dw * dh, t = new Float32Array(3 * N);
+    const mean = [0.485, 0.456, 0.406], std = [0.229, 0.224, 0.225];
+    for(let i = 0, q = 0; i < N; i++, q += 4){ t[i] = (dd[q] / 255 - mean[0]) / std[0]; t[N + i] = (dd[q + 1] / 255 - mean[1]) / std[1]; t[2 * N + i] = (dd[q + 2] / 255 - mean[2]) / std[2]; }
+    const din = new ort.Tensor('float32', t, [1, 3, dh, dw]);
+    const dr = await det.run({ [det.inputNames[0]]:din });
+    const P = dr[det.outputNames[0]].data;
+    prog(0.15);
+    // 2) les zones de texte (composantes connexes de la carte de probabilité)
+    const lab = new Int32Array(N), boxes = [], stack = new Int32Array(N);
+    let nl = 0;
+    for(let i = 0; i < N; i++){
+      if(lab[i] || P[i] <= 0.3) continue;
+      nl++; let sp = 0; stack[sp++] = i; lab[i] = nl;
+      let x0 = dw, y0 = dh, x1 = 0, y1 = 0, n = 0, s = 0;
+      while(sp){
+        const j = stack[--sp], x = j % dw, y = (j - x) / dw;
+        n++; s += P[j]; if(x < x0) x0 = x; if(x > x1) x1 = x; if(y < y0) y0 = y; if(y > y1) y1 = y;
+        if(x > 0 && !lab[j - 1] && P[j - 1] > 0.3){ lab[j - 1] = nl; stack[sp++] = j - 1; }
+        if(x < dw - 1 && !lab[j + 1] && P[j + 1] > 0.3){ lab[j + 1] = nl; stack[sp++] = j + 1; }
+        if(y > 0 && !lab[j - dw] && P[j - dw] > 0.3){ lab[j - dw] = nl; stack[sp++] = j - dw; }
+        if(y < dh - 1 && !lab[j + dw] && P[j + dw] > 0.3){ lab[j + dw] = nl; stack[sp++] = j + dw; }
+      }
+      const bw = x1 - x0 + 1, bh = y1 - y0 + 1;
+      if(n < 12 || bh < 3 || s / n < 0.55) continue;
+      const u = bw * bh * 1.6 / (2 * (bw + bh));              // « unclip » : DB rétrécit les zones, on les rend à leur taille
+      const X0 = Math.max(0, (x0 - u) / r), Y0 = Math.max(0, (y0 - u) / r), X1 = Math.min(W, (x1 + 1 + u) / r), Y1 = Math.min(H, (y1 + 1 + u) / r);
+      if(X0 >= W || Y0 >= H || X1 - X0 < 4 || Y1 - Y0 < 4) continue;
+      boxes.push({ x0:X0, y0:Y0, x1:X1, y1:Y1, sc:s / n });
+    }
+    boxes.sort((a, b) => (a.y0 + a.y1) / 2 - (b.y0 + b.y1) / 2 || a.x0 - b.x0);
+    // 3) la reconnaissance, ligne par ligne (hauteur 48 px)
+    const lines = [];
+    for(let bi = 0; bi < boxes.length; bi++){
+      const B = boxes[bi], bw = B.x1 - B.x0, bh = B.y1 - B.y0;
+      const vert = bh > bw * 1.5 && bh > 40;
+      if(vert) continue;                                       // texte vertical : on le laisse
+      const th = 48, tw = Math.max(16, Math.min(3200, Math.round(th * bw / bh)));
+      const cc = new OffscreenCanvas(tw, th), cx = cc.getContext('2d', { willReadFrequently:true });
+      cx.drawImage(src, B.x0, B.y0, bw, bh, 0, 0, tw, th);
+      const cd = cx.getImageData(0, 0, tw, th).data, M = tw * th, rt = new Float32Array(3 * M);
+      for(let i = 0, q = 0; i < M; i++, q += 4){ const v = gray(cd, q) / 127.5 - 1; rt[i] = v; rt[M + i] = v; rt[2 * M + i] = v; }
+      const rin = new ort.Tensor('float32', rt, [1, 3, th, tw]);
+      const rr = await rec.run({ [rec.inputNames[0]]:rin });
+      const o = rr[rec.outputNames[0]], T = o.dims[1], C = o.dims[2], L = o.data;
+      let D = dict;
+      if(D.length !== C){ D = [''].concat(D[0] === '' ? D.slice(1) : D); if(D.length === C - 1) D.push(''); }
+      const ch = [], pos = [], pr = []; let last = -1;
+      for(let k = 0; k < T; k++){
+        let mx = L[k * C], mi = 0;
+        for(let c = 1; c < C; c++){ const v = L[k * C + c]; if(v > mx){ mx = v; mi = c; } }
+        if(mi === 0 || mi === last){ last = mi; continue; }
+        last = mi;
+        let s = mi >= D.length ? ' ' : D[mi]; if(s === '' || s == null) s = ' ';
+        ch.push(s); pos.push((k + 0.5) / T); pr.push(mx);
+      }
+      gapSpaces(ch, pos, pr);                                  // un blanc oublié entre deux mots serrés (« LAREPUBLIQUE »)
+      const text = ch.join('').replace(/\s+/g, ' ').trim();
+      const conf = pr.length ? pr.reduce((a, b) => a + b, 0) / pr.length : 0;
+      if(!text || conf < 0.5){ continue; }
+      // les mots de la ligne, posés d'après l'instant où le modèle a « vu » chaque lettre
+      const words = []; let cur = null;
+      const step = 1 / T;
+      for(let k = 0; k < ch.length; k++){
+        if(/\s/.test(ch[k])){ if(cur){ words.push(cur); cur = null; } continue; }
+        if(!cur) cur = { t:'', a:pos[k], z:pos[k], p:[] };
+        cur.t += ch[k]; cur.z = pos[k]; cur.p.push(pr[k]);
+      }
+      if(cur) words.push(cur);
+      const ww = words.map((w, i) => {
+        const a = Math.max(0, w.a - step * 1.3), z = Math.min(1, w.z + step * 1.0);
+        return { text:w.t, confidence:Math.round(w.p.reduce((x, y) => x + y, 0) / w.p.length * 100), bbox:{ x0:Math.round(B.x0 + a * bw), y0:Math.round(B.y0), x1:Math.round(B.x0 + z * bw), y1:Math.round(B.y1) } };
+      });
+      lines.push({ text, confidence:Math.round(conf * 100), bbox:{ x0:Math.round(B.x0), y0:Math.round(B.y0), x1:Math.round(B.x1), y1:Math.round(B.y1) }, words:ww });
+      if(bi % 4 === 3) prog(0.15 + 0.85 * bi / boxes.length);
+    }
+    return { lines, w:W, h:H };
+  }
+}
+/* 🔎 la reconnaissance de texte : PaddleOCR d'abord (français, anglais), Tesseract en secours et pour l'arabe */
+async function tbOcrWorker(lang, onLog, eng){
+  if((eng || tbOcrEng()) === 'paddle' && tbOcrLatin(lang)){
+    try{ return await pdlEngine(onLog); }
+    catch(e){ console.warn('PaddleOCR indisponible, Tesseract prend le relais', e); try{ if(onLog) onLog({ status:'pdl:fallback' }); }catch(x){} }
+  }
+  return await tbOcrWorkerTess(lang, onLog);
+}
+async function tbOcrWorkerTess(lang, onLog){
   if(!(window.Tesseract && window.Tesseract.createWorker)){
     for(const u of TB_TESS){ try{ await tbLoadScript(u); }catch(e){ continue; } if(window.Tesseract && window.Tesseract.createWorker) break; }
   }
@@ -49399,6 +50097,9 @@ async function tbOcrWorker(lang, onLog){
 }
 function tbOcrStatus(m){
   const s = String(m && m.status || '');
+  if(s === 'pdl:dl') return `⬇️ le lecteur de texte PaddleOCR (une seule fois)… ${Math.round((m.progress || 0) * 100)} %`;
+  if(s === 'pdl:init') return '⚙️ je prépare le lecteur de texte…';
+  if(s === 'pdl:fallback') return '⚙️ je prends le lecteur de texte de secours…';
   if(/recogniz/.test(s)) return `🔎 je lis… ${Math.round((m.progress || 0) * 100)} %`;
   if(/traineddata|language/.test(s)) return `⬇️ la langue du texte… ${Math.round((m.progress || 0) * 100)} %`;
   if(/core/.test(s)) return '⬇️ le lecteur de texte…';
@@ -49419,7 +50120,7 @@ function tbOcrHtml(d){
     const lines = (p.lines || []).map(l => String(l.text || '').replace(/\s+/g, ' ').trim()).filter(Boolean);
     if(!lines.length) return '';
     let t = lines[0];
-    for(let i = 1; i < lines.length; i++){ const x = lines[i]; if(/\p{L}-$/u.test(t) && /^\p{Ll}/u.test(x)) t = t.slice(0, -1) + x; else t += ' ' + x; }
+    for(let i = 1; i < lines.length; i++){ const x = lines[i], hj = tbHyJoin(t, x); if(hj === 'join') t = t.slice(0, -1) + x; else if(hj === 'keep') t += x; else t += ' ' + x; }
     t = clean(t); if(!t) return '';
     const lh = (p.lines || []).reduce((s, l) => s + (l.bbox ? l.bbox.y1 - l.bbox.y0 : 0), 0) / Math.max(1, (p.lines || []).length);
     const head = med && lines.length <= 2 && t.length < 90 && lh > med * 1.35 && !/[.;,]$/.test(t);
@@ -49488,7 +50189,7 @@ async function tbPdfBuild(P, v, prog){
       const p = sel[k], scan = P.kind === 'img' || !!P.scan[p];
       prog.set(k, sel.length, scan ? `🔎 ${P.kind === 'img' ? 'Photo' : 'Page'} ${p} : je lis le texte de l'image (${k + 1} / ${sel.length})…` : `📄 Page ${p} (${k + 1} / ${sel.length})…`);
       if(scan){
-        if(!ocr){ prog.sub('⬇️ Je prépare le lecteur de texte…'); ocr = await tbOcrWorker(v.lang, (m) => { const t = tbOcrStatus(m); if(t) prog.sub(t); }); }
+        if(!ocr){ prog.sub('⬇️ Je prépare le lecteur de texte…'); ocr = await tbOcrWorker(v.lang, (m) => { const t = tbOcrStatus(m); if(t) prog.sub(t); }, v.eng); }
         let cv;
         if(P.kind === 'img') cv = await tbImgCanvas(P.files[p - 1], 2200);
         else { const page = await P.doc.getPage(p); cv = await tbPdfRender(page, 1800); try{ page.cleanup(); }catch(e){} }
@@ -49506,6 +50207,7 @@ async function tbPdfBuild(P, v, prog){
       } else {
         const page = await P.doc.getPage(p), vw = page.view || [0, 0, 600, 800];
         let tc = null; try{ tc = await page.getTextContent(); }catch(e){}
+        if(tc && (tc.items || []).some(x => x && tbPdfSpaced(x.str) === 2)){ try{ await tbPdfRespaceTc(page, P.lib, tc); }catch(e){ console.warn('lettres espacées', e); } }
         const imgs = (await tbPdfImages(page, P.lib, seen)) || [];
         const fonts = await tbPdfFonts(page, tc);
         pages.push({ n:p, lines:tbPdfLines(tc && tc.items, fonts), imgs, dots:imgs.dots || [], top:vw[3], bottom:vw[1], h:vw[3] - vw[1], left:vw[0], w:vw[2] - vw[0] });
@@ -49674,7 +50376,7 @@ async function pdvListLoad(){
 function pdvMeta(id){ return pdvList().find(x => x.id === id) || null; }
 function pdvPatch(id, p){ const L = pdvList(), m = L.find(x => x.id === id); if(!m) return; Object.assign(m, p); pdvSaveList(L); }
 function pdvBlobKey(id, p){ return nsKey('tbpdf') + '|' + id + (p ? '|' + p : ''); }
-function pdvOcrKey(id, p){ return nsKey('tbpdfocr') + '|' + id + '|' + p; }
+function pdvOcrKey(id, p){ return nsKey(tbOcrEng() === 'paddle' ? 'tbpdfocr-pd' : 'tbpdfocr') + '|' + id + '|' + p; }
 async function pdvPut(key, val){ try{ await tbStore('img', 'readwrite', os => { os.put(val, key); }); return true; }catch(e){ console.warn('pdv', e); return false; } }
 async function pdvGet(key){ try{ return await tbStore('img', 'readonly', os => os.get(key)) || null; }catch(e){ return null; } }
 async function pdvDelKey(key){ try{ await tbStore('img', 'readwrite', os => { os.delete(key); }); }catch(e){} }
@@ -49696,7 +50398,7 @@ async function pdvSave(P, v){
 }
 async function pdvRemoveKeys(id, nImg){
   if(nImg) for(let k = 1; k <= nImg; k++) await pdvDelKey(pdvBlobKey(id, k)); else await pdvDelKey(pdvBlobKey(id));
-  try{ const pre = nsKey('tbpdfocr') + '|' + id + '|', keys = await tbStore('img', 'readonly', os => os.getAllKeys()); for(const k of keys || []) if(typeof k === 'string' && k.startsWith(pre)) await pdvDelKey(k); }catch(e){}
+  try{ const pre = [nsKey('tbpdfocr') + '|' + id + '|', nsKey('tbpdfocr-pd') + '|' + id + '|'], keys = await tbStore('img', 'readonly', os => os.getAllKeys()); for(const k of keys || []) if(typeof k === 'string' && pre.some(x => k.startsWith(x))) await pdvDelKey(k); }catch(e){}
 }
 async function pdvRemove(id){
   const m = pdvMeta(id); if(!m) return;
@@ -49704,12 +50406,76 @@ async function pdvRemove(id){
   await pdvRemoveKeys(id, m.kind === 'img' ? m.n : 0);
 }
 /* 📚 dans la bibliothèque : « Mes PDF, tels quels » */
+/* 📁 1.0.46 : les dossiers de « Mes PDF, tels quels » (gardés sur l'appareil, avec la liste des PDF) */
+function pdvDirs(){
+  const u = nsKey('tbpdfdirs');
+  if(!PDV_DIRS || PDV_DIRS_U !== u){ PDV_DIRS_U = u; let L = []; try{ L = JSON.parse(localStorage.getItem(u) || '[]'); }catch(e){} PDV_DIRS = Array.isArray(L) ? L.filter(d => d && d.id) : [];
+    pdvGet(u).then(v => { if(Array.isArray(v) && PDV_DIRS_U === u && v.length > PDV_DIRS.length){ PDV_DIRS = v; pdvShelfRefresh(); } }).catch(() => {}); }
+  return PDV_DIRS.map(d => Object.assign({}, d));
+}
+var PDV_DIRS = null, PDV_DIRS_U = '';
+function pdvSaveDirs(L){ PDV_DIRS = (L || []).slice(0, 60); const u = nsKey('tbpdfdirs'); PDV_DIRS_U = u; try{ localStorage.setItem(u, JSON.stringify(PDV_DIRS)); }catch(e){} pdvPut(u, JSON.parse(JSON.stringify(PDV_DIRS))); }
+function pdvShelfItem(m){
+  const n = (m.pages || []).length || m.n;
+  return `<div class="pdv-sh-it" data-pdv-open="${tbAttr(m.id)}" role="button" tabindex="0" draggable="true" data-pdv-drag="${tbAttr(m.id)}" aria-label="Ouvrir « ${tbAttr(m.title)} »">
+      <span class="pdv-sh-i" aria-hidden="true">${m.kind === 'img' ? '📷' : '📄'}</span><span class="pdv-sh-m"><b>${escapeHtml(m.title)}</b><small>${n} page${n > 1 ? 's' : ''}${(m.scan || []).length || m.kind === 'img' ? ' · 🔎 scanné' : ''}${m.last ? ` · reprendre p. ${m.last}` : ''}</small></span>
+      <button type="button" class="pdv-sh-x pdv-sh-mv" data-pdvs="mv" data-id="${tbAttr(m.id)}" aria-label="Ranger « ${tbAttr(m.title)} » dans un dossier" title="Ranger dans un dossier">📁</button>
+      <button type="button" class="pdv-sh-x" data-pdv-del="${tbAttr(m.id)}" aria-label="Retirer « ${tbAttr(m.title)} » de l'appareil">🗑</button></div>`;
+}
 function pdvShelfHtml(){
   const L = pdvList(); if(!L.length) return '';
-  return `<div class="pdv-shelf" id="pdvShelf"><div class="pdv-sh-h">📖 Mes PDF, tels quels <small>· sur cet appareil · touche un mot de la page pour sa définition</small></div>
-    <div class="pdv-sh-l">${L.map(m => { const n = (m.pages || []).length || m.n; return `<div class="pdv-sh-it" data-pdv-open="${tbAttr(m.id)}" role="button" tabindex="0" aria-label="Ouvrir « ${tbAttr(m.title)} »">
-      <span class="pdv-sh-i" aria-hidden="true">${m.kind === 'img' ? '📷' : '📄'}</span><span class="pdv-sh-m"><b>${escapeHtml(m.title)}</b><small>${n} page${n > 1 ? 's' : ''}${(m.scan || []).length || m.kind === 'img' ? ' · 🔎 scanné' : ''}${m.last ? ` · reprendre p. ${m.last}` : ''}</small></span>
-      <button type="button" class="pdv-sh-x" data-pdv-del="${tbAttr(m.id)}" aria-label="Retirer « ${tbAttr(m.title)} » de l'appareil">🗑</button></div>`; }).join('')}</div></div>`;
+  const D = pdvDirs(), ids = new Set(D.map(d => d.id));
+  const loose = L.filter(m => !m.dir || !ids.has(m.dir));
+  return `<div class="pdv-shelf" id="pdvShelf"><div class="pdv-sh-h"><span>📖 Mes PDF, tels quels <small>· sur cet appareil · touche un mot de la page pour sa définition</small></span><button type="button" class="pdv-sh-nd" data-pdvs="new-dir">📁＋ Nouveau dossier</button></div>
+    ${D.map(d => { const In = L.filter(m => m.dir === d.id); return `<div class="pdv-dir ${d.open === false ? '' : 'open'}" data-dir="${tbAttr(d.id)}">
+      <div class="pdv-dir-h" data-pdvs="dir-tog" data-dir="${tbAttr(d.id)}" role="button" tabindex="0" aria-expanded="${d.open === false ? 'false' : 'true'}"><span class="pdv-dir-c" aria-hidden="true">▸</span><span class="pdv-dir-i" aria-hidden="true">${d.open === false ? '📁' : '📂'}</span><b>${escapeHtml(d.name)}</b><small>${In.length} PDF</small>
+        <button type="button" class="pdv-sh-x" data-pdvs="dir-ren" data-dir="${tbAttr(d.id)}" aria-label="Renommer le dossier « ${tbAttr(d.name)} »" title="Renommer">✏️</button><button type="button" class="pdv-sh-x" data-pdvs="dir-del" data-dir="${tbAttr(d.id)}" aria-label="Supprimer le dossier « ${tbAttr(d.name)} » (les PDF restent)" title="Supprimer le dossier (les PDF restent)">🗑</button></div>
+      <div class="pdv-sh-l">${In.map(pdvShelfItem).join('') || '<div class="pdv-dir-e">Vide : glisse un PDF ici, ou touche 📁 sur un PDF.</div>'}</div></div>`; }).join('')}
+    ${loose.length ? `<div class="pdv-sh-l pdv-sh-loose" data-dir="">${loose.map(pdvShelfItem).join('')}</div>` : ''}</div>`;
+}
+/* un petit nom à écrire (nouveau dossier, renommer) */
+function pdvAskName(title, val){
+  return new Promise(res => {
+    const ov = document.createElement('div'); ov.className = 'am-dlg-ov tbl-dlg-ov show';
+    ov.innerHTML = `<div class="am-dlg tbl-dlg" role="dialog" aria-modal="true" aria-label="${tbAttr(title)}"><div class="am-dlg-t">${escapeHtml(title)}</div>
+      <input class="am-in" id="pdvAskIn" maxlength="60" autocomplete="off" value="${tbAttr(val || '')}" placeholder="Le nom du dossier">
+      <div class="am-dlg-b"><button class="am-dlg-btn ghost" data-v="no">Annuler</button><button class="am-dlg-btn" data-v="ok">OK</button></div></div>`;
+    document.body.appendChild(ov);
+    const inp = ov.querySelector('#pdvAskIn'); setTimeout(() => { inp.focus(); inp.select(); }, 30);
+    const done = (v) => { ov.remove(); res(v); };
+    ov.addEventListener('click', (e) => { if(e.target === ov || e.target.closest('[data-v="no"]')) done(null); else if(e.target.closest('[data-v="ok"]')) done(inp.value.replace(/\s+/g, ' ').trim() || null); });
+    inp.addEventListener('keydown', (e) => { if(e.key === 'Enter'){ e.preventDefault(); done(inp.value.replace(/\s+/g, ' ').trim() || null); } else if(e.key === 'Escape'){ e.preventDefault(); done(null); } });
+  });
+}
+async function pdvNewDir(){
+  const name = await pdvAskName('📁 Nouveau dossier', ''); if(!name) return null;
+  const D = pdvDirs(), d = { id:'d' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), name, open:true, at:Date.now() };
+  D.push(d); pdvSaveDirs(D); pdvShelfRefresh(); return d;
+}
+function pdvMoveTo(id, dir){ pdvPatch(id, { dir:dir || '' }); pdvShelfRefresh(); const d = pdvDirs().find(x => x.id === dir); tbToast(d ? `📁 Rangé dans « ${d.name} »` : '📄 Sorti du dossier'); }
+/* 📁 sur un PDF : la liste des dossiers */
+function pdvMoveMenu(btn, id){
+  document.querySelectorAll('.pdv-menu').forEach(x => x.remove());
+  const m = pdvMeta(id); if(!m) return;
+  const D = pdvDirs(), r = btn.getBoundingClientRect();
+  const el = document.createElement('div'); el.className = 'pdv-menu'; el.setAttribute('role', 'menu');
+  el.innerHTML = `<div class="pdv-menu-h">Ranger « ${escapeHtml(m.title)} »</div>
+    ${D.map(d => `<button type="button" role="menuitem" data-mv="${tbAttr(d.id)}" class="${m.dir === d.id ? 'on' : ''}">📁 ${escapeHtml(d.name)}${m.dir === d.id ? ' ✓' : ''}</button>`).join('')}
+    ${m.dir ? `<button type="button" role="menuitem" data-mv="">📄 Sans dossier</button>` : ''}
+    <button type="button" role="menuitem" data-mv="__new">＋ Nouveau dossier…</button>`;
+  document.body.appendChild(el);
+  const w = el.offsetWidth, h = el.offsetHeight;
+  el.style.left = Math.max(8, Math.min(window.innerWidth - w - 8, r.right - w)) + 'px';
+  el.style.top = (r.bottom + h + 8 < window.innerHeight ? r.bottom + 4 : Math.max(8, r.top - h - 4)) + 'px';
+  const off = (e) => { if(!el.contains(e.target)){ el.remove(); document.removeEventListener('pointerdown', off, true); } };
+  setTimeout(() => document.addEventListener('pointerdown', off, true), 0);
+  el.addEventListener('click', async (e) => {
+    const b = e.target.closest('[data-mv]'); if(!b) return;
+    el.remove(); document.removeEventListener('pointerdown', off, true);
+    let dir = b.dataset.mv;
+    if(dir === '__new'){ const d = await pdvNewDir(); if(!d) return; dir = d.id; }
+    pdvMoveTo(id, dir);
+  });
 }
 function pdvShelfRefresh(){
   const lib = document.getElementById('tbkLib'); if(!lib) return;
@@ -49717,8 +50483,22 @@ function pdvShelfRefresh(){
   if(old){ if(html) old.outerHTML = html; else old.remove(); return; }
   const top = document.getElementById('tbkLibTop'); if(top && html) top.insertAdjacentHTML('afterend', html);
 }
-document.addEventListener('click', (e) => {
+document.addEventListener('click', async (e) => {
   const t = e.target; if(!t || !t.closest) return;
+  const act = t.closest('[data-pdvs]');
+  if(act && act.closest('#pdvShelf')){
+    e.preventDefault(); e.stopPropagation();
+    const a = act.dataset.pdvs, dir = act.dataset.dir;
+    if(a === 'new-dir'){ await pdvNewDir(); return; }
+    if(a === 'mv'){ pdvMoveMenu(act, act.dataset.id); return; }
+    if(a === 'dir-tog'){ const D = pdvDirs(), d = D.find(x => x.id === dir); if(d){ d.open = d.open === false; pdvSaveDirs(D); pdvShelfRefresh(); } return; }
+    if(a === 'dir-ren'){ const D = pdvDirs(), d = D.find(x => x.id === dir); if(!d) return; const n = await pdvAskName('✏️ Renommer le dossier', d.name); if(n){ d.name = n; pdvSaveDirs(D); pdvShelfRefresh(); } return; }
+    if(a === 'dir-del'){
+      if(!act.classList.contains('sure')){ act.classList.add('sure'); act.textContent = 'Sûr ?'; clearTimeout(act.__t); act.__t = setTimeout(() => { act.classList.remove('sure'); act.textContent = '🗑'; }, 3200); return; }
+      pdvSaveDirs(pdvDirs().filter(x => x.id !== dir)); pdvList().filter(m => m.dir === dir).forEach(m => pdvPatch(m.id, { dir:'' })); pdvShelfRefresh(); tbToast('📁 Dossier supprimé : ses PDF sont restés sur l’appareil'); return;
+    }
+    return;
+  }
   const del = t.closest('[data-pdv-del]');
   if(del){
     e.preventDefault(); e.stopPropagation();
@@ -49728,6 +50508,11 @@ document.addEventListener('click', (e) => {
   const it = t.closest('[data-pdv-open]'); if(it){ e.preventDefault(); pdvOpen(it.dataset.pdvOpen); }
 });
 document.addEventListener('keydown', (e) => { if(e.key !== 'Enter' || !e.target || !e.target.matches || !e.target.matches('[data-pdv-open]')) return; e.preventDefault(); pdvOpen(e.target.dataset.pdvOpen); });
+// 🖱 sur ordinateur : glisser un PDF sur un dossier (ou hors des dossiers)
+document.addEventListener('dragstart', (e) => { const it = e.target && e.target.closest && e.target.closest('[data-pdv-drag]'); if(!it) return; try{ e.dataTransfer.setData('text/x-pdv', it.dataset.pdvDrag); e.dataTransfer.effectAllowed = 'move'; }catch(err){} it.classList.add('drag'); });
+document.addEventListener('dragend', (e) => { document.querySelectorAll('.pdv-sh-it.drag, .pdv-dir.over, .pdv-sh-loose.over').forEach(x => x.classList.remove('drag', 'over')); });
+document.addEventListener('dragover', (e) => { const z = e.target && e.target.closest && e.target.closest('#pdvShelf .pdv-dir, #pdvShelf .pdv-sh-loose'); if(!z) return; try{ if(![...e.dataTransfer.types].includes('text/x-pdv')) return; }catch(err){ return; } e.preventDefault(); document.querySelectorAll('.pdv-dir.over, .pdv-sh-loose.over').forEach(x => { if(x !== z) x.classList.remove('over'); }); z.classList.add('over'); });
+document.addEventListener('drop', (e) => { const z = e.target && e.target.closest && e.target.closest('#pdvShelf .pdv-dir, #pdvShelf .pdv-sh-loose'); if(!z) return; let id = ''; try{ id = e.dataTransfer.getData('text/x-pdv'); }catch(err){} if(!id) return; e.preventDefault(); z.classList.remove('over'); pdvMoveTo(id, z.dataset.dir || ''); });
 /* ---------- la liseuse ---------- */
 /* 📖 1.0.43 : une vraie liseuse de PDF — la main pour glisser la page (souris) ou le doigt, le zoom en pinçant ou
    Ctrl + molette (autour de l'endroit visé), les vignettes des pages, la recherche (chaque résultat avec sa phrase :
@@ -49745,7 +50530,7 @@ async function pdvOpen(id, at){
   try{ wtClose(); }catch(e){}
   const N = (m.pages || []).length || m.n;
   const ov = document.createElement('div');
-  ov.className = 'pdv-ov'; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-label', 'Lire « ' + m.title + ' »');
+  ov.className = 'pdv-ov' + (tbUi().pdvLz === false ? ' pdv-lz-off' : '') + (tbUi().pdvNight ? ' pdv-night' : ''); ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-label', 'Lire « ' + m.title + ' »');
   const zsel = `<select class="pdv-zsel" id="pdvZv" aria-label="Zoom" title="Zoom (Ctrl + molette, ou pincer)"><option value="width">Largeur de la page</option><option value="page">Page entière</option>${[50, 75, 100, 125, 150, 200, 300, 400].map(z => `<option value="${z}">${z} %</option>`).join('')}<option value="cur" hidden></option></select>`;
   ov.innerHTML = `<div class="pdv-top" role="toolbar" aria-label="Outils du PDF">
       <button type="button" class="pdv-ib" data-pdv="x" aria-label="Fermer (Échap)" title="Fermer (Échap)">✕</button>
@@ -49754,6 +50539,9 @@ async function pdvOpen(id, at){
       <div class="pdv-nav"><button type="button" class="pdv-ib" data-pdv="prev" aria-label="Page précédente" title="Page précédente (←)">‹</button><button type="button" class="pdv-pn" data-pdv="pick" id="pdvPn" aria-label="Aller à une page" title="Aller à une page (G)">1 / ${N}</button><button type="button" class="pdv-ib" data-pdv="next" aria-label="Page suivante" title="Page suivante (→)">›</button></div>
       <div class="pdv-zm"><button type="button" class="pdv-ib" data-pdv="zm-" aria-label="Zoom arrière" title="Zoom arrière (Ctrl −)">−</button>${zsel}<button type="button" class="pdv-ib" data-pdv="zm+" aria-label="Zoom avant" title="Zoom avant (Ctrl +)">+</button></div>
       <div class="pdv-tools" role="group" aria-label="Outil"><button type="button" class="pdv-ib on" data-pdv="hand" aria-pressed="true" title="Main : glisser pour déplacer la page (H)" aria-label="Outil main">✋</button><button type="button" class="pdv-ib" data-pdv="sel" aria-pressed="false" title="Sélection : choisir des mots (V)" aria-label="Outil sélection"><span class="pdv-ibeam">I</span></button></div>
+      <button type="button" class="pdv-ib pdv-kb" data-pdv="kindle" aria-label="Mode liseuse, comme une Kindle (K)" title="Mode liseuse, comme une Kindle (K)">📖</button>
+      <button type="button" class="pdv-ib ${tbUi().pdvNight ? 'on' : ''}" data-pdv="night" aria-label="Mode nuit (N)" title="Mode nuit (N)" aria-pressed="${tbUi().pdvNight ? 'true' : 'false'}">🌙</button>
+      <button type="button" class="pdv-ib pdv-lzb ${tbUi().pdvLz === false ? '' : 'on'}" data-pdv="lz" aria-label="Les liaisons sur la page" title="Les liaisons sur la page (L)" aria-pressed="${tbUi().pdvLz === false ? 'false' : 'true'}">‿</button>
       <button type="button" class="pdv-ib" data-pdv="find" aria-label="Rechercher (Ctrl F)" title="Rechercher (Ctrl F)" aria-pressed="false">🔍</button>
       <button type="button" class="pdv-ib pdv-crb" data-pdv="carnet" aria-label="Mon carnet : les mots tagués" title="Mon carnet : les mots tagués">🏷️<b class="pdv-crn" id="pdvCrN"></b></button>
       <button type="button" class="pdv-ib pdv-helpb" data-pdv="help" aria-label="Raccourcis clavier (?)" title="Raccourcis clavier (?)">⌨</button>
@@ -49778,6 +50566,7 @@ async function pdvOpen(id, at){
   pdvKeysWire(S); pdvHandWire(S); pdvPinchWire(S);
   try{ bkPush('pdv', () => pdvClose()); }catch(e){}
   pdvTbInit(S);                                     // 📇 la fiche des mots et le carnet, comme sur la Tablette
+  if(m.kindle) setTimeout(() => { if(PDV === S && S.pages.length) pdkOpen(S); }, 400);
   const tbh = ov.querySelector('#pdvTb');
   tbh.addEventListener('click', (e) => pdvTbClick(S, e));
   tbh.addEventListener('keydown', (e) => { if(e.key === 'Enter' && e.target.matches && e.target.matches('[role="button"][data-tb]')){ e.preventDefault(); e.target.click(); } });
@@ -49800,6 +50589,9 @@ async function pdvOpen(id, at){
     else if(a === 'help') pdvHelp(S);
     else if(a === 'gopage') pdvGoPrompt(S);
     else if(a === 'carnet') pdvCarnet(S);
+    else if(a === 'lz') pdvLzSet(S, S.ov.classList.contains('pdv-lz-off'));
+    else if(a === 'night') pdvNightSet(S, !S.ov.classList.contains('pdv-night'));
+    else if(a === 'kindle') pdkOpen(S);
   });
   // 👆 toucher un mot de la page : sa fiche (comme sur la Tablette)
   ov.addEventListener('click', (e) => {
@@ -49836,7 +50628,7 @@ async function pdvOpen(id, at){
   S.pages = list.map((p, k) => ({ p, k, scan:m.kind === 'img' || (m.scan || []).includes(p), ar:S.ar0, el:null, st:'', tl:null }));
   S.body.innerHTML = `<div class="pdv-pages" id="pdvPages">${S.pages.map(pg => `<section class="pdv-pg" data-k="${pg.k}" aria-label="Page ${pg.p}">
       <div class="pdv-pl">${m.kind === 'img' ? 'Photo' : 'Page'} ${pg.p}${pg.scan ? ' · 🔎 scannée' : ''}</div>
-      <div class="pdv-sheet"><canvas aria-hidden="true"></canvas><div class="pdv-hls" aria-hidden="true"></div><div class="pdv-tl" lang="fr"></div><div class="pdv-chip" hidden></div></div>
+      <div class="pdv-sheet"><canvas aria-hidden="true"></canvas><div class="pdv-hls" aria-hidden="true"></div><div class="pdv-lz" aria-hidden="true"></div><div class="pdv-tl" lang="fr"></div><div class="pdv-chip" hidden></div></div>
     </section>`).join('')}</div>`;
   S.wrap = S.body.querySelector('#pdvPages');
   S.pages.forEach(pg => { pg.el = S.body.querySelector(`.pdv-pg[data-k="${pg.k}"]`); pg.sh = pg.el.querySelector('.pdv-sheet'); });
@@ -49863,6 +50655,8 @@ function pdvClose(quiet){
   const pl = document.getElementById('wtSelPill'); if(pl) pl.hidden = true;
   if(S.pages[S.cur]) pdvPatch(S.id, { last:S.pages[S.cur].p });
   S.pages.forEach(pg => { try{ if(pg.task) pg.task.cancel(); }catch(e){} });
+  if(S.pdk && S.pdk.on){ const pk = pdkCurPage(S); if(pk >= 0) pdvPatch(S.id, { last:S.pages[pk].p, kindle:true }); }
+  else pdvPatch(S.id, { kindle:false });
   pdvTbDone(S);
   S.ov.remove(); document.body.classList.remove('pdv-on');
   try{ if(S.ocr) S.ocr.terminate(); }catch(e){}
@@ -50019,6 +50813,7 @@ function pdvKeysWire(S){
     if(k === 'Escape' && S.tbArt && TB.sheetK !== -1){ e.preventDefault(); e.stopPropagation(); tbCloseSheet(); return; }
     if(e.target && e.target.closest && e.target.closest('#pdvTb')) return;
     if(typing(e)) return;
+    if(S.pdk && S.pdk.on){ if(pdkKey(S, e)) return; }
     if(k === 'Escape'){
       e.preventDefault(); e.stopPropagation();
       const h = S.ov.querySelector('.pdv-help'); if(h){ h.remove(); return; }
@@ -50052,6 +50847,9 @@ function pdvKeysWire(S){
     else if(k === 'g' || k === 'G'){ e.preventDefault(); pdvGoPrompt(S); }
     else if(k === 'h' || k === 'H'){ pdvTool(S, 'hand'); }
     else if(k === 'v' || k === 'V'){ pdvTool(S, 'sel'); }
+    else if(k === 'l' || k === 'L'){ pdvLzSet(S, S.ov.classList.contains('pdv-lz-off')); }
+    else if(k === 'n' || k === 'N'){ pdvNightSet(S, !S.ov.classList.contains('pdv-night')); }
+    else if(k === 'k' || k === 'K'){ pdkOpen(S); }
     else if(k === '?'){ e.preventDefault(); pdvHelp(S); }
   };
   S.onKeyUp = (e) => { if(e.key === ' ' && S.tmpHand){ S.tmpHand = false; S.ov.classList.toggle('pdv-hand', S.tool === 'hand'); } };
@@ -50060,7 +50858,7 @@ function pdvKeysWire(S){
 function pdvHelp(S){
   const old = S.ov.querySelector('.pdv-help'); if(old){ old.remove(); return; }
   const R = [['Ctrl F · F3 · /', 'Rechercher ; Entrée / Maj + Entrée : résultat suivant / précédent'], ['Ctrl + · Ctrl −', 'Zoom avant / arrière (ou Ctrl + molette, ou pincer)'], ['Ctrl 0 · Ctrl 1 · Ctrl 2', 'Page entière · Taille réelle (100 %) · Largeur de la page'],
-    ['← →', 'Page précédente / suivante'], ['Page ↑ · Page ↓ · Espace', 'Défiler d’un écran'], ['Début · Fin', 'Première / dernière page'], ['G · Ctrl G', 'Aller à une page'], ['H · V', 'La main (glisser) · La sélection (choisir des mots)'], ['Espace (maintenue)', 'La main, le temps de glisser'], ['Échap', 'Fermer (la recherche, puis le PDF)']];
+    ['← →', 'Page précédente / suivante'], ['Page ↑ · Page ↓ · Espace', 'Défiler d’un écran'], ['Début · Fin', 'Première / dernière page'], ['G · Ctrl G', 'Aller à une page'], ['L', 'Les liaisons sur la page (montrer / cacher)'], ['N', 'Mode nuit'], ['K', 'Mode liseuse (comme une Kindle) : ← → pour tourner les pages, Échap pour revenir'], ['H · V', 'La main (glisser) · La sélection (choisir des mots)'], ['Espace (maintenue)', 'La main, le temps de glisser'], ['Échap', 'Fermer (la recherche, puis le PDF)']];
   const el = document.createElement('div'); el.className = 'pdv-help'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', 'Raccourcis clavier');
   el.innerHTML = `<div class="pdv-help-in"><div class="pdv-help-h"><b>⌨ Raccourcis clavier</b><button type="button" class="pdv-ib" data-pdv="help" aria-label="Fermer">✕</button></div><dl>${R.map(r => `<dt>${r[0].split(' · ').map(x => `<kbd>${escapeHtml(x)}</kbd>`).join(' ')}</dt><dd>${escapeHtml(r[1])}</dd>`).join('')}</dl></div>`;
   el.addEventListener('click', (e) => { if(e.target === el) el.remove(); });
@@ -50124,7 +50922,7 @@ async function pdvRender(S, pg){
     if(my !== S.tok || PDV !== S){ c2.width = c2.height = 0; if(my === S.tok) pg.st = ''; return; }
     if(!pg.tl && page && !pg.scan){                 // le texte de la page, mot par mot, calé sur l'encre du dessin
       const items = pg.ix || await pdvTextItems(S, page, vp1);
-      if(items.length) pg.tl = pdvSplitWords(items, c2); else pg.scan = true;
+      if(items.length) pg.tl = pdvSplitWords(pdvRespace(items, c2), c2); else pg.scan = true;
       if(my !== S.tok || PDV !== S){ c2.width = c2.height = 0; if(my === S.tok) pg.st = ''; return; }
       if(pg.tl) pdvFindPageChanged(S, pg);
     }
@@ -50136,11 +50934,96 @@ async function pdvRender(S, pg){
   }catch(e){ pg.task = null; if(my === S.tok) pg.st = ''; if(!(e && /Rendering cancelled/i.test(e.name + ' ' + e.message))) console.warn('pdv page', e); }
 }
 /* le texte d'une page de PDF → des morceaux posés sur la page (en fraction de sa largeur) */
-async function pdvTextItems(S, page, vp1){
-  let tc = null; try{ tc = await page.getTextContent(); }catch(e){ return []; }
+/* ✂️ 1.0.46 : un mot coupé en fin de ligne (« che- » / « vronné ») redevient un seul mot. Un vrai trait d'union reste
+   (« peut- » / « être », « dit- » / « il », « grand- » / « mère »). Rend 'join' (on enlève le tiret), 'keep' (on le garde) ou ''. */
+var TB_HY_R = /^(?:être|même|mêmes|ci|là|t|il|ils|elle|elles|on|je|tu|nous|vous|moi|toi|lui|leur|leurs|le|la|les|y|en|ce|à|dessus|dessous|dedans|dehors|delà|deçà|midi|hier|demain)(?![\p{L}'’])/u;
+var TB_HY_L = /(?:^|[^\p{L}])(?:peut|vis|grand|grande|grands|grandes|demi|semi|quasi|arrière|vice|soi|sans|sous|belle|beau|petit|petite|petits|petites|chef|chefs)$/iu;
+function tbHyJoin(left, right){
+  const L = String(left || '').replace(/\s+$/, ''), R = String(right || '').replace(/^\s+/, '');
+  if(!/\p{L}[-‐‑]$/u.test(L) || !/^\p{Ll}/u.test(R)) return '';
+  const lw = L.slice(0, -1).split(/\s+/).pop() || '';
+  if(TB_HY_R.test(R) || TB_HY_L.test(lw)) return 'keep';
+  return 'join';
+}
+/* 🔤 1.0.46 : les lettres espacées (titres, lignes justifiées des journaux) : le PDF donne « j e u n e s p i l l e u r s ».
+   On retrouve les vrais mots d'après le dessin de la page : entre deux mots, le blanc est bien plus large qu'entre deux lettres. */
+function tbPdfSpaced(s){ s = String(s || '').trim(); return /^\S(?: \S){2,}$/.test(s) ? 2 : (/^\S \S$/.test(s) ? 1 : 0); }
+function pdvSpacedFix(it, cx, Wc, Hc){
+  const letters = [...String(it.t).replace(/\s+/g, '')]; if(letters.length < 2) return null;
+  const fs = it.h * Wc; if(fs < 6) return null;
+  const X0 = Math.max(0, Math.floor(it.x * Wc) - 1), X1 = Math.min(Wc, Math.ceil((it.x + it.w) * Wc) + 1), Y0 = Math.max(0, Math.floor(it.y * Wc + fs * 0.08)), Y1 = Math.min(Hc, Math.ceil(it.y * Wc + fs * 0.98));
+  if(X1 - X0 < 4 || Y1 - Y0 < 3) return null;
+  const w = X1 - X0, h = Y1 - Y0;
+  let d; try{ d = cx.getImageData(X0, Y0, w, h).data; }catch(e){ return null; }
+  const col = new Uint8Array(w);
+  for(let x = 0; x < w; x++) for(let y = 0; y < h; y++){ const j = (y * w + x) * 4; if(d[j] + d[j + 1] + d[j + 2] < 500){ col[x] = 1; break; } }
+  const runs = []; let s0 = -1;
+  for(let x = 0; x <= w; x++){ const on = x < w && col[x]; if(on && s0 < 0) s0 = x; if(!on && s0 >= 0){ runs.push([s0, x]); s0 = -1; } }
+  if(!runs.length) return null;
+  if(runs.length === 1) return letters.join('');
+  const gaps = runs.slice(1).map((r, i) => r[0] - runs[i][1]);
+  const srt = gaps.slice().sort((a, b) => a - b), med = srt[Math.floor((srt.length - 1) * 0.35)];
+  const thr = Math.max(med * 1.8, med + fs * 0.12, fs * 0.17);
+  const cut = gaps.map(g => g > thr);
+  if(!cut.some(Boolean)) return letters.join('');
+  // les paquets d'encre ↔ les lettres (un « i » ou un « ï » peut faire deux paquets : on recolle les plus proches)
+  const R = runs.map(r => r.slice()), C = cut.slice();
+  while(R.length > letters.length){
+    let bi = -1, bg = Infinity;
+    for(let k = 0; k < C.length; k++){ const g = R[k + 1][0] - R[k][1]; if(!C[k] && g < bg){ bg = g; bi = k; } }
+    if(bi < 0) break;
+    R.splice(bi, 2, [R[bi][0], R[bi + 1][1]]); C.splice(bi, 1);
+  }
+  let groups = [];
+  if(R.length === letters.length){ let n = 1; C.forEach(c => { if(c){ groups.push(n); n = 1; } else n++; }); groups.push(n); }
+  else {
+    // moins de paquets que de lettres (lettres qui se touchent, ligatures) : on répartit selon la largeur naturelle des lettres
+    const words = []; let a = 0; C.forEach((c, k) => { if(c){ words.push([a, k]); a = k + 1; } }); words.push([a, R.length - 1]);
+    if(words.length > letters.length) return null;
+    const inkW = words.map(([q0, q1]) => R[q1][1] - R[q0][0]), M = pdvMeasure(); M.font = fs + 'px serif';
+    const nat = letters.map(ch => M.measureText(ch).width + fs * 0.06), N = nat.reduce((x, y) => x + y, 0), I = inkW.reduce((x, y) => x + y, 0);
+    if(!(N > 0 && I > 0)) return null;
+    let li = 0, accI = 0, accN = 0;
+    for(let g = 0; g < words.length; g++){
+      accI += inkW[g] / I;
+      let n = 0;
+      if(g === words.length - 1) n = letters.length - li;
+      else {
+        while(li + n < letters.length - (words.length - g - 1) && accN + nat[li + n] / N / 2 < accI){ accN += nat[li + n] / N; n++; }
+        if(!n){ accN += nat[li] / N; n = 1; }
+      }
+      groups.push(n); li += n;
+    }
+  }
+  const out = []; let i = 0; groups.forEach(n => { out.push(letters.slice(i, i + n).join('')); i += n; });
+  return out.filter(Boolean).join(' ');
+}
+function pdvRespace(items, cv){
+  let cx = null;
+  for(const it of items || []){
+    if(!it || !it.ls) continue;
+    if(!it.a && cv){ try{ cx = cx || cv.getContext('2d', { willReadFrequently:true }); const t = pdvSpacedFix(it, cx, cv.width, cv.height); if(t) it.t = t; }catch(e){} }
+    it.ls = 0;
+  }
+  return items;
+}
+/* 📥 l'import d'un PDF en texte : les pages aux lettres espacées sont dessinées une fois, pour retrouver les mots */
+async function tbPdfRespaceTc(page, lib, tc){
+  const vp1 = page.getViewport({ scale:1 }), items = await pdvTextItems({ lib }, page, vp1, tc);
+  if(!items.some(it => it.ls)) return;
+  const k = Math.min(3, 1800 / Math.max(1, vp1.width)), cv = document.createElement('canvas');
+  cv.width = Math.max(1, Math.round(vp1.width * k)); cv.height = Math.max(1, Math.round(vp1.height * k));
+  const cx = cv.getContext('2d'); cx.fillStyle = '#fff'; cx.fillRect(0, 0, cv.width, cv.height);
+  await page.render({ canvasContext:cx, viewport:page.getViewport({ scale:k }) }).promise;
+  pdvRespace(items, cv);
+  items.forEach(it => { const o = it.src != null ? tc.items[it.src] : null; if(o && it.t !== it.t0) tc.items[it.src] = Object.assign({}, o, { str:it.t + (/\s$/.test(o.str) ? ' ' : '') }); });
+  cv.width = cv.height = 0;
+}
+async function pdvTextItems(S, page, vp1, tc0){
+  let tc = tc0 || null; if(!tc){ try{ tc = await page.getTextContent(); }catch(e){ return []; } }
   const st = (tc && tc.styles) || {}, W0 = vp1.width, out = [];
   const U = S.lib.Util;
-  (tc.items || []).forEach(it => {
+  (tc.items || []).forEach((it, src) => {
     if(!it || typeof it.str !== 'string') return;
     const t = tbPdfNorm(it.str);
     if(!t.trim()){ if(out.length) out[out.length - 1].sp = true; return; }
@@ -50148,8 +51031,10 @@ async function pdvTextItems(S, page, vp1){
     const a = Math.atan2(tx[1], tx[0]), asc = (st[it.fontName] && st[it.fontName].ascent) || 0.8;
     const x = a ? tx[4] + fh * asc * Math.sin(a) : tx[4], y = a ? tx[5] - fh * asc * Math.cos(a) : tx[5] - fh * asc;
     const w = (st[it.fontName] && st[it.fontName].vertical ? it.height : it.width) || 0;
-    out.push({ x:x / W0, y:y / W0, h:fh / W0, w:w / W0, a:Math.abs(a) > 0.01 ? a : 0, t, sp:!!it.hasEOL || /\s$/.test(t) });
+    out.push({ x:x / W0, y:y / W0, h:fh / W0, w:w / W0, a:Math.abs(a) > 0.01 ? a : 0, t, t0:t, src, sp:!!it.hasEOL || /\s$/.test(t), ls:tbPdfSpaced(t) });
   });
+  // « D e » (deux lettres) n'est espacé que si la ligne l'est aussi
+  out.forEach(it => { if(it.ls === 1 && !out.some(o => o.ls === 2 && Math.abs(o.y - it.y) < it.h * 0.4)) it.ls = 0; });
   for(let i = 0; i < out.length - 1; i++){        // un blanc entre deux morceaux, sauf s'ils se touchent (un mot coupé en deux morceaux)
     const A = out[i], B = out[i + 1]; if(A.sp || /\s$/.test(A.t) || /^\s/.test(B.t)) continue;
     const same = Math.abs(A.y - B.y) < A.h * 0.4, gap = B.x - (A.x + A.w);
@@ -50201,6 +51086,301 @@ function pdvOcrWords(d, Wc){
   else (d && d.words || []).forEach(w => { if(!w || !w.bbox || !String(w.text || '').trim()) return; const b = w.bbox; out.push({ x:b.x0 / Wc, y:b.y0 / Wc, h:(b.y1 - b.y0) / Wc, w:(b.x1 - b.x0) / Wc, a:0, t:String(w.text).trim(), sp:true, o:1 }); });
   return out;
 }
+/* ‿ 1.0.46 : les liaisons et les enchaînements, dessinés sur la page (comme dans la Tablette) : un petit arc sous le blanc
+   entre deux mots, avec le son qu'on entend (z, t, n). Orange : obligatoire · orange pâle : facultative · gris : enchaînement. */
+function pdvLzMarks(pg){
+  const P = pdvPageText(pg), E = P.E, t = P.t, out = []; if(!E.length) return out;
+  const M = pdvMeasure(); M.font = '100px sans-serif';
+  const J = (c) => { let lo = 0, hi = P.at.length - 1, r = 0; while(lo <= hi){ const m = (lo + hi) >> 1; if(P.at[m] <= c){ r = m; lo = m + 1; } else hi = m - 1; } return r; };
+  const xAt = (c, end) => {
+    const j = J(end ? Math.max(0, c - 1) : c), it = E[j], s = String(it.t || ''), loc = c - P.at[j];
+    if(loc <= 0) return { j, x:it.x };
+    if(loc >= s.replace(/[-‐‑]$/, '').length) return { j, x:it.x + it.w };
+    const a = M.measureText(s.slice(0, loc)).width, b = M.measureText(s).width || 1;
+    return { j, x:it.x + it.w * a / b };
+  };
+  let pos = 0;
+  bqSplit(t).forEach(sent => {
+    let b0 = t.indexOf(sent, pos); if(b0 < 0) b0 = pos; pos = b0 + sent.length;
+    let an; try{ an = dxAnalyze(sent); }catch(e){ return; }
+    const po = []; let o = 0; an.parts.forEach((q, i) => { po[i] = o; o += q.length; });
+    an.toks.forEach((A, i) => {
+      const g = an.gap[i]; if(!g || an.pause[i] || i >= an.toks.length - 1 || !/^(ob|fa|en)$/.test(g.k)) return;
+      const B = an.toks[i + 1];
+      const L = xAt(b0 + po[A.pi] + A.lead.length + A.core.length, true), R = xAt(b0 + po[B.pi] + B.lead.length, false);
+      const ia = E[L.j], ib = E[R.j]; if(!ia || !ib || Math.abs(ia.y - ib.y) > ia.h * 0.5 || R.x < L.x - ia.h * 0.05) return;   // pas d'arc d'une ligne à l'autre
+      out.push({ x1:L.x, x2:R.x, y:ia.y + ia.h * (ia.o ? 0.74 : 0.8), h:ia.h * (ia.o ? 0.86 : 1), k:g.k, s:g.s || '' });
+    });
+  });
+  return out;
+}
+function pdvLzPaint(S, pg){
+  const box = pg.sh && pg.sh.querySelector('.pdv-lz'); if(!box) return;
+  box.textContent = '';
+  if(!pg.tl || !pg.tl.length) return;
+  const L = pdvLzMarks(pg), ar = pg.ar || S.ar0 || 1.414, W = S.W || 800, frag = document.createDocumentFragment();
+  L.forEach(m => {
+    const i = document.createElement('i'); i.className = 'k-' + m.k;
+    const pad = m.h * 0.14, x = m.x1 - pad, w = Math.max(m.h * 0.3, m.x2 - m.x1 + pad * 2);
+    if(PDV_CQ){ i.style.left = (x * 100).toFixed(3) + '%'; i.style.top = (m.y / ar * 100).toFixed(3) + '%'; i.style.width = (w * 100).toFixed(3) + '%'; i.style.fontSize = (m.h * 100).toFixed(4) + 'cqw'; }
+    else { i.style.left = (x * W).toFixed(1) + 'px'; i.style.top = (m.y * W).toFixed(1) + 'px'; i.style.width = (w * W).toFixed(1) + 'px'; i.style.fontSize = (m.h * W).toFixed(2) + 'px'; }
+    if(m.s && m.k !== 'en'){ const b = document.createElement('b'); b.textContent = m.s; i.appendChild(b); }
+    frag.appendChild(i);
+  });
+  box.appendChild(frag);
+}
+function pdvLzSet(S, on){
+  tbUi().pdvLz = !!on; tbSaveUi();
+  S.ov.classList.toggle('pdv-lz-off', !on);
+  const b = S.ov.querySelector('[data-pdv="lz"]'); if(b){ b.classList.toggle('on', !!on); b.setAttribute('aria-pressed', String(!!on)); }
+  tbToast(on ? '‿ Les liaisons sont dessinées sur la page' : 'Liaisons cachées');
+}
+/* 🌙 1.0.46 : le mode nuit — les pages en sombre (blanc ↔ noir, les couleurs gardent leur teinte) */
+function pdvNightSet(S, on){
+  tbUi().pdvNight = !!on; tbSaveUi();
+  S.ov.classList.toggle('pdv-night', !!on);
+  const b = S.ov.querySelector('[data-pdv="night"]'); if(b){ b.classList.toggle('on', !!on); b.setAttribute('aria-pressed', String(!!on)); }
+  if(S.pdk && S.pdk.on && on && tbUi().pdkTheme !== 'night'){ pdkTheme(S, 'night'); }
+}
+/* 📖 1.0.46 : le mode liseuse, comme une Kindle. Le texte du PDF est remis en page pour lire (police, taille, marges, thème
+   papier, sépia ou nuit) ; on tourne les pages (bords de l'écran, glisser, flèches ←/→, espace) ; en bas : la page du PDF,
+   le pourcentage lu et le temps qu'il reste. Toucher un mot : la fiche de la Tablette (et les mots tagués restent les mêmes). */
+var PDK_SEC = 8;                                     // le texte est préparé par paquets de 8 pages du PDF
+var PDK_WPM = 170;                                   // mots lus par minute (pour « le temps qu'il reste »)
+function pdkUi(){ const u = tbUi(); return { theme:['paper', 'sepia', 'night'].includes(u.pdkTheme) ? u.pdkTheme : (u.pdvNight ? 'night' : 'paper'), fs:Math.max(14, Math.min(34, +u.pdkFs || 20)), font:u.pdkFont === 'sans' ? 'sans' : 'serif', lh:Math.max(1.3, Math.min(2, +u.pdkLh || 1.6)), mg:['s', 'm', 'l'].includes(u.pdkMg) ? u.pdkMg : 'm' }; }
+async function pdkOpen(S, at){
+  if(!S.tbArt){ await pdvTbInit(S); }
+  if(TB.sheetK !== -1) try{ tbCloseSheet(); }catch(e){}
+  const U = pdkUi();
+  let el = S.ov.querySelector('#pdk');
+  if(!el){
+    el = document.createElement('div'); el.id = 'pdk'; el.className = 'pdk'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', 'Mode liseuse');
+    el.innerHTML = `<div class="pdk-top"><button type="button" class="pdk-ib" data-pdk="x" aria-label="Revenir au PDF (Échap)" title="Revenir au PDF (Échap)">✕</button>
+        <div class="pdk-tt"><b>${escapeHtml(S.m.title)}</b><small id="pdkSub">Mode liseuse</small></div>
+        <button type="button" class="pdk-ib" data-pdk="carnet" aria-label="Mon carnet : les mots tagués" title="Mon carnet">🏷️</button>
+        <button type="button" class="pdk-ib pdk-aab" data-pdk="aa" aria-label="Police, taille, thème" title="Police, taille, thème" aria-expanded="false">Aa</button></div>
+      <div class="pdk-aa" id="pdkAa" hidden>
+        <div class="pdk-row"><span>Thème</span><div class="pdk-seg">${[['paper', '☀️ Papier'], ['sepia', '📜 Sépia'], ['night', '🌙 Nuit']].map(t => `<button type="button" data-pdk="th" data-v="${t[0]}">${t[1]}</button>`).join('')}</div></div>
+        <div class="pdk-row"><span>Taille</span><div class="pdk-seg"><button type="button" data-pdk="fs-" aria-label="Plus petit">A−</button><output id="pdkFsO"></output><button type="button" data-pdk="fs+" aria-label="Plus grand">A+</button></div></div>
+        <div class="pdk-row"><span>Police</span><div class="pdk-seg"><button type="button" data-pdk="font" data-v="serif" class="pdk-serif">Literata</button><button type="button" data-pdk="font" data-v="sans" class="pdk-sans">Inter</button></div></div>
+        <div class="pdk-row"><span>Interligne</span><div class="pdk-seg">${[[1.4, 'Serré'], [1.6, 'Normal'], [1.85, 'Large']].map(t => `<button type="button" data-pdk="lh" data-v="${t[0]}">${t[1]}</button>`).join('')}</div></div>
+        <div class="pdk-row"><span>Marges</span><div class="pdk-seg">${[['s', 'Petites'], ['m', 'Moyennes'], ['l', 'Grandes']].map(t => `<button type="button" data-pdk="mg" data-v="${t[0]}">${t[1]}</button>`).join('')}</div></div>
+      </div>
+      <div class="pdk-view" id="pdkView"><div class="pdk-clip"><div class="pdk-flow" id="pdkFlow" lang="fr"></div></div>
+        <button type="button" class="pdk-edge l" data-pdk="prev" aria-label="Page précédente">‹</button><button type="button" class="pdk-edge r" data-pdk="next" aria-label="Page suivante">›</button></div>
+      <div class="pdk-bot"><div class="pdk-bar"><i id="pdkBar"></i></div><span id="pdkPos"></span></div>`;
+    S.ov.insertBefore(el, S.ov.querySelector('#pdvTb'));
+    pdkWire(S, el);
+  }
+  S.pdk = Object.assign(S.pdk || {}, { on:true, el, flow:el.querySelector('#pdkFlow'), view:el.querySelector('#pdkView'), i:0, a:-1, z:-1 });
+  S.ov.classList.add('pdk-on');
+  pdkApply(S);
+  const k0 = at != null ? at : S.cur;
+  await pdkSection(S, k0, 'page', k0);
+  try{ bkPush('pdk', () => pdkClose(S)); }catch(e){}
+}
+function pdkClose(S, quiet){
+  if(!S.pdk || !S.pdk.on) return;
+  const pk = pdkCurPage(S);
+  S.pdk.on = false; S.ov.classList.remove('pdk-on');
+  if(TB.sheetK !== -1) try{ tbCloseSheet(); }catch(e){}
+  try{ bkPop('pdk'); }catch(e){}
+  S.pdk.flow.innerHTML = ''; TB.spans = []; TB.toks = []; S.tbPage = null;        // la page reprend sa fiche au prochain mot touché
+  if(pk >= 0){ pdvPatch(S.id, { last:S.pages[pk].p }); if(!quiet) pdvGo(S, pk, true); }
+}
+function pdkApply(S){
+  const U = pdkUi(), el = S.pdk.el;
+  el.classList.remove('th-paper', 'th-sepia', 'th-night'); el.classList.add('th-' + U.theme);
+  el.style.setProperty('--pdk-fs', U.fs + 'px'); el.style.setProperty('--pdk-lh', U.lh);
+  el.style.setProperty('--pdk-ff', U.font === 'sans' ? "'Inter', system-ui, sans-serif" : "'Literata', Georgia, 'Times New Roman', serif");
+  el.style.setProperty('--pdk-mg', ({ s:'clamp(10px, 3vw, 28px)', m:'clamp(18px, 6vw, 64px)', l:'clamp(28px, 11vw, 140px)' })[U.mg]);
+  const o = el.querySelector('#pdkFsO'); if(o) o.textContent = U.fs + ' px';
+  el.querySelectorAll('[data-pdk="th"]').forEach(b => b.classList.toggle('on', b.dataset.v === U.theme));
+  el.querySelectorAll('[data-pdk="font"]').forEach(b => b.classList.toggle('on', b.dataset.v === U.font));
+  el.querySelectorAll('[data-pdk="lh"]').forEach(b => b.classList.toggle('on', +b.dataset.v === U.lh));
+  el.querySelectorAll('[data-pdk="mg"]').forEach(b => b.classList.toggle('on', b.dataset.v === U.mg));
+}
+function pdkTheme(S, th){ tbUi().pdkTheme = th; tbSaveUi(); pdkApply(S); }
+function pdkSet(S, patch){ const k = pdkCurPage(S); Object.assign(tbUi(), patch); tbSaveUi(); pdkApply(S); pdkLayout(S, 'page', k); }
+/* les lignes d'une page → où commencent les paragraphes, quelles lignes sont des titres */
+function pdkLines(E){
+  const lines = []; let cur = null;
+  E.forEach((it, j) => { if(cur && Math.abs(it.y - cur.y) < Math.max(it.h, cur.h) * 0.5 && it.x >= cur.x1 - it.h * 0.5){ cur.js.push(j); cur.x1 = Math.max(cur.x1, it.x + it.w); cur.h = Math.max(cur.h, it.h); } else { cur = { y:it.y, h:it.h, x0:it.x, x1:it.x + it.w, js:[j] }; lines.push(cur); } });
+  const hs = lines.map(l => l.h).sort((a, b) => a - b), mh = hs[Math.floor(hs.length / 2)] || 0.012;
+  const gaps = []; for(let i = 1; i < lines.length; i++){ const g = lines[i].y - lines[i - 1].y; if(g > 0 && g < mh * 4) gaps.push(g); }
+  gaps.sort((a, b) => a - b); const mg = gaps[Math.floor(gaps.length / 2)] || mh * 1.25;
+  const wide = lines.reduce((m, l) => Math.max(m, l.x1 - l.x0), 0);
+  lines.forEach((l, i) => {
+    l.hd = l.h > mh * 1.28;
+    const pv = lines[i - 1]; if(!pv){ l.br = true; return; }
+    const g = l.y - pv.y;
+    l.br = l.hd !== pv.hd || g > mg * 1.45 || g < 0 || Math.abs(l.h - pv.h) > mh * 0.25 || ((pv.x1 - pv.x0) < wide * 0.7 && /[.!?:»…]$/.test(String(E[pv.js[pv.js.length - 1]].t || '').trim()));
+  });
+  return lines;
+}
+/* un paquet de pages du PDF → le texte de la liseuse (avec la même numérotation des phrases que sur les pages) */
+async function pdkSection(S, k0, how, keepPage){
+  const D = S.pdk, a = Math.floor(Math.max(0, Math.min(S.pages.length - 1, k0)) / PDK_SEC) * PDK_SEC, z = Math.min(S.pages.length, a + PDK_SEC);
+  const tok = (D.tok = (D.tok || 0) + 1);
+  D.flow.innerHTML = '<div class="pdk-load">⏳ Je prépare le texte…</div>';
+  for(let k = a; k < z; k++){ const pg = S.pages[k]; if(!pg.tl && !pg.ix){ try{ await pdvIndexPage(S, pg); }catch(e){} } if(D.tok !== tok || !D.on) return; }
+  TB.art = S.tbArt; TB.sents = []; TB.toks = []; TB.sentToks = []; TB.spans = []; TB.sBase = S.pages[a].p * 10000;
+  const parts = [], need = [];
+  // les en-têtes et pieds de page (titre courant répété, numéro de page) : on les repère sur tout le paquet
+  const sig = (t) => dxFold(t).replace(/\d+/g, '#').replace(/\s+/g, ' ').trim();
+  const edgeCount = new Map(), pageLines = {};
+  for(let k = a; k < z; k++){
+    const pg = S.pages[k], E = pg.tl || pg.ix; if(!E || !E.length) continue;
+    const ar = pg.ar || S.ar0 || 1.414, L = pdkLines(E);
+    L.forEach(l => { l.txt = l.js.map(j => E[j].t).join(' ').trim(); l.edge = l.y < ar * 0.075 || l.y + l.h > ar * 0.93; if(l.edge){ const g = sig(l.txt); if(g) edgeCount.set(g, (edgeCount.get(g) || 0) + 1); } });
+    pageLines[k] = L;
+  }
+  const isHF = (l) => l.edge && (/^\W*(page\s*)?\d{1,4}(\s*(\/|sur|of)\s*\d{1,4})?\W*$/i.test(l.txt) || (edgeCount.get(sig(l.txt)) || 0) >= 2);
+  for(let k = a; k < z; k++){
+    const pg = S.pages[k], E = pg.tl || pg.ix;
+    if(!E || !E.length){ parts.push(`<div class="pdk-pg" data-k="${k}"><span class="pdk-pn" data-p="${pg.p}">Page ${pg.p}</span><div class="pdk-miss">${pg.scan || S.m.kind === 'img' ? `🔎 Je lis le texte de cette page scannée…` : 'Pas de texte sur cette page.'}</div></div>`); if(pg.scan || S.m.kind === 'img') need.push(pg); continue; }
+    const P = pdvPageText(pg), base = pg.p * 10000;
+    TB.sents.length = Math.max(TB.sents.length, base); TB.sentToks.length = Math.max(TB.sentToks.length, base);
+    const t0 = TB.toks.length;
+    let h = ''; try{ h = tbSentsHtml(P.t, [], true); }catch(e){ h = escapeHtml(P.t); }
+    // chaque mot → son morceau de la page : où sont les paragraphes et les titres
+    const lines = pageLines[k] || pdkLines(P.E), lineOf = []; lines.forEach((l, li) => { l.hf = isHF(l); l.js.forEach(j => { lineOf[j] = li; }); });
+    const J = (c) => { let lo = 0, hi = P.at.length - 1, r = 0; while(lo <= hi){ const m = (lo + hi) >> 1; if(P.at[m] <= c){ r = m; lo = m + 1; } else hi = m - 1; } return r; };
+    const marks = {}; let pos = 0, s = base, lastLine = -1;
+    bqSplit(P.t).forEach(sent => {
+      let b0 = P.t.indexOf(sent, pos); if(b0 < 0) b0 = pos; pos = b0 + sent.length; let cur = 0;
+      (TB.sentToks[s] || []).forEach(k => { const raw = String(TB.toks[k].raw || TB.toks[k].form || ''); let o = sent.indexOf(raw, cur); if(o < 0) o = cur; cur = o + raw.length;
+        const li = lineOf[J(b0 + o)], L = lines[li];
+        if(L){ marks[k] = L.hf ? { hf:true } : { br:li !== lastLine && L.br && k > t0, hd:L.hd }; if(!L.hf) lastLine = li; } });
+      s++;
+    });
+    parts.push(`<div class="pdk-pg" data-k="${k}"><span class="pdk-pn" data-p="${pg.p}" aria-hidden="true">${pg.p}</span>${h}</div>`);
+    pg._pdkMarks = marks;
+  }
+  if(D.tok !== tok || !D.on) return;
+  D.a = a; D.z = z;
+  D.flow.innerHTML = parts.join('');
+  // paragraphes et titres
+  D.flow.querySelectorAll('.tbw[data-k]').forEach(sp => {
+    const k = +sp.dataset.k; TB.spans[k] = sp;
+    let m = null; for(let q = a; q < z && !m; q++){ const M = S.pages[q]._pdkMarks; if(M && M[k]) m = M[k]; }
+    if(!m) return;
+    if(m.hf){ sp.classList.add('pdk-hf'); sp._hf = true; return; }
+    if(m.hd) sp.classList.add('pdk-hd');
+    if(m.br){ const b = document.createElement('span'); b.className = 'pdk-br' + (m.hd ? ' hd' : ''); sp.parentNode.insertBefore(b, sp); }
+  });
+  // ce qui est entre deux mots cachés (« — », les blancs) se cache aussi
+  D.flow.querySelectorAll('.tb-s').forEach(se => { let hf = false; [...se.childNodes].forEach(n => {
+    if(n.nodeType === 1){ const w = n.matches('.tbw[data-k]') ? n : n.querySelector && n.querySelector('.tbw[data-k]'); if(w){ hf = !!w._hf; if(hf && n !== w) n.classList.add('pdk-hf'); } else if(hf && !n.matches('.pdk-br')) n.classList.add('pdk-hf'); }
+    else if(n.nodeType === 3 && hf && n.textContent){ const x = document.createElement('span'); x.className = 'pdk-hf'; x.textContent = n.textContent; se.replaceChild(x, n); }
+  }); });
+  TB.nS = TB.sents.length;
+  try{ tbPaintTags(); }catch(e){}
+  D.words = TB.toks.length;
+  need.forEach(pg => pdvOcrQueue(S, pg, true));
+  pdkLayout(S, how, keepPage);
+}
+function pdkRefresh(S){ const k = pdkCurPage(S); pdkSection(S, k >= 0 ? k : S.pdk.a, 'page', k); }
+/* la mise en page : des colonnes de la taille de l'écran (deux sur un grand écran) ; on glisse d'un écran à l'autre */
+function pdkLayout(S, how, keepPage){
+  const D = S.pdk, f = D.flow, v = f && f.parentElement; if(!v || !f) return;
+  const W = v.clientWidth, H = v.clientHeight, two = W > 960, gap = Math.round(Math.max(24, W * 0.06));
+  const colW = two ? (W - gap) / 2 : W;
+  f.style.height = H + 'px'; f.style.columnWidth = colW + 'px'; f.style.columnGap = gap + 'px'; f.style.width = W + 'px';
+  D.step = (colW + gap) * (two ? 2 : 1); D.cols = two ? 2 : 1;
+  D.n = Math.max(1, Math.ceil((f.scrollWidth + gap - 4) / D.step));
+  if(how === 'end') D.i = D.n - 1;
+  else if(how === 'page' && keepPage != null){ D.i = pdkScreenOf(S, keepPage); }
+  else D.i = Math.max(0, Math.min(D.n - 1, D.i || 0));
+  pdkShow(S);
+}
+function pdkScreenOf(S, k){
+  const D = S.pdk, m = D.flow.querySelector(`.pdk-pg[data-k="${k}"] .pdk-pn`); if(!m) return 0;
+  const fl = D.flow.getBoundingClientRect().left, r = m.getBoundingClientRect(), cs = D.step / (D.cols || 1);     // les deux bougent ensemble : l'écart ne dépend pas du glissement
+  return Math.max(0, Math.min(D.n - 1, Math.floor(Math.floor((r.left - fl + 2) / cs) / (D.cols || 1))));
+}
+function pdkShow(S){
+  const D = S.pdk;
+  D.flow.style.transform = `translateX(${-D.i * D.step}px)`;
+  const k = pdkCurPage(S), N = S.pages.length;
+  const frac = (D.a + (D.z - D.a) * (D.i + 1) / Math.max(1, D.n)) / Math.max(1, N), pct = Math.min(100, Math.round(frac * 100));
+  const perPage = D.words / Math.max(1, D.z - D.a), left = Math.max(0, perPage * N * (1 - frac)), min = Math.round(left / PDK_WPM);
+  const tl = min < 1 ? 'moins d’une minute' : (min < 60 ? `${min} min` : `${Math.floor(min / 60)} h ${String(min % 60).padStart(2, '0')}`);
+  const pg = S.pages[k] || S.pages[D.a];
+  const pos = D.el.querySelector('#pdkPos'); if(pos) pos.textContent = `Page ${pg ? pg.p : 1} sur ${N} · ${pct} % · ${pct >= 100 ? 'fini !' : tl + ' restantes'}`;
+  const bar = D.el.querySelector('#pdkBar'); if(bar) bar.style.width = pct + '%';
+  const sub = D.el.querySelector('#pdkSub'); if(sub) sub.textContent = `Écran ${D.i + 1} / ${D.n} de ce passage`;
+  D.el.querySelector('.pdk-edge.l').disabled = D.i === 0 && D.a === 0;
+  D.el.querySelector('.pdk-edge.r').disabled = D.i >= D.n - 1 && D.z >= N;
+  if(pg){ S.cur = S.pages.indexOf(pg); clearTimeout(D.saveT); D.saveT = setTimeout(() => pdvPatch(S.id, { last:pg.p }), 600); }
+}
+/* la page du PDF qu'on lit à l'écran (le dernier numéro de page déjà passé) */
+function pdkCurPage(S){
+  const D = S.pdk; if(!D || !D.flow || D.a < 0) return S.cur;
+  const fr = D.flow.getBoundingClientRect(), cs = D.step / (D.cols || 1), c0 = D.i * (D.cols || 1); let best = D.a;
+  D.flow.querySelectorAll('.pdk-pn').forEach(m => {                 // la page où commence l'écran : son numéro est avant (ou tout en haut de) la 1re colonne
+    const r = m.getBoundingClientRect(); if(!r.width) return;
+    const col = Math.floor((r.left - fr.left + 2) / cs);
+    if(col < c0 || (col === c0 && r.top - fr.top < r.height * 2)) best = +m.closest('.pdk-pg').dataset.k;
+  });
+  return best;
+}
+function pdkGo(S, d){
+  const D = S.pdk; if(TB.sheetK !== -1) try{ tbCloseSheet(); }catch(e){}
+  if(d > 0){ if(D.i < D.n - 1){ D.i++; pdkShow(S); } else if(D.z < S.pages.length){ D.i = 0; pdkSection(S, D.z, 'start'); } }
+  else { if(D.i > 0){ D.i--; pdkShow(S); } else if(D.a > 0){ pdkSection(S, D.a - 1, 'end'); } }
+}
+function pdkKey(S, e){
+  const k = e.key;
+  if(k === 'Escape'){ e.preventDefault(); e.stopPropagation(); const aa = S.pdk.el.querySelector('#pdkAa'); if(!aa.hidden){ aa.hidden = true; return true; } pdkClose(S); return true; }
+  if(k === 'ArrowRight' || k === 'PageDown' || (k === ' ' && !e.shiftKey)){ e.preventDefault(); pdkGo(S, 1); return true; }
+  if(k === 'ArrowLeft' || k === 'PageUp' || (k === ' ' && e.shiftKey)){ e.preventDefault(); pdkGo(S, -1); return true; }
+  if(k === 'k' || k === 'K'){ pdkClose(S); return true; }
+  if(k === 'n' || k === 'N'){ pdkTheme(S, pdkUi().theme === 'night' ? 'paper' : 'night'); return true; }
+  if(k === '+' || k === '='){ pdkSet(S, { pdkFs:pdkUi().fs + 1 }); return true; }
+  if(k === '-'){ pdkSet(S, { pdkFs:pdkUi().fs - 1 }); return true; }
+  return true;                                       // les autres raccourcis du PDF ne servent pas ici
+}
+function pdkWire(S, el){
+  el.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-pdk]');
+    if(b){
+      e.stopPropagation();
+      const a = b.dataset.pdk, U = pdkUi();
+      if(a === 'x') pdkClose(S);
+      else if(a === 'prev') pdkGo(S, -1);
+      else if(a === 'next') pdkGo(S, 1);
+      else if(a === 'aa'){ const aa = el.querySelector('#pdkAa'); aa.hidden = !aa.hidden; b.setAttribute('aria-expanded', String(!aa.hidden)); }
+      else if(a === 'carnet'){ TB.art = S.tbArt; if(TB.sheetK === -2) tbCloseSheet(); else tbOpenCarnet(); }
+      else if(a === 'th') pdkTheme(S, b.dataset.v);
+      else if(a === 'fs-' || a === 'fs+') pdkSet(S, { pdkFs:U.fs + (a === 'fs+' ? 1 : -1) });
+      else if(a === 'font') pdkSet(S, { pdkFont:b.dataset.v });
+      else if(a === 'lh') pdkSet(S, { pdkLh:+b.dataset.v });
+      else if(a === 'mg') pdkSet(S, { pdkMg:b.dataset.v });
+      return;
+    }
+    if(Date.now() < (S.pdk.noTap || 0)) return;
+    const w = e.target.closest('.pdk-flow .tbw[data-k]');
+    if(w){ e.stopPropagation(); if(String(window.getSelection() || '').trim()) return; try{ wtClose(); }catch(err){} tbOpenSheet(+w.dataset.k); return; }
+    if(e.target.closest('.pdk-view')){
+      e.stopPropagation();
+      if(TB.sheetK !== -1){ tbCloseSheet(); return; }
+      const r = S.pdk.view.getBoundingClientRect(), x = (e.clientX - r.left) / r.width;
+      if(x < 0.22) pdkGo(S, -1); else if(x > 0.78) pdkGo(S, 1); else el.classList.toggle('chrome-off');
+    }
+  });
+  // glisser du doigt : page suivante / précédente
+  let sx = 0, sy = 0, st = 0, sid = null;
+  el.addEventListener('pointerdown', (e) => { if(!e.target.closest('.pdk-view')) return; sx = e.clientX; sy = e.clientY; st = Date.now(); sid = e.pointerId; }, { passive:true });
+  el.addEventListener('pointerup', (e) => {
+    if(sid !== e.pointerId) return; sid = null;
+    const dx = e.clientX - sx, dy = e.clientY - sy;
+    if(Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.4 && Date.now() - st < 900){ S.pdk.noTap = Date.now() + 350; pdkGo(S, dx < 0 ? 1 : -1); }
+  }, { passive:true });
+  S.pdk = S.pdk || {};
+  const rz = () => { if(!S.pdk || !S.pdk.on) return; clearTimeout(S.pdk.rzT); S.pdk.rzT = setTimeout(() => { const k = pdkCurPage(S); pdkLayout(S, 'page', k); }, 180); };
+  window.addEventListener('resize', rz); (S.off = S.off || []).push(() => window.removeEventListener('resize', rz));
+}
 /* la couche de texte invisible, exactement sur les mots de la page — en unités de la page (elle suit le zoom toute seule) */
 function pdvLayout(S, pg){
   const tl = pg.sh.querySelector('.pdv-tl'), W = PDV_CQ ? 1000 : S.W, cx = pdvMeasure();
@@ -50224,6 +51404,7 @@ function pdvLayout(S, pg){
   tl.appendChild(frag);
   pg.laid = true; pg.layN = (pg.layN || 0) + 1;
   pdvHlPaint(S, pg);
+  try{ pdvLzPaint(S, pg); }catch(e){ console.warn('liaisons', e); }
   try{ if(S.tbArt && TB.sheetK === -1 && (S.tbArt.tags || []).some(g => Math.floor((g.s || 0) / 10000) === pg.p)) pdvTbHost(S, pg); }catch(e){}   // 🖍 ses mots tagués
 }
 function pdvChip(pg, t){ const c = pg.el && pg.el.querySelector('.pdv-chip'); if(!c) return; c.textContent = t || ''; c.hidden = !t; }
@@ -50259,6 +51440,7 @@ async function pdvOcrPump(S){
         if(words.length) setTimeout(() => { if(pg.tl === words) pdvChip(pg, ''); }, 2500);
         if(pg.st === 'done' || pg.st === 'old') pdvLayout(S, pg);
         pdvFindPageChanged(S, pg);
+        try{ if(S.pdk && S.pdk.on && S.pdk.a <= pg.k && pg.k < S.pdk.z) pdkRefresh(S); }catch(err){}
       }catch(e){ console.warn('pdv ocr', e); pdvChip(pg, '⚠️ La page n’a pas pu être lue'); }
       finally{ if(cv){ cv.width = cv.height = 0; } S.ocrPg = null; }
     }
@@ -50308,8 +51490,21 @@ function pdvPicker(S){
 function pdvFold(s){ s = String(s || ''); let o = ''; for(let i = 0; i < s.length; i++){ const c = s[i], d = (c.normalize ? c.normalize('NFD')[0] : c) || c; o += /[’`´ʼ‘]/.test(d) ? "'" : (/\s/.test(d) ? ' ' : (d.toLowerCase()[0] || ' ')); } return o; }
 function pdvPageText(pg){
   const E = pg.tl || pg.ix || []; let t = ''; const at = [];
-  E.forEach((it, j) => { at.push(t.length); t += it.t; if(it.sp || j === E.length - 1) t += ' '; else { const nx = E[j + 1]; if(nx && Math.abs(nx.y - it.y) > it.h * 0.5) t += ' '; } });
+  E.forEach((it, j) => {
+    at.push(t.length);
+    const nx = E[j + 1], nl = !!nx && Math.abs(nx.y - it.y) > it.h * 0.5;
+    if(nl){ const hj = tbHyJoin(it.t, nx.t); if(hj === 'join'){ t += it.t.replace(/[-‐‑]$/, ''); return; } if(hj === 'keep'){ t += it.t; return; } }   // ✂️ le mot coupé en fin de ligne
+    t += it.t; if(it.sp || j === E.length - 1 || nl) t += ' ';
+  });
   return { t, at, E };
+}
+/* un mot sur deux lignes (ou en plusieurs morceaux) : ses autres morceaux suivent le premier (violet, tagué, surligné) */
+function pdvTwin(S, a, tw){
+  if(!a || !tw || !tw.length) return;
+  a._tw = tw;
+  if(!S.twObs) S.twObs = new MutationObserver(ms => ms.forEach(m => { const el = m.target; (el._tw || []).forEach(b => { ['sel', 'tag', 'new', 'just', 'hov'].forEach(c => b.classList.toggle(c, el.classList.contains(c))); }); }));
+  S.twObs.observe(a, { attributes:true, attributeFilter:['class'] });
+  tw.forEach(b => { ['sel', 'tag', 'just'].forEach(c => b.classList.toggle(c, a.classList.contains(c))); });
 }
 function pdvFindRe(q){
   const f = pdvFold(String(q || '').replace(/\s+/g, ' ').trim()); if(f.length < 2) return null;
@@ -50458,10 +51653,12 @@ function pdvCrBadge(S){ const b = S.ov && S.ov.querySelector('#pdvCrN'); if(b) b
 /* le texte d'une page → les phrases et les mots de la Tablette (les phrases de la page N sont numérotées N × 10000 + …) */
 function pdvTbHost(S, pg){
   if(!S.tbArt || !pg || !pg.tl || !pg.tl.length) return false;
+  if(S.pdk && S.pdk.on) return false;                 // 📖 la liseuse tient la fiche
   if(TB.art !== S.tbArt) TB.art = S.tbArt;
   if(S.tbPage === pg.k && S.tbLay === pg.layN && TB.toks && TB.toks.length) return true;
   if(TB.sheetK !== -1) try{ tbCloseSheet(); }catch(e){}
-  (TB.spans || []).forEach(sp => { if(sp) sp.classList.remove('sel'); });
+  (TB.spans || []).forEach(sp => { if(sp){ sp.classList.remove('sel'); (sp._tw || []).forEach(b => b.classList.remove('sel')); } });
+  if(S.twObs){ S.twObs.disconnect(); S.twObs = null; }
   const P = pdvPageText(pg), base = pg.p * 10000, text = P.t;
   TB.sents = []; TB.sents.length = base; TB.toks = []; TB.sentToks = []; TB.sentToks.length = base; TB.sBase = base;
   try{ tbSentsHtml(text, [], true); }catch(e){ console.warn('pdv tablette', e); return false; }
@@ -50475,8 +51672,12 @@ function pdvTbHost(S, pg){
   });
   const byJ = []; pg.sh.querySelectorAll('.pdv-tl span[data-j]').forEach(sp => { byJ[+sp.dataset.j] = sp; });
   const J = (c) => { let lo = 0, hi = P.at.length - 1, r = 0; while(lo <= hi){ const m = (lo + hi) >> 1; if(P.at[m] <= c){ r = m; lo = m + 1; } else hi = m - 1; } return r; };
-  S.tbOff = off; S.tbJ = []; TB.spans = [];
-  TB.toks.forEach((tk, k) => { const j = J(off[k] || 0); S.tbJ[k] = j; TB.spans[k] = byJ[j] || document.createElement('span'); });
+  S.tbOff = off; S.tbJ = []; S.tbJz = []; TB.spans = [];
+  TB.toks.forEach((tk, k) => {
+    const a = off[k] || 0, j = J(a), jz = J(a + Math.max(0, String(tk.raw || tk.form || '').length - 1));
+    S.tbJ[k] = j; S.tbJz[k] = Math.max(j, jz); TB.spans[k] = byJ[j] || document.createElement('span');
+    if(jz > j){ const tw = []; for(let q = j + 1; q <= jz; q++) if(byJ[q]) tw.push(byJ[q]); pdvTwin(S, TB.spans[k], tw); }   // ✂️ « che- » + « vronné »
+  });
   S.tbPage = pg.k; S.tbLay = pg.layN; S.tbP = P;
   try{ tbPaintTags(); }catch(e){}
   return true;
@@ -50486,8 +51687,9 @@ function pdvTapWord(S, sp, e){
   const j = +sp.dataset.j, P = S.tbP;
   let c = P.at[j] || 0; const pt = wtPoint(e.clientX, e.clientY); if(pt && sp.contains(pt.node)) c += Math.min(pt.off, (sp.textContent || '').length);
   let best = -1;
-  TB.toks.forEach((tk, k) => { if(S.tbJ[k] !== j) return; const a = S.tbOff[k], z = a + String(tk.raw || tk.form).length; if(c >= a && c <= z) best = k; });
-  if(best < 0){ let L = 0; TB.toks.forEach((tk, k) => { if(S.tbJ[k] === j && tk.form.length > L){ L = tk.form.length; best = k; } }); }
+  const onJ = (k) => j >= S.tbJ[k] && j <= (S.tbJz[k] == null ? S.tbJ[k] : S.tbJz[k]);
+  TB.toks.forEach((tk, k) => { if(!onJ(k)) return; const a = S.tbOff[k], z = a + String(tk.raw || tk.form).length; if(c >= a && c <= z) best = k; });
+  if(best < 0){ let L = 0; TB.toks.forEach((tk, k) => { if(onJ(k) && tk.form.length > L){ L = tk.form.length; best = k; } }); }
   if(best < 0) return false;
   try{ wtClose(); }catch(err){}
   tbOpenSheet(best);
@@ -50510,7 +51712,7 @@ function pdvSelPick(){
   const r = s.getRangeAt(0), n0 = r.startContainer.nodeType === 1 ? r.startContainer : r.startContainer.parentNode;
   const pg = S.pages.find(x => x.sh.contains(n0)); if(!pg || !pdvTbHost(S, pg)) return false;
   const js = new Set(); pg.sh.querySelectorAll('.pdv-tl span[data-j]').forEach(sp => { try{ if(r.intersectsNode(sp)) js.add(+sp.dataset.j); }catch(e){} });
-  const ks = TB.toks.map((tk, k) => js.has(S.tbJ[k]) ? k : -1).filter(k => k >= 0); if(!ks.length) return false;
+  const ks = TB.toks.map((tk, k) => { for(let q = S.tbJ[k]; q <= (S.tbJz[k] == null ? S.tbJ[k] : S.tbJz[k]); q++) if(js.has(q)) return k; return -1; }).filter(k => k >= 0); if(!ks.length) return false;
   const s0 = TB.toks[ks[0]].s; if(ks.some(k => TB.toks[k].s !== s0) || ks.length > 40) return false;
   try{ s.removeAllRanges(); }catch(e){}
   tbOpenSheet(ks[0], ks[ks.length - 1]);
@@ -50529,7 +51731,7 @@ function pdvTbClick(S, e){
   e.stopPropagation();
   const id = a.dataset.tb;
   if(id === 'mark-sent'){ const pg = S.pages[S.tbPage]; tbCloseSheet(); if(pg){ pdvPatch(S.id, { last:pg.p, mark:pg.p }); tbToast(`🔖 Marque-page : ${S.m.kind === 'img' ? 'photo' : 'page'} ${pg.p}`); } return; }
-  if(id === 'cr-go' || id === 'cr-pick'){ const g = (S.tbArt.tags || [])[+a.dataset.i]; if(g) pdvTagGo(S, g, id === 'cr-pick'); return; }
+  if(id === 'cr-go' || id === 'cr-pick'){ const g = (S.tbArt.tags || [])[+a.dataset.i]; if(g){ if(S.pdk && S.pdk.on) pdkClose(S, true); pdvTagGo(S, g, id === 'cr-pick'); } return; }
   tbAction(id, a, e);
 }
 /* un mot du carnet : on va à sa page, sur le mot (ou on rouvre sa fiche) */
@@ -52488,6 +53690,7 @@ function tbRender(keep){
   tbPaintMark();
   tbPaintKnown();
   if(anchor) tbAnchorSet(anchor);
+  try{ tbImgOcrRestore(); }catch(e){}
 }
 function tbAnchorGet(){
   const sc = document.getElementById('tbScroll'); if(!sc) return null;
@@ -53232,6 +54435,7 @@ function tbReflowUndo(){
 function tbTagAt(k){ const tk = TB.toks[k]; if(!tk) return -1; return (TB.art.tags || []).findIndex(g => g.s === tk.s && tk.t >= g.t && tk.t <= (g.t2 == null ? g.t : g.t2)); }
 function tbRelocateTags(){
   (TB.art.tags || []).forEach(g => {
+    if(g.img != null && g.s >= TB_IMG_S0) return;       // 🖼️ un mot d'une image : il reste sur l'image
     const n = g.n || 1;
     const here = tbTagToks(g);
     if(here.length && dxFold(n > 1 ? tbPickText(here[0], here[here.length - 1]) : TB.toks[here[0]].form) === dxFold(g.w)) return;
@@ -53276,6 +54480,7 @@ function tbToggleTag(k, opts){
   const tag = { s:tk.s, t:tk.t, w:form, lemma, sent:TB.sents[tk.s], ar:(e && e.ar) || '', def:(e && e.def) || '', at:Date.now() };
   if(multi){ tag.t2 = TB.toks[kz].t; tag.n = ks.length; }
   else if(tbNounAt(k)) tag.noun = true;                // « l'été », « le marché » : un nom
+  if(tk.ocr != null) tag.img = tk.ocr;                 // 🖼️ un mot lu dans une image
   tags.push(tag);
   tbPaintTags(k); tbSaveArt(); tbEndHtml();
   try{ playChime([523, 784], { type:'triangle', noteDur:0.05, gap:0.015, volume:0.07 }); }catch(e){}
@@ -53564,18 +54769,23 @@ function tbOpenSheet(k, k2){
   const form = multi ? tbPickText(k, kz) : tk.form;
   const lemma0 = multi ? tbPickLemma(form, tk) : tbLemmaOf(tk), tagged = (multi ? tbTagIdx(k, kz) : tbTagIdx(k, k)) >= 0;
   const e = multi ? null : tbEntryCtx(k), nounCtx = !multi && tbNounAt(k), verbCtx = !multi && !e && tbVerbCtx(k);
-  const lookK = dxFold(form) + (nounCtx ? '#n' : (verbCtx ? '#v' : ''));
+  const pro = !multi && !nounCtx ? tbPronCtx(k) : null;                       // 🪞 un verbe pronominal
+  const lookK = dxFold(form) + (nounCtx ? '#n' : (verbCtx ? '#v' : '')) + (pro ? '#p' : '');
   const looked = TB.look[lookK];
-  const lemma = (looked && looked.lemma) || lemma0, known = tbIsKnown(lemma) || tbIsKnown(lemma0);
-  const cached = looked || (known && e ? { lemma:e.fr, ar:[e.ar], defs:[e.def], src:'lexique' } : null);
+  const eP = !!(e && /^(se |s['’])/i.test(String(e.fr || '')));
+  const lemmaP = pro && e && tbIsInf(e.fr) ? tbPronInf(e.fr) : '';
+  const lemma = (looked && looked.lemma) || lemmaP || lemma0, known = tbIsKnown(lemma) || (!pro && tbIsKnown(lemma0));
+  const cached = looked || (known && e && (!pro || eP) ? { lemma:e.fr, ar:[e.ar], defs:[e.def], src:'lexique' } : null);
+  const rawC = String(tk.raw || '').replace(/[’ʼ‘`´]/g, "'").replace(/^[^\p{L}]+|[^\p{L}]+$/gu, '');
+  const head = !multi && pro && /^[smt]'\p{L}/iu.test(rawC) ? rawC : form;   // « s'engouffrent » (avec son pronom)
   let rules = '';
   try{ if(dxOn()) rules = dxRulesHtml(TB.sents[tk.s]); }catch(err){}
   const tagLbl = (on) => on ? '✓ Tagué : retirer' : (multi ? '🖍 Taguer l\'expression' : '🖍 Taguer ce mot');
   sh.innerHTML = `<div class="tb-sh-in">
     <div class="tb-grab" aria-hidden="true"></div>
-    <div class="tb-sh-top"><div><div class="tb-sh-w" lang="fr">${escapeHtml(form)}</div><div class="tb-sh-ipa" id="tbIpa">${cached && cached.ipa && dxFold(cached.ipaOf || '') === dxFold(form) ? '/' + escapeHtml(cached.ipa) + '/' : ''}</div></div>
+    <div class="tb-sh-top"><div><div class="tb-sh-w" lang="fr">${escapeHtml(head)}</div><div class="tb-sh-ipa" id="tbIpa">${cached && cached.ipa && dxFold(cached.ipaOf || '') === dxFold(form) ? '/' + escapeHtml(cached.ipa) + '/' : ''}</div></div>
       <button type="button" class="tb-ib" data-tb="sheet-x" aria-label="Fermer">✕</button></div>
-    <div class="tb-sh-lemma" id="tbLemma">${dxFold(lemma) !== dxFold(form) ? `forme de <b>${escapeHtml(lemma)}</b>` : ''}</div>
+    <div class="tb-sh-lemma" id="tbLemma">${tbLemmaLine(lemma, form, pro)}</div>
     <div class="tb-pick" role="group" aria-label="Choisir les mots">
       <button type="button" class="tb-chip sm" data-tb="pick-l" ${ia <= 0 ? 'disabled' : ''}>＋ mot avant</button>
       ${multi ? `<button type="button" class="tb-chip sm" data-tb="pick-l-">− 1er mot</button><button type="button" class="tb-chip sm" data-tb="pick-r-">− dernier</button>` : ''}
@@ -53599,17 +54809,18 @@ function tbOpenSheet(k, k2){
   </div>`;
   tbSheetShow(sh);
   try{ conjBindSheetPeeks(sh); }catch(err){}
-  tbSay(form);
+  tbSay(head);
   TB.pickKeep = false;
   if(!cached || (!known && !(cached.defs && cached.defs.length))){
     const fk = dxFold(form);
-    tbLookup(form, { noun:nounCtx, verbCtx }).then(r => {
+    tbLookup(form, { noun:nounCtx, verbCtx:verbCtx || !!pro }).then(async r0 => {
+      const r = (pro && r0) ? await tbPronLook(r0, pro) : r0;
       if(r) TB.look[lookK] = r;
       if(TB.sheetK !== k || !TB.pick || TB.pick.k2 !== kz) return;
       const info = document.getElementById('tbInfo'); if(info) info.innerHTML = tbInfoHtml(r || { ar:[], defs:[] }, tk);
       const iw = document.getElementById('tbImgW'); if(iw && !multi && r && ((r.defs && r.defs.length) || (r.ar && r.ar.length))) iw.innerHTML = wimgSlot({ fr:r.lemma || form, ar:(r.ar || [])[0] || '' }, 'sheet');
       if(r && r.ipa && (!r.ipaOf || dxFold(r.ipaOf) === fk)){ const ip = document.getElementById('tbIpa'); if(ip) ip.textContent = '/' + r.ipa + '/'; }
-      if(r && r.lemma && dxFold(r.lemma) !== fk){ const lm = document.getElementById('tbLemma'); if(lm) lm.innerHTML = `forme de <b>${escapeHtml(r.lemma)}</b>`; }
+      if(r && r.lemma && (dxFold(r.lemma) !== fk || pro)){ const lm = document.getElementById('tbLemma'); if(lm) lm.innerHTML = tbLemmaLine(r.lemma, form, pro); }
       if(r && r.lemma && tbIsKnown(r.lemma)){ const ab = sh.querySelector('[data-tb="add"]'); if(ab) ab.outerHTML = tbAddBtnHtml(true, [r.lemma, form]); }
     });
   }
@@ -53798,8 +55009,10 @@ function tbAddForm(k){
   const tk = TB.toks[k], box = document.getElementById('tbAddF'); if(!tk || !box) return;
   const P = TB.pick && TB.pick.k1 === k ? TB.pick : { k1:k, k2:k }, multi = P.k2 !== P.k1;
   const form = multi ? tbPickText(P.k1, P.k2) : tk.form;
-  const r = TB.look[dxFold(form) + (!multi && tbNounAt(k) ? '#n' : (!multi && !tbEntryCtx(k) && tbVerbCtx(k) ? '#v' : ''))] || TB.look[dxFold(form)] || {};
-  const lemma = r.lemma || (multi ? tbPickLemma(form, tk) : tbLemmaOf(tk));
+  const pro = !multi && !tbNounAt(k) ? tbPronCtx(k) : null;
+  const r = TB.look[dxFold(form) + (!multi && tbNounAt(k) ? '#n' : (!multi && !tbEntryCtx(k) && tbVerbCtx(k) ? '#v' : '')) + (pro ? '#p' : '')] || (pro ? null : TB.look[dxFold(form)]) || {};
+  let lemma = r.lemma || (multi ? tbPickLemma(form, tk) : tbLemmaOf(tk));
+  if(pro && !r.lemma && tbIsInf(lemma)) lemma = tbPronInf(lemma);
   TB.exSpan = { s:tk.s, a:tk.s, b:tk.s };
   box.innerHTML = `<label class="tb-lbl">${multi ? 'Expression' : 'Mot'}<input class="tb-in" id="tbAfFr" value="${escapeHtml(lemma)}"></label>
     <label class="tb-lbl">En arabe<input class="tb-in ar" id="tbAfAr" dir="rtl" lang="ar" value="${escapeHtml(r.arPick || (r.ar || [])[0] || '')}" placeholder="الترجمة"></label>
@@ -53925,8 +55138,10 @@ function tbWire(el){
     const a = e.target.closest('[data-tb]');
     if(a){ tbAction(a.dataset.tb, a, e); return; }
     if(Date.now() < TB.noTapUntil) return;
+    const ow = e.target.closest('.tb-ocr .tbw[data-k]');
+    if(ow && sc.contains(ow)){ tbTapWord(+ow.dataset.k); return; }         // 🖼️ un mot lu dans l'image
     const fig = e.target.closest('.tb-fig');
-    if(fig && sc.contains(fig)){ if(!e.target.closest('.tb-fig-h')) tbImgSheet(+fig.dataset.b); return; }
+    if(fig && sc.contains(fig)){ if(!e.target.closest('.tb-fig-h')) tbFigTap(fig, e); return; }
     const w = e.target.closest('.tbw');
     if(w && sc.contains(w)){
       if(Date.now() - (TB.tapAt || 0) < 700) return;           // déjà pris par le toucher (pointerup)
@@ -54155,6 +55370,14 @@ function tbAction(id, btn, e){
     case 'drop': { tbUi().drop = btn.dataset.v === '1'; tbSaveUi(); tbRender(true); tbToggleAa(true); return; }
     case 'img-al': { tbImgSet(TB.imgSel, { al:btn.dataset.v }); btn.parentNode.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === btn)); return; }
     case 'img-del': tbImgRemove(TB.imgSel); return;
+    case 'img-ocr': {                                  // 🔁 relire le texte de l'image
+      const bi = TB.imgSel, b = TB.art.blocks[bi], key = tbImgOcrKey(b), fig = document.querySelector(`#tbBody .tb-fig[data-b="${bi}"]`), img = fig && fig.querySelector('img');
+      if(!key || !img) return;
+      tbCloseSheet(); (TB.imgOcr || {})[key] = undefined; delete (TB.imgOcr || {})[key];
+      const o = fig.querySelector('.tb-ocr'); if(o) o.remove();
+      tbImgOcrRun(fig, img, key).then(d => { if(d && d.n){ tbImgOcrMount(fig, bi, d); try{ tbPaintTags(); tbPaintKnown(); }catch(e){} tbToast(`📝 ${d.n} mot${d.n > 1 ? 's' : ''} lu${d.n > 1 ? 's' : ''} dans l’image : touche un mot`, 3000); } else if(d) tbToast('Pas de texte lisible dans cette image.'); });
+      return;
+    }
     case 'carnet': tbHuntToggle(false); tbOpenCarnet(); return;
     case 'top': document.getElementById('tbScroll').scrollTo({ top:0, behavior:'smooth' }); return;
     case 'sheet-x': tbCloseSheet(); return;
