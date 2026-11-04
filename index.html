@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- 🏷️ Version de l'appli : augmentée automatiquement par publier-site.cmd à chaque publication -->
-<meta name="app-version" content="1.0.41" data-date="2026-11-03">
+<meta name="app-version" content="1.0.42" data-date="2026-11-04">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <title>VocabVISION — Vocabulaire Français ↔ Arabe</title>
 <script>
@@ -2769,6 +2769,31 @@
   .tbl-shelf{ position:relative; border-radius:20px; background:var(--surface); border:1px solid var(--border); overflow:hidden; }
   .tbl-shelf::before{ content:''; position:absolute; left:0; top:0; bottom:0; width:6px; background:var(--cc); }
   .tbl-sh-h{ display:flex; align-items:center; gap:10px; padding:10px 8px 10px 18px; }
+  .tbl-full{ display:flex; flex-wrap:wrap; align-items:center; gap:6px 12px; margin:0 0 10px; padding:10px 12px; border-radius:12px; background:rgba(245,158,11,.1); border:1px solid rgba(245,158,11,.35); font-size:13.5px; }
+  .tbbig-l{ display:grid; gap:6px; max-height:52vh; overflow:auto; margin:0 0 10px; }
+  .tbbig-it{ display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:10px; border:1px solid var(--border); }
+  .tbbig-t{ flex:1; min-width:0; } .tbbig-t b{ display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:14px; } .tbbig-t small{ color:var(--text-dim); }
+  .tbbig-x{ border:0; background:transparent; cursor:pointer; font-size:15px; padding:4px 8px; border-radius:8px; } .tbbig-x.sure{ background:#DC2626; color:#fff; font-size:12px; font-weight:800; }
+  /* 🔒 1.0.42 : les catégories protégées */
+  .tbl-chip.lk{ border-style:dashed; color:var(--text-dim); }
+  .tbl-chip.priv{ border-style:dashed; }
+  .tbl-locked .tbl-sh-h{ background:repeating-linear-gradient(135deg, rgba(71,85,105,.06) 0 10px, transparent 10px 20px); border-radius:14px; }
+  .tbl-locked .tbl-sh-c{ color:var(--text-dim); }
+  .tbl-unlock{ flex:none; border:1px solid var(--border-strong, #cbd5e1); background:var(--surface); color:var(--text); border-radius:999px; padding:7px 14px; font:inherit; font-weight:800; font-size:13.5px; cursor:pointer; }
+  .tbl-relock{ font-size:15px; }
+  .tbpw-s{ font-size:13.5px; color:var(--text-dim); line-height:1.45; margin:0 0 10px; }
+  .tbpw .tbl-dlg-l small{ font-weight:500; color:var(--text-dim); }
+  .tbpw-show{ display:inline-flex; align-items:center; gap:6px; font-size:13px; color:var(--text-dim); margin:-4px 0 6px; }
+  .tbpw-err{ color:#DC2626; font-weight:700; font-size:13.5px; min-height:1.2em; margin:0 0 4px; }
+  .tbpw-forgot{ margin:0 0 8px; }
+  .tbpw-fg{ padding:10px 12px; border-radius:12px; background:rgba(220,38,38,.06); border:1px solid rgba(220,38,38,.2); margin:0 0 10px; }
+  .tbpw-hint{ font-size:14px; margin:0 0 6px; }
+  .tbpw-del{ border:1px solid rgba(220,38,38,.45); background:var(--surface); color:#B91C1C; border-radius:10px; padding:8px 12px; font:inherit; font-weight:800; cursor:pointer; width:100%; }
+  .tbpw-del.sure{ background:#DC2626; color:#fff; }
+  .tbpw.shake{ animation:tbpwShake .35s; }
+  @keyframes tbpwShake{ 0%,100%{ transform:none; } 25%{ transform:translateX(-8px); } 75%{ transform:translateX(8px); } }
+  @media (prefers-reduced-motion:reduce){ .tbpw.shake{ animation:none; } }
+
   .tbl-sh-ic{ width:40px; height:40px; flex:none; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:21px; background:var(--surface-sunken); background:color-mix(in srgb, var(--cc) 16%, transparent); }
   .tbl-sh-t{ flex:1; min-width:0; display:flex; flex-direction:column; align-items:flex-start; gap:1px; border:0; background:transparent; padding:2px 0; cursor:pointer; color:var(--text); text-align:left; font:inherit; }
   .tbl-sh-n{ font:800 18px/1.2 'Literata',Georgia,serif; }
@@ -18654,7 +18679,7 @@ function hqTabSvg(){
 }
 function hqTabHtml(){
   let a = null, pct = 0, n = 0;
-  try{ if(typeof TB !== 'undefined' && TB && typeof tbResumeArt === 'function'){ a = tbResumeArt(); pct = a ? Math.round(tbPct(a) * 100) : 0; n = tbLoad().filter(x => x.id !== 'sample').length; } }catch(e){ a = null; }
+  try{ if(typeof TB !== 'undefined' && TB && typeof tbResumeArt === 'function'){ a = tbResumeArt(); pct = a ? Math.round(tbPct(a) * 100) : 0; n = tbLoad().filter(x => x.id !== 'sample' && !(typeof tbArtHidden === 'function' && tbArtHidden(x))).length; } }catch(e){ a = null; }
   const left = a ? Math.max(1, Math.round(tbWordsCount(a.text) * (1 - pct / 100) / 170)) : 0;
   return `<button type="button" class="hq-tab" data-hq="tablette" ${a ? `data-open="${escapeHtml(a.id)}"` : ''} aria-label="${a ? 'Reprendre ma lecture dans la Tablette' : 'Ouvrir la Tablette'}">
     <span class="hq-tab-ic">${hqTabSvg()}</span>
@@ -18783,6 +18808,7 @@ document.addEventListener('click', (e) => {
 window.addEventListener('load', () => setTimeout(hqRefresh, 50));
 function renderBlockSelect(){
   clearQuestionTimer();
+  try{ if(typeof tbPrivRelock === 'function') tbPrivRelock(); }catch(e){}
   if(typeof stopRecognition === 'function'){ stopRecognition(); }
   document.body.classList.remove('quiz-active');
   currentBlock = null;
@@ -22875,6 +22901,11 @@ const COLOR_PRESETS = {
 /* ============ 🆕 NOUVEAUTÉS — pour que tout ce qui a été ajouté reste découvrable ============ */
 const WHATS_NEW_SECTIONS = [
   { icon:'🆕', title:'Nouveautés', items:[
+    { name:'🔒 Une catégorie privée, avec un mot de passe', desc:"Dans la bibliothèque de la Tablette : « 🔒 Catégorie privée » (ou ⋯ d'une catégorie › « Protéger par un mot de passe »). Ses textes sont cachés partout — liste, recherche, « Reprendre ta lecture », extraits, accueil — tant que le mot de passe n'est pas donné (« 🔓 Ouvrir »). Elle se reverrouille en revenant à l'accueil, ou après une minute en arrière-plan (ou avec 🔒). Un indice t'aide à t'en souvenir ; on peut changer ou retirer le mot de passe. Les textes restent sur l'appareil (cachés, pas chiffrés)." },
+    { name:'💾 Modifier un texte : « Enregistrer »', desc:"Après « ✏️ Modifier le texte », le bouton « 💾 Enregistrer » garde tes changements et te ramène à ta bibliothèque, sur ce texte (il ne se rouvre plus en grand). Ta lecture est gardée : position, « lu »." },
+    { name:'✓ « Lu » et « pas lu » qui tiennent', desc:"« ✓ Marquer comme lu » et le nouveau « ○ Marquer comme pas lu » (menu ⋯ d'un texte) tiennent maintenant, même juste après avoir fermé la lecture : avant, la lecture fermée se réenregistrait par-dessus (et pouvait aussi perdre ta position). Si la mémoire de l'appli est pleine, on le dit, avec « 📦 Voir ce qui prend le plus de place »." },
+    { name:'📝 Le titre écrit sur la page', desc:"À l'import d'un PDF, quand tu ne gardes que certaines pages, le titre est celui écrit en haut de la première page choisie (tu peux le changer). « 📄 Un texte par page » : chaque page devient un texte avec son propre titre. Pour une page scannée ouverte « tel quel », son titre est trouvé en la lisant." },
+    { name:'📖 PDF tels quels : réparé', desc:"Un PDF (même scanné) ouvert « tel quel » ne dit plus « Ce fichier n'est plus sur cet appareil » quand la mémoire de l'appli est pleine : sa liste est gardée avec les fichiers, sur l'appareil." },
     { name:'📖 Lire un PDF tel quel', desc:"À l'import d'un PDF (ou de photos de pages) : « 📰 En texte, sur la Tablette » comme avant, ou « 📖 Tel quel » — les vraies pages, sans conversion. Tu choisis les pages, tu vas de l'une à l'autre (‹ ›, ou « 3 / 12 » pour les voir en petit), tu zoomes. Touche un mot sur la page : sa définition et son arabe ; glisse sur plusieurs mots : « 🌐 Traduire ». Même sur une page scannée : son texte est lu par l'appli et posé sur l'image (gardé pour la prochaine fois). Tes PDF sont dans la bibliothèque, « 📖 Mes PDF, tels quels », et reprennent à la bonne page." },
     { name:'👉 Voir les mots : glisser, entendre, jouer', desc:"Dans la fiche d'un mot (Par statut, Liste…), glisse à gauche ou à droite, même sur le texte : le mot suivant s'affiche et se dit tout seul. Après le dernier, « 🎉 Tu as vu les 30 mots ! » et le choix du mode de jeu (ou « ↺ Revoir depuis le début »). Un mot ouvert depuis la fiche : un double appui (ou double clic) ramène au mot d'avant. Pour sélectionner des mots dans la fiche : appuie un instant, puis glisse." },
     { name:'✨ Chercher un nouveau mot', desc:"Dans Mots & recherche, écris un mot ou une expression qui n'est pas encore dans tes mots : « ✨ Chercher « … » » te donne le mot, son arabe, son sens et une vraie phrase avec ~ (du dictionnaire, sinon trouvée sur Wikipédia), avec sa traduction. « 🔁 Autre phrase », « ✏️ Changer la phrase » (le mot est retrouvé même conjugué), puis « ➕ Ajouter »." },
@@ -46453,7 +46484,7 @@ var TB = { art:null, sents:[], toks:[], sentToks:[], spans:[], mode:'', playing:
    + « lexiqueQuiz::tbMeta::id » (où tu en es, tes mots tagués). Un texte supprimé laisse une trace (« tbGone »)
    pour que l'autre appareil le supprime aussi. Les images et l'enregistrement de ta voix restent sur l'appareil. */
 var TB_DOC = 'lexiqueQuiz::tbDoc::', TB_META = 'lexiqueQuiz::tbMeta::', TB_GONE = 'lexiqueQuiz::tbGone', TB_PART = 30000, TB_MAX = 800;
-var TB_DOC_FIELDS = ['title', 'text', 'blocks', 'src', 'at'], TB_LOCAL_FIELDS = ['textOrig', 'blocksOrig', '_du', '_dh'];
+var TB_DOC_FIELDS = ['title', 'text', 'blocks', 'src', 'at'], TB_LOCAL_FIELDS = ['textOrig', 'blocksOrig', '_du', '_dh', '_mseen'];
 function tbArtKey(){ return nsKey('vocabVision.tablette'); }          // l'ancien rangement (avant 1.0.23) : repris automatiquement
 function tbUserSuf(){ return '::u:' + getCurrentUserId(); }
 function tbSKey(pre, id, part){ return pre + id + (part ? '~' + part : '') + tbUserSuf(); }
@@ -46583,6 +46614,7 @@ function tbSyncIn(){
 }
 /* les images des textes déjà gardés (avant 1.0.25) partent aussi, une fois */
 setTimeout(() => { try{ const ids = []; tbLoad().forEach(a => tbArtImgIds(a).forEach(i => ids.push(i))); if(ids.length) tbImgSyncOut(ids); }catch(e){} }, 6000);
+setTimeout(() => { try{ if(typeof pdvList === 'function') pdvList(); }catch(e){} }, 400);     // 📖 la liste des PDF tels quels
 function tbUi(){
   if(!TB.ui){ let u = null; try{ u = JSON.parse(localStorage.getItem(nsKey('lexiqueQuiz::tabletteUi')) || 'null'); }catch(e){} TB.ui = Object.assign({ fs:19, lh:1.65, align:'left', w:0 }, u || {}); }
   return TB.ui;
@@ -48053,6 +48085,136 @@ function tbLibRow(a, c){
       <button type="button" class="tbk-ib" data-tbl="art-menu" data-id="${tbAttr(a.id)}" aria-label="Plus d'options pour « ${tbAttr(a.title || '')} »" aria-haspopup="menu" title="Ranger, marquer comme lu, supprimer">⋯</button>
     </div>`;
 }
+/* 🔒 1.0.42 : une catégorie protégée par un mot de passe. Tant qu'il n'est pas donné, ses textes sont cachés partout
+   (bibliothèque, recherche, « Reprendre ta lecture », accueil, extraits). Elle se reverrouille en revenant à l'accueil,
+   ou quand l'appli reste en arrière-plan plus d'une minute. Le mot de passe n'est pas gardé : seulement son empreinte. */
+var TB_PRIV = { open:new Set(), hidAt:0, fails:0, waitTill:0 };
+function tbCatLocked(c){ return !!(c && c.lock && c.lock.h); }
+function tbCatShut(c){ return tbCatLocked(c) && !TB_PRIV.open.has(c.id); }
+function tbArtHidden(a){ try{ return !!a && tbCatShut(tbCatOf(a)); }catch(e){ return false; } }
+function tbHiddenIds(){ let C = []; try{ C = tbCats(); }catch(e){} if(!C.some(tbCatShut)) return new Set(); return new Set(tbLoad().filter(tbArtHidden).map(a => a.id)); }
+function tbPrivRelock(){ if(!TB_PRIV.open.size) return false; TB_PRIV.open.clear(); return true; }
+function tbB64(u8){ let s = ''; u8.forEach(b => { s += String.fromCharCode(b); }); return btoa(s); }
+function tbRandSalt(){ const a = new Uint8Array(16); try{ crypto.getRandomValues(a); }catch(e){ for(let i = 0; i < 16; i++) a[i] = Math.floor(Math.random() * 256); } return tbB64(a); }
+async function tbPwHash(pw, salt, it, weak){
+  const enc = new TextEncoder();
+  if(!weak && window.crypto && crypto.subtle){
+    const key = await crypto.subtle.importKey('raw', enc.encode(pw), 'PBKDF2', false, ['deriveBits']);
+    const bits = await crypto.subtle.deriveBits({ name:'PBKDF2', hash:'SHA-256', salt:enc.encode(salt), iterations:it || 150000 }, key, 256);
+    return tbB64(new Uint8Array(bits));
+  }
+  let h = salt + '|' + pw; for(let i = 0; i < 3000; i++) h = syncHash(h + '|' + i + '|' + pw);
+  return 'f:' + h;
+}
+async function tbPwCheck(c, pw){ const L = c && c.lock; if(!L || !L.h) return true; try{ return (await tbPwHash(pw, L.s, L.it, /^f:/.test(L.h))) === L.h; }catch(e){ return false; } }
+async function tbPwMake(pw, hint){ const s = tbRandSalt(), weak = !(window.crypto && crypto.subtle), it = 150000; return { s, it, h:await tbPwHash(pw, s, it, weak), hint:String(hint || '').trim().slice(0, 80), at:Date.now() }; }
+/* la fenêtre du mot de passe : « open » (ouvrir), « set » (protéger), « change », « remove » */
+function tbPwDialog(mode, c){
+  return new Promise(res => {
+    const L = c.lock || {}, nm = escapeHtml(c.name || 'Ma catégorie');
+    const T = { open:`🔒 « ${nm} » est protégée`, set:`🔒 Protéger « ${nm} »`, change:'🔑 Changer le mot de passe', remove:'🔓 Retirer le mot de passe' }[mode];
+    const needCur = mode !== 'set', needNew = mode === 'set' || mode === 'change';
+    const ov = document.createElement('div');
+    ov.className = 'am-dlg-ov tbl-dlg-ov tbpw-ov';
+    ov.innerHTML = `<div class="am-dlg tbl-dlg tbpw" role="dialog" aria-modal="true" aria-label="${tbAttr(T.replace(/<[^>]+>/g, ''))}">
+      <div class="am-dlg-t">${T}</div>
+      ${mode === 'open' ? `<div class="tbpw-s">Ses textes sont cachés. Donne le mot de passe pour les voir.</div>` : ''}
+      ${mode === 'set' ? `<div class="tbpw-s">Ses textes seront cachés tant que le mot de passe n'est pas donné (même la recherche et « Reprendre ta lecture » ne les montrent pas). Retiens-le bien : sans lui, tu ne pourras plus les ouvrir, seulement les supprimer.</div>` : ''}
+      ${mode === 'remove' ? `<div class="tbpw-s">Ses textes seront de nouveau visibles par tous.</div>` : ''}
+      ${needCur ? `<label class="tbl-dlg-l" for="tbpwCur">${mode === 'open' ? 'Mot de passe' : 'Mot de passe actuel'}</label><input class="am-in" id="tbpwCur" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="go">` : ''}
+      ${needNew ? `<label class="tbl-dlg-l" for="tbpwNew">${mode === 'change' ? 'Nouveau mot de passe' : 'Mot de passe'} <small>(au moins 4 caractères)</small></label><input class="am-in" id="tbpwNew" type="password" autocomplete="new-password" autocapitalize="off" spellcheck="false">
+        <label class="tbl-dlg-l" for="tbpwNew2">Encore une fois</label><input class="am-in" id="tbpwNew2" type="password" autocomplete="new-password" autocapitalize="off" spellcheck="false">
+        <label class="tbl-dlg-l" for="tbpwHint">Indice <small>(facultatif, pour t'en souvenir — pas le mot de passe lui-même)</small></label><input class="am-in" id="tbpwHint" maxlength="80" autocomplete="off" value="${tbAttr(mode === 'change' ? (L.hint || '') : '')}">` : ''}
+      <label class="tbpw-show"><input type="checkbox" id="tbpwShow"> Afficher</label>
+      <div class="tbpw-err" id="tbpwErr" role="alert"></div>
+      ${mode === 'open' ? `<button type="button" class="tbl-link tbpw-forgot" data-v="forgot">Mot de passe oublié ?</button><div class="tbpw-fg" id="tbpwFg" hidden></div>` : ''}
+      <div class="am-dlg-b"><button class="am-dlg-btn ghost" data-v="cancel">Annuler</button><button class="am-dlg-btn" data-v="ok">${{ open:'🔓 Ouvrir', set:'🔒 Protéger', change:'🔑 Changer', remove:'🔓 Retirer' }[mode]}</button></div>
+    </div>`;
+    document.body.appendChild(ov);
+    requestAnimationFrame(() => ov.classList.add('show'));
+    const $ = (s) => ov.querySelector(s), err = $('#tbpwErr'), ok = $('[data-v="ok"]');
+    const say = (t) => { err.textContent = t || ''; if(t){ const d = $('.tbpw'); d.classList.remove('shake'); void d.offsetWidth; d.classList.add('shake'); } };
+    const close = (v) => { document.removeEventListener('keydown', onKey, true); try{ bkPop('tbpw'); }catch(e){} ov.remove(); res(v); };
+    const go = async () => {
+      if(ok.disabled) return;
+      const cur = needCur ? $('#tbpwCur').value : '', nw = needNew ? $('#tbpwNew').value : '', nw2 = needNew ? $('#tbpwNew2').value : '';
+      if(needCur){
+        if(Date.now() < TB_PRIV.waitTill){ say(`Trop d'essais : attends ${Math.ceil((TB_PRIV.waitTill - Date.now()) / 1000)} s.`); return; }
+        if(!cur){ say('Écris le mot de passe.'); $('#tbpwCur').focus(); return; }
+      }
+      if(needNew){
+        if(nw.length < 4){ say('Le mot de passe doit avoir au moins 4 caractères.'); $('#tbpwNew').focus(); return; }
+        if(nw !== nw2){ say('Les deux mots de passe ne sont pas pareils.'); $('#tbpwNew2').focus(); return; }
+        const hint = $('#tbpwHint').value.trim(); if(hint && dxFold(hint).includes(dxFold(nw))){ say("L'indice ne doit pas contenir le mot de passe."); $('#tbpwHint').focus(); return; }
+      }
+      ok.disabled = true; ok.textContent = '⏳';
+      try{
+        if(needCur && !(await tbPwCheck(c, cur))){
+          TB_PRIV.fails++; if(TB_PRIV.fails >= 5){ TB_PRIV.fails = 0; TB_PRIV.waitTill = Date.now() + 30000; }
+          ok.disabled = false; ok.textContent = { open:'🔓 Ouvrir', change:'🔑 Changer', remove:'🔓 Retirer' }[mode];
+          say('Mot de passe incorrect.'); const ci = $('#tbpwCur'); ci.value = ''; ci.focus(); return;
+        }
+        TB_PRIV.fails = 0;
+        if(mode === 'open'){ TB_PRIV.open.add(c.id); close(true); return; }
+        if(mode === 'remove'){ tbCatPut({ id:c.id, lock:null }); TB_PRIV.open.delete(c.id); try{ setStatus(`🔓 « ${c.name} » n'a plus de mot de passe.`, 'ok'); }catch(e){} close(true); return; }
+        const lock = await tbPwMake(nw, $('#tbpwHint').value);
+        tbCatPut(Object.assign({}, c, { lock }));
+        TB_PRIV.open.add(c.id);
+        try{ setStatus(mode === 'set' ? `🔒 « ${c.name} » est protégée par un mot de passe.` : '🔑 Mot de passe changé.', 'ok'); }catch(e){}
+        close(true);
+      }catch(e){ ok.disabled = false; ok.textContent = 'Réessayer'; say("Ça n'a pas marché sur cet appareil : " + ((e && e.message) || 'erreur')); }
+    };
+    const onKey = (e) => { if(e.key === 'Escape'){ e.preventDefault(); e.stopPropagation(); close(false); } else if(e.key === 'Enter' && e.target && e.target.tagName === 'INPUT'){ e.preventDefault(); go(); } };
+    document.addEventListener('keydown', onKey, true);
+    try{ bkPush('tbpw', () => close(false)); }catch(e){}
+    ov.addEventListener('click', (e) => {
+      if(e.target === ov){ close(false); return; }
+      const b = e.target.closest('[data-v]'); if(!b) return;
+      const v = b.dataset.v;
+      if(v === 'ok'){ go(); return; }
+      if(v === 'cancel'){ close(false); return; }
+      if(v === 'forgot'){
+        const fg = $('#tbpwFg'); fg.hidden = !fg.hidden; if(fg.hidden) return;
+        const n = tbLoad().filter(a => tbCatOf(a).id === c.id).length;
+        fg.innerHTML = `${L.hint ? `<div class="tbpw-hint">💡 Ton indice : <b>${escapeHtml(L.hint)}</b></div>` : `<div class="tbpw-hint">Pas d'indice enregistré.</div>`}
+          <div class="tbpw-s">Sans le mot de passe, ses textes ne peuvent plus être ouverts. Tu peux seulement supprimer la catégorie avec ses ${n} texte${n > 1 ? 's' : ''}.</div>
+          <button type="button" class="tbpw-del" data-v="wipe">🗑 Supprimer « ${nm} » et ses ${n} texte${n > 1 ? 's' : ''}</button>`;
+        return;
+      }
+      if(v === 'wipe'){
+        if(!b.classList.contains('sure')){ b.classList.add('sure'); b.textContent = '🗑 Sûr ? Touche encore : c\'est définitif'; return; }
+        tbLoad().filter(a => tbCatOf(a).id === c.id).forEach(a => tbDel(a.id));
+        const all = tbCatsAll(), x = all.find(z => z.id === c.id); if(x){ x.gone = 1; x.lock = null; x.upd = Date.now(); tbCatsSave(all); }
+        TB_PRIV.open.delete(c.id);
+        try{ setStatus(`🗑 « ${c.name} » et ses textes sont supprimés.`, 'ok'); }catch(e){}
+        close('wiped');
+      }
+    });
+    const sh = $('#tbpwShow'); if(sh) sh.addEventListener('change', () => ov.querySelectorAll('input[type="password"], input[data-pw]').forEach(i => { i.dataset.pw = '1'; i.type = sh.checked ? 'text' : 'password'; }));
+    setTimeout(() => { const f = $('#tbpwCur') || $('#tbpwNew'); if(f) try{ f.focus(); }catch(e){} }, 60);
+  });
+}
+/* revenir après un moment en arrière-plan : tout se reverrouille (et une lecture privée se ferme) */
+document.addEventListener('visibilitychange', () => {
+  if(document.hidden){ TB_PRIV.hidAt = Date.now(); return; }
+  const away = TB_PRIV.hidAt ? Date.now() - TB_PRIV.hidAt : 0; TB_PRIV.hidAt = 0;
+  if(away < 60000 || !TB_PRIV.open.size) return;
+  const wasPriv = TB.art && document.getElementById('tbReader') && tbCatLocked(tbCatOf(TB.art));
+  tbPrivRelock();
+  try{
+    if(wasPriv){ tbClose(); renderTabletteHome(); }
+    else if(document.getElementById('tbkLib')){ tbLibRefresh(); tbEdCatOptions(); }
+  }catch(e){}
+});
+function tbLibShelfLocked(c){
+  return `<section class="tbl-shelf tbl-locked" data-cat="${tbAttr(c.id)}" style="--cc:${c.color}">
+    <div class="tbl-sh-h">
+      <span class="tbl-sh-ic" aria-hidden="true">🔒</span>
+      <button type="button" class="tbl-sh-t" data-tbl="unlock" data-cat="${tbAttr(c.id)}"><span class="tbl-sh-n">${escapeHtml(c.name)}</span><span class="tbl-sh-c">Protégée par un mot de passe</span></button>
+      <button type="button" class="tbl-unlock" data-tbl="unlock" data-cat="${tbAttr(c.id)}">🔓 Ouvrir</button>
+    </div>
+  </section>`;
+}
 function tbLibShelf(c, rows, fold){
   const done = rows.filter(a => a.done).length, avg = rows.length ? rows.reduce((t, a) => t + tbPct(a), 0) / rows.length : 0;
   return `<section class="tbl-shelf ${fold ? 'fold' : ''}" data-cat="${tbAttr(c.id)}" style="--cc:${c.color}">
@@ -48063,6 +48225,7 @@ function tbLibShelf(c, rows, fold){
         <span class="tbl-sh-c">${rows.length ? `${rows.length} texte${rows.length > 1 ? 's' : ''}${done ? `, ${done} lu${done > 1 ? 's' : ''}` : ''}` : 'vide'}</span>
       </button>
       ${rows.length ? `<span class="tbl-sh-avg" title="Lecture moyenne du rayon">${tbRing(avg, 30)}<b>${Math.round(avg * 100)}%</b></span>` : ''}
+      ${tbCatLocked(c) ? `<button type="button" class="tbk-ib tbl-relock" data-tbl="relock" data-cat="${tbAttr(c.id)}" aria-label="Reverrouiller ${tbAttr(c.name)}" title="Reverrouiller">🔒</button>` : ''}
       <button type="button" class="tbk-ib" data-tbl="cat-menu" data-cat="${tbAttr(c.id)}" aria-label="Options de la catégorie ${tbAttr(c.name)}" aria-haspopup="menu">⋯</button>
     </div>
     <div class="tbl-sh-list">${rows.length ? rows.map(a => tbLibRow(a, c)).join('') : `<div class="tbl-empty">Aucun texte dans ce rayon. <button type="button" class="tbl-link" data-tbl="new-text" data-cat="${tbAttr(c.id)}">✍️ Ajouter un texte dans « ${escapeHtml(c.name)} »</button></div>`}</div>
@@ -48075,10 +48238,43 @@ function tbFoldText(a){
   let v = TB_FOLD.get(k); if(v == null){ v = dxFold(t); TB_FOLD.set(k, v); if(TB_FOLD.size > 400) TB_FOLD.delete(TB_FOLD.keys().next().value); }
   return v;
 }
+/* 📦 1.0.42 : quand la mémoire de l'appli est presque pleine, un enregistrement peut échouer (« marquer comme lu »…).
+   On le dit dans la bibliothèque, avec les textes qui prennent le plus de place. */
+var TB_LS_MAX = 5200000;
+function tbLsUsed(){ let n = 0; try{ for(let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i) || ''; n += k.length + (localStorage.getItem(k) || '').length; } }catch(e){} return n; }
+function tbArtSizes(){
+  const suf = tbUserSuf(), by = new Map();
+  try{ for(let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); if(!k || !k.endsWith(suf)) continue; const pre = k.startsWith(TB_DOC) ? TB_DOC : (k.startsWith(TB_META) ? TB_META : ''); if(!pre) continue; const id = k.slice(pre.length, k.length - suf.length).replace(/~\d+$/, ''); by.set(id, (by.get(id) || 0) + k.length + (localStorage.getItem(k) || '').length); } }catch(e){}
+  return by;
+}
+function tbStoreWarnHtml(){
+  const used = tbLsUsed(), pct = Math.round(used / TB_LS_MAX * 100);
+  if(pct < 85) return '';
+  return `<div class="tbl-full" role="status"><span>⚠️ <b>La mémoire de l'appli est presque pleine (${Math.min(100, pct)} %)</b> : un texte, un « lu » ou un brouillon risque de ne pas être gardé.</span><button type="button" class="tbl-link" data-tbl="big">📦 Voir ce qui prend le plus de place</button></div>`;
+}
+function tbBigDialog(){
+  const by = tbArtSizes(), L = tbLoad().filter(a => by.has(a.id) && !tbArtHidden(a)).map(a => ({ a, n:by.get(a.id) })).sort((x, y) => y.n - x.n).slice(0, 12);
+  const kb = (n) => n >= 1e6 ? (n / 1e6).toFixed(1).replace('.', ',') + ' Mo' : Math.max(1, Math.round(n / 1000)) + ' ko';
+  const ov = document.createElement('div'); ov.className = 'am-dlg-ov tbl-dlg-ov show';
+  ov.innerHTML = `<div class="am-dlg tbl-dlg tbbig" role="dialog" aria-modal="true" aria-label="Ce qui prend le plus de place">
+    <div class="am-dlg-t">📦 Ce qui prend le plus de place</div>
+    <div class="tbpw-s"><span id="tbbigU">Mémoire utilisée : ${kb(tbLsUsed())} sur ≈ ${kb(TB_LS_MAX)}.</span> Supprimer un gros texte (souvent un livre ou un PDF importé en texte) libère de la place. Un PDF peut aussi être gardé « 📖 tel quel » : il ne prend pas cette mémoire.</div>
+    <div class="tbbig-l">${L.map(x => `<div class="tbbig-it"><span class="tbbig-t"><b>${escapeHtml(x.a.title || 'Sans titre')}</b><small>${kb(x.n)}${x.a.done ? ' · ✓ lu' : ''}</small></span><button type="button" class="tbbig-x" data-del="${tbAttr(x.a.id)}" aria-label="Supprimer « ${tbAttr(x.a.title || '')} »">🗑</button></div>`).join('') || '<div class="tbpw-s">Aucun texte.</div>'}</div>
+    <div class="am-dlg-b"><button class="am-dlg-btn" data-v="x">Fermer</button></div></div>`;
+  document.body.appendChild(ov);
+  const close = () => { ov.remove(); try{ tbLibRefresh(); }catch(e){} };
+  ov.addEventListener('click', (e) => {
+    if(e.target === ov || e.target.closest('[data-v="x"]')){ close(); return; }
+    const d = e.target.closest('[data-del]'); if(!d) return;
+    if(!d.classList.contains('sure')){ d.classList.add('sure'); d.textContent = 'Sûr ?'; return; }
+    tbDel(d.dataset.del); const it = d.closest('.tbbig-it'); if(it) it.remove();
+    const u = ov.querySelector('#tbbigU'); if(u) u.textContent = `Mémoire utilisée : ${kb(tbLsUsed())} sur ≈ ${kb(TB_LS_MAX)}.`;
+  });
+}
 function tbLibRefresh(){
   const top = document.getElementById('tbkLibTop'), box = document.getElementById('tbkMine'); if(!top || !box) return;
-  const S = tbLibState(), C = tbCats(), all = tbLoad().filter(a => a.id !== 'sample');
-  if(S.f !== 'all' && !C.some(c => c.id === S.f)) S.f = 'all';
+  const S = tbLibState(), C = tbCats(), all = tbLoad().filter(a => a.id !== 'sample' && !tbArtHidden(a));
+  if(S.f !== 'all' && !C.some(c => c.id === S.f && !tbCatShut(c))) S.f = 'all';
   const q = dxFold(S.q || '').trim();
   const hit = (a) => !q || dxFold(a.title || '').includes(q) || tbFoldText(a).includes(q);
   const so = tbUi().libSort || 'recent';
@@ -48092,15 +48288,16 @@ function tbLibRefresh(){
   if(stats) stats.textContent = all.length ? `${all.length} texte${all.length > 1 ? 's' : ''}, ${nDone} lu${nDone > 1 ? 's' : ''}, ${nOn} en cours` : 'Range tes textes par catégorie';
   const r = tbResumeArt(), rc = r ? tbCatOf(r) : null;
   const chip = (id, ic, name, k, color) => `<button type="button" class="tbl-chip ${S.f === id ? 'on' : ''}" data-tbl="filter" data-f="${tbAttr(id)}" ${color ? `style="--cc:${color}"` : ''} aria-pressed="${S.f === id}"><span aria-hidden="true">${ic}</span>${escapeHtml(name)}<b>${k}</b></button>`;
-  top.innerHTML = `${r && !q ? `<button type="button" class="tbl-hero" data-tbk-open="${tbAttr(r.id)}" style="--cc:${rc.color}">
+  top.innerHTML = `${tbStoreWarnHtml()}${r && !q ? `<button type="button" class="tbl-hero" data-tbk-open="${tbAttr(r.id)}" style="--cc:${rc.color}">
       <span class="tbl-hero-ring">${tbRing(tbPct(r), 58)}<b>${Math.round(tbPct(r) * 100)}%</b></span>
       <span class="tbl-hero-t"><small>Reprendre ta lecture, ${rc.icon} ${escapeHtml(rc.name)}</small><b>${escapeHtml(r.title || 'Sans titre')}</b><span>Encore ${Math.max(1, Math.round(tbWordsCount(r.text) * (1 - tbPct(r)) / 170))} min${r.mark ? ', 🔖 marque-page posé' : ''}</span></span>
       <span class="tbl-hero-go" aria-hidden="true">▶</span></button>` : ''}
     ${tbExtList().length ? `<button type="button" class="tbl-arv tbl-ext" data-tbl="extracts"><span aria-hidden="true">📌</span><span><b>Mes extraits</b><small>${tbExtList().length} passage${tbExtList().length > 1 ? 's' : ''} gardé${tbExtList().length > 1 ? 's' : ''}</small></span></button>` : ''}
     ${tbArWords().length ? `<button type="button" class="tbl-arv" data-tbl="ar-review"><span aria-hidden="true">🔄</span><span><b>Revoir l'arabe de tes mots</b><small>${tbArWords().length} mot${tbArWords().length > 1 ? 's' : ''} ajouté${tbArWords().length > 1 ? 's' : ''} depuis la Tablette : je propose la bonne traduction</small></span><span class="tbl-arv-go" aria-hidden="true">›</span></button>` : ''}
-    <div class="tbl-chips" role="group" aria-label="Catégories">${chip('all', '📚', 'Tout', all.length)}${C.map(c => chip(c.id, c.icon, c.name, by.get(c.id).length, c.color)).join('')}<button type="button" class="tbl-chip add" data-tbl="cat-new">＋ Catégorie</button></div>`;
+    <div class="tbl-chips" role="group" aria-label="Catégories">${chip('all', '📚', 'Tout', all.length)}${C.map(c => tbCatShut(c) ? `<button type="button" class="tbl-chip lk" data-tbl="unlock" data-cat="${tbAttr(c.id)}" style="--cc:${c.color}"><span aria-hidden="true">🔒</span>${escapeHtml(c.name)}</button>` : chip(c.id, tbCatLocked(c) ? '🔓' : c.icon, c.name, by.get(c.id).length, c.color)).join('')}<button type="button" class="tbl-chip add" data-tbl="cat-new">＋ Catégorie</button>${C.some(tbCatLocked) ? '' : `<button type="button" class="tbl-chip add priv" data-tbl="cat-priv" title="Une catégorie protégée par un mot de passe">🔒 Catégorie privée</button>`}</div>`;
   const fold = tbUi().libFold || {};
   const shelves = C.filter(c => S.f === 'all' || c.id === S.f).map(c => {
+    if(tbCatShut(c)) return q ? '' : tbLibShelfLocked(c);
     const rows = by.get(c.id).filter(hit).sort(sorter);
     if(q && !rows.length) return '';
     return tbLibShelf(c, rows, !q && S.f === 'all' && !!fold[c.id]);
@@ -48126,10 +48323,10 @@ function tbArtMenuHtml(a){
   const cur = tbCatOf(a).id;
   return `<div class="tbl-m-h">${escapeHtml(a.title || 'Sans titre')}</div>
     <div class="tbl-m-l">📂 Ranger dans</div>
-    ${tbCats().map(c => `<button type="button" role="menuitemradio" aria-checked="${c.id === cur}" class="${c.id === cur ? 'on' : ''}" data-tbl="move" data-id="${tbAttr(a.id)}" data-cat="${tbAttr(c.id)}" style="--cc:${c.color}"><span>${c.icon}</span>${escapeHtml(c.name)}${c.id === cur ? '<i>✓</i>' : ''}</button>`).join('')}
+    ${tbCats().map(c => `<button type="button" role="menuitemradio" aria-checked="${c.id === cur}" class="${c.id === cur ? 'on' : ''}" data-tbl="move" data-id="${tbAttr(a.id)}" data-cat="${tbAttr(c.id)}" style="--cc:${c.color}"><span>${c.icon}</span>${escapeHtml(c.name)}${tbCatLocked(c) ? ' 🔒' : ''}${c.id === cur ? '<i>✓</i>' : ''}</button>`).join('')}
     <hr>
-    ${a.done || tbPct(a) > 0.02 ? `<button type="button" role="menuitem" data-tbl="reset" data-id="${tbAttr(a.id)}">↺ Recommencer à zéro</button>` : ''}
-    ${a.done ? '' : `<button type="button" role="menuitem" data-tbl="mark-read" data-id="${tbAttr(a.id)}">✓ Marquer comme lu</button>`}
+    ${a.done ? `<button type="button" role="menuitem" data-tbl="mark-unread" data-id="${tbAttr(a.id)}">○ Marquer comme pas lu</button>` : `<button type="button" role="menuitem" data-tbl="mark-read" data-id="${tbAttr(a.id)}">✓ Marquer comme lu</button>`}
+    ${!a.done && tbPct(a) > 0.02 ? `<button type="button" role="menuitem" data-tbl="reset" data-id="${tbAttr(a.id)}">↺ Recommencer à zéro</button>` : ''}
     <button type="button" role="menuitem" data-tbk-edit="${tbAttr(a.id)}">✏️ Modifier le texte</button>
     <button type="button" role="menuitem" class="danger" data-tbk-del="${tbAttr(a.id)}">🗑 Supprimer</button>`;
 }
@@ -48139,6 +48336,7 @@ function tbCatMenuHtml(c){
     <button type="button" role="menuitem" data-tbl="new-text" data-cat="${tbAttr(c.id)}">✍️ Ajouter un texte ici</button>
     <button type="button" role="menuitem" data-tbl="import" data-cat="${tbAttr(c.id)}">📥 Importer ici (.md, .epub, .cbz)</button>
     <button type="button" role="menuitem" data-tbl="cat-edit" data-cat="${tbAttr(c.id)}">🎨 Renommer, icône, couleur</button>
+    ${tbCatLocked(c) ? `<button type="button" role="menuitem" data-tbl="relock" data-cat="${tbAttr(c.id)}">🔒 Reverrouiller maintenant</button><button type="button" role="menuitem" data-tbl="cat-pw" data-cat="${tbAttr(c.id)}">🔑 Changer le mot de passe</button><button type="button" role="menuitem" data-tbl="cat-unpw" data-cat="${tbAttr(c.id)}">🔓 Retirer le mot de passe</button>` : `<button type="button" role="menuitem" data-tbl="cat-lock" data-cat="${tbAttr(c.id)}">🔒 Protéger par un mot de passe</button>`}
     ${i > 0 ? `<button type="button" role="menuitem" data-tbl="cat-up" data-cat="${tbAttr(c.id)}">↑ Monter</button>` : ''}
     ${i < C.length - 1 ? `<button type="button" role="menuitem" data-tbl="cat-down" data-cat="${tbAttr(c.id)}">↓ Descendre</button>` : ''}
     ${C.length > 1 ? `<hr><button type="button" role="menuitem" class="danger" data-tbl="cat-del" data-cat="${tbAttr(c.id)}">🗑 Supprimer la catégorie</button>` : ''}`;
@@ -48220,8 +48418,25 @@ function tbLibWire(){
     if(act === 'art-menu'){ const a = tbGet(id); if(a) tbLibMenu(b, tbArtMenuHtml(a)); return; }
     if(act === 'cat-menu'){ const c = tbCats().find(x => x.id === cat); if(c) tbLibMenu(b, tbCatMenuHtml(c)); return; }
     if(act === 'move'){ const c = tbCats().find(x => x.id === cat); if(tbArtSetCat(id, cat)){ tbLibRefresh(); try{ setStatus(`📂 Rangé dans ${c.icon} ${c.name}`, 'ok'); }catch(err){} } return; }
-    if(act === 'mark-read'){ const a = tbGet(id); if(a){ a.done = true; a.pct = 1; tbPut(a); tbLibRefresh(); } return; }
-    if(act === 'reset'){ const a = tbGet(id); if(a){ a.done = false; a.pct = 0; a.pos = 0; a.posOff = 0; tbPut(a); tbLibRefresh(); } return; }
+    if(act === 'mark-read' || act === 'mark-unread' || act === 'reset'){
+      const a = tbGet(id); if(!a) return;
+      if(act === 'mark-read'){ a.done = true; a.pct = 1; } else { a.done = false; a.pct = 0; a.pos = 0; a.posOff = 0; }
+      if(TB.art && TB.art.id === id) ['done', 'pct', 'pos', 'posOff'].forEach(f => { TB.art[f] = a[f]; });     // la lecture en mémoire suit
+      const ok = tbPut(a); tbLibRefresh();
+      const t = a.title || 'Le texte';
+      try{ setStatus(ok ? (act === 'mark-read' ? `✓ « ${t} » : lu.` : act === 'mark-unread' ? `○ « ${t} » : pas lu (il repart du début).` : `↺ « ${t} » repart du début.`) : "⚠️ La mémoire de l'appli est pleine : impossible d'enregistrer. Supprime un texte ou un livre importé, puis réessaie.", ok ? 'ok' : 'err'); }catch(err){}
+      return;
+    }
+    if(act === 'big'){ tbBigDialog(); return; }
+    if(act === 'unlock'){ const c = tbCats().find(x => x.id === cat); if(c && await tbPwDialog('open', c)){ S.f = 'all'; tbLibRefresh(); tbEdCatOptions(); setTimeout(() => { const s = document.querySelector(`.tbl-shelf[data-cat="${cat}"]`); if(s) s.scrollIntoView({ block:'start', behavior:'smooth' }); }, 60); } return; }
+    if(act === 'relock'){ TB_PRIV.open.delete(cat); tbLibRefresh(); tbEdCatOptions(); try{ setStatus('🔒 Catégorie reverrouillée : ses textes sont cachés.', 'ok'); }catch(err){} return; }
+    if(act === 'cat-lock' || act === 'cat-pw' || act === 'cat-unpw'){ const c = tbCats().find(x => x.id === cat); if(c && await tbPwDialog(act === 'cat-lock' ? 'set' : act === 'cat-pw' ? 'change' : 'remove', c)){ tbLibRefresh(); tbEdCatOptions(); } return; }
+    if(act === 'cat-priv'){
+      const v = await tbCatDialog({ name:'Mon coin privé', icon:'🔒', color:'#475569', isNew:true }); if(!v) return;
+      const c = { id:'c' + Date.now().toString(36), name:v.name, icon:v.icon, color:v.color };
+      if(await tbPwDialog('set', c)){ S.f = 'all'; tbLibRefresh(); tbEdCatOptions(); }
+      return;
+    }
     if(act === 'cat-new'){ const v = await tbCatDialog(); if(!v) return; const c = tbCatPut({ id:'c' + Date.now().toString(36), name:v.name, icon:v.icon, color:v.color }); S.f = 'all'; tbLibRefresh(); tbEdCatOptions(); try{ setStatus(`${c.icon} « ${c.name} » est créée : range-y tes textes (menu ⋯).`, 'ok'); }catch(err){} return; }
     if(act === 'cat-edit'){ const c = tbCats().find(x => x.id === cat); if(!c) return; const v = await tbCatDialog(c); if(!v) return; tbCatPut({ id:c.id, name:v.name, icon:v.icon, color:v.color }); tbLibRefresh(); tbEdCatOptions(); return; }
     if(act === 'cat-up' || act === 'cat-down'){ tbCatMove(cat, act === 'cat-up' ? -1 : 1); tbLibRefresh(); tbEdCatOptions(); return; }
@@ -49004,6 +49219,9 @@ function tbPdfDialog(P, cat, existing){
       <div class="tbp-n" id="tbpN" aria-live="polite"></div>
       <div class="tbp-g" id="tbpG">${Array.from({ length:N }, (_, i) => `<button type="button" class="tbp-t on" data-p="${i + 1}" aria-pressed="true" aria-label="${isImg ? 'Photo' : 'Page'} ${i + 1}"><canvas width="92" height="120"></canvas><span>${i + 1}${P.scan[i + 1] && !isImg ? ' 📷' : ''}</span></button>`).join('')}</div>
       <div class="tbp-x"><button type="button" class="tbl-link" data-v="all">✓ Tout</button><button type="button" class="tbl-link" data-v="none">✗ Aucune</button><span>Touche une page pour la garder ou l'enlever.</span></div>
+      <label class="tbl-dlg-l" for="tbpTitle">📝 Titre <small class="tbp-tsrc" id="tbpTitleSrc"></small></label>
+      <input class="am-in tbp-title" id="tbpTitle" maxlength="150" autocomplete="off" value="${tbAttr(P.title)}" aria-describedby="tbpTitleSrc">
+      ${isImg ? '' : `<label class="tbl-imp-rep tbp-txt tbp-per" id="tbpPerL" hidden><input type="checkbox" id="tbpPer"> 📄 Un texte par page choisie, chacun avec le titre de sa page</label>`}
       ${nScan ? `<label class="tbl-dlg-l" for="tbpLang">🔤 Langue du texte ${isImg ? 'des photos' : 'scanné'}</label>
         <select class="am-in" id="tbpLang">${TB_OCR_LANGS.map(l => `<option value="${l[0]}">${l[1]}</option>`).join('')}</select>
         <label class="tbl-imp-rep tbp-txt"><input type="checkbox" id="tbpImg" ${isImg ? 'checked' : ''}> Garder aussi l'image de chaque ${isImg ? 'photo' : 'page scannée'} (pour comparer)</label>` : ''}
@@ -49018,6 +49236,22 @@ function tbPdfDialog(P, cat, existing){
     document.body.appendChild(ov);
     requestAnimationFrame(() => ov.classList.add('show'));
     const inp = ov.querySelector('#tbpIn'), okB = ov.querySelector('[data-v="ok"]'), nEl = ov.querySelector('#tbpN'), grid = ov.querySelector('#tbpG');
+    // 📝 le titre : quand on ne garde que certaines pages, celui écrit en haut de la première (on peut le changer)
+    const tIn = ov.querySelector('#tbpTitle'), tSrc = ov.querySelector('#tbpTitleSrc'); let tAuto = false, tT = 0, tTok = 0;
+    tIn.addEventListener('input', () => { tIn.dataset.user = '1'; tAuto = false; tSrc.textContent = ''; });
+    const schedTitle = () => {
+      clearTimeout(tT); tT = setTimeout(async () => {
+        if(tIn.dataset.user) return;
+        const first = [...sel].sort((a, b) => a - b)[0], my = ++tTok;
+        if(!first || sel.size === N){ tIn.value = P.title; tSrc.textContent = ''; tAuto = false; return; }
+        if(P.kind !== 'img' && P.doc && !P.scan[first]){
+          const t = await tbPdfPageTitle(P, first); if(my !== tTok || tIn.dataset.user) return;
+          if(t){ tIn.value = t; tSrc.textContent = `trouvé sur la page ${first}`; tAuto = false; return; }
+        }
+        tIn.value = P.title; tAuto = true;
+        tSrc.textContent = (P.kind === 'img' || P.scan[first]) ? 'celui de la page sera cherché en la lisant' : '';
+      }, 200);
+    };
     const mode = (m) => { const r = ov.querySelector(`input[name="tbpM"][value="${m}"]`); if(r) r.checked = true; };
     const sync = (fromInput) => {
       grid.querySelectorAll('.tbp-t').forEach(b => { const on = sel.has(+b.dataset.p); b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); });
@@ -49027,6 +49261,8 @@ function tbPdfDialog(P, cat, existing){
       okB.disabled = !sel.size;
       okB.textContent = sel.size === N ? (isImg ? 'Lire le texte' : 'Importer et lire') : `Importer ${sel.size} ${isImg ? 'photo' : 'page'}${sel.size > 1 ? 's' : ''}`;
       if(ov.classList.contains('tbp-view')) okB.textContent = '📖 ' + (sel.size === N ? (isImg ? 'Ouvrir les photos' : 'Ouvrir le PDF') : `Ouvrir ${sel.size} ${isImg ? 'photo' : 'page'}${sel.size > 1 ? 's' : ''}`);
+      { const pl = ov.querySelector('#tbpPerL'); if(pl) pl.hidden = !(sel.size >= 2 && sel.size <= 60 && sel.size < N); }
+      schedTitle();
     };
     sync();
     inp.addEventListener('input', () => {
@@ -49063,7 +49299,8 @@ function tbPdfDialog(P, cat, existing){
       if(v !== 'ok'){ close(null); return; }
       if(!sel.size) return;
       const r = ov.querySelector('#tbpRep'), lg = ov.querySelector('#tbpLang'), ki = ov.querySelector('#tbpImg');
-      close({ view:ov.classList.contains('tbp-view'), pages:[...sel].sort((a, b) => a - b), cat:ov.querySelector('#tbpCat').value, replace:!!(r && r.checked), lang:lg ? lg.value : 'fra', keepImg:!!(ki && ki.checked) });
+      const tv = tIn.value.replace(/\s+/g, ' ').trim(), per = ov.querySelector('#tbpPer');
+      close({ view:ov.classList.contains('tbp-view'), title:tv || P.title, titleSet:!!tv && tv !== P.title, autoTitle:tAuto && !tIn.dataset.user, perPage:!!(per && per.checked && !ov.classList.contains('tbp-view') && !ov.querySelector('#tbpPerL').hidden), pages:[...sel].sort((a, b) => a - b), cat:ov.querySelector('#tbpCat').value, replace:!!(r && r.checked), lang:lg ? lg.value : 'fra', keepImg:!!(ki && ki.checked) });
     });
   });
 }
@@ -49143,6 +49380,36 @@ function tbCanvasBlob(cv, maxW){
   if(cv.width > maxW){ c = document.createElement('canvas'); c.width = maxW; c.height = Math.round(cv.height * maxW / cv.width); c.getContext('2d').drawImage(cv, 0, 0, c.width, c.height); }
   return new Promise(res => c.toBlob(res, 'image/jpeg', 0.84));
 }
+/* 📝 1.0.42 : le titre d'une page — sa plus grande ligne de texte (en haut de la page), ou sa première ligne en gras */
+function tbTitleFromLines(lines, top, bottom, edge){
+  const H = (top || 800) - (bottom || 0);
+  const L = (lines || []).filter(l => { const s = String(l.text || '').trim(); return s.length >= 3 && s.length <= 140 && (s.match(/\p{L}/gu) || []).length >= 3 && !/^[-–—\s]*(page\s*)?\d{1,4}([-–—\s/]|$)/i.test(s) && !(edge && (edge.get(tbPdfSig(s)) || 0) >= 2); });
+  if(!L.length) return '';
+  const sz = L.map(l => l.size).sort((a, b) => a - b), med = sz[Math.floor(sz.length / 2)];
+  const up = L.filter(l => l.y > (bottom || 0) + H * 0.35);
+  const big = (up.length ? up : L).slice().sort((a, b) => (b.size - a.size) || (b.y - a.y))[0];
+  let t = '';
+  if(big && big.size >= med * 1.18){
+    t = big.text;
+    const nx = L.find(l => l !== big && Math.abs(l.size - big.size) < 0.5 && big.y - l.y > 0 && big.y - l.y < big.size * 1.7);
+    if(nx && (t + ' ' + nx.text).length <= 150) t += ' ' + nx.text;
+  } else { const b = (up.length ? up : L).find(l => l.bold && l.text.length <= 100); if(b) t = b.text; }
+  return String(t || '').replace(/\s+/g, ' ').replace(/[.:;,]+$/, '').trim();
+}
+async function tbPdfPageTitle(P, p){
+  P.ttl = P.ttl || {}; if(p in P.ttl) return P.ttl[p];
+  let t = '';
+  try{ const page = await P.doc.getPage(p), vw = page.view || [0, 0, 600, 800]; const tc = await page.getTextContent(); t = tbTitleFromLines(tbPdfLines(tc.items), vw[3], vw[1], P.edge); try{ page.cleanup(); }catch(e){} }catch(e){}
+  return (P.ttl[p] = t);
+}
+/* le titre d'une page lue par l'OCR : sa ligne nettement plus grande, parmi les premières */
+function tbOcrTitle(d){
+  const lines = []; (d && d.paragraphs || []).forEach(pp => (pp.lines || []).forEach(l => { if(l && l.bbox && String(l.text || '').trim()) lines.push(l); }));
+  if(lines.length < 2) return '';
+  const hs = lines.map(l => l.bbox.y1 - l.bbox.y0).sort((a, b) => a - b), med = hs[Math.floor(hs.length / 2)];
+  const c = lines.slice(0, 5).find(l => { const s = String(l.text).replace(/\s+/g, ' ').trim(), L = (s.match(/\p{L}/gu) || []).length; return l.bbox.y1 - l.bbox.y0 >= med * 1.3 && s.length >= 3 && s.length <= 120 && L / s.length >= 0.55; });
+  return c ? String(c.text).replace(/\s+/g, ' ').replace(/[.:;,]+$/, '').trim() : '';
+}
 /* les pages choisies → un livre (ses textes) : texte du PDF, ou texte lu par l'OCR */
 async function tbPdfBuild(P, v, prog){
   const sel = v.pages, seen = new Map(), pages = [];
@@ -49214,7 +49481,7 @@ async function tbPdfBuild(P, v, prog){
     }catch(e){}
   }
   starts = starts.filter((s, i, a) => s.p >= 1 && s.p <= P.N && a.findIndex(z => z.p === s.p) === i).sort((a, b) => a.p - b.p);
-  const sub = all ? '' : ` · p. ${tbPagesStr(done)}`;
+  const sub = (all || v.titleSet) ? '' : ` · p. ${tbPagesStr(done)}`;
   const groups = [];
   if(starts.length >= 2){
     const ranges = [];
@@ -49222,7 +49489,16 @@ async function tbPdfBuild(P, v, prog){
     starts.forEach((s, i) => ranges.push({ a:s.p, b:i + 1 < starts.length ? starts[i + 1].p - 1 : P.N, title:s.title || ('Partie ' + (i + 1)) }));
     ranges.forEach(r => { const ps = done.filter(n => n >= r.a && n <= r.b); if(ps.length) groups.push({ ps, title:r.title }); });
   }
-  if(groups.length < 2){
+  if(v.perPage){                                   // 📄 un texte par page, avec le titre de la page
+    groups.length = 0;
+    done.forEach(n => {
+      const pg = pages.find(x => x.n === n) || {};
+      let t = pg.lines ? tbTitleFromLines(pg.lines, pg.top, pg.bottom, P.edge) : '';
+      if(!t && pg.html){ const m = /<h[23][^>]*>([\s\S]*?)<\/h[23]>/.exec(pg.html); if(m) t = m[1].replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").trim(); }
+      groups.push({ ps:[n], title:t || `${P.title} · p. ${n}` });
+    });
+  }
+  if(groups.length < 2 && !v.perPage){
     groups.length = 0;
     if(chars <= 45000 || done.length <= 12) groups.push({ ps:done, title:P.title + sub });
     else for(let i = 0; i < done.length; i += 10){ const ps = done.slice(i, i + 10); groups.push({ ps, title:`${P.title} · pages ${ps[0]}–${ps[ps.length - 1]}` }); }
@@ -49233,6 +49509,7 @@ async function tbPdfBuild(P, v, prog){
     const html = tbPdfJoinPages(g.ps.map(n => (byN.get(n) || {}).html || ''));
     const body = new DOMParser().parseFromString('<body>' + html + '</body>', 'text/html').body;
     let blocks = tbDomToBlocks(body, {});
+    if(v.autoTitle && groups.length === 1 && blocks.length && /^h[23]$/.test(blocks[0].t)){ const ht = tbBlockText(blocks[0]).replace(/\s+/g, ' ').trim(); if(ht.length >= 3 && ht.length <= 150){ g.title = ht; book.title = ht; } }   // 📝 le titre écrit sur la page
     if(blocks.length && /^h[23]$/.test(blocks[0].t) && dxFold(tbBlockText(blocks[0]).replace(/\s+/g, ' ').trim()) === dxFold(g.title)) blocks = blocks.slice(1);
     if(tbWordsCount(tbBlocksText(blocks)) < 3 && !blocks.some(b => b.t === 'img')) return;
     const ocrG = g.ps.some(n => (byN.get(n) || {}).ocr);
@@ -49289,6 +49566,7 @@ async function tbPdfImport(file, cat){
     const v = await tbPdfDialog(P, cat, olds[0] || null);
     if(!v){ setStatus('📄 Import annulé.', 'ok'); return []; }
     if(v.view){ const pid = await pdvSave(P, v); pdvShelfRefresh(); pdvOpen(pid); return []; }     // 📖 1.0.41 : tel quel
+    if(v.title) P.title = v.title;
     const prog = tbProgOpen(`📄 « ${P.title} »`);
     let bk; try{ bk = await tbPdfBuild(P, v, prog); } finally { prog.close(); }
     if(!bk.chapters.length) throw new Error(bk.ocr ? 'aucun texte lisible sur ces pages (image trop floue ?)' : 'aucun texte sur ces pages');
@@ -49302,8 +49580,29 @@ async function tbPdfImport(file, cat){
    Le fichier reste sur l'appareil (IndexedDB) ; la lecture des pages scannées aussi, une fois faite. */
 var PDV_KEY = 'vocabVision.pdv';
 var PDV = null;
-function pdvList(){ try{ const L = JSON.parse(localStorage.getItem(nsKey(PDV_KEY)) || '[]'); return Array.isArray(L) ? L.filter(x => x && x.id) : []; }catch(e){ return []; } }
-function pdvSaveList(L){ try{ localStorage.setItem(nsKey(PDV_KEY), JSON.stringify(L.slice(0, 80))); return true; }catch(e){ return false; } }
+var PDV_LIST = null, PDV_LIST_U = '';
+function pdvList(){
+  const u = nsKey(PDV_KEY);
+  if(!PDV_LIST || PDV_LIST_U !== u){ PDV_LIST_U = u; let L = []; try{ L = JSON.parse(localStorage.getItem(u) || '[]'); }catch(e){} PDV_LIST = Array.isArray(L) ? L.filter(x => x && x.id) : []; pdvListLoad(); }
+  return PDV_LIST.map(x => Object.assign({}, x));
+}
+function pdvSaveList(L){
+  PDV_LIST = (L || []).slice(0, 80); PDV_LIST_U = nsKey(PDV_KEY);
+  pdvPut(nsKey('tbpdfmeta'), JSON.parse(JSON.stringify(PDV_LIST)));
+  try{ localStorage.setItem(nsKey(PDV_KEY), JSON.stringify(PDV_LIST)); }catch(e){ try{ localStorage.removeItem(nsKey(PDV_KEY)); }catch(err){} }   // pleine : la base de l'appareil suffit
+  return true;
+}
+/* au démarrage : la liste gardée dans la base de l'appareil (la plus complète des deux) */
+async function pdvListLoad(){
+  const u = nsKey(PDV_KEY), v = await pdvGet(nsKey('tbpdfmeta'));
+  if(!Array.isArray(v) || PDV_LIST_U !== u) return;
+  const by = new Map((PDV_LIST || []).map(x => [x.id, x]));
+  let ch = false;
+  v.forEach(x => { if(!x || !x.id) return; const o = by.get(x.id); if(!o || (x.at || 0) > (o.at || 0)){ by.set(x.id, x); ch = true; } });
+  if(!ch) return;
+  PDV_LIST = [...by.values()].sort((a, b) => (b.at0 || b.at || 0) - (a.at0 || a.at || 0)).slice(0, 80);
+  try{ pdvShelfRefresh(); }catch(e){}
+}
 function pdvMeta(id){ return pdvList().find(x => x.id === id) || null; }
 function pdvPatch(id, p){ const L = pdvList(), m = L.find(x => x.id === id); if(!m) return; Object.assign(m, p); pdvSaveList(L); }
 function pdvBlobKey(id, p){ return nsKey('tbpdf') + '|' + id + (p ? '|' + p : ''); }
@@ -49322,7 +49621,8 @@ async function pdvSave(P, v){
   if(!ok){ await pdvRemoveKeys(id, img ? v.pages.length : 0); throw new Error("plus de place sur l'appareil pour ce fichier"); }
   if(old) await pdvRemove(old.id);
   const meta = { id, kind:P.kind, title:P.title, name, n:img ? v.pages.length : P.N, pages:img ? v.pages.map((_, k) => k + 1) : v.pages.slice(),
-    scan:img ? null : v.pages.filter(p => P.scan && P.scan[p]), lang:v.lang || 'fra', at:Date.now(), last:old && old.last || 0 };
+    scan:img ? null : v.pages.filter(p => P.scan && P.scan[p]), lang:v.lang || 'fra', at:Date.now(), at0:Date.now(), last:old && old.last || 0, autoTitle:!!v.autoTitle };
+  if(v.title) meta.title = String(v.title).slice(0, 150);
   const L = pdvList(); L.unshift(meta); pdvSaveList(L);
   return id;
 }
@@ -49364,7 +49664,9 @@ document.addEventListener('keydown', (e) => { if(e.key !== 'Enter' || !e.target 
 function pdvMeasure(){ if(!pdvMeasure.cx){ pdvMeasure.cx = document.createElement('canvas').getContext('2d'); } return pdvMeasure.cx; }
 var PDV_ZOOMS = [0.6, 0.8, 1, 1.25, 1.5, 2, 2.5];
 async function pdvOpen(id, at){
-  const m = pdvMeta(id); if(!m){ setStatus("📖 Ce fichier n'est plus sur cet appareil.", 'err'); pdvShelfRefresh(); return; }
+  let m = pdvMeta(id);
+  if(!m){ await pdvListLoad(); m = pdvMeta(id); }
+  if(!m){ setStatus("📖 Ce fichier n'est plus sur cet appareil.", 'err'); pdvShelfRefresh(); return; }
   pdvClose(true);
   try{ wtClose(); }catch(e){}
   const N = (m.pages || []).length || m.n;
@@ -49635,6 +49937,7 @@ async function pdvOcrPump(S){
         const r = await S.ocr.recognize(cv);
         if(PDV !== S) break;
         const words = pdvOcrWords(r && r.data, cv.width);
+        if(pg.k === 0 && S.m.autoTitle){ const t = tbOcrTitle(r && r.data); if(t){ S.m.title = t; S.m.autoTitle = false; pdvPatch(S.id, { title:t, autoTitle:false }); const tb = S.ov.querySelector('.pdv-tt b'); if(tb) tb.textContent = t; } }
         pg.tl = words; pdvPut(pdvOcrKey(S.id, pg.p), { w:words, at:Date.now() });
         pdvChip(pg, words.length ? '✓ Texte lu : touche un mot' : '⚠️ Pas de texte lisible sur cette page');
         if(words.length) setTimeout(() => { if(pg.tl === words) pdvChip(pg, ''); }, 2500);
@@ -49676,6 +49979,7 @@ async function tbImgsOcrImport(files, cat){
   const v = await tbPdfDialog(P, cat, olds[0] || null);
   if(!v){ setStatus('📷 Import annulé.', 'ok'); return []; }
   if(v.view){ try{ const pid = await pdvSave(P, v); pdvShelfRefresh(); pdvOpen(pid); }catch(e){ setStatus('📷 ' + (e && e.message || 'impossible de garder ces photos'), 'err'); } return []; }
+  if(v.title) P.title = v.title;
   const prog = tbProgOpen(P.title);
   let bk; try{ bk = await tbPdfBuild(P, v, prog); } finally { prog.close(); }
   if(!bk.chapters.length){ setStatus('📷 Aucun texte lisible sur ces photos (trop floues ? mal éclairées ?).', 'err'); return []; }
@@ -49801,7 +50105,7 @@ function tbNoTrHtml(text){
    à l'endroit du texte, et « 📰 En faire un texte » les réunit dans la Tablette. */
 const TB_EXT_KEY = 'lexiqueQuiz::tbExtracts';
 function tbExtMap(){ try{ const m = JSON.parse(localStorage.getItem(nsKey(TB_EXT_KEY)) || '{}'); return m && typeof m === 'object' && !Array.isArray(m) ? m : {}; }catch(e){ return {}; } }
-function tbExtList(){ return Object.values(tbExtMap()).filter(x => x && !x.del && x.x).sort((a, b) => (b.t0 || 0) - (a.t0 || 0)); }
+function tbExtList(){ const H = (typeof tbHiddenIds === 'function') ? tbHiddenIds() : new Set(); return Object.values(tbExtMap()).filter(x => x && !x.del && x.x && !(x.aid && H.has(x.aid))).sort((a, b) => (b.t0 || 0) - (a.t0 || 0)); }
 function tbExtSave(m){
   try{
     const now = Date.now(); Object.keys(m).forEach(k => { const e = m[k]; if(e && e.del && now - (e.at || 0) > 90 * 864e5) delete m[k]; });
@@ -50517,7 +50821,7 @@ function tbMdDialog(list, cat){
 function tbEdCatOptions(){
   const sel = document.getElementById('tbkCat'); if(!sel) return;
   const v = sel.value;
-  sel.innerHTML = tbCats().map(c => `<option value="${tbAttr(c.id)}">${c.icon} ${escapeHtml(c.name)}</option>`).join('');
+  sel.innerHTML = tbCats().map(c => `<option value="${tbAttr(c.id)}">${c.icon} ${escapeHtml(c.name)}${tbCatLocked(c) ? ' 🔒' : ''}</option>`).join('');
   if([...sel.options].some(o => o.value === v)) sel.value = v;
 }
 /* 💾 1.0.41 : le brouillon d'un nouveau texte (titre + contenu, en blocs propres) reste sur l'appareil :
@@ -50537,6 +50841,16 @@ function tbDraftRestore(){
 }
 window.addEventListener('pagehide', () => { try{ tbDraftFlush(); }catch(e){} });
 document.addEventListener('visibilitychange', () => { if(document.hidden) try{ tbDraftFlush(); }catch(e){} });
+/* 💾 1.0.42 : un texte modifié est enregistré, et on revient à la bibliothèque, sur ce texte */
+function tbAfterEditSave(art){
+  clearTimeout(TB.saveT); clearTimeout(TB.scrollT); TB.scrollT = 0; TB.scrollApply = null;
+  if(TB.art && TB.art.id === art.id && !document.getElementById('tbReader')){ TB.art = Object.assign(TB.art, { title:art.title, text:art.text, blocks:art.blocks, cat:art.cat }); if(!art.blocks) delete TB.art.blocks; try{ const m = tbReadMeta(art.id); TB.art._mseen = (m && m.mupd) || 0; const d = tbReadDoc(art.id); if(d){ TB.art._du = d.upd; TB.art._dh = syncHash(d._str || ''); } }catch(e){} }
+  const S = tbLibState(), cid = tbCatOf(art).id; S.q = ''; if(S.f !== 'all' && S.f !== cid) S.f = 'all';
+  const u = tbUi(); if(u.libFold && u.libFold[cid]){ u.libFold[cid] = false; tbSaveUi(); }
+  renderTabletteHome();
+  try{ setStatus(`💾 « ${art.title || 'Ton texte'} » est enregistré.`, 'ok'); }catch(e){}
+  setTimeout(() => { const r = [...document.querySelectorAll('.tbl-row')].find(x => x.dataset.id === art.id); if(r){ r.classList.add('fresh'); r.scrollIntoView({ block:'center', behavior:'smooth' }); } }, 80);
+}
 function renderTabletteHome(){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
@@ -50657,9 +50971,9 @@ function renderTabletteHome(){
           <button type="button" class="tbk-paste tbk-fix" id="tbkFix" title="Recolle les phrases coupées : seulement la partie sélectionnée, sinon tout le texte. Tes sauts de ligne restent.">🧹 Ajuster</button>
           <button type="button" class="tbk-paste" id="tbkFlow" title="Lignes continues : la sélection devient un seul paragraphe ; sans sélection, plus aucun retour à la ligne au milieu des phrases (même les tiens). Le texte suit alors la largeur de l'écran.">${tbIcon('flow')} Lignes continues</button>
           <span class="tbk-count" id="tbkCount"></span>
-          <label class="tbk-catpick" title="La catégorie où ranger ce texte"><span aria-hidden="true">📂</span><select id="tbkCat" aria-label="Ranger dans la catégorie">${(() => { const cs = editing ? tbCatOf(editing).id : (TB.newCat || (tbLibState().f !== 'all' ? tbLibState().f : (tbCats()[0] || {}).id)); return tbCats().map(c => `<option value="${tbAttr(c.id)}" ${c.id === cs ? 'selected' : ''}>${c.icon} ${escapeHtml(c.name)}</option>`).join(''); })()}</select></label>
+          <label class="tbk-catpick" title="La catégorie où ranger ce texte"><span aria-hidden="true">📂</span><select id="tbkCat" aria-label="Ranger dans la catégorie">${(() => { const cs = editing ? tbCatOf(editing).id : (TB.newCat || (tbLibState().f !== 'all' ? tbLibState().f : (tbCats()[0] || {}).id)); return tbCats().map(c => `<option value="${tbAttr(c.id)}" ${c.id === cs ? 'selected' : ''}>${c.icon} ${escapeHtml(c.name)}${tbCatLocked(c) ? ' 🔒' : ''}</option>`).join(''); })()}</select></label>
           ${editing ? `<button type="button" class="tbk-cancel" id="tbkCancel">Annuler la modification</button>` : ''}
-          <button type="button" class="tbk-open" id="tbkOpen" disabled>${editing ? 'Enregistrer et ouvrir' : 'Ouvrir sur la Tablette'}</button>
+          <button type="button" class="tbk-open" id="tbkOpen" disabled>${editing ? '💾 Enregistrer' : 'Ouvrir sur la Tablette'}</button>
         </div>
       </div>
     </div>
@@ -51350,6 +51664,8 @@ function renderTabletteHome(){
     if(!editing) tbDraftClear();                                      // 💾 le texte est rangé : plus besoin du brouillon
     TB.edit = null; TB.draft = null; TB.mem = art; TB.edUsed = []; TB.newCat = null;
     document.body.classList.remove('tbk-full-on');
+    if(editing){ tbAfterEditSave(art); return; }
+    TB.privOk = art.id;
     renderTabletteReader(art.id);
   });
   const cancel = document.getElementById('tbkCancel');
@@ -51378,7 +51694,7 @@ function renderTabletteHome(){
 }
 /* 🏠 sur l'accueil : la Tablette toujours à portée de main (et la lecture en cours à reprendre) */
 function tbResumeArt(){
-  const L = tbLoad().filter(a => !a.done && (a.pos > 0 || (a.pct || 0) > 0.02));
+  const L = tbLoad().filter(a => !a.done && (a.pos > 0 || (a.pct || 0) > 0.02) && !tbArtHidden(a));
   L.sort((a, b) => (b.readAt || b.at || 0) - (a.readAt || a.at || 0));
   return L[0] || null;
 }
@@ -51427,6 +51743,8 @@ function renderTabletteReader(id){
   if(!art && id === 'sample'){ art = Object.assign({ at:Date.now(), pos:0, pct:0, tags:[] }, TB_SAMPLE); tbPut(art); }
   if(!art && TB.mem && TB.mem.id === id) art = TB.mem;      // (pas pu être gardé sur l'appareil)
   if(!art){ renderTabletteHome(); return; }
+  if(tbArtHidden(art) && TB.privOk !== id){ tbPwDialog('open', tbCatOf(art)).then(ok => { if(ok) renderTabletteReader(id); }); return; }
+  TB.privOk = null;
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
   currentBlock = null;
@@ -51444,6 +51762,7 @@ function renderTabletteReader(id){
 function tbOpen(art){
   tbClose(true, true);
   TB.art = art; TB.ui = null; tbUi();
+  try{ const m0 = tbReadMeta(art.id); art._mseen = (m0 && m0.mupd) || 0; }catch(e){}
   if(!Array.isArray(art.tags)) art.tags = [];
   TB.mode = ''; TB.playing = false; TB.hunt = false; TB.hintsOn = false; TB.q = ''; TB.hits = []; TB.hitI = -1; TB.sheetK = -1; TB.selfScores = {};
   const el = document.createElement('div');
@@ -51540,6 +51859,8 @@ function tbClose(quiet, keepBk){
   try{ TB.tipK = -1; TB.tipW = null; }catch(e){}
   const el = document.getElementById('tbReader');
   if(TB.mode){ tbStopModes(true); }
+  if(TB.scrollT){ clearTimeout(TB.scrollT); TB.scrollT = 0; if(TB.scrollApply && el) try{ TB.scrollApply(true); }catch(e){} }   // le dernier défilement compte
+  TB.scrollApply = null;
   if(TB.art && el) tbSavePosNow();
   if(el && !keepBk){ bkPop('tb'); tbWake(false); }
   if(el) el.remove();
@@ -51547,7 +51868,14 @@ function tbClose(quiet, keepBk){
   if(!quiet){ try{ window.speechSynthesis.cancel(); }catch(e){} }
 }
 function tbSaveArt(){ clearTimeout(TB.saveT); TB.saveT = setTimeout(tbSaveArtNow, 500); }
-function tbSaveArtNow(){ clearTimeout(TB.saveT); if(TB.art){ TB.art.readAt = Date.now(); if(!tbPut(TB.art)) TB.mem = TB.art; } }
+function tbSaveArtNow(){
+  clearTimeout(TB.saveT); if(!TB.art) return;
+  // la Tablette est fermée et la bibliothèque a changé ce texte depuis (lu, pas lu, rangé ailleurs…) : on garde ce changement
+  if(!document.getElementById('tbReader')){ try{ const m = tbReadMeta(TB.art.id); if(m && TB.art._mseen != null && (m.mupd || 0) > TB.art._mseen) ['done', 'pct', 'pos', 'posOff', 'cat', 'mark'].forEach(f => { if(m[f] !== undefined) TB.art[f] = m[f]; else delete TB.art[f]; }); }catch(e){} }
+  TB.art.readAt = Date.now();
+  if(!tbPut(TB.art)) TB.mem = TB.art;
+  try{ const m2 = tbReadMeta(TB.art.id); TB.art._mseen = (m2 && m2.mupd) || 0; }catch(e){}
+}
 function tbNS(){ return TB.nS != null ? TB.nS : TB.sents.length; }       // le nombre de phrases du texte (sans le titre)
 function tbRender(keep){
   const body = document.getElementById('tbBody');
@@ -51589,7 +51917,7 @@ function tbFirstVisibleSent(){ const a = tbAnchorGet(); return a ? a.s : 0; }
 /* le texte à lire ensuite : le chapitre suivant d'un livre, sinon un texte pas encore lu du même rayon */
 function tbNextUnread(a){
   if(!a) return null;
-  const L = tbLoad().filter(x => x.id !== a.id && x.id !== 'sample' && !x.done);
+  const L = tbLoad().filter(x => x.id !== a.id && x.id !== 'sample' && !x.done && !tbArtHidden(x));
   if(a.book){ const nx = L.filter(x => x.book === a.book && (x.ord || 0) > (a.ord || 0)).sort((x, y) => (x.ord || 0) - (y.ord || 0))[0]; if(nx) return nx; }
   const c = tbCatOf(a).id, same = L.filter(x => tbCatOf(x).id === c);
   const after = same.filter(x => (x.at || 0) < (a.at || 0)).sort((x, y) => (y.at || 0) - (x.at || 0));     // les textes rangés juste après celui-ci
@@ -53048,14 +53376,16 @@ function tbWire(el){
     const finding = !document.getElementById('tbFind').hidden || !document.getElementById('tbAa').hidden;
     if(dy > 6 && sc.scrollTop > 90 && !finding) el.classList.add('top-hide'); else if(dy < -6 || sc.scrollTop < 40) el.classList.remove('top-hide');
     clearTimeout(TB.scrollT);
-    TB.scrollT = setTimeout(() => {
-      if(!TB.art) return;
-      { const a0 = tbAnchorGet(); TB.art.pos = a0 ? a0.s : 0; TB.art.posOff = a0 ? Math.round(a0.off) : 0; }
+    TB.scrollApply = (quiet) => {
+      TB.scrollT = 0; TB.scrollApply = null;
+      if(!TB.art || !document.getElementById('tbReader')) return;      // la Tablette est déjà fermée : rien à retenir
+      { const a0 = tbAnchorGet(); if(a0){ TB.art.pos = a0.s; TB.art.posOff = Math.round(a0.off); } }
       TB.art.pct = Math.max(TB.art.pct || 0, pct);
       if(pct > 0.97 && !TB.art.done){ TB.art.done = true; TB.art.pct = 1; tbEndHtml(); }
-      tbSaveArt();
+      if(!quiet) tbSaveArt();
       try{ markUserInteraction(); }catch(e){}
-    }, 450);
+    };
+    TB.scrollT = setTimeout(() => { if(TB.scrollApply) TB.scrollApply(); }, 450);
   }, { passive:true });
   // 🤏 pincer pour zoomer (deux doigts), Ctrl + molette sur ordinateur
   const pts = new Map(), dist = () => { const [a, b] = [...pts.values()]; return Math.hypot(a.x - b.x, a.y - b.y) || 1; };
