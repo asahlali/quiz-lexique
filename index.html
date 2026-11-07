@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- 🏷️ Version de l'appli : augmentée automatiquement par publier-site.cmd à chaque publication -->
-<meta name="app-version" content="1.0.47" data-date="2026-11-07">
+<meta name="app-version" content="1.0.48" data-date="2026-11-07">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <title>VocabVISION — Vocabulaire Français ↔ Arabe</title>
 <script>
@@ -3123,6 +3123,9 @@
   .pdv-sh-it.remote .pdv-sh-m b{ opacity:.85; }
   .pdv-sh-cl{ flex:none; font:800 11.5px 'Nunito','Inter',sans-serif; color:var(--purple, #7C3AED); background:rgba(124,58,237,.1); border-radius:99px; padding:2px 8px; white-space:nowrap; }
   .pdv-sh-cl.dl{ color:#0369A1; background:rgba(14,165,233,.12); }
+  .pdv-sh-m .pdv-sh-cl{ display:table; margin-top:4px; }
+  .pdv-sh-m b{ white-space:normal; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; line-height:1.25; overflow-wrap:break-word; }
+  [data-theme="dark"] .pdv-sh-cl{ color:#C4B5FD; background:rgba(167,139,250,.16); } [data-theme="dark"] .pdv-sh-cl.dl{ color:#7DD3FC; background:rgba(56,189,248,.14); }
   .pdv-sh-hint{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:0 0 8px; padding:8px 10px; border-radius:12px; background:rgba(14,165,233,.08); border:1px solid rgba(14,165,233,.25); font-size:12.5px; font-weight:700; line-height:1.35; }
   .pdv-sh-hint.err{ background:rgba(220,38,38,.07); border-color:rgba(220,38,38,.3); }
   .pdv-sh-hint span{ flex:1; min-width:200px; }
@@ -22872,7 +22875,7 @@ function cloudAutoPush(){
 /* 📲 de nouvelles données sont arrivées de l'autre appareil : on rafraîchit ce qui est à l'écran */
 function syncAfterRemoteChange(){
   try{ if(autoApplyStreakFreeze()) cloudPushPending = true; }catch(e){}
-  setStatus('☁️ Synchronisé — nouveautés de ton autre appareil récupérées ✓', 'ok');
+  if(!(syncState.fullSaid && Date.now() - syncState.fullSaid < 3000)) setStatus('☁️ Synchronisé — nouveautés de ton autre appareil récupérées ✓', 'ok');
   if(document.body.classList.contains('quiz-active')) return;
   const inp = document.querySelector('#quizCard .ss-input');
   const typing = inp && (document.activeElement === inp || inp.value);
@@ -50858,7 +50861,7 @@ function pdvShelfItem(m){
   const chip = dl ? `<span class="pdv-sh-cl dl">⇣ ${Math.round((PDVUP.dl.get(m.id) || 0) * 100)} %</span>` : up ? `<span class="pdv-sh-cl">☁️ ${Math.round(PDVUP.frac * 100)} %</span>` : '';
   const sub = m.remote ? `☁️ sur ton autre appareil · touche pour l'avoir ici${mo}` : `${n} page${n > 1 ? 's' : ''}${(m.scan || []).length || m.kind === 'img' ? ' · 🔎 scanné' : ''}${m.last ? ` · reprendre p. ${m.last}` : ''}${m.cl ? ' · ☁️' : ''}`;
   return `<div class="pdv-sh-it${m.remote ? ' remote' : ''}" data-pdv-open="${tbAttr(m.id)}" role="button" tabindex="0" draggable="true" data-pdv-drag="${tbAttr(m.id)}" aria-label="${m.remote ? 'Télécharger et ouvrir' : 'Ouvrir'} « ${tbAttr(m.title)} »"${m.cl && !m.remote ? ' title="Aussi sur tes autres appareils (☁️ Cloudflare R2, chiffré)"' : ''}>
-      <span class="pdv-sh-i" aria-hidden="true">${m.kind === 'img' ? '📷' : '📄'}</span><span class="pdv-sh-m"><b>${escapeHtml(m.title)}</b><small>${sub}</small></span>${chip}
+      <span class="pdv-sh-i" aria-hidden="true">${m.kind === 'img' ? '📷' : '📄'}</span><span class="pdv-sh-m"><b>${escapeHtml(m.title)}</b><small>${sub}</small>${chip}</span>
       <button type="button" class="pdv-sh-x pdv-sh-mv" data-pdvs="mv" data-id="${tbAttr(m.id)}" aria-label="Ranger « ${tbAttr(m.title)} » dans un dossier" title="Ranger dans un dossier">📁</button>
       <button type="button" class="pdv-sh-x" data-pdv-del="${tbAttr(m.id)}" aria-label="${m.cl ? `Supprimer « ${tbAttr(m.title)} » (sur tous tes appareils)` : `Retirer « ${tbAttr(m.title)} » de l'appareil`}" title="${m.cl ? 'Supprimer (sur tous tes appareils)' : "Retirer de l'appareil"}">🗑</button></div>`;
 }
