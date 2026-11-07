@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- 🏷️ Version de l'appli : augmentée automatiquement par publier-site.cmd à chaque publication -->
-<meta name="app-version" content="1.0.46" data-date="2026-11-04">
+<meta name="app-version" content="1.0.47" data-date="2026-11-07">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <title>VocabVISION — Vocabulaire Français ↔ Arabe</title>
 <script>
@@ -3118,6 +3118,15 @@
   .pdv-menu-h{ padding:6px 8px; font:800 12px 'Nunito','Inter',sans-serif; color:var(--text-dim); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .pdv-menu button{ display:block; width:100%; text-align:left; padding:9px 10px; border:0; border-radius:10px; background:transparent; color:inherit; font:700 14px 'Nunito','Inter',sans-serif; cursor:pointer; }
   .pdv-menu button:hover, .pdv-menu button.on{ background:rgba(124,58,237,.1); }
+  /* ☁️ 1.0.47 : les PDF tels quels sur tous les appareils */
+  .pdv-sh-it.remote{ border-style:dashed; background:rgba(255,255,255,.55); } [data-theme="dark"] .pdv-sh-it.remote{ background:rgba(255,255,255,.04); }
+  .pdv-sh-it.remote .pdv-sh-m b{ opacity:.85; }
+  .pdv-sh-cl{ flex:none; font:800 11.5px 'Nunito','Inter',sans-serif; color:var(--purple, #7C3AED); background:rgba(124,58,237,.1); border-radius:99px; padding:2px 8px; white-space:nowrap; }
+  .pdv-sh-cl.dl{ color:#0369A1; background:rgba(14,165,233,.12); }
+  .pdv-sh-hint{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:0 0 8px; padding:8px 10px; border-radius:12px; background:rgba(14,165,233,.08); border:1px solid rgba(14,165,233,.25); font-size:12.5px; font-weight:700; line-height:1.35; }
+  .pdv-sh-hint.err{ background:rgba(220,38,38,.07); border-color:rgba(220,38,38,.3); }
+  .pdv-sh-hint span{ flex:1; min-width:200px; }
+  .pdv-sh-hint button{ border:0; border-radius:99px; padding:6px 12px; background:#0EA5E9; color:#fff; font:800 12.5px 'Nunito','Inter',sans-serif; cursor:pointer; }
   .pdv-sh-x{ border:0; background:transparent; cursor:pointer; font-size:15px; padding:4px 6px; border-radius:8px; color:var(--text-dim); } .pdv-sh-x.sure{ background:#DC2626; color:#fff; font-size:12px; font-weight:800; }
   body.pdv-on{ overflow:hidden; }
   .pdv-ov{ position:fixed; inset:0; z-index:10040; display:flex; flex-direction:column; background:#525659; color:#fff; font-family:'Inter', system-ui, sans-serif; }
@@ -21977,6 +21986,117 @@ function safeParse(s, fallback){
   try{ return JSON.parse(s); }catch(e){ return fallback; }
 }
 
+/* 📦 1.0.47 : les textes de la Tablette (et leurs images en route vers l'autre appareil) quittent la petite mémoire de
+   l'appli (≈ 5 Mo pour TOUT : sur le téléphone elle était pleine, et les textes venus du PC ne pouvaient plus s'y écrire)
+   pour le grand stockage de l'appareil (IndexedDB). Les noms des données ne changent pas : la synchro avec le Google Sheet
+   reste la même. Une copie en mémoire garde la lecture instantanée ; l'écriture sur l'appareil suit juste après. */
+var TBKV = { map:new Map(), sess:new Set(), q:new Map(), t:0, p:null, ready:false, noDb:false, lsClean:false, err:0 };
+function tbKvOwns(k){ k = String(k || ''); return k.startsWith('lexiqueQuiz::tbDoc::') || k.startsWith('lexiqueQuiz::tbMeta::') || k.startsWith('lexiqueQuiz::tbImg::') || k.startsWith('vocabVision.tbOrig::'); }
+function tbKvGet(k){
+  if(TBKV.map.has(k)) return TBKV.map.get(k);
+  if(TBKV.lsClean && !TBKV.noDb) return null;
+  try{ return localStorage.getItem(k); }catch(e){ return null; }       // (pas encore rangé, ou appareil sans IndexedDB)
+}
+function tbKvSet(k, v){
+  v = String(v);
+  if(TBKV.noDb){ localStorage.setItem(k, v); return; }                    // sans IndexedDB : comme avant
+  TBKV.map.set(k, v); TBKV.sess.add(k); TBKV.q.set(k, v); tbKvSchedule(); tbKvTouched(k);
+}
+function tbKvDel(k){
+  TBKV.map.delete(k); TBKV.sess.add(k);
+  if(!TBKV.noDb){ TBKV.q.set(k, null); tbKvSchedule(); }
+  try{ if(!TBKV.lsClean || TBKV.noDb) localStorage.removeItem(k); }catch(e){}
+}
+function tbKvKeys(){
+  const ks = new Set(TBKV.map.keys());
+  if(!TBKV.lsClean || TBKV.noDb){
+    try{ for(let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); if(k && tbKvOwns(k) && !(TBKV.sess.has(k) && !TBKV.map.has(k))) ks.add(k); } }catch(e){}
+  }
+  return [...ks];
+}
+/* une donnée de la Tablette a changé : la synchro part, comme pour le reste */
+function tbKvTouched(k){
+  try{
+    if(typeof syncState === 'undefined' || !syncState || syncState.merging || !syncTracked(k)) return;
+    if(SYNC_LAZY.test(k)) syncSoon(45000);
+    else syncSoon(document.body.classList.contains('quiz-active') ? 20000 : 4000);
+  }catch(e){}
+}
+function tbKvSchedule(){ if(!TBKV.t) TBKV.t = setTimeout(tbKvFlush, 30); }
+async function tbKvFlush(){
+  clearTimeout(TBKV.t); TBKV.t = 0;
+  if(!TBKV.q.size || TBKV.noDb) return true;
+  const q = TBKV.q; TBKV.q = new Map();
+  try{
+    await tbStore('img', 'readwrite', os => { q.forEach((v, k) => { if(v == null) os.delete('kv|' + k); else os.put(v, 'kv|' + k); }); });
+    TBKV.err = 0;
+    return true;
+  }catch(e){
+    console.warn('tablette : stockage', e);
+    q.forEach((v, k) => { if(!TBKV.q.has(k)) TBKV.q.set(k, v); });     // on réessaiera
+    if(!TBKV.err){ try{ setStatus("⚠️ Plus de place sur cet appareil : un texte de la Tablette n'a pas pu être gardé. Libère un peu d'espace (photos, vidéos…).", 'err'); }catch(err){} }
+    TBKV.err++;
+    if(TBKV.err < 20) setTimeout(tbKvSchedule, 30000);
+    return false;
+  }
+}
+function tbKvInit(){
+  if(TBKV.p) return TBKV.p;
+  TBKV.p = (async () => {
+    for(let i = 0; i < 50 && (typeof TB === 'undefined' || !TB); i++) await new Promise(r => setTimeout(r, i ? 20 : 0));   // (appelé avant que la Tablette soit prête)
+    let db = true;
+    try{
+      if(typeof indexedDB === 'undefined' || typeof IDBKeyRange === 'undefined') throw new Error("pas d'IndexedDB");
+      const R = IDBKeyRange.bound('kv|', 'kv|\uffff');
+      const got = await tbStore('img', 'readonly', os => ({ k:os.getAllKeys(R), v:os.getAll(R) }));
+      const ks = got.k.result || [], vs = got.v.result || [];
+      ks.forEach((k, i) => { k = String(k).slice(3); if(!TBKV.sess.has(k) && typeof vs[i] === 'string') TBKV.map.set(k, vs[i]); });
+    }catch(e){ db = false; console.warn('tablette : grand stockage indisponible', e); }
+    if(!db){
+      TBKV.noDb = true;                                                   // on reste dans la petite mémoire, comme avant
+      TBKV.map.forEach((v, k) => { try{ localStorage.setItem(k, v); }catch(e){} });
+      TBKV.map.clear(); TBKV.q.clear();
+    } else {
+      try{
+        // ce qui était dans la petite mémoire part dans le grand stockage, puis on libère la petite mémoire
+        const old = [];
+        for(let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); if(k && tbKvOwns(k)) old.push(k); }
+        old.forEach(k => { if(!TBKV.sess.has(k)){ const v = localStorage.getItem(k); if(v != null){ TBKV.map.set(k, v); TBKV.q.set(k, v); } } });
+        if(await tbKvFlush()){
+          old.forEach(k => { try{ localStorage.removeItem(k); }catch(e){} });
+          TBKV.lsClean = true;
+          if(old.length) TBKV.moved = old.length;
+        }
+      }catch(e){ console.warn('tablette : rangement', e); }
+      try{ if(navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {}); }catch(e){}   // que le navigateur ne l'efface pas
+    }
+    TBKV.ready = true;
+    try{ tbKvRepair(); }catch(e){}
+    try{ if(typeof TB !== 'undefined' && TB){ TB.idx = null; if(typeof TB.homeList === 'function' && document.getElementById('tbkRoot')) TB.homeList(); } }catch(e){}
+    try{ if(typeof isHomeScreen !== 'undefined' && isHomeScreen && document.getElementById('heroQuick')) hqRefresh(); }catch(e){}
+    return true;
+  })();
+  return TBKV.p;
+}
+function tbKvWait(ms){ return Promise.race([tbKvInit(), new Promise(r => setTimeout(r, ms || 3000))]); }
+/* 🩹 des textes venus de l'autre appareil n'avaient pas pu être gardés (appareil plein), mais la synchro croyait les avoir :
+   on oublie ce qu'elle croyait, pour qu'elle les reprenne au prochain tour */
+function tbKvRepair(){
+  const base = syncLoadBase(), suf = '::u:' + getCurrentUserId();
+  let gone = {}, sent = {}; try{ gone = tbGoneLoad(); sent = tbImgSent(); }catch(e){}
+  let n = 0;
+  Object.keys(base).forEach(k => {
+    if(!k.startsWith('lexiqueQuiz::') || !tbKvOwns(k) || !k.endsWith(suf) || tbKvGet(k) != null) return;
+    const img = k.startsWith('lexiqueQuiz::tbImg::'), pre = img ? 'lexiqueQuiz::tbImg::' : (k.startsWith('lexiqueQuiz::tbDoc::') ? 'lexiqueQuiz::tbDoc::' : 'lexiqueQuiz::tbMeta::');
+    const id = k.slice(pre.length, k.length - suf.length).replace(/~\d+$/, '');
+    if(img ? sent[id] : gone[id]) return;                                 // image déjà rangée / texte supprimé exprès
+    delete base[k]; n++;
+  });
+  if(n){ syncSaveBase(); syncState.needFull = true; syncSoon(1500); }
+  TBKV.repaired = n;
+  return n;
+}
+
 function collectLocalData(){
   const data = {};
   try{
@@ -21984,9 +22104,11 @@ function collectLocalData(){
       const key = localStorage.key(i);
       if(!key || !key.startsWith('lexiqueQuiz::')) continue;
       if(SYNC_EXCLUDED.includes(key) || key.startsWith('lexiqueQuiz::leaderboard::')) continue;   // le classement des autres n'est pas à renvoyer
+      if(tbKvOwns(key)) continue;                                              // (Tablette : ci-dessous)
       data[key] = localStorage.getItem(key);
     }
   }catch(e){}
+  try{ tbKvKeys().forEach(k => { if(!syncTracked(k)) return; const v = tbKvGet(k); if(v != null) data[k] = v; }); }catch(e){}
   return data;
 }
 
@@ -22053,6 +22175,7 @@ function migrateCurrentProfileTo(newId){
       }
     });
   }catch(e){}
+  try{ tbKvKeys().forEach(k => { if(!k.endsWith(oldSuffix)) return; const nk = k.slice(0, -oldSuffix.length) + newSuffix; if(tbKvGet(nk) == null){ const v = tbKvGet(k); if(v != null) tbKvSet(nk, v); } }); }catch(e){}
 }
 
 async function registerAccount(username, password){
@@ -22096,7 +22219,8 @@ async function loginAccount(username, password){
    Ne bloque jamais la connexion si le réseau est indisponible (best-effort, comme le reste de la synchro). */
 async function pullAfterAccountSwitch(){
   try{
-    await cloudPull();
+    await tbKvWait(4000);
+    await cloudPull(true);
     reloadAllUserState();
     rebuildBlocks();
     if(typeof renderBlockSelect === 'function'){ renderBlockSelect(); }
@@ -22320,11 +22444,25 @@ async function cloudPush(){
   return out.saved || Object.keys(data).length;
 }
 
-async function cloudPull(){
-  const out = await cloudRequest({ action: 'pull' });
+/* ⚡ 1.0.47 : avant, chaque tour (toutes les minutes) retéléchargeait TOUT le Google Sheet (plusieurs Mo avec les textes de la
+   Tablette). Avec le script v2, on ne demande que ce qui a changé depuis le dernier tour ; tout, de temps en temps (6 h),
+   en changeant de compte, ou pour reprendre ce qui n'avait pas pu être gardé. Un ancien script renvoie tout : ça marche aussi. */
+var SYNC_SINCE_KEY = 'vocabVision.syncSince';
+function syncSinceGet(){ try{ const o = JSON.parse(localStorage.getItem(SYNC_SINCE_KEY) || 'null'); return (o && o.u === getSyncUrl() && o.id === getCurrentUserId()) ? o : null; }catch(e){ return null; } }
+function syncSinceSet(o){ try{ if(o) localStorage.setItem(SYNC_SINCE_KEY, JSON.stringify(Object.assign({ u:getSyncUrl(), id:getCurrentUserId() }, o))); else localStorage.removeItem(SYNC_SINCE_KEY); }catch(e){} }
+async function cloudPull(full){
+  const st = syncSinceGet(), t0 = Date.now();
+  const retry = !!(syncState.retryAt && t0 >= syncState.retryAt);
+  const inc = !full && !syncState.needFull && !retry && !!(st && st.t) && t0 - (st.f || 0) < 6 * 3600000;
+  const req = { action:'pull', mine:'::u:' + getCurrentUserId() };
+  if(inc) req.since = st.t - 1000;
+  const out = await cloudRequest(req);
+  if(!inc){ syncState.needFull = false; syncState.retryAt = 0; }
+  syncState.srvV = +out.v || 1; syncState.lastInc = inc; syncState.pulls = (syncState.pulls || 0) + 1;
   syncState.merging = true;   // les écritures de la fusion ne relancent pas une synchro
   let changed = false;
   try{ changed = mergeRemoteData(out.data || {}); }finally{ syncState.merging = false; }
+  if(out.now) syncSinceSet({ t:+out.now, f:inc ? st.f : t0 }); else syncSinceSet(null);
   syncState.lastPull = Date.now();
   try{ localStorage.setItem(LAST_SYNC_KEY, String(Date.now())); }catch(e){}
   return changed;
@@ -22344,8 +22482,9 @@ function mergeRemoteData(remote){
   let changed = false;
   const base = syncLoadBase();
   const mySuffix = '::u:' + getCurrentUserId();
-  const getL = (k) => { try{ return localStorage.getItem(k); }catch(e){ return null; } };
-  const putL = (k, v) => { try{ localStorage.setItem(k, v); }catch(e){} };
+  const failed = new Set(), prev = new Map();
+  const getL = (k) => { try{ return tbKvOwns(k) ? tbKvGet(k) : localStorage.getItem(k); }catch(e){ return null; } };
+  const putL = (k, v) => { try{ if(tbKvOwns(k)) tbKvSet(k, v); else localStorage.setItem(k, v); return true; }catch(e){ failed.add(k); return false; } };
   const BEST_KEYS = [BLITZ_BEST_KEY, 'lexiqueQuiz::entMissionBest', 'lexiqueQuiz::besConjBest', 'lexiqueQuiz::besMissionBest', 'lexiqueQuiz::besGenreBest', 'lexiqueQuiz::redMissionBest'];
   for(const key of Object.keys(remote)){
     if(key.startsWith('lexiqueQuiz::leaderboard::')) continue;              // le classement n'est pas gardé ici
@@ -22359,6 +22498,7 @@ function mergeRemoteData(remote){
     if(lv === rv){ base[key] = rh; continue; }                     // déjà pareil des deux côtés
     if(base[key] === rh) continue;                                 // le cloud n'a pas bougé : la modif est ici, elle partira à l'envoi
     const dirty = lv != null && base[key] !== undefined && syncHash(lv) !== base[key];   // modifié ici depuis la dernière synchro
+    prev.set(key, [base[key], lv]);
     base[key] = rh;
 
     if(baseKey === DAILY_LOG_KEY){
@@ -22533,6 +22673,14 @@ function mergeRemoteData(remote){
       });
       if(m){ saveBlockTitles(); changed = true; }
 
+    } else if(baseKey === 'lexiqueQuiz::pdvCloud' || baseKey === 'lexiqueQuiz::pdvDirs'){
+      // ☁️ 1.0.47 : les PDF tels quels / leurs dossiers : un par un, le plus récent gagne (même supprimé)
+      const ro = safeParse(rv, []), lo = safeParse(lv, []) || [];
+      const out = Array.isArray(lo) ? lo.slice() : [];
+      let m = false;
+      (Array.isArray(ro) ? ro : []).forEach(r => { if(!r || !r.id) return; const i = out.findIndex(x => x && x.id === r.id); if(i < 0){ out.push(r); m = true; } else if((r.upd || 0) > (out[i].upd || 0)){ out[i] = r; m = true; } });
+      if(m || lv == null){ if(putL(key, JSON.stringify(out))) changed = true; }
+
     } else if(baseKey === 'lexiqueQuiz::tbCats'){
       // 📚 catégories de la Tablette : une par une, la plus récente gagne (même supprimée)
       const ro = safeParse(rv, []), lo = safeParse(lv, []) || [];
@@ -22543,8 +22691,7 @@ function mergeRemoteData(remote){
 
     } else if(/^lexiqueQuiz::tbImg::/.test(baseKey)){
       // 🖼 un morceau d'image de la Tablette : si l'appareil est plein, on le reprendra au prochain tour
-      let ok = true; try{ localStorage.setItem(key, rv); }catch(e){ ok = false; }
-      if(ok) changed = true; else delete base[key];
+      if(putL(key, rv)) changed = true;
 
     } else if(/^lexiqueQuiz::tb(Doc|Meta)::/.test(baseKey)){
       // 📰 textes de la Tablette : morceau par morceau, la version la plus récente gagne
@@ -22574,7 +22721,17 @@ function mergeRemoteData(remote){
       }
     } else {
       // le cloud a changé (l'autre appareil), pas nous : on prend sa version
-      putL(key, rv); changed = true;
+      if(putL(key, rv)) changed = true;
+    }
+  }
+  if(failed.size){
+    // 🩹 1.0.47 : pas pu l'écrire ici (appareil plein) → la synchro ne fait pas comme si c'était fait : elle le reprendra
+    failed.forEach(k => { const pv = prev.get(k); if(!pv) return; if(pv[0] !== undefined) base[k] = pv[0]; else if(pv[1] != null) base[k] = syncHash(pv[1]); else delete base[k]; });
+    syncState.retryAt = Date.now() + 10 * 60000;
+    if(!syncState.fullSaid || Date.now() - syncState.fullSaid > 10 * 60000){
+      syncState.fullSaid = Date.now();
+      const n = failed.size;
+      try{ setStatus(`⚠️ La mémoire de l'appli est pleine : ${n} donnée${n > 1 ? 's' : ''} de ton autre appareil n'${n > 1 ? 'ont' : 'a'} pas pu être gardée${n > 1 ? 's' : ''} (on réessaiera).`, 'err'); }catch(e){}
     }
   }
   syncSaveBase();
@@ -22612,7 +22769,7 @@ let cloudPushPending = false;
 var SYNC_BASE_KEY = 'vocabVision.syncBase';   // ce que contient le cloud (empreintes) — propre à cet appareil, jamais envoyé
 var syncBase = null;
 var syncState = { running:false, again:false, timer:0, due:0, merging:false, lastPull:0, lastOk:0, errAt:0, lastLb:0 };
-var SYNC_LAZY = /::(tbMeta|conjResume|bouqResume|audioLibPos|inProgressSession|comboStreak|homeSectionsCollapsed|questsCollapsed|filterRowCollapsed|dictView)(::|$)/;
+var SYNC_LAZY = /::(tbMeta|pdvPos|conjResume|bouqResume|audioLibPos|inProgressSession|comboStreak|homeSectionsCollapsed|questsCollapsed|filterRowCollapsed|dictView)(::|$)/;
 function syncHash(s){
   s = String(s == null ? '' : s);
   let h = 0x811c9dc5;
@@ -22680,7 +22837,8 @@ async function syncCycle(opts){
   if(opts.indicator) setSyncIndicator(true);
   let changed = false, sent = 0, pulled = false;
   try{
-    if(opts.force || !document.body.classList.contains('quiz-active')){ changed = await cloudPull(); pulled = true; try{ if(typeof wordsRepairMaybe === 'function') wordsRepairMaybe(); }catch(e){} }
+    if(!TBKV.ready) await tbKvWait(4000);
+    if(opts.force || !document.body.classList.contains('quiz-active')){ changed = await cloudPull(opts.full); pulled = true; try{ if(typeof wordsRepairMaybe === 'function') wordsRepairMaybe(); }catch(e){} }
     if(changed) syncAfterRemoteChange();   // l'écran se met à jour tout de suite
     sent = await syncPushDirty();
     syncState.lastOk = Date.now();
@@ -22789,8 +22947,8 @@ async function pushLeaderboardEntry(){
   }catch(e){ /* best-effort, comme le reste de la synchro : jamais bloquant */ }
 }
 async function fetchLeaderboardToday(){
-  const out = await cloudRequest({ action:'pull' });
   const prefix = `${LEADERBOARD_PREFIX}${todayKey()}::`;
+  const out = await cloudRequest({ action:'pull', prefix });
   const entries = [];
   Object.keys(out.data || {}).forEach(key => {
     if(!key.startsWith(prefix)) return;
@@ -22962,6 +23120,7 @@ function renderSyncView(){
       <button class="mode-chip" id="pullSyncBtn" ${hasUrl?'':'disabled style="opacity:.5;"'}>⇣ Récupérer du cloud</button>
     </div>
     <div class="question-line" id="syncStatusLine" style="margin-top:6px;">Dernière synchro : <b>${formatLastSync()}</b>${hasUrl ? ' · synchro auto au démarrage et après chaque bloc ✅' : ''}</div>
+    ${hasUrl && syncState.srvV === 1 ? `<div class="question-line" id="syncV2Hint" style="margin-top:4px;">💡 <b>Mets à jour ton script Google</b> (fichier <b>Code.gs</b>, version 2) : la synchro ne téléchargera plus toute la feuille à chaque fois — bien plus léger pour le téléphone.</div>` : ''}
 
     <div class="pm-summary" style="margin-top:14px;">
       <div class="pm-title">💾 Ce qui est sauvegardé</div>
@@ -23032,7 +23191,8 @@ function renderSyncView(){
     syncBusy = true;
     setSyncMsg('⏳ Envoi en cours...', true);
     try{
-      await cloudPull();   // d'abord ce que l'autre appareil a envoyé : on fusionne, on n'écrase pas
+      await tbKvWait(4000);
+      await cloudPull(true);   // d'abord ce que l'autre appareil a envoyé : on fusionne, on n'écrase pas
       const n = await cloudPush();
       setSyncMsg(`✓ ${n} élément${n>1?'s':''} envoyé${n>1?'s':''} vers ta feuille Google !`, true);
     }catch(e){ setSyncMsg('✗ Échec de l\'envoi : ' + escapeHtml(e.message), false); }
@@ -23044,7 +23204,8 @@ function renderSyncView(){
     syncBusy = true;
     setSyncMsg('⏳ Récupération en cours...', true);
     try{
-      const changed = await cloudPull();
+      await tbKvWait(4000);
+      const changed = await cloudPull(true);
       setSyncMsg(changed ? '✓ Données récupérées et fusionnées !' : '✓ Déjà à jour, rien de nouveau.', true);
     }catch(e){ setSyncMsg('✗ Échec de la récupération : ' + escapeHtml(e.message), false); }
     finally{ syncBusy = false; }
@@ -23183,6 +23344,9 @@ const COLOR_PRESETS = {
 /* ============ 🆕 NOUVEAUTÉS — pour que tout ce qui a été ajouté reste découvrable ============ */
 const WHATS_NEW_SECTIONS = [
   { icon:'🆕', title:'Nouveautés', items:[
+    { name:'🔄 La Tablette se synchronise vraiment entre le PC et le téléphone', desc:"Les textes (journaux, magazines, livres…) ne sont plus gardés dans la petite mémoire de l'appli (≈ 5 Mo pour tout, souvent pleine sur le téléphone : les textes venus du PC ne pouvaient pas s'y écrire, sans le dire) mais dans le grand stockage de l'appareil. Ceux qui n'avaient pas pu arriver sont repris tout seuls. Et si un jour une donnée ne peut pas être gardée, la synchro le dit et réessaie, au lieu de faire comme si c'était fait." },
+    { name:'☁️ Les PDF « tels quels » sur tous tes appareils', desc:"Un PDF (ou des photos de pages) ajouté sur le PC part tout seul dans ton espace Cloudflare R2 — chiffré : illisible sans ta clé. Sur le téléphone, il apparaît avec ☁️ dans « Mes PDF, tels quels » : touche-le, il se télécharge une fois et s'ouvre. Les dossiers et la page où tu en es suivent aussi ; 🗑 supprime partout. Les clés R2 ne sont nécessaires que sur l'appareil qui envoie." },
+    { name:'⚡ Une synchro plus légère', desc:"Avec le script Google mis à jour (Code.gs, version 2), l'appli ne retélécharge plus toute la feuille à chaque minute : seulement ce qui a changé (et seulement ton compte). Bien moins de données sur le téléphone. L'ancien script marche toujours." },
     { name:'🎯 Un meilleur lecteur de texte (OCR)', desc:"Les pages scannées et les photos de pages sont maintenant lues par PaddleOCR (PP-OCRv5, modèle « latin » : le français avec ses accents) : bien plus juste que Tesseract sur les magazines (colonnes, gros titres, fonds colorés). Tout se passe dans le navigateur, rien n'est envoyé sur un serveur ; le lecteur est téléchargé une seule fois. Tesseract reste au choix (« Lecteur de texte » à l'import) et sert pour l'arabe. Les pages déjà lues sont relues avec le nouveau lecteur." },
     { name:'🖼️ Le texte des images de la Tablette', desc:"Une caricature, une BD, un scan collé dans un texte : touche un mot de l'image. Elle est lue une fois (OCR), puis chaque mot de l'image a sa fiche, comme un mot du texte : 🖍 Taguer, ➕ Ajouter à mes mots… Touche l'image hors des mots : ses réglages (et 🔁 Relire le texte de l'image)." },
     { name:'📖 Mode liseuse, comme une Kindle', desc:"Dans un PDF, le bouton 📖 (ou K) remet le texte en page pour lire : on tourne les pages (bords de l'écran, glisser, ← →, espace), thème Papier, Sépia ou Nuit, taille, police, interligne, marges. En bas : la page, le % lu et le temps qu'il reste. Les en-têtes répétés sont cachés, les titres ressortent. Toucher un mot : sa fiche." },
@@ -46789,8 +46953,7 @@ function tbGoneLoad(){ try{ return JSON.parse(localStorage.getItem(nsKey(TB_GONE
 function tbStoreIds(){
   const suf = tbUserSuf(), ids = new Set();
   try{
-    for(let i = 0; i < localStorage.length; i++){
-      const k = localStorage.key(i);
+    for(const k of tbKvKeys()){
       if(!k || !k.endsWith(suf)) continue;
       const pre = k.startsWith(TB_DOC) ? TB_DOC : (k.startsWith(TB_META) ? TB_META : '');
       if(!pre) continue;
@@ -46802,11 +46965,11 @@ function tbStoreIds(){
 }
 function tbReadDoc(id){
   try{
-    const h = JSON.parse(localStorage.getItem(tbSKey(TB_DOC, id)) || 'null');
+    const h = JSON.parse(tbKvGet(tbSKey(TB_DOC, id)) || 'null');
     if(!h || typeof h.d !== 'string') return null;
     let str = h.d;
     for(let i = 1; i < (h.n || 1); i++){
-      const q = JSON.parse(localStorage.getItem(tbSKey(TB_DOC, id, i)) || 'null');
+      const q = JSON.parse(tbKvGet(tbSKey(TB_DOC, id, i)) || 'null');
       if(!q || q.upd !== h.upd || typeof q.d !== 'string') return null;          // un morceau pas encore arrivé
       str += q.d;
     }
@@ -46816,7 +46979,7 @@ function tbReadDoc(id){
     return doc;
   }catch(e){ return null; }
 }
-function tbReadMeta(id){ try{ return JSON.parse(localStorage.getItem(tbSKey(TB_META, id)) || 'null'); }catch(e){ return null; } }
+function tbReadMeta(id){ try{ return JSON.parse(tbKvGet(tbSKey(TB_META, id)) || 'null'); }catch(e){ return null; } }
 function tbGoneHides(id, doc){ const g = tbGoneLoad()[id]; return !!g && (!doc || (doc.upd || 0) <= g); }
 function tbAssemble(id, doc, meta){
   const a = Object.assign({}, meta || {});
@@ -46824,7 +46987,7 @@ function tbAssemble(id, doc, meta){
   a.id = id; delete a.mupd;
   if(a.text == null && a.blocks) a.text = tbBlocksText(a.blocks);
   if(!Array.isArray(a.tags)) a.tags = [];
-  try{ const o = JSON.parse(localStorage.getItem(tbOrigKey(id)) || 'null'); if(o){ a.textOrig = o.textOrig; if(o.blocksOrig) a.blocksOrig = o.blocksOrig; } }catch(e){}
+  try{ const o = JSON.parse(tbKvGet(tbOrigKey(id)) || 'null'); if(o){ a.textOrig = o.textOrig; if(o.blocksOrig) a.blocksOrig = o.blocksOrig; } }catch(e){}
   a._du = doc.upd; a._dh = syncHash(doc._str || '');
   return a;
 }
@@ -46854,15 +47017,15 @@ function tbWriteArt(a){
     const stale = cur && a._du != null && (cur.upd || 0) > a._du && a._dh === h;      // texte pas modifié ici, mais l'autre appareil l'a changé : on garde le sien
     if(!stale && (!cur || cur._str !== str)){
       const upd = Math.max(Date.now(), cur ? (cur.upd || 0) + 1 : 0), n = Math.max(1, Math.ceil(str.length / TB_PART));
-      for(let i = n - 1; i >= 0; i--){ const d = str.slice(i * TB_PART, (i + 1) * TB_PART); localStorage.setItem(tbSKey(TB_DOC, id, i), JSON.stringify(i ? { upd, i, d } : { upd, n, d })); }
-      const extra = []; for(let i = n; i < ((cur && cur.n) || 1); i++){ extra.push(tbSKey(TB_DOC, id, i)); localStorage.removeItem(tbSKey(TB_DOC, id, i)); }
+      for(let i = n - 1; i >= 0; i--){ const d = str.slice(i * TB_PART, (i + 1) * TB_PART); tbKvSet(tbSKey(TB_DOC, id, i), JSON.stringify(i ? { upd, i, d } : { upd, n, d })); }
+      const extra = []; for(let i = n; i < ((cur && cur.n) || 1); i++){ extra.push(tbSKey(TB_DOC, id, i)); tbKvDel(tbSKey(TB_DOC, id, i)); }
       if(extra.length) try{ cloudDeleteKeys(extra); }catch(e){}
       a._du = upd; a._dh = h;
     }
     const mcur = tbReadMeta(id), mstr = tbCanon(meta);
-    if(!mcur || tbCanon(Object.assign({}, mcur, { mupd:undefined })) !== mstr){ meta.mupd = Date.now(); localStorage.setItem(tbSKey(TB_META, id), tbCanon(meta)); }
-    if(a.textOrig != null) localStorage.setItem(tbOrigKey(id), JSON.stringify({ textOrig:a.textOrig, blocksOrig:a.blocksOrig || null }));
-    else localStorage.removeItem(tbOrigKey(id));
+    if(!mcur || tbCanon(Object.assign({}, mcur, { mupd:undefined })) !== mstr){ meta.mupd = Date.now(); tbKvSet(tbSKey(TB_META, id), tbCanon(meta)); }
+    if(a.textOrig != null) tbKvSet(tbOrigKey(id), JSON.stringify({ textOrig:a.textOrig, blocksOrig:a.blocksOrig || null }));
+    else tbKvDel(tbOrigKey(id));
     try{ const ims = tbArtImgIds(a); if(ims.length) tbImgSyncOut(ims); }catch(e){}       // ☁️ ses images partent aussi
     return true;
   }catch(e){ console.warn('tablette : rangement', e); return false; }
@@ -46870,10 +47033,10 @@ function tbWriteArt(a){
 function tbDropKeys(id, cloud){
   const keys = [];
   try{
-    const h = JSON.parse(localStorage.getItem(tbSKey(TB_DOC, id)) || 'null'), n = (h && h.n) || 1;
-    for(let i = 0; i < Math.max(n, 4); i++){ const k = tbSKey(TB_DOC, id, i); if(localStorage.getItem(k) != null){ keys.push(k); localStorage.removeItem(k); } }
-    const mk = tbSKey(TB_META, id); if(localStorage.getItem(mk) != null){ keys.push(mk); localStorage.removeItem(mk); }
-    localStorage.removeItem(tbOrigKey(id));
+    const h = JSON.parse(tbKvGet(tbSKey(TB_DOC, id)) || 'null'), n = (h && h.n) || 1;
+    for(let i = 0; i < Math.max(n, 4); i++){ const k = tbSKey(TB_DOC, id, i); if(tbKvGet(k) != null){ keys.push(k); tbKvDel(k); } }
+    const mk = tbSKey(TB_META, id); if(tbKvGet(mk) != null){ keys.push(mk); tbKvDel(mk); }
+    tbKvDel(tbOrigKey(id));
   }catch(e){}
   if(cloud && keys.length) try{ cloudDeleteKeys(keys); }catch(e){}
 }
@@ -46902,14 +47065,17 @@ function tbDel(id){ const a = tbGet(id); tbRemoveArt(id); try{ tbRecDel(id); }ca
 /* les textes de l'autre appareil viennent d'arriver : on range, et on rafraîchit la liste si on la regarde */
 function tbSyncIn(){
   const gone = tbGoneLoad();
-  Object.keys(gone).forEach(id => { const d = tbReadDoc(id); if(d ? (d.upd || 0) <= gone[id] : localStorage.getItem(tbSKey(TB_META, id)) != null) tbDropKeys(id, false); });
+  Object.keys(gone).forEach(id => { const d = tbReadDoc(id); if(d ? (d.upd || 0) <= gone[id] : tbKvGet(tbSKey(TB_META, id)) != null) tbDropKeys(id, false); });
   TB.idx = null;
   try{ if(typeof TB.homeList === 'function' && document.getElementById('tbkRoot')) TB.homeList(); }catch(e){}
   try{ tbImgImportAll(); }catch(e){}            // ☁️ les images de l'autre appareil
+  try{ if(typeof pdvCloudIn === 'function') pdvCloudIn(); }catch(e){}      // ☁️ 1.0.47 : les PDF tels quels
 }
 /* les images des textes déjà gardés (avant 1.0.25) partent aussi, une fois */
 setTimeout(() => { try{ const ids = []; tbLoad().forEach(a => tbArtImgIds(a).forEach(i => ids.push(i))); if(ids.length) tbImgSyncOut(ids); }catch(e){} }, 6000);
 setTimeout(() => { try{ if(typeof pdvList === 'function') pdvList(); }catch(e){} }, 400);     // 📖 la liste des PDF tels quels
+tbKvInit();                                                                                     // 📦 1.0.47 : le grand stockage
+document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'hidden') try{ tbKvFlush(); }catch(e){} });
 function tbUi(){
   if(!TB.ui){ let u = null; try{ u = JSON.parse(localStorage.getItem(nsKey('lexiqueQuiz::tabletteUi')) || 'null'); }catch(e){} TB.ui = Object.assign({ fs:19, lh:1.65, align:'left', w:0 }, u || {}); }
   return TB.ui;
@@ -47808,7 +47974,7 @@ async function tbImgSyncOut(ids){
   const sent = tbImgSent();
   for(const id of [...new Set(ids || [])]){
     if(!id || sent[id] || TB.imgOut.has(id)) continue;
-    try{ if(localStorage.getItem(tbImgSKey(id)) != null) continue; }catch(e){ continue; }
+    if(tbKvGet(tbImgSKey(id)) != null) continue;
     TB.imgOut.add(id);
     try{
       const blob = await tbImgGet(id); if(!blob) continue;
@@ -47816,9 +47982,9 @@ async function tbImgSyncOut(ids){
       if(!b64) continue;
       const n = Math.max(1, Math.ceil(b64.length / TB_PART)), done = [];
       try{
-        for(let i = n - 1; i >= 0; i--){ const k = tbImgSKey(id, i), d = b64.slice(i * TB_PART, (i + 1) * TB_PART); localStorage.setItem(k, JSON.stringify(i ? { i, d } : { n, t:small.type || 'image/jpeg', d })); done.push(k); }
+        for(let i = n - 1; i >= 0; i--){ const k = tbImgSKey(id, i), d = b64.slice(i * TB_PART, (i + 1) * TB_PART); tbKvSet(k, JSON.stringify(i ? { i, d } : { n, t:small.type || 'image/jpeg', d })); done.push(k); }
       }catch(e){
-        done.forEach(k => { try{ localStorage.removeItem(k); }catch(err){} });
+        done.forEach(k => { try{ tbKvDel(k); }catch(err){} });
         if(!TB.imgFullSaid){ TB.imgFullSaid = true; try{ setStatus("⚠️ Plus de place sur cet appareil pour envoyer une image de la Tablette à ton autre appareil.", 'err'); }catch(err){} }
       }
     }finally{ TB.imgOut.delete(id); }
@@ -47826,9 +47992,9 @@ async function tbImgSyncOut(ids){
 }
 function tbImgSyncParts(id){
   try{
-    const h = JSON.parse(localStorage.getItem(tbImgSKey(id)) || 'null'); if(!h || !h.n) return null;
+    const h = JSON.parse(tbKvGet(tbImgSKey(id)) || 'null'); if(!h || !h.n) return null;
     const parts = [h.d];
-    for(let i = 1; i < h.n; i++){ const q = JSON.parse(localStorage.getItem(tbImgSKey(id, i)) || 'null'); if(!q || typeof q.d !== 'string') return null; parts.push(q.d); }
+    for(let i = 1; i < h.n; i++){ const q = JSON.parse(tbKvGet(tbImgSKey(id, i)) || 'null'); if(!q || typeof q.d !== 'string') return null; parts.push(q.d); }
     return { n:h.n, t:h.t || 'image/jpeg', b64:parts.join('') };
   }catch(e){ return null; }
 }
@@ -47847,20 +48013,20 @@ async function tbImgPrune(){
   try{
     const suf = '::u:' + getCurrentUserId(), base = (typeof syncLoadBase === 'function') ? syncLoadBase() : {};
     const ids = new Set();
-    for(let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); if(k && k.startsWith(TB_IMG) && k.endsWith(suf)) ids.add(k.slice(TB_IMG.length, k.length - suf.length).replace(/~\d+$/, '')); }
+    for(const k of tbKvKeys()){ if(k && k.startsWith(TB_IMG) && k.endsWith(suf)) ids.add(k.slice(TB_IMG.length, k.length - suf.length).replace(/~\d+$/, '')); }
     for(const id of ids){
-      const h = JSON.parse(localStorage.getItem(tbImgSKey(id)) || 'null'); if(!h || !h.n) continue;
+      const h = JSON.parse(tbKvGet(tbImgSKey(id)) || 'null'); if(!h || !h.n) continue;
       const keys = []; for(let i = 0; i < h.n; i++) keys.push(tbImgSKey(id, i));
-      const pushed = keys.every(k => { const v = localStorage.getItem(k); return v != null && base[k] === syncHash(v); });
+      const pushed = keys.every(k => { const v = tbKvGet(k); return v != null && base[k] === syncHash(v); });
       if(!pushed || !(await tbImgGet(id))) continue;
       tbImgSentSet(id, h.n);
-      keys.forEach(k => { try{ localStorage.removeItem(k); }catch(e){} });
+      keys.forEach(k => { try{ tbKvDel(k); }catch(e){} });
     }
   }catch(e){}
 }
 function tbImgSyncDrop(id){
-  const n = Math.max(tbImgSent()[id] || 0, (() => { try{ const h = JSON.parse(localStorage.getItem(tbImgSKey(id)) || 'null'); return (h && h.n) || 0; }catch(e){ return 0; } })(), 1);
-  const keys = []; for(let i = 0; i < n; i++){ const k = tbImgSKey(id, i); keys.push(k); try{ localStorage.removeItem(k); }catch(e){} }
+  const n = Math.max(tbImgSent()[id] || 0, (() => { try{ const h = JSON.parse(tbKvGet(tbImgSKey(id)) || 'null'); return (h && h.n) || 0; }catch(e){ return 0; } })(), 1);
+  const keys = []; for(let i = 0; i < n; i++){ const k = tbImgSKey(id, i); keys.push(k); try{ tbKvDel(k); }catch(e){} }
   tbImgSentSet(id, 0);
   try{ cloudDeleteKeys(keys); }catch(e){}
 }
@@ -47868,7 +48034,7 @@ function tbImgSyncDrop(id){
 async function tbImgImportAll(){
   try{
     const suf = '::u:' + getCurrentUserId(), ids = new Set();
-    for(let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); if(k && k.startsWith(TB_IMG) && k.endsWith(suf) && !/~\d+::u:/.test(k)) ids.add(k.slice(TB_IMG.length, k.length - suf.length)); }
+    for(const k of tbKvKeys()){ if(k && k.startsWith(TB_IMG) && k.endsWith(suf) && !/~\d+::u:/.test(k)) ids.add(k.slice(TB_IMG.length, k.length - suf.length)); }
     for(const id of ids){ if(!(await tbImgGet(id))) await tbImgFromSync(id); }
     document.querySelectorAll('.missing[data-img]').forEach(el => { el.classList.remove('missing'); const im = el.tagName === 'IMG' ? el : el.querySelector('img'); if(im) im.removeAttribute('src'); });
     tbLoadImgs(document);
@@ -48751,7 +48917,7 @@ var TB_LS_MAX = 5200000;
 function tbLsUsed(){ let n = 0; try{ for(let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i) || ''; n += k.length + (localStorage.getItem(k) || '').length; } }catch(e){} return n; }
 function tbArtSizes(){
   const suf = tbUserSuf(), by = new Map();
-  try{ for(let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); if(!k || !k.endsWith(suf)) continue; const pre = k.startsWith(TB_DOC) ? TB_DOC : (k.startsWith(TB_META) ? TB_META : ''); if(!pre) continue; const id = k.slice(pre.length, k.length - suf.length).replace(/~\d+$/, ''); by.set(id, (by.get(id) || 0) + k.length + (localStorage.getItem(k) || '').length); } }catch(e){}
+  try{ for(const k of tbKvKeys()){ if(!k || !k.endsWith(suf)) continue; const pre = k.startsWith(TB_DOC) ? TB_DOC : (k.startsWith(TB_META) ? TB_META : ''); if(!pre) continue; const id = k.slice(pre.length, k.length - suf.length).replace(/~\d+$/, ''); by.set(id, (by.get(id) || 0) + k.length + (tbKvGet(k) || '').length); } }catch(e){}
   return by;
 }
 function tbStoreWarnHtml(){
@@ -50374,7 +50540,12 @@ async function pdvListLoad(){
   try{ pdvShelfRefresh(); }catch(e){}
 }
 function pdvMeta(id){ return pdvList().find(x => x.id === id) || null; }
-function pdvPatch(id, p){ const L = pdvList(), m = L.find(x => x.id === id); if(!m) return; Object.assign(m, p); pdvSaveList(L); }
+function pdvPatch(id, p){
+  const L = pdvList(), m = L.find(x => x.id === id); if(!m) return;
+  Object.assign(m, p);
+  try{ const t = pdvSyncPatch(id, p); if(t.c) m.cupd = t.c; if(t.p) m.pat = t.p; }catch(e){}     // ☁️ 1.0.47
+  pdvSaveList(L);
+}
 function pdvBlobKey(id, p){ return nsKey('tbpdf') + '|' + id + (p ? '|' + p : ''); }
 function pdvOcrKey(id, p){ return nsKey(tbOcrEng() === 'paddle' ? 'tbpdfocr-pd' : 'tbpdfocr') + '|' + id + '|' + p; }
 async function pdvPut(key, val){ try{ await tbStore('img', 'readwrite', os => { os.put(val, key); }); return true; }catch(e){ console.warn('pdv', e); return false; } }
@@ -50389,11 +50560,12 @@ async function pdvSave(P, v){
   if(img){ for(let k = 0; k < v.pages.length; k++){ if(!await pdvPut(pdvBlobKey(id, k + 1), P.files[v.pages[k] - 1])) ok = false; } }
   else ok = await pdvPut(pdvBlobKey(id), P.file);
   if(!ok){ await pdvRemoveKeys(id, img ? v.pages.length : 0); throw new Error("plus de place sur l'appareil pour ce fichier"); }
-  if(old) await pdvRemove(old.id);
+  if(old) await pdvDelete(old.id);
   const meta = { id, kind:P.kind, title:P.title, name, n:img ? v.pages.length : P.N, pages:img ? v.pages.map((_, k) => k + 1) : v.pages.slice(),
     scan:img ? null : v.pages.filter(p => P.scan && P.scan[p]), lang:v.lang || 'fra', at:Date.now(), at0:Date.now(), last:old && old.last || 0, autoTitle:!!v.autoTitle };
   if(v.title) meta.title = String(v.title).slice(0, 150);
   const L = pdvList(); L.unshift(meta); pdvSaveList(L);
+  setTimeout(() => { try{ pdvCloudPump(); }catch(e){} }, 300);        // ☁️ vers tes autres appareils
   return id;
 }
 async function pdvRemoveKeys(id, nImg){
@@ -50405,28 +50577,297 @@ async function pdvRemove(id){
   pdvSaveList(pdvList().filter(x => x.id !== id));
   await pdvRemoveKeys(id, m.kind === 'img' ? m.n : 0);
 }
+/* ☁️ 1.0.47 : les PDF « tels quels » passent aussi d'un appareil à l'autre.
+   • Le fichier est trop gros pour le Google Sheet : il part dans ton espace Cloudflare R2 (celui de l'Audiothèque), CHIFFRÉ
+     (AES-256, une clé par PDF) — même quelqu'un qui trouverait son adresse ne pourrait pas le lire.
+   • La liste (titre, dossier, la clé pour le déchiffrer…) passe par la synchro habituelle (« pdvCloud »), comme les dossiers
+     (« pdvDirs ») et la page où tu en es (« pdvPos », envoyée sans se presser).
+   • Sur l'autre appareil, le PDF apparaît avec ☁️ : on le touche, il se télécharge une fois et s'ouvre.
+   • Il faut les clés R2 seulement sur l'appareil qui ENVOIE (souvent le PC) ; l'autre lit l'adresse publique.
+   • 🗑 supprime partout ; le fichier est retiré de R2 par le premier appareil qui a les clés. */
+var PDV_CLOUD = 'lexiqueQuiz::pdvCloud', PDV_DIRS_S = 'lexiqueQuiz::pdvDirs', PDV_POS = 'lexiqueQuiz::pdvPos';
+var PDVUP = { busy:false, cur:'', frac:0, err:'', skip:new Set(), dl:new Map(), adopting:false };
+function pdvCloud(){ try{ const L = JSON.parse(localStorage.getItem(nsKey(PDV_CLOUD)) || '[]'); return Array.isArray(L) ? L.filter(x => x && x.id) : []; }catch(e){ return []; } }
+function pdvCloudSave(L){
+  const old = Date.now() - 120 * 86400000;
+  L = (L || []).filter(x => x && x.id && !(x.gone && !(x.del && x.del.length) && (x.upd || 0) < old)).slice(0, 300);
+  try{ localStorage.setItem(nsKey(PDV_CLOUD), JSON.stringify(L)); return true; }catch(e){ return false; }
+}
+function pdvCloudOf(id){ return pdvCloud().find(x => x.id === id) || null; }
+function pdvCloudPatch(id, p){
+  const L = pdvCloud(), e = L.find(x => x.id === id); if(!e || e.gone) return 0;
+  if(!Object.keys(p).some(f => JSON.stringify(e[f]) !== JSON.stringify(p[f]))) return 0;
+  const t = Math.max(Date.now(), (e.upd || 0) + 1);
+  Object.assign(e, p, { upd:t }); pdvCloudSave(L); return t;
+}
+function pdvPosAll(){ try{ return JSON.parse(localStorage.getItem(nsKey(PDV_POS)) || '{}') || {}; }catch(e){ return {}; } }
+function pdvPosSave(P){ try{ localStorage.setItem(nsKey(PDV_POS), JSON.stringify(P)); }catch(e){} }
+/* ce qui change sur un PDF et doit suivre sur les autres appareils : titre, dossier (tout de suite), page (sans se presser) */
+function pdvSyncPatch(id, p){
+  const out = {};
+  if(!pdvCloudOf(id)) return out;
+  const sp = {}; ['title', 'dir', 'autoTitle'].forEach(f => { if(f in p) sp[f] = p[f]; });
+  if(Object.keys(sp).length){ const t = pdvCloudPatch(id, sp); if(t) out.c = t; }
+  if('last' in p || 'kindle' in p || 'mark' in p){
+    const P = pdvPosAll(), o = Object.assign({}, P[id] || {});
+    let ch = false;
+    if('last' in p && o.p !== p.last){ o.p = p.last; ch = true; }
+    if('kindle' in p && !!o.k !== !!p.kindle){ o.k = !!p.kindle; ch = true; }
+    if('mark' in p && o.m !== p.mark){ o.m = p.mark; ch = true; }
+    if(ch){ o.at = Math.max(Date.now(), (o.at || 0) + 1); P[id] = o; pdvPosSave(P); out.p = o.at; }
+  }
+  return out;
+}
+function pdvR2Ok(){ try{ const c = r2CfgGet(); return r2Ready() && !!(c && c.publicUrl); }catch(e){ return false; } }
+function pdvRand(n){ const a = crypto.getRandomValues(new Uint8Array(n)), s = 'abcdefghijklmnopqrstuvwxyz0123456789'; return Array.from(a, b => s[b % 36]).join(''); }
+function pdvB64(u){ let s = ''; for(let i = 0; i < u.length; i++) s += String.fromCharCode(u[i]); return btoa(s); }
+function pdvUnB64(b){ const s = atob(String(b || '')), u = new Uint8Array(s.length); for(let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; }
+async function pdvKeyNew(){ const k = await crypto.subtle.generateKey({ name:'AES-GCM', length:256 }, true, ['encrypt', 'decrypt']); return { k, b64:pdvB64(new Uint8Array(await crypto.subtle.exportKey('raw', k))) }; }
+function pdvKeyOf(b64){ return crypto.subtle.importKey('raw', pdvUnB64(b64), { name:'AES-GCM' }, false, ['decrypt']); }
+async function pdvSeal(blob, key){ const iv = crypto.getRandomValues(new Uint8Array(12)); const ct = await crypto.subtle.encrypt({ name:'AES-GCM', iv }, key, await blob.arrayBuffer()); return new Blob([iv, ct], { type:'application/octet-stream' }); }
+async function pdvUnseal(buf, key, type){ const u = new Uint8Array(buf); const pt = await crypto.subtle.decrypt({ name:'AES-GCM', iv:u.slice(0, 12) }, key, u.slice(12)); return new Blob([pt], { type }); }
+function pdvR2Keys(e){ return e && e.r2 ? (e.kind === 'img' ? Array.from({ length:e.n || 1 }, (_, i) => e.r2 + '-' + (i + 1) + '.vv') : [e.r2 + '.vv']) : []; }
+/* ⇡ envoyer un PDF de cet appareil (chiffré) dans R2, puis l'ajouter à la liste synchronisée */
+async function pdvCloudUp(id){
+  const m = pdvMeta(id); if(!m) return false;
+  const ex = pdvCloudOf(id); if(ex) return !ex.gone;
+  const key = await pdvKeyNew(), base = 'vocabvision/pdf/' + pdvRand(26), img = m.kind === 'img', n = img ? (m.n || 1) : 1, types = [];
+  let size = 0;
+  for(let k = 1; k <= n; k++){
+    const b = await pdvGet(img ? pdvBlobKey(id, k) : pdvBlobKey(id)); if(!b) throw new Error("le fichier n'est plus sur cet appareil");
+    types.push(b.type || (img ? 'image/jpeg' : 'application/pdf'));
+    const sealed = await pdvSeal(b, key.k); size += sealed.size;
+    const q = { file:new File([sealed], 'pdf.vv', { type:'application/octet-stream' }), path:img ? base + '-' + k + '.vv' : base + '.vv' };
+    await r2UploadFile(q, (f) => { PDVUP.frac = (k - 1 + f) / n; pdvUpPaint(); });
+  }
+  if(!pdvMeta(id)) return false;                                                // supprimé pendant l'envoi
+  const c = r2CfgGet() || {}, mm = pdvMeta(id), pos = {};
+  const e = { id, kind:mm.kind, title:mm.title, name:mm.name || '', n:mm.n, pages:mm.pages, scan:mm.scan || null, lang:mm.lang || 'fra', at0:mm.at0 || mm.at || Date.now(), dir:mm.dir || '', autoTitle:!!mm.autoTitle,
+    last:mm.last || 0, kindle:!!mm.kindle, mark:mm.mark || 0, r2:base, url:String(c.publicUrl || '').replace(/\/+$/, '') + '/' + base, k:key.b64, mt:types, size, upd:Date.now() };
+  const L = pdvCloud().filter(x => x.id !== id); L.unshift(e); pdvCloudSave(L);
+  const P = pdvPosAll(); if(!P[id] && mm.last){ P[id] = { p:mm.last, k:!!mm.kindle, m:mm.mark || 0, at:Date.now() }; pdvPosSave(P); }
+  pdvPatch(id, { cupd:e.upd });
+  return true;
+}
+/* la file des envois (un à la fois) ; et les fichiers supprimés ailleurs à retirer de R2 */
+async function pdvCloudPump(){
+  if(PDVUP.busy) return;
+  PDVUP.busy = true;
+  try{
+    await pdvCloudAdopt();
+    if(r2Ready()){
+      const L = pdvCloud(); let ch = false;
+      for(const e of L){
+        if(!e.gone || !e.del || !e.del.length) continue;
+        const left = [];
+        for(const k of e.del){ try{ await r2Delete(k); }catch(err){ if(err && err.status !== 404) left.push(k); } }
+        if(left.length) e.del = left; else delete e.del;
+        ch = true;
+      }
+      if(ch){ const now = pdvCloud(); L.forEach(e => { const x = now.find(y => y.id === e.id); if(x && x.gone && x.upd === e.upd){ if(e.del) x.del = e.del; else delete x.del; } }); pdvCloudSave(now); }
+    }
+    if(!pdvR2Ok()) return;
+    for(let guard = 0; guard < 200; guard++){
+      const C = new Set(pdvCloud().map(x => x.id));
+      const m = pdvList().find(x => !C.has(x.id) && !PDVUP.skip.has(x.id));
+      if(!m) break;
+      PDVUP.cur = m.id; PDVUP.frac = 0; PDVUP.err = ''; pdvUpPaint();
+      try{ await pdvCloudUp(m.id); }
+      catch(e){
+        PDVUP.skip.add(m.id); PDVUP.err = (e && e.message) || String(e); console.warn('pdv ☁️', e);
+        if(e && (e.fatal || e.status === 0)) break;
+      }
+      PDVUP.cur = ''; pdvShelfRefresh();
+    }
+  }catch(e){ console.warn('pdv ☁️', e); }
+  finally{ PDVUP.busy = false; PDVUP.cur = ''; try{ pdvShelfRefresh(); }catch(e){} }
+}
+function pdvUpPaint(){
+  const el = document.querySelector(`#pdvShelf [data-pdv-open="${CSS.escape(PDVUP.cur || '-')}"] .pdv-sh-cl`);
+  if(el) el.textContent = '☁️ ' + Math.round(PDVUP.frac * 100) + ' %';
+  else if(PDVUP.cur && document.getElementById('pdvShelf') && !pdvUpPaint.t){ pdvUpPaint.t = setTimeout(() => { pdvUpPaint.t = 0; pdvShelfRefresh(); }, 50); }
+}
+/* le même PDF ajouté sur les deux appareils (avant 1.0.47) : on ne le garde qu'une fois — la copie d'ici prend le nom de celle du cloud */
+async function pdvCloudAdopt(){
+  if(PDVUP.adopting) return;
+  PDVUP.adopting = true;
+  try{
+    const C = pdvCloud().filter(e => !e.gone && e.r2);
+    for(const e of C){
+      const L = pdvList(); if(L.some(x => x.id === e.id)) continue;
+      const ids = new Set(pdvCloud().map(x => x.id));
+      const m = L.find(x => !ids.has(x.id) && x.kind === e.kind && (x.name || '') === (e.name || '') && x.n === e.n && (x.name || x.title === e.title));
+      if(m) await pdvRekey(m, e);
+    }
+  }catch(err){ console.warn('pdv ☁️ adopt', err); }
+  finally{ PDVUP.adopting = false; }
+}
+async function pdvRekey(m, e){
+  const img = m.kind === 'img', n = img ? (m.n || 1) : 0;
+  if(img){ for(let k = 1; k <= n; k++){ const b = await pdvGet(pdvBlobKey(m.id, k)); if(!b || !(await pdvPut(pdvBlobKey(e.id, k), b))) return false; } }
+  else { const b = await pdvGet(pdvBlobKey(m.id)); if(!b || !(await pdvPut(pdvBlobKey(e.id), b))) return false; }
+  try{                                                                                   // la lecture des pages scannées, déjà faite
+    const pres = ['tbpdfocr', 'tbpdfocr-pd'].map(x => nsKey(x) + '|'), keys = await tbStore('img', 'readonly', os => os.getAllKeys());
+    for(const k of keys || []){
+      if(typeof k !== 'string') continue;
+      const pre = pres.find(x => k.startsWith(x + m.id + '|')); if(!pre) continue;
+      const v = await pdvGet(k); if(v) await pdvPut(pre + e.id + '|' + k.slice((pre + m.id + '|').length), v);
+    }
+  }catch(err){}
+  const L = pdvList(), i = L.findIndex(x => x.id === m.id); if(i < 0) return false;
+  L[i] = Object.assign({}, L[i], { id:e.id, cupd:0, pat:0 }); pdvSaveList(L);
+  await pdvRemoveKeys(m.id, n);
+  pdvCloudIn(true);
+  return true;
+}
+/* les nouveautés de l'autre appareil (après une synchro) : titres, dossiers, page où on en est, PDF supprimés */
+function pdvCloudIn(quiet){
+  const C = pdvCloud(), P = pdvPosAll(), L = pdvList();
+  let ch = false; const rm = [];
+  C.forEach(e => {
+    const m = L.find(x => x.id === e.id); if(!m) return;
+    if(e.gone){ if(!(PDV && PDV.id === e.id)) rm.push(e.id); return; }
+    if((e.upd || 0) > (m.cupd || 0)){ ['title', 'dir', 'autoTitle'].forEach(f => { if(f in e) m[f] = e[f]; }); m.cupd = e.upd; ch = true; }
+    const o = P[e.id];
+    if(o && (o.at || 0) > (m.pat || 0) && !(PDV && PDV.id === e.id)){ if(o.p != null) m.last = o.p; if(o.k != null) m.kindle = !!o.k; if(o.m != null) m.mark = o.m; m.pat = o.at; ch = true; }
+  });
+  if(ch) pdvSaveList(L);
+  rm.forEach(id => { pdvRemove(id).then(() => pdvShelfRefresh()); });
+  PDV_DIRS = null;
+  try{ pdvShelfRefresh(); }catch(e){}
+  if(!quiet){ setTimeout(() => { try{ pdvCloudPump(); }catch(e){} }, 300); }
+}
+/* ⇣ un PDF de l'autre appareil : on le télécharge (une fois), on le déchiffre, il est rangé ici */
+async function pdvFetchBuf(url, onFrac, headers){
+  let r;
+  try{ r = await fetch(url, { cache:'no-store', headers:headers || {} }); }catch(e){ throw new Error('📴 téléchargement impossible : vérifie ta connexion (ou la règle CORS du bucket R2)'); }
+  if(!r.ok) throw new Error(r.status === 404 ? "le fichier n'est plus sur R2" : 'R2 a répondu ' + r.status);
+  const total = +(r.headers.get('content-length') || 0);
+  if(!r.body || !r.body.getReader){ const b = await r.arrayBuffer(); onFrac(1); return b; }
+  const rd = r.body.getReader(), parts = []; let got = 0;
+  for(;;){ const { done, value } = await rd.read(); if(done) break; parts.push(value); got += value.length; if(total) onFrac(Math.min(1, got / total)); }
+  const out = new Uint8Array(got); let o = 0; parts.forEach(x => { out.set(x, o); o += x.length; });
+  return out.buffer;
+}
+function pdvDlPaint(id){
+  const el = document.querySelector(`#pdvShelf [data-pdv-open="${CSS.escape(id)}"] .pdv-sh-cl`);
+  if(el){ el.classList.add('dl'); el.textContent = '⇣ ' + Math.round((PDVUP.dl.get(id) || 0) * 100) + ' %'; }
+}
+async function pdvCloudGet(e){
+  if(PDVUP.dl.has(e.id)) return false;
+  PDVUP.dl.set(e.id, 0); pdvDlPaint(e.id);
+  try{ tbToast('☁️ Téléchargement de « ' + e.title + ' »…'); }catch(err){}
+  const img = e.kind === 'img', n = img ? (e.n || 1) : 1;
+  try{
+    const key = await pdvKeyOf(e.k);
+    for(let k = 1; k <= n; k++){
+      const onF = (f) => { PDVUP.dl.set(e.id, (k - 1 + f) / n); pdvDlPaint(e.id); };
+      let buf;
+      try{ buf = await pdvFetchBuf(e.url + (img ? '-' + k : '') + '.vv', onF); }
+      catch(err){                                                   // l'adresse publique ne répond pas : avec les clés R2, on passe par l'accès signé
+        if(!r2Ready() || !e.r2) throw err;
+        const s = await r2Sign('GET', pdvR2Keys(e)[k - 1], {}, {});
+        buf = await pdvFetchBuf(s.url, onF, s.headers);
+      }
+      let blob;
+      try{ blob = await pdvUnseal(buf, key, (e.mt || [])[k - 1] || (img ? 'image/jpeg' : 'application/pdf')); }catch(err){ throw new Error('le fichier reçu est abîmé'); }
+      if(!(await pdvPut(img ? pdvBlobKey(e.id, k) : pdvBlobKey(e.id), blob))) throw new Error("plus de place sur l'appareil");
+    }
+    const o = pdvPosAll()[e.id] || {};
+    const meta = { id:e.id, kind:e.kind, title:e.title, name:e.name || '', n:e.n, pages:(e.pages && e.pages.length) ? e.pages : Array.from({ length:e.n }, (_, i) => i + 1), scan:e.scan || null, lang:e.lang || 'fra',
+      at:Date.now(), at0:e.at0 || Date.now(), last:o.p != null ? o.p : (e.last || 0), kindle:o.k != null ? !!o.k : !!e.kindle, mark:o.m != null ? o.m : (e.mark || 0), dir:e.dir || '', autoTitle:!!e.autoTitle, cupd:e.upd || 0, pat:o.at || 0 };
+    const L = pdvList().filter(x => x.id !== e.id); L.unshift(meta); pdvSaveList(L);
+    return true;
+  }catch(err){
+    await pdvRemoveKeys(e.id, img ? n : 0);
+    const msg = (err && err.message) || 'erreur inconnue';
+    setStatus('☁️ « ' + e.title + ' » : ' + msg, 'err');
+    try{ tbToast('⚠️ ' + msg); }catch(x){}
+    return false;
+  }finally{ PDVUP.dl.delete(e.id); try{ pdvShelfRefresh(); }catch(x){} }
+}
+/* 🗑 supprimer un PDF : ici, sur les autres appareils, et dans R2 */
+async function pdvDelete(id){
+  const L = pdvCloud(), e = L.find(x => x.id === id);
+  if(e && !e.gone){
+    const keys = pdvR2Keys(e);
+    Object.keys(e).forEach(f => { if(f !== 'id') delete e[f]; });
+    e.gone = true; e.upd = Date.now(); if(keys.length) e.del = keys;
+    pdvCloudSave(L);
+  }
+  await pdvRemove(id);
+  if(e && r2Ready()) setTimeout(() => { try{ pdvCloudPump(); }catch(err){} }, 200);
+}
+/* l'étagère : les PDF d'ici + ceux de l'autre appareil (pas encore téléchargés) */
+function pdvShelfAll(){
+  const L = pdvList(), C = pdvCloud(), cm = new Map(C.map(e => [e.id, e])), ids = new Set(L.map(m => m.id)), P = pdvPosAll();
+  const out = L.map(m => Object.assign({}, m, { cl:cm.has(m.id) && !cm.get(m.id).gone ? 1 : 0 }));
+  C.forEach(e => { if(!e.gone && e.url && e.k && !ids.has(e.id)){ const o = P[e.id] || {}; out.push(Object.assign({}, e, { remote:1, cl:1, last:o.p != null ? o.p : (e.last || 0) })); } });
+  return out.sort((a, b) => (b.at0 || b.at || 0) - (a.at0 || a.at || 0));
+}
+function pdvShelfHint(all){
+  if(PDVUP.err && pdvR2Ok()) return `<div class="pdv-sh-hint err" role="status"><span>⚠️ Envoi vers Cloudflare R2 impossible : ${escapeHtml(PDVUP.err)}</span><button type="button" data-pdvs="r2-retry">🔁 Réessayer</button></div>`;
+  const alone = all.filter(m => !m.remote && !m.cl).length;
+  if(!alone || pdvR2Ok()) return '';
+  return `<div class="pdv-sh-hint" role="note"><span>☁️ ${alone > 1 ? `Ces ${alone} PDF restent` : 'Ce PDF reste'} sur cet appareil. Pour ${alone > 1 ? 'les' : 'le'} retrouver sur ton autre appareil, connecte <b>Cloudflare R2</b> ici (le même espace que pour l'Audiothèque) : ${alone > 1 ? 'ils partiront' : 'il partira'} tout seul${alone > 1 ? 's' : ''}, chiffré${alone > 1 ? 's' : ''}.</span><button type="button" data-pdvs="r2">☁️ Connecter R2</button></div>`;
+}
+setTimeout(() => { try{ pdvCloudPump(); }catch(e){} }, 9000);
+
 /* 📚 dans la bibliothèque : « Mes PDF, tels quels » */
 /* 📁 1.0.46 : les dossiers de « Mes PDF, tels quels » (gardés sur l'appareil, avec la liste des PDF) */
+/* ☁️ 1.0.47 : les dossiers se synchronisent (« pdvDirs », un par un, le plus récent gagne) ; ouvert / fermé reste propre à l'appareil */
+function pdvDirsAll(){ try{ const L = JSON.parse(localStorage.getItem(nsKey(PDV_DIRS_S)) || 'null'); if(Array.isArray(L)) return L.filter(d => d && d.id); }catch(e){} return null; }
+function pdvDirsPut(A){ try{ localStorage.setItem(nsKey(PDV_DIRS_S), JSON.stringify(A)); }catch(e){} }
+function pdvShutKey(){ return 'vocabVision.pdvShut::u:' + getCurrentUserId(); }
+function pdvShut(){ try{ return JSON.parse(localStorage.getItem(pdvShutKey()) || '{}') || {}; }catch(e){ return {}; } }
 function pdvDirs(){
-  const u = nsKey('tbpdfdirs');
-  if(!PDV_DIRS || PDV_DIRS_U !== u){ PDV_DIRS_U = u; let L = []; try{ L = JSON.parse(localStorage.getItem(u) || '[]'); }catch(e){} PDV_DIRS = Array.isArray(L) ? L.filter(d => d && d.id) : [];
-    pdvGet(u).then(v => { if(Array.isArray(v) && PDV_DIRS_U === u && v.length > PDV_DIRS.length){ PDV_DIRS = v; pdvShelfRefresh(); } }).catch(() => {}); }
-  return PDV_DIRS.map(d => Object.assign({}, d));
+  const u = nsKey(PDV_DIRS_S);
+  if(!PDV_DIRS || PDV_DIRS_U !== u){
+    PDV_DIRS_U = u;
+    let A = pdvDirsAll();
+    if(!A){                                                                // 1.0.46 : gardés sur l'appareil seulement → repris
+      let old = []; try{ old = JSON.parse(localStorage.getItem(nsKey('tbpdfdirs')) || '[]'); }catch(e){}
+      A = (Array.isArray(old) ? old : []).filter(d => d && d.id && d.name).map(d => ({ id:d.id, name:d.name, at:d.at || Date.now(), upd:Date.now() }));
+      const sh = pdvShut(); (Array.isArray(old) ? old : []).forEach(d => { if(d && d.id && d.open === false) sh[d.id] = 1; }); try{ localStorage.setItem(pdvShutKey(), JSON.stringify(sh)); }catch(e){}
+      if(A.length) pdvDirsPut(A);
+    }
+    PDV_DIRS = A;
+  }
+  const sh = pdvShut();
+  return PDV_DIRS.filter(d => !d.gone).map(d => Object.assign({}, d, { open:!sh[d.id] }));
 }
 var PDV_DIRS = null, PDV_DIRS_U = '';
-function pdvSaveDirs(L){ PDV_DIRS = (L || []).slice(0, 60); const u = nsKey('tbpdfdirs'); PDV_DIRS_U = u; try{ localStorage.setItem(u, JSON.stringify(PDV_DIRS)); }catch(e){} pdvPut(u, JSON.parse(JSON.stringify(PDV_DIRS))); }
+function pdvSaveDirs(L){
+  const all = pdvDirsAll() || [], now = Date.now(), by = new Map(all.map(d => [d.id, d])), seen = new Set(), sh = pdvShut();
+  (L || []).slice(0, 60).forEach(d => {
+    if(!d || !d.id) return;
+    seen.add(d.id);
+    const o = by.get(d.id);
+    if(!o) by.set(d.id, { id:d.id, name:d.name, at:d.at || now, upd:now });
+    else if(o.gone || o.name !== d.name){ by.set(d.id, { id:d.id, name:d.name, at:o.at || d.at || now, upd:Math.max(now, (o.upd || 0) + 1) }); }
+    if(d.open === false) sh[d.id] = 1; else delete sh[d.id];
+  });
+  by.forEach((o, id) => { if(!seen.has(id) && !o.gone) by.set(id, { id, gone:true, upd:Math.max(now, (o.upd || 0) + 1) }); });
+  pdvDirsPut([...by.values()]);
+  try{ localStorage.setItem(pdvShutKey(), JSON.stringify(sh)); }catch(e){}
+  PDV_DIRS = null;
+}
 function pdvShelfItem(m){
-  const n = (m.pages || []).length || m.n;
-  return `<div class="pdv-sh-it" data-pdv-open="${tbAttr(m.id)}" role="button" tabindex="0" draggable="true" data-pdv-drag="${tbAttr(m.id)}" aria-label="Ouvrir « ${tbAttr(m.title)} »">
-      <span class="pdv-sh-i" aria-hidden="true">${m.kind === 'img' ? '📷' : '📄'}</span><span class="pdv-sh-m"><b>${escapeHtml(m.title)}</b><small>${n} page${n > 1 ? 's' : ''}${(m.scan || []).length || m.kind === 'img' ? ' · 🔎 scanné' : ''}${m.last ? ` · reprendre p. ${m.last}` : ''}</small></span>
+  const n = (m.pages || []).length || m.n, mo = m.size ? ` (${m.size < 1048576 ? Math.max(1, Math.round(m.size / 1024)) + ' Ko' : (m.size / 1048576).toFixed(1).replace('.', ',') + ' Mo'})` : '';
+  const up = PDVUP.cur === m.id, dl = PDVUP.dl.has(m.id);
+  const chip = dl ? `<span class="pdv-sh-cl dl">⇣ ${Math.round((PDVUP.dl.get(m.id) || 0) * 100)} %</span>` : up ? `<span class="pdv-sh-cl">☁️ ${Math.round(PDVUP.frac * 100)} %</span>` : '';
+  const sub = m.remote ? `☁️ sur ton autre appareil · touche pour l'avoir ici${mo}` : `${n} page${n > 1 ? 's' : ''}${(m.scan || []).length || m.kind === 'img' ? ' · 🔎 scanné' : ''}${m.last ? ` · reprendre p. ${m.last}` : ''}${m.cl ? ' · ☁️' : ''}`;
+  return `<div class="pdv-sh-it${m.remote ? ' remote' : ''}" data-pdv-open="${tbAttr(m.id)}" role="button" tabindex="0" draggable="true" data-pdv-drag="${tbAttr(m.id)}" aria-label="${m.remote ? 'Télécharger et ouvrir' : 'Ouvrir'} « ${tbAttr(m.title)} »"${m.cl && !m.remote ? ' title="Aussi sur tes autres appareils (☁️ Cloudflare R2, chiffré)"' : ''}>
+      <span class="pdv-sh-i" aria-hidden="true">${m.kind === 'img' ? '📷' : '📄'}</span><span class="pdv-sh-m"><b>${escapeHtml(m.title)}</b><small>${sub}</small></span>${chip}
       <button type="button" class="pdv-sh-x pdv-sh-mv" data-pdvs="mv" data-id="${tbAttr(m.id)}" aria-label="Ranger « ${tbAttr(m.title)} » dans un dossier" title="Ranger dans un dossier">📁</button>
-      <button type="button" class="pdv-sh-x" data-pdv-del="${tbAttr(m.id)}" aria-label="Retirer « ${tbAttr(m.title)} » de l'appareil">🗑</button></div>`;
+      <button type="button" class="pdv-sh-x" data-pdv-del="${tbAttr(m.id)}" aria-label="${m.cl ? `Supprimer « ${tbAttr(m.title)} » (sur tous tes appareils)` : `Retirer « ${tbAttr(m.title)} » de l'appareil`}" title="${m.cl ? 'Supprimer (sur tous tes appareils)' : "Retirer de l'appareil"}">🗑</button></div>`;
 }
 function pdvShelfHtml(){
-  const L = pdvList(); if(!L.length) return '';
+  const L = pdvShelfAll(); if(!L.length) return '';
   const D = pdvDirs(), ids = new Set(D.map(d => d.id));
   const loose = L.filter(m => !m.dir || !ids.has(m.dir));
-  return `<div class="pdv-shelf" id="pdvShelf"><div class="pdv-sh-h"><span>📖 Mes PDF, tels quels <small>· sur cet appareil · touche un mot de la page pour sa définition</small></span><button type="button" class="pdv-sh-nd" data-pdvs="new-dir">📁＋ Nouveau dossier</button></div>
+  return `<div class="pdv-shelf" id="pdvShelf"><div class="pdv-sh-h"><span>📖 Mes PDF, tels quels <small>· ${L.some(m => m.cl) ? 'sur tes appareils' : 'sur cet appareil'} · touche un mot de la page pour sa définition</small></span><button type="button" class="pdv-sh-nd" data-pdvs="new-dir">📁＋ Nouveau dossier</button></div>
+    ${pdvShelfHint(L)}
     ${D.map(d => { const In = L.filter(m => m.dir === d.id); return `<div class="pdv-dir ${d.open === false ? '' : 'open'}" data-dir="${tbAttr(d.id)}">
       <div class="pdv-dir-h" data-pdvs="dir-tog" data-dir="${tbAttr(d.id)}" role="button" tabindex="0" aria-expanded="${d.open === false ? 'false' : 'true'}"><span class="pdv-dir-c" aria-hidden="true">▸</span><span class="pdv-dir-i" aria-hidden="true">${d.open === false ? '📁' : '📂'}</span><b>${escapeHtml(d.name)}</b><small>${In.length} PDF</small>
         <button type="button" class="pdv-sh-x" data-pdvs="dir-ren" data-dir="${tbAttr(d.id)}" aria-label="Renommer le dossier « ${tbAttr(d.name)} »" title="Renommer">✏️</button><button type="button" class="pdv-sh-x" data-pdvs="dir-del" data-dir="${tbAttr(d.id)}" aria-label="Supprimer le dossier « ${tbAttr(d.name)} » (les PDF restent)" title="Supprimer le dossier (les PDF restent)">🗑</button></div>
@@ -50452,11 +50893,11 @@ async function pdvNewDir(){
   const D = pdvDirs(), d = { id:'d' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), name, open:true, at:Date.now() };
   D.push(d); pdvSaveDirs(D); pdvShelfRefresh(); return d;
 }
-function pdvMoveTo(id, dir){ pdvPatch(id, { dir:dir || '' }); pdvShelfRefresh(); const d = pdvDirs().find(x => x.id === dir); tbToast(d ? `📁 Rangé dans « ${d.name} »` : '📄 Sorti du dossier'); }
+function pdvMoveTo(id, dir){ if(pdvMeta(id)) pdvPatch(id, { dir:dir || '' }); else pdvCloudPatch(id, { dir:dir || '' }); pdvShelfRefresh(); const d = pdvDirs().find(x => x.id === dir); tbToast(d ? `📁 Rangé dans « ${d.name} »` : '📄 Sorti du dossier'); }
 /* 📁 sur un PDF : la liste des dossiers */
 function pdvMoveMenu(btn, id){
   document.querySelectorAll('.pdv-menu').forEach(x => x.remove());
-  const m = pdvMeta(id); if(!m) return;
+  const m = pdvMeta(id) || pdvCloudOf(id); if(!m) return;
   const D = pdvDirs(), r = btn.getBoundingClientRect();
   const el = document.createElement('div'); el.className = 'pdv-menu'; el.setAttribute('role', 'menu');
   el.innerHTML = `<div class="pdv-menu-h">Ranger « ${escapeHtml(m.title)} »</div>
@@ -50490,12 +50931,14 @@ document.addEventListener('click', async (e) => {
     e.preventDefault(); e.stopPropagation();
     const a = act.dataset.pdvs, dir = act.dataset.dir;
     if(a === 'new-dir'){ await pdvNewDir(); return; }
+    if(a === 'r2'){ try{ pdvClose(true); }catch(err){} audioAdmin.showR2 = true; audioAdmin.showGh = false; renderAudioManager(); return; }
+    if(a === 'r2-retry'){ PDVUP.skip.clear(); PDVUP.err = ''; pdvShelfRefresh(); pdvCloudPump(); return; }
     if(a === 'mv'){ pdvMoveMenu(act, act.dataset.id); return; }
     if(a === 'dir-tog'){ const D = pdvDirs(), d = D.find(x => x.id === dir); if(d){ d.open = d.open === false; pdvSaveDirs(D); pdvShelfRefresh(); } return; }
     if(a === 'dir-ren'){ const D = pdvDirs(), d = D.find(x => x.id === dir); if(!d) return; const n = await pdvAskName('✏️ Renommer le dossier', d.name); if(n){ d.name = n; pdvSaveDirs(D); pdvShelfRefresh(); } return; }
     if(a === 'dir-del'){
       if(!act.classList.contains('sure')){ act.classList.add('sure'); act.textContent = 'Sûr ?'; clearTimeout(act.__t); act.__t = setTimeout(() => { act.classList.remove('sure'); act.textContent = '🗑'; }, 3200); return; }
-      pdvSaveDirs(pdvDirs().filter(x => x.id !== dir)); pdvList().filter(m => m.dir === dir).forEach(m => pdvPatch(m.id, { dir:'' })); pdvShelfRefresh(); tbToast('📁 Dossier supprimé : ses PDF sont restés sur l’appareil'); return;
+      pdvSaveDirs(pdvDirs().filter(x => x.id !== dir)); pdvList().filter(m => m.dir === dir).forEach(m => pdvPatch(m.id, { dir:'' })); pdvCloud().filter(e => !e.gone && e.dir === dir).forEach(e => pdvCloudPatch(e.id, { dir:'' })); pdvShelfRefresh(); tbToast('📁 Dossier supprimé : ses PDF sont restés sur l’appareil'); return;
     }
     return;
   }
@@ -50503,7 +50946,7 @@ document.addEventListener('click', async (e) => {
   if(del){
     e.preventDefault(); e.stopPropagation();
     if(!del.classList.contains('sure')){ del.classList.add('sure'); del.textContent = 'Sûr ?'; clearTimeout(del.__t); del.__t = setTimeout(() => { del.classList.remove('sure'); del.textContent = '🗑'; }, 3200); return; }
-    pdvRemove(del.dataset.pdvDel).then(pdvShelfRefresh); return;
+    pdvDelete(del.dataset.pdvDel).then(pdvShelfRefresh); return;
   }
   const it = t.closest('[data-pdv-open]'); if(it){ e.preventDefault(); pdvOpen(it.dataset.pdvOpen); }
 });
@@ -50525,6 +50968,7 @@ function pdvNarrow(){ return window.innerWidth < 720; }
 async function pdvOpen(id, at){
   let m = pdvMeta(id);
   if(!m){ await pdvListLoad(); m = pdvMeta(id); }
+  if(!m){ const e = pdvCloudOf(id); if(e && !e.gone && e.url){ if(!(await pdvCloudGet(e))) return; m = pdvMeta(id); } }      // ☁️ 1.0.47
   if(!m){ setStatus("📖 Ce fichier n'est plus sur cet appareil.", 'err'); pdvShelfRefresh(); return; }
   pdvClose(true);
   try{ wtClose(); }catch(e){}
@@ -52641,6 +53085,7 @@ function tbAfterEditSave(art){
   setTimeout(() => { const r = [...document.querySelectorAll('.tbl-row')].find(x => x.dataset.id === art.id); if(r){ r.classList.add('fresh'); r.scrollIntoView({ block:'center', behavior:'smooth' }); } }, 80);
 }
 function renderTabletteHome(){
+  if(!TBKV.ready && !TBKV.waited){ TBKV.waited = 1; tbKvWait().then(() => renderTabletteHome()); return; }
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
   currentBlock = null;
@@ -53528,6 +53973,7 @@ function tbFromBouquinage(){
 
 /* ---------- 📰 la lecture, en plein écran ---------- */
 function renderTabletteReader(id){
+  if(!TBKV.ready && !TBKV.waited){ TBKV.waited = 1; tbKvWait().then(() => renderTabletteReader(id)); return; }
   let art = tbGet(id);
   if(!art && id === 'sample'){ art = Object.assign({ at:Date.now(), pos:0, pct:0, tags:[] }, TB_SAMPLE); tbPut(art); }
   if(!art && TB.mem && TB.mem.id === id) art = TB.mem;      // (pas pu être gardé sur l'appareil)
@@ -57955,6 +58401,7 @@ async function amR2Save(){
     } finally { r2.cfgTry = null; }
     r2CfgSet(cfg, remember);
     r2.pubBase = cfg.publicUrl;
+    try{ PDVUP.skip.clear(); PDVUP.err = ''; setTimeout(pdvCloudPump, 1500); }catch(e){}     // ☁️ 1.0.47 : les PDF tels quels partent
     audioAdmin.showR2 = false;
     audioAdmin.r2Draft = null;
     amRedest();
