@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- 🏷️ Version de l'appli : augmentée automatiquement par publier-site.cmd à chaque publication -->
-<meta name="app-version" content="1.0.50" data-date="2026-11-12">
+<meta name="app-version" content="1.0.51" data-date="2026-11-12">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <title>VocabVISION — Vocabulaire Français ↔ Arabe</title>
 <script>
@@ -2141,6 +2141,8 @@
   .tb-defs li + li{ margin-top:4px; }
   .tb-src{ font-size:11.5px; color:var(--tb-ink2); margin-top:6px; font-weight:700; }
   .tb-auto{ font-size:11.5px; font-weight:800; color:var(--tb-ink2); margin-top:2px; }
+  .tb-live{ cursor:default; } .tb-live iframe{ display:block; width:100%; height:180px; border:0; border-radius:12px; background:#fff; box-shadow:0 1px 0 rgba(0,0,0,.06); }
+  .tb-live.missing iframe{ display:none; } .tb-live.missing::before{ content:'🎞️ Figure animée pas encore arrivée sur cet appareil'; display:block; padding:16px; border-radius:12px; border:1px dashed var(--tb-line, #ccc); text-align:center; font-weight:800; opacity:.7; }
   .tb-missbar{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:6px 0 14px; padding:9px 12px; border-radius:14px; background:rgba(251,146,60,.12); border:1px solid rgba(251,146,60,.4); font:800 14px/1.35 'Nunito','Inter',sans-serif; }
   .tb-missbar span{ flex:1; min-width:200px; } .tb-missbar small{ font-weight:700; opacity:.8; }
   .tb-lit{ margin-top:8px; padding:8px 10px; border-radius:12px; background:rgba(251,191,36,.12); border:1px solid rgba(251,191,36,.4); font-size:14px; line-height:1.45; }
@@ -23540,6 +23542,7 @@ const COLOR_PRESETS = {
 /* ============ 🆕 NOUVEAUTÉS — pour que tout ce qui a été ajouté reste découvrable ============ */
 const WHATS_NEW_SECTIONS = [
   { icon:'🆕', title:'Nouveautés', items:[
+    { name:'🎞️ Les pages .html et leurs figures animées', desc:"Importe une page .html dans la Tablette (« 📥 Importer », avec ses images à côté, ou en .zip) : son texte arrive mis en page, et ses figures animées restent vivantes — schémas SVG animés, dessins dans un canvas, animations CSS, petites démos en JavaScript. Chacune tourne dans un petit cadre isolé (sans accès à l'appli ni à tes données), avec les couleurs de la page. Les GIF animés aussi, bien sûr." },
     { name:'🎞️ Les images animées restent animées', desc:"Dans la Tablette, une image animée (GIF, PNG ou WebP animé) ou un dessin SVG est gardé tel quel : il bouge comme dans le document d'origine (avant, l'appli le réduisait et seule la première image restait). Sur ton autre appareil aussi : les petites passent par la synchro, les grosses par Cloudflare R2 (chiffrées)." },
     { name:'🖼 Ajouter les images manquantes après coup', desc:"Un texte importé (.md) sans certaines de ses images ? En haut du texte : « 🖼 4 images manquent · 📎 Les choisir ». Choisis-les (plusieurs d'un coup) : elles se mettent toutes seules à leur place, grâce à leur nom." },
     { name:'🫁 PDF : les pauses, la respiration et la mélodie', desc:"Dans un PDF « tel quel », le bouton ‿ (touche L) dessine maintenant, en plus des liaisons : les petites pauses |, les endroits où respirer ‖, et la mélodie de la voix — ↗ en haut quand elle monte (fin d'un groupe, question oui/non), ↘ en bas quand elle descend (fin de phrase). Une petite légende s'affiche quand tu les montres." },
@@ -48170,7 +48173,23 @@ async function tbImgUrl(id){
   if(!blob) return '';
   return (TB.imgUrl[id] = URL.createObjectURL(blob));
 }
+/* 🎞️ 1.0.51 : les figures vivantes : leur page, dans un cadre isolé (sans accès à l'appli) ; il nous dit sa hauteur */
+function tbLoadLive(root){
+  (root || document).querySelectorAll('figure[data-live]').forEach(async (fig) => {
+    const f = fig.querySelector('iframe'); if(!f || f.dataset.on) return;
+    f.dataset.on = '1';
+    const id = fig.dataset.live;
+    let blob = await tbImgGet(id); if(!blob) blob = await tbImgFromSync(id);
+    if(!blob){ fig.classList.add('missing'); f.dataset.on = ''; return; }
+    try{ f.srcdoc = (await blob.text()).split('__VVLIVE__').join(id); fig.classList.remove('missing'); }catch(e){ fig.classList.add('missing'); }
+  });
+}
+window.addEventListener('message', (e) => {
+  const d = e.data; if(!d || typeof d !== 'object' || typeof d.vvLive !== 'string' || typeof d.h !== 'number') return;
+  document.querySelectorAll('figure[data-live] iframe').forEach(f => { if(f.contentWindow === e.source) f.style.height = Math.round(Math.min(2400, Math.max(40, d.h))) + 'px'; });
+});
 function tbLoadImgs(root){
+  try{ tbLoadLive(root); }catch(e){}
   (root || document).querySelectorAll('[data-img], [data-src]').forEach(async (el) => {
     const img = el.tagName === 'IMG' ? el : el.querySelector('img');
     if(!img || img.getAttribute('src')) return;
@@ -48366,6 +48385,7 @@ async function tbImgCleanup(){
 }
 function tbFigHtml(b, bi){
   const w = Math.max(15, Math.min(100, Math.round(b.w || 100))), al = ['l', 'r'].includes(b.al) ? b.al : 'c';
+  if(b.live && b.id) return `<figure class="tb-fig tb-live al-${al}" style="width:${w}%" data-b="${bi}" data-live="${escapeHtml(b.id)}" aria-label="Figure animée${b.cap ? ' : ' + escapeHtml(b.cap) : ''}"><iframe sandbox="allow-scripts" title="${escapeHtml(b.cap || 'Figure animée')}" referrerpolicy="no-referrer" loading="lazy"></iframe>${b.cap ? `<figcaption>${escapeHtml(b.cap)}</figcaption>` : ''}</figure>`;
   return `<figure class="tb-fig al-${al}" style="width:${w}%" data-b="${bi}"${b.id ? ` data-img="${escapeHtml(b.id)}"` : ''}${b.src ? ` data-src="${escapeHtml(b.src)}"` : ''} role="button" tabindex="0" aria-label="Image${b.cap ? ' : ' + escapeHtml(b.cap) : ''}. Toucher pour la régler"><img alt="${escapeHtml(b.cap || '')}" draggable="false">${b.cap ? `<figcaption>${escapeHtml(b.cap)}</figcaption>` : ''}</figure>`;
 }
 /* ---------- ✍️ l'éditeur de la Tablette : ce qu'on colle (page web, Word, mail, image) devient des blocs propres ---------- */
@@ -48379,6 +48399,7 @@ function tbImgBlockFrom(el){
   else if(el.dataset.src) b.src = el.dataset.src;
   else if(/^(https?:|data:image\/)/.test(src)) b.src = src;
   if(el.dataset.cap) b.cap = el.dataset.cap;
+  if(el.dataset.live && b.id) b.live = 1;                                      // 🎞️ 1.0.51 : figure vivante
   return (b.id || b.src) ? b : null;
 }
 function tbDomToBlocks(root, opts){
@@ -48609,7 +48630,7 @@ try{ if(window.speechSynthesis) window.speechSynthesis.addEventListener('voicesc
    comme un mot du texte (sa fiche, Taguer, Ajouter à mes mots…). Toucher l'image hors des mots : ses réglages. */
 var TB_IMG_S0 = 700000;                     // les phrases des images viennent après celles du texte (et du titre)
 function tbImgOcrKey(b){
-  if(!b) return '';
+  if(!b || b.live) return '';
   if(b.id) return 'id:' + b.id;
   if(b.src){ let h = 0; const s = String(b.src); for(let i = 0; i < s.length; i += Math.max(1, Math.floor(s.length / 4000))) h = (h * 31 + s.charCodeAt(i)) | 0; return 'src:' + s.length + ':' + (h >>> 0).toString(36); }
   return '';
@@ -49645,6 +49666,105 @@ function tbMdFindImg(pool, ref, dir){
   const base = norm(r.split('/').pop());
   return pool.find(f => norm(f.relPath || f.name) === full) || pool.find(f => norm(f.relPath || f.name).endsWith('/' + norm(r))) || pool.find(f => norm(f.name) === base) || null;
 }
+/* 🎞️ 1.0.51 : les figures animées d'une page .html → des « figures vivantes ».
+   On repère : les dessins SVG (pas les petites icônes), les canvas, ce que les règles CSS animent (@keyframes),
+   et ce qu'un script pilote (son id est cité dans le script). On garde le plus petit bloc qui les entoure ;
+   une section de texte qui apparaît en fondu reste du texte. Chaque figure est rangée comme une image (text/html). */
+function tbTl(el){ return (el && el.textContent || '').replace(/\s+/g, ' ').trim().length; }
+async function tbDataUrlOf(blob){ return new Promise((res) => { const r = new FileReader(); r.onload = () => res(String(r.result || '')); r.onerror = () => res(''); r.readAsDataURL(blob); }); }
+async function tbLiveExtract(doc, root, raw, pool, dir){
+  const cand = new Set();
+  const styles = [...root.querySelectorAll('style')].map(s => s.textContent || '');
+  const scripts = [...root.querySelectorAll('script')].filter(s => !s.type || /javascript|module/i.test(s.type));
+  // 1) ce que le CSS anime
+  try{
+    const sh = new CSSStyleSheet(); sh.replaceSync(styles.join('\n').replace(/@import[^;]*;/g, ''));
+    const sels = [];
+    const walkR = (rules) => { for(const r of rules){ if(r.selectorText && r.style){ const an = r.style.animationName || ''; if(an && an !== 'none') sels.push([r.selectorText, /infinite/.test(r.style.animationIterationCount || '') || /infinite/.test(r.style.cssText)]); } if(r.cssRules && r.cssRules.length) walkR(r.cssRules); } };
+    walkR(sh.cssRules);
+    // une animation qui tourne en boucle = une figure ; une apparition (fondu, glissé) sur du texte = juste un effet : le texte reste du texte
+    sels.forEach(([s, inf]) => { const s2 = s.replace(/::?(hover|focus|focus-within|focus-visible|active|visited|before|after|first-letter|first-line|marker|placeholder)\b(\([^)]*\))?/g, ''); if(!s2.trim()) return; try{ root.querySelectorAll(s2).forEach(el => { if(inf || tbTl(el) < 60) cand.add(el); }); }catch(e){} });
+  }catch(e){}
+  root.querySelectorAll('[style*="animation"]').forEach(el => { if(/infinite/.test(el.getAttribute('style') || '') || tbTl(el) < 60) cand.add(el); });
+  // 2) les dessins
+  root.querySelectorAll('svg').forEach(el => {
+    if(el.parentElement && el.parentElement.closest('svg')) return;
+    const w = parseFloat(el.getAttribute('width') || '0'), h = parseFloat(el.getAttribute('height') || '0'), vb = String(el.getAttribute('viewBox') || '').split(/[\s,]+/).map(Number);
+    if(Math.max(w, h, vb[2] || 0, vb[3] || 0) > 64 || el.querySelector('animate, animateTransform, animateMotion, set')) cand.add(el);
+  });
+  root.querySelectorAll('canvas, video[src^="http"], video[src^="data:"]').forEach(el => cand.add(el));
+  // 3) une petite démo pilotée par un script (le script cite son id)
+  const js = scripts.map(s => s.textContent || '').join('\n'), cited = new Set();
+  if(js.trim()) root.querySelectorAll('[id]').forEach(el => {
+    const id = el.id; if(!id || id.length < 2 || /^(tbMdRoot)$/.test(id)) return;
+    const q = id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    if(new RegExp(`(['"\`]${q}['"\`]|#${q}\\b)`).test(js)){ cand.add(el); cited.add(id); }
+  });
+  const isTop = (el) => !el || el === root || /^(body|html|main|article)$/i.test(el.localName);
+  const cons = [];
+  cand.forEach(el => {
+    if(!root.contains(el) || isTop(el) || /^(style|script|link|meta|head|title)$/i.test(el.localName)) return;
+    if(el.closest('svg') && el.localName !== 'svg') el = el.closest('svg');
+    if(el.localName !== 'svg' && el.localName !== 'canvas' && tbTl(el) > 400) return;         // du texte qui apparaît en fondu : il reste du texte
+    let c = el;
+    while(c.parentElement && !isTop(c.parentElement)){
+      const p = c.parentElement;
+      if(tbTl(p) - tbTl(c) > 140 || p.children.length > 8 || /^h[1-6]$/i.test(p.localName)) break;
+      if(p.querySelector('h1, h2, h3') && !c.querySelector('h1, h2, h3')) break;           // pas le titre de la section
+      c = p;
+    }
+    if(tbTl(c) > 1500) return;
+    cons.push(c);
+  });
+  const keep = [...new Set(cons)].filter(c => !cons.some(d => d !== c && d.contains(c)));
+  if(!keep.length) return 0;
+  // le décor de la page : ses styles, ses scripts, les attributs de <html> et <body>
+  let htmlA = '', bodyA = '';
+  try{ const fd = new DOMParser().parseFromString(raw, 'text/html'); const at = (e) => e ? [...e.attributes].map(a => ` ${a.name}="${escapeHtml(a.value)}"`).join('') : ''; htmlA = at(fd.documentElement); bodyA = at(fd.body); }catch(e){}
+  let head = '<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>html{background:#fff;}body{margin:0;padding:10px;}</style>';
+  for(const l of root.querySelectorAll('link[rel~="stylesheet"][href]')){
+    const h = l.getAttribute('href');
+    if(/^https:\/\//i.test(h)) head += `<link rel="stylesheet" href="${escapeHtml(h)}">`;
+    else { const f = tbMdFindImg(pool, h, dir); if(f){ try{ head += '<style>' + (await f.text()) + '</style>'; }catch(e){} } }
+  }
+  styles.forEach(t => { head += '<style>' + t + '</style>'; });
+  const SC = 'scr' + 'ipt';
+  let tail = `<${SC}>window.onerror=function(){return true;};</${SC}>`;               // (un script écrit pour toute la page : ses erreurs restent muettes)
+  for(const s of scripts){
+    const src = s.getAttribute('src');
+    if(src){ if(/^https:\/\//i.test(src)) tail += `<${SC} src="${escapeHtml(src)}"${s.type ? ` type="${escapeHtml(s.type)}"` : ''}></${SC}>`; else { const f = tbMdFindImg(pool, src, dir); if(f){ try{ tail += `<${SC}>` + (await f.text()) + `</${SC}>`; }catch(e){} } } }
+    else tail += `<${SC}${s.type ? ` type="${escapeHtml(s.type)}"` : ''}>` + (s.textContent || '') + `</${SC}>`;
+  }
+  // la hauteur du contenu (pas celle du cadre) : un repère à la fin, ou toute la page si elle déborde
+  const rep = `<${SC}>(function(){var id='__VVLIVE__';function s(){try{var d=document.documentElement,e=document.getElementById('__vvend'),h=e?e.getBoundingClientRect().bottom+(window.scrollY||0)+10:0;if(d.scrollHeight>window.innerHeight+2)h=Math.max(h,d.scrollHeight);parent.postMessage({vvLive:id,h:Math.ceil(h)},'*');}catch(x){}}addEventListener('load',s);try{new ResizeObserver(s).observe(document.body);}catch(x){}var n=0,t=setInterval(function(){s();if(++n>12)clearInterval(t);},400);s();})();</${SC}>`;
+  const END = '<div id="__vvend" style="clear:both;height:0;overflow:hidden"></div>';
+  let n = 0;
+  for(const c of keep){
+    // le contexte : ses parents (sans leurs autres enfants), pour que les règles « .cours .schema … » s'appliquent encore
+    let node = c.cloneNode(true);
+    for(let p = c.parentElement; p && p !== root && !/^(body|html)$/i.test(p.localName); p = p.parentElement){ const s = p.cloneNode(false); s.appendChild(node); node = s; }
+    for(const im of node.querySelectorAll('img[src], image')){
+      const at = im.hasAttribute('src') ? 'src' : 'href', s = im.getAttribute(at) || im.getAttribute('xlink:href') || '';
+      if(!s || /^(data:|https?:|blob:)/i.test(s)) continue;
+      const f = tbMdFindImg(pool, s, dir); if(f){ try{ im.setAttribute(at, await tbDataUrlOf(f)); }catch(e){} }
+    }
+    const capEl = c.querySelector('figcaption');
+    if(capEl && capEl.textContent.trim()) node.querySelectorAll('figcaption').forEach(x => x.remove());      // (la légende va sous le cadre, pas deux fois)
+    const needJs = !!(c.querySelector('canvas') || (c.id && cited.has(c.id)) || [...c.querySelectorAll('[id]')].some(e => cited.has(e.id)) || c.localName === 'canvas');
+    const html = `<!doctype html><html${htmlA}><head>${head}</head><body${bodyA}>${node.outerHTML}${END}${needJs ? tail : ''}${rep}</body></html>`;
+    const id = 'i' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+    if(!(await tbImgPut(id, new Blob([html], { type:'text/html' })))) continue;
+    const ph = doc.createElement('img');
+    ph.setAttribute('data-img', id); ph.setAttribute('data-live', '1');
+    const cap = c.querySelector('figcaption') || (c.localName === 'figure' ? null : null);
+    const lab = cap ? cap.textContent : (c.getAttribute('aria-label') || c.getAttribute('title') || '');
+    if(lab && lab.trim()) ph.setAttribute('data-cap', lab.replace(/\s+/g, ' ').trim().slice(0, 300));
+    c.replaceWith(ph);
+    n++;
+  }
+  return n;
+}
+
 /* un fichier → un texte de la Tablette (sans encore le ranger) */
 async function tbMdParseFile(f, pool){
   const kind = tbMdKind(f), raw = await tbMdText(f);
@@ -49662,12 +49782,14 @@ async function tbMdParseFile(f, pool){
   if(!title && h1 && h1 === root.querySelector('h1, h2, h3, h4, h5, h6, p, li, img')){ title = h1.textContent.replace(/\s+/g, ' ').trim(); h1.remove(); }
   if(!title) title = fname.replace(/[_]+/g, ' ').replace(/\s+/g, ' ').trim();
   // les images : intégrées (data:), sur internet (gardées en lien), ou à côté du .md (sélectionnées avec, ou dans le .zip)
-  const rep = { imgs:0, web:0, missing:[] };
+  const rep = { imgs:0, web:0, missing:[], live:0 };
+  try{ rep.live = await tbLiveExtract(doc, root, kind === 'html' ? raw : '', pool, dir); }catch(e){ console.warn('🎞️ figures', e); }
   const fitW = async (im, blob) => {   // une petite image (icône, schéma) n'est pas agrandie à toute la largeur
     if(im.getAttribute('data-w')) return;
     try{ const bm = await createImageBitmap(blob); const w = bm.width; if(bm.close) bm.close(); if(w && w < 680) im.setAttribute('data-w', String(Math.max(20, Math.round(w / 6.8)))); }catch(e){}
   };
   for(const im of [...root.querySelectorAll('img')]){
+    if(im.getAttribute('data-live')) continue;                                     // 🎞️ une figure vivante (déjà rangée)
     const srcA = (im.getAttribute('src') || '').trim(), alt = (im.getAttribute('alt') || im.getAttribute('title') || '').trim();
     im.setAttribute('data-nm', (() => { try{ return decodeURIComponent(srcA.split(/[?#]/)[0].split('/').pop()); }catch(e){ return srcA; } })().slice(0, 200));
     if(alt && !/^(image|img|photo|capture|screenshot|pasted image)[\s\d_.-]*$/i.test(alt) && !/\.(png|jpe?g|gif|webp|svg|bmp)$/i.test(alt)) im.setAttribute('data-cap', alt.slice(0, 300));
@@ -53359,7 +53481,7 @@ async function tbMdImport(fileList, cat){
   if(!docs.length){
     const ims = pool.filter(f => tbMdKind(f) === 'img');
     if(ims.length) return tbImgsOcrImport(ims, cat);                // 📷 1.0.38 : des photos de pages → leur texte (OCR)
-    setStatus("📥 Choisis un PDF (même scanné), des photos de pages, un document Word (.docx), un fichier .md (Markdown), un .zip, un livre .epub ou un .txt.", 'err'); return [];
+    setStatus("📥 Choisis un PDF (même scanné), des photos de pages, un document Word (.docx), un fichier .md (Markdown), une page .html, un .zip, un livre .epub ou un .txt.", 'err'); return [];
   }
   setStatus(`📥 Je prépare ${docs.length > 1 ? docs.length + ' fichiers' : '« ' + docs[0].name + ' »'}…`, 'ok');
   const imgs = pool.filter(f => tbMdKind(f) === 'img'), parsed = [];
@@ -53400,7 +53522,7 @@ function tbMdDialog(list, cat){
       <div class="am-dlg-t">📥 Importer ${list.length > 1 ? list.length + ' textes' : 'un texte'}</div>
       <div class="tbl-imp-list">${list.map((x, k) => `<label class="tbl-imp-it"><input type="checkbox" data-k="${k}" checked>
         <span class="tbl-imp-b"><b>${escapeHtml(x.title)}</b><small>${escapeHtml(x.file)}</small>
-        <span class="tbl-imp-m"><span>${x.words} mots</span>${x.rep.imgs ? `<span>🖼 ${x.rep.imgs} image${x.rep.imgs > 1 ? 's' : ''}</span>` : ''}${x.rep.web ? `<span>🌐 ${x.rep.web} en ligne</span>` : ''}${x.rep.missing.length ? `<span class="warn" title="${tbAttr(x.rep.missing.join(', '))}">⚠️ ${x.rep.missing.length} manquante${x.rep.missing.length > 1 ? 's' : ''}</span>` : ''}${x.rep.cut ? '<span class="warn">✂️ raccourci</span>' : ''}</span></span></label>`).join('')}</div>
+        <span class="tbl-imp-m"><span>${x.words} mots</span>${x.rep.imgs ? `<span>🖼 ${x.rep.imgs} image${x.rep.imgs > 1 ? 's' : ''}</span>` : ''}${x.rep.web ? `<span>🌐 ${x.rep.web} en ligne</span>` : ''}${x.rep.live ? `<span>🎞️ ${x.rep.live} figure${x.rep.live > 1 ? 's' : ''} animée${x.rep.live > 1 ? 's' : ''}</span>` : ''}${x.rep.missing.length ? `<span class="warn" title="${tbAttr(x.rep.missing.join(', '))}">⚠️ ${x.rep.missing.length} manquante${x.rep.missing.length > 1 ? 's' : ''}</span>` : ''}${x.rep.cut ? '<span class="warn">✂️ raccourci</span>' : ''}</span></span></label>`).join('')}</div>
       ${list.some(x => x.rep.missing.length) ? `<div class="tbl-imp-hint">⚠️ Des images sont à côté du .md sur ton appareil : choisis-les en même temps que le .md (ou importe le .zip complet). Tu pourras aussi les ajouter après, en haut du texte (« 📎 Les choisir »).</div>` : ''}
       <label class="tbl-dlg-l" for="tblImpCat">📂 Ranger dans</label>
       <select class="am-in" id="tblImpCat">${C.map(c => `<option value="${tbAttr(c.id)}" ${c.id === cs ? 'selected' : ''}>${c.icon} ${escapeHtml(c.name)}</option>`).join('')}</select>
