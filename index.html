@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- 🏷️ Version de l'appli : augmentée automatiquement par publier-site.cmd à chaque publication -->
-<meta name="app-version" content="1.0.48" data-date="2026-11-07">
+<meta name="app-version" content="1.0.50" data-date="2026-11-12">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <title>VocabVISION — Vocabulaire Français ↔ Arabe</title>
 <script>
@@ -1971,6 +1971,13 @@
   .tbw{ border-radius:.22em; cursor:pointer; transition:background-color .15s, color .2s; }
   @media (hover:hover){ .tb.hov-off .tbw:hover{ background-color:var(--tb-band); } }
   .tbw.hov{ background-color:var(--tb-hov, rgba(96,165,250,.32)); box-shadow:0 0 0 .12em var(--tb-hov, rgba(96,165,250,.32)); transition:background-color .08s, box-shadow .08s; }
+  /* 🖍 1.0.49 : la traînée — les 3 mots d'avant, chacun sa couleur, de plus en plus pâle */
+  .tbw.hov1, .pdv-tl span.hov1, #pdkFlow .tbw.hov1{ background-color:rgba(251,191,36,.34); box-shadow:0 0 0 .1em rgba(251,191,36,.34); border-radius:3px; }
+  .tbw.hov2, .pdv-tl span.hov2, #pdkFlow .tbw.hov2{ background-color:rgba(244,114,182,.24); box-shadow:0 0 0 .08em rgba(244,114,182,.24); border-radius:3px; }
+  .tbw.hov3, .pdv-tl span.hov3, #pdkFlow .tbw.hov3{ background-color:rgba(167,139,250,.16); border-radius:3px; }
+  .pdv-tl span.hov, #pdkFlow .tbw.hov{ background-color:var(--pdv-hov, rgba(96,165,250,.36)); box-shadow:0 0 0 .1em var(--pdv-hov, rgba(96,165,250,.36)); border-radius:3px; }
+  .tb.hov-off .tbw.hov1, .tb.hov-off .tbw.hov2, .tb.hov-off .tbw.hov3{ background-color:transparent; box-shadow:none; }
+  .tb-trail-demo i{ font-style:normal; border-radius:3px; padding:0 2px; }
   .tb.kn-on .tbw.kn{ text-decoration:underline dotted var(--tb-kn); text-decoration-thickness:.1em; text-underline-offset:.26em; text-decoration-skip-ink:none; }
   .tbw.tipsel{ background-color:var(--tb-hit); box-shadow:0 0 0 .12em var(--tb-hit); }
   .tbw.just{ animation:tbJust 2.2s ease-out 1; }
@@ -2134,6 +2141,12 @@
   .tb-defs li + li{ margin-top:4px; }
   .tb-src{ font-size:11.5px; color:var(--tb-ink2); margin-top:6px; font-weight:700; }
   .tb-auto{ font-size:11.5px; font-weight:800; color:var(--tb-ink2); margin-top:2px; }
+  .tb-missbar{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:6px 0 14px; padding:9px 12px; border-radius:14px; background:rgba(251,146,60,.12); border:1px solid rgba(251,146,60,.4); font:800 14px/1.35 'Nunito','Inter',sans-serif; }
+  .tb-missbar span{ flex:1; min-width:200px; } .tb-missbar small{ font-weight:700; opacity:.8; }
+  .tb-lit{ margin-top:8px; padding:8px 10px; border-radius:12px; background:rgba(251,191,36,.12); border:1px solid rgba(251,191,36,.4); font-size:14px; line-height:1.45; }
+  .tb-lit-h{ font-weight:800; font-size:13px; margin-bottom:4px; }
+  .tb-lit ul{ margin:0; padding-left:1.1em; } .tb-lit li{ margin:2px 0; } .tb-lit li span[lang="ar"]{ font-size:16px; }
+  .tb-lit-ar{ margin-top:5px; font-weight:700; } .tb-lit-ar span{ font-size:17px; }
   .tb-tr-bar{ display:flex; flex-wrap:wrap; gap:6px; margin:-4px 0 8px; }
   .tb-tr{ padding:10px 12px; border-radius:14px; background:var(--tb-paper); border:1px dashed var(--tb-rule); margin:0 0 10px; }
   .tb-tr[hidden]{ display:none; }
@@ -2652,6 +2665,12 @@
   .wcp-def{ font-size:15px; line-height:1.5; margin:0 0 10px; }
   .wcp-ex{ background:var(--surface-sunken); border:1px solid var(--border); border-radius:14px; padding:10px 12px; font-size:15.5px; line-height:1.55; font-style:italic; }
   .wcp-ex mark{ background:rgba(250,204,21,.45); color:inherit; border-radius:4px; padding:0 2px; font-style:normal; font-weight:800; }
+  .wcp-more{ margin-top:8px; display:flex; flex-direction:column; gap:6px; }
+  .wcp-more-h{ font-size:12px; font-weight:800; color:var(--text-dim); }
+  .wcp-ex2{ display:flex; gap:6px; align-items:flex-start; background:var(--surface-sunken); border:1px dashed var(--border); border-radius:12px; padding:8px 10px; font-size:15px; line-height:1.5; font-style:italic; }
+  .wcp-ex2 span{ flex:1; } .wcp-ex2 mark{ font-style:normal; }
+  .wcp-ex2 button{ flex:none; border:0; background:transparent; cursor:pointer; font-size:14px; padding:2px 4px; border-radius:8px; font-style:normal; }
+  .tb-tip-exadd{ margin-top:6px; }
   .wcp-exar{ margin-top:6px; font-family:'Amiri','Noto Naskh Arabic',serif; font-size:19px; line-height:1.6; color:var(--text); text-align:right; font-style:normal; }
   .wcp-exar.busy{ color:var(--text-dim); font-size:14px; font-family:inherit; text-align:left; }
   .wcp-exar:empty{ display:none; }
@@ -3212,6 +3231,19 @@
   .pdv-lz i.k-en{ border-color:var(--dx-en, #94A3B8); }
   .pdv-lz i b{ position:absolute; left:50%; top:.5em; transform:translateX(-50%); font:900 .5em/1 'Nunito','Inter',sans-serif; color:var(--dx-ob, #EA580C); }
   .pdv-lz-off .pdv-lz{ display:none; }
+  /* 🫁 1.0.49 : pauses, respiration et mélodie sur la page du PDF */
+  .pdv-lz u{ position:absolute; height:1em; width:.22em; text-decoration:none; box-sizing:border-box; border-left:max(1.5px, .07em) solid var(--dx-p1, #3B82F6); }
+  .pdv-lz u.p0{ border-left-color:var(--dx-p0, #7C3AED); border-left-style:dashed; opacity:.85; }
+  .pdv-lz u.p2, .pdv-lz u.p3{ border-left:max(1.5px, .07em) solid var(--dx-p3, #1D4ED8); border-right:max(1.5px, .07em) solid var(--dx-p3, #1D4ED8); width:.2em; }
+  .pdv-lz u b{ position:absolute; left:50%; transform:translateX(-50%); font:900 .74em/1 'Nunito','Inter',sans-serif; white-space:nowrap; }
+  .pdv-lz u b.up{ top:-.86em; color:#16A34A; }
+  .pdv-lz u b.dn{ bottom:-.88em; color:#C2410C; }
+  .pdv-lz u b.fl{ top:-.86em; color:#64748B; }
+  .pdv-night .pdv-lz u{ border-left-color:#93C5FD; } .pdv-night .pdv-lz u.p0{ border-left-color:#C4B5FD; } .pdv-night .pdv-lz u.p2, .pdv-night .pdv-lz u.p3{ border-color:#93C5FD; }
+  .pdv-night .pdv-lz u b.up{ color:#4ADE80; } .pdv-night .pdv-lz u b.dn{ color:#FDBA74; }
+  .pdv-lzk{ position:absolute; left:50%; bottom:58px; transform:translateX(-50%); z-index:6; display:flex; flex-wrap:wrap; justify-content:center; gap:4px 12px; max-width:min(94vw, 640px); padding:6px 12px; border-radius:12px; background:rgba(15,23,42,.88); color:#F8FAFC; font:800 12px/1.3 'Nunito','Inter',sans-serif; pointer-events:none; opacity:0; transition:opacity .25s; }
+  .pdv-lzk.show{ opacity:1; }
+  .pdv-lzk b{ font-weight:900; font-size:14px; margin-right:3px; }
   .pdv-ib.pdv-lzb{ font-weight:900; font-size:20px; }
   /* 🌙 1.0.46 : le mode nuit du PDF */
   .pdv-ov.pdv-night{ background:#1c1d20; }
@@ -3857,7 +3889,14 @@
   .am-name{ flex:1; min-width:0; display:flex; flex-direction:column; font-weight:800; font-size:14.5px; color:var(--text); word-break:break-word; }
   .am-name small{ font-weight:700; font-size:12px; color:var(--text-dim); }
   .am-more{ width:38px; height:38px; flex:none; border:none; border-radius:50%; background:var(--surface); color:var(--text); font-size:18px; font-weight:900; cursor:pointer; }
+  .audio-rep{ display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin-top:8px; padding:8px 10px; border-radius:12px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.16); color:inherit; font-size:13px; font-weight:800; }
+  .audio-rep[hidden]{ display:none; }
+  .audio-rep > span{ margin-right:2px; opacity:.85; }
+  .audio-rep-n{ display:inline-flex; align-items:center; gap:4px; font-weight:800; color:inherit; } .audio-rep-n input{ width:64px; padding:5px 8px; border-radius:10px; border:1px solid rgba(255,255,255,.3); background:rgba(255,255,255,.1); color:inherit; font:inherit; }
+  .audio-rep-n input::placeholder{ color:inherit; opacity:.6; }
   .am-quota{ margin-top:14px; font-size:12.5px; font-weight:700; color:var(--text-dim); text-align:left; }
+  .am-qbar{ position:relative; } .am-qmark{ position:absolute; top:0; bottom:0; width:2px; background:#DC2626; border-radius:2px; }
+  .am-quota.full .am-qbar span{ background:#DC2626 !important; } .am-qmsg{ margin-top:4px; font-weight:800; font-size:12.5px; color:#B91C1C; } [data-theme="dark"] .am-qmsg{ color:#FCA5A5; }
   .am-qbar{ height:6px; border-radius:999px; background:var(--surface-sunken); margin-top:6px; overflow:hidden; }
   .am-qbar span{ display:block; height:100%; border-radius:999px; background:linear-gradient(90deg,#22C55E,#16A34A); }
   .am-quota.hot .am-qbar span{ background:linear-gradient(90deg,#F59E0B,#EF4444); }
@@ -11222,6 +11261,7 @@ function renderAddWordsScreen(){
     if(ex && !ex.includes('~')){ const x = lexExFrom(ex, [exEl0.dataset.form || '', fr]); if(x){ exOut = x.ex; if(x.form && lexKey(x.form) !== lexKey(fr)) exForm = x.form; } }
     else if(ex && exEl0.dataset.auto === ex && exEl0.dataset.form && lexKey(exEl0.dataset.form) !== lexKey(fr)) exForm = exEl0.dataset.form;
     const nw = { fr, ar, def, ex:exOut, cat }; if(exForm) nw.exForm = exForm;
+    const sentFull = exOut && exOut !== '~' ? exOut.replace('~', exForm || fr) : '';
     const added = commitImport([nw], true);
     ['awFr','awAr','awDef','awEx','awCat'].forEach(id => { const el = document.getElementById(id); el.value = ''; el.classList.remove('aw-auto'); delete el.dataset.user; delete el.dataset.auto; delete el.dataset.form; });
     ['awLook', 'awSug', 'awExs'].forEach(id => { const el = document.getElementById(id); if(el){ el.innerHTML = ''; if(el._arp){ const c = el.cloneNode(false); el.replaceWith(c); } } });
@@ -11230,9 +11270,11 @@ function renderAddWordsScreen(){
       statusEl.className = 'csv-status ok';
     } else {
       const ew = findLexWord(fr);
-      statusEl.innerHTML = `⚠️ « ${escapeHtml(fr)} » existe déjà dans le lexique, non ajouté.` + (ew ? ` Tu veux le voir ?<button type="button" class="wcp-see" id="awSeeBtn">👁 Voir sa fiche</button>` : '');
+      const canAdd = ew && sentFull && !lexHasSentence(ew, sentFull);
+      statusEl.innerHTML = `⚠️ « ${escapeHtml(fr)} » existe déjà dans le lexique, non ajouté.` + (canAdd ? ` Garder ta phrase à la suite de la sienne ?<button type="button" class="wcp-see" id="awExAddBtn">➕ Ajouter la phrase à sa fiche</button>` : '') + (ew ? `<button type="button" class="wcp-see" id="awSeeBtn">👁 Voir sa fiche</button>` : '');
       statusEl.className = 'csv-status err';
       if(ew) document.getElementById('awSeeBtn').addEventListener('click', () => wordCardPopup(ew, { note:'📇 Ce mot est déjà dans ton lexique' }));
+      if(canAdd) document.getElementById('awExAddBtn').addEventListener('click', () => { const r = lexAddSentence(ew, sentFull); statusEl.innerHTML = r === 'ok' ? `✓ Phrase ajoutée à la fiche de « ${escapeHtml(ew.fr)} ».` : 'Cette phrase est déjà dans sa fiche.'; statusEl.className = 'csv-status ok'; });
     }
     document.getElementById('awFr').focus();
   });
@@ -11313,6 +11355,7 @@ async function awLookup(force){
   try{ const vb = (getAllVerbs() || []).find(v => String(v.inf || '').replace(/^s'|^se /, '') === fr.replace(/^(se |s')/i, '')); if(vb && vb.ar) add(vb.ar, 'Conjugaison'); }catch(e){}
   (r.ar || []).forEach(a => add(a, r.arAuto ? 'Traduction auto' : 'Dictionnaire'));
   (mt || []).forEach(a => add(a, 'Traduction auto'));
+  if(r.litAr) add(r.litAr, 'Mot à mot');
   // les exemples : la phrase avec ~ à la place du mot
   const exs = [];
   (r.exs || []).forEach(x => { const e = lexExFrom(x.t, [x.f, fr, r.lemma]); if(e && !exs.some(y => y.ex === e.ex)) exs.push({ ex:e.ex, form:e.form || '' }); });
@@ -11584,6 +11627,7 @@ const REVIEW_BLOCK_SIZE = 30;
 const TRAINING_TYPES = {
   classic: { emoji:'🎯', label:'Classique',    mode:'classic', pool:'all' },
   speak:   { emoji:'🎤', label:'Prononciation', mode:'speak',  pool:'all' },
+  speakBlocks: { emoji:'🎤', label:'Prononciation · blocs au choix', mode:'speak', pool:'blocks' },
   errors:  { emoji:'⚠️', label:'Erreurs',       mode:'speak',  pool:'errors' },
   pairs:   { emoji:'🧩', label:'Paires chrono', mode:'pairs',  pool:'all' },
   repeat:  { emoji:'🎧', label:'Répétition',    mode:'repeat', pool:'all' },
@@ -11591,6 +11635,7 @@ const TRAINING_TYPES = {
 };
 function getTrainingWords(poolType){
   if(poolType === 'srs'){ return getSRSDueWords(); }
+  if(poolType === 'blocks'){ return WORDS.slice(); }                          // 🎤 1.0.49 : tous tes mots, par blocs choisis
   const fresh = unstartedBlockWords();
   const words = WORDS.filter(w => {
     const s = wordStats[w.fr.toLowerCase()];
@@ -16600,6 +16645,109 @@ function addVerbsBulk(raw){
   }
 }
 
+/* 🎤 1.0.49 : la Prononciation sur les blocs de ton choix */
+var speakBlocksSel = new Set();
+var speakBlocksOpt = { mix:true, n:0 };
+try{ const o = JSON.parse(localStorage.getItem('vocabVision.speakBlocks') || 'null'); if(o){ (o.sel || []).forEach(k => speakBlocksSel.add(k)); if(o.mix === false) speakBlocksOpt.mix = false; if(+o.n) speakBlocksOpt.n = +o.n; } }catch(e){}
+function speakBlocksSave(){ try{ localStorage.setItem('vocabVision.speakBlocks', JSON.stringify({ sel:[...speakBlocksSel], mix:speakBlocksOpt.mix, n:speakBlocksOpt.n })); }catch(e){} }
+function speakBlocksWords(){
+  const words = [], seen = new Set();
+  const keys = [...speakBlocksSel].sort((a, b) => { const na = a.startsWith('n:'), nb = b.startsWith('n:'); if(na !== nb) return na ? -1 : 1; return na ? (+a.slice(2) - +b.slice(2)) : a.localeCompare(b); });
+  keys.forEach(key => {
+    let list = [];
+    if(key.startsWith('n:')) list = BLOCKS[parseInt(key.slice(2), 10)] || [];
+    else { const cb = getCustomBlock(key.slice(2)); if(cb) list = cb.words; }
+    list.forEach(w => { const k = String(w.fr).toLowerCase(); if(!seen.has(k)){ seen.add(k); words.push(w); } });
+  });
+  return words;
+}
+function renderSpeakBlocksSetup(){
+  clearQuestionTimer();
+  document.body.classList.remove('quiz-active');
+  currentBlock = null;
+  isHomeScreen = false;
+  window.__reviewSession = false;
+  document.getElementById('scoreboard').innerHTML = `<button class="chip total" id="backFromSBBtn" style="cursor:pointer;">← Centre d'entraînement</button>`;
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('footerNote').textContent = '';
+  try{ ensureAllCategoriesContext(); }catch(e){}
+  // les blocs qui n'existent plus (mots retirés…) ne restent pas cochés
+  [...speakBlocksSel].forEach(k => { if(k.startsWith('n:') ? !BLOCKS[+k.slice(2)] : !getCustomBlock(k.slice(2))) speakBlocksSel.delete(k); });
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `
+    <div class="cat-tag">🎤 Prononciation · blocs au choix</div>
+    <div class="word-fr" style="font-size:clamp(24px,4.5vw,32px);">Choisis les blocs à dire au micro</div>
+    <div class="question-line">Un bloc, plusieurs, ou tes blocs perso 🧩 : leurs mots arrivent un par un, tu les dis, le micro t'écoute.</div>
+    <div class="mode-row" style="margin-top:14px;">
+      <button class="mode-chip" id="sbAllBtn">✓ Tout sélectionner</button>
+      <button class="mode-chip" id="sbNoneBtn">✕ Tout désélectionner</button>
+    </div>
+    <div class="options" id="sbGrid" style="grid-template-columns:repeat(auto-fill,minmax(140px,1fr));margin-top:10px;max-height:360px;overflow-y:auto;padding-right:4px;"></div>
+    <div class="mode-row" style="margin-top:14px;align-items:center;">
+      <button class="mode-chip ${speakBlocksOpt.mix ? 'active' : ''}" id="sbMixBtn" aria-pressed="${speakBlocksOpt.mix}">🔀 Mélanger les mots</button>
+      <span style="font-weight:800;font-size:13px;color:var(--text-dim);margin-left:6px;">Combien :</span>
+      ${[[0, 'Tous'], [10, '10'], [20, '20'], [30, '30'], [50, '50']].map(([v, l]) => `<button class="mode-chip ${speakBlocksOpt.n === v ? 'active' : ''}" data-sb-n="${v}">${l}</button>`).join('')}
+    </div>
+    <button class="restart-btn" id="sbStartBtn" style="margin-top:18px;display:flex;align-items:center;gap:8px;">🎤 Commencer</button>
+    <div class="csv-status" id="sbStatus"></div>`;
+  document.getElementById('backFromSBBtn').addEventListener('click', renderTrainingCenter);
+  const grid = document.getElementById('sbGrid');
+  const stat = (list) => { let m = 0; list.forEach(w => { const s = wordStats[String(w.fr).toLowerCase()]; if(s && (s.streak || 0) >= MASTERY_STREAK) m++; }); return m; };
+  let html = '';
+  BLOCKS.forEach((b, i) => {
+    const key = 'n:' + i, on = speakBlocksSel.has(key), m = stat(b);
+    html += `<button class="opt ${on ? 'radio-block-selected' : ''}" data-sb-key="${key}" aria-pressed="${on}" style="text-align:center;">
+      <div style="font-family:'Nunito','Inter',sans-serif;font-weight:700;font-size:15px;">${on ? '✅ ' : ''}${escapeHtml(getBlockTitle(i))}</div>
+      <div style="font-size:11px;color:var(--text-dim);margin-top:4px;">${b.length} mots${m ? ` · ${m} maîtrisé${m > 1 ? 's' : ''}` : ''}</div></button>`;
+  });
+  (customBlocks || []).forEach(cb => {
+    const key = 'c:' + cb.id, on = speakBlocksSel.has(key);
+    html += `<button class="opt ${on ? 'radio-block-selected' : ''}" data-sb-key="${key}" aria-pressed="${on}" style="text-align:center;">
+      <div style="font-family:'Nunito','Inter',sans-serif;font-weight:700;font-size:15px;">${on ? '✅ ' : ''}🧩 ${escapeHtml(cb.title)}</div>
+      <div style="font-size:11px;color:var(--text-dim);margin-top:4px;">${cb.words.length} mots</div></button>`;
+  });
+  grid.innerHTML = html;
+  const startBtn = document.getElementById('sbStartBtn');
+  const refresh = () => {
+    grid.querySelectorAll('[data-sb-key]').forEach(btn => {
+      const on = speakBlocksSel.has(btn.dataset.sbKey);
+      btn.classList.toggle('radio-block-selected', on); btn.setAttribute('aria-pressed', String(on));
+      const t = btn.querySelector('div'); if(t) t.textContent = (on ? '✅ ' : '') + t.textContent.replace(/^✅ /, '');
+    });
+    const n = speakBlocksWords().length, k = speakBlocksOpt.n && speakBlocksOpt.n < n ? speakBlocksOpt.n : n;
+    startBtn.textContent = n ? `🎤 Commencer · ${k} mot${k > 1 ? 's' : ''}${speakBlocksSel.size > 1 ? ` de ${speakBlocksSel.size} blocs` : ''}` : '🎤 Choisis au moins un bloc';
+    startBtn.disabled = !n;
+    speakBlocksSave();
+  };
+  grid.querySelectorAll('[data-sb-key]').forEach(btn => btn.addEventListener('click', () => { const k = btn.dataset.sbKey; if(speakBlocksSel.has(k)) speakBlocksSel.delete(k); else speakBlocksSel.add(k); refresh(); }));
+  document.getElementById('sbAllBtn').addEventListener('click', () => { BLOCKS.forEach((_, i) => speakBlocksSel.add('n:' + i)); (customBlocks || []).forEach(cb => speakBlocksSel.add('c:' + cb.id)); refresh(); });
+  document.getElementById('sbNoneBtn').addEventListener('click', () => { speakBlocksSel.clear(); refresh(); });
+  document.getElementById('sbMixBtn').addEventListener('click', (e) => { speakBlocksOpt.mix = !speakBlocksOpt.mix; e.currentTarget.classList.toggle('active', speakBlocksOpt.mix); e.currentTarget.setAttribute('aria-pressed', String(speakBlocksOpt.mix)); refresh(); });
+  card.querySelectorAll('[data-sb-n]').forEach(b => b.addEventListener('click', () => { speakBlocksOpt.n = +b.dataset.sbN; card.querySelectorAll('[data-sb-n]').forEach(x => x.classList.toggle('active', x === b)); refresh(); }));
+  startBtn.addEventListener('click', () => startSpeakBlocks());
+  refresh();
+}
+function startSpeakBlocks(){
+  let words = speakBlocksWords();
+  if(!words.length){ setStatus('🎤 Choisis au moins un bloc.', 'err'); return; }
+  if(speakBlocksOpt.mix) words = shuffle(words.slice());
+  if(speakBlocksOpt.n && words.length > speakBlocksOpt.n) words = words.slice(0, speakBlocksOpt.n);
+  speakBlocksSave();
+  currentBlock = null;
+  isHomeScreen = false;
+  gameMode = 'speak';
+  window.__reviewSession = true;
+  window.__trainingType = 'speakBlocks';
+  window.__customBlockId = null;
+  window.__reviewChunkIndex = 0;
+  window.__reviewGraduated = [];
+  window.__reviewTotalWords = words.length;
+  setupDeckFromWords(words);
+  if(!speakBlocksOpt.mix){ try{ queue = groupDuplicateWords(words); }catch(e){} }    // dans l'ordre des blocs
+  renderScoreboard();
+  renderCard();
+}
+
 function renderTrainingCenter(){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
@@ -16634,6 +16782,7 @@ function renderTrainingCenter(){
 }
 
 function renderTrainingChunkPicker(typeKey){
+  if(TRAINING_TYPES[typeKey] && TRAINING_TYPES[typeKey].pool === 'blocks'){ renderSpeakBlocksSetup(); return; }
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
   const type = TRAINING_TYPES[typeKey];
@@ -16683,7 +16832,8 @@ function renderReviewEndScreen(){
   document.body.classList.remove('quiz-active');
   const type = TRAINING_TYPES[window.__trainingType] || TRAINING_TYPES.errors;
   const graduated = window.__reviewGraduated || [];
-  const stillLeft = getTrainingWords(type.pool).length;
+  const byBlocks = type.pool === 'blocks';
+  const stillLeft = byBlocks ? 0 : getTrainingWords(type.pool).length;
   const durationSec = computeActiveDurationSec(blockStartTime);
   recordDailyActivity();
   recordDailyStats(durationSec, false, 0, gameMode);
@@ -16698,11 +16848,11 @@ function renderReviewEndScreen(){
     <div class="end-screen">
       <div class="cat-tag">${type.emoji} ${type.label} terminé · ${score.total} mot${score.total>1?'s':''}</div>
       <div class="big">${score.correct} / ${score.total}</div>
-      <div class="sub" style="color:#6B6552;">${graduated.length} mot${graduated.length>1?'s':''} passé${graduated.length>1?'s':''} maîtrisé${graduated.length>1?'s':''} (${MASTERY_STREAK} d'affilée) 🎉 · ${stillLeft} mot${stillLeft>1?'s':''} restant${stillLeft>1?'s':''} dans ce pool</div>
+      <div class="sub" style="color:#6B6552;">${graduated.length} mot${graduated.length>1?'s':''} passé${graduated.length>1?'s':''} maîtrisé${graduated.length>1?'s':''} (${MASTERY_STREAK} d'affilée) 🎉${byBlocks ? '' : ` · ${stillLeft} mot${stillLeft>1?'s':''} restant${stillLeft>1?'s':''} dans ce pool`}</div>
       ${graduated.length ? `
       <div class="pass-banner ok">✅ ${graduated.length} mot${graduated.length>1?'s':''} maîtrisé${graduated.length>1?'s':''} !</div>` : ''}
       <div style="display:flex;gap:12px;justify-content:center;margin-top:20px;flex-wrap:wrap;">
-        ${stillLeft > 0 ? `<button class="restart-btn" id="reviewAgainBtn">🔁 Continuer</button>` : ''}
+        ${stillLeft > 0 || byBlocks ? `<button class="restart-btn" id="reviewAgainBtn">${byBlocks ? '🎤 Autres blocs' : '🔁 Continuer'}</button>` : ''}
         <button class="restart-btn" id="reviewCenterBtn" style="background:var(--surface-sunken);border:1px solid var(--border);color:var(--purple);box-shadow:none;">🎓 Centre d'entraînement</button>
         <button class="restart-btn" id="reviewBlocksBtn" style="background:var(--purple);color:#fff;box-shadow:0 4px 0 var(--purple-dark);">← Choisir un autre bloc</button>
       </div>
@@ -17667,6 +17817,46 @@ function findLexWord(q){
 }
 /* 🧭 1.0.35 : la pile des fiches — ouvrir un mot depuis la fiche d'un autre garde le chemin (↩ et « précédent » y reviennent) */
 var WCP = { stack:[], cur:null };
+/* ➕ 1.0.49 : les autres phrases d'un mot (« exMore ») : ajoutées quand tu retrouves le mot dans un nouveau texte */
+function lexSentNorm(s){ return String(s || '').replace(/\s+/g, ' ').trim(); }
+function lexHasSentence(w, s){
+  const f = dxFold(lexSentNorm(s)); if(!f) return true;
+  if(dxFold(lexSentNorm(exFull(w))) === f) return true;
+  return (w.exMore || []).some(x => dxFold(lexSentNorm(x)) === f);
+}
+function lexAddSentence(w, s){
+  s = lexSentNorm(s).slice(0, 600);
+  if(!w || WORDS.indexOf(w) < 0 || !s || s === '~') return 'none';
+  if(lexHasSentence(w, s)) return 'dup';
+  const main = lexSentNorm(exFull(w));
+  if(!main || main === '~'){                                   // pas encore de phrase : elle devient la première
+    const x = lexExFrom(s, [w.exForm || '', w.fr]);
+    if(x){ w.ex = x.ex; if(x.form && lexKey(x.form) !== lexKey(w.fr)) w.exForm = x.form; else delete w.exForm; }
+    else w.ex = s;
+  } else {
+    w.exMore = (w.exMore || []).concat([s]).slice(-6);
+  }
+  w.upd = Date.now();
+  lexAfterChange();
+  return 'ok';
+}
+function lexDelSentence(w, i){
+  if(!w || !w.exMore || !w.exMore[i]) return;
+  w.exMore = w.exMore.filter((_, j) => j !== i); if(!w.exMore.length) delete w.exMore;
+  w.upd = Date.now();
+  lexAfterChange();
+}
+/* la phrase, avec le mot surligné (ou une de ses formes) */
+function lexMarkSent(s, w){
+  s = String(s || '');
+  const forms = [w.exForm, exFullForm(w), w.fr].filter(Boolean).map(f => String(f));
+  for(const f of forms){ const at = s.toLowerCase().indexOf(f.toLowerCase()); if(at >= 0) return escapeHtml(s.slice(0, at)) + '<mark>' + escapeHtml(s.slice(at, at + f.length)) + '</mark>' + escapeHtml(s.slice(at + f.length)); }
+  const stem = dxFold(w.fr).replace(/^(se |s')/, '').slice(0, Math.max(4, dxFold(w.fr).length - 3));
+  const m = stem.length >= 4 ? s.match(new RegExp('(^|[^\\p{L}])(' + stem.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\p{L}*)', 'iu')) : null;
+  if(m){ const at = m.index + m[1].length; return escapeHtml(s.slice(0, at)) + '<mark>' + escapeHtml(m[2]) + '</mark>' + escapeHtml(s.slice(at + m[2].length)); }
+  return escapeHtml(s);
+}
+
 function wordCardPopup(w, opts){
   opts = opts || {};
   if(!w) return null;
@@ -17701,6 +17891,7 @@ function wordCardPopup(w, opts){
     ${w.ar ? `<div class="wcp-ar" dir="rtl" lang="ar">${escapeHtml(w.ar)}</div>` : ''}
     ${w.def ? `<div class="wcp-def">${escapeHtml(w.def)}</div>` : ''}
     ${full ? `<div class="wcp-ex" lang="fr">${exHtml}<div class="wcp-exar" dir="rtl" lang="ar" id="wcpExAr"></div></div>` : ''}
+    ${(w.exMore || []).length ? `<div class="wcp-more"><div class="wcp-more-h">➕ Ses autres phrases</div>${w.exMore.map((s, j) => `<div class="wcp-ex2" lang="fr"><span>${lexMarkSent(s, w)}</span><button type="button" data-wcp="ex2-say" data-i="${j}" aria-label="Écouter cette phrase">🔊</button>${i >= 0 ? `<button type="button" data-wcp="ex2-del" data-i="${j}" aria-label="Retirer cette phrase">✕</button>` : ''}</div>`).join('')}</div>` : ''}
     <div class="wcp-b">
       <button type="button" class="pri" data-wcp="say">🔊 Le mot</button>
       ${w.ar ? `<button type="button" data-wcp="ar">🔊 En arabe</button>` : ''}
@@ -17777,6 +17968,8 @@ function wordCardPopup(w, opts){
     else if(a === 'say') speak(w.fr, 'fr-FR');
     else if(a === 'ar') speak(w.ar, 'ar-SA');
     else if(a === 'ex') speak(full, 'fr-FR');
+    else if(a === 'ex2-say') speak((w.exMore || [])[+b.dataset.i] || '', 'fr-FR');
+    else if(a === 'ex2-del'){ lexDelSentence(w, +b.dataset.i); document.removeEventListener('keydown', onKey, true); ov.remove(); wordCardPopup(w, Object.assign({}, opts, { _nav:true })); }
     else if(a === 'edit'){ close(); wordEditPopup(w, opts); }
     else if(a === 'del'){ const c = ov.querySelector('#wcpConf'); if(c){ c.hidden = false; c.scrollIntoView({ block:'nearest' }); const g = c.querySelector('[data-wcp="del-go"]'); if(g) g.focus(); } }
     else if(a === 'del-no'){ const c = ov.querySelector('#wcpConf'); if(c) c.hidden = true; }
@@ -23347,6 +23540,15 @@ const COLOR_PRESETS = {
 /* ============ 🆕 NOUVEAUTÉS — pour que tout ce qui a été ajouté reste découvrable ============ */
 const WHATS_NEW_SECTIONS = [
   { icon:'🆕', title:'Nouveautés', items:[
+    { name:'🎞️ Les images animées restent animées', desc:"Dans la Tablette, une image animée (GIF, PNG ou WebP animé) ou un dessin SVG est gardé tel quel : il bouge comme dans le document d'origine (avant, l'appli le réduisait et seule la première image restait). Sur ton autre appareil aussi : les petites passent par la synchro, les grosses par Cloudflare R2 (chiffrées)." },
+    { name:'🖼 Ajouter les images manquantes après coup', desc:"Un texte importé (.md) sans certaines de ses images ? En haut du texte : « 🖼 4 images manquent · 📎 Les choisir ». Choisis-les (plusieurs d'un coup) : elles se mettent toutes seules à leur place, grâce à leur nom." },
+    { name:'🫁 PDF : les pauses, la respiration et la mélodie', desc:"Dans un PDF « tel quel », le bouton ‿ (touche L) dessine maintenant, en plus des liaisons : les petites pauses |, les endroits où respirer ‖, et la mélodie de la voix — ↗ en haut quand elle monte (fin d'un groupe, question oui/non), ↘ en bas quand elle descend (fin de phrase). Une petite légende s'affiche quand tu les montres." },
+    { name:'🖍 Le survol laisse une traînée de couleurs', desc:"Sur la Tablette (au doigt, au stylo, à la souris) et dans les PDF (souris, stylo) : le mot survolé s'allume, et les 3 mots d'avant gardent chacun une couleur, de plus en plus pâle (jaune, rose, lilas). Le dernier mot reste marqué quand tu lèves le doigt : tu sais où tu en es. Réglable dans Aa → Page → Traînée." },
+    { name:'🧩 Mots composés : le sens mot à mot', desc:"Une expression ou un mot composé que le dictionnaire ne connaît pas en entier (« pomme de terre », « coup d'œil »…) : la fiche donne son sens mot à mot (chaque mot avec son sens) et l'arabe mot à mot, et la définition est remplie pour l'ajouter à tes mots. À vérifier : le vrai sens d'une expression peut être différent." },
+    { name:'➕ Une autre phrase pour un mot déjà dans tes mots', desc:"Tu retrouves un de tes mots dans un nouveau texte ? Dans sa bulle : « ➕ Ajouter cette phrase à sa fiche ». Pareil quand tu essaies de l'ajouter de nouveau (Tablette, « Ajouter un mot »). Sa fiche montre ses autres phrases sous la première (🔊 pour l'écouter, ✕ pour la retirer)." },
+    { name:'🛑 Cloudflare R2 : alerte et blocage avant 10 Go', desc:"L'appli compte tout ton espace R2 (audios et PDF). À partir de 8,5 Go : une alerte te dit ce qu'il reste. Un envoi qui ferait dépasser 9,5 Go est bloqué, avec un message clair : tu restes dans les 10 Go gratuits. La jauge de l'Audiothèque montre la limite." },
+    { name:'🔂 Répéter un audio 10 ou 20 fois', desc:"Dans le lecteur de l'Audiothèque, « 🔂 Répéter » : 2, 3, 5, 10, 20 fois, sans fin, ou le nombre de ton choix (✏️). Le bouton compte les écoutes (« 🔂 3/10 fois »), puis on passe à l'audio suivant. Le choix est gardé sur l'appareil." },
+    { name:'🎤 Prononciation sur les blocs de ton choix', desc:"Centre d'entraînement → « 🎤 Prononciation · blocs au choix » : coche un bloc, plusieurs, ou tes blocs perso 🧩, mélange ou non, choisis combien de mots (10, 20, 30, 50 ou tous), puis dis-les au micro. Aussi à la voix : « prononciation »." },
     { name:'🔄 La Tablette se synchronise vraiment entre le PC et le téléphone', desc:"Les textes (journaux, magazines, livres…) ne sont plus gardés dans la petite mémoire de l'appli (≈ 5 Mo pour tout, souvent pleine sur le téléphone : les textes venus du PC ne pouvaient pas s'y écrire, sans le dire) mais dans le grand stockage de l'appareil. Ceux qui n'avaient pas pu arriver sont repris tout seuls. Et si un jour une donnée ne peut pas être gardée, la synchro le dit et réessaie, au lieu de faire comme si c'était fait." },
     { name:'☁️ Les PDF « tels quels » sur tous tes appareils', desc:"Un PDF (ou des photos de pages) ajouté sur le PC part tout seul dans ton espace Cloudflare R2 — chiffré : illisible sans ta clé. Sur le téléphone, il apparaît avec ☁️ dans « Mes PDF, tels quels » : touche-le, il se télécharge une fois et s'ouvre. Les dossiers et la page où tu en es suivent aussi ; 🗑 supprime partout. Les clés R2 ne sont nécessaires que sur l'appareil qui envoie." },
     { name:'⚡ Une synchro plus légère', desc:"Avec le script Google mis à jour (Code.gs, version 2), l'appli ne retélécharge plus toute la feuille à chaque minute : seulement ce qui a changé (et seulement ton compte). Bien moins de données sur le téléphone. L'ancien script marche toujours." },
@@ -42781,6 +42983,7 @@ const VA_DEST = [
   { id:'bescherelle', icon:'📘', label:'Bescherelle', ar:'بيشريل', words:['bescherelle', 'becherel', 'bescherel'], go:() => renderBescherelleHub(), say:"Voici le Bescherelle ! 📘" },
   { id:'jeux', icon:'🧩', label:'Jeux', ar:'الألعاب', words:['jeu', 'jeux', 'jouer', 's amuser', 'mots meles', 'anagramme', 'anagrammes', 'charade', 'charades', 'العاب', 'لعب', 'العب'], go:() => renderJeuxMotsHome(), say:"On s'amuse avec les mots ! 🧩" },
   { id:'audio', icon:'🎵', label:'Audiothèque', ar:'المكتبة الصوتية', words:['audiotheque', 'audio', 'audios', 'podcast', 'podcasts', 'mp3', 'musique', 'ecouter', 'استماع', 'اسمع', 'صوت'], go:() => renderAudioLibrary(), say:"Voici ton audiothèque ! 🎵" },
+  { id:'pronblocs', icon:'🎤', label:'Prononciation (blocs au choix)', ar:'النطق', words:['prononciation', 'prononcer', 'prononciation des blocs', 'dire les mots', 'نطق'], go:() => renderSpeakBlocksSetup(), say:"Choisis tes blocs, et dis les mots au micro ! 🎤" },
   { id:'radio', icon:'🎧', label:'Radio', ar:'الراديو', words:['radio', 'mains libres', 'راديو'], go:() => renderRadioSetup(), say:"La radio des mots, mains libres ! 🎧" },
   { id:'revision', icon:'🔁', label:'Réviser', ar:'المراجعة', words:['reviser', 'revision', 'revisions', 'repetition', 'memoriser', 'a revoir', 'مراجعه', 'راجع'], go:() => renderReviewIntro(), say:"Bonne idée, on révise ! 🔁" },
   { id:'defi', icon:'📅', label:'Défi du jour', ar:'تحدي اليوم', words:['defi', 'defi du jour', 'challenge', 'تحدي'], go:() => renderDailyChallenge(), say:"Voici le défi du jour ! 📅" },
@@ -47437,6 +47640,53 @@ async function tbMtText(text){
   try{ let C2 = {}; try{ C2 = JSON.parse(localStorage.getItem('vocabVision.exAr') || '{}') || {}; }catch(e){} C2[q] = t; const ks = Object.keys(C2); if(ks.length > 600) delete C2[ks[0]]; localStorage.setItem('vocabVision.exAr', JSON.stringify(C2)); }catch(e){}   // relu juste avant : deux traductions en même temps ne s'effacent plus
   return t;
 }
+/* 🧩 1.0.49 : le sens mot à mot d'un mot composé ou d'une expression (« pomme de terre », « garde-manger », « coup d'œil »)
+   quand le dictionnaire n'a pas l'expression entière : chaque mot avec son sens, et l'arabe mot à mot. */
+var TB_LIT_SMALL = { 'de':'من', "d'":'من', 'du':'من', 'des':'من', 'à':'إلى', 'au':'إلى', 'aux':'إلى', 'en':'في', 'dans':'في', 'sur':'على', 'sous':'تحت', 'avec':'مع', 'sans':'بدون', 'pour':'لـ', 'par':'بـ', 'et':'و', 'ou':'أو', 'chez':'عند', 'contre':'ضد', 'entre':'بين', 'vers':'نحو', 'après':'بعد', 'avant':'قبل', 'le':'', 'la':'', 'les':'', "l'":'', 'un':'', 'une':'', "s'":'', "se":'', "qu'":'', 'que':'', "n'":'', 'ne':'', "j'":'', "m'":'', "t'":'', "c'":'' };
+function tbIsCompound(key){
+  key = String(key || '').trim();
+  if(!/[\s\-]/.test(key)) return false;
+  if(/^(.+?)-(je|tu|il|elle|on|nous|vous|ils|elles|t-il|t-elle|t-on|ce|moi|toi|le|la|les|lui|leur|y|en)$/i.test(key)) return false;   // dit-il, vas-y
+  const ws = key.split(/[\s\-]+/).filter(w => /\p{L}{2,}/u.test(w));
+  return ws.length >= 2 && ws.length <= 7;
+}
+function tbLitShort(d){
+  d = String(d || '').replace(/\s+/g, ' ').replace(/^\([^)]*\)\s*/, '').trim();
+  const c = d.split(/[;.]/)[0].trim();
+  return (c.length > 70 ? c.slice(0, 68).replace(/\s+\S*$/, '') + '…' : c).replace(/[,:;]+$/, '');
+}
+async function tbLiteral(expr){
+  const toks = [];
+  String(expr || '').replace(/[’ʼ‘]/g, "'").split(/[\s\-]+/).forEach(w => {
+    w = w.replace(/^[^\p{L}']+|[^\p{L}']+$/gu, ''); if(!w) return;
+    const m = w.match(/^(l|d|j|m|t|s|c|n|qu)'(.+)$/i);
+    if(m){ toks.push(m[1].toLowerCase() + "'"); toks.push(m[2]); } else toks.push(w);
+  });
+  if(toks.length < 2 || toks.length > 8) return null;
+  const parts = [];
+  for(const w of toks){
+    const f = w.toLowerCase();
+    if(Object.prototype.hasOwnProperty.call(TB_LIT_SMALL, f) || f.length <= 1){ parts.push({ w, small:true, ar:TB_LIT_SMALL[f] || '' }); continue; }
+    let r = null; try{ r = await tbLookup(w); }catch(e){}
+    const d = r && r.defs && r.defs[0] ? tbLitShort(r.defs[0]) : '';
+    const ar = r && r.ar && r.ar[0] ? String(r.ar[0]).split(/[،,;]/)[0].trim() : '';
+    parts.push({ w, d, ar, lemma:r && r.lemma && dxFold(r.lemma) !== dxFold(w) ? r.lemma : '' });
+  }
+  const content = parts.filter(x => !x.small);
+  if(!content.length || !content.some(x => x.d || x.ar)) return null;
+  const fr = 'Mot à mot : ' + parts.map(x => x.small ? x.w : (x.d ? `${x.w} (${x.d})` : x.w)).join(' + ');
+  const ar = parts.map(x => x.ar).filter(Boolean).join(' + ');
+  return { parts, fr, ar };
+}
+function tbLitHtml(r){
+  if(!r || !r.lit) return '';
+  const L = r.lit.filter(x => !x.small);
+  return `<div class="tb-lit"><div class="tb-lit-h">🧩 Le dictionnaire n'a pas l'expression entière. Son sens <b>mot à mot</b> :</div>
+    <ul>${L.map(x => `<li><b lang="fr">${escapeHtml(x.w)}</b>${x.lemma ? ` <small>(${escapeHtml(x.lemma)})</small>` : ''}${x.d ? ' : ' + escapeHtml(x.d) : ''}${x.ar ? ` · <span dir="rtl" lang="ar">${escapeHtml(x.ar)}</span>` : ''}</li>`).join('')}</ul>
+    ${r.litAr ? `<div class="tb-lit-ar">En arabe, mot à mot : <span dir="rtl" lang="ar">${escapeHtml(r.litAr)}</span></div>` : ''}
+    <div class="tb-auto">⚠️ Le vrai sens d'une expression peut être différent du mot à mot : vérifie-le.</div></div>`;
+}
+
 async function tbLookup(form, o){
   o = o || {};
   const key = String(form || '').toLowerCase();
@@ -47444,7 +47694,7 @@ async function tbLookup(form, o){
   const e0 = o.noun ? null : tbEntry(form), e = (o.fresh && e0 && e0.known) ? null : e0;   // fresh : on ignore ce que tu as déjà écrit dans tes mots
   const ck = key + (o.noun ? '#n' : (o.verbCtx ? '#v' : '')) + (o.fresh && e0 && e0.known ? '#f' : '');
   const d = tbDictLoad();
-  if(d[ck] && (d[ck].defs && d[ck].defs.length || d[ck].ar && d[ck].ar.length)) return d[ck];
+  if(d[ck] && (d[ck].defs && d[ck].defs.length || d[ck].ar && d[ck].ar.length) && !(!(d[ck].defs && d[ck].defs.length) && tbIsCompound(key) && navigator.onLine !== false)) return d[ck];
   const res = { lemma: e ? e.fr : key, ipa:'', ipaOf:'', defs: e && e.def ? [e.def] : [], ar: e && e.ar ? [e.ar] : [], pos:'', src: e && e.known ? 'lexique' : '' };
   if(res.defs.length && res.ar.length) return res;
   if(typeof navigator !== 'undefined' && navigator.onLine === false) return res;
@@ -47470,6 +47720,10 @@ async function tbLookup(form, o){
   if(!res.ar.length){
     const L = /\s/.test(res.lemma) ? [await tbMtText(res.lemma)].filter(Boolean) : await tbMtWord(res.lemma);
     if(L.length){ res.ar = L.slice(0, 2); res.arAuto = true; }
+  }
+  // 🧩 1.0.49 : pas de définition pour l'expression entière → son sens mot à mot
+  if(!res.defs.length && tbIsCompound(key)){
+    try{ const L = await tbLiteral(key); if(L){ res.lit = L.parts; res.litAr = L.ar; res.defs = [L.fr]; res.litDef = true; res.src = res.src || 'mot à mot'; } }catch(err){}
   }
   if(res.defs.length || res.ar.length) tbDictPut(ck, res);
   return res;
@@ -47907,7 +48161,7 @@ async function tbStore(store, mode, fn){
 }
 async function tbImgPut(id, blob){ try{ await tbStore('img', 'readwrite', os => { os.put(blob, tbImgKey(id)); }); return true; }catch(e){ console.warn('tablette : image', e); return false; } }
 async function tbImgGet(id){ try{ return await tbStore('img', 'readonly', os => os.get(tbImgKey(id))) || null; }catch(e){ return null; } }
-async function tbImgDel(id){ try{ tbImgSyncDrop(id); }catch(e){} try{ await tbStore('img', 'readwrite', os => { os.delete(tbImgKey(id)); }); }catch(e){} if(TB.imgUrl[id]){ try{ URL.revokeObjectURL(TB.imgUrl[id]); }catch(e){} delete TB.imgUrl[id]; } }
+async function tbImgDel(id){ try{ tbImgSyncDrop(id); }catch(e){} try{ const m = tbImgR2Map(); if(m[id]){ if(r2Ready()) r2Delete(m[id]).catch(() => {}); delete m[id]; tbImgR2MapSave(m); } }catch(e){} try{ await tbStore('img', 'readwrite', os => { os.delete(tbImgKey(id)); }); }catch(e){} if(TB.imgUrl[id]){ try{ URL.revokeObjectURL(TB.imgUrl[id]); }catch(e){} delete TB.imgUrl[id]; } }
 async function tbImgUrl(id){
   if(!id) return '';
   if(TB.imgUrl[id]) return TB.imgUrl[id];
@@ -47924,7 +48178,36 @@ function tbLoadImgs(root){
     if(u){ img.onerror = () => el.classList.add('missing'); if(img.closest('#tbScroll')) img.dataset.h0 = Math.round(img.getBoundingClientRect().height); img.setAttribute('src', u); } else el.classList.add('missing');
   });
 }
+/* 🎞️ 1.0.50 : une image animée (GIF, PNG animé, WebP animé) ou un dessin SVG est gardé TEL QUEL :
+   réduite (redessinée), elle ne bougeait plus — seule la première image restait. */
+async function tbImgKind(blob){
+  if(!blob) return '';
+  const t = String(blob.type || '').toLowerCase(), n = String(blob.name || '').toLowerCase();
+  if(t === 'image/svg+xml' || /\.svg$/.test(n)) return 'svg';
+  let u;
+  try{ u = new Uint8Array(await blob.slice(0, Math.min(blob.size, 4 * 1048576)).arrayBuffer()); }catch(e){ return ''; }
+  if(u.length < 16) return '';
+  const s4 = (i) => String.fromCharCode(u[i], u[i + 1], u[i + 2], u[i + 3]);
+  if(u[0] === 0x47 && u[1] === 0x49 && u[2] === 0x46){                       // GIF : plusieurs images = animé
+    let g = 0;
+    for(let i = 13; i < u.length - 3; i++){ if(u[i] === 0x21 && u[i + 1] === 0xF9 && u[i + 2] === 0x04 && ++g > 1) return 'anim'; }
+    for(let i = 13; i < Math.min(u.length - 11, 4096); i++){ if(u[i] === 0x4E && s4(i) === 'NETS' && s4(i + 4) === 'CAPE') return 'anim'; }
+    return '';
+  }
+  if(u[0] === 0x89 && u[1] === 0x50 && u[2] === 0x4E && u[3] === 0x47){       // PNG : « acTL » avant les images = PNG animé
+    let i = 8;
+    while(i + 8 <= u.length){ const len = ((u[i] << 24) | (u[i + 1] << 16) | (u[i + 2] << 8) | u[i + 3]) >>> 0, ty = s4(i + 4); if(ty === 'acTL') return 'anim'; if(ty === 'IDAT') return ''; i += 12 + len; }
+    return '';
+  }
+  if(s4(0) === 'RIFF' && s4(8) === 'WEBP') return (s4(12) === 'VP8X' && (u[20] & 0x02)) ? 'anim' : '';
+  return '';
+}
+var TB_IMG_KEEP = 25 * 1048576;                // (au-delà : on garde l'image fixe, sinon l'appareil se remplit)
 async function tbImgShrink(file){
+  try{ if(file && file.size <= TB_IMG_KEEP && await tbImgKind(file)) return file; }catch(e){}
+  return tbImgShrink0(file);
+}
+async function tbImgShrink0(file){
   const url = URL.createObjectURL(file);
   try{
     const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; });
@@ -47956,7 +48239,19 @@ function tbImgSKey(id, i){ return TB_IMG + id + (i ? '~' + i : '') + '::u:' + ge
 function tbImgSentKey(){ return 'vocabVision.tbImgSent::u:' + getCurrentUserId(); }
 function tbImgSent(){ try{ return JSON.parse(localStorage.getItem(tbImgSentKey()) || '{}') || {}; }catch(e){ return {}; } }
 function tbImgSentSet(id, n){ try{ const m = tbImgSent(); if(n) m[id] = n; else delete m[id]; localStorage.setItem(tbImgSentKey(), JSON.stringify(m)); }catch(e){} }
+function tbImgR2Map(){ try{ return JSON.parse(localStorage.getItem('vocabVision.tbImgR2::u:' + getCurrentUserId()) || '{}') || {}; }catch(e){ return {}; } }
+function tbImgR2MapSave(m){ try{ localStorage.setItem('vocabVision.tbImgR2::u:' + getCurrentUserId(), JSON.stringify(m)); }catch(e){} }
+async function tbImgR2Up(id, blob){
+  try{
+    const key = await pdvKeyNew(), path = 'vocabvision/img/' + pdvRand(26) + '.vv';
+    const sealed = await pdvSeal(blob, key.k);
+    await r2UploadFile({ file:new File([sealed], 'img.vv', { type:'application/octet-stream' }), path }, () => {});
+    const c = r2CfgGet() || {}, m = tbImgR2Map(); m[id] = path; tbImgR2MapSave(m);
+    return { n:1, t:blob.type || 'image/gif', r2:String(c.publicUrl || '').replace(/\/+$/, '') + '/' + path, k:key.b64, sz:blob.size };
+  }catch(e){ console.warn('🎞️ image → R2', e); return null; }
+}
 async function tbImgForSync(blob){
+  try{ const kd = await tbImgKind(blob); if(kd && blob.size <= (kd === 'svg' ? 600000 : 1048576)) return blob; }catch(e){}   // 🎞️ 1.0.50 : animée, telle quelle
   let url = '';
   try{
     url = URL.createObjectURL(blob);
@@ -47981,6 +48276,11 @@ async function tbImgSyncOut(ids){
     TB.imgOut.add(id);
     try{
       const blob = await tbImgGet(id); if(!blob) continue;
+      // 🎞️ 1.0.50 : une grosse image animée passe par R2 (si connecté) : seule son adresse et sa clé vont au Google Sheet
+      if(blob.size > 1048576 && typeof pdvR2Ok === 'function' && pdvR2Ok() && await tbImgKind(blob) === 'anim'){
+        const head = await tbImgR2Up(id, blob);
+        if(head){ tbKvSet(tbImgSKey(id), JSON.stringify(head)); continue; }
+      }
       const small = await tbImgForSync(blob), b64 = await tbB64Of(small);
       if(!b64) continue;
       const n = Math.max(1, Math.ceil(b64.length / TB_PART)), done = [];
@@ -47996,6 +48296,7 @@ async function tbImgSyncOut(ids){
 function tbImgSyncParts(id){
   try{
     const h = JSON.parse(tbKvGet(tbImgSKey(id)) || 'null'); if(!h || !h.n) return null;
+    if(h.r2) return { n:1, t:h.t || 'image/gif', r2:h.r2, k:h.k };              // 🎞️ dans R2
     const parts = [h.d];
     for(let i = 1; i < h.n; i++){ const q = JSON.parse(tbKvGet(tbImgSKey(id, i)) || 'null'); if(!q || typeof q.d !== 'string') return null; parts.push(q.d); }
     return { n:h.n, t:h.t || 'image/jpeg', b64:parts.join('') };
@@ -48003,6 +48304,13 @@ function tbImgSyncParts(id){
 }
 async function tbImgFromSync(id){
   const P = tbImgSyncParts(id); if(!P) return null;
+  if(P.r2){                                                                       // 🎞️ 1.0.50 : téléchargée de R2, déchiffrée
+    try{
+      const buf = await pdvFetchBuf(P.r2, () => {}), blob = await pdvUnseal(buf, await pdvKeyOf(P.k), P.t);
+      if(await tbImgPut(id, blob)){ tbImgSentSet(id, 1); setTimeout(tbImgPrune, 0); }
+      return blob;
+    }catch(e){ console.warn('🎞️ image ← R2', e); return null; }
+  }
   try{
     const bin = atob(P.b64), arr = new Uint8Array(bin.length);
     for(let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
@@ -48571,6 +48879,8 @@ function tbTipOpen(k, w){
     ${w.ar ? `<div class="tb-tip-ar" dir="rtl" lang="ar">${escapeHtml(w.ar)}</div>` : `<div class="tb-tip-f">Pas encore de traduction en arabe : ✏️ pour l'ajouter.</div>`}
     ${w.def ? `<div class="tb-tip-def">${escapeHtml(w.def)}</div>` : ''}
     ${full && full !== '~' ? `<div class="tb-tip-ex" lang="fr">${escapeHtml(full.length > 150 ? full.slice(0, 147) + '…' : full)}</div>` : ''}
+    ${(w.exMore || []).length ? `<div class="tb-tip-f">➕ ${w.exMore.length} autre${w.exMore.length > 1 ? 's' : ''} phrase${w.exMore.length > 1 ? 's' : ''} dans sa fiche</div>` : ''}
+    ${TB.sents[tk.s] && !lexHasSentence(w, TB.sents[tk.s]) ? `<button type="button" class="tb-chip tb-tip-exadd" data-tb="tip-ex" title="La phrase du texte va dans sa fiche, à la suite de la première">➕ Ajouter cette phrase à sa fiche</button>` : ''}
     <div class="tb-tip-a">
       <button type="button" class="tb-chip" data-tb="tip-see">👁 Sa fiche</button>
       <button type="button" class="tb-chip" data-tb="tip-edit" title="Modifier : avec la recherche dans le moteur interne">✏️ Modifier</button>
@@ -50816,6 +51126,37 @@ function pdvShelfHint(all){
 }
 setTimeout(() => { try{ pdvCloudPump(); }catch(e){} }, 9000);
 
+/* 🖍 1.0.49 : la traînée de couleurs du survol. H = { el (le mot allumé), tr (les 3 d'avant) }.
+   Quand le doigt ou la souris quitte le texte, le dernier mot reste marqué (couleur 1) : on sait où on en était. */
+function tbTrailOn(){ const u = tbUi(); return u.hov !== 'off' && u.hovTrail !== false; }
+function tbTrailStep(H, sp){
+  const trail = tbTrailOn(), old = (H.tr || []).slice();
+  if(H.el){ H.el.classList.remove('hov'); if(trail) H.tr = [H.el].concat((H.tr || []).filter(x => x !== H.el)); }
+  H.el = sp || null;
+  if(sp) sp.classList.add('hov');
+  H.tr = trail ? (H.tr || []).filter(x => x !== sp && x.isConnected).slice(0, 3) : [];
+  old.forEach(x => x.classList.remove('hov1', 'hov2', 'hov3'));
+  H.tr.forEach((x, i) => { x.classList.remove('hov1', 'hov2', 'hov3'); x.classList.add('hov' + (i + 1)); });
+}
+function tbTrailClear(H){ if(!H) return; if(H.el) H.el.classList.remove('hov'); (H.tr || []).forEach(x => x.classList.remove('hov1', 'hov2', 'hov3')); H.el = null; H.tr = []; }
+/* 📄 dans le PDF (et la liseuse) : la souris ou le stylo allume le mot, avec sa traînée */
+function pdvTrailWire(S){
+  const H = S.hv = { el:null, tr:[], raf:0, x:0, y:0 };
+  try{ S.ov.style.setProperty('--pdv-hov', `rgba(${tbHovRgb()},.38)`); }catch(e){}
+  const run = () => {
+    H.raf = 0;
+    if(tbUi().hov === 'off'){ tbTrailClear(H); return; }
+    const t = document.elementFromPoint(H.x, H.y);
+    let sp = t && t.closest ? t.closest('.pdv-tl span[data-j], #pdkFlow .tbw') : null;
+    if(sp && sp.dataset.j != null && sp._tw0) sp = sp._tw0;                            // un mot coupé : on allume son premier morceau
+    if(sp !== H.el) tbTrailStep(H, sp);
+  };
+  S.ov.addEventListener('pointermove', (e) => {
+    if(!(e.pointerType === 'mouse' || e.pointerType === 'pen') || e.buttons) return;
+    H.x = e.clientX; H.y = e.clientY; if(!H.raf) H.raf = requestAnimationFrame(run);
+  }, { passive:true });
+}
+
 /* 📚 dans la bibliothèque : « Mes PDF, tels quels » */
 /* 📁 1.0.46 : les dossiers de « Mes PDF, tels quels » (gardés sur l'appareil, avec la liste des PDF) */
 /* ☁️ 1.0.47 : les dossiers se synchronisent (« pdvDirs », un par un, le plus récent gagne) ; ouvert / fermé reste propre à l'appareil */
@@ -50988,7 +51329,7 @@ async function pdvOpen(id, at){
       <div class="pdv-tools" role="group" aria-label="Outil"><button type="button" class="pdv-ib on" data-pdv="hand" aria-pressed="true" title="Main : glisser pour déplacer la page (H)" aria-label="Outil main">✋</button><button type="button" class="pdv-ib" data-pdv="sel" aria-pressed="false" title="Sélection : choisir des mots (V)" aria-label="Outil sélection"><span class="pdv-ibeam">I</span></button></div>
       <button type="button" class="pdv-ib pdv-kb" data-pdv="kindle" aria-label="Mode liseuse, comme une Kindle (K)" title="Mode liseuse, comme une Kindle (K)">📖</button>
       <button type="button" class="pdv-ib ${tbUi().pdvNight ? 'on' : ''}" data-pdv="night" aria-label="Mode nuit (N)" title="Mode nuit (N)" aria-pressed="${tbUi().pdvNight ? 'true' : 'false'}">🌙</button>
-      <button type="button" class="pdv-ib pdv-lzb ${tbUi().pdvLz === false ? '' : 'on'}" data-pdv="lz" aria-label="Les liaisons sur la page" title="Les liaisons sur la page (L)" aria-pressed="${tbUi().pdvLz === false ? 'false' : 'true'}">‿</button>
+      <button type="button" class="pdv-ib pdv-lzb ${tbUi().pdvLz === false ? '' : 'on'}" data-pdv="lz" aria-label="Les liaisons, les pauses et la mélodie sur la page" title="Liaisons ‿, pauses | ‖ et mélodie ↗ ↘ (L)" aria-pressed="${tbUi().pdvLz === false ? 'false' : 'true'}">‿</button>
       <button type="button" class="pdv-ib" data-pdv="find" aria-label="Rechercher (Ctrl F)" title="Rechercher (Ctrl F)" aria-pressed="false">🔍</button>
       <button type="button" class="pdv-ib pdv-crb" data-pdv="carnet" aria-label="Mon carnet : les mots tagués" title="Mon carnet : les mots tagués">🏷️<b class="pdv-crn" id="pdvCrN"></b></button>
       <button type="button" class="pdv-ib pdv-helpb" data-pdv="help" aria-label="Raccourcis clavier (?)" title="Raccourcis clavier (?)">⌨</button>
@@ -51040,6 +51381,7 @@ async function pdvOpen(id, at){
     else if(a === 'night') pdvNightSet(S, !S.ov.classList.contains('pdv-night'));
     else if(a === 'kindle') pdkOpen(S);
   });
+  try{ pdvTrailWire(S); }catch(e){ console.warn('traînée', e); }      // 🖍 1.0.49
   // 👆 toucher un mot de la page : sa fiche (comme sur la Tablette)
   ov.addEventListener('click', (e) => {
     if(e.target.closest('[data-pdv], #pdvTb, #pdvFind, .pdv-help, .pdv-goto, .pdv-side')) return;
@@ -51305,7 +51647,7 @@ function pdvKeysWire(S){
 function pdvHelp(S){
   const old = S.ov.querySelector('.pdv-help'); if(old){ old.remove(); return; }
   const R = [['Ctrl F · F3 · /', 'Rechercher ; Entrée / Maj + Entrée : résultat suivant / précédent'], ['Ctrl + · Ctrl −', 'Zoom avant / arrière (ou Ctrl + molette, ou pincer)'], ['Ctrl 0 · Ctrl 1 · Ctrl 2', 'Page entière · Taille réelle (100 %) · Largeur de la page'],
-    ['← →', 'Page précédente / suivante'], ['Page ↑ · Page ↓ · Espace', 'Défiler d’un écran'], ['Début · Fin', 'Première / dernière page'], ['G · Ctrl G', 'Aller à une page'], ['L', 'Les liaisons sur la page (montrer / cacher)'], ['N', 'Mode nuit'], ['K', 'Mode liseuse (comme une Kindle) : ← → pour tourner les pages, Échap pour revenir'], ['H · V', 'La main (glisser) · La sélection (choisir des mots)'], ['Espace (maintenue)', 'La main, le temps de glisser'], ['Échap', 'Fermer (la recherche, puis le PDF)']];
+    ['← →', 'Page précédente / suivante'], ['Page ↑ · Page ↓ · Espace', 'Défiler d’un écran'], ['Début · Fin', 'Première / dernière page'], ['G · Ctrl G', 'Aller à une page'], ['L', 'Les liaisons, les pauses | ‖ et la mélodie ↗ ↘ sur la page (montrer / cacher)'], ['N', 'Mode nuit'], ['K', 'Mode liseuse (comme une Kindle) : ← → pour tourner les pages, Échap pour revenir'], ['H · V', 'La main (glisser) · La sélection (choisir des mots)'], ['Espace (maintenue)', 'La main, le temps de glisser'], ['Échap', 'Fermer (la recherche, puis le PDF)']];
   const el = document.createElement('div'); el.className = 'pdv-help'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', 'Raccourcis clavier');
   el.innerHTML = `<div class="pdv-help-in"><div class="pdv-help-h"><b>⌨ Raccourcis clavier</b><button type="button" class="pdv-ib" data-pdv="help" aria-label="Fermer">✕</button></div><dl>${R.map(r => `<dt>${r[0].split(' · ').map(x => `<kbd>${escapeHtml(x)}</kbd>`).join(' ')}</dt><dd>${escapeHtml(r[1])}</dd>`).join('')}</dl></div>`;
   el.addEventListener('click', (e) => { if(e.target === el) el.remove(); });
@@ -51558,6 +51900,15 @@ function pdvLzMarks(pg){
       const ia = E[L.j], ib = E[R.j]; if(!ia || !ib || Math.abs(ia.y - ib.y) > ia.h * 0.5 || R.x < L.x - ia.h * 0.05) return;   // pas d'arc d'une ligne à l'autre
       out.push({ x1:L.x, x2:R.x, y:ia.y + ia.h * (ia.o ? 0.74 : 0.8), h:ia.h * (ia.o ? 0.86 : 1), k:g.k, s:g.s || '' });
     });
+    // 🫁 1.0.49 : les pauses (|), où respirer (‖), et la mélodie : ↗ la voix monte (en haut), ↘ elle descend (en bas)
+    an.toks.forEach((A, i) => {
+      const pz = an.pause[i]; if(!pz) return;
+      const L = xAt(b0 + po[A.pi] + A.lead.length + A.core.length + String(A.trail || '').length, true), ia = E[L.j]; if(!ia) return;
+      let x = L.x + ia.h * 0.14;
+      const B = an.toks[i + 1];
+      if(B){ const R = xAt(b0 + po[B.pi] + B.lead.length, false), ib = E[R.j]; if(ib && Math.abs(ib.y - ia.y) < ia.h * 0.5 && R.x > L.x + ia.h * 0.05) x = pz.lvl === 0 ? (L.x + R.x) / 2 : Math.min(x, L.x + (R.x - L.x) * 0.6); }
+      out.push({ pz:1, x, y:ia.y + ia.h * 0.06, h:ia.h * (ia.o ? 0.8 : 0.92), lvl:pz.lvl, ar:pz.arrow || '' });
+    });
   });
   return out;
 }
@@ -51567,6 +51918,14 @@ function pdvLzPaint(S, pg){
   if(!pg.tl || !pg.tl.length) return;
   const L = pdvLzMarks(pg), ar = pg.ar || S.ar0 || 1.414, W = S.W || 800, frag = document.createDocumentFragment();
   L.forEach(m => {
+    if(m.pz){
+      const u = document.createElement('u'); u.className = 'p' + m.lvl;
+      if(PDV_CQ){ u.style.left = (m.x * 100).toFixed(3) + '%'; u.style.top = (m.y / ar * 100).toFixed(3) + '%'; u.style.fontSize = (m.h * 100).toFixed(4) + 'cqw'; }
+      else { u.style.left = (m.x * W).toFixed(1) + 'px'; u.style.top = (m.y * W).toFixed(1) + 'px'; u.style.fontSize = (m.h * W).toFixed(2) + 'px'; }
+      const R = (typeof DX_RULES !== 'undefined' && DX_RULES) ? DX_RULES['p' + m.lvl] : null; if(R) u.title = R.label;
+      if(m.ar){ const b = document.createElement('b'); b.className = m.ar === '↗' ? 'up' : (m.ar === '↘' ? 'dn' : 'fl'); b.textContent = m.ar; u.appendChild(b); }
+      frag.appendChild(u); return;
+    }
     const i = document.createElement('i'); i.className = 'k-' + m.k;
     const pad = m.h * 0.14, x = m.x1 - pad, w = Math.max(m.h * 0.3, m.x2 - m.x1 + pad * 2);
     if(PDV_CQ){ i.style.left = (x * 100).toFixed(3) + '%'; i.style.top = (m.y / ar * 100).toFixed(3) + '%'; i.style.width = (w * 100).toFixed(3) + '%'; i.style.fontSize = (m.h * 100).toFixed(4) + 'cqw'; }
@@ -51580,7 +51939,18 @@ function pdvLzSet(S, on){
   tbUi().pdvLz = !!on; tbSaveUi();
   S.ov.classList.toggle('pdv-lz-off', !on);
   const b = S.ov.querySelector('[data-pdv="lz"]'); if(b){ b.classList.toggle('on', !!on); b.setAttribute('aria-pressed', String(!!on)); }
-  tbToast(on ? '‿ Les liaisons sont dessinées sur la page' : 'Liaisons cachées');
+  tbToast(on ? '‿ Liaisons, pauses et mélodie dessinées sur la page' : 'Liaisons et pauses cachées');
+  pdvLzKey(S, on);
+}
+/* la petite légende, quelques secondes, quand on les montre */
+function pdvLzKey(S, on){
+  let k = S.ov.querySelector('.pdv-lzk');
+  if(!on){ if(k) k.classList.remove('show'); return; }
+  if(!k){ k = document.createElement('div'); k.className = 'pdv-lzk'; k.setAttribute('aria-hidden', 'true');
+    k.innerHTML = '<span><b style="color:#FDBA74">‿</b>liaison</span><span><b style="color:#93C5FD">|</b>petite pause</span><span><b style="color:#93C5FD">‖</b>respire</span><span><b style="color:#4ADE80">↗</b>la voix monte</span><span><b style="color:#FDBA74">↘</b>la voix descend</span>';
+    S.ov.appendChild(k); }
+  clearTimeout(k._t); requestAnimationFrame(() => k.classList.add('show'));
+  k._t = setTimeout(() => k.classList.remove('show'), 5200);
 }
 /* 🌙 1.0.46 : le mode nuit — les pages en sombre (blanc ↔ noir, les couleurs gardent leur teinte) */
 function pdvNightSet(S, on){
@@ -51949,7 +52319,8 @@ function pdvPageText(pg){
 function pdvTwin(S, a, tw){
   if(!a || !tw || !tw.length) return;
   a._tw = tw;
-  if(!S.twObs) S.twObs = new MutationObserver(ms => ms.forEach(m => { const el = m.target; (el._tw || []).forEach(b => { ['sel', 'tag', 'new', 'just', 'hov'].forEach(c => b.classList.toggle(c, el.classList.contains(c))); }); }));
+  if(!S.twObs) S.twObs = new MutationObserver(ms => ms.forEach(m => { const el = m.target; (el._tw || []).forEach(b => { ['sel', 'tag', 'new', 'just', 'hov', 'hov1', 'hov2', 'hov3'].forEach(c => b.classList.toggle(c, el.classList.contains(c))); }); }));
+  tw.forEach(b => { b._tw0 = a; });
   S.twObs.observe(a, { attributes:true, attributeFilter:['class'] });
   tw.forEach(b => { ['sel', 'tag', 'just'].forEach(c => b.classList.toggle(c, a.classList.contains(c))); });
 }
@@ -53030,7 +53401,7 @@ function tbMdDialog(list, cat){
       <div class="tbl-imp-list">${list.map((x, k) => `<label class="tbl-imp-it"><input type="checkbox" data-k="${k}" checked>
         <span class="tbl-imp-b"><b>${escapeHtml(x.title)}</b><small>${escapeHtml(x.file)}</small>
         <span class="tbl-imp-m"><span>${x.words} mots</span>${x.rep.imgs ? `<span>🖼 ${x.rep.imgs} image${x.rep.imgs > 1 ? 's' : ''}</span>` : ''}${x.rep.web ? `<span>🌐 ${x.rep.web} en ligne</span>` : ''}${x.rep.missing.length ? `<span class="warn" title="${tbAttr(x.rep.missing.join(', '))}">⚠️ ${x.rep.missing.length} manquante${x.rep.missing.length > 1 ? 's' : ''}</span>` : ''}${x.rep.cut ? '<span class="warn">✂️ raccourci</span>' : ''}</span></span></label>`).join('')}</div>
-      ${list.some(x => x.rep.missing.length) ? `<div class="tbl-imp-hint">⚠️ Des images sont à côté du .md sur ton appareil : choisis-les en même temps que le .md (ou importe le .zip complet).</div>` : ''}
+      ${list.some(x => x.rep.missing.length) ? `<div class="tbl-imp-hint">⚠️ Des images sont à côté du .md sur ton appareil : choisis-les en même temps que le .md (ou importe le .zip complet). Tu pourras aussi les ajouter après, en haut du texte (« 📎 Les choisir »).</div>` : ''}
       <label class="tbl-dlg-l" for="tblImpCat">📂 Ranger dans</label>
       <select class="am-in" id="tblImpCat">${C.map(c => `<option value="${tbAttr(c.id)}" ${c.id === cs ? 'selected' : ''}>${c.icon} ${escapeHtml(c.name)}</option>`).join('')}</select>
       ${dup ? `<label class="tbl-imp-rep"><input type="checkbox" id="tblImpRep" checked> Remplacer les textes déjà importés depuis le même fichier (ta lecture est gardée)</label>` : ''}
@@ -54031,6 +54402,7 @@ function tbOpen(art){
       <article class="tb-page" id="tbPage" lang="fr">
         <div class="tb-meta"><span>${escapeHtml(art.src && art.src !== 'Collé' ? art.src : 'Ajouté le ' + tbDateLabel(art.at))}</span><span>${n} mots</span><span>≈ ${Math.max(1, Math.round(n / 170))} min de lecture</span></div>
         <div class="tb-h1" role="heading" aria-level="1">${escapeHtml(art.title)}</div>
+        ${tbMissHtml(art)}
         <div class="tb-body" id="tbBody"></div>
         <div class="tb-end" id="tbEnd"></div>
       </article>
@@ -54280,6 +54652,8 @@ function tbAaHtml(){
     <div class="tb-hovs" role="group" aria-label="Couleur du surlignage">${Object.entries(TB_HOV).map(([k, H]) => `<button type="button" class="tb-hov ${hov === k ? 'on' : ''}" data-tb="hov" data-v="${k}" aria-pressed="${hov === k}" title="${H[0]}"><i style="background:rgba(${H[1]},.38)"></i><span>${H[0]}</span></button>`).join('')}
       <label class="tb-hov ${hov === 'custom' ? 'on' : ''}" title="Ta couleur"><i style="background:rgba(${tbHexRgb(u.hovc) || '96,165,250'},.38)"></i><span>À toi</span><input type="color" id="tbHovC" value="${/^#[0-9a-f]{6}$/i.test(u.hovc || '') ? u.hovc : '#60a5fa'}" aria-label="Choisir ta couleur de surlignage"></label>
       <button type="button" class="tb-hov off ${hov === 'off' ? 'on' : ''}" data-tb="hov" data-v="off" aria-pressed="${hov === 'off'}"><i></i><span>Aucun</span></button></div>
+    <div class="tb-pop-row"><span class="tb-pop-l">Traînée</span><div class="tb-seg" role="group" aria-label="Traînée de couleurs derrière le mot">${seg('hov-tr', 1, '🖍 Les 3 mots d\'avant', u.hovTrail !== false)}${seg('hov-tr', 0, 'Non', u.hovTrail === false)}</div></div>
+    <div class="tb-pop-hint">Les mots que tu viens de survoler gardent une couleur (<span class="tb-trail-demo"><i style="background:rgba(${tbHovRgb(u)},.38)">mot</i> <i style="background:rgba(251,191,36,.34)">d'avant</i> <i style="background:rgba(244,114,182,.24)">encore</i> <i style="background:rgba(167,139,250,.16)">avant</i></span>) : tu vois où tu en es. Aussi dans les PDF, à la souris ou au stylo.</div>
     <div class="tb-pop-row"><span class="tb-pop-l">Mes mots</span><div class="tb-seg">${seg('kn', 1, '┄ Soulignés', u.kn !== false)}${seg('kn', 0, 'Non', u.kn === false)}</div></div>
     <div class="tb-pop-hint">Les mots déjà dans tes mots sont soulignés en pointillé : touche-les pour leur bulle.</div>
     <div class="tb-pop-row"><span class="tb-pop-l">Texte</span><div class="tb-seg">${seg('align', 'left', '<span class="tb-al l" aria-hidden="true"><i></i><i></i><i></i></span> À gauche', u.align !== 'justify')}${seg('align', 'justify', '<span class="tb-al j" aria-hidden="true"><i></i><i></i><i></i></span> Justifié', u.align === 'justify')}</div></div>
@@ -55076,7 +55450,8 @@ function tbInfoHtml(r, tk){
   if(!ar.length && !defs.length) return `<div class="tb-info-l">Pas trouvé dans le dictionnaire${navigator.onLine === false ? ' (pas de connexion)' : ''}. Tu peux écrire le sens toi-même en l'ajoutant à tes mots.</div>`;
   return `${ar.length ? `<div class="tb-ar" dir="rtl" lang="ar">${escapeHtml(r.arPick || ar.join('، '))}</div>${r.arAuto && !r.arPick ? `<div class="tb-auto">🌐 traduction automatique : à vérifier</div>` : ''}` : ''}
     ${r.src !== 'lexique' ? `<button type="button" class="tb-link tb-armore" data-tb="ar-more">🔄 Pas convaincu ? D'autres traductions</button><div class="arp tb-arp" id="tbInfoArp" hidden></div>` : ''}
-    ${defs.length ? `<ol class="tb-defs">${defs.slice(0, 4).map(d => `<li>${escapeHtml(d)}</li>`).join('')}</ol>` : ''}
+    ${defs.length && !r.litDef ? `<ol class="tb-defs">${defs.slice(0, 4).map(d => `<li>${escapeHtml(d)}</li>`).join('')}</ol>` : ''}
+    ${r.litDef ? tbLitHtml(r) : ''}
     <div class="tb-src">${r.src === 'lexique' ? '✓ Dans ton lexique' : (r.src ? 'Source : ' + escapeHtml(r.src) : '')}${r.pos ? ` <span>(${escapeHtml(r.pos)})</span>` : ''}</div>`;
 }
 /* ---------- 🔎 1.0.23 : une expression de plusieurs mots (« tandis que »), choisie dans la phrase ---------- */
@@ -55333,6 +55708,38 @@ function tbAddBtnHtml(known, cands){
   if(w) return `<button type="button" class="tb-btn see" data-tb="see-word" data-w="${tbAttr(w.fr)}">👁 Déjà dans tes mots · le voir</button><button type="button" class="tb-btn" data-tb="edit-word" data-w="${tbAttr(w.fr)}">✏️ Modifier</button>`;
   return `<button type="button" class="tb-btn" data-tb="add" ${known ? 'disabled' : ''}>${known ? '✓ Déjà dans tes mots' : '➕ Ajouter à mes mots'}</button>`;
 }
+/* 🖼 1.0.50 : un texte importé sans certaines de ses images : on peut les choisir après coup (le nom suffit) */
+function tbMissNames(art){ return (art && art.blocks ? art.blocks : []).filter(b => b && b.miss).map(b => b.miss); }
+function tbMissHtml(art){
+  const L = tbMissNames(art); if(!L.length) return '';
+  return `<div class="tb-missbar" id="tbMissBar"><span>🖼 ${L.length > 1 ? `${L.length} images manquent` : "Une image manque"} dans ce texte <small>(${escapeHtml(L.slice(0, 4).join(', '))}${L.length > 4 ? '…' : ''})</small></span>
+    <button type="button" class="tb-btn pri sm" data-tb="miss-add">📎 ${L.length > 1 ? 'Les choisir' : 'La choisir'}</button><input type="file" id="tbMissFile" accept="image/*,.gif,.svg,.webp,.png,.jpg,.jpeg" multiple hidden></div>`;
+}
+async function tbMissAdd(files){
+  const art = TB.art; if(!art || !art.blocks) return;
+  files = [...(files || [])]; if(!files.length) return;
+  const norm = (x) => String(x || '').toLowerCase().replace(/\.[^.]+$/, '').replace(/[^a-z0-9]+/g, '');
+  const blocks = art.blocks.slice(), left = files.slice();
+  let n = 0;
+  for(let i = 0; i < blocks.length; i++){
+    const b = blocks[i]; if(!b || !b.miss) continue;
+    let k = left.findIndex(f => String(f.name).toLowerCase() === String(b.miss).toLowerCase());
+    if(k < 0) k = left.findIndex(f => norm(f.name) === norm(b.miss));
+    if(k < 0 && tbMissNames({ blocks }).length === 1 && left.length === 1) k = 0;          // une seule manque, une seule choisie : c'est elle
+    if(k < 0) continue;
+    const f = left.splice(k, 1)[0], id = await tbImgAdd(f);
+    if(!id) continue;
+    blocks[i] = { t:'img', id, nm:b.miss, w:100, al:'c' };
+    n++;
+  }
+  if(!n){ tbToast(`🖼 Aucune image ne porte le nom attendu (${tbMissNames(art).slice(0, 3).join(', ')}).`, 3800); return; }
+  const a2 = Object.assign({}, art, { blocks, text:tbBlocksText(blocks) });
+  if(!tbPut(a2)){ tbToast("⚠️ Plus de place sur l'appareil.", 3000); return; }
+  const rest = tbMissNames(a2).length;
+  tbToast(`🖼 ${n} image${n > 1 ? 's' : ''} ajoutée${n > 1 ? 's' : ''}${rest ? ` · encore ${rest} à trouver` : ' ✓'}`, 2800);
+  renderTabletteReader(art.id);
+}
+
 function tbSeeWord(fr){
   const w = tbLexWord(fr); if(!w) return;
   try{ wordCardPopup(w, { note:'📇 Ce mot est déjà dans tes mots' }); }catch(e){ console.warn(e); }
@@ -55471,7 +55878,7 @@ function tbAddForm(k){
     <div class="tb-exbar"><button type="button" class="tb-chip sm" data-tb="ex-prev" data-ex="tbAfEx" ${tk.s > 0 && tk.s < tbNS() ? '' : 'disabled'}>＋ phrase d'avant</button><button type="button" class="tb-chip sm" data-tb="ex-next" data-ex="tbAfEx" ${tk.s < tbNS() - 1 ? '' : 'disabled'}>＋ phrase d'après</button><button type="button" class="tb-chip sm" data-tb="ex-reset" data-ex="tbAfEx">↺ La phrase du texte</button></div>
     <button type="button" class="tb-btn pri wide" data-tb="add-go">➕ Ajouter à mes mots</button>`;
   box.hidden = false;
-  arPickMount(document.getElementById('tbAfArp'), document.getElementById('tbAfAr'), { list:(r.ar || []).map(a => ({ ar:a, src:r.arAuto ? 'Traduction auto' : 'Dictionnaire' })), fr:() => (document.getElementById('tbAfFr') || {}).value || lemma, lemma:() => lemma });
+  arPickMount(document.getElementById('tbAfArp'), document.getElementById('tbAfAr'), { list:(r.ar || []).map(a => ({ ar:a, src:r.arAuto ? 'Traduction auto' : 'Dictionnaire' })).concat(r.litAr && !(r.ar || []).includes(r.litAr) ? [{ ar:r.litAr, src:'Mot à mot' }] : []), fr:() => (document.getElementById('tbAfFr') || {}).value || lemma, lemma:() => lemma });
   box.scrollIntoView({ block:'nearest', behavior:'smooth' });
   const d = document.getElementById(r.defs && r.defs.length ? 'tbAfAr' : 'tbAfDef'); if(d && !d.value) d.focus();
 }
@@ -55499,7 +55906,14 @@ function tbAddFromForm(k){
     return;
   }
   const box = document.getElementById('tbAddF'), lw = tbLexWord(fr);
-  if(box && lw){ box.innerHTML = `<div class="tb-dup">📇 « ${escapeHtml(lw.fr)} » est déjà dans tes mots. Tu veux le voir ?<button type="button" class="tb-btn hl sm" data-tb="see-word" data-w="${tbAttr(lw.fr)}">👁 Voir sa fiche</button></div>`; box.hidden = false; return; }
+  if(box && lw){
+    const sFull = ex.ex && ex.ex !== '~' ? ex.ex.replace('~', ex.exForm || form) : sent;
+    TB.dupSent = sFull;
+    const canAdd = sFull && !lexHasSentence(lw, sFull);
+    box.innerHTML = `<div class="tb-dup">📇 « ${escapeHtml(lw.fr)} » est déjà dans tes mots.${canAdd ? ' Tu peux garder cette phrase aussi, à la suite de la première :' : ' Tu veux le voir ?'}
+      ${canAdd ? `<button type="button" class="tb-btn pri sm" data-tb="dup-ex" data-w="${tbAttr(lw.fr)}">➕ Ajouter cette phrase à sa fiche</button>` : ''}<button type="button" class="tb-btn hl sm" data-tb="see-word" data-w="${tbAttr(lw.fr)}">👁 Voir sa fiche</button></div>`;
+    box.hidden = false; return;
+  }
   tbToast(`« ${fr} » est déjà dans tes mots.`);
 }
 /* ---------- 🏷️ le carnet : les mots tagués → tes mots ---------- */
@@ -55645,7 +56059,7 @@ function tbWire(el){
   const pts = new Map(), dist = () => { const [a, b] = [...pts.values()]; return Math.hypot(a.x - b.x, a.y - b.y) || 1; };
   // 🖊️ 1.0.29 : le mot sous ton doigt, ton stylo ou ta souris s'allume (couleur claire, au choix dans Aa)
   const H = { el:null, raf:0, x:0, y:0, t:0 };
-  const hovSet = (sp) => { if(sp === H.el) return; if(H.el) H.el.classList.remove('hov'); H.el = sp; if(sp) sp.classList.add('hov'); };
+  const hovSet = (sp) => { if(sp === H.el) return; tbTrailStep(H, sp); };
   const hovRun = () => {
     H.raf = 0;
     if(tbUi().hov === 'off' || pts.size > 1 || TB.pinch){ hovSet(null); return; }
@@ -55752,10 +56166,21 @@ function tbAction(id, btn, e){
     case 'mark-go': tbGoMark(); return;
     case 'mark-del': tbDelMark(); return;
     case 'see-word': tbSeeWord(btn.dataset.w); return;
+    case 'miss-add': { const inp = document.getElementById('tbMissFile'); if(inp){ inp.value = ''; inp.onchange = () => tbMissAdd(inp.files); inp.click(); } return; }
     case 'edit-word': { const w = tbLexWord(btn.dataset.w), tk = TB.toks[TB.sheetK]; if(w){ tbCloseSheet(); wordEditPopup(w, tk ? { sentence:TB.sents[tk.s], form:tk.form } : {}); } return; }
     case 'tip-x': tbTipClose(); return;
     case 'tip-say': if(TB.tipW) tbSay(TB.tipW.fr); return;
     case 'tip-see': { const w = TB.tipW; tbTipClose(); if(w) wordCardPopup(w, { note:'📇 Dans tes mots' }); return; }
+    case 'tip-ex': case 'dup-ex': {
+      const k0 = TB.tipK, w = btn.dataset.tb === 'tip-ex' ? TB.tipW : tbLexWord(btn.dataset.w), tk = TB.toks[btn.dataset.tb === 'tip-ex' ? TB.tipK : TB.sheetK];
+      const s = btn.dataset.tb === 'dup-ex' && TB.dupSent ? TB.dupSent : (tk ? TB.sents[tk.s] : '');
+      const r = lexAddSentence(w, s), n = w ? (w.exMore || []).length : 0;
+      if(r === 'ok'){ try{ playCorrectSound(); }catch(e){} tbToast(n ? `➕ Phrase ajoutée à « ${w.fr} » (${n + 1}ᵉ phrase)` : `➕ Phrase ajoutée à « ${w.fr} »`, 2600); }
+      else if(r === 'dup') tbToast('Cette phrase est déjà dans sa fiche.');
+      if(btn.dataset.tb === 'tip-ex'){ tbTipClose(); if(w && r === 'ok') setTimeout(() => { try{ tbTipOpen(k0, w); }catch(e){} }, 60); }
+      else { const box = document.getElementById('tbAddF'); if(box && r === 'ok') box.innerHTML = `<div class="tb-dup">✅ Phrase ajoutée à la fiche de « ${escapeHtml(w.fr)} ».<button type="button" class="tb-btn hl sm" data-tb="see-word" data-w="${tbAttr(w.fr)}">👁 Voir sa fiche</button></div>`; }
+      return;
+    }
     case 'tip-edit': { const w = TB.tipW, tk = TB.toks[TB.tipK]; tbTipClose(); if(w) wordEditPopup(w, tk ? { sentence:TB.sents[tk.s], form:tk.form } : {}); return; }
     case 'tip-del': { const c = document.getElementById('tbTipConf'); if(c){ c.hidden = false; tbTipPlace(); } return; }
     case 'tip-del-no': { const c = document.getElementById('tbTipConf'); if(c) c.hidden = true; return; }
@@ -55767,6 +56192,7 @@ function tbAction(id, btn, e){
     case 'sp': { const a = tbAnchorGet(); tbUi().sp = +btn.dataset.v || 0; tbSaveUi(); tbApplyUi(); if(a) tbAnchorSet(a); tbToggleAa(true); return; }
     case 'paper': { const dk = document.documentElement.getAttribute('data-theme') === 'dark'; tbUi()[dk ? 'paperD' : 'paperL'] = btn.dataset.v; tbSaveUi(); tbApplyUi(); tbToggleAa(true); return; }
     case 'hov': { tbUi().hov = btn.dataset.v; tbSaveUi(); tbApplyUi(); tbToggleAa(true); if(btn.dataset.v !== 'off') tbToast('🖊️ Passe ton doigt ou ton stylo sur le texte', 1800); return; }
+    case 'hov-tr': { tbUi().hovTrail = btn.dataset.v === '1'; tbSaveUi(); tbToggleAa(true); tbToast(tbUi().hovTrail ? '🖍 Traînée de couleurs : les 3 mots d\'avant restent allumés' : 'Traînée enlevée', 2200); return; }
     case 'kn': { tbUi().kn = btn.dataset.v === '1'; tbSaveUi(); tbPaintKnown(); tbToggleAa(true); return; }
     case 'preset': { const P0 = TB_PRESETS[btn.dataset.v]; if(!P0) return; const a = tbAnchorGet(), u = tbUi(); ['font', 'fs', 'lh', 'fw', 'bio', 'sp'].forEach(x => { u[x] = P0[x]; }); tbSaveUi(); tbApplyUi(); tbRender(true); if(a) tbAnchorSet(a); tbToggleAa(true); tbToast('🅰️ ' + P0.n, 1400); return; }
     case 'aa-reset': { const a = tbAnchorGet(), u = tbUi(); ['font', 'fw', 'bio', 'sp', 'paperL', 'paperD', 'hov', 'hovc'].forEach(x => { delete u[x]; }); u.fs = 19; u.lh = 1.65; u.kn = true; tbSaveUi(); tbApplyUi(); tbRender(true); if(a) tbAnchorSet(a); tbToggleAa(true); return; }
@@ -55986,7 +56412,21 @@ const AUDIO_EXT = /\.(mp3|m4a|aac|ogg|oga|opus|wav|webm|flac)$/i;
 const AUDIO_CACHE_KEY = 'vocabVision.audioLibCache';
 const AUDIO_POS_KEY = 'lexiqueQuiz::audioLibPos';
 const AUDIO_LAST_KEY = 'vocabVision.audioLast';
-const audioLib = { el:null, data:null, pl:-1, tr:-1, error:'', loading:false, speed:1, loopOne:false, autoPaused:false, lastTick:0, pending:0, openPl:{} };
+const audioLib = { el:null, data:null, pl:-1, tr:-1, error:'', loading:false, speed:1, loopOne:false, autoPaused:false, lastTick:0, pending:0, openPl:{}, rep:0, repDone:0, repKey:'', repOpen:false };
+/* 🔂 1.0.49 : répéter le même audio N fois (0 = non, -1 = sans fin) ; le choix est gardé sur l'appareil */
+try{ const r = +localStorage.getItem('vocabVision.audioRep'); if(r === -1 || (r >= 2 && r <= 99)){ audioLib.rep = r; audioLib.loopOne = r === -1; } }catch(e){}
+function audioRepSet(n){
+  n = +n || 0; if(n !== -1 && (n < 2 || n > 99)) n = 0;
+  audioLib.rep = n; audioLib.loopOne = n === -1; audioLib.repDone = 0;
+  try{ localStorage.setItem('vocabVision.audioRep', String(n)); }catch(e){}
+}
+function audioRepLabel(){
+  const R = audioLib.rep;
+  if(!R) return '🔂 Répéter';
+  if(R < 0) return '🔂 Répéter : ∞';
+  const c = audioCurrent(), same = c && audioLib.repKey === c.t.file && audioLib.repDone > 0;
+  return `🔂 ${same ? Math.min(R, audioLib.repDone + 1) + '/' : ''}${R} fois`;
+}
 
 function audioPretty(name){
   const t = String(name).replace(/\.[^.\/]+$/, '').replace(/_+/g, ' ').replace(/\s+/g, ' ').trim();
@@ -56109,7 +56549,16 @@ function audioEnsureEl(){
   el.addEventListener('ended', () => {
     const c = audioCurrent();
     if(c){ const map = audioLoadPos(); map[c.t.file] = { t:0, done:true }; audioSavePos(map); }
-    if(audioLib.loopOne){ el.currentTime = 0; el.play().catch(() => {}); return; }
+    // 🔂 1.0.49 : encore une fois ? (N fois en tout, ou sans fin)
+    const R = audioLib.rep || (audioLib.loopOne ? -1 : 0);
+    if(R){
+      const key = c ? c.t.file : '';
+      if(audioLib.repKey !== key){ audioLib.repKey = key; audioLib.repDone = 0; }
+      audioLib.repDone++;
+      if(R < 0 || audioLib.repDone < R){ el.currentTime = 0; el.play().catch(() => {}); audioUpdateUI(true); return; }
+      audioLib.repDone = 0;
+      try{ tbToast(`🔂 Écouté ${R} fois ✓`, 1800); }catch(e){}
+    }
     audioNext(true);
   });
   el.addEventListener('error', () => {
@@ -57208,9 +57657,13 @@ function audioUpdateUI(rebuild){
           </div>
           <div class="audio-opts">
             ${[0.75, 1, 1.25, 1.5].map(s => `<button class="mode-chip ${audioLib.speed === s ? 'active' : ''}" data-audio-speed="${s}">${s}×</button>`).join('')}
-            <button class="mode-chip ${audioLib.loopOne ? 'active' : ''}" id="audioLoopBtn">🔂 Répéter</button>
+            <button class="mode-chip ${audioLib.rep ? 'active' : ''}" id="audioLoopBtn" aria-expanded="${audioLib.repOpen}" title="Répéter le même audio">${audioRepLabel()}</button>
             <button class="mode-chip ${TRX.on ? 'active' : ''}" id="trxBtn" aria-pressed="${TRX.on}">📝 Transcription en direct</button>
             ${apSupported() ? `<button class="mode-chip ${AP.win && !AP.win.closed ? 'active' : ''}" id="apBtn" title="Une petite fenêtre toujours visible, même appli réduite">🪟 Lecteur flottant</button>` : ''}
+          </div>
+          <div class="audio-rep" id="audioRep" ${audioLib.repOpen ? '' : 'hidden'} role="group" aria-label="Combien de fois répéter cet audio">
+            <span>Répéter cet audio :</span>${[[0, 'Non'], [2, '2×'], [3, '3×'], [5, '5×'], [10, '10×'], [20, '20×'], [-1, '∞']].map(([v, l]) => `<button class="mode-chip ${audioLib.rep === v ? 'active' : ''}" data-audio-rep="${v}">${l}</button>`).join('')}
+            <label class="audio-rep-n">✏️ <input type="number" id="audioRepN" min="2" max="99" inputmode="numeric" placeholder="Autre" value="${audioLib.rep > 0 && ![2, 3, 5, 10, 20].includes(audioLib.rep) ? audioLib.rep : ''}" aria-label="Nombre de fois (2 à 99)"> fois</label>
           </div>
           <div id="trxBox" class="trx-box" ${TRX.on || (TRX.segs && TRX.segs.length) ? '' : 'hidden'}></div>`;
         now.querySelector('#trxBtn').addEventListener('click', () => trxToggle());
@@ -57220,7 +57673,9 @@ function audioUpdateUI(rebuild){
         now.querySelector('#audioNextBtn').addEventListener('click', () => { audioNext(); audioRenderList(); });
         now.querySelector('#audioBackBtn').addEventListener('click', () => audioSkip(-10));
         now.querySelector('#audioFwdBtn').addEventListener('click', () => audioSkip(10));
-        now.querySelector('#audioLoopBtn').addEventListener('click', () => { audioLib.loopOne = !audioLib.loopOne; audioUpdateUI(true); });
+        now.querySelector('#audioLoopBtn').addEventListener('click', () => { audioLib.repOpen = !audioLib.repOpen; audioUpdateUI(true); });
+        now.querySelectorAll('[data-audio-rep]').forEach(b => b.addEventListener('click', () => { audioRepSet(+b.dataset.audioRep); audioLib.repOpen = false; audioUpdateUI(true); try{ tbToast(audioLib.rep ? (audioLib.rep < 0 ? '🔂 Cet audio se répète sans fin' : `🔂 Chaque audio sera joué ${audioLib.rep} fois`) : 'Plus de répétition', 1800); }catch(e){} }));
+        { const ni = now.querySelector('#audioRepN'); const go = () => { const v = Math.round(+ni.value); if(v >= 2 && v <= 99){ audioRepSet(v); audioLib.repOpen = false; audioUpdateUI(true); try{ tbToast(`🔂 Chaque audio sera joué ${v} fois`, 1800); }catch(e){} } }; ni.addEventListener('change', go); ni.addEventListener('keydown', (e) => { if(e.key === 'Enter') go(); }); }
         now.querySelectorAll('[data-audio-speed]').forEach(b => b.addEventListener('click', () => { audioLib.speed = +b.dataset.audioSpeed; if(audioLib.el) audioLib.el.playbackRate = audioLib.speed; audioUpdateUI(true); }));
         const seek = now.querySelector('#audioSeek');
         seek.addEventListener('input', () => { if(el && isFinite(el.duration)) el.currentTime = seek.value / 1000 * el.duration; });
@@ -57757,7 +58212,7 @@ function amRenderQuota(){
   const sum = (l) => (l || []).reduce((s, e) => s + (e.size || 0), 0);
   let html = '';
   if(audioAdmin.ghEntries){ const u = sum(audioAdmin.ghEntries); html += bar(u, audioAdmin.pagesLimit, `💾 GitHub : <b>${amFmtSize(u)}</b> utilisés sur ~1 Go (limite d'un site GitHub Pages)`); }
-  if(audioAdmin.r2Entries){ const u = sum(audioAdmin.r2Entries); html += bar(u, audioAdmin.r2Free, `☁️ Cloudflare R2 : <b>${amFmtSize(u)}</b> utilisés sur 10 Go gratuits`); }
+  if(audioAdmin.r2Entries){ html += r2QuotaHtml(sum(audioAdmin.r2Entries)); }
   q.innerHTML = html;
 }
 
@@ -58175,14 +58630,71 @@ async function r2ListAll(prefix, max){
   return out;
 }
 function r2PutSmall(key, text, type){ return r2Req('PUT', key, { headers:{ 'content-type':type || 'text/plain; charset=utf-8' }, body:text }); }
-function r2Delete(key){ return r2Req('DELETE', key); }
+function r2Delete(key){ R2Q.at = 0; return r2Req('DELETE', key); }        // (le total sera recompté)
 async function r2Copy(from, to){
   const c = r2CfgActive();
   const { text } = await r2Req('PUT', to, { headers:{ 'x-amz-copy-source':'/' + r2Enc(c.bucket) + '/' + r2KeyPath(from) } });
   if(/<Error>/.test(text)) throw r2Err(500, text);
 }
+/* 🛑 1.0.49 : rester dans les 10 Go gratuits de Cloudflare R2. On compte TOUT le bucket (audios + PDF + petits fichiers) :
+   • à partir de 8,5 Go : une alerte (« il reste … avant le blocage ») ;
+   • un envoi qui ferait dépasser 9,5 Go est refusé, avec un message clair.
+   Le total est gardé sur l'appareil (recompté toutes les 10 minutes, et après chaque suppression). */
+var R2_LIMIT = 9.5 * 1073741824, R2_WARN = 8.5 * 1073741824;
+var R2Q = { bytes:null, at:0, p:null, warned:0, k:'' };
+function r2UsageKey(){ const c = (typeof r2CfgGet === 'function' && r2CfgGet()) || {}; return 'vocabVision.r2Usage::' + (c.bucket || ''); }
+function r2UsageLoad(){
+  const k = r2UsageKey(); if(R2Q.k === k) return; R2Q.k = k; R2Q.bytes = null; R2Q.at = 0;
+  try{ const o = JSON.parse(localStorage.getItem(k) || 'null'); if(o && typeof o.b === 'number'){ R2Q.bytes = o.b; R2Q.at = o.t || 0; } }catch(e){}
+}
+function r2UsageSave(){ try{ localStorage.setItem(r2UsageKey(), JSON.stringify({ b:R2Q.bytes, t:R2Q.at })); }catch(e){} }
+async function r2Usage(force){
+  if(!r2Ready()) return null;
+  r2UsageLoad();
+  if(!force && R2Q.bytes != null && Date.now() - R2Q.at < 10 * 60000) return R2Q.bytes;
+  if(R2Q.p) return R2Q.p;
+  R2Q.p = (async () => {
+    try{ const all = await r2ListAll(''); R2Q.bytes = all.reduce((s, e) => s + (e.size || 0), 0); R2Q.at = Date.now(); r2UsageSave(); return R2Q.bytes; }
+    finally{ R2Q.p = null; }
+  })();
+  return R2Q.p;
+}
+function r2FmtGo(b){ return (b / 1073741824).toFixed(2).replace('.', ',') + ' Go'; }
+async function r2QuotaCheck(size){
+  let used = null;
+  try{ used = await r2Usage(); }catch(e){ return; }               // impossible de compter (pas de réseau…) : R2 dira lui-même s'il refuse
+  if(used == null) return;
+  if(used + (size || 0) > R2_LIMIT){
+    const err = new Error(`🛑 Cloudflare R2 presque plein : ${r2FmtGo(used)} utilisés. Cet envoi (${amFmtSize(size || 0)}) dépasserait la limite de sécurité de 9,5 Go (tu restes ainsi dans les 10 Go gratuits). Supprime des audios ou des PDF, puis réessaie.`);
+    err.fatal = true; err.quota = true; throw err;
+  }
+}
+function r2QuotaAfter(size){
+  r2UsageLoad();
+  if(R2Q.bytes != null){ R2Q.bytes = Math.max(0, R2Q.bytes + (size || 0)); r2UsageSave(); }
+  const u = R2Q.bytes; if(u == null || u < R2_WARN) return;
+  if(R2Q.warned && Date.now() - R2Q.warned < 30 * 60000) return;
+  R2Q.warned = Date.now();
+  const msg = `⚠️ Cloudflare R2 : ${r2FmtGo(u)} utilisés sur 10 Go gratuits. Encore ${amFmtSize(Math.max(0, R2_LIMIT - u))} avant le blocage des envois (9,5 Go).`;
+  try{ setStatus(msg, 'err'); }catch(e){}
+  try{ tbToast(msg, 6000); }catch(e){}
+}
+function r2QuotaHtml(audioBytes){
+  r2UsageLoad();
+  const u = R2Q.bytes != null ? Math.max(R2Q.bytes, audioBytes || 0) : (audioBytes || 0), lim = 10 * 1073741824;
+  const pct = Math.min(100, u / lim * 100), cls = u >= R2_LIMIT ? 'full' : (u >= R2_WARN ? 'hot' : '');
+  if(!R2Q.p && (R2Q.bytes == null || Date.now() - R2Q.at > 10 * 60000)) r2Usage().then(() => { try{ amRenderQuota(); }catch(e){} }).catch(() => {});
+  return `<div class="am-quota ${cls}"><div>☁️ Cloudflare R2 : <b>${amFmtSize(u)}</b> utilisés sur 10 Go gratuits${R2Q.bytes != null ? ' <small>(audios + PDF)</small>' : ''} · <small>alerte à 8,5 Go, envois bloqués à 9,5 Go</small></div><div class="am-qbar"><span style="width:${pct.toFixed(1)}%"></span><i class="am-qmark" style="left:95%" title="9,5 Go : envois bloqués"></i></div>
+    ${u >= R2_LIMIT ? '<div class="am-qmsg">🛑 Limite de 9,5 Go atteinte : les envois vers R2 sont bloqués. Supprime des fichiers pour en remettre.</div>' : (u >= R2_WARN ? `<div class="am-qmsg">⚠️ Plus que ${amFmtSize(R2_LIMIT - u)} avant le blocage des envois.</div>` : '')}</div>`;
+}
 /* Envoi d'un fichier : direct jusqu'à 48 Mo, en morceaux de 16 Mo au-delà (R2 exige des morceaux de même taille). */
 async function r2UploadFile(q, onFrac){
+  if(!q.mp && !q.noQuota) await r2QuotaCheck(q.file && q.file.size);        // 🛑 1.0.49
+  const out = await r2UploadFile0(q, onFrac);
+  try{ r2QuotaAfter(q.file && q.file.size); }catch(e){}
+  return out;
+}
+async function r2UploadFile0(q, onFrac){
   const file = q.file, key = q.path, size = file.size, type = r2Mime(file.name || key);
   onFrac = onFrac || (() => {});
   if(size <= r2.singleMax){
