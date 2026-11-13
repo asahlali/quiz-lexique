@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- 🏷️ Version de l'appli : augmentée automatiquement par publier-site.cmd à chaque publication -->
-<meta name="app-version" content="1.0.51" data-date="2026-11-12">
+<meta name="app-version" content="1.0.52" data-date="2026-11-13">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <title>VocabVISION — Vocabulaire Français ↔ Arabe</title>
 <script>
@@ -678,15 +678,27 @@
   .mascot{ transform-origin:bottom center; animation:mascotIdle 3.2s ease-in-out infinite; filter:drop-shadow(0 8px 10px rgba(0,0,0,0.18)); }
   .mascot svg{ display:block; }
   .m-shadow{ fill:rgba(0,0,0,0.12); }
+  /* ⚡ 1.0.52 : validation automatique */
+  .autov-ok{ animation:autovOk .7s ease-out; border-color:#16A34A !important; }
+  @keyframes autovOk{ 0%{ box-shadow:0 0 0 0 rgba(34,197,94,.65); } 100%{ box-shadow:0 0 0 16px rgba(34,197,94,0); } }
+  .autov-hint{ margin:12px 0 0; font-size:12.5px; font-weight:700; color:var(--text-dim); text-align:center; }
+  @media (prefers-reduced-motion:reduce){ .autov-ok{ animation:none; } }
   /* ===== 🦊 Mascotte 3D temps réel (WebGL) ===== */
   .fox3d-canvas{ position:absolute; left:50%; top:50%; transform:translate(-50%,-56%); pointer-events:none; z-index:2; }
   .mascot.fox3d-on{ position:relative; }
   .mascot.fox3d-on, .mascot.fox3d-on.happy, .mascot.fox3d-on.sad{ animation:none; filter:none; }
   .mascot.fox3d-on > svg{ visibility:hidden; }
-  .mascot.fox3d-on .fox3d-canvas{ width:150px !important; height:150px !important; transform:translate(-50%,-68%); }
+  .mascot.fox3d-on .fox3d-canvas{ width:178px !important; height:178px !important; transform:translate(-50%,-66%); }
   #heroMascotContainer.fox3d-on{ animation:heroFadeUp .6s cubic-bezier(.16,1,.3,1) both !important; }
   #heroMascotContainer.fox3d-on .mascot-3d-wrap{ visibility:hidden; }
-  #heroMascotContainer.fox3d-on .fox3d-canvas{ width:176px !important; height:176px !important; transform:translate(-50%,-67%); }
+  #heroMascotContainer.fox3d-on .fox3d-canvas{ width:196px !important; height:196px !important; transform:translate(-50%,-64%); }
+  /* 1.0.52 : un socle lumineux sous le grand renard de l'accueil */
+  html body .home-hero.hh2 #heroMascotContainer.fox3d-on::after{ content:''; position:absolute; left:50%; bottom:2px; width:120%; height:26px; transform:translateX(-50%); border-radius:50%; z-index:1; pointer-events:none;
+    background:radial-gradient(closest-side, rgba(242,181,68,.42), rgba(242,181,68,.12) 62%, rgba(242,181,68,0)); animation:foxPlinth 3.4s ease-in-out infinite; }
+  @keyframes foxPlinth{ 0%,100%{ opacity:.75; transform:translateX(-50%) scaleX(1); } 50%{ opacity:1; transform:translateX(-50%) scaleX(1.12); } }
+  @media (prefers-reduced-motion:reduce){ html body .home-hero.hh2 #heroMascotContainer.fox3d-on::after{ animation:none; } }
+  html body .home-hero.hh2 .hh2-fox{ padding-top:16px; }
+  @media (min-width:720px){ html body .home-hero.hh2 .hh2-fox{ padding-top:30px; } }
   /* ===== Mascotte 3D réaliste ===== */
   .mascot{ transform-style:preserve-3d; }
   .mascot > svg, .mascot-3d-wrap{
@@ -4233,7 +4245,7 @@
   html body .home-hero.hh2 .hero-title .grad{ background:linear-gradient(90deg, #FFE3A3, #F2B544) !important; -webkit-background-clip:text !important; background-clip:text !important; }
   html body .home-hero.hh2 .type-cursor{ background:var(--hh-saf) !important; }
   html body .home-hero.hh2 .hero-sub{ margin:0 !important; max-width:34em; font-size:15px !important; line-height:1.45; text-align:left !important; color:rgba(255,255,255,.72) !important; }
-  html body .home-hero.hh2 #heroMascotContainer{ width:104px !important; height:104px !important; margin:0 !important; }
+  html body .home-hero.hh2 #heroMascotContainer{ width:118px !important; height:118px !important; margin:0 !important; }
   html body .home-hero.hh2 .va-hero-pill{ bottom:-4px; font-size:12px; padding:5px 10px; }
   html body .home-hero.hh2 .hero-cta{ display:flex !important; width:100%; align-items:flex-start; text-align:left; gap:3px; background:var(--hh-saf) !important; color:var(--hh-txt) !important; font-weight:800 !important; font-size:17px !important; border-radius:14px !important; padding:13px 18px !important; margin:0 !important;
     box-shadow:0 1px 0 rgba(255,255,255,.35) inset, 0 10px 26px -12px rgba(242,181,68,.75) !important; }
@@ -4262,7 +4274,8 @@
     html body .home-hero.hh2{ padding:30px 34px 24px !important; }
     .hh2-grid{ grid-template-columns:minmax(0, 1fr) minmax(0, 1fr); grid-template-areas:"copy fox" "act deck" "slots deck"; column-gap:40px; row-gap:14px; grid-template-rows:auto auto 1fr; }
     .hh2-fox{ justify-self:center; align-self:end; margin-bottom:4px; }
-    html body .home-hero.hh2 #heroMascotContainer{ width:120px !important; height:120px !important; }
+    html body .home-hero.hh2 #heroMascotContainer{ width:168px !important; height:168px !important; }
+    html body .home-hero.hh2 #heroMascotContainer.fox3d-on .fox3d-canvas{ width:262px !important; height:262px !important; transform:translate(-50%,-62%); }
     .hh2-act{ align-self:start; } html body .home-hero.hh2 .hero-cta{ width:auto; min-width:280px; display:inline-flex !important; }
   }
   @media (prefers-reduced-motion:reduce){ .hw-card.hw-in{ animation:none; } }
@@ -4644,6 +4657,65 @@
   .va-fox:not(.has3d).listening .va-ear{ opacity:1; transform:scale(1); animation:vaEar 1s ease-in-out infinite; }
   @keyframes vaEar{ 0%,100%{ transform:scale(1) rotate(-6deg); } 50%{ transform:scale(1.15) rotate(6deg); } }
   /* 🏆 grande fête de l'objectif du jour */
+  /* ===== 🎯 1.0.52 : un objectif du jour atteint → la mascotte sort, t'encourage, la barre se remplit ===== */
+  .qw{ position:fixed; inset:0; z-index:9985; display:flex; align-items:flex-end; justify-content:center; padding:0 12px calc(env(safe-area-inset-bottom, 0px) + 14px); }
+  @media (min-width:720px){ .qw{ align-items:center; padding-bottom:0; } }
+  .qw-bg{ position:absolute; inset:0; background:radial-gradient(120% 80% at 50% 100%, rgba(20,26,51,.72), rgba(20,26,51,.45)); backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px); opacity:0; transition:opacity .35s ease; }
+  .qw.in .qw-bg{ opacity:1; }
+  .qw-card{ position:relative; width:min(470px, 100%); margin-top:190px; border-radius:24px; padding:18px 16px 14px; color:#fff;
+    background:radial-gradient(380px 180px at 100% 0%, rgba(242,181,68,.2), rgba(242,181,68,0) 60%), linear-gradient(165deg, #2A3170 0%, #161B3A 75%);
+    border:1px solid rgba(255,255,255,.1); box-shadow:0 30px 60px -24px rgba(0,0,0,.7), 0 0 0 1px rgba(242,181,68,.12) inset;
+    transform:translateY(110%) scale(.96); transition:transform .55s cubic-bezier(.2,1.25,.35,1); }
+  .qw.in .qw-card{ transform:none; }
+  .qw.out .qw-card{ transform:translateY(120%); transition:transform .4s ease-in; }
+  .qw.out .qw-bg{ opacity:0; }
+  .qw-fox{ position:absolute; left:6px; bottom:calc(100% - 26px); width:170px; height:170px; pointer-events:none; z-index:2; }
+  .qw-fox .fox3d-canvas{ position:absolute; left:50%; top:50%; width:220px !important; height:220px !important; transform:translate(-50%,-55%); }
+  .qw-fox2d{ position:absolute; left:20px; bottom:0; width:130px; height:130px; background:var(--vv-fox-body-m) center/contain no-repeat; transform:translateY(40%) scale(.4); opacity:0; transition:transform .6s cubic-bezier(.2,1.6,.4,1) .25s, opacity .3s ease .25s; }
+  .qw.in .qw-fox2d{ transform:none; opacity:1; animation:qwHop 1.8s ease-in-out 1s infinite; }
+  @keyframes qwHop{ 0%,100%{ translate:0 0; } 40%{ translate:0 -12px; } 55%{ translate:0 0; } }
+  .qw-bubble{ position:absolute; left:168px; right:4px; bottom:calc(100% + 18px); z-index:3; background:#fff; color:#1B1F3B; border-radius:16px; padding:10px 12px; font:700 14.5px/1.4 'Nunito','Inter',sans-serif;
+    box-shadow:0 14px 30px -12px rgba(0,0,0,.5); opacity:0; transform:translateY(8px) scale(.9); transform-origin:0 100%; transition:opacity .3s ease, transform .4s cubic-bezier(.2,1.4,.4,1); }
+  .qw-bubble::after{ content:''; position:absolute; left:-7px; bottom:16px; border:8px solid transparent; border-right-color:#fff; border-left:0; }
+  .qw-bubble.on{ opacity:1; transform:none; }
+  @media (max-width:420px){ .qw-fox{ width:140px; height:140px; left:0; } .qw-fox .fox3d-canvas{ width:184px !important; height:184px !important; } .qw-bubble{ left:132px; font-size:13.5px; } }
+  .qw-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin:0 2px 12px; }
+  .qw-kick{ font:900 19px/1.15 'Nunito','Inter',sans-serif; letter-spacing:-.01em; }
+  .qw-kt{ background:linear-gradient(90deg,#FFE3A3,#F2B544); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .qw-count{ flex:none; font:800 13px/1 'Nunito','Inter',sans-serif; padding:7px 10px; border-radius:999px; background:rgba(242,181,68,.16); color:#FFE3A3; border:1px solid rgba(242,181,68,.35); font-variant-numeric:tabular-nums; }
+  .qw-count b{ display:inline-block; }
+  .qw-count b.bump{ animation:qwBump .5s cubic-bezier(.2,1.6,.4,1); }
+  @keyframes qwBump{ 0%{ transform:scale(1); } 40%{ transform:scale(1.7); color:#fff; } 100%{ transform:scale(1); } }
+  .qw-list{ display:flex; flex-direction:column; gap:8px; max-height:min(46vh, 380px); overflow:auto; padding:2px; margin:0 -2px; scrollbar-width:thin; }
+  .qw-row{ position:relative; display:grid; grid-template-columns:30px minmax(0,1fr) auto; align-items:center; gap:4px 10px; padding:9px 10px; border-radius:14px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.07); }
+  .qw-row.now{ background:linear-gradient(135deg, rgba(242,181,68,.2), rgba(236,72,153,.14)); border-color:rgba(242,181,68,.55); box-shadow:0 0 0 0 rgba(242,181,68,.6); animation:qwGlow 1.6s ease-out 1.6s 2; }
+  @keyframes qwGlow{ 0%{ box-shadow:0 0 0 0 rgba(242,181,68,.55); } 100%{ box-shadow:0 0 0 14px rgba(242,181,68,0); } }
+  .qw-ic{ font-size:20px; text-align:center; grid-row:span 2; }
+  .qw-lbl{ font:700 13.5px/1.3 'Nunito','Inter',sans-serif; color:rgba(255,255,255,.92); min-width:0; }
+  .qw-row.ok .qw-lbl{ color:rgba(255,255,255,.62); }
+  .qw-val{ font:800 12.5px/1 'Nunito','Inter',sans-serif; color:rgba(255,255,255,.7); font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .qw-row.now .qw-val, .qw-row.ok .qw-val{ color:#86EFAC; }
+  .qw-bar{ grid-column:2 / 4; position:relative; height:9px; border-radius:99px; background:rgba(255,255,255,.1); overflow:hidden; }
+  .qw-bar i{ position:absolute; inset:0 auto 0 0; width:var(--w, 0%); border-radius:inherit; background:linear-gradient(90deg,#818CF8,#A78BFA); transition:width 1.25s cubic-bezier(.3,.9,.3,1); }
+  .qw-row.ok .qw-bar i{ background:linear-gradient(90deg,#34D399,#22C55E); }
+  .qw-row.now .qw-bar i{ background:linear-gradient(90deg,#F2B544,#F97316,#EC4899); box-shadow:0 0 14px rgba(242,181,68,.7); }
+  .qw-row.now .qw-bar i::after{ content:''; position:absolute; inset:0; background:linear-gradient(100deg, transparent 20%, rgba(255,255,255,.75) 45%, transparent 70%); background-size:220% 100%; animation:qwShine 1.1s linear infinite; }
+  @keyframes qwShine{ from{ background-position:120% 0; } to{ background-position:-120% 0; } }
+  .qw-row.now.full .qw-bar i{ background:linear-gradient(90deg,#34D399,#22C55E); transition:width 1.25s cubic-bezier(.3,.9,.3,1), background .4s; }
+  .qw-row.full .qw-val{ opacity:0; transition:opacity .2s; }
+  .qw-stamp{ position:absolute; right:8px; top:7px; font:900 12px/1 'Nunito','Inter',sans-serif; color:#14532D; background:#86EFAC; padding:5px 9px; border-radius:999px; box-shadow:0 6px 14px -6px rgba(34,197,94,.9);
+    transform:scale(0) rotate(-14deg); opacity:0; }
+  .qw-row.full .qw-stamp{ animation:qwStamp .55s cubic-bezier(.2,1.7,.4,1) forwards; }
+  @keyframes qwStamp{ 0%{ transform:scale(2.4) rotate(-14deg); opacity:0; } 60%{ transform:scale(.9) rotate(-6deg); opacity:1; } 100%{ transform:scale(1) rotate(-6deg); opacity:1; } }
+  .qw-spark{ position:absolute; width:6px; height:6px; border-radius:50%; pointer-events:none; animation:qwSpark .9s ease-out forwards; }
+  @keyframes qwSpark{ from{ transform:translate(0,0) scale(1); opacity:1; } to{ transform:translate(var(--dx), var(--dy)) scale(.2); opacity:0; } }
+  .qw-sep{ font:800 11px/1 'Nunito','Inter',sans-serif; letter-spacing:.06em; text-transform:uppercase; color:rgba(255,255,255,.45); margin:6px 4px 0; }
+  .qw-foot{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:12px; }
+  .qw-left{ font:700 13px/1.35 'Nunito','Inter',sans-serif; color:rgba(255,255,255,.78); }
+  .qw-left b{ color:#FFE3A3; }
+  .qw-go{ flex:none; border:0; border-radius:12px; padding:10px 16px; font:800 15px/1 'Nunito','Inter',sans-serif; color:#1B1F3B; background:#F2B544; cursor:pointer; box-shadow:0 10px 22px -10px rgba(242,181,68,.9); }
+  .qw-go:hover{ background:#F5C25F; } .qw-go:focus-visible{ outline:3px solid #FFE3A3; outline-offset:3px; }
+  @media (prefers-reduced-motion:reduce){ .qw-card, .qw-bar i, .qw-bubble{ transition:none !important; } .qw-row.now, .qw-row.now .qw-bar i::after, .qw.in .qw-fox2d{ animation:none !important; } }
   .gf{ position:fixed; inset:0; z-index:9990; display:flex; flex-direction:column; align-items:center; justify-content:space-between; padding:calc(env(safe-area-inset-top, 0px) + 22px) 16px calc(env(safe-area-inset-bottom, 0px) + 20px); color:#fff; font-family:'Nunito','Inter',sans-serif; opacity:0; transition:opacity .45s ease; overflow:hidden; }
   .gf.in{ opacity:1; }
   .gf.out{ opacity:0; }
@@ -5086,10 +5158,71 @@
     .navbar, .footer-note, .mascot-zone, #questPeekFab, .home-nav-arrows{ display:none !important; }
     .wrap{ max-width:none !important; }
   }
+  /* ============ 🌌 1.0.52 : « BIG BANG DES LETTRES » ============
+     Un tunnel d'hyperespace fait de lettres françaises et arabes (et d'étoiles à huit branches), qui implose en un
+     point de lumière d'où jaillit le renard ; les lettres deviennent une galaxie qui tourne autour de lui, et le nom
+     de l'appli se rassemble lettre par lettre. Toujours de nuit, même en thème clair. */
+  html body .splash-screen.sp4.sp4 .sp-bg{ background:radial-gradient(75% 60% at 50% 54%, #1E1A5C 0%, #0D0C30 42%, #050512 100%) !important; }
+  html body .splash-screen.sp4.sp4 .sp-bg::before{ content:''; display:block !important; position:absolute; inset:-35%; opacity:.95 !important; background-size:100% 100% !important;
+    background-image:radial-gradient(32% 28% at 28% 32%, rgba(236,72,153,.2), rgba(236,72,153,0) 70%), radial-gradient(30% 26% at 74% 66%, rgba(34,211,238,.15), rgba(34,211,238,0) 70%),
+      radial-gradient(40% 34% at 56% 42%, rgba(124,58,237,.3), rgba(124,58,237,0) 70%), radial-gradient(22% 20% at 40% 74%, rgba(253,186,116,.1), rgba(253,186,116,0) 70%) !important;
+    animation:sp4Neb 26s linear infinite !important; }
+  @keyframes sp4Neb{ to{ transform:rotate(360deg); } }
+  html body .splash-screen.sp4.sp4 .sp-bg::after,
+  html body .splash-screen.sp4.sp4 .sp-aurora, html body .splash-screen.sp4.sp4 .sp-rays, html body .splash-screen.sp4.sp4 .sp-letters,
+  html body .splash-screen.sp4.sp4 .sp-portal, html body .splash-screen.sp4.sp4 .sp-beam{ display:none !important; }
+  html body .splash-screen.sp4.sp4 .sp-front{ position:absolute; inset:0; z-index:2; pointer-events:none; }
+  html body .splash-screen.sp4.sp4.leaving .sp-front{ opacity:0; transition:opacity .3s ease; }
+  /* le nom se rassemble : chaque lettre arrive de loin en tournoyant, puis une vague de lumière la parcourt */
+  html body .splash-screen.sp4.sp4 .sp-brand{ font-family:'Nunito','Inter',sans-serif !important; font-size:clamp(38px,11vw,60px) !important; letter-spacing:-.02em !important; }
+  html body .splash-screen.sp4.sp4 .sp-brand span{ opacity:0; color:#FFFFFF !important; font-weight:900 !important; filter:blur(7px);
+    transform:translate3d(var(--sx, 0px), var(--sy, -120px), 0) rotate(var(--sr, 0deg)) scale(2.4);
+    text-shadow:0 0 18px rgba(165,180,252,.6), 0 3px 0 rgba(8,6,36,.65) !important;
+    animation:sp4Assemble 1s cubic-bezier(.16,1,.3,1) forwards, sp4Glint 3.4s ease-in-out infinite !important;
+    animation-delay:calc(var(--bd, .25s) + var(--i) * .05s), calc(var(--bd, .25s) + 1.3s + var(--i) * .07s) !important; }
+  html body .splash-screen.sp4.sp4 .sp-brand span.acc{ background:linear-gradient(180deg,#FFFFFF 0%,#C7D2FE 28%,#A78BFA 62%,#F472B6 100%) !important; -webkit-background-clip:text !important; background-clip:text !important;
+    color:transparent !important; -webkit-text-fill-color:transparent; text-shadow:none !important;
+    animation:sp4AssembleAcc 1s cubic-bezier(.16,1,.3,1) forwards, sp4GlintAcc 3.4s ease-in-out infinite !important;
+    animation-delay:calc(var(--bd, .25s) + var(--i) * .05s), calc(var(--bd, .25s) + 1.3s + var(--i) * .07s) !important; }
+  @keyframes sp4Assemble{ 0%{ opacity:0; } 30%{ opacity:1; } 100%{ opacity:1; filter:blur(0); transform:none; } }
+  @keyframes sp4AssembleAcc{ 0%{ opacity:0; } 30%{ opacity:1; } 100%{ opacity:1; transform:none; filter:drop-shadow(0 0 12px rgba(167,139,250,.75)) drop-shadow(0 3px 0 rgba(8,6,36,.6)); } }
+  @keyframes sp4Glint{ 0%,100%{ text-shadow:0 0 18px rgba(165,180,252,.55), 0 3px 0 rgba(8,6,36,.65); } 50%{ text-shadow:0 0 22px #fff, 0 0 44px rgba(253,224,71,.8), 0 3px 0 rgba(8,6,36,.65); } }
+  @keyframes sp4GlintAcc{ 0%,100%{ filter:drop-shadow(0 0 12px rgba(167,139,250,.75)) drop-shadow(0 3px 0 rgba(8,6,36,.6)); } 50%{ filter:drop-shadow(0 0 22px rgba(255,255,255,.95)) drop-shadow(0 0 40px rgba(244,114,182,.8)) drop-shadow(0 3px 0 rgba(8,6,36,.6)); } }
+  html body .splash-screen.sp4.sp4 .sp-tag{ color:rgba(199,210,254,.78) !important; font-weight:700 !important; }
+  html body .splash-screen.sp4.sp4 .sp-tag .ar{ display:inline !important; color:#F0ABFC !important; }
+  /* le big bang : flash blanc, onde de choc, et le renard jaillit du point de lumière */
+  html body .splash-screen.sp4.sp4 .sp-flash{ background:radial-gradient(circle at 50% var(--sp-cy, 46%), rgba(255,255,255,.98), rgba(199,210,254,.4) 20%, rgba(199,210,254,0) 55%) !important; }
+  html body .splash-screen.sp4.sp4.fox-in .sp-flash{ animation:spFlash .85s ease-out .24s both !important; }
+  html body .splash-screen.sp4.sp4 .sp-wave{ bottom:auto !important; top:58% !important; border-width:2px !important; border-color:rgba(224,231,255,.95) !important; }
+  html body .splash-screen.sp4.sp4 .sp-wave.w2{ border-color:rgba(240,171,252,.8) !important; }
+  html body .splash-screen.sp4.sp4.fox-in .sp-wave{ animation:spWave 1.1s cubic-bezier(.1,.7,.3,1) .26s forwards !important; }
+  html body .splash-screen.sp4.sp4.fox-in .sp-wave.w2{ animation-delay:.42s !important; }
+  html body .splash-screen.sp4.sp4.fox-in .sp-fox{ animation:sp4Bang 1.15s cubic-bezier(.16,1.25,.3,1) .26s both !important; transform-origin:50% 62% !important; }
+  @keyframes sp4Bang{ 0%{ opacity:0; transform:scale(.04); filter:brightness(5) blur(3px); } 35%{ opacity:1; filter:brightness(1.8) blur(0); } 60%{ transform:scale(1.13); filter:none; } 80%{ transform:scale(.96); } 100%{ opacity:1; transform:none; filter:none; } }
+  html body .splash-screen.sp4.sp4 .sp-fox.flying{ animation:none !important; opacity:1; }
+  html body .splash-screen.sp4.sp4 .sp-fox.is3d::before{ background:radial-gradient(circle, rgba(165,180,252,.42), rgba(165,180,252,0) 66%) !important; }
+  /* la bulle : verre de nuit, bord arc-en-ciel froid */
+  html body .splash-screen.sp4.sp4 .sp-bubble{ background:linear-gradient(rgba(12,11,40,.72), rgba(12,11,40,.72)) padding-box, linear-gradient(135deg,#67E8F9,#A78BFA 50%,#F472B6) border-box !important;
+    border:1.5px solid transparent !important; color:#F8FAFC !important; box-shadow:0 22px 50px -22px rgba(0,0,0,.8), 0 0 40px -10px rgba(167,139,250,.6) !important; }
+  html body .splash-screen.sp4.sp4 .sp-hello{ background:linear-gradient(90deg,#FFFFFF,#C7D2FE 45%,#F0ABFC) !important; -webkit-background-clip:text !important; background-clip:text !important; color:transparent !important; -webkit-text-fill-color:transparent; font-weight:900 !important; }
+  html body .splash-screen.sp4.sp4 .sp-msg{ color:rgba(226,232,240,.9) !important; font-weight:700 !important; }
+  html body .splash-screen.sp4.sp4 .sp-caret{ background:#F0ABFC !important; }
+  html body .splash-screen.sp4.sp4 .sp-hint{ color:rgba(199,210,254,.62) !important; }
+  html body .splash-screen.sp4.sp4 .sp-bar{ background:rgba(255,255,255,.1) !important; }
+  html body .splash-screen.sp4.sp4 .sp-bar i{ background:linear-gradient(90deg,#67E8F9,#A78BFA,#F472B6) !important; box-shadow:0 0 12px rgba(167,139,250,.8) !important; }
+  html body .splash-screen.sp4.sp4 .sp-ver{ color:rgba(199,210,254,.45) !important; }
+  html body .splash-screen.sp4.sp4 .sp-sound{ background:rgba(255,255,255,.08) !important; border-color:rgba(199,210,254,.22) !important; color:#E0E7FF !important; }
+  html body .splash-screen.sp4.sp4 .sp-sound.blocked{ background:linear-gradient(135deg,#6366F1,#A855F7) !important; border-color:rgba(255,255,255,.4) !important; color:#fff !important; }
+  html body .splash-screen.sp4.sp4 .sp-iris-ring{ box-shadow:0 0 0 2px rgba(255,255,255,.95), 0 0 30px 10px rgba(167,139,250,.7), 0 0 90px 30px rgba(103,232,249,.35) !important; }
+  @media (prefers-reduced-motion: reduce){
+    html body .splash-screen.sp4.sp4 .sp-bg::before{ animation:none !important; }
+    html body .splash-screen.sp4.sp4 .sp-brand span, html body .splash-screen.sp4.sp4 .sp-brand span.acc{ transform:none; filter:none; animation:spUp .4s ease forwards !important; }
+    html body .splash-screen.sp4.sp4.fox-in .sp-fox{ animation:spUp .5s ease forwards !important; }
+  }
 </style>
 </head>
 <body>
-<div class="splash-screen sp2 sp3" id="splashScreen" role="img" aria-label="VocabVISION démarre">
+<div class="splash-screen sp2 sp3 sp4" id="splashScreen" role="img" aria-label="VocabVISION démarre">
   <div class="sp-bg" id="spBg">
     <div class="sp-aurora a1"></div><div class="sp-aurora a2"></div><div class="sp-aurora a3"></div>
     <div class="sp-rays"></div>
@@ -5110,6 +5243,7 @@
     </div>
     <div class="sp-bubble" id="spBubble" aria-live="polite"><span class="sp-hello" id="spHello"></span><span class="sp-msg" id="spMsg"></span></div>
   </div>
+  <canvas class="sp-canvas sp-front" id="spCanvasF" aria-hidden="true"></canvas>
   <button class="sp-sound" id="spSound" type="button" aria-label="Activer le son"><span class="ic"></span><span class="lbl">Activer le son</span></button>
   <button class="sp-sound sp-quiet" id="spQuiet" type="button" aria-pressed="false" title="Le renard ne parle plus à voix haute (retenu pour les prochaines fois)"><span class="ic">🦊</span><span class="lbl">Faire taire le renard</span></button>
   <div class="sp-foot"><div class="sp-hint">Touche l'écran pour commencer</div><div class="sp-bar"><i id="spBar"></i></div><div class="sp-ver" id="spVer"></div></div>
@@ -5991,6 +6125,7 @@ function reloadAllUserState(){
   try{ readingVoiceGender = loadReadingVoice(); readingRate = loadReadingRate(); readingScale = loadReadingScale(); applyReadingScale(); }catch(e){}
   try{ applyVoiceHelp(); }catch(e){}
   try{ gfWasDone = null; }catch(e){}   // 🏆 nouveau profil : on repart de ses propres objectifs
+  try{ qwState = null; qwPending.length = 0; }catch(e){}   // 🎯 pareil pour la fête de chaque objectif
   const custom = loadCustomWords();
   WORDS = custom ? custom : DEFAULT_WORDS.slice();
   activeFilterCat = null; currentBlock = null;
@@ -10453,6 +10588,12 @@ function foxSetHtml(){
       <button type="button" class="mode-chip ${gf3dWanted() ? '' : 'active'}" data-fox="gf" data-v="2d" aria-pressed="${!gf3dWanted()}">✨ Version simple</button>
       <button type="button" class="mode-chip" data-fox="gfdemo">▶ Voir la fête</button>
     </div>
+    <div class="fox-l">🎯 À chaque objectif du jour atteint (en fin d'exercice)…</div>
+    <div class="fox-row" role="group" aria-label="La petite fête de chaque objectif">
+      <button type="button" class="mode-chip ${qwOn() ? 'active' : ''}" data-fox="qw" data-v="on" aria-pressed="${qwOn()}">🦊 Elle sort et m'encourage</button>
+      <button type="button" class="mode-chip ${qwOn() ? '' : 'active'}" data-fox="qw" data-v="off" aria-pressed="${!qwOn()}">🙈 Non merci</button>
+      <button type="button" class="mode-chip" data-fox="qwdemo">▶ Voir</button>
+    </div>
   </section>`;
 }
 function foxSetWire(root){
@@ -10467,6 +10608,8 @@ function foxSetWire(root){
     else if(a === 'count') foxCfgSave({ count:b.dataset.v === 'total' ? 'total' : 'streak' });
     else if(a === 'gf'){ try{ localStorage.setItem(nsKey(GF3D_KEY), b.dataset.v === '2d' ? '2d' : '3d'); }catch(err){} }
     else if(a === 'gfdemo'){ try{ goalFinale(true); }catch(err){} return; }
+    else if(a === 'qw'){ try{ localStorage.setItem(nsKey(QW_ON_KEY), b.dataset.v === 'off' ? 'off' : 'on'); }catch(err){} }
+    else if(a === 'qwdemo'){ try{ questWin(null, true); }catch(err){ console.warn(err); } return; }
     redraw();
     try{ haptic('tap'); }catch(err){}
   });
@@ -10518,6 +10661,12 @@ function renderSoundSettings(){
       <button class="mode-chip" data-haptic-test="success">Essai : réussite</button>
       <button class="mode-chip" data-haptic-test="error">Essai : erreur</button>
     </div>
+    <div style="font-weight:800;color:var(--purple);margin:18px 0 8px;">⚡ Validation automatique</div>
+    <div class="word-def" style="margin:0 0 8px;font-size:13px;text-align:left;">Dès que ta réponse est juste (accents compris), elle se valide toute seule, sans toucher « Valider ». Mots en ordre : dès que tous les mots sont placés.</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="mode-chip ${autoVOn() ? 'active' : ''}" data-autov="1">⚡ Activée</button>
+      <button class="mode-chip ${autoVOn() ? '' : 'active'}" data-autov="0">✋ Non, je touche « Valider »</button>
+    </div>
     <div style="font-weight:800;color:var(--purple);margin:18px 0 8px;">🎆 Animations spectaculaires</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;">
       <button class="mode-chip ${fxOn ? 'active' : ''}" data-fx="1">✨ Activées (renard, orages, explosions…)</button>
@@ -10535,6 +10684,7 @@ function renderSoundSettings(){
   card.querySelectorAll('[data-fx]').forEach(b => b.addEventListener('click', () => { fxOn = b.dataset.fx === '1'; try{ localStorage.setItem(FX_PREF_KEY, fxOn ? '1' : '0'); }catch(e){} renderSoundSettings(); }));
   card.querySelectorAll('[data-haptics]').forEach(b => b.addEventListener('click', () => { hapticsOn = b.dataset.haptics === '1'; try{ localStorage.setItem(HAPTICS_KEY, hapticsOn ? 'on' : 'off'); }catch(e){} if(hapticsOn) haptic('success'); renderSoundSettings(); }));
   card.querySelectorAll('[data-haptic-test]').forEach(b => b.addEventListener('click', () => { hapticLastAt = 0; haptic(b.dataset.hapticTest); }));
+  card.querySelectorAll('[data-autov]').forEach(b => b.addEventListener('click', () => { try{ localStorage.setItem(nsKey(AUTOV_KEY), b.dataset.autov === '1' ? 'on' : 'off'); }catch(e){} renderSoundSettings(); }));
   document.getElementById('fxDemoBtn').addEventListener('click', () => {
     if(!fxOn) return;
     foxCameo('party', 'Regarde ce que je sais faire ! 🦊', { force:true, edge:'bottom', demo:true });
@@ -13149,6 +13299,7 @@ function renderGrammarQuizCard(){
   `;
   const input = document.getElementById('gramAnswerInput');
   input.focus();
+  autoVArm(input, v => autoVEq(v, ch.answer), validateGrammarAnswer);
   input.addEventListener('keydown', (e) => { if(e.key === 'Enter'){ e.preventDefault(); validateGrammarAnswer(); } });
   document.getElementById('gramValidateBtn').addEventListener('click', validateGrammarAnswer);
   document.getElementById('gramShowRuleBtn').addEventListener('click', () => {
@@ -14720,6 +14871,7 @@ function renderPluralQuizCard(){
   const input = document.getElementById('miniAnswerInput');
   input.focus();
   const validate = () => validateMiniOrtho(pluralize(word), 'renderPluralQuizCard');
+  autoVArm(input, v => autoVEq(v, pluralize(word)), validate);
   input.addEventListener('keydown', (e) => { if(e.key === 'Enter'){ e.preventDefault(); validate(); } });
   document.getElementById('miniValidateBtn').addEventListener('click', validate);
 }
@@ -14774,6 +14926,7 @@ function renderAccordQuizCard(){
   const input = document.getElementById('miniAnswerInput');
   input.focus();
   const validate = () => validateMiniOrtho(fem, 'renderAccordQuizCard');
+  autoVArm(input, v => autoVEq(v, fem), validate);
   input.addEventListener('keydown', (e) => { if(e.key === 'Enter'){ e.preventDefault(); validate(); } });
   document.getElementById('miniValidateBtn').addEventListener('click', validate);
 }
@@ -14993,6 +15146,7 @@ function renderOrthoQuizCard(){
   `;
   const input = document.getElementById('orthoAnswerInput');
   input.focus();
+  autoVArm(input, v => autoVEq(v, ch.answer), validateOrthoAnswer);
   input.addEventListener('keydown', (e) => { if(e.key === 'Enter'){ e.preventDefault(); validateOrthoAnswer(); } });
   document.getElementById('orthoValidateBtn').addEventListener('click', validateOrthoAnswer);
   document.getElementById('orthoShowRuleBtn').addEventListener('click', () => {
@@ -15270,6 +15424,70 @@ function conjAnswerMatches(typed, form){
   if(t === f) return true;
   const stripped = t.replace(/^(que |qu')/, '').replace(/^(j'|je |tu |il |elle |on |nous |vous |ils |elles )/, '');
   return stripped === f;
+}
+/* ============ ⚡ 1.0.52 : VALIDATION AUTOMATIQUE ============
+   Dès que ta réponse est juste (au mot et à l'accent près), elle se valide toute seule : plus besoin de toucher
+   « Valider ». Mots en ordre : dès que tous les mots sont placés. QCM à plusieurs réponses : dès que tu as coché
+   autant de cases qu'il y a de bonnes réponses. Une réponse fausse, elle, attend toujours que tu valides.
+   Réglable dans 🔊 Sons (« ⚡ Validation automatique »). */
+const AUTOV_KEY = 'lexiqueQuiz::autoValid';
+function autoVOn(){ try{ return localStorage.getItem(nsKey(AUTOV_KEY)) !== 'off'; }catch(e){ return true; } }
+function autoVNorm(s){ return String(s || '').normalize('NFC').toLowerCase().replace(/[’`´ʼ]/g, "'").replace(/\s*'\s*/g, "'").replace(/\s+/g, ' ').trim(); }
+function autoVEq(typed, ans){ const t = autoVNorm(typed); return !!t && t === autoVNorm(ans); }
+function autoVConj(typed, form){
+  const t = autoVNorm(typed), f = autoVNorm(form);
+  if(!t) return false;
+  if(t === f) return true;
+  return t.replace(/^(que |qu')/, '').replace(/^(j'|je |tu |il |elle |on |nous |vous |ils |elles )/, '') === f;
+}
+/* un champ de réponse : ok(valeur) → juste ? ; go() → valider comme si on touchait « Valider » */
+function autoVArm(input, ok, go, delay){ if(!input) return; input.__autoV = { ok, go, d:delay || 420 }; input.__autoVDone = false; }
+function autoVFlash(el){ if(!el) return; try{ el.classList.remove('autov-ok'); void el.offsetWidth; el.classList.add('autov-ok'); setTimeout(() => el.classList.remove('autov-ok'), 900); }catch(e){} }
+document.addEventListener('input', (e) => {
+  const el = e.target;
+  if(!el || !el.__autoV) return;
+  clearTimeout(el.__autoVT);
+  if(!autoVOn()) return;
+  el.__autoVT = setTimeout(() => {
+    if(!el.isConnected || el.disabled || el.readOnly || el.__autoVDone) return;
+    let ok = false; try{ ok = el.__autoV.ok(el.value); }catch(err){}
+    if(!ok) return;
+    el.__autoVDone = true; autoVFlash(el);
+    try{ el.__autoV.go(); }catch(err){ console.warn('validation auto', err); }
+  }, el.__autoV.d);
+}, true);
+/* plusieurs champs (mot mystère, texte à trous) : chaque champ juste se met au vert et on passe au suivant ;
+   quand tout est juste, on vérifie */
+function autoVFields(card, sel, answerOf, onOne, onAll){
+  const list = [...card.querySelectorAll(sel)];
+  list.forEach((inp) => {
+    const i = parseInt(inp.dataset.idx, 10);
+    autoVArm(inp, v => autoVEq(v, answerOf(i)), () => {
+      inp.disabled = true; inp.style.borderColor = '#16A34A';
+      try{ onOne(i); }catch(e){}
+      try{ playCorrectSound(); }catch(e){}
+      if(list.every(x => x.disabled)){ setTimeout(onAll, 260); return; }
+      const next = list.find((x, k) => k > list.indexOf(inp) && !x.disabled && !x.value.trim()) || list.find(x => !x.disabled && !x.value.trim()) || list.find(x => !x.disabled);
+      if(next){ try{ next.focus(); }catch(e){} }
+    });
+  });
+}
+/* Mots en ordre : dès que tous les mots sont posés, on valide (juste ou faux : même délai, rien ne se devine) */
+function autoVOrderSig(){ const s = window.__orderBlankSlots || []; return s.map(f => f ? f.uid : '_').join(','); }
+let autoVOrdT = 0;
+function autoVOrder(){
+  clearTimeout(autoVOrdT);
+  if(!autoVOn() || (typeof answered !== 'undefined' && answered)) return;
+  const slots = window.__orderBlankSlots; if(!slots || !slots.length || !slots.every(Boolean)) return;
+  const sig = autoVOrderSig();
+  if(sig === window.__ordTriedSig) return;
+  autoVOrdT = setTimeout(function fire(){
+    const btn = document.getElementById('orderValidateBtn');
+    if(answered || !btn || !btn.isConnected || btn.style.display === 'none' || autoVOrderSig() !== sig || window.__ordTriedSig === sig) return;
+    if(btn.disabled){ autoVOrdT = setTimeout(fire, 300); return; }
+    autoVFlash(document.getElementById('orderSentence'));
+    btn.click();
+  }, 650);
 }
 
 /* Complément de phrase d'un verbe : notre liste, puis celui donné avec le verbe (verbes ajoutés), puis
@@ -16054,6 +16272,7 @@ function renderConjugationQuizCard(){
   document.getElementById('conjRuleBtn').addEventListener('click', () => { const ids = conjSheetIds(ch); if(ids.length) conjSheetPeek(ids[0]); });
   const sayBtn = document.getElementById('conjSayBtn'); if(sayBtn) sayBtn.addEventListener('click', () => conjOralAnswer(ch));   // 🗣️ répondre à voix haute
   if(!(typeof VS !== 'undefined' && VS && VS.on)) input.focus();
+  autoVArm(input, v => autoVConj(v, ch.verb.tenses[ch.tense][ch.pronounIdx]), validateConjugationAnswer);
   input.addEventListener('keydown', (e) => { if(e.key === 'Enter'){ e.preventDefault(); validateConjugationAnswer(); } });
   document.getElementById('conjValidateBtn').addEventListener('click', validateConjugationAnswer);
   conjSaveResume(st, st.idx);   // ⏸️ si on sort par erreur, on reprendra ici
@@ -16272,6 +16491,7 @@ function renderConjListenCard(){
   setTimeout(playIt, 350);
   const input = document.getElementById('conjListenInput');
   input.focus();
+  autoVArm(input, v => autoVEq(v, fullText) || (/^qu(e |')/.test(autoVNorm(fullText)) && autoVNorm(v) === autoVNorm(fullText).replace(/^qu(e |')/, '')), () => validateConjListenAnswer(fullText));
   input.addEventListener('keydown', (e) => { if(e.key === 'Enter'){ e.preventDefault(); validateConjListenAnswer(fullText); } });
   document.getElementById('conjListenValidateBtn').addEventListener('click', () => validateConjListenAnswer(fullText));
 }
@@ -21162,6 +21382,7 @@ function renderOrderZones(animate){
   if(validateBtn){
     const complete = slots.every(Boolean);
     validateBtn.style.display = complete ? 'inline-flex' : 'none';
+    if(complete) autoVOrder(); else clearTimeout(autoVOrdT);
   }
   try{ ordRefreshBar(); }catch(e){}
 }
@@ -21372,6 +21593,7 @@ function showOrderRetryFeedback(){
 
 function handleOrderAnswer(timedOut){
   if(answered) return;
+  window.__ordTriedSig = autoVOrderSig();   // ⚡ cet ordre-là a été essayé : la validation auto ne le revalide pas
   const word = window.__currentWord;
   const fullWords = window.__orderFullTarget;
   const blankIndices = window.__orderBlankIndices;
@@ -23542,6 +23764,10 @@ const COLOR_PRESETS = {
 /* ============ 🆕 NOUVEAUTÉS — pour que tout ce qui a été ajouté reste découvrable ============ */
 const WHATS_NEW_SECTIONS = [
   { icon:'🆕', title:'Nouveautés', items:[
+    { name:'🌌 Un nouvel écran de démarrage : le big bang des lettres', desc:"Tu fonces dans un tunnel de lettres françaises et arabes (et d'étoiles à huit branches). Tout implose en un point de lumière… et le renard en jaillit ! Les lettres deviennent une galaxie qui tourne autour de lui, et le nom de l'appli se rassemble lettre par lettre. Touche l'écran pour passer." },
+    { name:'🦊 Une mascotte plus grande, plus 3D, qui bouge tout le temps', desc:"Sur l'accueil, le renard est plus grand, sur un socle lumineux, et la caméra tourne doucement autour de lui : on voit son relief. Il fait un geste toutes les 3 à 7 secondes (il salue, saute, danse, applaudit, tourne sur lui-même, renifle, fait un clin d'œil…), sans plus disparaître sous terre. Abdel et Souky s'échangent d'une double vrille, dans des paillettes. Pendant les exercices, le petit renard est plus grand et bouge aussi." },
+    { name:"🎯 À chaque objectif du jour atteint, la mascotte sort et t'encourage", desc:"Quand tu termines un des objectifs du jour, à la fin de l'exercice, Abdel ou Souky sort de son terrier au-dessus d'un panneau : il te félicite (à voix haute, sauf si le renard est muet), la barre de l'objectif se remplit jusqu'au bout, « ✓ Fait ! », et tu vois les objectifs qui restent avec leurs barres. Le dernier objectif, c'est la grande fête. Réglable dans 🔊 Sons → La mascotte (avec « ▶ Voir »)." },
+    { name:'⚡ Validation automatique dans les exercices', desc:"Plus besoin de toucher « Valider » : dès que ta réponse est juste (accents compris), elle se valide toute seule — grammaire, orthographe, pluriels, accords, conjugaison (écrite et à l'écoute), Bescherelle, anagrammes, « Conjugue ! », mot mystère et texte à trous (chaque case juste passe au vert, et on passe à la suivante). Mots en ordre : dès que tous les mots sont placés. QCM à plusieurs réponses : dès que tu as coché le bon nombre de cases. Une réponse fausse attend toujours que tu valides. Réglable dans 🔊 Sons." },
     { name:'🎞️ Les pages .html et leurs figures animées', desc:"Importe une page .html dans la Tablette (« 📥 Importer », avec ses images à côté, ou en .zip) : son texte arrive mis en page, et ses figures animées restent vivantes — schémas SVG animés, dessins dans un canvas, animations CSS, petites démos en JavaScript. Chacune tourne dans un petit cadre isolé (sans accès à l'appli ni à tes données), avec les couleurs de la page. Les GIF animés aussi, bien sûr." },
     { name:'🎞️ Les images animées restent animées', desc:"Dans la Tablette, une image animée (GIF, PNG ou WebP animé) ou un dessin SVG est gardé tel quel : il bouge comme dans le document d'origine (avant, l'appli le réduisait et seule la première image restait). Sur ton autre appareil aussi : les petites passent par la synchro, les grosses par Cloudflare R2 (chiffrées)." },
     { name:'🖼 Ajouter les images manquantes après coup', desc:"Un texte importé (.md) sans certaines de ses images ? En haut du texte : « 🖼 4 images manquent · 📎 Les choisir ». Choisis-les (plusieurs d'un coup) : elles se mettent toutes seules à leur place, grâce à leur nom." },
@@ -37412,7 +37638,7 @@ function renderAnagrammeCard(){
   };
   const checkBtn = document.getElementById('anagCheckBtn');
   if(checkBtn) checkBtn.addEventListener('click', check);
-  if(input){ input.focus(); input.addEventListener('keydown', (e) => { if(e.key === 'Enter') check(); }); }
+  if(input){ input.focus(); input.addEventListener('keydown', (e) => { if(e.key === 'Enter') check(); }); autoVArm(input, v => autoVEq(v, item.answer), check); }
   const revealBtn = document.getElementById('anagRevealBtn');
   if(revealBtn) revealBtn.addEventListener('click', () => { st.revealed = true; renderAnagrammeCard(); });
   const nextBtn = document.getElementById('anagNextBtn');
@@ -37565,6 +37791,7 @@ function renderMotMystereCard(){
   card.querySelectorAll('.mm-input').forEach(inp => {
     inp.addEventListener('input', () => { st.answers[parseInt(inp.dataset.idx,10)] = inp.value; });
   });
+  autoVFields(card, '.mm-input', i => MOT_MYSTERE.clues[i].answer, i => { st.checked[i] = true; }, () => { const b = document.getElementById('mmCheckBtn'); if(b) b.click(); });
   document.getElementById('mmCheckBtn').addEventListener('click', () => {
     MOT_MYSTERE.clues.forEach((clue, i) => {
       st.checked[i] = normalizeForSearch(st.answers[i]) === normalizeForSearch(clue.answer);
@@ -37677,6 +37904,7 @@ function renderTexteATrousCard(){
   card.querySelectorAll('.tat-input').forEach(inp => {
     inp.addEventListener('input', () => { st.answers[parseInt(inp.dataset.idx,10)] = inp.value; });
   });
+  autoVFields(card, '.tat-input', i => item.blanks[i].answer, i => { st.checked[i] = true; }, () => { const b = document.getElementById('tatCheckBtn'); if(b) b.click(); });
   document.getElementById('tatCheckBtn').addEventListener('click', () => {
     item.blanks.forEach((blank, i) => {
       st.checked[i] = normalizeForSearch(st.answers[i]) === normalizeForSearch(blank.answer);
@@ -37836,7 +38064,7 @@ function renderConjugueCard(){
   };
   const checkBtn = document.getElementById('cgCheckBtn');
   if(checkBtn) checkBtn.addEventListener('click', check);
-  if(input){ input.focus(); input.addEventListener('keydown', (e) => { if(e.key === 'Enter') check(); }); }
+  if(input){ input.focus(); input.addEventListener('keydown', (e) => { if(e.key === 'Enter') check(); }); if(!st.answered) autoVArm(input, v => autoVConj(v, item.answer), check); }
   const nextBtn = document.getElementById('cgNextBtn');
   if(nextBtn) nextBtn.addEventListener('click', () => {
     if(st.idx + 1 < st.queue.length){ st.idx++; st.answered = false; st.wasCorrect = false; renderConjugueCard(); }
@@ -40126,13 +40354,17 @@ function renderQcmQuestionCard(){
         const pos = st.selected.indexOf(i);
         if(pos >= 0){ st.selected.splice(pos,1); btn.classList.remove('selected'); btn.textContent = '☐ ' + q.options[i]; }
         else { st.selected.push(i); btn.classList.add('selected'); btn.textContent = '☑️ ' + q.options[i]; }
+        // ⚡ autant de cases cochées que de bonnes réponses : ça se valide tout seul (juste ou faux, même délai)
+        clearTimeout(st.__autoT);
+        if(autoVOn() && st.selected.length === q.correct.length){ const sig = st.selected.slice().sort().join(','); st.__autoT = setTimeout(() => { if(!st.answered && st.selected.slice().sort().join(',') === sig){ autoVFlash(document.getElementById('qcmOptionsWrap2')); handleQcmAnswer(st.selected); } }, 700); }
       } else {
         handleQcmAnswer([i]);
       }
     });
   });
   const multiBtn = document.getElementById('qcmMultiValidateBtn');
-  if(multiBtn){ multiBtn.addEventListener('click', () => handleQcmAnswer(st.selected)); }
+  if(multiBtn){ multiBtn.addEventListener('click', () => { clearTimeout(st.__autoT); handleQcmAnswer(st.selected); }); }
+  if(multiBtn && autoVOn()) multiBtn.insertAdjacentHTML('beforebegin', `<div class="autov-hint">⚡ ${q.correct.length} bonne${q.correct.length > 1 ? 's' : ''} réponse${q.correct.length > 1 ? 's' : ''} à cocher : ça se valide tout seul.</div>`);
 }
 
 function handleQcmAnswer(selectedIndices){
@@ -40827,6 +41059,7 @@ function renderBesConjCard(){
   `;
   const input = document.getElementById('besConjInput');
   const check = () => answerBesConj(input.value);
+  autoVArm(input, v => { const t = besStripPronoun(besNorm(v)); return !!t && t === besNorm(it.answer); }, check);
   document.getElementById('besConjCheck').addEventListener('click', check);
   input.addEventListener('keydown', (e) => { if(e.key === 'Enter'){ e.preventDefault(); check(); } });
   setTimeout(() => { try{ input.focus(); }catch(e){} }, 50);
@@ -41307,6 +41540,7 @@ function fox3dCreateToon(T, sizePx, opts){
     auto:opts.auto || 0, act:null, queue:[], hole:0, holeTarget:0, hidden:false, swapping:false, pendingReact:null,
     nextIdle:5 + Math.random() * 4, emit:{ flame:0, trail:0 }, emitAcc:{ flame:0, trail:0 },
     mouth:0, mouthW:1, brow:0, tilt:0, one:0,
+    pool:opts.pool || null, every:opts.every || null, orbit:opts.orbit || 0, camA:0, camB:0, swapAt:0, swapFn:null, gestures:0,
   };
   f.bow.visible = f.lashes.visible = st.female;
   const DUR = { dig:2.0, digShort:1.6, dive:0.95, emerge:1.5, pounce:2.6, sniff:1.8, wink:1.0, sly:2.2,
@@ -41366,6 +41600,18 @@ function fox3dCreateToon(T, sizePx, opts){
       play(() => { st.swapping = false; });
     },
     setAuto(level){ st.auto = level || 0; },
+    // 🎛 1.0.52 : gestes, rythme et caméra réglables après coup (le renard du splash devient celui de l'accueil)
+    setOpts(o){ o = o || {}; if('pool' in o) st.pool = o.pool; if('every' in o) st.every = o.every; if('orbit' in o){ st.orbit = o.orbit || 0; if(!st.orbit && !party){ st.camA = st.camB = 0; camera.position.set(0, 0.35, 9.2); camera.lookAt(0, 0.05, 0); } } if('auto' in o) st.auto = o.auto; if(st.nextIdle > st.t + 6) st.nextIdle = st.t + 1.5; },
+    // 🌀 Abdel ↔ Souky : il fait une double vrille et change en plein tour, dans une pluie de paillettes
+    swapSpin(on){
+      on = !!on;
+      if(on === st.female || st.swapFn || st.swapping || st.hidden) return;
+      const go = () => { st.female = on; f.bow.visible = on; f.lashes.visible = on; try{ fxSpawn('sparkles', null, { count:18 }); }catch(e){} };
+      if(fox3d.reduced){ go(); return; }
+      st.act = null; st.queue.length = 0; st.pendingReact = null;
+      st.jumpT = 0; st.spinT = 0; st.spinTurns = 2; st.spinDur = 0.95; st.happyT = 0;
+      st.swapAt = st.t + 0.46; st.swapFn = go;
+    },
     pop(){
       if(st.swapping) return;
       if(fox3d.reduced){ st.intro = 0; return; }
@@ -41582,6 +41828,7 @@ function fox3dCreateToon(T, sizePx, opts){
   let last = performance.now();
   function update(dt){
     st.t += dt;
+    if(st.swapFn && st.t >= st.swapAt){ const fn = st.swapFn; st.swapFn = null; fn(); }
     if(api.onFrame){ try{ api.onFrame(dt); }catch(e){ console.warn('fox route', e); api.onFrame = null; } }
     const R = fox3d.reduced ? 0.25 : 1;
     // --- cible du regard : doigt / souris, sinon flânerie curieuse
@@ -41603,10 +41850,12 @@ function fox3dCreateToon(T, sizePx, opts){
     if(st.curiousEnd && st.t > st.curiousEnd){ st.curious = 0; st.curiousEnd = 0; }
     // --- petits gestes spontanés (accueil, quiz)
     if(!st.act && !st.queue.length && st.auto > 0 && st.t > st.nextIdle && !st.hidden && st.jumpT < 0 && st.spinT < 0){
-      const pool = st.auto >= 2 ? ['sniff', 'sly', 'wink', 'digShort', 'pounce', 'sly', 'wink', 'hop', 'spin', 'wave', 'clap', 'dance'] : ['wink', 'sly'];
-      const g = pool[(Math.random() * pool.length) | 0];
+      const pool = st.pool || (st.auto >= 2 ? ['sniff', 'sly', 'wink', 'digShort', 'pounce', 'sly', 'wink', 'hop', 'spin', 'wave', 'clap', 'dance'] : ['wink', 'sly']);
+      let g = pool[(Math.random() * pool.length) | 0];
+      if(g === st.lastIdle) g = pool[(Math.random() * pool.length) | 0];   // pas deux fois le même geste
+      st.lastIdle = g; st.gestures++;
       if(g === 'hop') doReact('hop'); else if(g === 'spin') spinJump(); else play(g);
-      st.nextIdle = st.t + (st.auto >= 2 ? 7 + Math.random() * 6 : 11 + Math.random() * 8);
+      st.nextIdle = st.t + (st.every ? st.every[0] + Math.random() * st.every[1] : (st.auto >= 2 ? 7 + Math.random() * 6 : 11 + Math.random() * 8));
     }
     if(!st.act) st.act = nextAct();
     if(!st.act && st.pendingReact && !st.swapping){ const r = st.pendingReact; st.pendingReact = null; doReact(r); }
@@ -41947,6 +42196,14 @@ function fox3dCreateToon(T, sizePx, opts){
     shadow.material.opacity = sh;
     if(st.emit.flame || st.emit.trail) fxEmit(dt);
     if(parts.length || ropeTop || ropeMesh) fxUpdate(dt);
+    if(!party && st.orbit){
+      const near = p.x !== null && performance.now() - p.t < 3500;
+      const ta = Math.sin(st.t * 0.37) * st.orbit + (near ? -st.lookX * 0.22 : 0), tb = Math.sin(st.t * 0.29 + 1.2) * 0.32 + (near ? st.lookY * 0.18 : 0);
+      st.camA += (ta - st.camA) * Math.min(1, dt * 1.6); st.camB += (tb - st.camB) * Math.min(1, dt * 1.6);
+      camera.position.set(Math.sin(st.camA) * 9.2, 0.35 + st.camB * 1.6, Math.cos(st.camA) * 9.2);
+      camera.lookAt(0, 0.05, 0);
+      f.root.rotation.y += st.camA * 0.42;   // il se tourne un peu vers toi, mais on voit son profil
+    }
   }
   function frame(now){
     requestAnimationFrame(frame);
@@ -41960,12 +42217,15 @@ function fox3dCreateToon(T, sizePx, opts){
   return api;
 }
 
+// 🦊 1.0.52 : il bouge tout le temps (gestes toutes les 3 à 7 s, jamais sous terre), la caméra tourne autour de lui
+const FOX_HERO_OPTS = { auto:2, pool:['wave', 'hop', 'dance', 'clap', 'spin', 'sniff', 'wink', 'sly', 'cheer', 'hop', 'wave', 'dance'], every:[3, 4], orbit:0.5 };
+const FOX_QUIZ_OPTS = { auto:2, pool:['wink', 'sly', 'hop', 'wave', 'sniff', 'clap', 'wink', 'hop'], every:[5, 5], orbit:0.42 };
 function fox3dMountHero(){
   if(!fox3d.ready || fox3d.splashHold) return; // pendant le splash, c'est son renard qui viendra se poser ici
   const box = document.getElementById('heroMascotContainer');
   if(!box || box.querySelector('.fox3d-canvas')) return;
-  if(!fox3d.hero){ try{ fox3d.hero = fox3dCreate(THREE, 176, { auto:2 }); }catch(e){ console.warn('fox3d hero', e); return; } }
-  if(fox3d.hero.setAuto) fox3d.hero.setAuto(2);
+  if(!fox3d.hero){ try{ fox3d.hero = fox3dCreate(THREE, 250, FOX_HERO_OPTS); }catch(e){ console.warn('fox3d hero', e); return; } }
+  if(fox3d.hero.setOpts) fox3d.hero.setOpts(FOX_HERO_OPTS); else if(fox3d.hero.setAuto) fox3d.hero.setAuto(2);
   box.classList.add('fox3d-on');
   box.appendChild(fox3d.hero.canvas);
   fox3d.hero.pop();
@@ -41975,7 +42235,7 @@ function fox3dMountQuiz(){
   if(!fox3d.ready || fox3d.quiz) return;
   const m = document.getElementById('mascot');
   if(!m) return;
-  try{ fox3d.quiz = fox3dCreate(THREE, 150, { auto:1 }); }catch(e){ console.warn('fox3d quiz', e); return; }
+  try{ fox3d.quiz = fox3dCreate(THREE, 190, FOX_QUIZ_OPTS); }catch(e){ console.warn('fox3d quiz', e); return; }
   m.classList.add('fox3d-on');
   m.appendChild(fox3d.quiz.canvas);
 }
@@ -41992,7 +42252,7 @@ function initFox3D(){
     const card = document.getElementById('quizCard');
     if(card){ new MutationObserver(() => fox3dMountHero()).observe(card, { childList:true }); }
     // Abdel ↔ Souky toutes les 26 s : l'un creuse et plonge dans son terrier, l'autre en surgit
-    setInterval(() => { if(fox3d.hero && fox3d.hero.canvas.isConnected && !document.hidden) fox3d.hero.setFemale(!fox3d.hero.st.female, true); }, 26000);
+    setInterval(() => { const h = fox3d.hero; if(h && h.canvas.isConnected && !document.hidden){ if(h.swapSpin) h.swapSpin(!h.st.female); else h.setFemale(!h.st.female, true); } }, 26000);
     // réactions branchées sur la mascotte existante
     const origReact = reactMascot;
     reactMascot = function(kind){ origReact.apply(this, arguments); if(fox3d.quiz) fox3d.quiz.react(kind); };
@@ -45244,6 +45504,179 @@ function goalFinaleCheck(){
 }
 setTimeout(goalFinaleCheck, 2500);
 setInterval(goalFinaleCheck, 3000);
+/* ============ 🎯 1.0.52 : CHAQUE OBJECTIF DU JOUR ATTEINT → la mascotte sort à la fin et t'encourage ============
+   On surveille les objectifs du jour. Quand l'un d'eux vient d'être atteint, on attend la fin de l'exercice
+   (et des confettis), puis Abdel ou Souky sort de son terrier au-dessus d'un panneau : la barre de l'objectif
+   atteint se remplit jusqu'au bout, « ✓ Fait ! », et on voit combien il en reste. Le dernier objectif, lui,
+   déclenche la grande fête (goalFinale). Une fois par objectif et par jour (même après un rechargement). */
+const QW_KEY = 'lexiqueQuiz::questWinSeen', QW_ON_KEY = 'lexiqueQuiz::questWin';
+let qwState = null, qwPending = [], qwTimer = 0, qwT0 = 0, qwFreeAt = 0;
+function qwOn(){ try{ return localStorage.getItem(nsKey(QW_ON_KEY)) !== 'off'; }catch(e){ return true; } }
+function qwPct(q){ return q.goal ? Math.max(0, Math.min(100, Math.round(q.cur / q.goal * 100))) : 100; }
+function qwSeenLoad(day){ try{ const o = JSON.parse(localStorage.getItem(nsKey(QW_KEY)) || 'null'); if(o && o.d === day && Array.isArray(o.k)) return new Set(o.k); }catch(e){} return null; }
+function qwSeenSave(){ try{ localStorage.setItem(nsKey(QW_KEY), JSON.stringify({ d:qwState.d, k:[...qwState.keys] })); }catch(e){} }
+function questWinCheck(){
+  let qs, day; try{ qs = getDailyQuests(); day = questDayKey(); }catch(e){ return; }
+  const doneNow = qs.filter(q => q.cur >= q.goal).map(q => q.key);
+  if(!qwState || qwState.d !== day){
+    const seen = qwSeenLoad(day);
+    qwState = { d:day, keys:seen || new Set(doneNow), cur:{} };   // à l'ouverture : on note juste où on en est
+    if(!seen) qwSeenSave();
+    qwPending = qwPending.filter(x => x.day === day);
+  }
+  const fresh = doneNow.filter(k => !qwState.keys.has(k));
+  // un objectif redevenu « à faire » (objectif relevé dans les réglages) pourra être fêté à nouveau
+  let changed = false;
+  [...qwState.keys].forEach(k => { if(qs.some(q => q.key === k) && !doneNow.includes(k)){ qwState.keys.delete(k); changed = true; } });
+  if(fresh.length){
+    fresh.forEach(k => qwState.keys.add(k)); changed = true;
+    const all = doneNow.length === qs.length;   // le dernier : c'est la grande fête qui s'en charge
+    if(!all && qwOn()) fresh.forEach(k => qwPending.push({ key:k, from:qwState.cur[k] != null ? qwState.cur[k] : 0, day }));
+  }
+  if(changed) qwSeenSave();
+  qs.forEach(q => { qwState.cur[q.key] = qwPct(q); });
+  if(qwPending.length) qwSchedule();
+}
+function qwBusy(){
+  const b = document.body.classList;
+  return b.contains('quiz-active') || b.contains('kb-open') || document.hidden || !!document.getElementById('splashScreen') || !!document.getElementById('goalFinale')
+    || !!document.getElementById('questWin') || (typeof VA !== 'undefined' && VA.open) || (typeof celeb !== 'undefined' && (celeb.busy || celeb.draining))
+    || (typeof cameoBusy !== 'undefined' && cameoBusy)
+    // 📖 en pleine lecture (Tablette, PDF, Bouquinage) ou en train d'écrire : on attend que tu aies fini
+    || !!document.getElementById('tbBody') || !!document.getElementById('pdvPages') || !!document.getElementById('tbkEd') || !!document.getElementById('bqSay')
+    || (() => { const a = document.activeElement; return !!a && (a.tagName === 'TEXTAREA' || (a.tagName === 'INPUT' && !/^(button|checkbox|radio|range|file)$/i.test(a.type)) || a.isContentEditable); })();
+}
+function qwSchedule(){
+  if(qwTimer) return;
+  qwT0 = Date.now(); qwFreeAt = 0;
+  const go = () => {
+    qwTimer = 0;
+    if(!qwPending.length) return;
+    let all = false; try{ all = questsAllDone(); }catch(e){}
+    if(all){ qwPending.length = 0; return; }
+    if(qwBusy()){ qwFreeAt = 0; if(Date.now() - qwT0 < 4 * 3600000) qwTimer = setTimeout(go, 700); else qwPending.length = 0; return; }
+    if(!qwFreeAt){ qwFreeAt = Date.now(); qwTimer = setTimeout(go, 700); return; }
+    if(Date.now() - qwFreeAt < 1300){ qwTimer = setTimeout(go, 400); return; }   // l'écran de fin s'affiche d'abord
+    const day = questDayKey(), items = qwPending.splice(0).filter(x => x.day === day);
+    if(items.length) questWin(items);
+  };
+  qwTimer = setTimeout(go, 900);
+}
+function qwText(fresh, left){
+  const name = (() => { try{ return vaUserFirstName(); }catch(e){ return ''; } })(), N = name ? ' ' + name : '';
+  const pick = (a) => a[Math.floor(Math.random() * a.length)];
+  const hi = pick(['Bravo', 'Super', 'Génial', 'Bien joué', 'Yes', 'Trop fort', 'Excellent', 'Chapeau', 'Waouh']) + N + ' !';
+  const what = fresh.length > 1 ? `${fresh.length} objectifs d'un coup !` : pick(['Un objectif de plus !', 'Objectif atteint !', 'Et un objectif de coché !', "Celui-là, c'est fait !", 'Mission accomplie !']);
+  const rest = left <= 0 ? '' : left === 1 ? pick(["Plus qu'un seul, et c'est la grande fête !", "Il n'en reste qu'un, tu y es presque !"])
+    : left <= 3 ? pick([`Plus que ${left}, tu y es presque !`, `Encore ${left} et c'est la grande fête !`])
+    : pick([`Encore ${left} objectifs, on continue ensemble ?`, `Il en reste ${left} : un à la fois, tu vas y arriver !`, `${left} à faire encore, je crois en toi !`, `Continue comme ça, plus que ${left} !`]);
+  return `${hi} ${what} ${rest}`.trim();
+}
+function qwVal(q){ return q.isTime ? `${Math.floor(q.cur / 60)}/${Math.round(q.goal / 60)} min` : `${q.cur}/${q.goal}`; }
+/* preview : démo depuis les réglages (un objectif fait semblant de se terminer) */
+function questWin(items, preview){
+  if(document.getElementById('questWin')) return false;
+  let qs = []; try{ qs = getDailyQuests(); }catch(e){ return false; }
+  if(preview){
+    const q = qs.find(x => x.cur < x.goal) || qs[0]; if(!q) return false;
+    items = [{ key:q.key, from:qwPct(q) }];
+  }
+  const nowKeys = items.map(x => x.key).filter(k => qs.some(q => q.key === k));
+  if(!nowKeys.length) return false;
+  const isDone = (q) => q.cur >= q.goal || nowKeys.includes(q.key);
+  const total = qs.length, doneN = qs.filter(isDone).length, left = total - doneN, before = doneN - nowKeys.length;
+  const fromOf = (k) => { const it = items.find(x => x.key === k); return Math.max(0, Math.min(96, it && it.from != null ? it.from : 0)); };
+  const row = (q, kind) => {
+    const now = kind === 'now', ok = kind === 'ok';
+    const w = now ? fromOf(q.key) : (ok ? 100 : qwPct(q));
+    const val = now ? (q.isTime ? `${Math.round(q.goal / 60)}/${Math.round(q.goal / 60)} min` : `${q.goal}/${q.goal}`) : (ok ? (q.isTime ? `${Math.round(q.goal / 60)} min` : `${q.goal}/${q.goal}`) : qwVal(q));
+    return `<div class="qw-row ${kind}" data-k="${escapeHtml(q.key)}"><span class="qw-ic" aria-hidden="true">${q.icon || '🎯'}</span><span class="qw-lbl">${escapeHtml(q.label)}</span><span class="qw-val">${escapeHtml(val)}</span>`
+      + `<div class="qw-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${now ? 100 : w}"><i style="--w:${w}%"></i></div>${now ? '<span class="qw-stamp">✓ Fait !</span>' : ''}</div>`;
+  };
+  const nowQ = qs.filter(q => nowKeys.includes(q.key));
+  const todo = qs.filter(q => !isDone(q)).sort((a, b) => qwPct(b) - qwPct(a));
+  const okQ = qs.filter(q => isDone(q) && !nowKeys.includes(q.key));
+  const text = qwText(nowQ, left);
+  const use3d = typeof fox3d !== 'undefined' && fox3d.ready && (() => { try{ return foxCfg().on; }catch(e){ return true; } })();
+  const showFox = (() => { try{ return foxCfg().on; }catch(e){ return true; } })();
+  const ov = document.createElement('div');
+  ov.id = 'questWin'; ov.className = 'qw'; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-label', 'Objectif atteint');
+  ov.innerHTML = `<div class="qw-bg"></div>
+    <div class="qw-card">
+      ${showFox ? `<div class="qw-fox" aria-hidden="true">${use3d ? '' : '<div class="qw-fox2d"></div>'}</div><div class="qw-bubble" id="qwMsg" aria-live="polite"></div>` : ''}
+      <div class="qw-head"><span class="qw-kick"><span class="qw-em" aria-hidden="true">🎯</span> <span class="qw-kt">${nowQ.length > 1 ? nowQ.length + ' objectifs atteints !' : 'Objectif atteint !'}</span></span><span class="qw-count"><b id="qwN">${before}</b> / ${total}</span></div>
+      <div class="qw-list">${nowQ.map(q => row(q, 'now')).join('')}${todo.length ? `<div class="qw-sep">Encore à faire</div>${todo.map(q => row(q, 'todo')).join('')}` : ''}${okQ.length ? `<div class="qw-sep">Déjà faits</div>${okQ.map(q => row(q, 'ok')).join('')}` : ''}</div>
+      <div class="qw-foot"><span class="qw-left">${left > 0 ? `Encore <b>${left}</b> objectif${left > 1 ? 's' : ''} avant la grande fête 🏆` : 'Tous tes objectifs sont faits 🏆'}</span><button type="button" class="qw-go" id="qwGo">Continuer ➜</button></div>
+    </div>`;
+  document.body.appendChild(ov);
+  let fox = null;
+  if(use3d){
+    try{ if(!fox3d.cameo) fox3d.cameo = fox3dCreate(THREE, 220); fox = fox3d.cameo; }catch(e){ fox = null; }
+    if(fox){
+      try{ cameoBusy = true; }catch(e){}
+      fox.setFemale(Math.random() < 0.5);
+      if(fox.setOpts) fox.setOpts({ orbit:0.38 });
+      ov.querySelector('.qw-fox').appendChild(fox.canvas);
+      fox.st.intro = 0; fox.st.hidden = true;
+    } else ov.querySelector('.qw-fox').innerHTML = '<div class="qw-fox2d"></div>';
+  }
+  window.__qwState = { text, keys:nowKeys, fox:!!fox };
+  const timers = [];
+  const later = (fn, ms) => timers.push(setTimeout(() => { if(ov.isConnected) fn(); }, ms));
+  requestAnimationFrame(() => requestAnimationFrame(() => ov.classList.add('in')));
+  try{ fxSound('whoosh'); }catch(e){}
+  // 🦊 il sort de son terrier, puis fête ça
+  later(() => { if(fox){ fox.st.hidden = false; fox.pop(); } }, 380);
+  later(() => { if(fox) fox.act(Math.random() < 0.5 ? 'cheer' : 'clap'); }, 2150);
+  later(() => { if(fox) fox.act('dance'); }, 4200);
+  later(() => { if(fox) fox.act('wave'); }, 7400);
+  // 💬 il t'encourage (bulle + voix)
+  later(() => {
+    const m = document.getElementById('qwMsg'); if(m){ m.textContent = text; m.classList.add('on'); }
+    if(showFox && !foxQuiet()){ try{ window.speechSynthesis.cancel(); }catch(e){} try{ speakNarrator(fxCleanSpeech(text), 'fr-FR'); }catch(e){} }
+  }, 950);
+  // 📊 la barre de l'objectif atteint se remplit jusqu'au bout, puis « ✓ Fait ! »
+  later(() => { ov.querySelectorAll('.qw-row.now .qw-bar i').forEach(i => i.style.setProperty('--w', '100%')); }, 700);
+  later(() => {
+    ov.querySelectorAll('.qw-row.now').forEach(r => {
+      r.classList.add('full');
+      const cols = ['#FDE047', '#F97316', '#EC4899', '#A78BFA', '#34D399', '#38BDF8'];
+      if(!(typeof fox3d !== 'undefined' && fox3d.reduced)) for(let i = 0; i < 16; i++){
+        const s = document.createElement('i'); s.className = 'qw-spark';
+        const a = Math.random() * Math.PI * 2, d = 30 + Math.random() * 50;
+        s.style.cssText = `right:${30 + Math.random() * 40}px;top:${2 + Math.random() * 10}px;background:${cols[i % cols.length]};--dx:${Math.cos(a) * d}px;--dy:${Math.sin(a) * d}px`;
+        r.appendChild(s); setTimeout(() => s.remove(), 1000);
+      }
+    });
+    const n = document.getElementById('qwN'); if(n){ n.textContent = String(doneN); n.classList.remove('bump'); void n.offsetWidth; n.classList.add('bump'); }
+    try{ playUnlockSound(); }catch(e){}
+    try{ haptic('success'); }catch(e){}
+    if(fox) try{ fox.fx('stars', null, { count:8 }); }catch(e){}
+  }, 2000);
+  const close = () => {
+    if(!ov.isConnected || ov.classList.contains('out')) return;
+    timers.forEach(clearTimeout);
+    ov.classList.remove('in'); ov.classList.add('out');
+    try{ window.speechSynthesis.cancel(); ttsSpeaking = false; }catch(e){}
+    document.removeEventListener('keydown', onKey, true);
+    setTimeout(() => {
+      if(fox){ try{ fox.canvas.remove(); if(fox.setOpts) fox.setOpts({ orbit:0 }); fox.still(); }catch(e){} try{ cameoBusy = false; cameoLast = Date.now(); }catch(e){} }
+      ov.remove();
+      try{ if(isHomeScreen) renderBlockSelect(); }catch(e){}   // l'accueil montre les barres à jour
+    }, 420);
+  };
+  const onKey = (e) => { if(e.key === 'Escape' || e.key === 'Enter'){ e.preventDefault(); close(); } };
+  document.addEventListener('keydown', onKey, true);
+  ov.querySelector('#qwGo').addEventListener('click', close);
+  ov.querySelector('.qw-bg').addEventListener('click', close);
+  const autoMs = 11500;
+  let autoT = setTimeout(function tick(){ if(!ov.isConnected) return; if(ttsSpeaking){ autoT = setTimeout(tick, 800); return; } close(); }, autoMs);
+  timers.push(autoT);
+  ov.querySelector('.qw-card').addEventListener('pointerdown', () => { clearTimeout(autoT); });   // tu regardes : il attend que tu touches « Continuer »
+  return true;
+}
+setTimeout(questWinCheck, 2600);
+setInterval(questWinCheck, 3000);
 /* « 🎉 Tu as terminé tous les défis du jour ! » sur l'accueil : toucher = revoir la fête */
 document.addEventListener('click', (e) => { const t = e.target.closest && e.target.closest('.quests-alldone'); if(t) goalFinale(true); });
 
@@ -47092,6 +47525,7 @@ function advStop(quiet){
   const L = advLog(); const last = L[L.length - 1];
   if(last && !last.b){ last.b = Math.min(Date.now(), advEndOfDay(last.a)); advSaveLog(L); }
   try{ gfWasDone = null; }catch(e){}
+  try{ qwState = null; qwPending.length = 0; }catch(e){}
   if(!quiet) setStatus("📅 Retour à aujourd'hui. Ce que tu as fait en avance reste compté pour demain.", 'ok');
   advRefreshUi();
 }
@@ -59547,6 +59981,174 @@ function splashSoundEngine(){
   };
   return api;
 }
+/* 🌌 1.0.52 : « BIG BANG DES LETTRES » — le ciel du démarrage.
+   1) warp : on fonce dans un tunnel de lettres (françaises et arabes) et d'étoiles à huit branches, de plus en plus vite ;
+   2) burst() : tout implose en un point de lumière… et explose : le renard jaillit, les lettres deviennent une galaxie
+      qui tourne autour de lui (la moitié avant passe devant lui, sur la 2e toile) ;
+   3) leave() : la galaxie part en hyperespace pendant que le portail s'ouvre sur l'appli.
+   Chaque lettre est dessinée une fois (avec son halo) puis seulement redimensionnée : fluide sur téléphone. */
+function splashWarp(stage, opts){
+  opts = opts || {};
+  const cvB = document.getElementById('spCanvas'), cvF = document.getElementById('spCanvasF');
+  if(!cvB || !cvB.getContext) return { burst(){}, stop(){}, leave(){}, mode(){ return 'none'; } };
+  const cB = cvB.getContext('2d'), cF = cvF && cvF.getContext ? cvF.getContext('2d') : null;
+  const reduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  let w = 0, h = 0, run = true, last = performance.now(), t = 0;
+  const resize = () => {
+    const d = Math.min(window.devicePixelRatio || 1, 2); w = window.innerWidth; h = window.innerHeight;
+    [[cvB, cB], [cvF, cF]].forEach(([cv, c]) => { if(!c) return; cv.width = Math.round(w * d); cv.height = Math.round(h * d); c.setTransform(d, 0, 0, d, 0, 0); });
+  };
+  resize(); window.addEventListener('resize', resize);
+  const rand = (a, b) => a + Math.random() * (b - a), pk = (a) => a[(Math.random() * a.length) | 0];
+  const clamp01 = (x) => Math.max(0, Math.min(1, x)), easeIn = (x) => x * x * x, easeIO = (x) => x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+  const LAT = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZéèêàâçùîôœ'], AR = [...'ابتثجحخدذرزسشصضطظعغفقكلمنهوي'];
+  const COLS = ['#FFFFFF', '#E0E7FF', '#A5B4FC', '#C4B5FD', '#F0ABFC', '#FDE68A', '#FDBA74', '#67E8F9'];
+  const SP = 72, cache = new Map();
+  const sprite = (ch, col) => {
+    const k = ch + col; let c = cache.get(k); if(c) return c;
+    c = document.createElement('canvas'); c.width = c.height = SP;
+    const g = c.getContext('2d'); g.textAlign = 'center'; g.textBaseline = 'middle';
+    const ar = AR.includes(ch), y = SP / 2 + (ar ? 0 : 3);
+    g.font = `${ar ? 700 : 900} ${Math.round(SP * (ar ? 0.56 : 0.6))}px ${ar ? "'Changa','IBM Plex Sans Arabic','Noto Naskh Arabic'" : "'Nunito','Inter'"}, sans-serif`;
+    g.shadowColor = col; g.shadowBlur = SP * 0.2; g.fillStyle = col; g.fillText(ch, SP / 2, y);
+    g.shadowBlur = 0; g.globalAlpha = 0.6; g.fillStyle = '#FFFFFF'; g.fillText(ch, SP / 2, y);
+    cache.set(k, c); return c;
+  };
+  const N = reduced ? 50 : Math.round(Math.min(260, Math.max(140, w * h / 3800)));
+  const parts = [];
+  const spawn = (p, far) => { p.a = rand(0, 6.283); p.r = rand(0.28, 1.3); p.z = far ? rand(0.9, 1.45) : rand(0.1, 1.45); p.ch = Math.random() < 0.5 ? pk(LAT) : pk(AR); p.col = pk(COLS); p.sx = null; return p; };
+  for(let i = 0; i < N; i++) parts.push(spawn({ i }, false));
+  const stars = Array.from({ length:reduced ? 40 : 150 }, () => ({ x:Math.random(), y:Math.random(), r:rand(0.3, 1.3), p:rand(0, 6.28), s:rand(0.8, 2.4) }));
+  const rings = Array.from({ length:7 }, (_, k) => ({ z:0.2 + k * 0.2 }));
+  const charge = Math.max(0.3, opts.charge || 1.3);
+  let mode = 'warp', mt = 0, spin = 0, speed = 0.15, pulse = 0, ptx = 0, pty = 0, tpx = 0, tpy = 0;
+  const onPtr = (e) => { tpx = (e.clientX / Math.max(1, w) - 0.5) * -26; tpy = (e.clientY / Math.max(1, h) - 0.5) * -18; };
+  window.addEventListener('pointermove', onPtr, { passive:true });
+  const center = () => { const r = stage.getBoundingClientRect(); return { x:r.left + r.width / 2 + ptx, y:r.top + r.height * 0.56 + pty, s:Math.max(120, r.width) }; };
+  const unit = () => Math.max(0.7, Math.min(1.35, Math.min(w, h) / 640));
+  const star8 = (c, x, y, R, rot) => {   // étoile à huit branches (deux carrés), le motif de l'accueil
+    c.beginPath();
+    for(let q = 0; q < 2; q++){ const a0 = rot + q * Math.PI / 4; for(let k = 0; k < 4; k++){ const a = a0 + k * Math.PI / 2, px = x + Math.cos(a) * R, py = y + Math.sin(a) * R; if(k) c.lineTo(px, py); else c.moveTo(px, py); } c.closePath(); }
+    c.stroke();
+  };
+  const glowAt = (c, x, y, R, k) => {
+    if(k <= 0.01) return;
+    const g = c.createRadialGradient(x, y, 0, x, y, R);
+    g.addColorStop(0, `rgba(255,255,255,${Math.min(1, k)})`); g.addColorStop(0.18, `rgba(224,231,255,${Math.min(1, k * 0.7)})`);
+    g.addColorStop(0.45, `rgba(167,139,250,${Math.min(1, k * 0.25)})`); g.addColorStop(1, 'rgba(167,139,250,0)');
+    c.fillStyle = g; c.globalAlpha = 1; c.fillRect(x - R, y - R, R * 2, R * 2);
+  };
+  const api = {
+    burst(){
+      if(mode === 'warp'){ mode = 'implode'; mt = 0; parts.forEach(p => { p.ix = p.sx != null ? p.sx : center().x; p.iy = p.sx != null ? p.sy : center().y; }); }
+      else pulse = 1;   // déjà en orbite (le renard 3D arrive après coup) : la galaxie pulse
+    },
+    leave(){ if(mode === 'out') return; mode = 'out'; mt = 0; },
+    stop(){ run = false; window.removeEventListener('resize', resize); window.removeEventListener('pointermove', onPtr); },
+    mode(){ return mode; },
+  };
+  const frame = (now) => {
+    if(!run) return;
+    requestAnimationFrame(frame);
+    const dt = Math.max(0, Math.min(0.05, (now - last) / 1000)); last = now; t += dt; mt += dt;
+    ptx += (tpx - ptx) * Math.min(1, dt * 3); pty += (tpy - pty) * Math.min(1, dt * 3);
+    const C = center(), U = unit(), F = Math.min(w, h) * 0.13;
+    cB.globalCompositeOperation = 'source-over'; cB.globalAlpha = 1; cB.clearRect(0, 0, w, h);
+    if(cF){ cF.globalAlpha = 1; cF.clearRect(0, 0, w, h); }
+    // étoiles lointaines (elles filent un peu pendant le warp)
+    cB.fillStyle = '#fff';
+    const drift = mode === 'warp' ? clamp01(mt / charge) : 0;
+    for(const s of stars){
+      let x = s.x * w, y = s.y * h;
+      if(drift){ const dx = x - C.x, dy = y - C.y; x += dx * drift * 0.08 * Math.sin(t * 2 + s.p); y += dy * drift * 0.08 * Math.sin(t * 2 + s.p); }
+      cB.globalAlpha = 0.12 + 0.5 * (0.5 + 0.5 * Math.sin(t * s.s + s.p)); cB.beginPath(); cB.arc(x, y, s.r, 0, 6.283); cB.fill();
+    }
+    cB.globalCompositeOperation = 'lighter';
+    pulse = Math.max(0, pulse - dt * 1.6);
+    if(mode === 'warp' || mode === 'implode'){
+      const k = mode === 'warp' ? clamp01(mt / charge) : 1;
+      speed = (reduced ? 0.12 : 0.16) + (reduced ? 0.2 : 1.55) * k * k;
+      spin += (0.22 + 1.3 * k) * dt * (reduced ? 0.3 : 1);
+      // anneaux du tunnel : des étoiles à huit branches qui foncent vers toi
+      const ringK = mode === 'implode' ? 1 - clamp01(mt / 0.25) : clamp01(mt / 0.35);
+      if(ringK > 0) rings.forEach((rg, n) => {
+        rg.z -= speed * dt * 0.8; if(rg.z < 0.12) rg.z += 1.4;
+        const R = F * 1.55 / rg.z, al = clamp01((1.5 - rg.z) * 1.4) * clamp01((rg.z - 0.12) / 0.25) * 0.32 * ringK;
+        if(al <= 0.01 || R > Math.max(w, h) * 1.4) return;
+        cB.globalAlpha = al; cB.lineWidth = Math.max(0.8, 2.2 / Math.sqrt(rg.z)); cB.strokeStyle = n % 2 ? '#A5B4FC' : '#F0ABFC';
+        star8(cB, C.x, C.y, R, spin * 0.6 + n * 0.3);
+      });
+      // la lumière au bout du tunnel
+      glowAt(cB, C.x, C.y, C.s * (0.5 + 0.7 * k) * (mode === 'implode' ? 1 + mt * 2.4 : 1), mode === 'implode' ? 0.7 + mt * 2.4 : 0.18 + 0.55 * k);
+      for(const p of parts){
+        let x, y, size, al;
+        if(mode === 'warp'){
+          p.z -= speed * dt;
+          if(p.z < 0.06){ spawn(p, true); continue; }
+          const f = F / p.z;
+          x = C.x + Math.cos(p.a + spin) * p.r * f; y = C.y + Math.sin(p.a + spin) * p.r * f;
+          size = Math.min(86, 7.5 / p.z) * U;
+          al = clamp01((1.48 - p.z) * 2) * clamp01((p.z - 0.06) / 0.12);
+        } else {
+          const e = easeIn(clamp01(mt / 0.3));
+          x = p.ix + (C.x - p.ix) * e; y = p.iy + (C.y - p.iy) * e;
+          size = Math.min(86, 7.5 / Math.max(0.1, p.z)) * U * (1 - e * 0.75); al = 1;
+        }
+        if(x < -90 || x > w + 90 || y < -90 || y > h + 90){ p.sx = null; continue; }
+        if(p.sx != null && al > 0.05){   // traînée de vitesse
+          const tx = x - (x - p.sx) * 3.2, ty = y - (y - p.sy) * 3.2;
+          cB.globalAlpha = al * 0.4; cB.strokeStyle = p.col; cB.lineWidth = Math.max(0.6, size * 0.07);
+          cB.beginPath(); cB.moveTo(tx, ty); cB.lineTo(x, y); cB.stroke();
+        }
+        cB.globalAlpha = al; cB.drawImage(sprite(p.ch, p.col), x - size / 2, y - size / 2, size, size);
+        p.sx = x; p.sy = y;
+      }
+      if(mode === 'implode' && mt >= 0.3){
+        mode = 'boom'; mt = 0;
+        const gold = ['#FFFFFF', '#FDE68A', '#C7D2FE', '#F0ABFC', '#A5B4FC', '#67E8F9'];
+        parts.forEach((p, i) => {
+          const an = rand(0, 6.283), sp = rand(260, 1150) * U;
+          p.ex = C.x; p.ey = C.y; p.vx = Math.cos(an) * sp; p.vy = Math.sin(an) * sp;
+          p.ra = (i / parts.length) * 6.283 + rand(-0.06, 0.06); p.rr = rand(0.84, 1.16); p.rz = rand(-0.06, 0.06); p.sz = rand(11, 21); p.col = pk(gold); p.sx = null;
+        });
+      }
+      return;
+    }
+    // ---- big bang → galaxie (et départ en hyperespace)
+    const fl = mode === 'boom' ? Math.max(0, 1.5 - mt * 1.9) : 0;
+    glowAt(cB, C.x, C.y, C.s * (0.6 + fl * 0.9), Math.max(mode === 'out' ? 0.25 * (1 - clamp01(mt / 0.6)) : 0.3, fl));
+    const Rx = Math.max(140, Math.min(w * 0.47, C.s * 0.98)) * (1 + pulse * 0.22), Ry = Rx * 0.24, cyR = C.y + C.s * 0.1;
+    for(const p of parts){
+      if(mode === 'boom'){
+        p.vx *= 1 - Math.min(1, 2.8 * dt); p.vy *= 1 - Math.min(1, 2.8 * dt); p.ex += p.vx * dt; p.ey += p.vy * dt;
+        const ph = p.ra + t * 0.55, dep = Math.sin(ph);
+        const tx = C.x + Math.cos(ph) * Rx * p.rr, ty = cyR + dep * Ry * p.rr + p.rz * Rx;
+        const b = easeIO(clamp01((mt - 0.3) / 1.1));
+        const x = p.ex + (tx - p.ex) * b, y = p.ey + (ty - p.ey) * b;
+        const size = p.sz * U * (0.62 + 0.38 * (dep + 1) / 2) * (1 + (1 - b) * 0.5);
+        const al = (b < 0.6 ? 1 : (dep > 0 ? 0.95 : 0.35 + 0.3 * (dep + 1))) * clamp01(mt * 5);
+        const c = (cF && b > 0.55 && dep > 0) ? cF : cB;
+        if(b < 0.5 && p.sx != null){ c.globalAlpha = al * 0.45; c.strokeStyle = p.col; c.lineWidth = Math.max(0.6, size * 0.08); c.beginPath(); c.moveTo(x - (x - p.sx) * 2.5, y - (y - p.sy) * 2.5); c.lineTo(x, y); c.stroke(); }
+        if(c === cF) c.globalCompositeOperation = 'lighter';
+        c.globalAlpha = al; c.drawImage(sprite(p.ch, p.col), x - size / 2, y - size / 2, size, size);
+        p.sx = x; p.sy = y;
+      } else {   // out : tout file vers l'extérieur
+        const px = p.sx != null ? p.sx : C.x, py = p.sy != null ? p.sy : C.y;
+        let dx = px - C.x, dy = py - C.y; const dl = Math.hypot(dx, dy) || 1; dx /= dl; dy /= dl;
+        const v = (240 + 3000 * mt * mt) * U;
+        const x = px + dx * v * dt, y = py + dy * v * dt, size = (p.sz || 14) * U * (1 + mt * 1.6), al = 1 - clamp01(mt / 0.85);
+        if(al > 0){
+          cB.globalAlpha = al * 0.5; cB.strokeStyle = p.col; cB.lineWidth = Math.max(0.7, size * 0.08);
+          cB.beginPath(); cB.moveTo(x - dx * v * 0.06, y - dy * v * 0.06); cB.lineTo(x, y); cB.stroke();
+          cB.globalAlpha = al; cB.drawImage(sprite(p.ch, p.col), x - size / 2, y - size / 2, size, size);
+        }
+        p.sx = x; p.sy = y;
+      }
+    }
+  };
+  requestAnimationFrame(frame);
+  return api;
+}
 /* Ciel animé : étoiles, étoiles filantes, lettres FR/AR qui montent, énergie qui converge vers le portail, explosion. */
 function splashParticles(stage){
   const cv = document.getElementById('spCanvas');
@@ -59661,7 +60263,9 @@ function fox3dBindHeroClick(box){
   fox3d.splashHold = true; // l'accueil attend : c'est le renard du splash qui viendra s'y poser
   const placeCenter = () => { const r = stage.getBoundingClientRect(); sp.style.setProperty('--sp-cy', Math.round(r.top + r.height * 0.6) + 'px'); };
   placeCenter(); window.addEventListener('resize', placeCenter);
-  const P = splashParticles(stage);
+  const BIGBANG = sp.classList.contains('sp4');
+  // 🌌 1.0.52 : les lettres du nom partent de partout (elles se rassembleront en tournoyant)
+  if(BIGBANG) sp.querySelectorAll('.sp-brand span').forEach(s => { const a = Math.random() * 6.283, d = 140 + Math.random() * 240; s.style.setProperty('--sx', Math.round(Math.cos(a) * d) + 'px'); s.style.setProperty('--sy', Math.round(Math.sin(a) * d) + 'px'); s.style.setProperty('--sr', Math.round((Math.random() - 0.5) * 600) + 'deg'); });
   // 🔊 son : démarre tout seul quand le navigateur l'autorise (appli installée), sinon bouton « Activer le son »
   const SFX = splashSoundEngine();
   const sb = $('spSound');
@@ -59684,8 +60288,9 @@ function fox3dBindHeroClick(box){
     syncSound();
   });
 
-  const EMERGE_AT = quick ? 300 : 650;   // ms depuis l'ouverture de l'appli
-  const WAIT_3D = quick ? 800 : 1500;    // attente max du moteur 3D (le portail « se charge » pendant ce temps)
+  const EMERGE_AT = quick ? 300 : (BIGBANG ? 1350 : 650);   // ms depuis l'ouverture de l'appli (🌌 le temps de traverser le tunnel)
+  const WAIT_3D = quick ? 800 : (BIGBANG ? 1900 : 1500);    // attente max du moteur 3D (le portail « se charge » pendant ce temps)
+  const P = BIGBANG ? splashWarp(stage, { charge:Math.max(0.3, (EMERGE_AT - performance.now()) / 1000) }) : splashParticles(stage);
   const TALK_AFTER = quick ? 280 : 520;
   const STAY = quick ? 1400 : 3100;      // durée de la conversation avant l'envol
   const bar = $('spBar');
@@ -59802,7 +60407,7 @@ function fox3dBindHeroClick(box){
     fox3d.splashHold = false;
     if(foxInst){
       fox3d.hero = foxInst; // un seul renard 3D : celui du splash devient celui de l'accueil
-      if(foxInst.setAuto) foxInst.setAuto(2);
+      if(foxInst.setOpts) foxInst.setOpts(FOX_HERO_OPTS); else if(foxInst.setAuto) foxInst.setAuto(2);
       const box = document.getElementById('heroMascotContainer');
       if(box && !box.querySelector('.fox3d-canvas')){
         box.style.setProperty('animation', 'none', 'important');
@@ -59820,6 +60425,7 @@ function fox3dBindHeroClick(box){
     state = 'leaving';
     sp.classList.add('leaving');
     SFX.leave();
+    try{ if(P.leave) P.leave(); }catch(e){}
     const fr = foxBox.getBoundingClientRect();
     const cx = fr.left + fr.width / 2, cy = fr.top + fr.height * 0.55;
     if(!wasOut){ sp.classList.add('fade-out'); setTimeout(finish, 520); return; }
@@ -59834,7 +60440,7 @@ function fox3dBindHeroClick(box){
     if(reduced){ foxBox.style.opacity = '0'; }
     else if(target){
       let tx, ty, s;
-      if(foxInst){ const size = 176; s = size / fr.width; tx = target.left + target.width / 2 - size / 2; ty = target.top + target.height / 2 - 0.67 * size; }
+      if(foxInst){ const big = !!(window.matchMedia && window.matchMedia('(min-width:720px)').matches), size = big ? 262 : 196, ky = big ? 0.62 : 0.64; s = size / fr.width; tx = target.left + target.width / 2 - size / 2; ty = target.top + target.height / 2 - ky * size; }
       else { s = target.width / fr.width; tx = target.left; ty = target.top; setTimeout(() => { foxBox.style.opacity = '0'; }, 520); }
       foxBox.style.transform = `translate(${tx - fr.left}px, ${ty - fr.top}px) scale(${s})`;
       if(foxInst) foxInst.react('ok');
