@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- 🏷️ Version de l'appli : augmentée automatiquement par publier-site.cmd à chaque publication -->
-<meta name="app-version" content="1.0.52" data-date="2026-11-13">
+<meta name="app-version" content="1.0.53" data-date="2026-11-19">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <title>VocabVISION — Vocabulaire Français ↔ Arabe</title>
 <script>
@@ -1984,9 +1984,9 @@
   @media (hover:hover){ .tb.hov-off .tbw:hover{ background-color:var(--tb-band); } }
   .tbw.hov{ background-color:var(--tb-hov, rgba(96,165,250,.32)); box-shadow:0 0 0 .12em var(--tb-hov, rgba(96,165,250,.32)); transition:background-color .08s, box-shadow .08s; }
   /* 🖍 1.0.49 : la traînée — les 3 mots d'avant, chacun sa couleur, de plus en plus pâle */
-  .tbw.hov1, .pdv-tl span.hov1, #pdkFlow .tbw.hov1{ background-color:rgba(251,191,36,.34); box-shadow:0 0 0 .1em rgba(251,191,36,.34); border-radius:3px; }
-  .tbw.hov2, .pdv-tl span.hov2, #pdkFlow .tbw.hov2{ background-color:rgba(244,114,182,.24); box-shadow:0 0 0 .08em rgba(244,114,182,.24); border-radius:3px; }
-  .tbw.hov3, .pdv-tl span.hov3, #pdkFlow .tbw.hov3{ background-color:rgba(167,139,250,.16); border-radius:3px; }
+  .tbw.hov1, .pdv-tl span.hov1, #pdkFlow .tbw.hov1{ background-color:rgba(var(--tb-hov-rgb, 96,165,250), .2); box-shadow:none; border-radius:3px; transition:background-color .35s ease; }
+  .tbw.hov2, .pdv-tl span.hov2, #pdkFlow .tbw.hov2{ background-color:rgba(var(--tb-hov-rgb, 96,165,250), .11); box-shadow:none; border-radius:3px; transition:background-color .35s ease; }
+  .tbw.hov3, .pdv-tl span.hov3, #pdkFlow .tbw.hov3{ background-color:rgba(var(--tb-hov-rgb, 96,165,250), .055); box-shadow:none; border-radius:3px; transition:background-color .35s ease; }
   .pdv-tl span.hov, #pdkFlow .tbw.hov{ background-color:var(--pdv-hov, rgba(96,165,250,.36)); box-shadow:0 0 0 .1em var(--pdv-hov, rgba(96,165,250,.36)); border-radius:3px; }
   .tb.hov-off .tbw.hov1, .tb.hov-off .tbw.hov2, .tb.hov-off .tbw.hov3{ background-color:transparent; box-shadow:none; }
   .tb-trail-demo i{ font-style:normal; border-radius:3px; padding:0 2px; }
@@ -2511,7 +2511,9 @@
   .wcp-end-g .opt{ margin:0; padding:10px; font-size:14px; }
   /* ➕ 1.0.39 : les mots d'une fiche → mes blocs ; glisser pour sélectionner */
   .ex-text, .result-ex, .def-text, .repeat-sentence, .wcp-ex, .wcp-def, .reading-text:not(.dsel-x), .bq-quote, .cq-sentence{ touch-action:pan-y pinch-zoom; }
-  .fsa-row{ display:flex; justify-content:center; margin:10px 0 0; }
+  .fsa-row{ display:flex; justify-content:center; margin:10px 0 0; flex-wrap:wrap; gap:8px; }
+  .fsa-copy{ font-weight:800; }
+  .fsa-copy.ok{ background:rgba(34,197,94,.14) !important; border-color:rgba(34,197,94,.5) !important; color:#15803D !important; }
   .fsa-btn{ background:linear-gradient(135deg, #7C3AED, #EC4899) !important; color:#fff !important; border:0 !important; font-weight:800; }
   .fsa{ max-height:90vh; overflow-y:auto; }
   .fsa .wcp-head{ justify-content:space-between; align-items:flex-start; } .fsa .wcp-head > div{ flex:1; min-width:0; }
@@ -2867,6 +2869,9 @@
   .tbl-link{ border:0; background:transparent; color:var(--cc); font:800 13.5px 'Nunito','Inter',sans-serif; cursor:pointer; padding:4px 0; text-decoration:underline; text-underline-offset:3px; }
   .tbl-foot{ display:flex; flex-wrap:wrap; gap:6px 14px; justify-content:space-between; margin:10px 4px 0; font:700 12px 'Nunito','Inter',sans-serif; color:var(--text-dim); }
   .tbl-foot .tbk-sync{ margin-left:0; }
+  .tbk-sync-btn{ border:1px solid var(--border); background:var(--surface-sunken); border-radius:999px; padding:6px 12px; cursor:pointer; color:var(--text); }
+  .tbk-sync-btn:hover{ border-color:var(--blue, #6366F1); } .tbk-sync-btn:disabled{ opacity:.7; cursor:default; }
+  .tbk-sync-btn:focus-visible{ outline:3px solid rgba(99,102,241,.5); outline-offset:2px; }
   @media (hover:none){ .tbl-tip{ display:none; } }
   .tbl-menu{ position:absolute; z-index:40; width:256px; max-width:calc(100vw - 16px); padding:6px; border-radius:16px; background:var(--surface); border:1px solid var(--border); box-shadow:0 20px 44px -16px rgba(15,23,42,.45); }
   .tbl-menu[hidden]{ display:none; }
@@ -4979,6 +4984,77 @@
   .ss-hint{ margin:12px 2px 0; font-size:13px; color:var(--text-dim); }
   #quizCard.ss-on > :not(.ss-keep){ display:none !important; }
 
+  /* ============ 🔤 1.0.53 : chercher un mot depuis l'accueil (ou une fiche) ============ */
+  .ss-scope{ display:flex; align-items:center; gap:6px; margin:8px 2px 0; flex-wrap:wrap; font-size:12.5px; font-weight:700; color:var(--text-dim); }
+  .ss-scope button{ border:1px solid var(--border); background:var(--surface); color:var(--text-dim); border-radius:999px; padding:6px 12px; font:700 13px 'Nunito','Inter',sans-serif; cursor:pointer; }
+  .ss-scope button[aria-pressed="true"]{ background:var(--accent, var(--purple)); border-color:var(--accent, var(--purple)); color:#fff; }
+  .ss-scope button:focus-visible{ outline:3px solid var(--accent-soft, rgba(124,58,237,.3)); outline-offset:2px; }
+  .ssw-row{ display:flex; align-items:stretch; gap:6px; margin:6px 0 0; }
+  .ssw-main{ flex:1; min-width:0; display:grid; grid-template-columns:minmax(0,1fr) auto; gap:2px 10px; align-items:baseline; text-align:left; padding:10px 12px; background:var(--surface); border:1px solid var(--border); border-radius:12px; cursor:pointer; color:var(--text); font:inherit; }
+  .ssw-main:hover, .ssw-main:focus-visible{ background:var(--surface-hover); border-color:var(--border-strong, var(--border)); }
+  .ssw-fr{ font-weight:800; font-size:15px; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .ssw-ar{ font-size:16px; font-weight:600; color:var(--text); direction:rtl; text-align:right; }
+  .ssw-def{ grid-column:1 / -1; font-size:12.5px; color:var(--text-dim); line-height:1.4; display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; overflow:hidden; }
+  .ssw-meta{ grid-column:1 / -1; font-size:11.5px; color:var(--text-faint, var(--text-dim)); font-weight:700; }
+  .ssw-b{ flex:none; width:42px; border:1px solid var(--border); background:var(--surface); border-radius:12px; cursor:pointer; font-size:16px; color:var(--text-dim); display:inline-flex; align-items:center; justify-content:center; padding:0; }
+  .ssw-b:hover{ background:var(--surface-hover); color:var(--text); }
+  .ssw-b.del.arm, .wl-del.arm{ width:auto; padding:0 10px; background:#DC2626; border-color:#DC2626; color:#fff; font:800 12.5px 'Nunito','Inter',sans-serif; }
+  .ssw-row.gone{ opacity:0; transform:translateX(16px); transition:opacity .25s, transform .25s; }
+  .ssw-add{ display:flex; align-items:center; gap:10px; width:100%; margin-top:10px; padding:12px; border-radius:12px; border:1px dashed var(--accent, var(--purple)); background:var(--accent-soft, rgba(124,58,237,.08)); color:var(--text); font:700 14px 'Nunito','Inter',sans-serif; cursor:pointer; text-align:left; }
+  /* 🗑 dans les listes de mots (dictionnaire) : retirer sans ouvrir la fiche */
+  .wl-acts{ display:flex; gap:6px; justify-content:flex-end; margin-top:8px; }
+  .dict-row .wl-acts{ margin:0; flex:none; }
+  html body .dict-row:has(.wl-acts){ grid-template-columns:32px minmax(0,1fr) auto auto auto; }
+  @media (max-width:600px){ html body .dict-row:has(.wl-acts){ grid-template-columns:28px minmax(0,1fr) auto auto; } .dict-row .wl-acts button{ min-width:30px; padding:0 6px; } }
+  .wl-acts button{ border:1px solid var(--border); background:var(--surface); color:var(--text-dim); border-radius:10px; min-width:34px; height:32px; padding:0 8px; cursor:pointer; font:700 12.5px 'Nunito','Inter',sans-serif; }
+  .wl-acts button:hover{ color:var(--text); background:var(--surface-hover); }
+  .result-card[data-wl-open], .dict-row[data-wl-open]{ cursor:pointer; }
+  .result-card.gone, .dict-row.gone{ opacity:0; transform:scale(.97); transition:opacity .25s, transform .25s; }
+  /* ➕ ajouter une phrase à la fiche d'un mot */
+  .wcp-addex{ margin-top:10px; display:flex; flex-direction:column; gap:8px; }
+  .wcp-addex textarea{ width:100%; min-height:70px; resize:vertical; border:1px solid var(--border); border-radius:12px; padding:10px 12px; font:500 15px/1.45 'Inter',sans-serif; background:var(--surface); color:var(--text); box-sizing:border-box; }
+  .wcp-addex textarea:focus{ outline:none; border-color:var(--accent, var(--purple)); box-shadow:0 0 0 3px var(--accent-soft, rgba(124,58,237,.16)); }
+  .wcp-addex-h{ font-size:12px; font-weight:800; color:var(--text-dim); }
+  .wcp-addex-n{ font-size:12px; color:#B45309; font-weight:700; }
+  /* ============ 🔁 1.0.53 : réviser plusieurs blocs dans le même mode ============ */
+  .mb-ov{ position:fixed; inset:0; z-index:9970; background:rgba(15,18,40,.55); backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px); display:flex; align-items:flex-end; justify-content:center; padding:0 10px; opacity:0; transition:opacity .2s; }
+  .mb-ov.show{ opacity:1; }
+  @media (min-width:720px){ .mb-ov{ align-items:center; } }
+  .mb{ width:min(620px, 100%); max-height:min(92vh, 860px); display:flex; flex-direction:column; background:var(--surface); color:var(--text); border:1px solid var(--border); border-radius:22px 22px 0 0; box-shadow:0 30px 60px -20px rgba(0,0,0,.5); transform:translateY(24px); transition:transform .3s cubic-bezier(.2,1.2,.4,1); }
+  @media (min-width:720px){ .mb{ border-radius:22px; } }
+  .mb-ov.show .mb{ transform:none; }
+  .mb-head{ display:flex; align-items:flex-start; gap:10px; padding:16px 16px 6px; }
+  .mb-head h2{ margin:0; font:900 19px/1.2 'Nunito','Inter',sans-serif; color:var(--text); }
+  .mb-head p{ margin:4px 0 0; font-size:13px; line-height:1.45; color:var(--text-dim); }
+  .mb-x{ margin-left:auto; flex:none; width:36px; height:36px; border-radius:11px; border:1px solid var(--border); background:var(--surface-sunken); color:var(--text-dim); cursor:pointer; font-size:15px; }
+  .mb-body{ padding:6px 16px 10px; overflow:auto; }
+  .mb-l{ font:800 12px 'Nunito','Inter',sans-serif; text-transform:uppercase; letter-spacing:.05em; color:var(--text-dim); margin:12px 0 6px; }
+  .mb-modes, .mb-quick{ display:flex; flex-wrap:wrap; gap:6px; }
+  .mb-modes button, .mb-quick button{ border:1px solid var(--border); background:var(--surface-sunken); color:var(--text); border-radius:999px; padding:7px 12px; font:700 13px 'Nunito','Inter',sans-serif; cursor:pointer; }
+  .mb-modes button[aria-pressed="true"]{ background:var(--accent, var(--purple)); border-color:var(--accent, var(--purple)); color:#fff; }
+  .mb-quick button{ background:transparent; color:var(--accent, var(--purple)); border-style:dashed; }
+  .mb-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(92px, 1fr)); gap:6px; }
+  .mb-b{ position:relative; display:flex; flex-direction:column; align-items:flex-start; gap:2px; padding:8px 9px; border-radius:12px; border:1.5px solid var(--border); background:var(--surface); color:var(--text); cursor:pointer; text-align:left; font:inherit; }
+  .mb-b b{ font:800 13.5px 'Nunito','Inter',sans-serif; }
+  .mb-b span{ font-size:11.5px; color:var(--text-dim); font-weight:700; }
+  .mb-b.ok span{ color:#15803D; }
+  .mb-b[aria-pressed="true"]{ border-color:var(--accent, var(--purple)); background:var(--accent-soft, rgba(124,58,237,.1)); box-shadow:0 0 0 2px var(--accent-soft, rgba(124,58,237,.18)); }
+  .mb-b[aria-pressed="true"]::after{ content:'✓'; position:absolute; top:6px; right:8px; font-weight:900; color:var(--accent, var(--purple)); }
+  .mb-b:disabled{ opacity:.45; cursor:not-allowed; }
+  .mb-b:focus-visible, .mb-modes button:focus-visible, .mb-go:focus-visible{ outline:3px solid var(--accent-soft, rgba(124,58,237,.35)); outline-offset:2px; }
+  .mb-foot{ display:flex; align-items:center; gap:10px; padding:12px 16px calc(12px + env(safe-area-inset-bottom, 0px)); border-top:1px solid var(--border); }
+  .mb-sum{ flex:1; font-size:13px; font-weight:700; color:var(--text-dim); }
+  .mb-sum b{ color:var(--text); }
+  .mb-go{ flex:none; border:0; border-radius:12px; padding:11px 18px; font:800 15px 'Nunito','Inter',sans-serif; color:#fff; background:linear-gradient(135deg,#7C3AED,#EC4899); cursor:pointer; }
+  .mb-go:disabled{ opacity:.45; cursor:not-allowed; }
+  .mb-res{ margin:16px auto 4px; max-width:520px; text-align:left; border:1px solid var(--border); border-radius:14px; padding:12px 14px; background:var(--surface-sunken); }
+  .mb-res-h{ font:800 14px 'Nunito','Inter',sans-serif; color:var(--purple); margin-bottom:6px; }
+  .mb-r{ display:grid; grid-template-columns:auto 1fr auto; gap:10px; align-items:center; padding:6px 0; border-top:1px dashed var(--border); font-size:13.5px; }
+  .mb-r:first-of-type{ border-top:0; }
+  .mb-r b{ font-family:'Nunito','Inter',sans-serif; }
+  .mb-r .v{ font-variant-numeric:tabular-nums; color:var(--text-dim); font-weight:700; }
+  .mb-r .s{ font-weight:800; font-size:12.5px; }
+  .mb-r.ok .s{ color:#15803D; } .mb-r.todo .s{ color:#B45309; } .mb-r.kept .s{ color:var(--text-dim); }
   /* ============ ✍️ Conjugaison : à refaire, redire la phrase, reprendre ============ */
   .cq-retry{ display:inline-block; margin:2px auto 8px; padding:6px 12px; border-radius:999px; background:rgba(249,115,22,.12); border:1px solid rgba(249,115,22,.45); color:#C2410C; font-weight:700; font-size:13px; }
   .conj-requeue{ margin-top:8px; font-size:13.5px; font-weight:700; color:#C2410C; }
@@ -6773,7 +6849,7 @@ function startListMode(words, mode, src){
   gameMode = mode;
   if(typeof src.block === 'number' && BLOCKS[src.block] && BLOCKS[src.block].length){ buildDeck(src.block); }
   else if(src.custom && getCustomBlock(src.custom)){ buildCustomDeck(src.custom); }
-  else { startModeWithWords(words, mode, { title:src.title || 'Ma liste', back:src.back || null }); return; }
+  else { startModeWithWords(words, mode, { title:src.title || 'Ma liste', back:src.back || null, multi:src.multi || null }); return; }
   renderScoreboard();
   renderCard();
 }
@@ -6807,7 +6883,7 @@ function startModeWithWords(words, mode, info){
   window.__reviewSession = false;
   window.__customBlockId = null;
   setupDeckFromWords(words);
-  window.__freeList = { words:words.slice(), title:(info && info.title) || 'Ma liste', back:(info && info.back) || null };   // 🎧 l'écran de fin saura quoi proposer
+  window.__freeList = { words:words.slice(), title:(info && info.title) || 'Ma liste', back:(info && info.back) || null, multi:(info && Array.isArray(info.multi) && info.multi.length) ? info.multi.slice() : null };   // 🎧 l'écran de fin saura quoi proposer
   renderScoreboard();
   renderCard();
 }
@@ -6837,7 +6913,7 @@ function srsBoxLabel(box){
    l'Association, les révisions ou une liste libre. Le « maîtrisé » affiché dans un bloc ne vient que de là :
    un bloc jamais commencé montre donc ses mots comme nouveaux. */
 function wordStatInBlock(){
-  try{ return !window.__reviewSession && !window.__freeList && ((typeof currentBlock === 'number') || !!window.__customBlockId); }catch(e){ return false; }
+  try{ if(window.__freeList && window.__freeList.multi) return true; return !window.__reviewSession && !window.__freeList && ((typeof currentBlock === 'number') || !!window.__customBlockId); }catch(e){ return false; }
 }
 function recordWordStat(fr, isCorrect, src){
   const key = fr.toLowerCase();
@@ -9916,6 +9992,50 @@ function loadBlockResult(blockIndex, mode){
 
 const GAME_MODES = ['classic', 'blank', 'chrono', 'speak', 'pairs', 'dialogue', 'repeat', 'listen'];
 
+/* 🧩 1.0.53 : SUPPRIMER UN MOT NE REMET PLUS LES BLOCS À ZÉRO
+   Les résultats d'un bloc sont rangés sous l'empreinte de ses 30 mots. Retirer un mot décale tous les blocs suivants
+   d'un mot → nouvelles empreintes → les blocs verts redevenaient « pas faits ». Chaque résultat garde la liste des mots
+   joués (history) : on rattache chaque résultat « orphelin » au bloc actuel qui contient la grande majorité de ses mots
+   (au moins 60 % du bloc, et 70 % des mots joués). Si le bloc a déjà un résultat pour ce mode, le plus récent l'emporte.
+   Ça répare aussi les blocs perdus avant cette version. */
+const BLK_RESCUE = { ds:'', n:0 };
+function blockResultsRescue(force){
+  if(!storageAvailable || activeFilterCat || !BLOCKS.length) return 0;
+  if(!force && BLK_RESCUE.ds === datasetHash) return 0;
+  BLK_RESCUE.ds = datasetHash;
+  const uid = getCurrentUserId(), esc = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const re = new RegExp('^lexiqueQuiz::all::(h[0-9a-z]+_\\d+)::([a-zA-Z]+)::u:' + esc(uid) + '$');
+  const cur = new Set(BLOCKS.map(b => hashWords(b)));
+  const where = new Map(); BLOCKS.forEach((b, i) => b.forEach(w => where.set(w.fr, i)));
+  const orphans = [];
+  for(let i = 0; i < localStorage.length; i++){
+    const k = localStorage.key(i); const m = k && k.match(re);
+    if(m && !cur.has(m[1]) && GAME_MODES.includes(m[2])) orphans.push({ k, mode:m[2] });
+  }
+  let n = 0;
+  for(const o of orphans){
+    let r = null; try{ r = JSON.parse(localStorage.getItem(o.k)); }catch(e){}
+    if(!r || !r.total) continue;
+    const frs = [...new Set((Array.isArray(r.blockFr) && r.blockFr.length ? r.blockFr : (Array.isArray(r.history) ? r.history.map(h => h && h.fr) : [])).filter(Boolean))];
+    if(frs.length < 3) continue;
+    const cnt = new Map(); let known = 0;
+    frs.forEach(f => { const b = where.get(f); if(b == null) return; known++; cnt.set(b, (cnt.get(b) || 0) + 1); });
+    let best = -1, bc = 0; cnt.forEach((c, b) => { if(c > bc){ bc = c; best = b; } });
+    if(best < 0) continue;
+    const size = BLOCKS[best].length;
+    if(bc < Math.ceil(0.6 * Math.min(size, frs.length)) || bc < Math.ceil(0.7 * known)) continue;
+    const ex = blockResults[best] && blockResults[best][o.mode];
+    if(ex && (ex.finishedAt || 0) >= (r.finishedAt || 0)) continue;   // le bloc a déjà un résultat plus récent
+    r.blockFr = BLOCKS[best].map(w => w.fr);                           // il appartient désormais à ce bloc-ci
+    try{ localStorage.setItem(storageKey(best, o.mode), JSON.stringify(r)); }catch(e){ continue; }
+    if(!blockResults[best]) blockResults[best] = {};
+    blockResults[best][o.mode] = r;
+    n++;
+  }
+  BLK_RESCUE.n += n;
+  if(n){ try{ cloudAutoPush(); }catch(e){} }
+  return n;
+}
 function rebuildBlocks(){
   datasetHash = hashWords(WORDS);
   const pool = activeFilterCat ? WORDS.filter(w => w.cat === activeFilterCat) : WORDS;
@@ -9928,6 +10048,7 @@ function rebuildBlocks(){
     GAME_MODES.forEach(m => { perMode[m] = loadBlockResult(i, m); });
     return perMode;
   });
+  try{ blockResultsRescue(); }catch(e){ console.warn('blocs : rattrapage', e); }
 }
 
 function escapeHtml(s){
@@ -17537,9 +17658,12 @@ try{ const dv = localStorage.getItem(nsKey('lexiqueQuiz::dictView')); if(dv === 
 
 const SPEAK_SVG_SMALL = `<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>`;
 
+function wlActsHtml(w){
+  return `<div class="wl-acts"><button type="button" data-wl="open" data-fr="${tbAttr(w.fr)}" title="Voir sa fiche" aria-label="Voir la fiche de « ${tbAttr(w.fr)} »">👁</button><button type="button" class="wl-del" data-wl="del" data-fr="${tbAttr(w.fr)}" title="Retirer de mes mots" aria-label="Retirer « ${tbAttr(w.fr)} » de mes mots">🗑</button></div>`;
+}
 function buildWordCardHtml(w){
   return `
-    <div class="result-card">${wimgSlot(w, 'th')}
+    <div class="result-card" data-wl-open="${tbAttr(w.fr)}">${wimgSlot(w, 'th')}
       <div class="result-head">
         <div class="result-fr">${escapeHtml(w.fr)}
           <button class="speak-btn small" data-speak-fr="${escapeHtml(w.fr)}" title="Écouter">${SPEAK_SVG_SMALL}</button>
@@ -17550,6 +17674,7 @@ function buildWordCardHtml(w){
       <div class="result-def">${escapeHtml(w.def)}</div>
       <div class="result-ex">${renderExample(w.ex)}</div>
       <div style="margin-top:8px;">${getWordBadge(w.fr)}</div>
+      ${WORDS.indexOf(w) >= 0 ? wlActsHtml(w) : ''}
     </div>`;
 }
 
@@ -18120,7 +18245,8 @@ function wordCardPopup(w, opts){
       ${full ? `<button type="button" data-wcp="ex">🗣️ La phrase</button>` : ''}
       <button type="button" data-wcp="x">Fermer</button>
     </div>
-    ${i >= 0 ? `<div class="wcp-b2"><button type="button" data-wcp="edit">✏️ Modifier</button><button type="button" class="del" data-wcp="del">🗑 Retirer de mes mots</button></div>
+    ${i >= 0 ? `<div class="wcp-b2"><button type="button" data-wcp="addex">➕ Ajouter une phrase</button><button type="button" data-wcp="edit">✏️ Modifier</button><button type="button" class="del" data-wcp="del">🗑 Retirer de mes mots</button></div>
+    <form class="wcp-addex" id="wcpAddEx" hidden><label class="wcp-addex-h" for="wcpAddExT">➕ Une phrase avec « ${escapeHtml(w.fr)} » (elle va dans sa fiche, après ${full ? 'les autres' : 'rien : ce sera sa première phrase'})</label><textarea id="wcpAddExT" lang="fr" maxlength="600" placeholder="Écris ou colle ta phrase…"></textarea><div class="wcp-addex-n" id="wcpAddExN" hidden></div><div class="wcp-b"><button type="submit" class="pri">➕ Ajouter</button><button type="button" data-wcp="addex-no">Annuler</button></div></form>
     <div class="wcp-conf" id="wcpConf" hidden>Retirer « <b>${escapeHtml(w.fr)}</b> » de tes mots ? Il disparaît de tes blocs et de tes révisions, sur tous tes appareils.<div class="wcp-b"><button type="button" class="del" data-wcp="del-go">🗑 Oui, le retirer</button><button type="button" data-wcp="del-no">Non, le garder</button></div></div>` : ''}
   </div>`;
   document.body.appendChild(ov);
@@ -18193,11 +18319,27 @@ function wordCardPopup(w, opts){
     else if(a === 'ex2-say') speak((w.exMore || [])[+b.dataset.i] || '', 'fr-FR');
     else if(a === 'ex2-del'){ lexDelSentence(w, +b.dataset.i); document.removeEventListener('keydown', onKey, true); ov.remove(); wordCardPopup(w, Object.assign({}, opts, { _nav:true })); }
     else if(a === 'edit'){ close(); wordEditPopup(w, opts); }
+    else if(a === 'addex'){ const f = ov.querySelector('#wcpAddEx'); if(f){ f.hidden = false; const t = f.querySelector('textarea'); try{ t.focus(); }catch(err){} f.scrollIntoView({ block:'nearest' }); } }
+    else if(a === 'addex-no'){ const f = ov.querySelector('#wcpAddEx'); if(f){ f.hidden = true; f.querySelector('textarea').value = ''; } }
     else if(a === 'del'){ const c = ov.querySelector('#wcpConf'); if(c){ c.hidden = false; c.scrollIntoView({ block:'nearest' }); const g = c.querySelector('[data-wcp="del-go"]'); if(g) g.focus(); } }
     else if(a === 'del-no'){ const c = ov.querySelector('#wcpConf'); if(c) c.hidden = true; }
     else if(a === 'del-go'){ close(); lexDeleteUi(w); }
   });
   setTimeout(() => { const x = ov.querySelector('.wcp-b .pri'); if(x) try{ x.focus({ preventScroll:true }); }catch(e){} }, 60);
+  {
+    const f = ov.querySelector('#wcpAddEx');
+    if(f) f.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const t = f.querySelector('textarea'), n = f.querySelector('#wcpAddExN'), s = lexSentNorm(t.value);
+      if(s.length < 3){ n.hidden = false; n.textContent = 'Écris une phrase un peu plus longue.'; return; }
+      const r = lexAddSentence(w, s);
+      if(r === 'dup'){ n.hidden = false; n.textContent = 'Cette phrase est déjà dans sa fiche.'; return; }
+      if(r !== 'ok'){ n.hidden = false; n.textContent = "Je n'ai pas pu l'ajouter."; return; }
+      try{ playCorrectSound(); }catch(err){}
+      document.removeEventListener('keydown', onKey, true); ov.remove();
+      wordCardPopup(w, Object.assign({}, opts, { _nav:true, noAutoSay:true, note:'➕ Phrase ajoutée à sa fiche' }));
+    });
+  }
   if(navd && !opts.noAutoSay) setTimeout(() => { if(ov.isConnected) try{ speak(w.fr, 'fr-FR'); }catch(e){} }, 160);   // 🔊 1.0.41 : en glissant, on entend le mot
   {
     const card = ov.querySelector('.wcp'); let lt = 0, lx = 0, ly = 0, dn = 0;
@@ -18585,11 +18727,12 @@ window.addEventListener('resize', () => { if(WT.el) wtClose(); });
 })();
 function buildWordRowHtml(w){
   return `
-    <div class="dict-row">
+    <div class="dict-row" data-wl-open="${tbAttr(w.fr)}">
       <button class="speak-btn small" data-speak-fr="${escapeHtml(w.fr)}" title="Écouter">${SPEAK_SVG_SMALL}</button>
       <div class="dict-row-fr" title="${escapeHtml(w.def)}">${escapeHtml(w.fr)}</div>
       <div class="dict-row-ar">${escapeHtml(w.ar)}</div>
       <div class="dict-row-badge">${getWordBadge(w.fr)}</div>
+      ${WORDS.indexOf(w) >= 0 ? wlActsHtml(w) : ''}
     </div>`;
 }
 
@@ -18987,6 +19130,35 @@ function renderDictionaryView(){
   if(!('ontouchstart' in window)){ input.focus(); }
 }
 
+/* 🗑 1.0.53 : dans les listes de mots (dictionnaire, mots vus / à revoir…), retirer un mot sans ouvrir sa fiche :
+   🗑 puis « Retirer ? » (deux touchers, pour ne rien perdre par erreur), et « ↩ Annuler » quelques secondes.
+   Toucher le mot lui-même ouvre sa fiche. */
+document.addEventListener('click', (e) => {
+  const t = e.target; if(!t || !t.closest) return;
+  const b = t.closest('[data-wl]');
+  const host = t.closest('[data-wl-open]');
+  if(!b && !host) return;
+  if(!b && (t.closest('button, a, input, textarea, select, .wimg, [data-wimg]'))) return;
+  const fr = b ? b.dataset.fr : host.dataset.wlOpen;
+  const w = WORDS.find(x => x.fr === fr); if(!w) return;
+  const box = host && host.parentElement;
+  const list = box ? [...box.querySelectorAll(':scope > [data-wl-open]')].map(el => WORDS.find(x => x.fr === el.dataset.wlOpen)).filter(Boolean) : [w];
+  if(!b || b.dataset.wl === 'open'){ e.preventDefault(); wordCardPopup(w, { list, index:Math.max(0, list.indexOf(w)), onClose:() => { try{ if(document.getElementById('dictResults')) renderDictResults(); }catch(err){} } }); return; }
+  e.preventDefault(); e.stopPropagation();
+  if(!b.classList.contains('arm')){
+    document.querySelectorAll('.wl-del.arm').forEach(x => { x.classList.remove('arm'); x.textContent = '🗑'; });
+    b.classList.add('arm'); b.textContent = 'Retirer ?'; clearTimeout(b.__t);
+    b.__t = setTimeout(() => { if(b.isConnected){ b.classList.remove('arm'); b.textContent = '🗑'; } }, 3500);
+    return;
+  }
+  if(host) host.classList.add('gone');
+  setTimeout(() => {
+    const d = lexDeleteWord(w);
+    if(host && host.isConnected) host.remove();
+    try{ const c = document.getElementById('dictCount'); if(c && document.getElementById('dictResults')) renderDictResults(); }catch(err){}
+    if(d){ try{ haptic('tap'); }catch(err){} lexSnack(`🗑 « ${w.fr} » retiré de tes mots`, '↩ Annuler', () => { if(lexUndoDelete(d)){ lexSnack(`↩ « ${w.fr} » est revenu dans tes mots`); try{ if(document.getElementById('dictResults')) renderDictResults(); }catch(err){} } }); }
+  }, 220);
+}, true);
 function deleteBlockResult(blockIndex, mode){
   const key = storageKey(blockIndex, mode);
   if(blockResults[blockIndex]) blockResults[blockIndex][mode] = null;
@@ -19789,12 +19961,14 @@ function renderBlockSelect(){
     <div class="filter-row" id="filterRow" style="display:${filterRowCollapsed ? 'none' : 'flex'};margin-top:8px;"></div>
     <div class="mode-row" style="margin-top:0;">
       <button class="mode-chip" id="createCustomBlockBtn" style="background:var(--surface-sunken);border:1px solid var(--border);color:var(--purple);">🧩 Créer un bloc personnalisé</button>
+      <button class="mode-chip" id="multiBlockBtn" style="background:var(--surface-sunken);border:1px solid var(--border);color:var(--purple);" title="Choisis 2 blocs ou plus et un mode : tous leurs mots dans la même partie, et le mode compte pour chacun">🔁 Réviser plusieurs blocs</button>
     </div>
     <div class="options" id="blockGrid" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr));"></div>
     </div>
   `;
 
   document.getElementById('createCustomBlockBtn').addEventListener('click', () => renderCustomBlockBuilder());
+  { const mbb = document.getElementById('multiBlockBtn'); if(mbb) mbb.addEventListener('click', () => mbOpen()); }
   // 🎵 lecteur de l'Audiothèque intégré à la carte d'accueil (différé : au tout premier affichage,
   // le module Audiothèque, défini plus loin dans le script, n'est pas encore initialisé)
   setTimeout(() => { try{ audioRenderHero(); }catch(e){} }, 0);
@@ -22284,6 +22458,122 @@ function renderRecapView(blockIndex, result, justFinished){
   }
 }
 
+/* ============ 🔁 1.0.53 : RÉVISER PLUSIEURS BLOCS DANS LE MÊME MODE ============
+   Tu choisis 2 blocs ou plus (ex. 3, 5 et 8) et un mode : tous leurs mots, mélangés, dans une seule partie.
+   À la fin, le mode compte pour CHAQUE bloc, avec son propre score (ses mots à lui). Un bloc déjà réussi dans ce
+   mode garde son résultat si la révision fait moins bien (une révision ne fait jamais perdre un bloc vert). */
+const MB = { sel:new Set(), mode:null };
+function mbPass(r){ return !!(r && r.total && r.correct / r.total * 100 >= PASS_THRESHOLD); }
+function mbOpen(){
+  document.querySelectorAll('.mb-ov').forEach(x => x.remove());
+  if(!GAME_MODES.includes(MB.mode)) MB.mode = GAME_MODES.includes(gameMode) ? gameMode : 'classic';
+  MB.sel = new Set([...MB.sel].filter(i => BLOCKS[i] && BLOCKS[i].length && isBlockUnlocked(i)));
+  const ov = document.createElement('div');
+  ov.className = 'mb-ov';
+  ov.innerHTML = `<div class="mb" role="dialog" aria-modal="true" aria-labelledby="mbT">
+    <div class="mb-head"><div><h2 id="mbT">🔁 Réviser plusieurs blocs</h2><p>Choisis au moins 2 blocs et un mode : tous leurs mots dans une même partie. À la fin, le mode compte pour chaque bloc.</p></div><button type="button" class="mb-x" data-mb="x" aria-label="Fermer">✕</button></div>
+    <div class="mb-body">
+      <div class="mb-l">Le mode</div>
+      <div class="mb-modes" role="group" aria-label="Le mode">${GAME_MODES.map(m => `<button type="button" data-mb="mode" data-m="${m}" aria-pressed="${m === MB.mode}">${escapeHtml(MODE_LABELS[m] || m)}</button>`).join('')}</div>
+      <div class="mb-l">Les blocs</div>
+      <div class="mb-quick"><button type="button" data-mb="q-last">🕘 Les 3 derniers joués</button><button type="button" data-mb="q-todo">🎯 3 pas encore réussis dans ce mode</button><button type="button" data-mb="q-none">Tout décocher</button></div>
+      <div class="mb-grid" id="mbGrid" role="group" aria-label="Les blocs" style="margin-top:8px;"></div>
+    </div>
+    <div class="mb-foot"><div class="mb-sum" id="mbSum" aria-live="polite"></div><button type="button" class="mb-go" id="mbGo" data-mb="go">▶ Commencer</button></div>
+  </div>`;
+  document.body.appendChild(ov);
+  requestAnimationFrame(() => ov.classList.add('show'));
+  const grid = ov.querySelector('#mbGrid');
+  const paint = () => {
+    grid.innerHTML = BLOCKS.map((b, i) => {
+      if(!b.length) return '';
+      const lock = !isBlockUnlocked(i), pm = blockResults[i] || {}, r = pm[MB.mode];
+      const nOk = GAME_MODES.filter(m => mbPass(pm[m])).length;
+      const st = mbPass(r) ? '✅ réussi' : (r && r.total ? Math.round(r.correct / r.total * 100) + ' %' : '— pas fait');
+      let t = ''; try{ t = getBlockTitle(i); if(t === 'Bloc ' + (i + 1)) t = ''; }catch(err){}
+      return `<button type="button" class="mb-b ${mbPass(r) ? 'ok' : ''}" data-mb="b" data-i="${i}" aria-pressed="${MB.sel.has(i)}" ${lock ? 'disabled' : ''} title="${tbAttr((t ? t + ' · ' : '') + b.length + ' mots · ' + nOk + '/' + GAME_MODES.length + ' modes réussis')}"><b>${lock ? '🔒 ' : ''}Bloc ${i + 1}</b><span>${st}</span></button>`;
+    }).join('');
+    const n = MB.sel.size, words = [...MB.sel].reduce((s, i) => s + (BLOCKS[i] ? BLOCKS[i].length : 0), 0);
+    ov.querySelector('#mbSum').innerHTML = n ? `<b>${n} bloc${n > 1 ? 's' : ''}</b> · ${words} mots · ${escapeHtml(MODE_LABELS[MB.mode] || MB.mode)}${n < 2 ? ' — encore 1 bloc' : ''}` : 'Touche les blocs à réviser.';
+    ov.querySelector('#mbGo').disabled = n < 2;
+    ov.querySelectorAll('[data-mb="mode"]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.m === MB.mode)));
+  };
+  paint();
+  const close = () => { document.removeEventListener('keydown', onKey, true); try{ bkPop('mb'); }catch(e){} ov.classList.remove('show'); setTimeout(() => ov.remove(), 200); };
+  const onKey = (e) => { if(e.key === 'Escape'){ e.preventDefault(); e.stopPropagation(); close(); } };
+  document.addEventListener('keydown', onKey, true);
+  try{ bkPush('mb', close); }catch(e){}
+  const lastAt = (i) => { const pm = blockResults[i] || {}; return Math.max(0, ...GAME_MODES.map(m => (pm[m] && pm[m].finishedAt) || 0)); };
+  ov.addEventListener('click', (e) => {
+    if(e.target === ov){ close(); return; }
+    const b = e.target.closest('[data-mb]'); if(!b) return;
+    const a = b.dataset.mb;
+    if(a === 'x') close();
+    else if(a === 'mode'){ MB.mode = b.dataset.m; paint(); }
+    else if(a === 'b'){ const i = +b.dataset.i; if(MB.sel.has(i)) MB.sel.delete(i); else MB.sel.add(i); paint(); const nb = grid.querySelector(`[data-i="${i}"]`); if(nb) try{ nb.focus({ preventScroll:true }); }catch(err){} }
+    else if(a === 'q-none'){ MB.sel.clear(); paint(); }
+    else if(a === 'q-last'){ MB.sel = new Set(BLOCKS.map((_, i) => i).filter(i => BLOCKS[i].length && isBlockUnlocked(i) && lastAt(i) > 0).sort((x, y) => lastAt(y) - lastAt(x)).slice(0, 3)); paint(); }
+    else if(a === 'q-todo'){ MB.sel = new Set(BLOCKS.map((_, i) => i).filter(i => BLOCKS[i].length && isBlockUnlocked(i) && !mbPass((blockResults[i] || {})[MB.mode])).slice(0, 3)); paint(); }
+    else if(a === 'go'){ if(MB.sel.size < 2) return; const idx = [...MB.sel].sort((x, y) => x - y); close(); mbStart(idx, MB.mode); }
+  });
+  setTimeout(() => { const f = ov.querySelector('.mb-modes [aria-pressed="true"]'); if(f) try{ f.focus({ preventScroll:true }); }catch(e){} }, 60);
+  return ov;
+}
+function mbTitle(idx){
+  const L = idx.map(i => i + 1);
+  return '🔁 Blocs ' + (L.length > 6 ? L.slice(0, 5).join(', ') + '… (' + L.length + ')' : L.slice(0, -1).join(', ') + ' et ' + L[L.length - 1]);
+}
+function mbStart(idx, mode){
+  idx = (idx || []).filter(i => BLOCKS[i] && BLOCKS[i].length);
+  if(idx.length < 2) return false;
+  const words = [];
+  idx.forEach(i => BLOCKS[i].forEach(w => words.push(w)));
+  if(typeof stopPeekPlay === 'function'){ try{ stopPeekPlay(); }catch(e){} }
+  try{ window.speechSynthesis.cancel(); }catch(e){}
+  startModeWithWords(words, mode, { title:mbTitle(idx), back:() => renderBlockSelect(), multi:idx });
+  setStatus(`🔁 ${idx.length} blocs · ${words.length} mots · ${MODE_LABELS[mode] || mode} : à la fin, le mode comptera pour chaque bloc.`, 'ok');
+  return true;
+}
+/* à la fin : le score de chaque bloc (ses mots à lui), enregistré comme si tu l'avais joué seul */
+function mbDistribute(idx, mode, durationSec, passed90){
+  const hist = (sessionHistory || []).slice(), out = [], now = Date.now();
+  const n = Math.max(1, hist.length);
+  idx.forEach(i => {
+    const B = BLOCKS[i]; if(!B || !B.length) return;
+    const set = new Set(B.map(w => w.fr));
+    const H = hist.filter(h => h && set.has(h.fr));
+    let correct, total;
+    if(H.length){ correct = H.filter(h => !h.failed).length; total = H.reduce((s, h) => s + Math.max(1, +h.attempts || 1), 0); }
+    else if(!hist.length && score.total){ correct = score.correct; total = score.total; }   // un mode qui ne note pas mot par mot : le score de la partie
+    else { out.push({ i, skipped:true }); return; }
+    const pct = total ? Math.round(correct / total * 100) : 0;
+    const prev = blockResults[i] && blockResults[i][mode];
+    const prevPass = mbPass(prev), nowPass = pct >= PASS_THRESHOLD;
+    const r = { correct, total, history:H, mode, finishedAt:now, bestCombo:0, durationSec:Math.round((durationSec || 0) * (H.length || 1) / n), xp:0, multi:idx.map(x => x + 1) };
+    const save = !prevPass || nowPass;
+    if(save) saveBlockResult(i, mode, r);
+    out.push({ i, correct, total, pct, saved:save, nowPass, prevPass, n:H.length, size:B.length });
+  });
+  // 🎯 objectifs du jour : chaque bloc réussi compte (« Réussis 90 %+ dans N blocs »), et le temps n'est pas plafonné à un seul bloc
+  try{
+    const s = todayStats(), extraPass = out.filter(x => x.nowPass).length - (passed90 ? 1 : 0);
+    if(extraPass > 0) s.passed += extraPass;
+    const extraSec = Math.min(durationSec || 0, 900 * idx.length) - Math.min(durationSec || 0, 900);
+    if(extraSec > 0){ s.seconds += extraSec; const subj = modeToSubject(mode); s.bySubject[subj] = (s.bySubject[subj] || 0) + extraSec; }
+    saveDailyStats();
+  }catch(e){ console.warn('révision multi-blocs', e); }
+  try{ cloudAutoPush(); }catch(e){}
+  return out;
+}
+function mbResultHtml(out, mode){
+  const rows = out.map(x => {
+    if(x.skipped) return `<div class="mb-r kept"><b>Bloc ${x.i + 1}</b><span class="v">—</span><span class="s">aucun mot joué</span></div>`;
+    const cls = !x.saved ? 'kept' : (x.nowPass ? 'ok' : 'todo');
+    const s = !x.saved ? '✅ déjà réussi (gardé)' : (x.nowPass ? '✅ réussi' : '🎯 enregistré');
+    return `<div class="mb-r ${cls}"><b>Bloc ${x.i + 1}</b><span class="v">${x.correct} / ${x.total} · ${x.pct} %</span><span class="s">${s}</span></div>`;
+  }).join('');
+  return `<div class="mb-res"><div class="mb-res-h">🧩 ${escapeHtml(MODE_LABELS[mode] || mode)} : compté pour chaque bloc</div>${rows}</div>`;
+}
 /* 🎧 Fin d'un mode joué sur une liste libre (Entreprise, Rédaction, Bescherelle…) : le résultat compte
    (objectifs du jour, points, temps), le score de chaque mode est gardé, et on peut rejouer la liste dans un autre mode. */
 function renderFreeListEndScreen(){
@@ -22298,6 +22588,7 @@ function renderFreeListEndScreen(){
   const questsBefore = questsAllDone();
   recordDailyStats(durationSec, passed90, xpEarned, gameMode);
   const questsJustDone = !questsBefore && questsAllDone();
+  const mbOut = (fl.multi && fl.multi.length) ? mbDistribute(fl.multi, gameMode, durationSec, passed90) : null;   // 🔁 1.0.53
   const all = loadListResults(), k = listKeyOf(fl.title, fl.words);
   const entry = all[k] || { title:fl.title, modes:{} };
   const prev = entry.modes[gameMode];
@@ -22320,6 +22611,7 @@ function renderFreeListEndScreen(){
       <div class="sub" style="color:#6B6552;">${pctVal}% de bonnes réponses${flawless ? ' · sans erreur, bravo !' : ''}</div>
       <div class="recap-meta">${durationSec ? `<span class="recap-meta-pill">⏱️ ${fmtDuration(durationSec)}</span>` : ''}<span class="recap-meta-pill xp">⭐ +${xpEarned} points${mult > 1 ? ` <b>×${mult}</b>` : ''}</span></div>
       <div class="pass-banner ${passed90 ? 'ok' : 'todo'}">${passed90 ? '✅ Bravo ! ' : '🎯 '}Résultat enregistré : il compte dans tes objectifs du jour et tes points.</div>
+      ${mbOut ? mbResultHtml(mbOut, gameMode) : ''}
       <div style="font-family:'Nunito','Inter',sans-serif;font-weight:800;color:var(--purple);margin:20px 0 8px;font-size:15px;">🔁 Rejouer cette liste dans un autre mode :</div>
       <div class="replay-modes" id="replayModes">${PEEK_SUGGEST_MODES.map(m => `<button class="replay-mode-btn${m.mode === gameMode ? ' current' : ''}" data-fl-mode="${m.mode}">${m.label}${scores[m.mode] != null ? ` <span class="rp-score">${scores[m.mode]}%</span>` : ' <span class="rp-new">nouveau</span>'}</button>`).join('')}</div>
       <div style="display:flex;gap:12px;justify-content:center;margin-top:14px;flex-wrap:wrap;">
@@ -22328,7 +22620,7 @@ function renderFreeListEndScreen(){
       </div>
       ${sessionHistory.length ? buildRecapTableHtml(sessionHistory) : ''}
     </div>`;
-  card.querySelectorAll('[data-fl-mode]').forEach(b => b.addEventListener('click', () => startListMode(fl.words, b.dataset.flMode, { title:fl.title, back:fl.back })));
+  card.querySelectorAll('[data-fl-mode]').forEach(b => b.addEventListener('click', () => startListMode(fl.words, b.dataset.flMode, { title:fl.title, back:fl.back, multi:fl.multi })));
   document.getElementById('flPeekBtn').addEventListener('click', () => renderBlockWordsPeek(fl.words, fl.title, fl.back || (() => renderBlockSelect()), { title:fl.title }));
   document.getElementById('flBackBtn').addEventListener('click', back);
   document.getElementById('flEndBackBtn').addEventListener('click', back);
@@ -22439,7 +22731,7 @@ function tbKvTouched(k){
   try{
     if(typeof syncState === 'undefined' || !syncState || syncState.merging || !syncTracked(k)) return;
     if(SYNC_LAZY.test(k)) syncSoon(45000);
-    else syncSoon(document.body.classList.contains('quiz-active') ? 20000 : 4000);
+    else syncSoon(document.body.classList.contains('quiz-active') ? 20000 : 2000);
   }catch(e){}
 }
 function tbKvSchedule(){ if(!TBKV.t) TBKV.t = setTimeout(tbKvFlush, 30); }
@@ -23292,6 +23584,7 @@ function cloudAutoPush(){
 /* 📲 de nouvelles données sont arrivées de l'autre appareil : on rafraîchit ce qui est à l'écran */
 function syncAfterRemoteChange(){
   try{ if(autoApplyStreakFreeze()) cloudPushPending = true; }catch(e){}
+  try{ blockResultsRescue(true); }catch(e){}
   if(!(syncState.fullSaid && Date.now() - syncState.fullSaid < 3000)) setStatus('☁️ Synchronisé — nouveautés de ton autre appareil récupérées ✓', 'ok');
   if(document.body.classList.contains('quiz-active')) return;
   const inp = document.querySelector('#quizCard .ss-input');
@@ -23325,7 +23618,7 @@ function syncFlushNow(){
     const touched = (st, k) => {
       if(st !== window.localStorage || syncState.merging || !syncTracked(k)) return;
       if(SYNC_LAZY.test(k)) syncSoon(45000);
-      else syncSoon(document.body.classList.contains('quiz-active') ? 20000 : 4000);
+      else syncSoon(document.body.classList.contains('quiz-active') ? 20000 : 2000);
     };
     S.setItem = function(k, v){ const r = set0.apply(this, arguments); try{ touched(this, String(k)); }catch(e){} return r; };
     S.removeItem = function(k){ const r = rem0.apply(this, arguments); try{ touched(this, String(k)); }catch(e){} return r; };
@@ -23337,13 +23630,14 @@ function syncFlushNow(){
   window.addEventListener('online', () => syncSoon(500));
   window.addEventListener('pagehide', syncFlushNow);
   // appli ouverte : un coup d'œil toutes les minutes (pas pendant un exercice, pas si on ne l'utilise plus depuis 15 min)
+  // ⚡ 1.0.53 : toutes les 25 s quand tu t'en sers (avant : 1 min), toutes les 90 s si elle reste ouverte sans toi
   setInterval(() => {
     if(document.visibilityState !== 'visible' || !getSyncUrl() || syncState.running) return;
     if(document.body.classList.contains('quiz-active')) return;
     let idle = 0; try{ idle = Date.now() - lastInteractionAt; }catch(e){}
     if(idle > 15 * 60000) return;
-    if(Date.now() - syncState.lastPull > 60000) syncCycle();
-  }, 15000);
+    if(Date.now() - syncState.lastPull > (idle < 5 * 60000 ? 25000 : 90000)) syncCycle();
+  }, 5000);
   // ménage : les anciennes copies locales du classement (elles ralentissaient chaque envoi)
   setTimeout(() => { try{ const ks = []; for(let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); if(k && k.startsWith('lexiqueQuiz::leaderboard::')) ks.push(k); } ks.forEach(k => localStorage.removeItem(k)); }catch(e){} }, 3000);
 })();
@@ -23456,6 +23750,16 @@ function hideSyncOverlay(){
   setTimeout(() => { ov.classList.remove('show','hide'); }, 420);
 }
 
+/* ☁️ 1.0.53 : « Synchroniser maintenant » (bibliothèque de la Tablette) */
+document.addEventListener('click', async (e) => {
+  const b = e.target.closest && e.target.closest('[data-sync-now]'); if(!b || b.disabled) return;
+  e.preventDefault();
+  b.disabled = true; const t0 = b.textContent; b.textContent = '☁️ Synchronisation…';
+  let r = null; try{ r = await syncCycle({ force:true, indicator:true, loud:true }); }catch(err){}
+  if(!b.isConnected) return;
+  b.textContent = syncState.errAt && Date.now() - syncState.errAt < 5000 ? '⚠️ Pas de réseau ?' : (r && r.changed ? '✓ Nouveautés récupérées' : '✓ Tout est à jour');
+  setTimeout(() => { if(b.isConnected){ b.textContent = t0; b.disabled = false; } }, 2200);
+});
 async function autoSyncOnLoad(){
   if(!getSyncUrl()){ return; }
   setStatus('☁️ Synchronisation en arrière-plan...', 'ok');
@@ -23764,6 +24068,15 @@ const COLOR_PRESETS = {
 /* ============ 🆕 NOUVEAUTÉS — pour que tout ce qui a été ajouté reste découvrable ============ */
 const WHATS_NEW_SECTIONS = [
   { icon:'🆕', title:'Nouveautés', items:[
+    { name:'🧩 Supprimer un mot ne remet plus tes blocs à zéro', desc:"Avant, retirer un mot décalait tous les blocs suivants d'un mot, et les blocs verts redevenaient « pas faits ». Maintenant chaque résultat est rattaché au bloc qui contient ses mots. Et les blocs perdus avant cette version sont retrouvés tout seuls, à l'ouverture." },
+    { name:"🥇 « Go » sur l'objectif « Maîtrise N blocs »", desc:"Il lançait le prochain bloc à faire, ce qui ne faisait jamais avancer cet objectif. Maintenant il ouvre le bloc le plus proche de la maîtrise complète, directement dans le mode qui lui manque." },
+    { name:'🔁 Réviser plusieurs blocs dans le même mode', desc:"Sur l'accueil, « 🔁 Réviser plusieurs blocs » : choisis 2 blocs ou plus et un mode. Tous leurs mots dans une même partie, et à la fin le mode compte pour chaque bloc, avec son propre score. Une révision ne fait jamais perdre un bloc déjà vert. Les blocs réussis comptent dans les objectifs du jour." },
+    { name:"🔤 Chercher un mot depuis l'accueil", desc:"La barre de l'accueil cherche maintenant d'abord dans tes mots (en français ou en arabe) : le mot, son arabe, son bloc. Touche-le pour sa fiche. « 📄 Une fiche, un verbe » pour chercher dans les fiches comme avant." },
+    { name:'🗑 Retirer un mot sans ouvrir sa fiche', desc:"Dans les résultats de recherche et dans le dictionnaire, chaque mot a son 🗑 : touche-le deux fois (« Retirer ? »), avec « ↩ Annuler » quelques secondes." },
+    { name:'➕ Ajouter une phrase à la fiche d\'un mot', desc:"Dans la fiche d'un mot : « ➕ Ajouter une phrase » pour écrire ou coller ta propre phrase. Dans la Tablette et les PDF, la fiche d'un mot déjà dans tes mots propose aussi « ➕ Ajouter cette phrase à sa fiche »." },
+    { name:'📋 Copier tout le tableau d\'une fiche', desc:"Sur chaque fiche avec un tableau (expressions et sens, etc.) : « 📋 Copier le tableau ». Tout part d'un coup dans le presse-papiers, avec les en-têtes : ça se colle en colonnes dans Excel, Word, Google Docs ou une note." },
+    { name:'⚡ Une synchro plus rapide', desc:"Ce que tu fais part vers ton autre appareil 2 s après (au lieu de 4), et l'appli regarde s'il y a du nouveau toutes les 25 s quand tu t'en sers (au lieu d'une minute). Dans la bibliothèque de la Tablette : « ☁️ Synchroniser maintenant »." },
+    { name:'🖍 Un survol plus sobre dans la Tablette', desc:"La traînée derrière le mot survolé n'a plus plusieurs couleurs : les 3 mots d'avant restent légèrement teintés de la même couleur, de plus en plus pâle." },
     { name:'🌌 Un nouvel écran de démarrage : le big bang des lettres', desc:"Tu fonces dans un tunnel de lettres françaises et arabes (et d'étoiles à huit branches). Tout implose en un point de lumière… et le renard en jaillit ! Les lettres deviennent une galaxie qui tourne autour de lui, et le nom de l'appli se rassemble lettre par lettre. Touche l'écran pour passer." },
     { name:'🦊 Une mascotte plus grande, plus 3D, qui bouge tout le temps', desc:"Sur l'accueil, le renard est plus grand, sur un socle lumineux, et la caméra tourne doucement autour de lui : on voit son relief. Il fait un geste toutes les 3 à 7 secondes (il salue, saute, danse, applaudit, tourne sur lui-même, renifle, fait un clin d'œil…), sans plus disparaître sous terre. Abdel et Souky s'échangent d'une double vrille, dans des paillettes. Pendant les exercices, le petit renard est plus grand et bouge aussi." },
     { name:"🎯 À chaque objectif du jour atteint, la mascotte sort et t'encourage", desc:"Quand tu termines un des objectifs du jour, à la fin de l'exercice, Abdel ou Souky sort de son terrier au-dessus d'un panneau : il te félicite (à voix haute, sauf si le renard est muet), la barre de l'objectif se remplit jusqu'au bout, « ✓ Fait ! », et tu vois les objectifs qui restent avec leurs barres. Le dernier objectif, c'est la grande fête. Réglable dans 🔊 Sons → La mascotte (avec « ▶ Voir »)." },
@@ -38243,6 +38556,44 @@ function buildSheetTableHtml(columns, rows, speakableCols, micCol){
   `;
 }
 
+/* 📋 1.0.53 : COPIER TOUT LE TABLEAU D'UNE FICHE (en-têtes compris), d'un seul toucher.
+   Dans le presse-papiers : un vrai tableau (il se colle en colonnes dans Excel, Word, Google Docs, un mail) et, pour une
+   simple note, le même texte avec une tabulation entre les colonnes. Pour toutes les fiches qui ont un tableau. */
+function sheetTableCopyData(sheet){
+  if(!sheet) return null;
+  const t = sheet.type === 'table' ? { columns:sheet.columns, rows:sheet.rows } : (sheet.table || null);
+  if(!t || !Array.isArray(t.rows) || !t.rows.length) return null;
+  const clean = (s) => String(s == null ? '' : s).replace(/\s+/g, ' ').trim();
+  const cols = (t.columns || []).map(clean);
+  const rows = t.rows.map(r => (Array.isArray(r) ? r : [r]).map(clean));
+  const tsv = (cols.length ? [cols.join('\t')] : []).concat(rows.map(r => r.join('\t'))).join('\n');
+  const th = 'style="border:1px solid #999;padding:4px 8px;background:#EEE;text-align:left"', td = 'style="border:1px solid #999;padding:4px 8px"';
+  const html = `<table style="border-collapse:collapse">${cols.length ? `<thead><tr>${cols.map(c => `<th ${th}>${escapeHtml(c)}</th>`).join('')}</tr></thead>` : ''}<tbody>${rows.map(r => `<tr>${r.map(c => `<td ${td}>${escapeHtml(c)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+  return { tsv, html, n:rows.length, cols };
+}
+async function copyRich(text, html){
+  try{
+    if(html && navigator.clipboard && navigator.clipboard.write && typeof ClipboardItem !== 'undefined'){
+      await navigator.clipboard.write([new ClipboardItem({ 'text/plain':new Blob([text], { type:'text/plain' }), 'text/html':new Blob([html], { type:'text/html' }) })]);
+      return true;
+    }
+  }catch(e){}
+  try{ if(navigator.clipboard && navigator.clipboard.writeText){ await navigator.clipboard.writeText(text); return true; } }catch(e){}
+  try{
+    const ta = document.createElement('textarea'); ta.value = text; ta.setAttribute('readonly', ''); ta.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0';
+    document.body.appendChild(ta); ta.select(); const ok = document.execCommand('copy'); ta.remove(); return !!ok;
+  }catch(e){ return false; }
+}
+document.addEventListener('click', async (e) => {
+  const b = e.target && e.target.closest && e.target.closest('[data-sheet-copy]'); if(!b) return;
+  e.preventDefault();
+  const sheet = PRACTICAL_SHEETS.find(s => s.id === b.dataset.sheetCopy), c = sheetTableCopyData(sheet); if(!c) return;
+  const ok = await copyRich(c.tsv, c.html);
+  const t0 = b.dataset.t0 || b.textContent; b.dataset.t0 = t0;
+  if(ok){ b.classList.add('ok'); b.textContent = `✓ Copié : ${c.n} ligne${c.n > 1 ? 's' : ''}${c.cols.length ? ' + les en-têtes' : ''}`; try{ haptic('tap'); }catch(err){} setStatus(`📋 Le tableau « ${sheet.title} » est dans ton presse-papiers : colle-le où tu veux.`, 'ok'); }
+  else { b.textContent = '⚠️ Copie impossible ici'; }
+  clearTimeout(b.__t); b.__t = setTimeout(() => { if(b.isConnected){ b.classList.remove('ok'); b.textContent = t0; } }, 2600);
+});
 function renderPracticalSheetDetail(id){
   clearQuestionTimer();
   document.body.classList.remove('quiz-active');
@@ -38308,7 +38659,7 @@ function renderPracticalSheetDetail(id){
     <div class="word-fr" style="font-size:clamp(19px,4vw,25px);">${escapeHtml(sheet.title)}</div>
     <div class="word-def" style="margin-top:6px;">${escapeHtml(sheet.intro)}</div>
     <div class="done-top-row"><button type="button" class="mode-chip done-top-btn" id="sheetValidateTopBtn"></button>${sheet.section === 'oratoire' && sheet.type !== 'table' ? `<button type="button" class="mode-chip done-top-btn tb-echo-btn" id="sheetEchoBtn" title="La voix lit une phrase, tu la répètes : les mots s'allument en vert">🔁 Écoute et répète</button>` : ''}</div>
-    ${(() => { let n = 0; try{ n = fsItems(sheet).length; }catch(e){} return n ? `<div class="fsa-row"><button type="button" class="mode-chip fsa-btn" id="sheetAddWordsBtn">➕ Ajouter ces ${n} mots à mes blocs</button></div>` : ''; })()}
+    ${(() => { let n = 0; try{ n = fsItems(sheet).length; }catch(e){} const c = sheetTableCopyData(sheet); return (n || c) ? `<div class="fsa-row">${n ? `<button type="button" class="mode-chip fsa-btn" id="sheetAddWordsBtn">➕ Ajouter ces ${n} mots à mes blocs</button>` : ''}${c ? `<button type="button" class="mode-chip fsa-copy" id="sheetCopyBtn" data-sheet-copy="${escapeHtml(sheet.id)}" title="Tout le tableau, avec ses en-têtes, d'un seul coup : il se colle tel quel dans Excel, Word, Google Docs ou une note">📋 Copier le tableau (${c.n} ligne${c.n > 1 ? 's' : ''})</button>` : ''}</div>` : ''; })()}
     ${buildReadingToolbarHtml()}
     ${bodyHtml}
     ${sheet.note ? `<div style="margin-top:16px;text-align:left;font-size:12.5px;color:var(--text-dim);background:rgba(80,70,229,0.06);border:1px solid rgba(80,70,229,0.18);border-radius:12px;padding:12px 16px;">💡 ${escapeHtml(sheet.note)}</div>` : ''}
@@ -45897,7 +46248,7 @@ function ssDomItems(card){
 }
 /* de quoi parle la page ? (pour chercher d'abord « dans cette section ») */
 function ssDetect(card){
-  if(isHomeScreen && card.querySelector('.home-greet')) return { sig:'home', home:true, name:"l'appli", ph:'Chercher une fiche, un verbe…', scope:() => true, anchor:card.querySelector('.home-greet') };
+  if(isHomeScreen && card.querySelector('.home-greet')) return { sig:'home', home:true, name:"l'appli", ph:SSW_PH.mot, scope:() => true, anchor:card.querySelector('.home-greet') };
   const items = ssDomItems(card);
   const tag = card.querySelector('.cat-tag');
   const tagTxt = tag ? tag.textContent.replace(/\s+/g, ' ').trim() : '';
@@ -45934,7 +46285,21 @@ function ssMount(info){
   if(info.anchor && info.anchor.parentNode === card) info.anchor.after(wrap); else card.prepend(wrap);
   for(let p = wrap.previousElementSibling; p; p = p.previousElementSibling) p.classList.add('ss-keep');
   const input = wrap.querySelector('.ss-input'), res = wrap.querySelector('.ss-res'), x = wrap.querySelector('.ss-x'), mic = wrap.querySelector('.ss-mic');
-  const st = { info, input, res, wrap, card, more:{} };
+  const st = { info, input, res, wrap, card, more:{}, scope:'mot' };
+  // 🔤 1.0.53 : sur l'accueil, on cherche d'abord un mot ; « 📄 Une fiche » pour chercher dans les fiches
+  if(info.home){
+    if(ssMem && ssMem.sig === 'home' && ssMem.scope) st.scope = ssMem.scope;
+    wrap.querySelector('.ss-bar').insertAdjacentHTML('afterend', `<div class="ss-scope" role="group" aria-label="Que chercher ?"><span>Chercher :</span><button type="button" data-ss-scope="mot" aria-pressed="${st.scope === 'mot'}">🔤 Un mot</button><button type="button" data-ss-scope="fiche" aria-pressed="${st.scope === 'fiche'}">📄 Une fiche, un verbe</button></div>`);
+    const setScope = (s) => {
+      st.scope = s; st.more = {};
+      wrap.querySelectorAll('[data-ss-scope]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.ssScope === s)));
+      input.placeholder = SSW_PH[s]; input.setAttribute('aria-label', SSW_PH[s]);
+      if(ssMem && ssMem.sig === 'home') ssMem.scope = s;
+      ssRun(st);
+    };
+    wrap.querySelectorAll('[data-ss-scope]').forEach(b => b.addEventListener('click', () => { setScope(b.dataset.ssScope); if(!fxTouch) input.focus(); }));
+    input.placeholder = SSW_PH[st.scope]; input.setAttribute('aria-label', SSW_PH[st.scope]);
+  }
   wrap.__ss = st;
   let t = 0;
   input.addEventListener('input', () => { ssLastInputAt = Date.now(); st.more = {}; clearTimeout(t); t = setTimeout(() => ssRun(st), 140); });
@@ -46016,12 +46381,75 @@ function ssRow(x, toks, i){
   const snip = ((x.r >= 4 && x.r < 5) || x.r === 1.5) ? ssSnippet(e, toks) : '';
   return `<button type="button" class="ss-row" data-ss-i="${i}"><span class="ss-r-ic${e.kind === 'word' ? ' ss-r-img' : ''}" aria-hidden="true">${escapeHtml(e.icon || '▸')}${e.kind === 'word' ? wimgSlot({ fr:e.title, ar:'' }, 'ic') : ''}</span><span class="ss-r-tx"><span class="ss-r-t">${ssMark(e.title, toks)}</span>${e.sub ? `<span class="ss-r-s">${escapeHtml(e.sub)}</span>` : ''}${snip ? `<span class="ss-r-x">${snip}</span>` : ''}</span><span class="ss-r-go" aria-hidden="true">›</span></button>`;
 }
+/* ============ 🔤 1.0.53 : CHERCHER UN MOT DEPUIS L'ACCUEIL ============
+   La barre de l'accueil cherche d'abord dans tes mots (français, arabe, définition) ; « 📄 Une fiche, un verbe »
+   la fait chercher dans les fiches comme avant. Chaque mot trouvé : toucher → sa fiche ; 🔊 ; 🗑 (deux touchers,
+   avec « ↩ Annuler »). Rien trouvé : « ✨ Chercher ce mot et l'ajouter ». */
+const SSW_PH = { mot:'Chercher un mot (français ou arabe)…', fiche:'Chercher une fiche, un verbe…' };
+function sswFind(q){
+  const qa = /[؀-ۿ]/.test(q) ? arStripMarks(q) : '', qn = qa ? '' : normalizeForSearch(q);
+  return WORDS.map((w, i) => ({ w, i, r:dictRank(w, qn, qa) })).filter(x => x.r < 9).sort((a, b) => (a.r - b.r) || (a.i - b.i)).map(x => x.w);
+}
+function sswBlockOf(w){
+  for(let b = 0; b < BLOCKS.length; b++) if(BLOCKS[b].indexOf(w) >= 0) return b + 1;
+  return 0;
+}
+function sswRun(st, q){
+  const card = st.card, L = sswFind(q), lim = st.more.mot ? Math.min(L.length, 80) : 12;
+  st.list = L;
+  const rows = L.slice(0, lim).map((w, i) => {
+    const blk = sswBlockOf(w);
+    return `<div class="ssw-row" data-ssw-i="${i}">
+      <button type="button" class="ssw-main" data-ssw="open" data-i="${i}" aria-label="${tbAttr(w.fr)} : ouvrir sa fiche"><span class="ssw-fr" lang="fr">${ssMark(w.fr, ssQuery(q).toks)}</span><span class="ssw-ar" lang="ar" dir="rtl">${escapeHtml(w.ar || '')}</span>${w.def ? `<span class="ssw-def">${escapeHtml(w.def)}</span>` : ''}<span class="ssw-meta">${escapeHtml(w.cat || '')}${blk ? ' · Bloc ' + blk : ''}</span></button>
+      <button type="button" class="ssw-b" data-ssw="say" data-i="${i}" aria-label="Écouter « ${tbAttr(w.fr)} »" title="Écouter">🔊</button>
+      <button type="button" class="ssw-b del" data-ssw="del" data-i="${i}" aria-label="Retirer « ${tbAttr(w.fr)} » de mes mots" title="Retirer de mes mots">🗑</button>
+    </div>`;
+  }).join('');
+  const q0 = q.replace(/\s+/g, ' ').trim();
+  const canNew = q0.length >= 2 && q0.length <= 60 && /\p{L}/u.test(q0) && !/[؀-ۿ]/.test(q0) && !(typeof findLexWord === 'function' && findLexWord(q0));
+  let html = '';
+  if(L.length) html = `<div class="ss-g"><span>🔤 Tes mots</span><span>${L.length}</span></div>${rows}${L.length > lim ? (lim < 80 ? `<button type="button" class="ss-more" data-ssw="more">Voir les ${L.length - lim} autres ▾</button>` : `<button type="button" class="ss-more" data-ssw="dict">📖 Tout voir dans le dictionnaire (${L.length})</button>`) : ''}`;
+  else html = `<div class="ss-empty">🦊 « <b>${escapeHtml(q0)}</b> » n'est pas encore dans tes mots.</div>`;
+  if(canNew) html += `<button type="button" class="ssw-add" data-ssw="new"><span aria-hidden="true">✨</span><span>${L.length ? 'Un autre mot ? ' : ''}Chercher « <b>${escapeHtml(q0)}</b> » et l'ajouter à mes mots</span></button>`;
+  html += `<button type="button" class="ss-more" data-ssw="fiche">📄 Chercher « ${escapeHtml(q0)} » dans les fiches</button>`;
+  st.res.innerHTML = html;
+  st.res.hidden = false;
+  card.classList.add('ss-on');
+  if(!st.res.__sswWired){
+    st.res.__sswWired = true;
+    st.res.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-ssw]'); if(!b || st.scope !== 'mot') return;
+      const a = b.dataset.ssw, list = st.list || [], w = list[+b.dataset.i];
+      if(a === 'open' && w){ ssMem = { sig:'home', q:st.input.value.trim(), at:Date.now(), scope:'mot' }; wordCardPopup(w, { list, index:+b.dataset.i, onClose:() => { if(st.wrap.isConnected) ssRun(st); } }); }
+      else if(a === 'say' && w){ try{ speak(w.fr, 'fr-FR'); }catch(err){} }
+      else if(a === 'del' && w){
+        if(!b.classList.contains('arm')){
+          st.res.querySelectorAll('.ssw-b.del.arm').forEach(x => { x.classList.remove('arm'); x.textContent = '🗑'; });
+          b.classList.add('arm'); b.textContent = 'Retirer ?'; clearTimeout(b.__t);
+          b.__t = setTimeout(() => { if(b.isConnected){ b.classList.remove('arm'); b.textContent = '🗑'; } }, 3500);
+          return;
+        }
+        const row = b.closest('.ssw-row'); if(row) row.classList.add('gone');
+        setTimeout(() => {
+          const d = lexDeleteWord(w);
+          if(d){ try{ haptic('tap'); }catch(err){} lexSnack(`🗑 « ${w.fr} » retiré de tes mots`, '↩ Annuler', () => { if(lexUndoDelete(d)){ lexSnack(`↩ « ${w.fr} » est revenu dans tes mots`); if(st.wrap.isConnected) ssRun(st); } }); }
+          if(st.wrap.isConnected) ssRun(st);
+        }, 220);
+      }
+      else if(a === 'more'){ st.more.mot = true; ssRun(st); }
+      else if(a === 'dict'){ dictQuery = st.input.value.trim(); dictCat = null; renderDictionaryView(); }
+      else if(a === 'new'){ try{ nwSearch(st.input.value.replace(/\s+/g, ' ').trim()); }catch(err){ console.warn(err); } }
+      else if(a === 'fiche'){ const sb = st.wrap.querySelector('[data-ss-scope="fiche"]'); if(sb) sb.click(); }
+    });
+  }
+}
 function ssRun(st){
   const q = st.input.value.trim();
   const card = st.card;
   st.wrap.querySelector('.ss-x').hidden = !q;
-  ssMem = q ? { sig:st.info.sig, q, at:Date.now() } : null;
-  if(ssFold(q).replace(/[^a-z0-9؀-ۿ]/g, '').length < 2){ st.res.hidden = true; st.res.innerHTML = ''; card.classList.remove('ss-on'); return; }
+  ssMem = q ? { sig:st.info.sig, q, at:Date.now(), scope:st.scope } : (st.info.home ? { sig:'home', q:'', at:Date.now(), scope:st.scope } : null);
+  if(ssFold(q).replace(/[^a-z0-9؀-ۿ]/g, '').length < (st.info.home && st.scope === 'mot' && /[؀-ۿ]/.test(q) ? 1 : 2)){ st.res.hidden = true; st.res.innerHTML = ''; card.classList.remove('ss-on'); return; }
+  if(st.info.home && st.scope === 'mot'){ sswRun(st, q); return; }
   const r = ssSearch(q, st.info, card);
   const all = [];
   const group = (title, list, key, lim) => {
@@ -49506,7 +49934,7 @@ function tbLibShellHtml(){
     <div id="tbkLibTop"></div>
     ${typeof pdvShelfHtml === 'function' ? pdvShelfHtml() : ''}
     <div class="tbl-shelves tbk-list" id="tbkMine"></div>
-    <div class="tbl-foot"><span class="tbk-sync" id="tbkSync">${getSyncUrl() ? '☁️ sur tous tes appareils' : ''}</span><span class="tbl-tip">Astuce : sur ordinateur, glisse un texte (ou un fichier .md) sur une catégorie pour l'y ranger.</span></div>
+    <div class="tbl-foot">${getSyncUrl() ? '<button type="button" class="tbk-sync tbk-sync-btn" id="tbkSync" data-sync-now title="Récupérer tout de suite ce que tu as ajouté sur ton autre appareil">☁️ Synchroniser maintenant</button>' : '<span class="tbk-sync" id="tbkSync"></span>'}<span class="tbl-tip">Astuce : sur ordinateur, glisse un texte (ou un fichier .md) sur une catégorie pour l'y ranger.</span></div>
     <div class="tbl-dropzone" aria-hidden="true"><span>📥 Lâche ton fichier ici (PDF, photos de pages, Word, .md, .epub, .cbz)</span></div>
     <div class="tbl-menu" id="tbkLibMenu" hidden role="menu"></div>
   </section>`;
@@ -51698,7 +52126,7 @@ function tbTrailClear(H){ if(!H) return; if(H.el) H.el.classList.remove('hov'); 
 /* 📄 dans le PDF (et la liseuse) : la souris ou le stylo allume le mot, avec sa traînée */
 function pdvTrailWire(S){
   const H = S.hv = { el:null, tr:[], raf:0, x:0, y:0 };
-  try{ S.ov.style.setProperty('--pdv-hov', `rgba(${tbHovRgb()},.38)`); }catch(e){}
+  try{ S.ov.style.setProperty('--pdv-hov', `rgba(${tbHovRgb()},.38)`); S.ov.style.setProperty('--tb-hov-rgb', tbHovRgb()); }catch(e){}
   const run = () => {
     H.raf = 0;
     if(tbUi().hov === 'off'){ tbTrailClear(H); return; }
@@ -55130,6 +55558,7 @@ function tbApplyUi(){
   el.style.setProperty('--tb-ls', ['0', '.03em', '.06em'][sp] || '0');
   el.style.setProperty('--tb-ws', ['0', '.12em', '.26em'][sp] || '0');
   el.style.setProperty('--tb-hov', `rgba(${tbHovRgb(u)},${document.documentElement.getAttribute('data-theme') === 'dark' ? '.36' : '.30'})`);
+  el.style.setProperty('--tb-hov-rgb', tbHovRgb(u));   // 🖍 1.0.53 : la traînée garde la même couleur
   el.classList.toggle('hov-off', u.hov === 'off');
   el.dataset.paperL = u.paperL || 'auto'; el.dataset.paperD = u.paperD || 'auto';
   const fo = document.getElementById('tbFwOut'); if(fo) fo.textContent = tbFwLbl(fw);
@@ -55208,8 +55637,8 @@ function tbAaHtml(){
     <div class="tb-hovs" role="group" aria-label="Couleur du surlignage">${Object.entries(TB_HOV).map(([k, H]) => `<button type="button" class="tb-hov ${hov === k ? 'on' : ''}" data-tb="hov" data-v="${k}" aria-pressed="${hov === k}" title="${H[0]}"><i style="background:rgba(${H[1]},.38)"></i><span>${H[0]}</span></button>`).join('')}
       <label class="tb-hov ${hov === 'custom' ? 'on' : ''}" title="Ta couleur"><i style="background:rgba(${tbHexRgb(u.hovc) || '96,165,250'},.38)"></i><span>À toi</span><input type="color" id="tbHovC" value="${/^#[0-9a-f]{6}$/i.test(u.hovc || '') ? u.hovc : '#60a5fa'}" aria-label="Choisir ta couleur de surlignage"></label>
       <button type="button" class="tb-hov off ${hov === 'off' ? 'on' : ''}" data-tb="hov" data-v="off" aria-pressed="${hov === 'off'}"><i></i><span>Aucun</span></button></div>
-    <div class="tb-pop-row"><span class="tb-pop-l">Traînée</span><div class="tb-seg" role="group" aria-label="Traînée de couleurs derrière le mot">${seg('hov-tr', 1, '🖍 Les 3 mots d\'avant', u.hovTrail !== false)}${seg('hov-tr', 0, 'Non', u.hovTrail === false)}</div></div>
-    <div class="tb-pop-hint">Les mots que tu viens de survoler gardent une couleur (<span class="tb-trail-demo"><i style="background:rgba(${tbHovRgb(u)},.38)">mot</i> <i style="background:rgba(251,191,36,.34)">d'avant</i> <i style="background:rgba(244,114,182,.24)">encore</i> <i style="background:rgba(167,139,250,.16)">avant</i></span>) : tu vois où tu en es. Aussi dans les PDF, à la souris ou au stylo.</div>
+    <div class="tb-pop-row"><span class="tb-pop-l">Traînée</span><div class="tb-seg" role="group" aria-label="Traînée de couleurs derrière le mot">${seg('hov-tr', 1, '🖍 Discrète', u.hovTrail !== false)}${seg('hov-tr', 0, 'Non', u.hovTrail === false)}</div></div>
+    <div class="tb-pop-hint">Les 3 mots que tu viens de survoler restent légèrement teintés, de la même couleur, de plus en plus pâle (<span class="tb-trail-demo"><i style="background:rgba(${tbHovRgb(u)},.055)">avant</i> <i style="background:rgba(${tbHovRgb(u)},.11)">encore</i> <i style="background:rgba(${tbHovRgb(u)},.2)">d'avant</i> <i style="background:rgba(${tbHovRgb(u)},.38)">mot</i></span>) : tu vois où tu en es, sans bariolage. Aussi dans les PDF, à la souris ou au stylo.</div>
     <div class="tb-pop-row"><span class="tb-pop-l">Mes mots</span><div class="tb-seg">${seg('kn', 1, '┄ Soulignés', u.kn !== false)}${seg('kn', 0, 'Non', u.kn === false)}</div></div>
     <div class="tb-pop-hint">Les mots déjà dans tes mots sont soulignés en pointillé : touche-les pour leur bulle.</div>
     <div class="tb-pop-row"><span class="tb-pop-l">Texte</span><div class="tb-seg">${seg('align', 'left', '<span class="tb-al l" aria-hidden="true"><i></i><i></i><i></i></span> À gauche', u.align !== 'justify')}${seg('align', 'justify', '<span class="tb-al j" aria-hidden="true"><i></i><i></i><i></i></span> Justifié', u.align === 'justify')}</div></div>
@@ -56261,7 +56690,11 @@ function tbOthersPrompt(s){
 }
 function tbAddBtnHtml(known, cands){
   const w = known ? (cands || []).map(tbLexWord).find(Boolean) : null;
-  if(w) return `<button type="button" class="tb-btn see" data-tb="see-word" data-w="${tbAttr(w.fr)}">👁 Déjà dans tes mots · le voir</button><button type="button" class="tb-btn" data-tb="edit-word" data-w="${tbAttr(w.fr)}">✏️ Modifier</button>`;
+  if(w){
+    let s = ''; try{ const tk = TB.toks[TB.sheetK]; s = tk ? TB.sents[tk.s] || '' : ''; }catch(e){}
+    const canEx = s && lexSentNorm(s).length > 3 && !lexHasSentence(w, s);
+    return `<button type="button" class="tb-btn see" data-tb="see-word" data-w="${tbAttr(w.fr)}">👁 Déjà dans tes mots · le voir</button><button type="button" class="tb-btn" data-tb="edit-word" data-w="${tbAttr(w.fr)}">✏️ Modifier</button>${canEx ? `<button type="button" class="tb-btn" data-tb="sh-ex" data-w="${tbAttr(w.fr)}" title="La phrase du texte va dans sa fiche, à la suite des autres">➕ Ajouter cette phrase à sa fiche</button>` : ''}`;
+  }
   return `<button type="button" class="tb-btn" data-tb="add" ${known ? 'disabled' : ''}>${known ? '✓ Déjà dans tes mots' : '➕ Ajouter à mes mots'}</button>`;
 }
 /* 🖼 1.0.50 : un texte importé sans certaines de ses images : on peut les choisir après coup (le nom suffit) */
@@ -56727,6 +57160,13 @@ function tbAction(id, btn, e){
     case 'tip-x': tbTipClose(); return;
     case 'tip-say': if(TB.tipW) tbSay(TB.tipW.fr); return;
     case 'tip-see': { const w = TB.tipW; tbTipClose(); if(w) wordCardPopup(w, { note:'📇 Dans tes mots' }); return; }
+    case 'sh-ex': {
+      const w = tbLexWord(btn.dataset.w), tk = TB.toks[TB.sheetK], s = tk ? TB.sents[tk.s] : '';
+      const r = lexAddSentence(w, s), n = w ? (w.exMore || []).length : 0;
+      if(r === 'ok'){ try{ playCorrectSound(); }catch(e){} tbToast(n ? `➕ Phrase ajoutée à « ${w.fr} » (${n + 1}ᵉ phrase)` : `➕ Phrase ajoutée à « ${w.fr} »`, 2600); btn.disabled = true; btn.textContent = '✓ Phrase ajoutée à sa fiche'; }
+      else if(r === 'dup') tbToast('Cette phrase est déjà dans sa fiche.');
+      return;
+    }
     case 'tip-ex': case 'dup-ex': {
       const k0 = TB.tipK, w = btn.dataset.tb === 'tip-ex' ? TB.tipW : tbLexWord(btn.dataset.w), tk = TB.toks[btn.dataset.tb === 'tip-ex' ? TB.tipK : TB.sheetK];
       const s = btn.dataset.tb === 'dup-ex' && TB.dupSent ? TB.dupSent : (tk ? TB.sents[tk.s] : '');
@@ -56748,7 +57188,7 @@ function tbAction(id, btn, e){
     case 'sp': { const a = tbAnchorGet(); tbUi().sp = +btn.dataset.v || 0; tbSaveUi(); tbApplyUi(); if(a) tbAnchorSet(a); tbToggleAa(true); return; }
     case 'paper': { const dk = document.documentElement.getAttribute('data-theme') === 'dark'; tbUi()[dk ? 'paperD' : 'paperL'] = btn.dataset.v; tbSaveUi(); tbApplyUi(); tbToggleAa(true); return; }
     case 'hov': { tbUi().hov = btn.dataset.v; tbSaveUi(); tbApplyUi(); tbToggleAa(true); if(btn.dataset.v !== 'off') tbToast('🖊️ Passe ton doigt ou ton stylo sur le texte', 1800); return; }
-    case 'hov-tr': { tbUi().hovTrail = btn.dataset.v === '1'; tbSaveUi(); tbToggleAa(true); tbToast(tbUi().hovTrail ? '🖍 Traînée de couleurs : les 3 mots d\'avant restent allumés' : 'Traînée enlevée', 2200); return; }
+    case 'hov-tr': { tbUi().hovTrail = btn.dataset.v === '1'; tbSaveUi(); tbToggleAa(true); tbToast(tbUi().hovTrail ? '🖍 Traînée discrète : les 3 mots d\'avant restent légèrement teintés' : 'Traînée enlevée', 2200); return; }
     case 'kn': { tbUi().kn = btn.dataset.v === '1'; tbSaveUi(); tbPaintKnown(); tbToggleAa(true); return; }
     case 'preset': { const P0 = TB_PRESETS[btn.dataset.v]; if(!P0) return; const a = tbAnchorGet(), u = tbUi(); ['font', 'fs', 'lh', 'fw', 'bio', 'sp'].forEach(x => { u[x] = P0[x]; }); tbSaveUi(); tbApplyUi(); tbRender(true); if(a) tbAnchorSet(a); tbToggleAa(true); tbToast('🅰️ ' + P0.n, 1400); return; }
     case 'aa-reset': { const a = tbAnchorGet(), u = tbUi(); ['font', 'fw', 'bio', 'sp', 'paperL', 'paperD', 'hov', 'hovc'].forEach(x => { delete u[x]; }); u.fs = 19; u.lh = 1.65; u.kn = true; tbSaveUi(); tbApplyUi(); tbRender(true); if(a) tbAnchorSet(a); tbToggleAa(true); return; }
@@ -59613,6 +60053,34 @@ function goalEnterSplash(el, sec){
   setTimeout(() => { const g = ov.querySelector('.gls-go'); if(g) try{ g.focus({ preventScroll:true }); }catch(e){} }, 50);
   window.__glsEnd = end;
 }
+/* 🥇 1.0.53 : « Go » sur l'objectif « Maîtrise N blocs à 100 % » — avant, il lançait simplement le prochain bloc à faire
+   dans le mode en cours, ce qui ne faisait jamais avancer cet objectif. Maintenant : le bloc le plus proche de la maîtrise
+   complète (le plus de modes déjà à 90 %+), dans le mode qui lui manque (celui où tu es déjà le plus près). */
+function masteryNextTarget(){
+  const pass = (r) => !!(r && r.total && r.correct / r.total * 100 >= PASS_THRESHOLD);
+  const pct = (r) => (r && r.total) ? r.correct / r.total : -1;
+  let best = null;
+  BLOCKS.forEach((b, i) => {
+    if(!b.length || (typeof isBlockUnlocked === 'function' && !isBlockUnlocked(i))) return;
+    const pm = blockResults[i] || {};
+    const missing = GAME_MODES.filter(m => !pass(pm[m]));
+    if(!missing.length) return;
+    const done = GAME_MODES.length - missing.length;
+    if(!best || done > best.done) best = { idx:i, done, missing, pm };
+  });
+  if(!best) return null;
+  best.missing.sort((a, b) => pct(best.pm[b]) - pct(best.pm[a]));
+  return { idx:best.idx, mode:best.missing[0], done:best.done, left:best.missing.length, missing:best.missing.slice() };
+}
+function goMastery(){
+  const t = masteryNextTarget();
+  if(!t){ startNextBlockInMode(); return; }
+  gameMode = t.mode;
+  buildDeck(t.idx);
+  renderScoreboard();
+  renderCard();
+  setStatus(`🥇 Bloc ${t.idx + 1} : ${t.done}/${GAME_MODES.length} modes réussis. Il lui manque ${t.left === 1 ? 'ce mode' : t.left + ' modes'} — on commence par ${MODE_LABELS[t.mode] || t.mode}.`, 'ok');
+}
 function goToQuest(key){
   // on quitte proprement la consultation (le chrono de question ne doit pas reprendre)
   questPeekPausedTimer = false;
@@ -59646,7 +60114,8 @@ function goToQuest(key){
     startNextBlockInMode(mode);
     return;
   }
-  // lessons, time, pass, mastery → le prochain bloc à faire, directement
+  if(key === 'mastery'){ goMastery(); return; }
+  // lessons, time, pass → le prochain bloc à faire, directement
   startNextBlockInMode();
 }
 document.addEventListener('click', (e) => {
