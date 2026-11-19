@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- 🏷️ Version de l'appli : augmentée automatiquement par publier-site.cmd à chaque publication -->
-<meta name="app-version" content="1.0.53" data-date="2026-11-19">
+<meta name="app-version" content="1.0.54" data-date="2026-11-19">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <title>VocabVISION — Vocabulaire Français ↔ Arabe</title>
 <script>
@@ -3170,6 +3170,84 @@
   .pdv-sh-hint button{ border:0; border-radius:99px; padding:6px 12px; background:#0EA5E9; color:#fff; font:800 12.5px 'Nunito','Inter',sans-serif; cursor:pointer; }
   .pdv-sh-x{ border:0; background:transparent; cursor:pointer; font-size:15px; padding:4px 6px; border-radius:8px; color:var(--text-dim); } .pdv-sh-x.sure{ background:#DC2626; color:#fff; font-size:12px; font-weight:800; }
   body.pdv-on{ overflow:hidden; }
+  /* ============ 📕 1.0.54 : la liseuse EPUB (un vrai livre, tel quel) ============ */
+  .epv-how-dlg{ width:min(100%, 480px); }
+  .epv-ov{ --epv-bg:#FBFAF7; --epv-fg:#1F2328; --epv-dim:#5F6670; --epv-rule:rgba(0,0,0,.12); --epv-link:#2563EB; --epv-sel:rgba(124,58,237,.26); }
+  .epv-ov.epv-sepia{ --epv-bg:#F4ECD8; --epv-fg:#3B2E1F; --epv-dim:#6E5B43; --epv-rule:rgba(94,70,40,.22); --epv-link:#8A4B08; --epv-sel:rgba(146,64,14,.22); }
+  .epv-ov.epv-night{ --epv-bg:#141619; --epv-fg:#D6DAE0; --epv-dim:#9AA2AD; --epv-rule:rgba(255,255,255,.13); --epv-link:#8AB4F8; --epv-sel:rgba(167,139,250,.36); }
+  .epv-ov .pdv-body{ background:var(--epv-bg); touch-action:pan-y; }
+  .epv-book{ position:relative; max-width:var(--epv-w, 40em); margin:0 auto; padding:26px 22px 75vh; box-sizing:content-box; color:var(--epv-fg);
+    font-family:var(--epv-ff, 'Literata', Georgia, 'Times New Roman', serif); font-size:calc(18px * var(--epv-z, 1)); line-height:var(--epv-lh, 1.62);
+    text-rendering:optimizeLegibility; overflow-wrap:break-word; -webkit-text-size-adjust:100%; }
+  html body .epv-ov .epv-book, html body .epv-ov .epv-book *:not(code):not(pre):not(kbd):not(samp){ font-family:var(--epv-ff, 'Literata', Georgia, serif) !important; }
+  html body .epv-ov .epv-book{ letter-spacing:normal; }
+  html body .epv-aa [data-epv-font="serif"]{ font-family:'Literata', Georgia, serif !important; } html body .epv-aa [data-epv-font="sans"]{ font-family:'Inter', system-ui, sans-serif !important; } html body .epv-aa [data-epv-font="dys"]{ font-family:'Atkinson Hyperlegible Next', 'Atkinson Hyperlegible', Verdana, sans-serif !important; }
+  @media (max-width:600px){ .epv-book{ padding:18px 18px 75vh; font-size:calc(17px * var(--epv-z, 1)); } }
+  .epv-book p{ margin:0 0 .75em; }
+  .epv-book h1, .epv-book h2, .epv-book h3, .epv-book h4, .epv-book h5, .epv-book h6{ line-height:1.25; margin:1.4em 0 .6em; font-weight:700; color:var(--epv-fg); }
+  .epv-book h1, .epv-book h2, .epv-book h3, .epv-book h4, .epv-book h5, .epv-book h6{ text-shadow:none; animation:none; transform:none; letter-spacing:normal; font-family:inherit; }
+  .epv-book h1{ font-size:1.7em; } .epv-book h2{ font-size:1.42em; } .epv-book h3{ font-size:1.2em; } .epv-book h4, .epv-book h5, .epv-book h6{ font-size:1.05em; }
+  .epv-book img{ display:block; max-width:100%; height:auto; margin:1em auto; border-radius:2px; }
+  .epv-book .epv-img-in{ display:inline; margin:0 .1em; vertical-align:middle; max-height:1.6em; }
+  .epv-night .epv-book img{ filter:brightness(.88); }
+  .epv-book a{ color:var(--epv-link); text-decoration:underline; text-underline-offset:2px; }
+  .epv-book a.epv-nref{ text-decoration:none; font-size:.8em; vertical-align:super; line-height:0; }
+  .epv-book blockquote{ margin:1em 0 1em .4em; padding:.1em 0 .1em 1em; border-left:3px solid var(--epv-rule); color:var(--epv-fg); }
+  .epv-book ul, .epv-book ol{ padding-left:1.6em; margin:0 0 .8em; } .epv-book li{ margin:.2em 0; }
+  .epv-book pre{ white-space:pre-wrap; font-size:.85em; background:rgba(127,127,127,.08); padding:.6em .8em; border-radius:6px; }
+  .epv-book table{ border-collapse:collapse; margin:1em 0; max-width:100%; display:block; overflow-x:auto; font-size:.92em; }
+  .epv-book td, .epv-book th{ border:1px solid var(--epv-rule); padding:.3em .6em; vertical-align:top; }
+  .epv-book hr{ border:0; border-top:1px solid var(--epv-rule); margin:1.6em auto; width:40%; }
+  .epv-book figure{ margin:1em 0; } .epv-book figcaption{ font-size:.85em; color:var(--epv-dim); text-align:center; }
+  .epv-book .epv-a-center{ text-align:center; } .epv-book .epv-a-right{ text-align:right; } .epv-book .epv-a-justify{ text-align:justify; }
+  .epv-book sup, .epv-book sub{ line-height:0; }
+  .epv-ch{ position:relative; scroll-margin-top:10px; }
+  .epv-ch + .epv-ch{ margin-top:2.2em; padding-top:2em; border-top:1px solid var(--epv-rule); }
+  .epv-end{ text-align:center; color:var(--epv-dim); margin:3em 0 0; font-style:italic; }
+  /* les mots : toucher → la fiche ; la traînée et la sélection comme sur la Tablette */
+  .epv-w{ border-radius:3px; cursor:pointer; }
+  .epv-w.sel{ background:var(--epv-sel); }
+  .epv-w.tag{ background:rgba(250,204,21,.38); box-shadow:inset 0 -2px 0 #EAB308; }
+  .epv-night .epv-w.tag{ background:rgba(250,204,21,.24); box-shadow:inset 0 -2px 0 #CA8A04; }
+  .epv-w.just{ animation:pdvJust 2.4s ease 1; }
+  .epv-w.hov{ background-color:var(--pdv-hov, rgba(96,165,250,.36)); }
+  .epv-w.hov1{ background-color:rgba(var(--tb-hov-rgb, 96,165,250), .2); } .epv-w.hov2{ background-color:rgba(var(--tb-hov-rgb, 96,165,250), .11); } .epv-w.hov3{ background-color:rgba(var(--tb-hov-rgb, 96,165,250), .055); }
+  .epv-book ::selection{ background:rgba(37,99,235,.28); }
+  /* 🔍 les résultats surlignés */
+  .epv-hl{ position:absolute; pointer-events:none; background:rgba(255,213,0,.45); mix-blend-mode:multiply; border-radius:2px; z-index:1; }
+  .epv-night .epv-hl{ mix-blend-mode:normal; background:rgba(253,214,99,.32); }
+  .epv-hl.cur{ background:rgba(255,120,0,.5); box-shadow:0 0 0 2px rgba(255,120,0,.85); animation:pdvHit .9s ease 1; }
+  /* ☰ le sommaire */
+  .epv-toc{ width:290px; flex:none; background:#2A2D30; border-right:1px solid rgba(0,0,0,.4); display:flex; flex-direction:column; min-height:0; }
+  .epv-toc[hidden]{ display:none; }
+  .epv-toc-h{ display:flex; align-items:center; gap:6px; padding:10px 10px 6px 14px; } .epv-toc-h b{ flex:1; font-size:13.5px; }
+  .epv-toc-l{ flex:1; overflow:auto; padding:2px 6px 30px; }
+  .epv-toc-l button{ display:block; width:100%; text-align:left; border:0; background:transparent; color:#E8EAED; font:inherit; font-size:13.5px; line-height:1.35; padding:7px 10px; border-radius:7px; cursor:pointer; }
+  .epv-toc-l button:hover{ background:rgba(255,255,255,.07); } .epv-toc-l button.on{ background:rgba(138,180,248,.18); color:#fff; font-weight:600; }
+  .epv-toc-l button:focus-visible{ outline:2px solid #8AB4F8; outline-offset:-2px; }
+  .epv-toc-mk{ margin:4px 8px 8px; border:1px dashed rgba(138,180,248,.6) !important; color:#8AB4F8 !important; }
+  @media (max-width:719px){ .epv-toc{ position:absolute; inset:0; z-index:5; width:auto; background:rgba(32,33,36,.98); } }
+  /* Aa : les réglages de lecture */
+  .epv-aa{ position:absolute; top:52px; right:10px; z-index:7; width:min(320px, calc(100vw - 20px)); background:#202124; color:#E8EAED; border-radius:14px; box-shadow:0 16px 40px rgba(0,0,0,.55); padding:12px 14px 14px; }
+  .epv-aa[hidden]{ display:none; }
+  .epv-aa-l{ font-size:11.5px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:#9AA0A6; margin:10px 0 6px; } .epv-aa-l:first-child{ margin-top:0; }
+  .epv-aa-r{ display:flex; gap:6px; flex-wrap:wrap; }
+  .epv-aa-r button{ flex:1; min-width:0; height:36px; border-radius:9px; border:1px solid rgba(255,255,255,.16); background:#2D2F33; color:#E8EAED; font:inherit; font-size:13.5px; font-weight:600; cursor:pointer; }
+  .epv-aa-r button.on{ border-color:#8AB4F8; background:rgba(138,180,248,.2); color:#fff; }
+  .epv-aa-r button:focus-visible{ outline:2px solid #8AB4F8; outline-offset:1px; }
+  .epv-aa-r [data-epv-th="day"]{ background:#FBFAF7; color:#1F2328; } .epv-aa-r [data-epv-th="sepia"]{ background:#F4ECD8; color:#3B2E1F; } .epv-aa-r [data-epv-th="night"]{ background:#141619; color:#D6DAE0; }
+  .epv-zv{ min-width:56px; text-align:center; font-size:13px; font-weight:700; color:#E8EAED; font-variant-numeric:tabular-nums; background:transparent; border:0; cursor:pointer; }
+  /* la progression */
+  .epv-prog{ position:absolute; left:0; right:0; bottom:0; height:3px; background:rgba(127,127,127,.18); z-index:3; pointer-events:none; }
+  .epv-prog i{ display:block; height:100%; width:0; background:linear-gradient(90deg,#8AB4F8,#A78BFA); transition:width .25s; }
+  .epv-back{ position:absolute; left:50%; bottom:18px; transform:translateX(-50%); z-index:6; border:0; border-radius:999px; padding:9px 16px; background:rgba(32,33,36,.92); color:#fff; font:600 13.5px 'Inter',sans-serif; cursor:pointer; box-shadow:0 6px 18px rgba(0,0,0,.35); }
+  .epv-back[hidden]{ display:none; }
+  @media (max-width:719px){
+    .epv-ov .pdv-top > [data-epv="x"]{ order:0; } .epv-ov .pdv-top > [data-epv="toc"]{ order:2; } .epv-ov .pdv-top > [data-epv="find"]{ order:3; } .epv-ov .pdv-top > [data-epv="carnet"]{ order:4; }
+    .epv-ov .pdv-tt{ flex:1 1 calc(100% - 200px); min-width:0; }
+    .epv-ov .pdv-top .pdv-nav{ order:5; } .epv-ov .pdv-top .epv-zm{ order:6; margin-left:auto; } .epv-ov .pdv-top > [data-epv="aa"]{ order:7; } .epv-ov .pdv-top > [data-epv="night"]{ order:8; }
+  }
+  @media (prefers-reduced-motion:reduce){ .epv-w.just, .epv-hl.cur{ animation:none; } }
   .pdv-ov{ position:fixed; inset:0; z-index:10040; display:flex; flex-direction:column; background:#525659; color:#fff; font-family:'Inter', system-ui, sans-serif; }
   .pdv-top{ display:flex; align-items:center; gap:6px; padding:6px 10px; padding-top:max(6px, env(safe-area-inset-top)); background:#323639; box-shadow:0 1px 0 rgba(0,0,0,.4), 0 2px 8px rgba(0,0,0,.25); position:relative; z-index:4; }
   .pdv-tt{ flex:1; min-width:80px; } .pdv-tt b{ display:block; font-size:14px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .pdv-tt small{ display:block; font-size:11.5px; color:#BFC4CC; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
@@ -18519,7 +18597,7 @@ function wceSuggest(ov, w){
    Dans les phrases d'exemple, la Répétition, les fiches (Art oratoire, Grammaire…), le Bouquinage : touche un mot
    difficile, une bulle s'ouvre avec sa traduction et sa définition (ton lexique d'abord, sinon le dictionnaire en ligne),
    et tu peux l'écouter, l'ajouter à tes mots, ou réentendre la phrase. */
-var WT_SEL = '.ex-text, .result-ex, .def-text, .repeat-sentence, .wcp-ex, .wcp-def, .reading-text, .bq-quote, .cq-sentence, .pdv-tl';
+var WT_SEL = '.ex-text, .result-ex, .def-text, .repeat-sentence, .wcp-ex, .wcp-def, .reading-text, .bq-quote, .cq-sentence, .pdv-tl, .epv-book';
 var WT = { el:null, bypass:false, ctx:null, tok:0 };
 function wtClose(){
   if(WT.el){ WT.el.remove(); WT.el = null; }
@@ -24068,6 +24146,9 @@ const COLOR_PRESETS = {
 /* ============ 🆕 NOUVEAUTÉS — pour que tout ce qui a été ajouté reste découvrable ============ */
 const WHATS_NEW_SECTIONS = [
   { icon:'🆕', title:'Nouveautés', items:[
+    { name:'📕 Lire un livre .epub tel quel', desc:"Un .epub s'ouvre maintenant comme dans une vraie liseuse : un seul livre, avec ses titres, ses italiques, ses images et ses notes, au lieu d'être découpé en textes. ☰ le sommaire · 🔍 chercher un mot dans tout le livre (chaque résultat avec sa phrase) · A− / A+ (ou Ctrl + molette, ou pincer) · Aa : police, thème jour / sépia / nuit, largeur, interligne. Touche un mot pour sa fiche, comme sur un PDF. L'endroit où tu en es est gardé." },
+    { name:'📖 « Tel quel » coché par défaut', desc:"Pour un PDF, un .epub ou une BD .cbz, la première option, « Tel quel », est maintenant cochée d'office : les vraies pages du PDF, le vrai livre. « En textes, sur la Tablette » reste possible en un clic." },
+    { name:'🖼 Les BD .cbz page par page', desc:"Une BD .cbz « telle quelle » s'ouvre comme un PDF : chaque image est une page, avec le zoom et la liste des pages." },
     { name:'🧩 Supprimer un mot ne remet plus tes blocs à zéro', desc:"Avant, retirer un mot décalait tous les blocs suivants d'un mot, et les blocs verts redevenaient « pas faits ». Maintenant chaque résultat est rattaché au bloc qui contient ses mots. Et les blocs perdus avant cette version sont retrouvés tout seuls, à l'ouverture." },
     { name:"🥇 « Go » sur l'objectif « Maîtrise N blocs »", desc:"Il lançait le prochain bloc à faire, ce qui ne faisait jamais avancer cet objectif. Maintenant il ouvre le bloc le plus proche de la maîtrise complète, directement dans le mode qui lui manque." },
     { name:'🔁 Réviser plusieurs blocs dans le même mode', desc:"Sur l'accueil, « 🔁 Réviser plusieurs blocs » : choisis 2 blocs ou plus et un mode. Tous leurs mots dans une même partie, et à la fin le mode compte pour chaque bloc, avec son propre score. Une révision ne fait jamais perdre un bloc déjà vert. Les blocs réussis comptent dans les objectifs du jour." },
@@ -50203,7 +50284,7 @@ function tbCatMenuHtml(c){
   const C = tbCats(), i = C.findIndex(x => x.id === c.id);
   return `<div class="tbl-m-h">${c.icon} ${escapeHtml(c.name)}</div>
     <button type="button" role="menuitem" data-tbl="new-text" data-cat="${tbAttr(c.id)}">✍️ Ajouter un texte ici</button>
-    <button type="button" role="menuitem" data-tbl="import" data-cat="${tbAttr(c.id)}">📥 Importer ici (.md, .epub, .cbz)</button>
+    <button type="button" role="menuitem" data-tbl="import" data-cat="${tbAttr(c.id)}">📥 Importer ici (.md, .epub, .cbz, .pdf)</button>
     <button type="button" role="menuitem" data-tbl="cat-edit" data-cat="${tbAttr(c.id)}">🎨 Renommer, icône, couleur</button>
     ${tbCatLocked(c) ? `<button type="button" role="menuitem" data-tbl="relock" data-cat="${tbAttr(c.id)}">🔒 Reverrouiller maintenant</button><button type="button" role="menuitem" data-tbl="cat-pw" data-cat="${tbAttr(c.id)}">🔑 Changer le mot de passe</button><button type="button" role="menuitem" data-tbl="cat-unpw" data-cat="${tbAttr(c.id)}">🔓 Retirer le mot de passe</button>` : `<button type="button" role="menuitem" data-tbl="cat-lock" data-cat="${tbAttr(c.id)}">🔒 Protéger par un mot de passe</button>`}
     ${i > 0 ? `<button type="button" role="menuitem" data-tbl="cat-up" data-cat="${tbAttr(c.id)}">↑ Monter</button>` : ''}
@@ -50808,6 +50889,16 @@ async function tbBookImport(file, cat){
   if(/\.pdf$/i.test(file.name)) return tbPdfImport(file, cat);   // 📄 1.0.38 : choisir ses pages, OCR des pages scannées
   const kind = /\.cbz$/i.test(file.name) ? 'cbz' : /\.pdf$/i.test(file.name) ? 'pdf' : /\.docx$/i.test(file.name) ? 'docx' : 'epub';
   if(typeof DecompressionStream === 'undefined') throw new Error('ce navigateur ne sait pas ouvrir ce fichier (trop ancien)');
+  // 📖 1.0.54 : un livre .epub s'ouvre comme dans une vraie liseuse (un seul livre, ses images), une BD .cbz page par page
+  if(kind === 'epub' || kind === 'cbz'){
+    const how = await epvAskHow(file, kind);
+    if(!how){ setStatus('📚 Import annulé.', 'ok'); return []; }
+    if(how === 'view'){
+      if(kind === 'epub'){ const id = await epvSave(file); setStatus('', 'ok'); pdvShelfRefresh(); epvOpen(id); }
+      else { const pages = await epvCbzPages(file); if(!pages.length) throw new Error('aucune page (image) dans ce fichier'); const title = String(file.name).replace(/\.[^.]+$/, '').replace(/[_]+/g, ' ').trim().slice(0, 150); const pid = await pdvSave({ kind:'img', files:pages, title }, { pages:pages.map((_, i) => i + 1), title }); setStatus('', 'ok'); pdvShelfRefresh(); pdvOpen(pid); }
+      return [];
+    }
+  }
   setStatus(`📚 J'ouvre « ${file.name} »…`, 'ok');
   const step = (i, n) => { try{ setStatus(kind === 'docx' ? `📝 Je lis le document…` : `${kind === 'pdf' ? '📄' : '📚'} ${kind === 'cbz' || kind === 'pdf' ? 'Page' : 'Chapitre'} ${i} / ${n}…`, 'ok'); }catch(e){} };
   const bk = kind === 'cbz' ? await tbCbzParse(file, step) : kind === 'docx' ? await tbDocxParse(file, step) : await tbEpubParse(file, step);
@@ -51182,8 +51273,8 @@ function tbPdfDialog(P, cat, existing){
         <span class="tbl-imp-m"><span>${isImg ? '📷' : '📄'} ${N} ${isImg ? 'photo' : 'page'}${N > 1 ? 's' : ''}</span>${!isImg && nScan ? `<span>📷 ${nScan === N ? 'scanné' : nScan + ' page' + (nScan > 1 ? 's' : '') + ' scannée' + (nScan > 1 ? 's' : '')}</span>` : ''}</span></div>
       ${nScan ? `<div class="tbl-imp-hint">🔎 ${isImg ? 'Le texte des photos' : (nScan === N ? 'Ce PDF est scanné : son texte' : 'Le texte des pages scannées')} sera lu par l'appli (reconnaissance de texte, sur ton appareil) : quelques secondes par page. La première fois, le lecteur de texte se télécharge (≈ 5 Mo).</div>` : ''}
       <div class="tbp-how" role="radiogroup" aria-label="Comment l'ouvrir">
-        <label class="tbp-hw"><input type="radio" name="tbpH" value="text" checked><span><b>📰 En texte, sur la Tablette</b><small>remis en page comme un article : liaisons, recherche, marque-page</small></span></label>
-        <label class="tbp-hw"><input type="radio" name="tbpH" value="view"><span><b>📖 Tel quel : ${isImg ? 'les photos' : 'les vraies pages du PDF'}</b><small>sans conversion : touche un mot sur la page pour sa définition${nScan ? ', même scannée' : ''}</small></span></label>
+        <label class="tbp-hw"><input type="radio" name="tbpH" value="view" checked><span><b>📖 Tel quel : ${isImg ? 'les photos' : 'les vraies pages du PDF'}</b><small>sans conversion : touche un mot sur la page pour sa définition${nScan ? ', même scannée' : ''}</small></span></label>
+        <label class="tbp-hw"><input type="radio" name="tbpH" value="text"><span><b>📰 En texte, sur la Tablette</b><small>remis en page comme un article : liaisons, recherche, marque-page</small></span></label>
       </div>
       <div class="tbl-dlg-l">📑 ${isImg ? 'Photos' : 'Pages'} à importer</div>
       <div class="tbp-mode" role="radiogroup"><label><input type="radio" name="tbpM" value="all" checked> Toutes (${N})</label><label><input type="radio" name="tbpM" value="pick"> Seulement :</label>
@@ -51209,6 +51300,7 @@ function tbPdfDialog(P, cat, existing){
     </div>`;
     document.body.appendChild(ov);
     requestAnimationFrame(() => ov.classList.add('show'));
+    { const h0 = ov.querySelector('input[name="tbpH"]:checked'); ov.classList.toggle('tbp-view', !!h0 && h0.value === 'view'); }   // 📖 1.0.54 : « tel quel » par défaut
     const inp = ov.querySelector('#tbpIn'), okB = ov.querySelector('[data-v="ok"]'), nEl = ov.querySelector('#tbpN'), grid = ov.querySelector('#tbpG');
     // 📝 le titre : quand on ne garde que certaines pages, celui écrit en haut de la première (on peut le changer)
     const tIn = ov.querySelector('#tbpTitle'), tSrc = ov.querySelector('#tbpTitleSrc'); let tAuto = false, tT = 0, tTok = 0;
@@ -52131,7 +52223,7 @@ function pdvTrailWire(S){
     H.raf = 0;
     if(tbUi().hov === 'off'){ tbTrailClear(H); return; }
     const t = document.elementFromPoint(H.x, H.y);
-    let sp = t && t.closest ? t.closest('.pdv-tl span[data-j], #pdkFlow .tbw') : null;
+    let sp = t && t.closest ? t.closest('.pdv-tl span[data-j], #pdkFlow .tbw, .epv-w') : null;
     if(sp && sp.dataset.j != null && sp._tw0) sp = sp._tw0;                            // un mot coupé : on allume son premier morceau
     if(sp !== H.el) tbTrailStep(H, sp);
   };
@@ -52184,9 +52276,9 @@ function pdvShelfItem(m){
   const n = (m.pages || []).length || m.n, mo = m.size ? ` (${m.size < 1048576 ? Math.max(1, Math.round(m.size / 1024)) + ' Ko' : (m.size / 1048576).toFixed(1).replace('.', ',') + ' Mo'})` : '';
   const up = PDVUP.cur === m.id, dl = PDVUP.dl.has(m.id);
   const chip = dl ? `<span class="pdv-sh-cl dl">⇣ ${Math.round((PDVUP.dl.get(m.id) || 0) * 100)} %</span>` : up ? `<span class="pdv-sh-cl">☁️ ${Math.round(PDVUP.frac * 100)} %</span>` : '';
-  const sub = m.remote ? `☁️ sur ton autre appareil · touche pour l'avoir ici${mo}` : `${n} page${n > 1 ? 's' : ''}${(m.scan || []).length || m.kind === 'img' ? ' · 🔎 scanné' : ''}${m.last ? ` · reprendre p. ${m.last}` : ''}${m.cl ? ' · ☁️' : ''}`;
+  const sub = m.remote ? `☁️ sur ton autre appareil · touche pour l'avoir ici${mo}` : m.kind === 'epub' ? `📕 livre · ${m.n || 0} chapitre${(m.n || 0) > 1 ? 's' : ''}${m.author ? ' · ' + escapeHtml(m.author) : ''}${m.pct ? ` · lu à ${Math.round(m.pct)} %` : ''}${m.cl ? ' · ☁️' : ''}` : `${n} page${n > 1 ? 's' : ''}${(m.scan || []).length || m.kind === 'img' ? ' · 🔎 scanné' : ''}${m.last ? ` · reprendre p. ${m.last}` : ''}${m.cl ? ' · ☁️' : ''}`;
   return `<div class="pdv-sh-it${m.remote ? ' remote' : ''}" data-pdv-open="${tbAttr(m.id)}" role="button" tabindex="0" draggable="true" data-pdv-drag="${tbAttr(m.id)}" aria-label="${m.remote ? 'Télécharger et ouvrir' : 'Ouvrir'} « ${tbAttr(m.title)} »"${m.cl && !m.remote ? ' title="Aussi sur tes autres appareils (☁️ Cloudflare R2, chiffré)"' : ''}>
-      <span class="pdv-sh-i" aria-hidden="true">${m.kind === 'img' ? '📷' : '📄'}</span><span class="pdv-sh-m"><b>${escapeHtml(m.title)}</b><small>${sub}</small>${chip}</span>
+      <span class="pdv-sh-i" aria-hidden="true">${m.kind === 'epub' ? '📕' : m.kind === 'img' ? '📷' : '📄'}</span><span class="pdv-sh-m"><b>${escapeHtml(m.title)}</b><small>${sub}</small>${chip}</span>
       <button type="button" class="pdv-sh-x pdv-sh-mv" data-pdvs="mv" data-id="${tbAttr(m.id)}" aria-label="Ranger « ${tbAttr(m.title)} » dans un dossier" title="Ranger dans un dossier">📁</button>
       <button type="button" class="pdv-sh-x" data-pdv-del="${tbAttr(m.id)}" aria-label="${m.cl ? `Supprimer « ${tbAttr(m.title)} » (sur tous tes appareils)` : `Retirer « ${tbAttr(m.title)} » de l'appareil`}" title="${m.cl ? 'Supprimer (sur tous tes appareils)' : "Retirer de l'appareil"}">🗑</button></div>`;
 }
@@ -52194,7 +52286,7 @@ function pdvShelfHtml(){
   const L = pdvShelfAll(); if(!L.length) return '';
   const D = pdvDirs(), ids = new Set(D.map(d => d.id));
   const loose = L.filter(m => !m.dir || !ids.has(m.dir));
-  return `<div class="pdv-shelf" id="pdvShelf"><div class="pdv-sh-h"><span>📖 Mes PDF, tels quels <small>· ${L.some(m => m.cl) ? 'sur tes appareils' : 'sur cet appareil'} · touche un mot de la page pour sa définition</small></span><button type="button" class="pdv-sh-nd" data-pdvs="new-dir">📁＋ Nouveau dossier</button></div>
+  return `<div class="pdv-shelf" id="pdvShelf"><div class="pdv-sh-h"><span>📖 Mes PDF et livres, tels quels <small>· ${L.some(m => m.cl) ? 'sur tes appareils' : 'sur cet appareil'} · touche un mot de la page pour sa définition</small></span><button type="button" class="pdv-sh-nd" data-pdvs="new-dir">📁＋ Nouveau dossier</button></div>
     ${pdvShelfHint(L)}
     ${D.map(d => { const In = L.filter(m => m.dir === d.id); return `<div class="pdv-dir ${d.open === false ? '' : 'open'}" data-dir="${tbAttr(d.id)}">
       <div class="pdv-dir-h" data-pdvs="dir-tog" data-dir="${tbAttr(d.id)}" role="button" tabindex="0" aria-expanded="${d.open === false ? 'false' : 'true'}"><span class="pdv-dir-c" aria-hidden="true">▸</span><span class="pdv-dir-i" aria-hidden="true">${d.open === false ? '📁' : '📂'}</span><b>${escapeHtml(d.name)}</b><small>${In.length} PDF</small>
@@ -52284,6 +52376,681 @@ document.addEventListener('dragstart', (e) => { const it = e.target && e.target.
 document.addEventListener('dragend', (e) => { document.querySelectorAll('.pdv-sh-it.drag, .pdv-dir.over, .pdv-sh-loose.over').forEach(x => x.classList.remove('drag', 'over')); });
 document.addEventListener('dragover', (e) => { const z = e.target && e.target.closest && e.target.closest('#pdvShelf .pdv-dir, #pdvShelf .pdv-sh-loose'); if(!z) return; try{ if(![...e.dataTransfer.types].includes('text/x-pdv')) return; }catch(err){ return; } e.preventDefault(); document.querySelectorAll('.pdv-dir.over, .pdv-sh-loose.over').forEach(x => { if(x !== z) x.classList.remove('over'); }); z.classList.add('over'); });
 document.addEventListener('drop', (e) => { const z = e.target && e.target.closest && e.target.closest('#pdvShelf .pdv-dir, #pdvShelf .pdv-sh-loose'); if(!z) return; let id = ''; try{ id = e.dataTransfer.getData('text/x-pdv'); }catch(err){} if(!id) return; e.preventDefault(); z.classList.remove('over'); pdvMoveTo(id, z.dataset.dir || ''); });
+/* ============ 📕 1.0.54 : LIRE UN LIVRE .EPUB TEL QUEL ============
+   Le livre n'est plus découpé en textes : il s'ouvre en entier, comme dans une vraie liseuse, avec ses titres, ses
+   italiques, ses images, ses notes. ☰ le sommaire · 🔍 chercher un mot dans tout le livre (chaque résultat avec sa
+   phrase) · A− / A+ (ou Ctrl + molette, ou pincer) pour la taille · Aa : police, thème jour / sépia / nuit, largeur ·
+   touche un mot → sa fiche (la même que sur la Tablette et les PDF), glisse sur plusieurs → la fiche de l'expression
+   ou la traduction · 🏷️ le carnet des mots tagués · la page où tu en es est gardée (et suit sur tes autres appareils).
+   Le fichier reste sur l'appareil (comme les PDF « tels quels »), et passe par Cloudflare R2, chiffré, s'il est configuré. */
+var EPV = null;
+const EPV_FONTS = { serif:"'Literata', Georgia, 'Iowan Old Style', 'Times New Roman', serif", sans:"'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif", dys:"'Atkinson Hyperlegible Next', 'Atkinson Hyperlegible', Verdana, sans-serif" };
+const EPV_W = { s:'32em', m:'40em', l:'52em' };
+function epvUi(){
+  const u = tbUi();
+  return { z:Math.max(0.6, Math.min(2.6, +u.epvZ || 1)), font:EPV_FONTS[u.epvFont] ? u.epvFont : 'serif', th:['day', 'sepia', 'night'].includes(u.epvTh) ? u.epvTh : (u.pdvNight ? 'night' : 'day'), w:EPV_W[u.epvW] ? u.epvW : 'm', lh:[1.4, 1.62, 1.85].includes(+u.epvLh) ? +u.epvLh : 1.62 };
+}
+function epvUiSet(p){ Object.assign(tbUi(), p); tbSaveUi(); }
+/* ---------- lire le .epub : le sommaire (OPF), l'ordre des chapitres, la table des matières ---------- */
+async function epvParse(blob, name){
+  const files = await tbUnzip(blob instanceof File ? blob : new File([blob], name || 'livre.epub'));
+  const byPath = new Map(files.map(f => [tbPathNorm(f.relPath || f.name), f]));
+  const get = (pth) => byPath.get(tbPathNorm(pth)) || null;
+  const cont = get('META-INF/container.xml'); if(!cont) throw new Error('ce n’est pas un livre .epub lisible');
+  const rf = tbXq(tbXml(await cont.text()), 'rootfile')[0], opfPath = rf && rf.getAttribute('full-path');
+  const opfF = opfPath && get(opfPath); if(!opfF) throw new Error('livre sans sommaire (OPF)');
+  const opf = tbXml(await opfF.text()), opfDir = tbPathDir(opfPath);
+  const meta = (n) => { const e = tbXq(opf, n)[0]; return e ? e.textContent.replace(/\s+/g, ' ').trim() : ''; };
+  const items = new Map();
+  tbXq(opf, 'item').forEach(it => items.set(it.getAttribute('id'), { href:tbPathNorm(tbPathJoin(opfDir, it.getAttribute('href') || '')), type:it.getAttribute('media-type') || '', props:it.getAttribute('properties') || '' }));
+  const spine = tbXq(opf, 'itemref').map(r => items.get(r.getAttribute('idref'))).filter(x => x && (/html|xml/.test(x.type) || /\.x?html?$/i.test(x.href)) && !/ncx/.test(x.type) && get(x.href));
+  const toc = [];
+  try{
+    const nav = [...items.values()].find(x => /\bnav\b/.test(x.props));
+    if(nav && get(nav.href)){
+      const nd = new DOMParser().parseFromString(await get(nav.href).text(), 'text/html'), dir = tbPathDir(nav.href);
+      const navs = [...nd.querySelectorAll('nav')], tn = navs.find(n => /toc/.test(n.getAttribute('epub:type') || n.getAttribute('type') || n.id || '')) || navs[0];
+      if(tn) tn.querySelectorAll('a[href]').forEach(a => { const t = a.textContent.replace(/\s+/g, ' ').trim(); if(!t) return; let d = 0; for(let e = a.parentElement; e && e !== tn; e = e.parentElement) if(e.tagName === 'LI') d++; const [pa, fr] = String(a.getAttribute('href')).split('#'); toc.push({ t, path:tbPathNorm(tbPathJoin(dir, pa)), frag:fr || '', d:Math.max(0, d - 1) }); });
+    }
+    const ncx = [...items.values()].find(x => /ncx/.test(x.type));
+    if(!toc.length && ncx && get(ncx.href)){
+      const nd = tbXml(await get(ncx.href).text()), dir = tbPathDir(ncx.href);
+      tbXq(nd, 'navpoint').forEach(np => { const c = tbXq(np, 'content')[0], l = tbXq(np, 'text')[0]; if(!c || !l) return; let d = 0; for(let e = np.parentNode; e && e.nodeType === 1; e = e.parentNode) if((e.localName || '').toLowerCase() === 'navpoint') d++; const [pa, fr] = String(c.getAttribute('src') || '').split('#'); toc.push({ t:l.textContent.replace(/\s+/g, ' ').trim(), path:tbPathNorm(tbPathJoin(dir, pa)), frag:fr || '', d }); });
+    }
+  }catch(e){}
+  const nImg = [...items.values()].filter(x => /^image\//.test(x.type)).length;
+  return { title:meta('title') || String(name || 'Livre').replace(/\.[^.]+$/, ''), author:meta('creator'), lang:meta('language'), get, spine, toc, nImg };
+}
+/* une BD .cbz : ses pages (des images), dans l'ordre */
+async function epvCbzPages(file){
+  const files = await tbUnzip(file), coll = new Intl.Collator('fr', { numeric:true, sensitivity:'base' });
+  return files.filter(f => /\.(jpe?g|png|gif|webp|avif|bmp)$/i.test(f.relPath || f.name)).sort((a, b) => coll.compare(a.relPath || a.name, b.relPath || b.name));
+}
+/* la question à l'import : tel quel (par défaut) ou en textes sur la Tablette */
+async function epvAskHow(file, kind){
+  let info = { title:String(file.name).replace(/\.[^.]+$/, ''), author:'', n:0, img:0 };
+  try{
+    if(kind === 'epub'){ const B = await epvParse(file, file.name); info = { title:B.title, author:B.author, n:B.spine.length, img:B.nImg }; }
+    else { const pages = await epvCbzPages(file); info.n = pages.length; }
+  }catch(e){ throw e; }
+  return new Promise(res => {
+    const ov = document.createElement('div');
+    ov.className = 'am-dlg-ov tbl-dlg-ov';
+    const ep = kind === 'epub';
+    ov.innerHTML = `<div class="am-dlg tbl-dlg epv-how-dlg" role="dialog" aria-modal="true" aria-label="${ep ? 'Ouvrir un livre' : 'Ouvrir une BD'}">
+      <div class="am-dlg-t">${ep ? '📕 Ouvrir un livre' : '🖼 Ouvrir une BD'}</div>
+      <div class="tbl-book"><b>${escapeHtml(info.title)}</b>${info.author ? `<small>${escapeHtml(info.author)}</small>` : ''}
+        <span class="tbl-imp-m">${ep ? `<span>📑 ${info.n} chapitre${info.n > 1 ? 's' : ''}</span>${info.img ? `<span>🖼 ${info.img} image${info.img > 1 ? 's' : ''}</span>` : ''}` : `<span>🖼 ${info.n} page${info.n > 1 ? 's' : ''}</span>`}</span></div>
+      <div class="tbp-how" role="radiogroup" aria-label="Comment l'ouvrir">
+        <label class="tbp-hw on"><input type="radio" name="epvH" value="view" checked><span><b>📖 Tel quel : ${ep ? 'le vrai livre' : 'les vraies pages'}</b><small>${ep ? "un seul livre, avec ses images, comme dans une liseuse : sommaire, recherche, zoom, et touche un mot pour sa définition" : 'page par page, comme un PDF : zoom, et touche un mot de la bulle pour sa définition'}</small></span></label>
+        <label class="tbp-hw"><input type="radio" name="epvH" value="text"><span><b>📰 En ${ep ? 'textes' : 'texte'}, sur la Tablette</b><small>${ep ? 'chaque chapitre devient un texte de ta bibliothèque (liaisons, lecture à voix haute…)' : 'la BD devient un texte de ses pages'}</small></span></label>
+      </div>
+      <div class="am-dlg-b"><button class="am-dlg-btn ghost" data-v="cancel">Annuler</button><button class="am-dlg-btn" data-v="ok" id="epvHowOk">📖 ${ep ? 'Ouvrir le livre' : 'Ouvrir la BD'}</button></div>
+    </div>`;
+    document.body.appendChild(ov);
+    requestAnimationFrame(() => ov.classList.add('show'));
+    const ok = ov.querySelector('#epvHowOk');
+    ov.querySelectorAll('input[name="epvH"]').forEach(r => r.addEventListener('change', () => {
+      ov.querySelectorAll('.tbp-hw').forEach(l => l.classList.toggle('on', l.querySelector('input').checked));
+      ok.textContent = r.value === 'view' && r.checked ? '📖 ' + (ep ? 'Ouvrir le livre' : 'Ouvrir la BD') : 'Continuer ➜';
+    }));
+    const close = (v) => { document.removeEventListener('keydown', onKey, true); ov.remove(); res(v); };
+    const onKey = (e) => { if(e.key === 'Escape'){ e.preventDefault(); close(null); } };
+    document.addEventListener('keydown', onKey, true);
+    ov.addEventListener('click', (e) => {
+      if(e.target === ov){ close(null); return; }
+      const b = e.target.closest('[data-v]'); if(!b) return;
+      if(b.dataset.v !== 'ok'){ close(null); return; }
+      const r = ov.querySelector('input[name="epvH"]:checked');
+      close(r ? r.value : 'view');
+    });
+    setTimeout(() => { try{ ok.focus(); }catch(e){} }, 40);
+  });
+}
+/* ranger le livre sur l'appareil (avec les PDF « tels quels » : même étagère, mêmes dossiers, même synchro) */
+async function epvSave(file){
+  const B = await epvParse(file, file.name);
+  const id = 'pd' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), name = String(file.name || '');
+  const old = pdvList().find(x => x.kind === 'epub' && x.name === name);
+  if(!(await pdvPut(pdvBlobKey(id), new Blob([file], { type:'application/epub+zip' })))) throw new Error("plus de place sur l'appareil pour ce livre");
+  if(old) await pdvDelete(old.id);
+  const meta = { id, kind:'epub', title:String(B.title || name).slice(0, 150), author:String(B.author || '').slice(0, 120), name, n:B.spine.length, pages:[], scan:null, lang:'fra',
+    at:Date.now(), at0:Date.now(), last:old ? old.last || 0 : 0, mark:old ? old.mark || 0 : 0, pct:old ? old.pct || 0 : 0, dir:old ? old.dir || '' : '', size:file.size };
+  const L = pdvList(); L.unshift(meta); pdvSaveList(L);
+  setTimeout(() => { try{ pdvCloudPump(); }catch(e){} }, 300);
+  return id;
+}
+/* ---------- le contenu d'un chapitre, nettoyé (pas de script, pas de style du livre : la mise en page de la liseuse) ---------- */
+const EPV_KEEP = new Set('p div section article aside header footer main span em i strong b u s strike del ins sup sub small big mark br hr h1 h2 h3 h4 h5 h6 ul ol li dl dt dd blockquote pre code table thead tbody tfoot tr th td caption figure figcaption a abbr cite q dfn kbd samp var time ruby rt rp'.split(' '));
+const EPV_DROP = new Set('script style link meta iframe object embed form input button select textarea audio video source track canvas noscript template head title math'.split(' '));
+const EPV_MIME = { jpg:'image/jpeg', jpeg:'image/jpeg', png:'image/png', gif:'image/gif', webp:'image/webp', svg:'image/svg+xml', avif:'image/avif', bmp:'image/bmp' };
+function epvId(c, id){ return 'e' + c + '-' + String(id).replace(/[^\w-]/g, '_'); }
+function epvImgUrl(ctx, src){
+  if(!src || /^(data:|https?:)/i.test(src)) return /^data:image\//i.test(src || '') ? src : '';
+  const path = tbPathNorm(tbPathJoin(ctx.dir, String(src).split('#')[0]));
+  if(ctx.urls.has(path)) return ctx.urls.get(path);
+  const f = ctx.get(path); if(!f){ ctx.urls.set(path, ''); return ''; }
+  const ext = (path.split('.').pop() || '').toLowerCase();
+  const u = URL.createObjectURL(EPV_MIME[ext] ? new Blob([f], { type:EPV_MIME[ext] }) : f);
+  ctx.urls.set(path, u); ctx.made.push(u);
+  return u;
+}
+function epvSan(node, ctx){
+  let out = '';
+  node.childNodes.forEach(n => {
+    if(n.nodeType === 3){ out += escapeHtml(n.data); return; }
+    if(n.nodeType !== 1) return;
+    let tag = String(n.localName || n.nodeName).toLowerCase();
+    if(tag === 'svg'){
+      const im = n.getElementsByTagName('image')[0];
+      if(im){ const h = im.getAttribute('xlink:href') || (im.getAttributeNS ? im.getAttributeNS('http://www.w3.org/1999/xlink', 'href') : '') || im.getAttribute('href'); const u = epvImgUrl(ctx, h); if(u) out += `<img src="${u}" alt="" loading="lazy" decoding="async">`; }
+      return;
+    }
+    if(EPV_DROP.has(tag)) return;
+    if(tag === 'img' || tag === 'image'){
+      const u = epvImgUrl(ctx, n.getAttribute('src') || n.getAttribute('xlink:href') || n.getAttribute('href'));
+      if(u){ const w = parseInt(n.getAttribute('width') || '', 10), small = w && w <= 40; out += `<img src="${u}" alt="${escapeHtml(n.getAttribute('alt') || '')}" loading="lazy" decoding="async"${small ? ' class="epv-img-in"' : ''}>`; }
+      return;
+    }
+    if(tag === 'center') tag = 'div';
+    if(tag === 'font') tag = 'span';
+    if(!EPV_KEEP.has(tag)){ out += epvSan(n, ctx); return; }
+    let at = '';
+    const id = n.getAttribute('id'); if(id) at += ` id="${escapeHtml(epvId(ctx.c, id))}"`;
+    if(tag === 'a'){
+      const h = n.getAttribute('href') || (n.getAttributeNS ? n.getAttributeNS('http://www.w3.org/1999/xlink', 'href') : '') || '';
+      const et = n.getAttribute('epub:type') || (n.getAttributeNS ? n.getAttributeNS('http://www.idpf.org/2007/ops', 'type') : '') || '';
+      if(/^https?:\/\//i.test(h)) at += ` href="${escapeHtml(h)}" target="_blank" rel="noopener noreferrer"`;
+      else if(h && !/^(javascript|data|mailto):/i.test(h)){ const [pa, fr] = h.split('#'); const tgt = pa ? tbPathNorm(tbPathJoin(ctx.dir, pa)) : ctx.path; at += ` href="#" data-epv-go="${escapeHtml(tgt + (fr ? '#' + fr : ''))}"`; }
+      if(/noteref/.test(et)) at += ' class="epv-nref"';
+    }
+    if(tag === 'td' || tag === 'th') ['colspan', 'rowspan'].forEach(a => { const v = n.getAttribute(a); if(v && /^\d{1,2}$/.test(v)) at += ` ${a}="${v}"`; });
+    const lg = n.getAttribute('xml:lang') || n.getAttribute('lang'); if(lg && /^[a-z]{2,3}(-[a-z0-9]{2,8})?$/i.test(lg)) at += ` lang="${lg}"`;
+    const dr = n.getAttribute('dir'); if(dr === 'rtl' || dr === 'ltr') at += ` dir="${dr}"`;
+    if(tag !== 'a'){
+      const st = n.getAttribute('style') || '', cn = String(n.getAttribute('class') || '').toLowerCase(), al = /text-align\s*:\s*(center|right|justify)/i.exec(st);
+      const c = al ? 'epv-a-' + al[1].toLowerCase() : (/(^|[\s_-])(center|centre|centered|centrer|aligncenter)([\s_-]|$)/.test(cn) ? 'epv-a-center' : (/(^|[\s_-])(right|alignright|droite)([\s_-]|$)/.test(cn) ? 'epv-a-right' : ''));
+      if(c) at += ` class="${c}"`;
+    }
+    if(tag === 'br' || tag === 'hr'){ out += `<${tag}${at}>`; return; }
+    out += `<${tag}${at}>${epvSan(n, ctx)}</${tag}>`;
+  });
+  return out;
+}
+async function epvChapterHtml(B, it, c, ctx){
+  const f = B.get(it.href); if(!f) return '';
+  const raw = await f.text();
+  let doc = null;
+  try{ doc = new DOMParser().parseFromString(raw, 'application/xhtml+xml'); if(doc.getElementsByTagName('parsererror').length) doc = null; }catch(e){ doc = null; }
+  if(!doc) doc = new DOMParser().parseFromString(raw, 'text/html');
+  const body = doc.body || doc.getElementsByTagName('body')[0]; if(!body) return '';
+  ctx.c = c; ctx.dir = tbPathDir(it.href); ctx.path = it.href;
+  return epvSan(body, ctx);
+}
+/* ---------- ouvrir le livre ---------- */
+async function epvOpen(id, at){
+  let m = pdvMeta(id);
+  if(!m){ await pdvListLoad(); m = pdvMeta(id); }
+  if(!m){ setStatus("📕 Ce livre n'est plus sur cet appareil.", 'err'); pdvShelfRefresh(); return; }
+  try{ pdvClose(true); }catch(e){}
+  epvClose(true);
+  try{ wtClose(); }catch(e){}
+  const U = epvUi();
+  const ov = document.createElement('div');
+  ov.className = 'pdv-ov epv-ov epv-' + U.th; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-label', 'Lire « ' + m.title + ' »');
+  ov.innerHTML = `<div class="pdv-top" role="toolbar" aria-label="Outils du livre">
+      <button type="button" class="pdv-ib" data-epv="x" aria-label="Fermer (Échap)" title="Fermer (Échap)">✕</button>
+      <button type="button" class="pdv-ib pdv-sidebtn" data-epv="toc" aria-label="Le sommaire" title="Le sommaire (S)" aria-pressed="false">☰</button>
+      <div class="pdv-tt"><b>${escapeHtml(m.title)}</b><small id="epvSt">👆 Touche un mot : sa définition</small></div>
+      <div class="pdv-nav"><button type="button" class="pdv-ib" data-epv="prev" aria-label="Chapitre précédent" title="Chapitre précédent (←)">‹</button><button type="button" class="pdv-pn" data-epv="toc" id="epvPn" aria-label="Le sommaire" title="Le sommaire">—</button><button type="button" class="pdv-ib" data-epv="next" aria-label="Chapitre suivant" title="Chapitre suivant (→)">›</button></div>
+      <div class="pdv-zm epv-zm"><button type="button" class="pdv-ib" data-epv="zm-" aria-label="Texte plus petit" title="Plus petit (Ctrl −)">A−</button><button type="button" class="epv-zv" data-epv="zm0" id="epvZv" title="Taille normale (Ctrl 0)">100 %</button><button type="button" class="pdv-ib" data-epv="zm+" aria-label="Texte plus grand" title="Plus grand (Ctrl +)">A+</button></div>
+      <button type="button" class="pdv-ib" data-epv="aa" aria-label="Police, thème, largeur" title="Police, thème, largeur" aria-expanded="false">Aa</button>
+      <button type="button" class="pdv-ib ${U.th === 'night' ? 'on' : ''}" data-epv="night" aria-label="Mode nuit (N)" title="Mode nuit (N)" aria-pressed="${U.th === 'night'}">🌙</button>
+      <button type="button" class="pdv-ib" data-epv="find" aria-label="Rechercher (Ctrl F)" title="Rechercher (Ctrl F)" aria-pressed="false">🔍</button>
+      <button type="button" class="pdv-ib pdv-crb" data-epv="carnet" aria-label="Mon carnet : les mots tagués" title="Mon carnet : les mots tagués">🏷️<b class="pdv-crn" id="pdvCrN"></b></button>
+    </div>
+    <div class="pdv-find" id="epvFind" hidden role="search">
+      <div class="pdv-fbar"><span aria-hidden="true">🔍</span><input id="epvQ" type="search" placeholder="Chercher un mot, une expression dans le livre…" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" aria-label="Chercher dans le livre">
+        <span class="pdv-fn" id="epvFn" aria-live="polite"></span>
+        <button type="button" class="pdv-ib" data-epv="f-prev" aria-label="Résultat précédent (Maj + Entrée)" title="Précédent (Maj + Entrée)">‹</button><button type="button" class="pdv-ib" data-epv="f-next" aria-label="Résultat suivant (Entrée)" title="Suivant (Entrée)">›</button>
+        <button type="button" class="pdv-ib" data-epv="f-list" aria-label="La liste des résultats" title="La liste des résultats" aria-expanded="true">☰</button><button type="button" class="pdv-ib" data-epv="f-x" aria-label="Fermer la recherche">✕</button></div>
+      <div class="pdv-fres" id="epvRes" role="list"></div>
+    </div>
+    <div class="epv-aa" id="epvAa" hidden role="dialog" aria-label="Réglages de lecture">
+      <div class="epv-aa-l">Police</div><div class="epv-aa-r"><button type="button" data-epv-font="serif" style="font-family:${EPV_FONTS.serif}">Livre</button><button type="button" data-epv-font="sans" style="font-family:${EPV_FONTS.sans}">Moderne</button><button type="button" data-epv-font="dys" style="font-family:${EPV_FONTS.dys}">Lisible</button></div>
+      <div class="epv-aa-l">Thème</div><div class="epv-aa-r"><button type="button" data-epv-th="day">Jour</button><button type="button" data-epv-th="sepia">Sépia</button><button type="button" data-epv-th="night">Nuit</button></div>
+      <div class="epv-aa-l">Largeur du texte</div><div class="epv-aa-r"><button type="button" data-epv-w="s">Étroite</button><button type="button" data-epv-w="m">Moyenne</button><button type="button" data-epv-w="l">Large</button></div>
+      <div class="epv-aa-l">Interligne</div><div class="epv-aa-r"><button type="button" data-epv-lh="1.4">Serré</button><button type="button" data-epv-lh="1.62">Normal</button><button type="button" data-epv-lh="1.85">Aéré</button></div>
+    </div>
+    <div class="pdv-main"><aside class="epv-toc" id="epvToc" hidden aria-label="Le sommaire"></aside>
+      <div class="pdv-body" id="epvBody" tabindex="-1"><div class="pdv-load">⏳ J'ouvre « ${escapeHtml(m.title)} »…</div></div>
+      <div class="epv-prog" aria-hidden="true"><i id="epvProg"></i></div>
+      <button type="button" class="epv-back" id="epvBack" hidden data-epv="back">↩ Revenir où j'étais</button></div>
+    <div class="pdv-ztip" id="epvZt" aria-hidden="true"></div>
+    <div class="tb pdv-tb" id="epvTb"><div class="tb-sheet" id="tbSheet" aria-hidden="true"></div><div class="tb-toast" id="tbToast" role="status" aria-live="polite"></div></div>`;
+  document.body.appendChild(ov);
+  document.body.classList.add('pdv-on');
+  const S = EPV = { id, m, ov, body:ov.querySelector('#epvBody'), book:null, pages:[], chs:[], cur:0, tok:0, find:{ q:'', hits:[], i:-1 }, urls:[], tbArt:null, tbPage:-1, off:[] };
+  epvApplyUi(S);
+  try{ bkPush('epv', () => epvClose()); }catch(e){}
+  // 📇 la fiche des mots et le carnet (comme sur la Tablette et les PDF)
+  S.tbPrev = { art:TB.art, sents:TB.sents, toks:TB.toks, sentToks:TB.sentToks, spans:TB.spans, nS:TB.nS, blocks:TB.blocks, sBase:TB.sBase };
+  S.tbArt = { id:'epv:' + id, _pdv:id, title:m.title, tags:[], src:'Livre' };
+  TB.art = S.tbArt; TB.sents = []; TB.toks = []; TB.sentToks = []; TB.spans = []; TB.nS = 0; TB.sheetK = -1; TB.pick = null; TB.sBase = 0;
+  pdvGet(pdvTbKey(id)).then(v => { if(v && Array.isArray(v.tags) && EPV === S){ S.tbArt.tags = v.tags; pdvCrBadge(S); } }).catch(() => {});
+  const tbh = ov.querySelector('#epvTb');
+  tbh.addEventListener('click', (e) => epvTbClick(S, e));
+  tbh.addEventListener('keydown', (e) => { if(e.key === 'Enter' && e.target.matches && e.target.matches('[role="button"][data-tb]')){ e.preventDefault(); e.target.click(); } });
+  ov.addEventListener('click', (e) => epvClick(S, e));
+  try{ pdvTrailWire(S); }catch(e){}
+  epvKeysWire(S); epvPinchWire(S);
+  const q = ov.querySelector('#epvQ'); let qt = 0;
+  q.addEventListener('input', () => { clearTimeout(qt); qt = setTimeout(() => epvFind(S, q.value), 260); });
+  q.addEventListener('keydown', (e) => { if(e.key === 'Enter'){ e.preventDefault(); clearTimeout(qt); if(S.find.q !== q.value.trim()) epvFind(S, q.value); else epvHitStep(S, e.shiftKey ? -1 : 1); } });
+  let rq = 0;
+  S.body.addEventListener('scroll', () => { if(rq) return; rq = requestAnimationFrame(() => { rq = 0; epvSeen(S); }); }, { passive:true });
+  S.onResize = () => { if(EPV !== S) return; clearTimeout(S.rzT); S.rzT = setTimeout(() => { epvHlClear(S); epvSeen(S); }, 200); };
+  window.addEventListener('resize', S.onResize);
+  // le livre
+  let B;
+  try{
+    const blob = await pdvGet(pdvBlobKey(id)); if(!blob) throw new Error("le fichier n'est plus sur cet appareil");
+    B = await epvParse(blob, m.name || 'livre.epub');
+    if(!B.spine.length) throw new Error('aucun chapitre dans ce livre');
+  }catch(e){ if(EPV === S) S.body.innerHTML = `<div class="pdv-load err">⚠️ Impossible d'ouvrir ce livre : ${escapeHtml(e && e.message || 'il est abîmé')}.</div>`; return; }
+  if(EPV !== S) return;
+  S.B = B;
+  const ctx = { get:B.get, urls:new Map(), made:S.urls, c:0, dir:'', path:'' };
+  const parts = [];
+  for(let c = 0; c < B.spine.length; c++){
+    let h = ''; try{ h = await epvChapterHtml(B, B.spine[c], c, ctx); }catch(e){ h = ''; }
+    parts.push(h);
+    if(EPV !== S) return;
+  }
+  const titleOf = (c) => { const it = B.spine[c], t = B.toc.find(x => x.path === it.href && !x.frag) || B.toc.find(x => x.path === it.href); return t ? t.t : ''; };
+  S.body.innerHTML = `<article class="epv-book" id="epvBook" lang="${tbAttr((B.lang || 'fr').slice(0, 10))}">${parts.map((h, c) => `<section class="epv-ch" data-c="${c}" id="epvC${c}" aria-label="${tbAttr(titleOf(c) || 'Chapitre ' + (c + 1))}"><div class="epv-cc">${h}</div></section>`).join('')}<div class="epv-end">— Fin —</div></article>`;
+  S.book = S.body.querySelector('#epvBook');
+  S.chs = [...S.book.querySelectorAll('.epv-ch')].map((el, k) => ({ k, p:k + 1, el, cc:el.querySelector('.epv-cc'), title:titleOf(k), path:B.spine[k].href, armed:false }));
+  S.pages = S.chs;
+  // les chapitres vides (une page de garde sans texte ni image) restent, sans prendre de place
+  S.chs.forEach(ch => { if(!ch.cc.textContent.trim() && !ch.cc.querySelector('img')) ch.el.style.display = 'none'; });
+  epvTocPaint(S);
+  // 👀 un chapitre qui arrive à l'écran : ses mots deviennent touchables
+  S.io = new IntersectionObserver(es => es.forEach(e => { if(e.isIntersecting){ const ch = S.chs[+e.target.dataset.c]; if(ch) epvArm(S, ch); } }), { root:S.body, rootMargin:'800px 0px' });
+  S.chs.forEach(ch => S.io.observe(ch.el));
+  // reprendre où tu en étais
+  const want = at != null ? at : (m.last || 0);
+  epvGoPos(S, want, true);
+  [250, 900, 2000].forEach(t => setTimeout(() => { if(EPV === S && !S.moved && want) epvGoPos(S, want, true); }, t));   // les images qui arrivent poussent le texte
+  S.body.addEventListener('pointerdown', () => { S.moved = true; }, { passive:true, once:true });
+  S.body.addEventListener('wheel', () => { S.moved = true; }, { passive:true, once:true });
+  try{ S.body.focus({ preventScroll:true }); }catch(e){}
+  pdvPatch(id, { at:Date.now() });
+  setTimeout(() => epvSeen(S), 60);
+}
+function epvApplyUi(S){
+  const U = epvUi();
+  S.ov.classList.remove('epv-day', 'epv-sepia', 'epv-night'); S.ov.classList.add('epv-' + U.th);
+  if(U.font === 'dys' && typeof tbFontLoad === 'function'){ try{ tbFontLoad('atkinson'); }catch(e){} }
+  S.ov.style.setProperty('--epv-z', U.z); S.ov.style.setProperty('--epv-ff', EPV_FONTS[U.font]); S.ov.style.setProperty('--epv-w', EPV_W[U.w]); S.ov.style.setProperty('--epv-lh', U.lh);
+  const zv = S.ov.querySelector('#epvZv'); if(zv) zv.textContent = Math.round(U.z * 100) + ' %';
+  const nb = S.ov.querySelector('[data-epv="night"]'); if(nb){ nb.classList.toggle('on', U.th === 'night'); nb.setAttribute('aria-pressed', String(U.th === 'night')); }
+  S.ov.querySelectorAll('[data-epv-font]').forEach(b => b.classList.toggle('on', b.dataset.epvFont === U.font));
+  S.ov.querySelectorAll('[data-epv-th]').forEach(b => b.classList.toggle('on', b.dataset.epvTh === U.th));
+  S.ov.querySelectorAll('[data-epv-w]').forEach(b => b.classList.toggle('on', b.dataset.epvW === U.w));
+  S.ov.querySelectorAll('[data-epv-lh]').forEach(b => b.classList.toggle('on', +b.dataset.epvLh === U.lh));
+}
+/* changer la taille, la police… sans perdre sa place */
+function epvRelayout(S, fn){
+  const pos = epvPos(S);
+  fn();
+  epvApplyUi(S); epvHlClear(S);
+  requestAnimationFrame(() => { epvGoPos(S, pos, true); if(S.find.i >= 0) epvHitGo(S, S.find.i, true); });
+  // une police qui arrive d'internet (Lisible) change la mise en page : on revient au même endroit une fois chargée
+  try{ document.fonts.ready.then(() => { if(EPV === S && S.ov.isConnected){ epvGoPos(S, pos, true); if(S.find.i >= 0) epvHitGo(S, S.find.i, true); } }); }catch(e){}
+}
+function epvZoom(S, z){
+  z = Math.max(0.6, Math.min(2.6, Math.round(z * 100) / 100));
+  epvRelayout(S, () => epvUiSet({ epvZ:z }));
+  const t = S.ov.querySelector('#epvZt'); if(t){ t.textContent = Math.round(z * 100) + ' %'; t.classList.add('on'); clearTimeout(t.__t); t.__t = setTimeout(() => t.classList.remove('on'), 900); }
+}
+function epvZoomStep(S, d){
+  const z = epvUi().z, steps = [0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.35, 1.5, 1.7, 1.9, 2.2, 2.6];
+  const nx = d > 0 ? (steps.find(x => x > z + 0.001) || steps[steps.length - 1]) : ([...steps].reverse().find(x => x < z - 0.001) || steps[0]);
+  epvZoom(S, nx);
+}
+/* ---------- où on en est : chapitre + fraction (1-based : 3.25 = le quart du chapitre 3) ---------- */
+function epvLine(S){ return Math.round(Math.min(220, S.body.clientHeight * 0.3)); }   // la « ligne de lecture » : un peu sous le haut de l'écran
+function epvPos(S){
+  if(!S.chs.length) return 0;
+  const B = S.body, top = B.scrollTop + epvLine(S);
+  let c = 0; for(let k = 0; k < S.chs.length; k++){ const el = S.chs[k].el; if(el.style.display === 'none') continue; if(el.offsetTop <= top) c = k; else break; }
+  const el = S.chs[c].el, h = Math.max(1, el.offsetHeight), f = Math.max(0, Math.min(0.999, (top - el.offsetTop) / h));
+  return c + 1 + Math.round(f * 1000) / 1000;
+}
+function epvGoPos(S, pos, instant){
+  if(!S.chs.length) return;
+  const c = Math.max(0, Math.min(S.chs.length - 1, Math.floor(pos || 1) - 1)), f = Math.max(0, (pos || 1) - Math.floor(pos || 1));
+  const el = S.chs[c].el;
+  S.body.scrollTo({ top:Math.max(0, el.offsetTop + f * el.offsetHeight - epvLine(S)), behavior:instant ? 'auto' : 'smooth' });
+  epvSeen(S);
+}
+function epvGoCh(S, c, frag){
+  if(c < 0 || c >= S.chs.length) return;
+  S.moved = true;
+  const tgt = frag ? S.body.querySelector('#' + CSS.escape(epvId(c, frag))) : null;
+  const el = tgt || S.chs[c].el, br = S.body.getBoundingClientRect(), r = el.getBoundingClientRect();
+  S.body.scrollTo({ top:S.body.scrollTop + r.top - br.top - 10, behavior:'auto' });
+  if(tgt){ tgt.classList.remove('just'); void tgt.offsetWidth; }
+  epvSeen(S);
+}
+function epvSeen(S){
+  if(!S.chs.length) return;
+  const pos = epvPos(S), c = Math.floor(pos) - 1, B = S.body;
+  S.cur = c;
+  const pct = Math.max(0, Math.min(100, B.scrollHeight - B.clientHeight > 0 ? B.scrollTop / (B.scrollHeight - B.clientHeight) * 100 : 0));
+  const pr = S.ov.querySelector('#epvProg'); if(pr) pr.style.width = pct.toFixed(1) + '%';
+  const st = S.ov.querySelector('#epvSt'), ch = S.chs[c];
+  if(st) st.textContent = `${ch && ch.title ? ch.title + ' · ' : ''}${Math.round(pct)} % lu`;
+  const pn = S.ov.querySelector('#epvPn'); if(pn) pn.textContent = `${c + 1} / ${S.chs.length}`;
+  S.ov.querySelectorAll('#epvToc [data-epv="go"]').forEach(b => b.classList.toggle('on', +b.dataset.c === c && !b.dataset.frag));
+  clearTimeout(S.saveT);
+  S.saveT = setTimeout(() => { if(EPV === S){ S.pct = pct; pdvPatch(S.id, { last:pos, pct:Math.round(pct) }); } }, 1500);
+  if(ch) epvArm(S, ch);
+}
+/* ---------- ☰ le sommaire ---------- */
+function epvTocPaint(S){
+  const el = S.ov.querySelector('#epvToc'), B = S.B; if(!el || !B) return;
+  const idx = (path) => B.spine.findIndex(it => it.href === path);
+  let L = B.toc.map(t => ({ t:t.t, c:idx(t.path), frag:t.frag, d:t.d })).filter(x => x.c >= 0);
+  if(!L.length) L = S.chs.map(ch => ({ t:ch.title || ('Chapitre ' + (ch.k + 1)), c:ch.k, frag:'', d:0 }));
+  const mk = S.m.mark ? `<button type="button" class="epv-toc-mk" data-epv="mark-go">🔖 Aller au marque-page (chapitre ${Math.floor(S.m.mark)})</button>` : '';
+  el.innerHTML = `<div class="epv-toc-h"><b>☰ Sommaire</b><button type="button" class="pdv-ib" data-epv="toc-x" aria-label="Fermer le sommaire">✕</button></div>${mk}<div class="epv-toc-l" role="list">${L.map(x => `<button type="button" role="listitem" data-epv="go" data-c="${x.c}" data-frag="${tbAttr(x.frag || '')}" style="padding-left:${10 + Math.min(4, x.d) * 16}px">${escapeHtml(x.t)}</button>`).join('')}</div>`;
+}
+function epvTocShow(S, on){
+  const el = S.ov.querySelector('#epvToc'); if(!el) return;
+  el.hidden = !on;
+  S.ov.querySelectorAll('[data-epv="toc"]').forEach(b => b.setAttribute('aria-pressed', String(!!on)));
+  if(on){ const b = el.querySelector('button.on') || el.querySelector('[data-epv="go"]'); if(b){ try{ b.scrollIntoView({ block:'center' }); b.focus({ preventScroll:true }); }catch(e){} } }
+}
+/* ---------- les mots du chapitre deviennent touchables (une seule fois, quand on arrive au chapitre) ---------- */
+const EPV_BLOCK = 'p, li, h1, h2, h3, h4, h5, h6, blockquote, td, th, dt, dd, figcaption, caption, pre, div, section, article, aside, header, footer';
+function epvArm(S, ch){
+  if(ch.armed) return; ch.armed = true;
+  const root = ch.cc, nodes = [];
+  const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  while(w.nextNode()) nodes.push(w.currentNode);
+  let t = '', j = 0, last = null;
+  const at = [];
+  nodes.forEach(n => {
+    if(!n.data.trim()){ if(t && !/\s$/.test(t)) t += ' '; return; }      // un blanc entre deux balises : un espace
+    const blk = n.parentElement ? n.parentElement.closest(EPV_BLOCK) : null;
+    if(blk !== last){ if(last && t && !/[.!?…:;]["»”’')\]]*\s*$/.test(t)) t += '.'; if(t && !/\s$/.test(t)) t += '\n'; last = blk; }
+    const s = n.data, frag = document.createDocumentFragment(), re = /\S+/g; let pos = 0, m;
+    const txt = (x) => frag.appendChild(document.createTextNode(x));
+    while((m = re.exec(s))){
+      if(m.index > pos){ txt(s.slice(pos, m.index)); if(t && !/\s$/.test(t)) t += ' '; }
+      const mm = /^([^\p{L}\p{N}]*)([\s\S]*?)([^\p{L}\p{N}]*)$/u.exec(m[0]) || ['', '', m[0], ''];
+      if(mm[1]){ txt(mm[1]); t += mm[1]; }
+      if(mm[2]){
+        const el = /^(?:qu|jusqu|lorsqu|puisqu|[ldjmtsnc])['’](?=\p{L})/iu.exec(mm[2]);
+        (el ? [el[0], mm[2].slice(el[0].length)] : [mm[2]]).forEach(pt => { const sp = document.createElement('span'); sp.className = 'epv-w'; sp.dataset.j = j; sp.textContent = pt; frag.appendChild(sp); at[j] = t.length; t += pt; j++; });
+      }
+      if(mm[3]){ txt(mm[3]); t += mm[3]; }
+      pos = m.index + m[0].length;
+    }
+    if(pos < s.length){ txt(s.slice(pos)); if(t && !/\s$/.test(t)) t += ' '; }
+    n.parentNode.replaceChild(frag, n);
+  });
+  ch.P = { t, at };
+}
+/* le texte du chapitre → les phrases et les mots de la Tablette (les phrases du chapitre N sont numérotées N × 10000 + …) */
+function epvHost(S, ch){
+  if(!S.tbArt || !ch) return false;
+  epvArm(S, ch);
+  if(TB.art !== S.tbArt) TB.art = S.tbArt;
+  if(S.tbPage === ch.k && TB.toks && TB.toks.length) return true;
+  if(TB.sheetK !== -1) try{ tbCloseSheet(); }catch(e){}
+  (TB.spans || []).forEach(sp => { if(sp){ sp.classList.remove('sel'); (sp._tw || []).forEach(b => b.classList.remove('sel')); } });
+  if(S.twObs){ S.twObs.disconnect(); S.twObs = null; }
+  const P = ch.P, base = ch.p * 10000, text = P.t;
+  TB.sents = []; TB.sents.length = base; TB.toks = []; TB.sentToks = []; TB.sentToks.length = base; TB.sBase = base;
+  try{ tbSentsHtml(text, [], true); }catch(e){ console.warn('livre', e); return false; }
+  TB.nS = TB.sents.length;
+  const off = []; let pos = 0, s = base;
+  bqSplit(text).forEach(sent => {
+    let b0 = text.indexOf(sent, pos); if(b0 < 0) b0 = pos; pos = b0 + sent.length;
+    let cur = 0;
+    (TB.sentToks[s] || []).forEach(k => { const raw = String(TB.toks[k].raw || TB.toks[k].form || ''); let o = sent.indexOf(raw, cur); if(o < 0) o = cur; off[k] = b0 + o; cur = o + raw.length; });
+    s++;
+  });
+  const byJ = []; ch.cc.querySelectorAll('.epv-w[data-j]').forEach(sp => { byJ[+sp.dataset.j] = sp; });
+  const J = (c) => { let lo = 0, hi = P.at.length - 1, r = 0; while(lo <= hi){ const mi = (lo + hi) >> 1; if(P.at[mi] <= c){ r = mi; lo = mi + 1; } else hi = mi - 1; } return r; };
+  S.tbOff = off; S.tbJ = []; S.tbJz = []; TB.spans = [];
+  TB.toks.forEach((tk, k) => {
+    const a = off[k] || 0, j = J(a), jz = J(a + Math.max(0, String(tk.raw || tk.form || '').length - 1));
+    S.tbJ[k] = j; S.tbJz[k] = Math.max(j, jz); TB.spans[k] = byJ[j] || document.createElement('span');
+    if(jz > j){ const tw = []; for(let q = j + 1; q <= jz; q++) if(byJ[q]) tw.push(byJ[q]); pdvTwin(S, TB.spans[k], tw); }
+  });
+  S.tbPage = ch.k; S.tbP = P;
+  try{ tbPaintTags(); }catch(e){}
+  return true;
+}
+function epvTapWord(S, sp, e){
+  const sec = sp.closest('.epv-ch'), ch = sec && S.chs[+sec.dataset.c]; if(!ch || !epvHost(S, ch)) return false;
+  const j = +sp.dataset.j, P = S.tbP;
+  let c = P.at[j] || 0; const pt = wtPoint(e.clientX, e.clientY); if(pt && sp.contains(pt.node)) c += Math.min(pt.off, (sp.textContent || '').length);
+  let best = -1;
+  const onJ = (k) => j >= S.tbJ[k] && j <= (S.tbJz[k] == null ? S.tbJ[k] : S.tbJz[k]);
+  TB.toks.forEach((tk, k) => { if(!onJ(k)) return; const a = S.tbOff[k], z = a + String(tk.raw || tk.form).length; if(c >= a && c <= z) best = k; });
+  if(best < 0){ let L = 0; TB.toks.forEach((tk, k) => { if(onJ(k) && tk.form.length > L){ L = tk.form.length; best = k; } }); }
+  if(best < 0) return false;
+  try{ wtClose(); }catch(err){}
+  tbOpenSheet(best);
+  epvReveal(S, TB.spans[best]);
+  return true;
+}
+function epvReveal(S, sp){
+  requestAnimationFrame(() => {
+    const sh = document.getElementById('tbSheet'); if(!sp || !sp.isConnected || !sh) return;
+    const top = S.ov.getBoundingClientRect().bottom - sh.offsetHeight, r = sp.getBoundingClientRect(), br = S.body.getBoundingClientRect();
+    if(r.bottom > top - 18) S.body.scrollBy({ top:r.bottom - (top - 18) + 24, behavior:'smooth' });
+    else if(r.top < br.top + 8) S.body.scrollBy({ top:r.top - br.top - 40, behavior:'smooth' });
+  });
+}
+/* plusieurs mots choisis (glisser, ou la souris) : la fiche de l'expression */
+function epvSelPick(){
+  const S = EPV; if(!S || !S.tbArt) return false;
+  const s = window.getSelection(); if(!s || !s.rangeCount) return false;
+  const r = s.getRangeAt(0), n0 = r.startContainer.nodeType === 1 ? r.startContainer : r.startContainer.parentNode;
+  const sec = n0 && n0.closest && n0.closest('.epv-ch'), ch = sec && S.chs[+sec.dataset.c]; if(!ch || !epvHost(S, ch)) return false;
+  const js = new Set(); ch.cc.querySelectorAll('.epv-w[data-j]').forEach(sp => { try{ if(r.intersectsNode(sp)) js.add(+sp.dataset.j); }catch(e){} });
+  const ks = TB.toks.map((tk, k) => { for(let q = S.tbJ[k]; q <= (S.tbJz[k] == null ? S.tbJ[k] : S.tbJz[k]); q++) if(js.has(q)) return k; return -1; }).filter(k => k >= 0); if(!ks.length) return false;
+  const s0 = TB.toks[ks[0]].s; if(ks.some(k => TB.toks[k].s !== s0) || ks.length > 40) return false;
+  try{ s.removeAllRanges(); }catch(e){}
+  tbOpenSheet(ks[0], ks[ks.length - 1]);
+  epvReveal(S, TB.spans[ks[0]]);
+  return true;
+}
+function epvTbClick(S, e){
+  const a = e.target.closest('[data-tb]'); if(!a) return;
+  e.stopPropagation();
+  const id = a.dataset.tb;
+  if(id === 'mark-sent'){ const sp = TB.spans[TB.sheetK]; tbCloseSheet(); const pos = epvPosOf(S, sp); pdvPatch(S.id, { mark:pos, last:pos }); S.m.mark = pos; epvTocPaint(S); tbToast(`🔖 Marque-page : chapitre ${Math.floor(pos)}`); return; }
+  if(id === 'cr-go' || id === 'cr-pick'){ const g = (S.tbArt.tags || [])[+a.dataset.i]; if(g) epvTagGo(S, g, id === 'cr-pick'); return; }
+  tbAction(id, a, e);
+}
+function epvPosOf(S, sp){
+  const sec = sp && sp.closest ? sp.closest('.epv-ch') : null; if(!sec) return epvPos(S);
+  const c = +sec.dataset.c, r = sp.getBoundingClientRect(), sr = sec.getBoundingClientRect();
+  return c + 1 + Math.max(0, Math.min(0.999, Math.round((r.top - sr.top - 40) / Math.max(1, sr.height) * 1000) / 1000));
+}
+function epvTagGo(S, g, pick){
+  const c = Math.floor((g.s || 0) / 10000) - 1, ch = S.chs[c];
+  if(!ch){ tbToast('Ce mot n’est plus dans le livre.'); return; }
+  tbCloseSheet();
+  if(!epvHost(S, ch)) return;
+  const ks = tbTagToks(g); if(!ks.length){ tbToast('Le mot n’est plus à sa place.'); return; }
+  if(pick){ tbOpenSheet(ks[0], ks[ks.length - 1]); return; }
+  const sp = TB.spans[ks[0]]; if(!sp || !sp.isConnected) return;
+  const br = S.body.getBoundingClientRect(), r = sp.getBoundingClientRect();
+  S.moved = true;
+  S.body.scrollTo({ top:S.body.scrollTop + r.top - (br.top + S.body.clientHeight * 0.4), behavior:'smooth' });
+  ks.forEach(x => { const q = TB.spans[x]; if(q){ q.classList.remove('just'); void q.offsetWidth; q.classList.add('just'); setTimeout(() => q.classList.remove('just'), 2400); } });
+}
+function epvCarnet(S){
+  if(!S.tbArt) return;
+  TB.art = S.tbArt;
+  const ch = S.chs[S.cur]; if(ch) epvHost(S, ch);
+  if(TB.sheetK === -2){ tbCloseSheet(); return; }
+  tbOpenCarnet();
+}
+/* ---------- les clics ---------- */
+function epvClick(S, e){
+  const b = e.target.closest('[data-epv]');
+  if(b){
+    const a = b.dataset.epv;
+    e.preventDefault();
+    if(a === 'x') epvClose();
+    else if(a === 'toc') epvTocShow(S, S.ov.querySelector('#epvToc').hidden);
+    else if(a === 'toc-x') epvTocShow(S, false);
+    else if(a === 'go'){ if(window.innerWidth < 720) epvTocShow(S, false); epvGoCh(S, +b.dataset.c, b.dataset.frag || ''); }
+    else if(a === 'mark-go'){ if(window.innerWidth < 720) epvTocShow(S, false); S.moved = true; epvGoPos(S, S.m.mark, false); }
+    else if(a === 'prev' || a === 'next'){ let c = S.cur + (a === 'next' ? 1 : -1); while(S.chs[c] && S.chs[c].el.style.display === 'none') c += a === 'next' ? 1 : -1; if(a === 'prev' && S.chs[S.cur] && S.body.scrollTop - S.chs[S.cur].el.offsetTop > 40) c = S.cur; epvGoCh(S, c); }
+    else if(a === 'zm-' || a === 'zm+') epvZoomStep(S, a === 'zm+' ? 1 : -1);
+    else if(a === 'zm0') epvZoom(S, 1);
+    else if(a === 'aa'){ const p = S.ov.querySelector('#epvAa'); p.hidden = !p.hidden; b.setAttribute('aria-expanded', String(!p.hidden));
+      if(!p.hidden){ const tp = S.ov.querySelector('.pdv-top'); p.style.top = ((tp ? tp.offsetHeight : 46) + 6) + 'px'; } }
+    else if(a === 'night'){ const th = epvUi().th === 'night' ? 'day' : 'night'; epvUiSet({ epvTh:th }); epvApplyUi(S); }
+    else if(a === 'find') epvFindShow(S, S.ov.querySelector('#epvFind').hidden);
+    else if(a === 'f-x') epvFindShow(S, false);
+    else if(a === 'f-next' || a === 'f-prev') epvHitStep(S, a === 'f-next' ? 1 : -1);
+    else if(a === 'f-list'){ const r = S.ov.querySelector('#epvRes'), on = r.hidden; r.hidden = !on; b.setAttribute('aria-expanded', String(on)); }
+    else if(a === 'hit'){ epvHitGo(S, +b.dataset.i); if(window.innerWidth < 720){ const r = S.ov.querySelector('#epvRes'); r.hidden = true; S.ov.querySelector('[data-epv="f-list"]').setAttribute('aria-expanded', 'false'); } }
+    else if(a === 'carnet') epvCarnet(S);
+    else if(a === 'back'){ if(S.back != null){ S.body.scrollTo({ top:S.back, behavior:'auto' }); S.back = null; } b.hidden = true; }
+    return;
+  }
+  const f = e.target.closest('[data-epv-font], [data-epv-th], [data-epv-w], [data-epv-lh]');
+  if(f){
+    if(f.dataset.epvTh){ epvUiSet({ epvTh:f.dataset.epvTh }); epvApplyUi(S); return; }
+    epvRelayout(S, () => epvUiSet(f.dataset.epvFont ? { epvFont:f.dataset.epvFont } : f.dataset.epvW ? { epvW:f.dataset.epvW } : { epvLh:+f.dataset.epvLh }));
+    return;
+  }
+  const aa = S.ov.querySelector('#epvAa'); if(aa && !aa.hidden && !e.target.closest('#epvAa')){ aa.hidden = true; const ab = S.ov.querySelector('[data-epv="aa"]'); if(ab) ab.setAttribute('aria-expanded', 'false'); }
+  if(e.target.closest('#epvTb, #epvFind, .epv-toc')) return;
+  // un lien du livre : un autre chapitre, une note (et « ↩ Revenir »)
+  const ln = e.target.closest('a[data-epv-go]');
+  if(ln){
+    e.preventDefault();
+    const [pa, fr] = String(ln.dataset.epvGo).split('#'), c = S.chs.findIndex(ch => ch.path === pa);
+    if(c >= 0){ S.back = S.body.scrollTop; epvGoCh(S, c, fr || ''); const bb = S.ov.querySelector('#epvBack'); if(bb){ bb.hidden = false; clearTimeout(bb.__t); bb.__t = setTimeout(() => { bb.hidden = true; }, 12000); } }
+    return;
+  }
+  if(e.target.closest('a[href]')) return;
+  // 👆 un mot : sa fiche
+  const sp = e.target.closest('.epv-w');
+  if(sp){ if(String(window.getSelection() || '').trim()) return; if(epvTapWord(S, sp, e)) return; }
+  if(TB.sheetK !== -1 && e.target.closest('.pdv-body')) tbCloseSheet();
+}
+/* ---------- ⌨ le clavier ---------- */
+function epvKeysWire(S){
+  S.onKey = (e) => {
+    if(EPV !== S) return;
+    const typing = e.target && e.target.matches && e.target.matches('input, textarea, select');
+    const mod = e.ctrlKey || e.metaKey;
+    if(mod && (e.key === 'f' || e.key === 'F')){ e.preventDefault(); e.stopPropagation(); epvFindShow(S, true); return; }
+    if(mod && (e.key === '+' || e.key === '=')){ e.preventDefault(); epvZoomStep(S, 1); return; }
+    if(mod && (e.key === '-' || e.key === '_')){ e.preventDefault(); epvZoomStep(S, -1); return; }
+    if(mod && e.key === '0'){ e.preventDefault(); epvZoom(S, 1); return; }
+    if(e.key === 'Escape'){
+      e.preventDefault(); e.stopPropagation();
+      const aa = S.ov.querySelector('#epvAa');
+      if(TB.sheetK !== -1){ tbCloseSheet(); return; }
+      if(aa && !aa.hidden){ aa.hidden = true; return; }
+      if(!S.ov.querySelector('#epvFind').hidden){ epvFindShow(S, false); return; }
+      if(!S.ov.querySelector('#epvToc').hidden && window.innerWidth < 720){ epvTocShow(S, false); return; }
+      epvClose(); return;
+    }
+    if(typing || mod || e.altKey) return;
+    if(e.key === 'ArrowRight'){ e.preventDefault(); S.ov.querySelector('[data-epv="next"]').click(); }
+    else if(e.key === 'ArrowLeft'){ e.preventDefault(); S.ov.querySelector('[data-epv="prev"]').click(); }
+    else if(e.key === 's' || e.key === 'S'){ epvTocShow(S, S.ov.querySelector('#epvToc').hidden); }
+    else if(e.key === 'n' || e.key === 'N'){ S.ov.querySelector('[data-epv="night"]').click(); }
+  };
+  document.addEventListener('keydown', S.onKey, true);
+  // Ctrl + molette : la taille du texte
+  S.body.addEventListener('wheel', (e) => { if(!(e.ctrlKey || e.metaKey)) return; e.preventDefault(); const now = Date.now(); if(S.wt && now - S.wt < 90) return; S.wt = now; epvZoomStep(S, e.deltaY < 0 ? 1 : -1); }, { passive:false });
+}
+/* 🤏 pincer à deux doigts : la taille du texte */
+function epvPinchWire(S){
+  const P = { d0:0, z0:1 };
+  const dist = (t) => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+  S.body.addEventListener('touchstart', (e) => { if(e.touches.length === 2){ P.d0 = dist(e.touches); P.z0 = epvUi().z; } }, { passive:true });
+  S.body.addEventListener('touchmove', (e) => {
+    if(e.touches.length !== 2 || !P.d0) return;
+    e.preventDefault();
+    const z = Math.max(0.6, Math.min(2.6, P.z0 * dist(e.touches) / P.d0));
+    S.ov.style.setProperty('--epv-z', z.toFixed(3)); P.z = z;
+    const t = S.ov.querySelector('#epvZt'); if(t){ t.textContent = Math.round(z * 100) + ' %'; t.classList.add('on'); }
+  }, { passive:false });
+  S.body.addEventListener('touchend', (e) => { if(P.d0 && e.touches.length < 2){ const z = P.z; P.d0 = 0; P.z = 0; const t = S.ov.querySelector('#epvZt'); if(t) setTimeout(() => t.classList.remove('on'), 600); if(z) epvZoom(S, z); } }, { passive:true });
+}
+/* ---------- 🔍 chercher dans tout le livre ---------- */
+function epvFindShow(S, on){
+  const f = S.ov.querySelector('#epvFind'); f.hidden = !on;
+  S.ov.querySelector('[data-epv="find"]').setAttribute('aria-pressed', String(!!on));
+  if(on){ const q = S.ov.querySelector('#epvQ'); setTimeout(() => { q.focus(); q.select(); }, 30); }
+  else { epvHlClear(S); try{ S.body.focus({ preventScroll:true }); }catch(e){} }
+}
+function epvFold(ch){ return ch.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[’`´ʼ]/g, "'").replace(/œ/g, 'o').replace(/æ/g, 'a').charAt(0) || ch; }
+/* le texte d'un chapitre pour chercher : replié (sans accents, minuscules, un seul espace), avec la place de chaque lettre */
+function epvChText(S, ch){
+  if(ch.ft) return ch.ft;
+  const w = document.createTreeWalker(ch.cc, NodeFilter.SHOW_TEXT); let raw = '';
+  while(w.nextNode()) raw += w.currentNode.data;
+  let f = '', idx = [], sp = false;
+  for(let i = 0; i < raw.length; i++){
+    const c = raw[i];
+    if(/\s/.test(c)){ if(!sp && f){ f += ' '; idx.push(i); } sp = true; continue; }
+    sp = false; f += epvFold(c); idx.push(i);
+  }
+  ch.ft = { raw, f, idx };
+  return ch.ft;
+}
+function epvFind(S, q){
+  q = String(q || '').replace(/\s+/g, ' ').trim();
+  S.find = { q, hits:[], i:-1 };
+  epvHlClear(S);
+  const fn = S.ov.querySelector('#epvFn'), res = S.ov.querySelector('#epvRes');
+  if(q.length < 2){ fn.textContent = ''; res.innerHTML = ''; return; }
+  const fq = [...q].map(epvFold).join('');
+  const hits = [];
+  S.chs.forEach(ch => {
+    if(hits.length >= 1000) return;
+    const T = epvChText(S, ch); let i = T.f.indexOf(fq);
+    while(i >= 0 && hits.length < 1000){
+      const a = T.idx[i], z = T.idx[i + fq.length - 1] + 1;
+      const s0 = Math.max(0, a - 60), s1 = Math.min(T.raw.length, z + 70);
+      hits.push({ c:ch.k, a, z, pre:(s0 > 0 ? '…' : '') + T.raw.slice(s0, a).replace(/\s+/g, ' '), hit:T.raw.slice(a, z), post:T.raw.slice(z, s1).replace(/\s+/g, ' ') + (s1 < T.raw.length ? '…' : '') });
+      i = T.f.indexOf(fq, i + Math.max(1, fq.length));
+    }
+  });
+  S.find.hits = hits;
+  fn.textContent = hits.length ? `${hits.length}${hits.length >= 1000 ? '+' : ''} résultat${hits.length > 1 ? 's' : ''}` : 'Aucun résultat';
+  res.innerHTML = hits.slice(0, 300).map((h, i) => `<button type="button" class="pdv-hit" role="listitem" data-epv="hit" data-i="${i}"><b>Ch. ${h.c + 1}</b><span>${escapeHtml(h.pre)}<mark>${escapeHtml(h.hit)}</mark>${escapeHtml(h.post)}</span></button>`).join('') + (hits.length > 300 ? `<div class="pdv-more">… et ${hits.length - 300} autres (Entrée pour aller au suivant)</div>` : '');
+  if(hits.length){ const c0 = S.cur; let k = hits.findIndex(h => h.c >= c0); if(k < 0) k = 0; epvHitGo(S, k); }
+}
+function epvHitStep(S, d){ const n = S.find.hits.length; if(!n) return; epvHitGo(S, ((S.find.i < 0 ? 0 : S.find.i + d) % n + n) % n); }
+function epvRange(S, ch, a, z){
+  const w = document.createTreeWalker(ch.cc, NodeFilter.SHOW_TEXT); let pos = 0, r = document.createRange(), sOk = false;
+  while(w.nextNode()){
+    const n = w.currentNode, L = n.data.length;
+    if(!sOk && a < pos + L){ r.setStart(n, a - pos); sOk = true; }
+    if(sOk && z <= pos + L){ r.setEnd(n, z - pos); return r; }
+    pos += L;
+  }
+  return sOk ? r : null;
+}
+function epvHlClear(S){ (S.hlEls || []).forEach(x => x.remove()); S.hlEls = []; }
+function epvHitGo(S, i, keepScroll){
+  const h = S.find.hits[i]; if(!h) return;
+  S.find.i = i; S.moved = true;
+  const ch = S.chs[h.c]; if(!ch) return;
+  if(ch.el.style.display === 'none') ch.el.style.display = '';
+  epvHlClear(S);
+  const sr = ch.el.getBoundingClientRect();
+  // les autres résultats du chapitre (en jaune), et celui-ci (en orange)
+  S.find.hits.forEach((x, k) => {
+    if(x.c !== h.c || Math.abs(k - i) > 150) return;
+    const r = epvRange(S, ch, x.a, x.z); if(!r) return;
+    [...r.getClientRects()].forEach(b => { const d = document.createElement('i'); d.className = 'epv-hl' + (k === i ? ' cur' : ''); d.style.cssText = `left:${b.left - sr.left}px;top:${b.top - sr.top}px;width:${b.width}px;height:${b.height}px`; ch.el.appendChild(d); S.hlEls.push(d); });
+  });
+  const cur = S.hlEls.find(x => x.classList.contains('cur'));
+  if(cur && !keepScroll){ const br = S.body.getBoundingClientRect(), r = cur.getBoundingClientRect(); S.body.scrollTo({ top:S.body.scrollTop + r.top - (br.top + S.body.clientHeight * 0.35), behavior:'auto' }); }
+  S.ov.querySelectorAll('#epvRes .pdv-hit').forEach(b => b.classList.toggle('on', +b.dataset.i === i));
+  const on = S.ov.querySelector(`#epvRes .pdv-hit[data-i="${i}"]`); if(on) try{ on.scrollIntoView({ block:'nearest' }); }catch(e){}
+  const fn = S.ov.querySelector('#epvFn'); if(fn) fn.textContent = `${i + 1} / ${S.find.hits.length}`;
+  epvSeen(S);
+}
+/* ---------- fermer ---------- */
+function epvClose(quiet){
+  const S = EPV; if(!S) return;
+  EPV = null; S.tok++;
+  try{ bkPop('epv'); }catch(e){}
+  document.removeEventListener('keydown', S.onKey, true);
+  window.removeEventListener('resize', S.onResize);
+  try{ if(S.io) S.io.disconnect(); }catch(e){}
+  try{ wtClose(); }catch(e){}
+  try{ window.getSelection().removeAllRanges(); }catch(e){}
+  const pl = document.getElementById('wtSelPill'); if(pl) pl.hidden = true;
+  clearTimeout(S.saveT);
+  if(S.chs.length){ const B = S.body, pct = B.scrollHeight - B.clientHeight > 0 ? B.scrollTop / (B.scrollHeight - B.clientHeight) * 100 : 0; pdvPatch(S.id, { last:epvPos(S), pct:Math.round(pct) }); }
+  pdvTbDone(S);
+  S.ov.remove(); document.body.classList.remove('pdv-on');
+  setTimeout(() => (S.urls || []).forEach(u => { try{ URL.revokeObjectURL(u); }catch(e){} }), 1000);
+  if(!quiet) pdvShelfRefresh();
+}
 /* ---------- la liseuse ---------- */
 /* 📖 1.0.43 : une vraie liseuse de PDF — la main pour glisser la page (souris) ou le doigt, le zoom en pinçant ou
    Ctrl + molette (autour de l'endroit visé), les vignettes des pages, la recherche (chaque résultat avec sa phrase :
@@ -52298,6 +53065,7 @@ async function pdvOpen(id, at){
   if(!m){ await pdvListLoad(); m = pdvMeta(id); }
   if(!m){ const e = pdvCloudOf(id); if(e && !e.gone && e.url){ if(!(await pdvCloudGet(e))) return; m = pdvMeta(id); } }      // ☁️ 1.0.47
   if(!m){ setStatus("📖 Ce fichier n'est plus sur cet appareil.", 'err'); pdvShelfRefresh(); return; }
+  if(m.kind === 'epub') return epvOpen(id, at);     // 📕 1.0.54 : un livre .epub, dans sa liseuse
   pdvClose(true);
   try{ wtClose(); }catch(e){}
   const N = (m.pages || []).length || m.n;
@@ -53832,6 +54600,7 @@ function wtSrcOf(el){
   try{
     if(el.closest('#trxText')){ const c = audioCurrent(); return '📝 ' + ((c && c.t && c.t.title) || 'Transcription'); }
     if(el.closest('#trxvText')){ const h = document.querySelector('#quizCard .word-fr'); return '📝 ' + ((h && h.textContent) || 'Transcription'); }
+    if(el.closest('.epv-ov') && EPV){ return '📕 ' + EPV.m.title; }
     if(el.closest('.pdv-ov') && PDV){ return '📄 ' + PDV.m.title + (PDV.pages[PDV.cur] ? ' · p. ' + PDV.pages[PDV.cur].p : ''); }
     const wc = el.closest('.wcp'); if(wc){ const f = wc.querySelector('.wcp-fr'); return '📇 ' + ((f && f.textContent) || 'Fiche'); }
     const h = document.querySelector('#quizCard .cat-tag'); if(h) return h.textContent.trim().slice(0, 80);
@@ -53868,6 +54637,7 @@ function wtSelCheck(){
     pill.addEventListener('click', (e) => {
       e.stopPropagation(); e.preventDefault();
       const S = WT.sel; pill.hidden = true; if(!S) return;
+      if(S.el && S.el.closest && S.el.closest('.epv-ov') && typeof epvSelPick === 'function' && epvSelPick()) return;   // 📕 dans un livre
       if(S.el && S.el.closest && S.el.closest('.pdv-ov') && typeof pdvSelPick === 'function' && pdvSelPick()) return;   // 📇 sur un PDF : la fiche de la Tablette
       try{ window.getSelection().removeAllRanges(); }catch(err){}
       const n = S.x.split(' ').length, ctx = { sentence:wtSentOf(S.el, S.x), src:wtSrcOf(S.el) };
@@ -55464,7 +56234,7 @@ function tbClose(quiet, keepBk){
 function tbSaveArt(){ clearTimeout(TB.saveT); TB.saveT = setTimeout(tbSaveArtNow, 500); }
 function tbSaveArtNow(){
   clearTimeout(TB.saveT); if(!TB.art) return;
-  if(TB.art._pdv){ if(typeof PDV !== 'undefined' && PDV && PDV.tbArt === TB.art) pdvTbSaveNow(PDV); return; }
+  if(TB.art._pdv){ if(typeof PDV !== 'undefined' && PDV && PDV.tbArt === TB.art) pdvTbSaveNow(PDV); else if(typeof EPV !== 'undefined' && EPV && EPV.tbArt === TB.art) pdvTbSaveNow(EPV); return; }
   // la Tablette est fermée et la bibliothèque a changé ce texte depuis (lu, pas lu, rangé ailleurs…) : on garde ce changement
   if(!document.getElementById('tbReader')){ try{ const m = tbReadMeta(TB.art.id); if(m && TB.art._mseen != null && (m.mupd || 0) > TB.art._mseen) ['done', 'pct', 'pos', 'posOff', 'cat', 'mark'].forEach(f => { if(m[f] !== undefined) TB.art[f] = m[f]; else delete TB.art[f]; }); }catch(e){} }
   TB.art.readAt = Date.now();
