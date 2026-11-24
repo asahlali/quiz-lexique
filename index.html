@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- 🏷️ Version de l'appli : augmentée automatiquement par publier-site.cmd à chaque publication -->
-<meta name="app-version" content="1.0.54" data-date="2026-11-19">
+<meta name="app-version" content="1.0.55" data-date="2026-11-24">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <title>VocabVISION — Vocabulaire Français ↔ Arabe</title>
 <script>
@@ -1987,6 +1987,42 @@
   .tbw.hov1, .pdv-tl span.hov1, #pdkFlow .tbw.hov1{ background-color:rgba(var(--tb-hov-rgb, 96,165,250), .2); box-shadow:none; border-radius:3px; transition:background-color .35s ease; }
   .tbw.hov2, .pdv-tl span.hov2, #pdkFlow .tbw.hov2{ background-color:rgba(var(--tb-hov-rgb, 96,165,250), .11); box-shadow:none; border-radius:3px; transition:background-color .35s ease; }
   .tbw.hov3, .pdv-tl span.hov3, #pdkFlow .tbw.hov3{ background-color:rgba(var(--tb-hov-rgb, 96,165,250), .055); box-shadow:none; border-radius:3px; transition:background-color .35s ease; }
+  /* 🖍 1.0.55 : la phrase sous le doigt ; ce qui a été lu (reste) ; la phrase lue à voix haute */
+  .pdv-sh-hb{ display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end; }
+  .pdv-sh-use{ font:600 11.5px/1.3 'Inter', system-ui, sans-serif; color:var(--text-dim, #64748b); margin:2px 2px 8px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .pdv-sh-use i{ display:inline-block; width:120px; height:6px; border-radius:6px; background:var(--surface-sunken, #e5e7eb); position:relative; overflow:hidden; }
+  .pdv-sh-use i::after{ content:''; position:absolute; inset:0 auto 0 0; width:var(--w, 0%); background:linear-gradient(90deg, #22c55e, #f59e0b); border-radius:6px; }
+  .pdv-tl span.hovs, .epv-w.hovs{ background-color:rgba(var(--tb-hov-rgb, 96,165,250), .26); border-radius:2px; }
+  .tb-s.hovs{ background-color:rgba(var(--tb-hov-rgb, 96,165,250), .2); border-radius:4px; -webkit-box-decoration-break:clone; box-decoration-break:clone; }
+  .pdv-tl span.lr-rd, .epv-w.lr-rd{ background-color:rgba(var(--lr-rd-rgb, 34,197,94), .24); border-radius:2px; }
+  .pdv-tl span.lr-ok, .epv-w.lr-ok{ background-color:rgba(var(--lr-rd-rgb, 34,197,94), .42); border-radius:2px; }
+  .pdv-tl span.lr-cur, .epv-w.lr-cur{ box-shadow:inset 0 -2px 0 rgba(var(--lr-say-rgb, 250,204,21), .95); }
+  .pdv-tl span.lr-say, .epv-w.lr-say{ background-color:rgba(var(--lr-say-rgb, 250,204,21), .45) !important; border-radius:2px; }
+  .pdv-night .pdv-tl span.lr-rd{ background-color:rgba(var(--lr-rd-rgb, 34,197,94), .3); }
+  .lr-dock{ position:absolute; left:50%; bottom:calc(14px + env(safe-area-inset-bottom)); transform:translateX(-50%); z-index:30; display:flex; align-items:center; gap:6px; padding:7px 8px 7px 14px;
+    background:rgba(15,23,42,.92); color:#fff; border-radius:999px; box-shadow:0 10px 30px rgba(0,0,0,.3); font:700 13px/1.2 'Inter', system-ui, sans-serif; max-width:calc(100% - 24px); }
+  .lr-dock[hidden]{ display:none; }
+  .lr-dock .lr-dt{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-right:4px; }
+  .lr-dock button{ flex:0 0 auto; min-width:38px; height:38px; border-radius:999px; border:0; background:rgba(255,255,255,.12); color:#fff; font:800 15px/1 system-ui, sans-serif; cursor:pointer; padding:0 10px; }
+  .lr-dock button:hover{ background:rgba(255,255,255,.22); }
+  .lr-dock button.lr-x{ background:rgba(239,68,68,.85); }
+  .lr-pan{ position:absolute; right:10px; top:56px; z-index:31; width:min(360px, calc(100% - 20px)); max-height:calc(100% - 80px); overflow:auto; background:var(--surface, #fff); color:var(--text, #111);
+    border:1px solid var(--border, #e5e7eb); border-radius:16px; box-shadow:0 18px 50px rgba(0,0,0,.25); padding:12px 14px 14px; font:600 13px/1.35 'Inter', system-ui, sans-serif; }
+  .lr-pan[hidden]{ display:none; }
+  .lr-pan h4{ margin:2px 0 8px; font:800 14px/1.2 'Inter', system-ui, sans-serif; }
+  .lr-pl{ margin:10px 0 5px; font-size:11.5px; font-weight:800; color:var(--text-dim, #6b7280); text-transform:uppercase; letter-spacing:.03em; }
+  .lr-seg{ display:flex; gap:6px; flex-wrap:wrap; }
+  .lr-seg button{ flex:1 1 auto; border:1px solid var(--border, #e5e7eb); background:var(--surface-sunken, #f8fafc); color:inherit; border-radius:10px; padding:7px 8px; font:700 12.5px/1.2 inherit; cursor:pointer; }
+  .lr-seg button.on{ border-color:#7C3AED; background:rgba(124,58,237,.1); color:#6D28D9; }
+  .lr-cols{ display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
+  .lr-cols button, .lr-cols label{ width:30px; height:30px; border-radius:50%; border:2px solid transparent; cursor:pointer; padding:0; position:relative; display:inline-block; }
+  .lr-cols button.on, .lr-cols label.on{ border-color:#111; box-shadow:0 0 0 2px #fff inset; }
+  .lr-cols label input{ position:absolute; inset:0; opacity:0; cursor:pointer; }
+  .lr-cols label{ background:conic-gradient(#f43f5e, #f59e0b, #22c55e, #3b82f6, #a855f7, #f43f5e); }
+  .lr-pan .lr-clear{ margin-top:12px; width:100%; border:1px dashed var(--border, #d1d5db); background:transparent; color:inherit; border-radius:10px; padding:8px; font:700 12.5px/1.2 inherit; cursor:pointer; }
+  .lr-pan .lr-hint{ font-size:11.5px; color:var(--text-dim, #6b7280); margin-top:4px; font-weight:500; }
+  .pdv-ib.lr-on{ background:rgba(250,204,21,.25) !important; }
+  .pdv-tl span.hovs, .pdv-tl span.lr-rd, .pdv-tl span.lr-ok, .pdv-tl span.lr-say{ color:transparent; }
   .pdv-tl span.hov, #pdkFlow .tbw.hov{ background-color:var(--pdv-hov, rgba(96,165,250,.36)); box-shadow:0 0 0 .1em var(--pdv-hov, rgba(96,165,250,.36)); border-radius:3px; }
   .tb.hov-off .tbw.hov1, .tb.hov-off .tbw.hov2, .tb.hov-off .tbw.hov3{ background-color:transparent; box-shadow:none; }
   .tb-trail-demo i{ font-style:normal; border-radius:3px; padding:0 2px; }
@@ -2501,6 +2537,8 @@
   .done-top-row{ display:flex; justify-content:center; margin:10px 0 2px; flex-wrap:wrap; gap:8px; }
   .tb-echo-btn{ background:linear-gradient(135deg, rgba(124,58,237,.12), rgba(236,72,153,.12)) !important; border-color:rgba(124,58,237,.35) !important; color:var(--purple, #7C3AED) !important; font-weight:800; }
   .done-top-btn{ font-weight:800 !important; }
+  .done-top-btn.redo{ background:rgba(59,130,246,.1) !important; border-color:rgba(59,130,246,.45) !important; color:#2563EB !important; }
+  .done-top-btn[hidden]{ display:none !important; }
   .done-top-btn.on{ background:rgba(34,197,94,.12) !important; border-color:rgba(34,197,94,.55) !important; color:#16A34A !important; }
   /* 📇 1.0.26 : la fiche d'un mot en fenêtre, 🔖 le marque-page de la Tablette, 🎤 le micro de la Répétition */
   /* 🎮 1.0.41 : la fin de la liste dans la fiche d'un mot */
@@ -7391,14 +7429,16 @@ function recordDailyStats(seconds, passed90, xpEarned, mode){
 /* Les défis du jour, à la Duolingo — objectifs personnalisables via renderQuestSettings(). */
 function getDailyQuests(){
   const qk = questDayKey();   // 🌙 aujourd'hui, ou demain en mode avance
-  const lessons = dailyLog[qk] || 0;
+  let rd = { n:0, subj:new Set() }; try{ rd = sheetsReadToday(); }catch(e){}
+  const lessons = (dailyLog[qk] || 0) + rd.n;                         // ✅ 1.0.55 : une fiche lue et validée compte
   const s = dailyStats[qk] || { seconds:0, passed:0, xp:0, modesPlayed:[], bySubject:{} };
+  const subjN = new Set([...Object.keys(s.bySubject || {}), ...rd.subj]).size;
   const timeGoalSec = questSettings.timeGoalMin * 60;
   const quests = [
     { key:'lessons', icon:'📗', label:`Termine ${questSettings.lessonGoal} exercice${questSettings.lessonGoal>1?'s':''} (tous modes)`, cur:Math.min(lessons, questSettings.lessonGoal), goal:questSettings.lessonGoal },
     { key:'time', icon:'⏱️', label:`Passe ${questSettings.timeGoalMin} min à apprendre`, cur:Math.min(s.seconds, timeGoalSec), goal:timeGoalSec, isTime:true },
     { key:'pass', icon:'🏆', label:`Réussis 90%+ dans ${questSettings.passGoal} bloc${questSettings.passGoal>1?'s':''}`, cur:Math.min(s.passed, questSettings.passGoal), goal:questSettings.passGoal },
-    { key:'subjects', icon:'⚖️', label:'Touche à 2 matières différentes (vocabulaire, conjugaison, grammaire, orthographe)', cur:Math.min(Object.keys(s.bySubject || {}).length, 2), goal:2 },
+    { key:'subjects', icon:'⚖️', label:'Touche à 2 matières différentes (vocabulaire, conjugaison, grammaire, orthographe)', cur:Math.min(subjN, 2), goal:2 },
   ];
   // 🎯 Objectifs configurables par section — dynamique via le registre SHEET_SECTIONS : un futur
   // module ajouté à ce registre apparaît ici automatiquement, sans autre modification.
@@ -9704,6 +9744,11 @@ function reconcileWordsOrder(){
 const savedCustom = loadCustomWords();
 if(savedCustom){ WORDS = savedCustom; }
 reconcileWordsOrder();
+(function lexExAtMigrate(){
+  let ch = false;
+  WORDS.forEach(w => { if(w && Array.isArray(w.exMore) && w.exMore.length && (!Array.isArray(w.exMoreAt) || w.exMoreAt.length < w.exMore.length)){ w.exMoreAt = lexExAtFix(w); w.upd = Date.now(); ch = true; } });
+  if(ch) try{ saveCustomWords(WORDS); }catch(e){}
+})();
 
 let gameMode = 'classic'; // 'classic' | 'blank' | 'chrono'
 let chronoStreak = 0;
@@ -9994,11 +10039,24 @@ function getBlockCategorySummary(words){
 /* 🧩 Regroupe les mots ayant exactement le même "fr" dans un bloc (homonymes / sens multiples) */
 function groupDuplicateWords(words){
   const map = new Map();
+  let rot = null;
   words.forEach(w => {
     const key = w.fr.trim().toLowerCase();
-    if(!map.has(key)){ map.set(key, Object.assign({}, w, { variants:[w] })); }
+    if(!map.has(key)){
+      const c = Object.assign({}, w, { variants:[w] });
+      // ➕ 1.0.55 : un mot avec des phrases ajoutées → à chaque partie, une autre de ses phrases (à tour de rôle)
+      if(!w.echo && Array.isArray(w.exMore) && w.exMore.length){
+        try{
+          if(!rot){ try{ rot = JSON.parse(localStorage.getItem('vocabVision.exRot') || '{}') || {}; }catch(e){ rot = {}; } }
+          const n = 1 + w.exMore.length, r = (rot[key] = ((+rot[key] || 0) + 1)) % n;
+          if(r > 0){ const x = lexExFrom(w.exMore[r - 1], [w.exForm || '', w.fr]); if(x && x.ex && x.ex.includes('~')){ c.ex = x.ex; if(x.form && lexKey(x.form) !== lexKey(w.fr)) c.exForm = x.form; else delete c.exForm; c.exRot = r; } }
+        }catch(e){}
+      }
+      map.set(key, c);
+    }
     else { map.get(key).variants.push(w); }
   });
+  if(rot) try{ localStorage.setItem('vocabVision.exRot', JSON.stringify(rot)); }catch(e){}
   return Array.from(map.values());
 }
 
@@ -10007,7 +10065,7 @@ function renderVariantsExtra(word){
   if(!word || !word.variants || word.variants.length <= 1) return '';
   return word.variants.slice(1).map(v => `
     <div class="result-card" style="margin-top:10px;">
-      <div style="font-size:12px;font-weight:800;color:var(--purple);margin-bottom:4px;">📎 Autre sens de « ${escapeHtml(word.fr)} »</div>
+      <div style="font-size:12px;font-weight:800;color:var(--purple);margin-bottom:4px;">${v.echo ? '📝 Une autre de ses phrases' : `📎 Autre sens de « ${escapeHtml(word.fr)} »`}</div>
       <div class="arabic-word" style="font-size:20px;">${escapeHtml(v.ar)}</div>
       <div class="result-def">${escapeHtml(v.def)}</div>
       <div class="result-ex">${renderExample(v.ex)}</div>
@@ -10020,7 +10078,7 @@ function getCategories(){
 }
 
 function hashWords(words){
-  let str = words.map(w => w.fr).join('|');
+  let str = words.map(w => w.echo ? w.fr + '#' + (w.addedAt || 0) : w.fr).join('|');   // ➕ 1.0.55 : la carte d'une phrase ajoutée
   let h = 0;
   for(let i=0;i<str.length;i++){ h = (h*31 + str.charCodeAt(i)) | 0; }
   return 'h' + (h >>> 0).toString(36) + '_' + words.length;
@@ -10052,8 +10110,10 @@ function trackWastedTime(key, result){
 }
 function getBlockWastedTime(key){ return blockWastedTime[key] || 0; }
 
+function blkIdOf(w){ return w ? (w.echo ? '↻' + w.fr + '#' + (w.addedAt || 0) : w.fr) : ''; }
 function saveBlockResult(blockIndex, mode, result){
   if(!blockResults[blockIndex]) blockResults[blockIndex] = {};
+  try{ if(result && !activeFilterCat && BLOCKS[blockIndex]) result.blockFr = BLOCKS[blockIndex].map(blkIdOf); }catch(e){}   // 🧩 1.0.55 : pour le retrouver si les mots bougent
   trackWastedTime(blockIndex + '::' + mode, result);
   blockResults[blockIndex][mode] = result;
   if(!storageAvailable) return;
@@ -10084,7 +10144,7 @@ function blockResultsRescue(force){
   const uid = getCurrentUserId(), esc = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const re = new RegExp('^lexiqueQuiz::all::(h[0-9a-z]+_\\d+)::([a-zA-Z]+)::u:' + esc(uid) + '$');
   const cur = new Set(BLOCKS.map(b => hashWords(b)));
-  const where = new Map(); BLOCKS.forEach((b, i) => b.forEach(w => where.set(w.fr, i)));
+  const where = new Map(); BLOCKS.forEach((b, i) => b.forEach(w => where.set(blkIdOf(w), i)));
   const orphans = [];
   for(let i = 0; i < localStorage.length; i++){
     const k = localStorage.key(i); const m = k && k.match(re);
@@ -10095,28 +10155,90 @@ function blockResultsRescue(force){
     let r = null; try{ r = JSON.parse(localStorage.getItem(o.k)); }catch(e){}
     if(!r || !r.total) continue;
     const frs = [...new Set((Array.isArray(r.blockFr) && r.blockFr.length ? r.blockFr : (Array.isArray(r.history) ? r.history.map(h => h && h.fr) : [])).filter(Boolean))];
+    o.r = r; o.frs = frs;
     if(frs.length < 3) continue;
     const cnt = new Map(); let known = 0;
     frs.forEach(f => { const b = where.get(f); if(b == null) return; known++; cnt.set(b, (cnt.get(b) || 0) + 1); });
     let best = -1, bc = 0; cnt.forEach((c, b) => { if(c > bc){ bc = c; best = b; } });
     if(best < 0) continue;
     const size = BLOCKS[best].length;
-    if(bc < Math.ceil(0.6 * Math.min(size, frs.length)) || bc < Math.ceil(0.7 * known)) continue;
+    if(bc < Math.ceil(0.6 * size) || bc < Math.ceil(0.7 * known)) continue;          // 1.0.55 : 60 % du bloc d'aujourd'hui
     const ex = blockResults[best] && blockResults[best][o.mode];
     if(ex && (ex.finishedAt || 0) >= (r.finishedAt || 0)) continue;   // le bloc a déjà un résultat plus récent
-    r.blockFr = BLOCKS[best].map(w => w.fr);                           // il appartient désormais à ce bloc-ci
+    { const F = new Set(frs); r.blockFr = BLOCKS[best].map(blkIdOf).filter(id => F.has(id)); }   // 1.0.55 : seulement les mots vraiment joués
     try{ localStorage.setItem(storageKey(best, o.mode), JSON.stringify(r)); }catch(e){ continue; }
     if(!blockResults[best]) blockResults[best] = {};
     blockResults[best][o.mode] = r;
     n++;
   }
+  // 🧩 1.0.55 : 2ᵉ passage. Des mots retirés (ou ajoutés) décalent les blocs : un ancien bloc se retrouve coupé en deux,
+  // à cheval sur deux blocs d'aujourd'hui (aucun des deux n'en a « la grande majorité »). Pour chaque bloc et chaque mode
+  // encore sans résultat : si ses mots étaient (presque) tous dans des résultats d'avant (au moins 80 %), il retrouve son
+  // résultat — le moins bon des morceaux, pour ne rien inventer. Un bloc avec beaucoup de mots nouveaux reste « à faire ».
+  const byMode = {};
+  orphans.forEach(o => { if(o.r && o.frs && o.frs.length >= 3) (byMode[o.mode] = byMode[o.mode] || []).push(o); });
+  BLOCKS.forEach((b, j) => GAME_MODES.forEach(m => {                       // les résultats des autres blocs comptent aussi (leurs mots joués)
+    const r = blockResults[j] && blockResults[j][m]; if(!r || !r.total) return;
+    const frs = (Array.isArray(r.blockFr) && r.blockFr.length ? r.blockFr : (Array.isArray(r.history) ? r.history.map(h => h && h.fr) : [])).filter(Boolean);
+    if(frs.length >= 3) (byMode[m] = byMode[m] || []).push({ r, frs });
+  }));
+  BLOCKS.forEach((blk, i) => {
+    if(!blk || blk.length < 3) return;
+    const ids = blk.map(blkIdOf);
+    Object.keys(byMode).forEach(mode => {
+      if(blockResults[i] && blockResults[i][mode]) return;
+      const used = [], got = new Set();
+      byMode[mode].forEach(o => { const S = new Set(o.frs); const hit = ids.filter(id => S.has(id)); if(hit.length >= 3){ used.push(o); hit.forEach(h => got.add(h)); } });
+      if(!used.length || got.size < Math.ceil(0.8 * ids.length)) return;
+      const pct = Math.min(...used.map(o => (o.r.correct || 0) / (o.r.total || 1)));
+      const total = blk.length, at = Math.max(...used.map(o => o.r.finishedAt || 0));
+      const res = { correct:Math.round(pct * total), total, mode, finishedAt:at, rescued:2, blockFr:ids.filter(id => got.has(id)), history:blk.map(w => ({ fr:w.fr, attempts:1 })), durationSec:0, xp:0 };
+      try{ localStorage.setItem(storageKey(i, mode), JSON.stringify(res)); }catch(e){ return; }
+      if(!blockResults[i]) blockResults[i] = {};
+      blockResults[i][mode] = res; n++;
+    });
+  });
   BLK_RESCUE.n += n;
   if(n){ try{ cloudAutoPush(); }catch(e){} }
   return n;
 }
+/* ➕ 1.0.55 : les phrases ajoutées à un mot déjà connu deviennent aussi des cartes, rangées à la date de leur ajout
+   (donc dans le dernier bloc) : on les travaille comme un nouveau mot, l'ancien bloc ne bouge pas. Une carte « écho »
+   n'est pas un mot de plus : elle vit dans la fiche du mot (w.exMore + w.exMoreAt) et suit ses changements. */
+function lexEchoesOf(pool){
+  const out = [];
+  pool.forEach(w => {
+    if(!w || !Array.isArray(w.exMore)) return;
+    w.exMore.forEach((s, k) => {
+      const at = +((w.exMoreAt || [])[k]) || 0; if(!at || !s) return;
+      let ex = s, exForm;
+      try{ const x = lexExFrom(s, [w.exForm || '', w.fr]); if(x){ ex = x.ex; if(x.form && lexKey(x.form) !== lexKey(w.fr)) exForm = x.form; } }catch(e){}
+      const e = Object.assign({}, w, { ex, echo:1, echoOf:w, echoS:s, addedAt:at });
+      delete e.exMore; delete e.exMoreAt; if(exForm) e.exForm = exForm; else delete e.exForm;
+      out.push(e);
+    });
+  });
+  return out.sort((a, b) => a.addedAt - b.addedAt);
+}
+function lexPoolWithEchoes(pool){
+  const E = lexEchoesOf(pool); if(!E.length) return pool;
+  const out = []; let k = 0;
+  pool.forEach(w => { const a = +w.addedAt || 0; while(k < E.length && a && E[k].addedAt < a) out.push(E[k++]); out.push(w); });
+  while(k < E.length) out.push(E[k++]);
+  return out;
+}
+/* le bloc où se trouve un mot (ou la carte d'une de ses phrases) — 1-based, 0 si introuvable */
+function lexBlockOf(w, echoS){
+  for(let i = 0; i < BLOCKS.length; i++){ if((BLOCKS[i] || []).some(x => echoS ? (x.echo && x.echoOf === w && x.echoS === echoS) : x === w)) return i + 1; }
+  return 0;
+}
+function lexEchoNote(w){
+  try{ const s = w && w.exMore && w.exMore[w.exMore.length - 1]; const b = s ? lexBlockOf(w, s) : 0; return b ? ` · aussi dans le Bloc ${b}` : ''; }catch(e){ return ''; }
+}
 function rebuildBlocks(){
-  datasetHash = hashWords(WORDS);
-  const pool = activeFilterCat ? WORDS.filter(w => w.cat === activeFilterCat) : WORDS;
+  const pool0 = activeFilterCat ? WORDS.filter(w => w.cat === activeFilterCat) : WORDS;
+  const pool = lexPoolWithEchoes(pool0);                                   // ➕ 1.0.55 : les phrases ajoutées, à leur date
+  datasetHash = hashWords(pool.length === pool0.length ? WORDS : WORDS.concat(pool.filter(w => w.echo)));
   BLOCKS = [];
   for(let i=0;i<pool.length;i+=BLOCK_SIZE){
     BLOCKS.push(pool.slice(i, i+BLOCK_SIZE));
@@ -18259,15 +18381,25 @@ function lexAddSentence(w, s){
     if(x){ w.ex = x.ex; if(x.form && lexKey(x.form) !== lexKey(w.fr)) w.exForm = x.form; else delete w.exForm; }
     else w.ex = s;
   } else {
-    w.exMore = (w.exMore || []).concat([s]).slice(-6);
+    const at = lexExAtFix(w);
+    w.exMore = (w.exMore || []).concat([s]); w.exMoreAt = at.concat([Date.now()]);
+    if(w.exMore.length > 6){ w.exMore = w.exMore.slice(-6); w.exMoreAt = w.exMoreAt.slice(-6); }
   }
   w.upd = Date.now();
   lexAfterChange();
   return 'ok';
 }
+/* les dates des phrases ajoutées (avant 1.0.55 : pas de date → elles arrivent maintenant, à la fin) */
+function lexExAtFix(w){
+  const n = (w.exMore || []).length, a = Array.isArray(w.exMoreAt) ? w.exMoreAt.slice(0, n) : [];
+  const t0 = Date.now(); while(a.length < n) a.push(t0 + a.length);
+  return a;
+}
 function lexDelSentence(w, i){
   if(!w || !w.exMore || !w.exMore[i]) return;
-  w.exMore = w.exMore.filter((_, j) => j !== i); if(!w.exMore.length) delete w.exMore;
+  const at = lexExAtFix(w);
+  w.exMore = w.exMore.filter((_, j) => j !== i); w.exMoreAt = at.filter((_, j) => j !== i);
+  if(!w.exMore.length){ delete w.exMore; delete w.exMoreAt; }
   w.upd = Date.now();
   lexAfterChange();
 }
@@ -18285,6 +18417,7 @@ function lexMarkSent(s, w){
 function wordCardPopup(w, opts){
   opts = opts || {};
   if(!w) return null;
+  if(w.echo && w.echoOf) w = w.echoOf;                                     // ➕ 1.0.55 : la carte d'une phrase ajoutée
   const had = document.querySelector('.wcp-ov');
   if(opts._nav || opts._back){ /* même chemin */ }
   else if(had && WCP.cur && WCP.cur.w !== w) WCP.stack.push(WCP.cur);
@@ -18297,7 +18430,7 @@ function wordCardPopup(w, opts){
   if(L && li < 0) li = 0;
   const prevW = WCP.stack.length ? WCP.stack[WCP.stack.length - 1].w : null;
   document.querySelectorAll('.wcp-ov').forEach(x => x.remove());
-  const i = WORDS.indexOf(w), blk = i >= 0 ? Math.floor(i / BLOCK_SIZE) + 1 : 0;
+  const i = WORDS.indexOf(w), blk = lexBlockOf(w);
   const full = exFull(w) || '', form = exFullForm(w) || w.fr;
   let exHtml = escapeHtml(full);
   if(full){
@@ -18415,7 +18548,7 @@ function wordCardPopup(w, opts){
       if(r !== 'ok'){ n.hidden = false; n.textContent = "Je n'ai pas pu l'ajouter."; return; }
       try{ playCorrectSound(); }catch(err){}
       document.removeEventListener('keydown', onKey, true); ov.remove();
-      wordCardPopup(w, Object.assign({}, opts, { _nav:true, noAutoSay:true, note:'➕ Phrase ajoutée à sa fiche' }));
+      wordCardPopup(w, Object.assign({}, opts, { _nav:true, noAutoSay:true, note:'➕ Phrase ajoutée à sa fiche' + lexEchoNote(w) }));
     });
   }
   if(navd && !opts.noAutoSay) setTimeout(() => { if(ov.isConnected) try{ speak(w.fr, 'fr-FR'); }catch(e){} }, 160);   // 🔊 1.0.41 : en glissant, on entend le mot
@@ -18760,7 +18893,7 @@ function wtAdd(){
   try{ if(typeof exFullCache !== 'undefined' && exFullCache) exFullCache.clear(); }catch(e){}
   try{ if(typeof TB !== 'undefined') TB.idx = null; }catch(e){}
   const box = WT.el && WT.el.querySelector('#wtAct');
-  if(n){ try{ playCorrectSound(); }catch(e){} setStatus(`➕ « ${lemma} » ajouté à tes mots (bloc ${Math.floor((WORDS.length - 1) / BLOCK_SIZE) + 1})`, 'ok'); }
+  if(n){ try{ playCorrectSound(); }catch(e){} const lw = WORDS.find(x => lexKey(x.fr) === lexKey(lemma)); setStatus(`➕ « ${lemma} » ajouté à tes mots (bloc ${(lw && lexBlockOf(lw)) || BLOCKS.length})`, 'ok'); }
   else setStatus(`« ${lemma} » est déjà dans tes mots.`, 'ok');
   const kw = (typeof tbLexWord === 'function') ? tbLexWord(lemma) : null;
   if(box){ C.known = kw; box.innerHTML = `<button type="button" disabled>✓ Dans tes mots</button>${kw ? `<button type="button" class="pri" data-wt="see">👁 Voir sa fiche</button>` : ''}${wtOthers().length ? `<button type="button" data-wt="others">➕ D'autres mots de cette phrase ?</button>` : ''}`; }
@@ -19385,22 +19518,47 @@ function loadSheetResults(){
 function saveSheetResults(results){
   try{ localStorage.setItem(nsKey(SHEET_RESULTS_KEY), JSON.stringify(results)); }catch(e){}
 }
-function markSheetPassed(sheetId, pct){
+/* ✅ 1.0.55 : une fiche validée en la LISANT (à la main, ou après 20 s de lecture) compte aussi dans les objectifs
+   « Termine N exercices » et « 2 matières » (man:1) — une fiche validée par son quiz y compte déjà, par le quiz.
+   Dévalidée à la main (off:1) : elle ne se revalide plus toute seule à la visite suivante. */
+function markSheetPassed(sheetId, pct, how){
   const results = loadSheetResults();
   const prevBest = (results[sheetId] && results[sheetId].passed) ? (results[sheetId].pct || 0) : 0;
   results[sheetId] = { passed: true, pct: Math.max(pct, prevBest), lastAt: Date.now() };
+  if(how && how.man) results[sheetId].man = 1;
   saveSheetResults(results);
 }
 function unmarkSheetPassed(sheetId){
   const results = loadSheetResults();
-  results[sheetId] = { passed:false, pct:0, lastAt:Date.now() };   // trace datée : « défaite » aussi sur l'autre appareil
+  results[sheetId] = { passed:false, pct:0, lastAt:Date.now(), off:1 };   // trace datée : « défaite » aussi sur l'autre appareil
   saveSheetResults(results);
+}
+function sheetPassedToday(sheetId){ const r = loadSheetResults()[sheetId]; return !!(r && r.passed && isTodayTimestamp(r.lastAt)); }
+/* la matière d'une fiche (pour « Touche à 2 matières ») */
+function sheetSubjectOf(sh){
+  if(!sh) return 'vocabulaire';
+  const t = ((sh.id || '') + ' ' + (sh.title || '') + ' ' + (sh.category || '')).toLowerCase();
+  if(sh.section === 'conjugaison' || /conjug/.test(t)) return 'conjugaison';
+  if(/orthograph/.test(t)) return 'orthographe';
+  if(sh.section === 'atelier' || sh.section === 'avance' || /grammai/.test(t)) return 'grammaire';
+  return 'vocabulaire';
+}
+/* les fiches validées aujourd'hui en les lisant : combien, et quelles matières */
+function sheetsReadToday(){
+  const R = loadSheetResults(), out = { n:0, subj:new Set() };
+  Object.keys(R).forEach(id => {
+    const r = R[id]; if(!r || !r.passed || !r.man || !isTodayTimestamp(r.lastAt)) return;
+    out.n++; out.subj.add(sheetSubjectOf(PRACTICAL_SHEETS.find(s => s.id === id)));
+  });
+  return out;
 }
 /* Met à jour le badge « ✅ Validée » et le bouton Valider/Dévalider de la fiche ouverte. */
 function refreshSheetValidateUi(sheetId){
-  const done = isSheetPassed(sheetId);
+  const done = isSheetPassed(sheetId), today = done && sheetPassedToday(sheetId);
+  const r = loadSheetResults()[sheetId] || {};
+  const when = done && !today && r.lastAt ? new Date(r.lastAt).toLocaleDateString('fr-FR', { day:'2-digit', month:'2-digit' }) : '';
   const tag = document.getElementById('sheetValidatedTag');
-  if(tag) tag.textContent = done ? ' · ✅ Validée' : '';
+  if(tag) tag.textContent = done ? (today ? " · ✅ Validée aujourd'hui" : ` · ✅ Validée le ${when}`) : '';
   const btn = document.getElementById('sheetValidateToggleBtn');
   if(btn){
     btn.textContent = done ? '↩️ Dévalider (ouverte par erreur)' : '✅ Marquer comme faite';
@@ -19408,9 +19566,11 @@ function refreshSheetValidateUi(sheetId){
   }
   const top = document.getElementById('sheetValidateTopBtn');   // ✅ 1.0.25 : le même bouton en haut, sans descendre jusqu'à la fin
   if(top){
-    top.textContent = done ? '✅ Faite · annuler' : '✅ Marquer comme faite';
+    top.textContent = done ? (today ? "✅ Faite aujourd'hui · annuler" : `✅ Faite le ${when} · annuler`) : '✅ Marquer comme faite';
     top.classList.toggle('active', !done); top.classList.toggle('on', done);
   }
+  const redo = document.getElementById('sheetRedoBtn');          // ↻ 1.0.55 : faite un autre jour → la compter aussi aujourd'hui
+  if(redo) redo.hidden = !(done && !today);
 }
 function isSheetPassed(sheetId){
   const results = loadSheetResults();
@@ -23343,6 +23503,30 @@ function mergeRemoteData(remote){
       Object.keys(ro || {}).forEach(v => { const r = ro[v], l = lo[v]; if(r && (!l || ((r.correct||0) + (r.wrong||0)) > ((l.correct||0) + (l.wrong||0)))){ lo[v] = r; m = true; } });
       if(m){ putL(key, JSON.stringify(lo)); changed = true; }
 
+    } else if(baseKey === R2_TRASH){
+      const ro = safeParse(rv, {}) || {}, lo = safeParse(lv, {}) || {};
+      let m = false; Object.keys(ro).forEach(k => { if(ro[k] && !lo[k]){ lo[k] = ro[k]; m = true; } });
+      if(m){ putL(key, JSON.stringify(lo)); changed = true; }
+
+    } else if(baseKey === LR_KEY){
+      // ✅ 1.0.55 : ce qui a été lu (PDF, livres) : on additionne, sauf ce qui a été effacé après
+      const ro = safeParse(rv, {}) || {}, lo = safeParse(lv, {}) || {};
+      let m = false;
+      Object.keys(ro).forEach(id => {
+        const r = ro[id] || {}, l = lo[id] || { c:0, u:{} }, c = Math.max(+r.c || 0, +l.c || 0), u = {};
+        new Set([...Object.keys(r.u || {}), ...Object.keys(l.u || {})]).forEach(uk => {
+          const a = (r.u || {})[uk], b = (l.u || {})[uk], R = [];
+          if(a && (a.t || 0) > c) R.push(...lrRanges(a.r)); if(b && (b.t || 0) > c) R.push(...lrRanges(b.r));
+          if(R.length) u[uk] = { r:lrRangesStr(lrUnion(R)), t:Math.max((a && a.t) || 0, (b && b.t) || 0) };
+        });
+        const nv = { c, u, at:Math.max(+r.at || 0, +l.at || 0) };
+        if(JSON.stringify(nv) !== JSON.stringify(lo[id] || null)){ lo[id] = nv; m = true; }
+      });
+      if(m){
+        putL(key, JSON.stringify(lo)); changed = true;
+        try{ const S = (typeof PDV !== 'undefined' && PDV) || (typeof EPV !== 'undefined' && EPV); if(S && lo[S.id]){ lrUnits(S).forEach(u => { u.lrM = null; }); lrRepaintAll(S); lrUnits(S).forEach((u, k) => { if(u.lrI) lrPaintUnit(S, k); }); } }catch(e){}
+      }
+
     } else if(baseKey === SHEET_RESULTS_KEY || baseKey === BOUQUINAGE_READ_KEY){
       // ✅ fiches faites / 📚 textes lus : fiche par fiche (le plus récent gagne), jamais toute la liste écrasée
       const flag = baseKey === SHEET_RESULTS_KEY ? 'passed' : 'read';
@@ -23401,7 +23585,10 @@ function mergeRemoteData(remote){
           if(!l){ byKey.set(k, w); base0.push(w); added++; return; }
           if(w.addedAt && (!l.addedAt || w.addedAt < l.addedAt)){ l.addedAt = w.addedAt; added++; }   // 🧩 même place dans les blocs partout
           if((+w.upd || 0) > (+l.upd || 0)){                              // ✏️ modifié ailleurs, plus récemment
-            ['fr', 'ar', 'def', 'ex', 'exForm', 'cat', 'upd'].forEach(f => { if(w[f] === undefined) delete l[f]; else l[f] = w[f]; });
+            const keep = l.addedAt;                                        // ➕ 1.0.55 : tous les champs (phrases ajoutées, image…)
+            Object.keys(l).forEach(f => { if(!(f in w)) delete l[f]; });
+            Object.keys(w).forEach(f => { l[f] = w[f]; });
+            if(keep && (!w.addedAt || keep < w.addedAt)) l.addedAt = keep;
             added++;
           }
         });
@@ -23559,7 +23746,7 @@ let cloudPushPending = false;
 var SYNC_BASE_KEY = 'vocabVision.syncBase';   // ce que contient le cloud (empreintes) — propre à cet appareil, jamais envoyé
 var syncBase = null;
 var syncState = { running:false, again:false, timer:0, due:0, merging:false, lastPull:0, lastOk:0, errAt:0, lastLb:0 };
-var SYNC_LAZY = /::(tbMeta|pdvPos|conjResume|bouqResume|audioLibPos|inProgressSession|comboStreak|homeSectionsCollapsed|questsCollapsed|filterRowCollapsed|dictView)(::|$)/;
+var SYNC_LAZY = /::(lrMarks|tbMeta|pdvPos|conjResume|bouqResume|audioLibPos|inProgressSession|comboStreak|homeSectionsCollapsed|questsCollapsed|filterRowCollapsed|dictView)(::|$)/;
 function syncHash(s){
   s = String(s == null ? '' : s);
   let h = 0x811c9dc5;
@@ -23669,7 +23856,16 @@ function syncAfterRemoteChange(){
   const typing = inp && (document.activeElement === inp || inp.value);
   try{
     if(isHomeScreen && !typing){ renderBlockSelect(); return; }
-    // listes de fiches : les ✅ se mettent à jour sur place
+    // listes de fiches : 1.0.55 → on redessine l'écran (une fiche dévalidée ailleurs perd aussi son ✅), à la même hauteur
+    const cur = (typeof navStack !== 'undefined' && navStack) ? navStack[navIdx] : null;
+    const LISTS = ['renderPracticalSheetsHome', 'renderAtelierHome', 'renderConjugaisonHome', 'renderGrammaireAvanceeHome', 'renderArtOratoireHome', 'renderSituationsHome', 'renderSheetsHomeBySection', 'renderBescherelleHub', 'renderRedactionHub', 'renderEntrepriseHub'];
+    if(cur && !cur.x && LISTS.includes(cur.n) && typeof window[cur.n] === 'function' && document.querySelector('#quizCard [data-sheet], #quizCard [data-ent-sheet]')){
+      const y = window.scrollY;
+      try{ navRestoring = true; window[cur.n].apply(null, cur.a || []); }finally{ navRestoring = false; }
+      window.scrollTo(0, y);
+      return;
+    }
+    document.querySelectorAll('#quizCard .sync-done').forEach(x => { const b = x.closest('[data-sheet], [data-ent-sheet]'); const id = b && (b.dataset.sheet || b.dataset.entSheet); if(id && !isSheetPassed(id)){ x.remove(); b.style.background = ''; b.style.borderColor = ''; } });
     document.querySelectorAll('#quizCard [data-sheet], #quizCard [data-ent-sheet]').forEach(b => {
       const id = b.dataset.sheet || b.dataset.entSheet;
       if(isSheetPassed(id) && !b.querySelector('.sync-done') && !/✅/.test(b.textContent)){
@@ -23714,7 +23910,8 @@ function syncFlushNow(){
     if(document.body.classList.contains('quiz-active')) return;
     let idle = 0; try{ idle = Date.now() - lastInteractionAt; }catch(e){}
     if(idle > 15 * 60000) return;
-    if(Date.now() - syncState.lastPull > (idle < 5 * 60000 ? 25000 : 90000)) syncCycle();
+    const tbOn = !!document.getElementById('tbkRoot');               // ⚡ 1.0.55 : dans la Tablette, on attend un texte ou un PDF de l'autre appareil
+    if(Date.now() - syncState.lastPull > (tbOn && idle < 3 * 60000 ? 8000 : idle < 5 * 60000 ? 25000 : 90000)) syncCycle();
   }, 5000);
   // ménage : les anciennes copies locales du classement (elles ralentissaient chaque envoi)
   setTimeout(() => { try{ const ks = []; for(let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); if(k && k.startsWith('lexiqueQuiz::leaderboard::')) ks.push(k); } ks.forEach(k => localStorage.removeItem(k)); }catch(e){} }, 3000);
@@ -24146,6 +24343,15 @@ const COLOR_PRESETS = {
 /* ============ 🆕 NOUVEAUTÉS — pour que tout ce qui a été ajouté reste découvrable ============ */
 const WHATS_NEW_SECTIONS = [
   { icon:'🆕', title:'Nouveautés', items:[
+    { name:'🔊 Écouter un PDF ou un livre : ce qui est lu reste coloré', desc:"Sur un PDF « tel quel » ou un livre .epub, touche 🔊 : la voix lit à partir de ce que tu vois, phrase par phrase ; la phrase lue est surlignée, puis elle garde une couleur « lu ». Tu vois où tu en es, même en revenant le lendemain, et sur ton autre appareil. ⏮ ⏸ ⏭, la vitesse, ✕ (ou Échap) pour arrêter." },
+    { name:'🎤 « Je lis » sur un PDF ou un livre', desc:"Touche 🎤 et lis à voix haute la phrase soulignée : le micro te suit, chaque mot que tu dis prend la couleur « lu » et la garde ; phrase bien lue → on passe à la suivante." },
+    { name:'🖍 Le surligneur : le mot ou la phrase, tes couleurs', desc:"Dans un PDF ou un livre, 🖍 règle tout : la souris (ou le doigt) allume le mot entier ou toute la phrase, dans la couleur de ton choix ; la couleur de ce qui est lu, celle de la phrase lue à voix haute ; garder ou non ; et « 🧽 Effacer » pour recommencer un document. Dans la Tablette : Aa › Page › Suivre." },
+    { name:'🎯 Les mots du PDF bien calés, même dans un journal', desc:"Sur les colonnes serrées d'un journal (deux-points, guillemets, mots coupés en fin de ligne), chaque mot a maintenant sa propre boîte : le surlignage suit le bon mot, et un mot coupé s'allume en entier." },
+    { name:'✅ Fiches : valider ou dévalider compte vraiment', desc:"« ✅ Marquer comme faite » compte dans tes objectifs du jour (exercices, matières, fiches de la rubrique). Une fiche faite un autre jour : « ↻ Refaite aujourd'hui ». Dévalidée à la main, elle ne se revalide plus toute seule, et la liste se met à jour sur tes deux appareils." },
+    { name:'🧩 Les blocs gardent leurs résultats quand tes mots changent', desc:"Retirer, ajouter ou modifier des mots décale les blocs : leurs résultats et les pastilles des modes sont maintenant retrouvés, même quand un ancien bloc se retrouve coupé en deux. Un bloc qui a reçu beaucoup de mots nouveaux reste « à faire »." },
+    { name:'➕ Une phrase ajoutée arrive aussi dans les nouveaux blocs', desc:"Une phrase ajoutée à un mot déjà expliqué devient aussi une carte dans ton dernier bloc, pour la travailler comme un nouveau mot (le message te dit dans quel bloc). Dans le bloc du mot, ses phrases passent à tour de rôle d'une partie à l'autre. Et elles suivent enfin sur ton autre appareil." },
+    { name:'⚡ La Tablette et les PDF arrivent plus vite sur l\'autre appareil', desc:"Dans la Tablette, l'appli regarde les nouveautés toutes les 8 secondes. Un PDF ou un livre ajouté sur le PC se télécharge tout seul sur le téléphone (en Wi-Fi, jusqu'à 60 Mo) : il est prêt quand tu l'ouvres." },
+    { name:'🧹 Cloudflare R2 : ce que tu supprimes part aussi de R2', desc:"Supprimer un PDF, un livre ou une image d'un texte les retire aussi de Cloudflare R2 (même supprimés sur le téléphone : l'appareil relié à R2 s'en charge). Sous l'étagère : la place utilisée sur les 10 Go gratuits, et « 🧹 Ranger Cloudflare » pour retirer les fichiers qui ne servent plus." },
     { name:'📕 Lire un livre .epub tel quel', desc:"Un .epub s'ouvre maintenant comme dans une vraie liseuse : un seul livre, avec ses titres, ses italiques, ses images et ses notes, au lieu d'être découpé en textes. ☰ le sommaire · 🔍 chercher un mot dans tout le livre (chaque résultat avec sa phrase) · A− / A+ (ou Ctrl + molette, ou pincer) · Aa : police, thème jour / sépia / nuit, largeur, interligne. Touche un mot pour sa fiche, comme sur un PDF. L'endroit où tu en es est gardé." },
     { name:'📖 « Tel quel » coché par défaut', desc:"Pour un PDF, un .epub ou une BD .cbz, la première option, « Tel quel », est maintenant cochée d'office : les vraies pages du PDF, le vrai livre. « En textes, sur la Tablette » reste possible en un clic." },
     { name:'🖼 Les BD .cbz page par page', desc:"Une BD .cbz « telle quelle » s'ouvre comme un PDF : chaque image est une page, avec le zoom et la liste des pages." },
@@ -38695,13 +38901,17 @@ function renderPracticalSheetDetail(id){
   // Elle n'est plus validée dès l'ouverture (un clic par erreur la comptait) mais seulement après
   // 20 s de lecture réelle sur la fiche — et elle reste dévalidable à la main (bouton en bas).
   if(window.__sheetAutoValidateTimer){ clearTimeout(window.__sheetAutoValidateTimer); window.__sheetAutoValidateTimer = null; }
-  if(!canQuiz && !isSheetPassed(sheet.id)){
+  const offByHand = (() => { const r = loadSheetResults()[sheet.id]; return !!(r && r.off && !r.passed); })();
+  if(!canQuiz && !sheetPassedToday(sheet.id) && !offByHand){
     window.__sheetAutoValidateTimer = setTimeout(() => {
       window.__sheetAutoValidateTimer = null;
-      if(window.__currentSheetDetailId !== sheet.id || isSheetPassed(sheet.id) || window.__sheetManuallyUnvalidated === sheet.id) return;
-      markSheetPassed(sheet.id, 100);
+      if(window.__currentSheetDetailId !== sheet.id || sheetPassedToday(sheet.id) || window.__sheetManuallyUnvalidated === sheet.id) return;
+      const r0 = loadSheetResults()[sheet.id]; if(r0 && r0.off && !r0.passed) return;
+      const again = isSheetPassed(sheet.id);
+      markSheetPassed(sheet.id, 100, { man:1 });
       refreshSheetValidateUi(sheet.id);
-      setStatus('✅ Fiche lue — validée automatiquement (tu peux la dévalider en bas).', 'ok');
+      setStatus(again ? '✅ Fiche relue — elle compte aussi pour aujourd\'hui.' : '✅ Fiche lue — validée automatiquement (tu peux la dévalider en bas).', 'ok');
+      try{ questWinCheck(); }catch(e){}
     }, 20000);
   }
   window.__currentSheetDetailId = sheet.id;
@@ -38739,7 +38949,7 @@ function renderPracticalSheetDetail(id){
     <div class="cat-tag">${sheet.icon} ${escapeHtml(sheet.category)}<span id="sheetValidatedTag">${isSheetPassed(sheet.id) ? ' · ✅ Validée' : ''}</span></div>
     <div class="word-fr" style="font-size:clamp(19px,4vw,25px);">${escapeHtml(sheet.title)}</div>
     <div class="word-def" style="margin-top:6px;">${escapeHtml(sheet.intro)}</div>
-    <div class="done-top-row"><button type="button" class="mode-chip done-top-btn" id="sheetValidateTopBtn"></button>${sheet.section === 'oratoire' && sheet.type !== 'table' ? `<button type="button" class="mode-chip done-top-btn tb-echo-btn" id="sheetEchoBtn" title="La voix lit une phrase, tu la répètes : les mots s'allument en vert">🔁 Écoute et répète</button>` : ''}</div>
+    <div class="done-top-row"><button type="button" class="mode-chip done-top-btn" id="sheetValidateTopBtn"></button><button type="button" class="mode-chip done-top-btn redo" id="sheetRedoBtn" hidden>↻ Refaite aujourd'hui</button>${sheet.section === 'oratoire' && sheet.type !== 'table' ? `<button type="button" class="mode-chip done-top-btn tb-echo-btn" id="sheetEchoBtn" title="La voix lit une phrase, tu la répètes : les mots s'allument en vert">🔁 Écoute et répète</button>` : ''}</div>
     ${(() => { let n = 0; try{ n = fsItems(sheet).length; }catch(e){} const c = sheetTableCopyData(sheet); return (n || c) ? `<div class="fsa-row">${n ? `<button type="button" class="mode-chip fsa-btn" id="sheetAddWordsBtn">➕ Ajouter ces ${n} mots à mes blocs</button>` : ''}${c ? `<button type="button" class="mode-chip fsa-copy" id="sheetCopyBtn" data-sheet-copy="${escapeHtml(sheet.id)}" title="Tout le tableau, avec ses en-têtes, d'un seul coup : il se colle tel quel dans Excel, Word, Google Docs ou une note">📋 Copier le tableau (${c.n} ligne${c.n > 1 ? 's' : ''})</button>` : ''}</div>` : ''; })()}
     ${buildReadingToolbarHtml()}
     ${bodyHtml}
@@ -38757,19 +38967,30 @@ function renderPracticalSheetDetail(id){
   const sheetToggleDone = () => {
     if(isSheetPassed(sheet.id)){
       unmarkSheetPassed(sheet.id);
-      window.__sheetManuallyUnvalidated = sheet.id; // pas de re-validation automatique pendant cette visite
+      window.__sheetManuallyUnvalidated = sheet.id; // pas de re-validation automatique (ni maintenant, ni aux visites suivantes)
       if(window.__sheetAutoValidateTimer){ clearTimeout(window.__sheetAutoValidateTimer); window.__sheetAutoValidateTimer = null; }
       setStatus('↩️ Fiche dévalidée — elle ne compte plus dans tes objectifs.', 'ok');
     } else {
-      markSheetPassed(sheet.id, 100);
+      markSheetPassed(sheet.id, 100, { man:1 });
       window.__sheetManuallyUnvalidated = null;
       playCorrectSound();
-      setStatus('✅ Fiche validée !', 'ok');
+      setStatus("✅ Fiche validée ! Elle compte dans tes objectifs du jour.", 'ok');
     }
     refreshSheetValidateUi(sheet.id);
+    try{ questWinCheck(); }catch(e){}
     if(typeof cloudAutoPush === 'function') cloudAutoPush();
   };
   ['sheetValidateToggleBtn', 'sheetValidateTopBtn'].forEach(id => { const b = document.getElementById(id); if(b) b.addEventListener('click', sheetToggleDone); });
+  { const rb = document.getElementById('sheetRedoBtn'); if(rb) rb.addEventListener('click', () => {
+    const r = loadSheetResults()[sheet.id] || {};
+    markSheetPassed(sheet.id, r.pct || 100, { man:1 });
+    window.__sheetManuallyUnvalidated = null;
+    playCorrectSound();
+    setStatus("↻ Fiche refaite : elle compte aussi pour aujourd'hui.", 'ok');
+    refreshSheetValidateUi(sheet.id);
+    try{ questWinCheck(); }catch(e){}
+    if(typeof cloudAutoPush === 'function') cloudAutoPush();
+  }); }
   document.getElementById('backFromSheetDetailBtn').addEventListener('click', homeFn);
   wireReadingToolbar(() => {
     let fullText = '';
@@ -49107,7 +49328,12 @@ async function tbStore(store, mode, fn){
 }
 async function tbImgPut(id, blob){ try{ await tbStore('img', 'readwrite', os => { os.put(blob, tbImgKey(id)); }); return true; }catch(e){ console.warn('tablette : image', e); return false; } }
 async function tbImgGet(id){ try{ return await tbStore('img', 'readonly', os => os.get(tbImgKey(id))) || null; }catch(e){ return null; } }
-async function tbImgDel(id){ try{ tbImgSyncDrop(id); }catch(e){} try{ const m = tbImgR2Map(); if(m[id]){ if(r2Ready()) r2Delete(m[id]).catch(() => {}); delete m[id]; tbImgR2MapSave(m); } }catch(e){} try{ await tbStore('img', 'readwrite', os => { os.delete(tbImgKey(id)); }); }catch(e){} if(TB.imgUrl[id]){ try{ URL.revokeObjectURL(TB.imgUrl[id]); }catch(e){} delete TB.imgUrl[id]; } }
+async function tbImgDel(id){
+  // 🗑 1.0.55 : l'image était dans Cloudflare R2 → on la retire (ou, sans les clés R2 sur cet appareil, l'appareil connecté s'en chargera)
+  let r2p = ''; try{ const h = JSON.parse(tbKvGet(tbImgSKey(id)) || 'null'); const m0 = h && h.r2 && /(vocabvision\/img\/[^/?#]+\.vv)$/.exec(h.r2); if(m0) r2p = m0[1]; }catch(e){}
+  try{ const m = tbImgR2Map(); if(m[id]){ r2p = r2p || m[id]; delete m[id]; tbImgR2MapSave(m); } }catch(e){}
+  if(r2p){ if(r2Ready()) r2Delete(r2p).catch(() => r2TrashAdd(r2p)); else r2TrashAdd(r2p); }
+  try{ tbImgSyncDrop(id); }catch(e){} try{ await tbStore('img', 'readwrite', os => { os.delete(tbImgKey(id)); }); }catch(e){} if(TB.imgUrl[id]){ try{ URL.revokeObjectURL(TB.imgUrl[id]); }catch(e){} delete TB.imgUrl[id]; } }
 async function tbImgUrl(id){
   if(!id) return '';
   if(TB.imgUrl[id]) return TB.imgUrl[id];
@@ -52038,12 +52264,26 @@ async function pdvCloudUp(id){
   pdvPatch(id, { cupd:e.upd });
   return true;
 }
+/* 🗑 1.0.55 : les fichiers de R2 à retirer (images des textes supprimés sur un appareil sans les clés R2) — synchronisé */
+var R2_TRASH = 'lexiqueQuiz::r2Trash';
+function r2TrashAll(){ try{ return JSON.parse(localStorage.getItem(nsKey(R2_TRASH)) || '{}') || {}; }catch(e){ return {}; } }
+function r2TrashAdd(path){ if(!path) return; const T = r2TrashAll(); T[path] = Date.now(); try{ localStorage.setItem(nsKey(R2_TRASH), JSON.stringify(T)); }catch(e){} }
+async function r2TrashPump(){
+  if(!r2Ready()) return 0;
+  const T = r2TrashAll(), ks = Object.keys(T).filter(k => T[k]); if(!ks.length) return 0;
+  let n = 0;
+  for(const k of ks){ try{ await r2Delete(k); T[k] = 0; n++; }catch(err){ if(err && err.status === 404){ T[k] = 0; } } }
+  Object.keys(T).forEach(k => { if(!T[k]) delete T[k]; });
+  try{ localStorage.setItem(nsKey(R2_TRASH), JSON.stringify(T)); }catch(e){}
+  return n;
+}
 /* la file des envois (un à la fois) ; et les fichiers supprimés ailleurs à retirer de R2 */
 async function pdvCloudPump(){
   if(PDVUP.busy) return;
   PDVUP.busy = true;
   try{
     await pdvCloudAdopt();
+    try{ await r2TrashPump(); }catch(e){}
     if(r2Ready()){
       const L = pdvCloud(); let ch = false;
       for(const e of L){
@@ -52125,6 +52365,29 @@ function pdvCloudIn(quiet){
   PDV_DIRS = null;
   try{ pdvShelfRefresh(); }catch(e){}
   if(!quiet){ setTimeout(() => { try{ pdvCloudPump(); }catch(e){} }, 300); }
+  setTimeout(() => { try{ pdvAutoGet(); }catch(e){} }, 1200);
+}
+/* ⇣ 1.0.55 : un PDF (ou un livre) ajouté sur ton autre appareil est téléchargé tout seul, en arrière-plan :
+   il est prêt quand tu l'ouvres. Pas en données mobiles ni en mode « économie de données », et pas au-delà de 60 Mo
+   (ceux-là : touche-les pour les avoir). Un seul à la fois. */
+var PDV_AUTO = { busy:false, fail:{} };
+function pdvSay(msg, ms){ if(document.getElementById('tbToast')){ try{ tbToast(msg, ms || 3000); return; }catch(e){} } try{ setStatus(msg, 'ok'); }catch(e){} }
+async function pdvAutoGet(){
+  if(PDV_AUTO.busy) return;
+  try{ const c = navigator.connection; if(c && (c.saveData || c.type === 'cellular')) return; }catch(e){}
+  const have = new Set(pdvList().map(m => m.id));
+  const todo = pdvCloud().filter(e => !e.gone && e.url && e.k && !have.has(e.id) && !PDVUP.dl.has(e.id) && (e.size || 0) <= 60 * 1048576 && !((PDV_AUTO.fail[e.id] || 0) >= 2));
+  if(!todo.length) return;
+  PDV_AUTO.busy = true;
+  try{
+    for(const e of todo){
+      if(pdvList().some(m => m.id === e.id)) continue;
+      let ok = false; try{ ok = await pdvCloudGet(e, true); }catch(err){ ok = false; }
+      if(!ok) PDV_AUTO.fail[e.id] = (PDV_AUTO.fail[e.id] || 0) + 1;
+      else pdvSay('☁️ « ' + e.title + ' » est arrivé de ton autre appareil', 2600);
+      try{ PDVUP.dl.delete(e.id); pdvShelfRefresh(); }catch(err){}
+    }
+  } finally { PDV_AUTO.busy = false; }
 }
 /* ⇣ un PDF de l'autre appareil : on le télécharge (une fois), on le déchiffre, il est rangé ici */
 async function pdvFetchBuf(url, onFrac, headers){
@@ -52142,10 +52405,10 @@ function pdvDlPaint(id){
   const el = document.querySelector(`#pdvShelf [data-pdv-open="${CSS.escape(id)}"] .pdv-sh-cl`);
   if(el){ el.classList.add('dl'); el.textContent = '⇣ ' + Math.round((PDVUP.dl.get(id) || 0) * 100) + ' %'; }
 }
-async function pdvCloudGet(e){
+async function pdvCloudGet(e, quiet){
   if(PDVUP.dl.has(e.id)) return false;
   PDVUP.dl.set(e.id, 0); pdvDlPaint(e.id);
-  try{ tbToast('☁️ Téléchargement de « ' + e.title + ' »…'); }catch(err){}
+  if(!quiet) try{ tbToast('☁️ Téléchargement de « ' + e.title + ' »…'); }catch(err){}
   const img = e.kind === 'img', n = img ? (e.n || 1) : 1;
   try{
     const key = await pdvKeyOf(e.k);
@@ -52194,6 +52457,58 @@ function pdvShelfAll(){
   C.forEach(e => { if(!e.gone && e.url && e.k && !ids.has(e.id)){ const o = P[e.id] || {}; out.push(Object.assign({}, e, { remote:1, cl:1, last:o.p != null ? o.p : (e.last || 0) })); } });
   return out.sort((a, b) => (b.at0 || b.at || 0) - (a.at0 || a.at || 0));
 }
+/* ☁️ la place prise sur Cloudflare R2 (sous l'étagère) */
+function pdvR2UsePaint(){
+  const el = document.getElementById('pdvR2Use'); if(!el || !r2Ready()) return;
+  r2Usage().then(b => { if(b == null || !el.isConnected) return; const pct = Math.min(100, b / (10 * 1073741824) * 100); el.innerHTML = `☁️ Cloudflare R2 : <b>${r2FmtGo(b)}</b> utilisés sur 10 Go gratuits <i style="--w:${pct.toFixed(1)}%"></i>`; }).catch(() => {});
+}
+/* 🧹 1.0.55 : les fichiers de R2 que plus rien n'utilise (PDF, livres, images de textes supprimés, envois interrompus).
+   Prudence : on récupère d'abord les nouveautés de tes autres appareils, et un fichier de moins de 24 h n'est jamais retiré
+   (il peut être en train d'arriver d'un autre appareil). Les audios de l'Audiothèque ne sont pas concernés. */
+async function r2TidyScan(){
+  try{ await syncCycle({ force:true }); }catch(e){}
+  const keep = new Set();
+  pdvCloud().forEach(e => { if(!e.gone) pdvR2Keys(e).forEach(k => keep.add(k)); });
+  try{ Object.values(tbImgR2Map()).forEach(k => keep.add(k)); }catch(e){}
+  try{ const re = /^lexiqueQuiz::tbImg::[^~:]+::u:/; const ks = (typeof TBKV !== 'undefined' && TBKV.map) ? [...TBKV.map.keys()] : [];
+    for(let i = 0; i < localStorage.length; i++) ks.push(localStorage.key(i));
+    ks.forEach(k => { if(!k || !re.test(k)) return; try{ const h = JSON.parse(tbKvGet(k) || 'null'); const m = h && h.r2 && /(vocabvision\/img\/[^/?#]+\.vv)$/.exec(h.r2); if(m) keep.add(m[1]); }catch(e){} });
+  }catch(e){}
+  const all = (await r2ListAll('vocabvision/pdf/')).concat(await r2ListAll('vocabvision/img/'));
+  const old = Date.now() - 24 * 3600000;
+  return all.filter(o => o.path && !keep.has(o.path) && (o.mod || 0) < old);
+}
+function r2Ask(msg, yes, no){
+  return new Promise(res => {
+    const ov = document.createElement('div'); ov.className = 'am-dlg-ov tbl-dlg-ov show';
+    ov.innerHTML = `<div class="am-dlg tbl-dlg" role="dialog" aria-modal="true" aria-label="Cloudflare R2"><div class="am-dlg-t">${escapeHtml(msg)}</div>
+      <div class="am-dlg-b"><button class="am-dlg-btn ghost" data-v="no">${escapeHtml(no || 'Annuler')}</button><button class="am-dlg-btn" data-v="ok">${escapeHtml(yes || 'OK')}</button></div></div>`;
+    document.body.appendChild(ov);
+    const done = (v) => { ov.remove(); document.removeEventListener('keydown', key, true); res(v); };
+    const key = (e) => { if(e.key === 'Escape'){ e.preventDefault(); e.stopPropagation(); done(false); } };
+    document.addEventListener('keydown', key, true);
+    ov.addEventListener('click', (e) => { if(e.target === ov || e.target.closest('[data-v="no"]')) done(false); else if(e.target.closest('[data-v="ok"]')) done(true); });
+    setTimeout(() => { const b = ov.querySelector('[data-v="ok"]'); if(b) b.focus(); }, 30);
+  });
+}
+async function r2Tidy(btn){
+  if(!r2Ready()) return;
+  if(btn){ btn.disabled = true; btn.textContent = '🧹 Je regarde…'; }
+  let L = [];
+  try{ L = await r2TidyScan(); }
+  catch(e){ pdvSay('⚠️ Cloudflare R2 : ' + ((e && e.message) || 'impossible de lister les fichiers'), 3600); if(btn){ btn.disabled = false; btn.textContent = '🧹 Ranger Cloudflare'; } return; }
+  if(btn){ btn.disabled = false; btn.textContent = '🧹 Ranger Cloudflare'; }
+  const size = L.reduce((s, o) => s + (o.size || 0), 0);
+  if(!L.length){ pdvSay('🧹 Cloudflare R2 est déjà rangé : aucun fichier inutile', 3000); pdvR2UsePaint(); return; }
+  const ok = await r2Ask(`🧹 ${L.length} fichier${L.length > 1 ? 's' : ''} ne ser${L.length > 1 ? 'vent' : 't'} plus à rien sur Cloudflare R2 (${amFmtSize(size)}) : des PDF, livres ou images déjà supprimés. Les retirer ?`, 'Retirer', 'Laisser');
+  if(!ok) return;
+  let n = 0, freed = 0;
+  for(const o of L){ try{ await r2Delete(o.path); n++; freed += o.size || 0; }catch(e){} }
+  R2Q.at = 0;
+  pdvSay(`🧹 ${n} fichier${n > 1 ? 's' : ''} retiré${n > 1 ? 's' : ''} · ${amFmtSize(freed)} libérés sur Cloudflare R2`, 3600);
+  try{ await r2Usage(true); }catch(e){}
+  pdvR2UsePaint();
+}
 function pdvShelfHint(all){
   if(PDVUP.err && pdvR2Ok()) return `<div class="pdv-sh-hint err" role="status"><span>⚠️ Envoi vers Cloudflare R2 impossible : ${escapeHtml(PDVUP.err)}</span><button type="button" data-pdvs="r2-retry">🔁 Réessayer</button></div>`;
   const alone = all.filter(m => !m.remote && !m.cl).length;
@@ -52202,6 +52517,360 @@ function pdvShelfHint(all){
 }
 setTimeout(() => { try{ pdvCloudPump(); }catch(e){} }, 9000);
 
+/* ============ 🔊🎤🖍 1.0.55 : LIRE ET ÉCOUTER UN PDF (OU UN LIVRE), CE QUI EST LU RESTE COLORÉ ============
+   • une page de PDF ou un chapitre de livre = une « unité » : son texte (P.t) et la place de chaque mot (P.at[j], data-j) ;
+   • on en tire les mots entiers (morceaux collés, mot coupé en fin de ligne) et les phrases ;
+   • 🔊 Écouter : la voix lit phrase par phrase, la phrase lue est surlignée, puis elle garde la couleur « lu » ;
+   • 🎤 Je lis : le micro suit ta lecture, les mots que tu dis prennent la couleur « lu » et la gardent ;
+   • ce qui est lu est gardé pour chaque document (plages de texte), et voyage vers tes autres appareils ;
+   • 🖍 le survol suit le mot ou la phrase, dans la couleur choisie. */
+var LR = null, LR_KEY = 'lexiqueQuiz::lrMarks';
+var LR_COL = { green:['Vert', '34,197,94'], gold:['Jaune', '250,204,21'], sky:['Ciel', '96,165,250'], rose:['Rose', '244,114,182'], peach:['Pêche', '251,146,60'], lilac:['Lilas', '167,139,250'] };
+function lrRgb(k, c, def){ if(k === 'custom') return tbHexRgb(c) || def; return (LR_COL[k] || TB_HOV[k] || [0, def])[1]; }
+function lrApplyVars(S){
+  if(!S || !S.ov) return; const u = tbUi();
+  try{ S.ov.style.setProperty('--tb-hov-rgb', tbHovRgb()); S.ov.style.setProperty('--pdv-hov', `rgba(${tbHovRgb()},.38)`); }catch(e){}
+  S.ov.style.setProperty('--lr-rd-rgb', lrRgb(u.lrRd || 'green', u.lrRdc, LR_COL.green[1]));
+  S.ov.style.setProperty('--lr-say-rgb', lrRgb(u.lrSay || 'gold', u.lrSayc, LR_COL.gold[1]));
+}
+function lrKind(S){ return S === PDV ? 'pdf' : 'epub'; }
+function lrUnits(S){ return S === PDV ? S.pages : (S.chs || []); }
+function lrUnitOf(S, el){
+  if(S === PDV){ const pg = S.pages.find(x => x.sh && x.sh.contains(el)); return pg ? S.pages.indexOf(pg) : -1; }
+  const sec = el.closest && el.closest('.epv-ch'); return sec ? +sec.dataset.c : -1;
+}
+function lrUKey(S, k){ return S === PDV ? 'p' + (S.pages[k] ? S.pages[k].p : k + 1) : 'c' + k; }
+function lrText(S, k){
+  if(S === PDV){ const pg = S.pages[k]; if(!pg || !(pg.tl || pg.ix)) return null; return pdvPageText(pg); }
+  const ch = (S.chs || [])[k]; if(!ch) return null; try{ epvArm(S, ch); }catch(e){} return ch.P || null;
+}
+/* l'index d'une unité : les mots (groupes de morceaux) et les phrases, avec leurs plages dans le texte */
+function lrIdx(S, k){
+  const u = lrUnits(S)[k]; if(!u) return null;
+  const src = S === PDV ? (u.tl || u.ix) : u.P;
+  if(u.lrI && u.lrI.src === src) return u.lrI;
+  const P = lrText(S, k); if(!P || !P.t) return null;
+  const t = P.t, at = P.at, n = at.length, end = new Array(n);
+  for(let j = 0; j < n; j++){ let z = j + 1 < n ? at[j + 1] : t.length; while(z > at[j] && /\s/.test(t[z - 1])) z--; end[j] = z; }
+  // les mots : des morceaux sans blanc entre eux (« co » « fonda » « teur », « cofonda‐ » + « teur », « l' » + « homme »)
+  const G = [], gOf = new Int32Array(n).fill(-1);
+  for(let j = 0; j < n; j++){
+    if(end[j] <= at[j]){ continue; }
+    const prev = G.length ? G[G.length - 1] : null;
+    if(prev && prev.b === at[j]){ prev.js.push(j); prev.b = end[j]; }
+    else G.push({ a:at[j], b:end[j], js:[j] });
+    gOf[j] = G.length - 1;
+  }
+  G.forEach(g => { g.n = spCompact(t.slice(g.a, g.b)); });
+  // les phrases
+  const Sx = []; let pos = 0;
+  (typeof bqSplit === 'function' ? bqSplit(t) : t.split(/(?<=[.!?…])\s+/)).forEach(s => {
+    const s0 = String(s || '').trim(); if(!s0) return;
+    let a = t.indexOf(s0, pos); if(a < 0) a = pos; const b = Math.min(t.length, a + s0.length); pos = b;
+    Sx.push({ a, b, gs:[] });
+  });
+  if(!Sx.length) Sx.push({ a:0, b:t.length, gs:[] });
+  const sOf = new Int32Array(G.length).fill(0); let si = 0;
+  G.forEach((g, gi) => { while(si < Sx.length - 1 && g.a >= Sx[si + 1].a) si++; sOf[gi] = si; Sx[si].gs.push(gi); });
+  const I = { src, t, at, end, G, gOf, S:Sx.filter(x => x.gs.length), sOf:null };
+  const map = new Map(); Sx.forEach((x, i) => map.set(x, i));
+  const keep = I.S, re = new Int32Array(G.length); keep.forEach((x, i) => x.gs.forEach(gi => { re[gi] = i; })); I.sOf = re;
+  u.lrI = I;
+  return I;
+}
+/* les éléments (spans) d'une unité, par numéro de morceau */
+function lrEls(S, k){
+  const u = lrUnits(S)[k]; if(!u) return [];
+  const root = S === PDV ? u.sh : u.cc; if(!root) return [];
+  const key = S === PDV ? 'L' + (u.layN || 0) : 'A' + (u.armed ? 1 : 0);
+  if(u.lrE && u.lrE.key === key && u.lrE.root === root) return u.lrE.by;
+  const by = []; root.querySelectorAll(S === PDV ? '.pdv-tl span[data-j]' : '.epv-w[data-j]').forEach(sp => { by[+sp.dataset.j] = sp; });
+  u.lrE = { key, root, by };
+  return by;
+}
+function lrGroupEls(S, k, I, gis){ const by = lrEls(S, k), out = []; gis.forEach(gi => (I.G[gi] ? I.G[gi].js : []).forEach(j => { if(by[j]) out.push(by[j]); })); return out; }
+/* ---------- les marques « lu » : par document, par unité, des plages [a, b) du texte ---------- */
+function lrAll(){ try{ return JSON.parse(localStorage.getItem(nsKey(LR_KEY)) || '{}') || {}; }catch(e){ return {}; } }
+function lrSaveAll(A){ try{ localStorage.setItem(nsKey(LR_KEY), JSON.stringify(A)); }catch(e){} }
+function lrRanges(s){ return String(s || '').split(',').filter(Boolean).map(x => x.split('-').map(Number)).filter(r => r.length === 2 && r[1] > r[0]); }
+function lrRangesStr(R){ return R.map(r => r[0] + '-' + r[1]).join(','); }
+function lrUnion(R){ R = R.slice().sort((a, b) => a[0] - b[0]); const o = []; R.forEach(r => { const l = o[o.length - 1]; if(l && r[0] <= l[1] + 1) l[1] = Math.max(l[1], r[1]); else o.push([r[0], r[1]]); }); return o; }
+var LR_PEND = null;
+function lrDocMarks(id){ const d = lrAll()[id]; return d && d.u ? d : { c:0, u:{} }; }
+function lrMark(S, k, a, b){
+  if(b <= a) return;
+  const id = S.id, uk = lrUKey(S, k);
+  if(!LR_PEND || LR_PEND.id !== id) { lrFlush(); LR_PEND = { id, u:{} }; }
+  (LR_PEND.u[uk] = LR_PEND.u[uk] || []).push([a, b]);
+  const u = lrUnits(S)[k]; if(u){ u.lrM = lrUnion((u.lrM || lrRanges((lrDocMarks(id).u[uk] || {}).r)).concat([[a, b]])); }
+  clearTimeout(lrMark.t); lrMark.t = setTimeout(lrFlush, 1200);
+}
+function lrFlush(){
+  const P = LR_PEND; LR_PEND = null; if(!P) return;
+  const A = lrAll(), d = A[P.id] = A[P.id] && A[P.id].u ? A[P.id] : { c:0, u:{} }, now = Date.now();
+  Object.keys(P.u).forEach(uk => { const o = d.u[uk] || {}; d.u[uk] = { r:lrRangesStr(lrUnion(lrRanges(o.r).concat(P.u[uk]))), t:Math.max(now, (o.t || 0) + 1) }; });
+  d.at = now;
+  lrSaveAll(A);
+}
+function lrClearDoc(S){
+  lrFlush();
+  const A = lrAll(), now = Date.now(); A[S.id] = { c:now, u:{}, at:now }; lrSaveAll(A);
+  lrUnits(S).forEach((u, k) => { u.lrM = []; const by = lrEls(S, k); by.forEach(sp => { if(sp) sp.classList.remove('lr-rd', 'lr-ok'); }); });
+}
+/* peindre ce qui est lu sur une unité (après son dessin, un zoom, l'arrivée du chapitre…) */
+function lrPaintUnit(S, k){
+  const u = lrUnits(S)[k]; if(!u) return;
+  if(!u.lrM){ const d = lrDocMarks(S.id); u.lrM = lrRanges((d.u[lrUKey(S, k)] || {}).r); }
+  if(!u.lrM.length && !(LR && LR.S === S && LR.k === k)) return;
+  const I = lrIdx(S, k); if(!I) return;
+  const by = lrEls(S, k), R = u.lrM;
+  if(R.length) I.G.forEach(g => { const on = R.some(r => g.a < r[1] && g.b > r[0]); g.js.forEach(j => { const sp = by[j]; if(sp) sp.classList.toggle('lr-rd', on); }); });
+  if(LR && LR.S === S && LR.k === k) lrPaintCur(LR);
+}
+function lrPaintCur(L){
+  document.querySelectorAll('.lr-say, .lr-cur').forEach(x => x.classList.remove('lr-say', 'lr-cur'));
+  const I = lrIdx(L.S, L.k); if(!I || !I.S[L.s]) return [];
+  const els = lrGroupEls(L.S, L.k, I, I.S[L.s].gs);
+  els.forEach(sp => sp.classList.add(L.kind === 'say' ? 'lr-say' : 'lr-cur'));
+  return els;
+}
+/* ---------- 🖍 le survol : le mot entier, ou toute la phrase ---------- */
+function lrHovGroup(S, sp){
+  const k = lrUnitOf(S, sp); if(k < 0) return null;
+  const I = lrIdx(S, k); if(!I) return null;
+  const gi = I.gOf[+sp.dataset.j]; if(gi == null || gi < 0) return null;
+  if(tbUi().hovUnit === 'phrase'){ const si = I.sOf[gi]; return { key:'s' + k + ':' + si, els:lrGroupEls(S, k, I, I.S[si] ? I.S[si].gs : [gi]), ph:1 }; }
+  return { key:'g' + k + ':' + gi, els:lrGroupEls(S, k, I, [gi]), ph:0 };
+}
+function lrHovClear(H){ if(!H) return; (H.gEls || []).forEach(x => x.classList.remove('hov', 'hovs')); (H.gTr || []).forEach(g => g.forEach(x => x.classList.remove('hov1', 'hov2', 'hov3'))); H.gEls = null; H.gKey = ''; H.gTr = []; }
+function lrHovStep(H, G){
+  if((G ? G.key : '') === (H.gKey || '')) return;
+  const trail = tbTrailOn() && !(G && G.ph), old = (H.gTr || []).slice();
+  if(H.gEls){ H.gEls.forEach(x => x.classList.remove('hov', 'hovs')); if(trail && !H.gPh) H.gTr = [H.gEls].concat(H.gTr || []); }
+  H.gEls = G ? G.els : null; H.gKey = G ? G.key : ''; H.gPh = G ? G.ph : 0;
+  if(G) G.els.forEach(x => x.classList.add(G.ph ? 'hovs' : 'hov'));
+  H.gTr = trail ? (H.gTr || []).filter(g => g !== (G && G.els) && g[0] && g[0].isConnected).slice(0, 3) : [];
+  old.forEach(g => g.forEach(x => x.classList.remove('hov1', 'hov2', 'hov3')));
+  H.gTr.forEach((g, i) => g.forEach(x => { if(!(G && G.els.includes(x))) x.classList.add('hov' + (i + 1)); }));
+}
+/* ---------- 🔊 Écouter / 🎤 Je lis ---------- */
+function lrNote(S, msg){ try{ tbToast(msg, 2600); }catch(e){} }
+function lrVisibleStart(S){
+  const units = lrUnits(S), body = S.body, br = body.getBoundingClientRect(), y0 = br.top + 50;
+  let k = S === PDV ? S.cur : Math.max(0, Math.floor(+epvPos(S) || 1) - 1);
+  for(let tries = 0; tries < 2; tries++){
+    const I = lrIdx(S, k); if(I){
+      const by = lrEls(S, k);
+      for(let si = 0; si < I.S.length; si++){ const els = lrGroupEls(S, k, I, I.S[si].gs.slice(0, 1)); const r = els[0] && els[0].getBoundingClientRect(); if(r && r.bottom > y0 && r.top < br.bottom) return { k, s:si }; }
+      if(by.length) return { k, s:0 };
+    }
+    if(k + 1 < units.length) k++;
+  }
+  return { k:S === PDV ? S.cur : k, s:0 };
+}
+async function lrReady(S, k){
+  if(S !== PDV){ return !!lrIdx(S, k); }
+  const pg = S.pages[k]; if(!pg) return false;
+  if(!pg.tl && !pg.ix){
+    try{ if(pg.scan) pdvOcrQueue(S, pg, true); else pdvRender(S, pg); }catch(e){}
+    for(let i = 0; i < 160 && PDV === S && !(pg.tl || pg.ix); i++) await new Promise(r => setTimeout(r, 150));
+  }
+  return !!lrIdx(S, k);
+}
+function lrDock(L){
+  let d = L.S.ov.querySelector('#lrDock');
+  if(!d){ d = document.createElement('div'); d.className = 'lr-dock'; d.id = 'lrDock'; d.setAttribute('role', 'toolbar'); d.setAttribute('aria-label', 'Lecture'); L.S.ov.appendChild(d); }
+  const I = lrIdx(L.S, L.k), n = I ? I.S.length : 0, where = L.S === PDV ? `p. ${L.S.pages[L.k] ? L.S.pages[L.k].p : L.k + 1}` : `ch. ${L.k + 1}`;
+  const t = L.kind === 'say' ? `🔊 ${L.playing ? '' : '⏸ '}Phrase ${Math.min(L.s + 1, n)} / ${n} · ${where}` : `🎤 ${L.msg || 'Lis la phrase soulignée'} · ${where}`;
+  if(d.dataset.k !== L.kind){                       // la barre est construite une fois : un toucher n'est jamais perdu pendant qu'elle se met à jour
+    d.dataset.k = L.kind;
+    d.innerHTML = `<span class="lr-dt" aria-live="polite"></span><button type="button" data-lr="prev" aria-label="Phrase précédente" title="Phrase précédente">⏮</button><button type="button" data-lr="toggle"></button><button type="button" data-lr="next" aria-label="Phrase suivante" title="Phrase suivante">⏭</button>${L.kind === 'say' ? `<button type="button" data-lr="rate" aria-label="Vitesse" title="Vitesse de la voix"></button>` : ''}<button type="button" class="lr-x" data-lr="x" aria-label="Arrêter la lecture" title="Arrêter (Échap)">✕</button>`;
+  }
+  d.hidden = false;
+  d.querySelector('.lr-dt').textContent = t;
+  const tg = d.querySelector('[data-lr="toggle"]'), on = L.kind === 'say' ? L.playing : !L.paused;
+  tg.textContent = on ? '⏸' : (L.kind === 'say' ? '▶' : '🎤'); tg.setAttribute('aria-label', on ? 'Pause' : 'Reprendre');
+  const rt = d.querySelector('[data-lr="rate"]'); if(rt) rt.textContent = String(L.rate || 1).replace('.', ',') + '×';
+  L.S.ov.querySelectorAll('[data-lr="say"], [data-lr="self"]').forEach(b => b.classList.toggle('lr-on', b.dataset.lr === L.kind));
+}
+function lrShow(L){
+  const els = lrPaintCur(L);
+  lrDock(L);
+  const el = els[0]; if(!el) return;
+  const r = el.getBoundingClientRect(), br = L.S.body.getBoundingClientRect();
+  if(r.top < br.top + 60 || r.bottom > br.bottom - 110) L.S.body.scrollBy({ top:r.top - br.top - br.height * 0.3, behavior:'smooth' });
+}
+async function lrStart(S, kind){
+  if(S === PDV && S.pdk && S.pdk.on){ lrNote(S, '📖 Quitte le mode liseuse (📖) pour écouter la page'); return; }
+  if(kind === 'self' && !(window.SpeechRecognition || window.webkitSpeechRecognition)){ lrNote(S, "🎤 Ce navigateur ne sait pas reconnaître la voix : essaie Chrome (ordinateur, Android) ou Safari (iPhone)."); return; }
+  lrStop(true);
+  try{ if(TB.sheetK !== -1) tbCloseSheet(); }catch(e){}
+  const st = lrVisibleStart(S);
+  const L = LR = { S, kind, k:st.k, s:st.s, tok:0, playing:kind === 'say', paused:false, rate:+(tbUi().lrRate || 1) || 1, sr:null, msg:'' };
+  if(!(await lrReady(S, L.k))){ lrNote(S, "Je ne trouve pas de texte sur cette page."); LR = null; return; }
+  lrApplyVars(S);
+  if(kind === 'say') lrSay(L); else { lrShow(L); lrSRStart(L); }
+}
+function lrStop(quiet){
+  const L = LR; if(!L) return;
+  LR = null; L.tok++;
+  if(L.kind === 'say'){ try{ window.speechSynthesis.cancel(); }catch(e){} try{ ttsSpeaking = false; }catch(e){} }
+  lrSRStop(L);
+  lrFlush();
+  document.querySelectorAll('.lr-say, .lr-cur').forEach(x => x.classList.remove('lr-say', 'lr-cur'));
+  try{ const d = L.S.ov.querySelector('#lrDock'); if(d) d.hidden = true; L.S.ov.querySelectorAll('.lr-on').forEach(b => b.classList.remove('lr-on')); }catch(e){}
+  if(!quiet) lrNote(L.S, '⏹ Lecture arrêtée');
+}
+function lrSentText(L){ const I = lrIdx(L.S, L.k); const x = I && I.S[L.s]; return x ? I.t.slice(x.a, x.b).replace(/\s+/g, ' ').trim() : ''; }
+function lrSay(L){
+  if(LR !== L) return;
+  const I = lrIdx(L.S, L.k);
+  if(!I || L.s >= I.S.length){ lrNextUnit(L, () => lrSay(L)); return; }
+  L.playing = true;
+  lrShow(L);
+  const tok = ++L.tok, text = lrSentText(L);
+  L.own = true;
+  try{ tbNarrFr(dxOn() ? dxSpeakText(text) : text, 'fr-FR', () => {
+    if(LR !== L || tok !== L.tok || !L.playing) return;
+    if(tbUi().lrKeep !== false){ const x = I.S[L.s]; if(x){ lrMark(L.S, L.k, x.a, x.b); lrGroupEls(L.S, L.k, I, x.gs).forEach(sp => sp.classList.add('lr-rd')); } }
+    L.s++;
+    L.gapT = setTimeout(() => { if(LR === L && tok === L.tok && L.playing) lrSay(L); }, 220);
+  }, L.rate * (typeof readingRate === 'number' && readingRate > 0 ? readingRate : 1)); }
+  finally{ L.own = false; }
+}
+async function lrNextUnit(L, then){
+  const units = lrUnits(L.S);
+  if(L.k + 1 >= units.length){ lrNote(L.S, L.kind === 'say' ? '✓ Écouté jusqu\'au bout' : '✓ Lu jusqu\'au bout'); lrStop(true); return; }
+  L.k++; L.s = 0;
+  if(L.S === PDV){ try{ pdvGo(L.S, L.k); }catch(e){} }
+  if(!(await lrReady(L.S, L.k)) || LR !== L){ if(LR === L) lrStop(true); return; }
+  const I = lrIdx(L.S, L.k); if(!I || !I.S.length){ lrNextUnit(L, then); return; }
+  then();
+}
+async function lrMove(L, d){
+  L.tok++; try{ if(L.kind === 'say') window.speechSynthesis.cancel(); }catch(e){}
+  clearTimeout(L.gapT);
+  let I = lrIdx(L.S, L.k);
+  L.s += d;
+  if(I && L.s >= I.S.length){ await lrNextUnit(L, () => {}); if(LR !== L) return; }
+  else if(L.s < 0){
+    if(L.k > 0){ L.k--; if(L.S === PDV) try{ pdvGo(L.S, L.k); }catch(e){} await lrReady(L.S, L.k); I = lrIdx(L.S, L.k); L.s = I ? Math.max(0, I.S.length - 1) : 0; }
+    else L.s = 0;
+  }
+  if(L.sr){ L.sr.consumed = tbSessionToks(L.sr).length; }
+  if(L.kind === 'say' && L.playing) lrSay(L); else lrShow(L);
+}
+function lrPause(L){ L = L || LR; if(!L) return; if(L.kind === 'say'){ L.playing = false; L.tok++; try{ window.speechSynthesis.cancel(); }catch(e){} } else { L.paused = true; lrSRStop(L); L.msg = 'Micro en pause'; } lrDock(L); }
+function lrResume(L){ L = L || LR; if(!L) return; if(L.kind === 'say'){ lrSay(L); } else { L.paused = false; L.msg = ''; lrSRStart(L); lrDock(L); } }
+/* 🎤 le micro suit la lecture */
+function lrSRStart(L){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition; if(!SR || LR !== L) return;
+  try{ vvHearStop(); }catch(e){} try{ stopRecognition(); }catch(e){} try{ tbSRStop(); }catch(e){}
+  let rec; try{ rec = new SR(); }catch(e){ lrNote(L.S, '🎤 Le micro est bloqué'); return; }
+  rec.lang = 'fr-FR'; rec.continuous = true; rec.interimResults = true; rec.maxAlternatives = 1;
+  const R = L.sr = { rec, res:[], consumed:0, dead:false, err:'' };
+  rec.onresult = (e) => {
+    if(R.dead || L.sr !== R) return;
+    let fin = false;
+    for(let q = e.resultIndex; q < e.results.length; q++){ const r = e.results[q]; R.res[q] = { t:(r[0] && r[0].transcript) || '', f:!!r.isFinal }; if(r.isFinal) fin = true; }
+    R.res.length = e.results.length;
+    lrSelfEval(L, fin);
+  };
+  rec.onerror = (e) => { if(!R.dead && e.error !== 'no-speech' && e.error !== 'aborted') R.err = e.error; };
+  rec.onend = () => {
+    if(R.dead || L.sr !== R) return;
+    L.sr = null;
+    if(R.err === 'not-allowed' || R.err === 'service-not-allowed'){ L.msg = 'Micro refusé : autorise-le dans le navigateur'; lrDock(L); return; }
+    if(LR === L && !L.paused) setTimeout(() => { if(LR === L && !L.paused && !L.sr) lrSRStart(L); }, 200);
+  };
+  try{ rec.start(); }catch(e){ L.sr = null; }
+}
+function lrSRStop(L){ const R = L && L.sr; if(!R) return; L.sr = null; R.dead = true; try{ R.rec.onresult = null; R.rec.onend = null; R.rec.onerror = null; R.rec.abort(); }catch(e){} }
+function lrSelfEval(L, fin){
+  if(LR !== L || L.kind !== 'self' || L.paused || !L.sr) return;
+  const I = lrIdx(L.S, L.k), x = I && I.S[L.s]; if(!x) return;
+  const norms = x.gs.map(gi => I.G[gi].n), toks = tbSessionToks(L.sr).slice(L.sr.consumed);
+  const { hit, last } = tbAlign(norms, toks);
+  const keep = tbUi().lrKeep !== false;
+  x.gs.forEach((gi, i) => { if(!hit[i]) return; const g = I.G[gi]; if(g.ok) return; g.ok = 1; if(keep) lrMark(L.S, L.k, g.a, g.b); lrGroupEls(L.S, L.k, I, [gi]).forEach(sp => sp.classList.add('lr-ok')); });
+  const n = norms.filter(Boolean).length || 1, got = hit.filter((h, i) => h && norms[i]).length, ratio = got / n;
+  let li = norms.length - 1; while(li > 0 && !norms[li]) li--;
+  L.msg = `${got} / ${n} mots`; lrDock(L);
+  if(ratio >= TB_SR_OK && (fin || ratio >= 0.999 || (hit[li] && ratio >= 0.85))){
+    L.sr.consumed += last + 1;
+    try{ playChime([660, 990], { type:'sine', noteDur:0.07, gap:0.02, volume:0.06 }); }catch(e){}
+    L.msg = ratio >= 0.95 ? '✓ Parfait !' : `✓ Bien lu (${Math.round(ratio * 100)} %)`;
+    L.s++;
+    if(L.s >= I.S.length) lrNextUnit(L, () => lrShow(L)); else lrShow(L);
+  }
+}
+/* ---------- 🖍 le panneau : survol, couleurs, lecture ---------- */
+function lrPanHtml(S){
+  const u = tbUi(), hov = u.hov || 'sky', unit = u.hov === 'off' ? 'off' : (u.hovUnit === 'phrase' ? 'phrase' : 'mot');
+  const pal = (attr, cur, cols, custom, cval) => `<div class="lr-cols">${Object.entries(cols).map(([k, c]) => `<button type="button" data-${attr}="${k}" class="${cur === k ? 'on' : ''}" style="background:rgb(${c[1]})" aria-label="${c[0]}" title="${c[0]}"></button>`).join('')}<label class="${cur === 'custom' ? 'on' : ''}" title="Ta couleur"><input type="color" data-${attr}-c="1" value="${/^#[0-9a-f]{6}$/i.test(cval || '') ? cval : '#22c55e'}" aria-label="Choisir ta couleur"></label></div>`;
+  const seg = (attr, v, l, on) => `<button type="button" data-${attr}="${v}" class="${on ? 'on' : ''}">${l}</button>`;
+  return `<h4>🖍 Surligneur et lecture</h4>
+    <div class="lr-pl">🖊️ Quand je passe dessus</div>
+    <div class="lr-seg">${seg('lr-unit', 'mot', '🔤 Le mot', unit === 'mot')}${seg('lr-unit', 'phrase', '📝 La phrase', unit === 'phrase')}${seg('lr-unit', 'off', '✋ Rien', unit === 'off')}</div>
+    <div class="lr-pl">Couleur du survol</div>${pal('lr-hov', hov === 'off' ? (u.hovPrev || 'sky') : hov, TB_HOV, true, u.hovc)}
+    <div class="lr-pl">Traînée derrière le mot</div>
+    <div class="lr-seg">${seg('lr-tr', 1, '🖍 Discrète', u.hovTrail !== false)}${seg('lr-tr', 0, 'Non', u.hovTrail === false)}</div>
+    <div class="lr-pl">🔊 Écouter · 🎤 Je lis</div>
+    <div class="lr-seg">${seg('lr-keep', 1, '✅ Ce qui est lu reste coloré', u.lrKeep !== false)}${seg('lr-keep', 0, 'Non', u.lrKeep === false)}</div>
+    <div class="lr-pl">Couleur de ce qui est lu</div>${pal('lr-rd', u.lrRd || 'green', LR_COL, true, u.lrRdc)}
+    <div class="lr-pl">Couleur de la phrase lue à voix haute</div>${pal('lr-say', u.lrSay || 'gold', LR_COL, true, u.lrSayc)}
+    <div class="lr-hint">🔊 : la voix lit, phrase par phrase. 🎤 : lis à voix haute, le micro te suit. Ce qui est lu est gardé, et suit sur tes autres appareils.</div>
+    <button type="button" class="lr-clear" data-lr="clear">🧽 Effacer les couleurs de lecture de ce document</button>`;
+}
+function lrPanShow(S, on){
+  let pn = S.ov.querySelector('#lrPan');
+  if(on == null) on = !pn || pn.hidden;
+  if(!pn){ pn = document.createElement('div'); pn.className = 'lr-pan'; pn.id = 'lrPan'; pn.setAttribute('role', 'dialog'); pn.setAttribute('aria-label', 'Surligneur et lecture'); S.ov.appendChild(pn); }
+  if(on){ pn.innerHTML = lrPanHtml(S); const tp = S.ov.querySelector('.pdv-top'); pn.style.top = ((tp ? tp.offsetHeight : 46) + 8) + 'px'; }
+  pn.hidden = !on;
+  const b = S.ov.querySelector('[data-lr="pan"]'); if(b) b.setAttribute('aria-expanded', String(on));
+}
+function lrRepaintAll(S){ lrUnits(S).forEach((u, k) => { if(u.lrM && u.lrM.length) lrPaintUnit(S, k); }); }
+function lrWire(S){
+  lrApplyVars(S);
+  S.ov.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-lr], [data-lr-unit], [data-lr-hov], [data-lr-tr], [data-lr-keep], [data-lr-rd], [data-lr-say]'); if(!b) return;
+    const u = tbUi(), L = LR && LR.S === S ? LR : null;
+    if(b.dataset.lr){
+      const a = b.dataset.lr;
+      if(a === 'say' || a === 'self'){ if(L && L.kind === a) lrStop(); else lrStart(S, a); }
+      else if(a === 'pan') lrPanShow(S);
+      else if(a === 'x') lrStop();
+      else if(a === 'prev' && L) lrMove(L, -1);
+      else if(a === 'next' && L) lrMove(L, 1);
+      else if(a === 'toggle' && L){ if(L.kind === 'say' ? L.playing : !L.paused) lrPause(L); else lrResume(L); }
+      else if(a === 'rate' && L){ const R = [0.8, 1, 1.2, 1.4]; L.rate = R[(R.indexOf(L.rate) + 1) % R.length] || 1; u.lrRate = L.rate; tbSaveUi(); lrDock(L); }
+      else if(a === 'clear'){ lrClearDoc(S); lrNote(S, '🧽 Couleurs de lecture effacées'); }
+      return;
+    }
+    if(b.dataset.lrUnit){ const v = b.dataset.lrUnit; if(v === 'off'){ if(u.hov !== 'off') u.hovPrev = u.hov; u.hov = 'off'; } else { if(u.hov === 'off') u.hov = u.hovPrev || 'sky'; u.hovUnit = v; } }
+    else if(b.dataset.lrHov){ u.hov = b.dataset.lrHov; }
+    else if(b.dataset.lrTr != null){ u.hovTrail = b.dataset.lrTr === '1'; }
+    else if(b.dataset.lrKeep != null){ u.lrKeep = b.dataset.lrKeep === '1'; }
+    else if(b.dataset.lrRd){ u.lrRd = b.dataset.lrRd; }
+    else if(b.dataset.lrSay){ u.lrSay = b.dataset.lrSay; }
+    tbSaveUi(); lrApplyVars(S); try{ if(S.hv) lrHovClear(S.hv), tbTrailClear(S.hv); }catch(e){}
+    lrPanShow(S, true);
+  });
+  S.ov.addEventListener('input', (e) => {
+    const t = e.target; if(!t || t.type !== 'color') return;
+    const u = tbUi();
+    if(t.dataset.lrHovC){ u.hov = 'custom'; u.hovc = t.value; }
+    else if(t.dataset.lrRdC){ u.lrRd = 'custom'; u.lrRdc = t.value; }
+    else if(t.dataset.lrSayC){ u.lrSay = 'custom'; u.lrSayc = t.value; }
+    else return;
+    lrApplyVars(S); clearTimeout(lrWire.t); lrWire.t = setTimeout(tbSaveUi, 300);
+  });
+}
+/* une autre voix commence (un mot touché, une fiche…) : la lecture se met en pause, sans sauter de phrase */
+(function lrSpeakGuard(){
+  try{ const o = speak; speak = function(){ if(LR && LR.kind === 'say' && LR.playing && !LR.own) lrPause(LR); return o.apply(this, arguments); }; }catch(e){}
+})();
 /* 🖍 1.0.49 : la traînée de couleurs du survol. H = { el (le mot allumé), tr (les 3 d'avant) }.
    Quand le doigt ou la souris quitte le texte, le dernier mot reste marqué (couleur 1) : on sait où on en était. */
 function tbTrailOn(){ const u = tbUi(); return u.hov !== 'off' && u.hovTrail !== false; }
@@ -52221,9 +52890,16 @@ function pdvTrailWire(S){
   try{ S.ov.style.setProperty('--pdv-hov', `rgba(${tbHovRgb()},.38)`); S.ov.style.setProperty('--tb-hov-rgb', tbHovRgb()); }catch(e){}
   const run = () => {
     H.raf = 0;
-    if(tbUi().hov === 'off'){ tbTrailClear(H); return; }
+    if(tbUi().hov === 'off'){ tbTrailClear(H); lrHovClear(H); return; }
     const t = document.elementFromPoint(H.x, H.y);
     let sp = t && t.closest ? t.closest('.pdv-tl span[data-j], #pdkFlow .tbw, .epv-w') : null;
+    // 🖍 1.0.55 : sur la page (PDF) et dans le livre : le mot entier (tous ses morceaux), ou toute la phrase
+    if(sp && sp.dataset.j != null && !sp.closest('#pdkFlow')){
+      let G = null; try{ G = lrHovGroup(S, sp); }catch(e){ G = null; }
+      if(G && G.els.length){ if(H.el) tbTrailClear(H); lrHovStep(H, G); return; }
+    }
+    if(!sp){ if(H.gEls) lrHovStep(H, null); }                                       // entre deux mots : le dernier rejoint la traînée
+    else if(H.gEls || (H.gTr && H.gTr.length)) lrHovClear(H);
     if(sp && sp.dataset.j != null && sp._tw0) sp = sp._tw0;                            // un mot coupé : on allume son premier morceau
     if(sp !== H.el) tbTrailStep(H, sp);
   };
@@ -52284,9 +52960,11 @@ function pdvShelfItem(m){
 }
 function pdvShelfHtml(){
   const L = pdvShelfAll(); if(!L.length) return '';
+  setTimeout(() => { try{ pdvR2UsePaint(); }catch(e){} }, 0);
   const D = pdvDirs(), ids = new Set(D.map(d => d.id));
   const loose = L.filter(m => !m.dir || !ids.has(m.dir));
-  return `<div class="pdv-shelf" id="pdvShelf"><div class="pdv-sh-h"><span>📖 Mes PDF et livres, tels quels <small>· ${L.some(m => m.cl) ? 'sur tes appareils' : 'sur cet appareil'} · touche un mot de la page pour sa définition</small></span><button type="button" class="pdv-sh-nd" data-pdvs="new-dir">📁＋ Nouveau dossier</button></div>
+  return `<div class="pdv-shelf" id="pdvShelf"><div class="pdv-sh-h"><span>📖 Mes PDF et livres, tels quels <small>· ${L.some(m => m.cl) ? 'sur tes appareils' : 'sur cet appareil'} · touche un mot de la page pour sa définition</small></span><span class="pdv-sh-hb">${r2Ready() ? `<button type="button" class="pdv-sh-nd" data-pdvs="r2-tidy" title="Retirer de Cloudflare R2 les fichiers qui ne servent plus">🧹 Ranger Cloudflare</button>` : ''}<button type="button" class="pdv-sh-nd" data-pdvs="new-dir">📁＋ Nouveau dossier</button></span></div>
+    ${r2Ready() ? '<div class="pdv-sh-use" id="pdvR2Use" aria-live="polite"></div>' : ''}
     ${pdvShelfHint(L)}
     ${D.map(d => { const In = L.filter(m => m.dir === d.id); return `<div class="pdv-dir ${d.open === false ? '' : 'open'}" data-dir="${tbAttr(d.id)}">
       <div class="pdv-dir-h" data-pdvs="dir-tog" data-dir="${tbAttr(d.id)}" role="button" tabindex="0" aria-expanded="${d.open === false ? 'false' : 'true'}"><span class="pdv-dir-c" aria-hidden="true">▸</span><span class="pdv-dir-i" aria-hidden="true">${d.open === false ? '📁' : '📂'}</span><b>${escapeHtml(d.name)}</b><small>${In.length} PDF</small>
@@ -52353,6 +53031,7 @@ document.addEventListener('click', async (e) => {
     if(a === 'new-dir'){ await pdvNewDir(); return; }
     if(a === 'r2'){ try{ pdvClose(true); }catch(err){} audioAdmin.showR2 = true; audioAdmin.showGh = false; renderAudioManager(); return; }
     if(a === 'r2-retry'){ PDVUP.skip.clear(); PDVUP.err = ''; pdvShelfRefresh(); pdvCloudPump(); return; }
+    if(a === 'r2-tidy'){ r2Tidy(act); return; }
     if(a === 'mv'){ pdvMoveMenu(act, act.dataset.id); return; }
     if(a === 'dir-tog'){ const D = pdvDirs(), d = D.find(x => x.id === dir); if(d){ d.open = d.open === false; pdvSaveDirs(D); pdvShelfRefresh(); } return; }
     if(a === 'dir-ren'){ const D = pdvDirs(), d = D.find(x => x.id === dir); if(!d) return; const n = await pdvAskName('✏️ Renommer le dossier', d.name); if(n){ d.name = n; pdvSaveDirs(D); pdvShelfRefresh(); } return; }
@@ -52366,7 +53045,12 @@ document.addEventListener('click', async (e) => {
   if(del){
     e.preventDefault(); e.stopPropagation();
     if(!del.classList.contains('sure')){ del.classList.add('sure'); del.textContent = 'Sûr ?'; clearTimeout(del.__t); del.__t = setTimeout(() => { del.classList.remove('sure'); del.textContent = '🗑'; }, 3200); return; }
-    pdvDelete(del.dataset.pdvDel).then(pdvShelfRefresh); return;
+    { const id = del.dataset.pdvDel, ce = pdvCloudOf(id), had = !!(ce && !ce.gone), mo = ce && ce.size ? ` (${amFmtSize(ce.size)} libérés)` : '';
+      pdvDelete(id).then(() => {
+        pdvShelfRefresh();
+        pdvSay(!had ? "🗑 Retiré de cet appareil" : r2Ready() ? `🗑 Supprimé de tes appareils et de Cloudflare R2${mo}` : "🗑 Supprimé de tes appareils. Il sera retiré de Cloudflare R2 dès que ton appareil relié à R2 s'ouvrira.", 3600);
+      }); }
+    return;
   }
   const it = t.closest('[data-pdv-open]'); if(it){ e.preventDefault(); pdvOpen(it.dataset.pdvOpen); }
 });
@@ -52567,6 +53251,7 @@ async function epvOpen(id, at){
       <button type="button" class="pdv-ib" data-epv="aa" aria-label="Police, thème, largeur" title="Police, thème, largeur" aria-expanded="false">Aa</button>
       <button type="button" class="pdv-ib ${U.th === 'night' ? 'on' : ''}" data-epv="night" aria-label="Mode nuit (N)" title="Mode nuit (N)" aria-pressed="${U.th === 'night'}">🌙</button>
       <button type="button" class="pdv-ib" data-epv="find" aria-label="Rechercher (Ctrl F)" title="Rechercher (Ctrl F)" aria-pressed="false">🔍</button>
+      <button type="button" class="pdv-ib" data-lr="say" aria-label="Écouter : la voix lit, phrase par phrase" title="🔊 Écouter : la voix lit, phrase par phrase">🔊</button><button type="button" class="pdv-ib" data-lr="self" aria-label="Je lis à voix haute : le micro me suit" title="🎤 Je lis à voix haute : le micro me suit">🎤</button><button type="button" class="pdv-ib" data-lr="pan" aria-label="Surligneur : couleurs, mot ou phrase" title="🖍 Surligneur : couleurs, mot ou phrase" aria-expanded="false">🖍</button>
       <button type="button" class="pdv-ib pdv-crb" data-epv="carnet" aria-label="Mon carnet : les mots tagués" title="Mon carnet : les mots tagués">🏷️<b class="pdv-crn" id="pdvCrN"></b></button>
     </div>
     <div class="pdv-find" id="epvFind" hidden role="search">
@@ -52603,6 +53288,7 @@ async function epvOpen(id, at){
   tbh.addEventListener('keydown', (e) => { if(e.key === 'Enter' && e.target.matches && e.target.matches('[role="button"][data-tb]')){ e.preventDefault(); e.target.click(); } });
   ov.addEventListener('click', (e) => epvClick(S, e));
   try{ pdvTrailWire(S); }catch(e){}
+  try{ lrWire(S); }catch(e){ console.warn('lecture', e); }
   epvKeysWire(S); epvPinchWire(S);
   const q = ov.querySelector('#epvQ'); let qt = 0;
   q.addEventListener('input', () => { clearTimeout(qt); qt = setTimeout(() => epvFind(S, q.value), 260); });
@@ -52763,6 +53449,7 @@ function epvArm(S, ch){
     n.parentNode.replaceChild(frag, n);
   });
   ch.P = { t, at };
+  try{ setTimeout(() => { if(EPV === S) lrPaintUnit(S, S.chs.indexOf(ch)); }, 0); }catch(e){}   // ✅ 1.0.55
 }
 /* le texte du chapitre → les phrases et les mots de la Tablette (les phrases du chapitre N sont numérotées N × 10000 + …) */
 function epvHost(S, ch){
@@ -52797,6 +53484,7 @@ function epvHost(S, ch){
   return true;
 }
 function epvTapWord(S, sp, e){
+  try{ if(LR && LR.S === S && LR.kind === 'say' && LR.playing) lrPause(LR); }catch(err){}
   const sec = sp.closest('.epv-ch'), ch = sec && S.chs[+sec.dataset.c]; if(!ch || !epvHost(S, ch)) return false;
   const j = +sp.dataset.j, P = S.tbP;
   let c = P.at[j] || 0; const pt = wtPoint(e.clientX, e.clientY); if(pt && sp.contains(pt.node)) c += Math.min(pt.off, (sp.textContent || '').length);
@@ -52927,6 +53615,8 @@ function epvKeysWire(S){
       e.preventDefault(); e.stopPropagation();
       const aa = S.ov.querySelector('#epvAa');
       if(TB.sheetK !== -1){ tbCloseSheet(); return; }
+      { const pn = S.ov.querySelector('#lrPan'); if(pn && !pn.hidden){ lrPanShow(S, false); return; } }
+      if(LR && LR.S === S){ lrStop(); return; }
       if(aa && !aa.hidden){ aa.hidden = true; return; }
       if(!S.ov.querySelector('#epvFind').hidden){ epvFindShow(S, false); return; }
       if(!S.ov.querySelector('#epvToc').hidden && window.innerWidth < 720){ epvTocShow(S, false); return; }
@@ -53036,6 +53726,7 @@ function epvHitGo(S, i, keepScroll){
 /* ---------- fermer ---------- */
 function epvClose(quiet){
   const S = EPV; if(!S) return;
+  try{ if(LR && LR.S === S) lrStop(true); }catch(e){}
   EPV = null; S.tok++;
   try{ bkPop('epv'); }catch(e){}
   document.removeEventListener('keydown', S.onKey, true);
@@ -53084,6 +53775,7 @@ async function pdvOpen(id, at){
       <button type="button" class="pdv-ib pdv-lzb ${tbUi().pdvLz === false ? '' : 'on'}" data-pdv="lz" aria-label="Les liaisons, les pauses et la mélodie sur la page" title="Liaisons ‿, pauses | ‖ et mélodie ↗ ↘ (L)" aria-pressed="${tbUi().pdvLz === false ? 'false' : 'true'}">‿</button>
       <button type="button" class="pdv-ib" data-pdv="find" aria-label="Rechercher (Ctrl F)" title="Rechercher (Ctrl F)" aria-pressed="false">🔍</button>
       <button type="button" class="pdv-ib pdv-crb" data-pdv="carnet" aria-label="Mon carnet : les mots tagués" title="Mon carnet : les mots tagués">🏷️<b class="pdv-crn" id="pdvCrN"></b></button>
+      <button type="button" class="pdv-ib" data-lr="say" aria-label="Écouter : la voix lit, phrase par phrase" title="🔊 Écouter : la voix lit, phrase par phrase">🔊</button><button type="button" class="pdv-ib" data-lr="self" aria-label="Je lis à voix haute : le micro me suit" title="🎤 Je lis à voix haute : le micro me suit">🎤</button><button type="button" class="pdv-ib" data-lr="pan" aria-label="Surligneur : couleurs, mot ou phrase" title="🖍 Surligneur : couleurs, mot ou phrase" aria-expanded="false">🖍</button>
       <button type="button" class="pdv-ib pdv-helpb" data-pdv="help" aria-label="Raccourcis clavier (?)" title="Raccourcis clavier (?)">⌨</button>
     </div>
     <div class="pdv-find" id="pdvFind" hidden role="search">
@@ -53134,6 +53826,7 @@ async function pdvOpen(id, at){
     else if(a === 'kindle') pdkOpen(S);
   });
   try{ pdvTrailWire(S); }catch(e){ console.warn('traînée', e); }      // 🖍 1.0.49
+  try{ lrWire(S); }catch(e){ console.warn('lecture', e); }             // 🔊🎤🖍 1.0.55
   // 👆 toucher un mot de la page : sa fiche (comme sur la Tablette)
   ov.addEventListener('click', (e) => {
     if(e.target.closest('[data-pdv], #pdvTb, #pdvFind, .pdv-help, .pdv-goto, .pdv-side')) return;
@@ -53186,6 +53879,7 @@ async function pdvOpen(id, at){
 }
 function pdvClose(quiet){
   const S = PDV; if(!S) return;
+  try{ if(LR && LR.S === S) lrStop(true); }catch(e){}
   PDV = null; S.tok++;
   try{ bkPop('pdv'); }catch(e){}
   document.removeEventListener('keydown', S.onKey, true); document.removeEventListener('keyup', S.onKeyUp, true);
@@ -53352,6 +54046,7 @@ function pdvKeysWire(S){
     }
     if((mod && (k === 'f' || k === 'F')) || k === 'F3' || (k === '/' && !typing(e))){ e.preventDefault(); if(k === 'F3' && S.find.hits.length) pdvHitStep(S, e.shiftKey ? -1 : 1); else pdvFindShow(S, true); return; }
     if(k === 'Escape' && S.tbArt && TB.sheetK !== -1){ e.preventDefault(); e.stopPropagation(); tbCloseSheet(); return; }
+    if(k === 'Escape' && !typing(e)){ const pn = S.ov.querySelector('#lrPan'); if(pn && !pn.hidden){ e.preventDefault(); e.stopPropagation(); lrPanShow(S, false); return; } if(LR && LR.S === S){ e.preventDefault(); e.stopPropagation(); lrStop(); return; } }
     if(e.target && e.target.closest && e.target.closest('#pdvTb')) return;
     if(typing(e)) return;
     if(S.pdk && S.pdk.on){ if(pdkKey(S, e)) return; }
@@ -53463,7 +54158,13 @@ async function pdvRender(S, pg){
     if(my !== S.tok || PDV !== S){ c2.width = c2.height = 0; if(my === S.tok) pg.st = ''; return; }
     if(!pg.tl && page && !pg.scan){                 // le texte de la page, mot par mot, calé sur l'encre du dessin
       const items = pg.ix || await pdvTextItems(S, page, vp1);
-      if(items.length) pg.tl = pdvSplitWords(pdvRespace(items, c2), c2); else pg.scan = true;
+      let c3 = c2;
+      if(items.length && c2.width < 1400){                   // 🖍 1.0.55 : petit dessin → un dessin plus fin, juste pour caler les mots
+        try{ c3 = document.createElement('canvas'); c3.width = 1600; c3.height = Math.round(1600 * pg.ar); const x3 = c3.getContext('2d'); x3.fillStyle = '#fff'; x3.fillRect(0, 0, c3.width, c3.height);
+          await page.render({ canvasContext:x3, viewport:page.getViewport({ scale:c3.width / vp1.width }) }).promise; }catch(e){ c3 = c2; }
+      }
+      if(items.length) pg.tl = pdvSplitWords(pdvRespace(items, c3), c3); else pg.scan = true;
+      if(c3 !== c2){ c3.width = c3.height = 0; }
       if(my !== S.tok || PDV !== S){ c2.width = c2.height = 0; if(my === S.tok) pg.st = ''; return; }
       if(pg.tl) pdvFindPageChanged(S, pg);
     }
@@ -53585,31 +54286,92 @@ async function pdvTextItems(S, page, vp1, tc0){
 }
 /* chaque morceau de texte → ses mots, posés exactement sur l'encre de la page dessinée : on cherche les blancs entre
    les mots dans le dessin (les polices de l'appareil ne sont pas celles du PDF : sans ça, les mots glisseraient) */
+/* 🖍 1.0.55 : découper une ligne du PDF en mots, calés sur l'encre de la page.
+   Avant : on fusionnait les plus petits blancs jusqu'à avoir autant de morceaux que de mots ; sur une ligne de journal
+   serrée (« à obtenir : il faut », guillemets, deux-points) un blanc entre deux lettres pouvait gagner sur un vrai espace :
+   la ligne entière restait UNE boîte, ou les boîtes glissaient d'un mot (« teur de » allumé au lieu de « teur »).
+   Maintenant : on choisit, parmi tous les blancs de la ligne, ceux qui donnent à chaque mot la largeur qu'il doit avoir
+   (calcul pas à pas, le meilleur ensemble), en préférant les blancs larges ; et s'il n'y a pas d'encre lisible (texte
+   clair sur fond foncé, page vide…), on coupe à la largeur des mots. Jamais plus une boîte pour plusieurs mots. */
 function pdvSplitWords(items, cv){
   const cx = cv.getContext('2d', { willReadFrequently:true }), Wc = cv.width, Hc = cv.height, M = pdvMeasure(), out = [];
   for(const it of items){
-    const words = []; { let off = 0; it.t.split(/(\s+)/).forEach(s => { if(!s) return; if(!/^\s+$/.test(s)) words.push(s); off += s.length; }); }
+    const words = [], offs = []; { let off = 0; it.t.split(/(\s+)/).forEach(s => { if(!s) return; if(!/^\s+$/.test(s)){ words.push(s); offs.push(off); } off += s.length; }); }
     if(words.length <= 1 || it.a){ out.push(it); continue; }
     const fs = it.h * Wc, X0 = Math.max(0, Math.floor(it.x * Wc) - 1), X1 = Math.min(Wc, Math.ceil((it.x + it.w) * Wc) + 1), Y0 = Math.max(0, Math.floor(it.y * Wc + fs * 0.08)), Y1 = Math.min(Hc, Math.ceil(it.y * Wc + fs * 0.98));
+    M.font = Math.max(4, fs) + 'px serif';
+    const pre = (n) => M.measureText(it.t.slice(0, n)).width;
+    const inkW = (w) => { const m = M.measureText(w); const a = (m.actualBoundingBoxLeft || 0) + (m.actualBoundingBoxRight || 0); return a > 0 ? a : m.width; };   // la largeur de l'encre du mot (pas son avance)
+    const nat = words.map(w => Math.max(0.5, inkW(w))), xs = offs.map(o => pre(o)), xe = offs.map((o, k) => pre(o + words[k].length));
     let segs = null;
     try{
-      if(X1 - X0 > 4 && Y1 - Y0 > 2 && fs >= 5){
-        const w = X1 - X0, h = Y1 - Y0, d = cx.getImageData(X0, Y0, w, h).data, col = new Uint8Array(w);
-        for(let x = 0; x < w; x++) for(let y = 0; y < h; y++){ const j = (y * w + x) * 4; if(d[j] + d[j + 1] + d[j + 2] < 500){ col[x] = 1; break; } }
-        const runs = []; let s0 = -1;
-        for(let x = 0; x <= w; x++){ const on = x < w && col[x]; if(on && s0 < 0) s0 = x; if(!on && s0 >= 0){ runs.push([s0, x]); s0 = -1; } }
-        if(runs.length >= words.length){
-          while(runs.length > words.length){ let bi = 0, bg = Infinity; for(let k = 0; k < runs.length - 1; k++){ const g = runs[k + 1][0] - runs[k][1]; if(g < bg){ bg = g; bi = k; } } runs.splice(bi, 2, [runs[bi][0], runs[bi + 1][1]]); }
-          M.font = fs + 'px sans-serif';
-          const nat = words.map(x => M.measureText(x).width), tot = nat.reduce((a, b) => a + b, 0), rw = runs.reduce((a, r) => a + r[1] - r[0], 0);
-          let ok = rw > 0 && tot > 0;
-          for(let k = 0; ok && k < words.length; k++){ const q = ((runs[k][1] - runs[k][0]) / rw) / (nat[k] / tot); if(q < 0.4 || q > 2.5) ok = false; }
-          for(let k = 0; ok && k < runs.length - 1; k++) if(runs[k + 1][0] - runs[k][1] < Math.max(1, fs * 0.1)) ok = false;
-          if(ok) segs = runs;
+      if(X1 - X0 > 4 && Y1 - Y0 > 2 && fs >= 4){
+        const w = X1 - X0, h = Y1 - Y0, d = cx.getImageData(X0, Y0, w, h).data;
+        // l'encre : ce qui s'écarte du fond (le fond = la luminosité la plus fréquente de la ligne)
+        const L = new Uint8Array(w * h), hist = new Uint32Array(32);
+        for(let q = 0, j = 0; q < w * h; q++, j += 4){ const v = (d[j] * 299 + d[j + 1] * 587 + d[j + 2] * 114) / 1000 | 0; L[q] = v; hist[v >> 3]++; }
+        let bi = 0; for(let q = 1; q < 32; q++) if(hist[q] > hist[bi]) bi = q;
+        const bg = bi * 8 + 4, col = new Uint8Array(w);
+        for(let x = 0; x < w; x++) for(let y = 0; y < h; y++){ if(Math.abs(L[y * w + x] - bg) > 70){ col[x] = 1; break; } }
+        let iL = -1, iR = -1; for(let x = 0; x < w; x++) if(col[x]){ if(iL < 0) iL = x; iR = x; }
+        if(iL >= 0 && iR - iL > 2){
+          const G = []; let g0 = -1;
+          for(let x = iL; x <= iR + 1; x++){ const blank = x <= iR && !col[x]; if(blank && g0 < 0) g0 = x; if(!blank && g0 >= 0){ G.push([g0, x]); g0 = -1; } }
+          const n = words.length;
+          if(G.length >= n - 1 && n * G.length * G.length > 4e6){               // très longue ligne : le blanc le plus large près de l'endroit attendu
+            const span = xe[n - 1] - xs[0], k2 = span > 0 ? (iR + 1 - iL) / span : 0;
+            if(k2 > 0){
+              segs = []; let a = iL, gi0 = 0;
+              for(let k = 0; k < n - 1; k++){
+                const at = iL + ((xe[k] + xs[k + 1]) / 2 - xs[0]) * k2, win = Math.max(3, (xs[k + 1] - xe[k]) * k2 * 2 + fs * 0.6);
+                let best = -1, bs = -1e9;
+                for(let i = gi0; i < G.length; i++){ const c = (G[i][0] + G[i][1]) / 2; if(c < a) continue; if(c > at + win) break; if(c < at - win) continue; const sc = (G[i][1] - G[i][0]) - Math.abs(c - at) * 0.15; if(sc > bs){ bs = sc; best = i; } }
+                if(best < 0){ segs.push([a, Math.max(a + 1, at)]); a = Math.max(a + 1, at); continue; }
+                segs.push([a, G[best][0]]); a = G[best][1]; gi0 = best + 1;
+              }
+              segs.push([a, iR + 1]);
+            }
+          }
+          else if(G.length >= n - 1){
+            const ink = iR + 1 - iL, wide = G.map(g => g[1] - g[0]).sort((a, b) => b - a), gapSum = wide.slice(0, n - 1).reduce((a, b) => a + b, 0);
+            const natSum = nat.reduce((a, b) => a + b, 0), sw = Math.max(0.2, (ink - gapSum) / natSum);      // l'échelle des lettres
+            const sp0 = Math.max(1, M.measureText(' ').width * sw);
+            const wc = (k, a, z) => { const ww = z - a; if(ww <= 0) return 1e9; const r = Math.log(ww / (nat[k] * sw)); return 6 * r * r; };
+            const gr = (g) => Math.min((g[1] - g[0]) / sp0, 1.6);
+            // le meilleur choix des n-1 blancs (pas à pas) : chaque mot à sa largeur, des blancs larges
+            const m = G.length, INF = 1e18;
+            let dp = new Float64Array(m).fill(INF); const from = [];
+            for(let i = 0; i < m; i++) dp[i] = wc(0, iL, G[i][0]) - gr(G[i]);
+            for(let k = 1; k < n - 1; k++){
+              const nd = new Float64Array(m).fill(INF), fr = new Int32Array(m).fill(-1);
+              let best = INF, bj = -1;
+              for(let i = 0; i < m; i++){
+                for(let j = 0; j < i; j++){ if(dp[j] >= INF) continue; const c = dp[j] + wc(k, G[j][1], G[i][0]); if(c < nd[i]){ nd[i] = c; fr[i] = j; } }
+                if(nd[i] < INF) nd[i] -= gr(G[i]);
+              }
+              from.push(fr); dp = nd;
+            }
+            let bi2 = -1, bc = INF;
+            for(let i = 0; i < m; i++){ if(dp[i] >= INF) continue; const c = dp[i] + wc(n - 1, G[i][1], iR + 1); if(c < bc){ bc = c; bi2 = i; } }
+            if(bi2 >= 0 && bc < 6 * n){                                           // (en moyenne, chaque mot à moins de ~±70 % de sa largeur)
+              const ch = [bi2]; for(let k = from.length - 1; k >= 0; k--) ch.unshift(from[k][ch[0]]);
+              segs = []; let a = iL;
+              ch.forEach(gi => { segs.push([a, G[gi][0]]); a = G[gi][1]; });
+              segs.push([a, iR + 1]);
+            }
+          }
+          if(!segs){                                                              // pas assez de blancs : à la largeur des mots
+            const span = xe[words.length - 1] - xs[0], k2 = span > 0 ? (iR + 1 - iL) / span : 0;
+            if(k2 > 0) segs = words.map((_, k) => [iL + (xs[k] - xs[0]) * k2, iL + (xe[k] - xs[0]) * k2]);
+          }
         }
       }
     }catch(e){ segs = null; }
-    if(segs) words.forEach((t, k) => { const a = (X0 + segs[k][0]) / Wc, z = (X0 + segs[k][1]) / Wc; out.push({ x:a, y:it.y, h:it.h, w:z - a, a:0, t, sp:k < words.length - 1 ? true : it.sp }); });
+    if(!segs){                                                                    // pas d'encre lisible : à la largeur des mots, dans la boîte de la ligne
+      const span = xe[words.length - 1] - xs[0], X = it.x * Wc, k2 = span > 0 ? it.w * Wc / span : 0;
+      if(k2 > 0) segs = words.map((_, k) => [X + (xs[k] - xs[0]) * k2 - X0, X + (xe[k] - xs[0]) * k2 - X0]);
+    }
+    if(segs) words.forEach((t, k) => { const a = (X0 + segs[k][0]) / Wc, z = (X0 + segs[k][1]) / Wc; out.push({ x:a, y:it.y, h:it.h, w:Math.max(z - a, 0.5 / Wc), a:0, t, sp:k < words.length - 1 ? true : it.sp }); });
     else out.push(it);
   }
   return out;
@@ -53973,6 +54735,7 @@ function pdvLayout(S, pg){
   tl.appendChild(frag);
   pg.laid = true; pg.layN = (pg.layN || 0) + 1;
   pdvHlPaint(S, pg);
+  try{ lrPaintUnit(S, S.pages.indexOf(pg)); }catch(e){}                 // ✅ 1.0.55 : ce qui a été lu garde sa couleur
   try{ pdvLzPaint(S, pg); }catch(e){ console.warn('liaisons', e); }
   try{ if(S.tbArt && TB.sheetK === -1 && (S.tbArt.tags || []).some(g => Math.floor((g.s || 0) / 10000) === pg.p)) pdvTbHost(S, pg); }catch(e){}   // 🖍 ses mots tagués
 }
@@ -54253,6 +55016,7 @@ function pdvTbHost(S, pg){
   return true;
 }
 function pdvTapWord(S, sp, e){
+  try{ if(LR && LR.S === S && LR.kind === 'say' && LR.playing) lrPause(LR); }catch(err){}
   const pg = S.pages.find(x => x.sh.contains(sp)); if(!pg || !pdvTbHost(S, pg)) return false;
   const j = +sp.dataset.j, P = S.tbP;
   let c = P.at[j] || 0; const pt = wtPoint(e.clientX, e.clientY); if(pt && sp.contains(pt.node)) c += Math.min(pt.off, (sp.textContent || '').length);
@@ -56407,6 +57171,7 @@ function tbAaHtml(){
     <div class="tb-hovs" role="group" aria-label="Couleur du surlignage">${Object.entries(TB_HOV).map(([k, H]) => `<button type="button" class="tb-hov ${hov === k ? 'on' : ''}" data-tb="hov" data-v="${k}" aria-pressed="${hov === k}" title="${H[0]}"><i style="background:rgba(${H[1]},.38)"></i><span>${H[0]}</span></button>`).join('')}
       <label class="tb-hov ${hov === 'custom' ? 'on' : ''}" title="Ta couleur"><i style="background:rgba(${tbHexRgb(u.hovc) || '96,165,250'},.38)"></i><span>À toi</span><input type="color" id="tbHovC" value="${/^#[0-9a-f]{6}$/i.test(u.hovc || '') ? u.hovc : '#60a5fa'}" aria-label="Choisir ta couleur de surlignage"></label>
       <button type="button" class="tb-hov off ${hov === 'off' ? 'on' : ''}" data-tb="hov" data-v="off" aria-pressed="${hov === 'off'}"><i></i><span>Aucun</span></button></div>
+    <div class="tb-pop-row"><span class="tb-pop-l">Suivre</span><div class="tb-seg" role="group" aria-label="Le survol allume le mot ou la phrase">${seg('hov-unit', 'mot', '🔤 Le mot', u.hovUnit !== 'phrase')}${seg('hov-unit', 'phrase', '📝 La phrase', u.hovUnit === 'phrase')}</div></div>
     <div class="tb-pop-row"><span class="tb-pop-l">Traînée</span><div class="tb-seg" role="group" aria-label="Traînée de couleurs derrière le mot">${seg('hov-tr', 1, '🖍 Discrète', u.hovTrail !== false)}${seg('hov-tr', 0, 'Non', u.hovTrail === false)}</div></div>
     <div class="tb-pop-hint">Les 3 mots que tu viens de survoler restent légèrement teintés, de la même couleur, de plus en plus pâle (<span class="tb-trail-demo"><i style="background:rgba(${tbHovRgb(u)},.055)">avant</i> <i style="background:rgba(${tbHovRgb(u)},.11)">encore</i> <i style="background:rgba(${tbHovRgb(u)},.2)">d'avant</i> <i style="background:rgba(${tbHovRgb(u)},.38)">mot</i></span>) : tu vois où tu en es, sans bariolage. Aussi dans les PDF, à la souris ou au stylo.</div>
     <div class="tb-pop-row"><span class="tb-pop-l">Mes mots</span><div class="tb-seg">${seg('kn', 1, '┄ Soulignés', u.kn !== false)}${seg('kn', 0, 'Non', u.kn === false)}</div></div>
@@ -57818,11 +58583,14 @@ function tbWire(el){
   const pts = new Map(), dist = () => { const [a, b] = [...pts.values()]; return Math.hypot(a.x - b.x, a.y - b.y) || 1; };
   // 🖊️ 1.0.29 : le mot sous ton doigt, ton stylo ou ta souris s'allume (couleur claire, au choix dans Aa)
   const H = { el:null, raf:0, x:0, y:0, t:0 };
-  const hovSet = (sp) => { if(sp === H.el) return; tbTrailStep(H, sp); };
+  const hovSent = (s) => { if(H.sEl === s) return; if(H.sEl) H.sEl.classList.remove('hovs'); H.sEl = s || null; if(s) s.classList.add('hovs'); };   // 📝 1.0.55
+  const hovSet = (sp) => { if(!sp) hovSent(null); if(sp === H.el) return; tbTrailStep(H, sp); };
   const hovRun = () => {
     H.raf = 0;
     if(tbUi().hov === 'off' || pts.size > 1 || TB.pinch){ hovSet(null); return; }
     const t = document.elementFromPoint(H.x, H.y), sp = t && t.closest ? t.closest('.tbw') : null;
+    if(tbUi().hovUnit === 'phrase'){ const s = sp && sc.contains(sp) ? sp.closest('.tb-s') : null; if(H.el) tbTrailStep(H, null); hovSent(s); return; }
+    if(H.sEl) hovSent(null);
     hovSet(sp && sc.contains(sp) ? sp : null);
   };
   const hovAt = (x, y) => { clearTimeout(H.t); H.x = x; H.y = y; if(!H.raf) H.raf = requestAnimationFrame(hovRun); };
@@ -57933,7 +58701,7 @@ function tbAction(id, btn, e){
     case 'sh-ex': {
       const w = tbLexWord(btn.dataset.w), tk = TB.toks[TB.sheetK], s = tk ? TB.sents[tk.s] : '';
       const r = lexAddSentence(w, s), n = w ? (w.exMore || []).length : 0;
-      if(r === 'ok'){ try{ playCorrectSound(); }catch(e){} tbToast(n ? `➕ Phrase ajoutée à « ${w.fr} » (${n + 1}ᵉ phrase)` : `➕ Phrase ajoutée à « ${w.fr} »`, 2600); btn.disabled = true; btn.textContent = '✓ Phrase ajoutée à sa fiche'; }
+      if(r === 'ok'){ try{ playCorrectSound(); }catch(e){} tbToast((n ? `➕ Phrase ajoutée à « ${w.fr} » (${n + 1}ᵉ phrase)` : `➕ Phrase ajoutée à « ${w.fr} »`) + lexEchoNote(w), 3200); btn.disabled = true; btn.textContent = '✓ Phrase ajoutée à sa fiche'; }
       else if(r === 'dup') tbToast('Cette phrase est déjà dans sa fiche.');
       return;
     }
@@ -57941,7 +58709,7 @@ function tbAction(id, btn, e){
       const k0 = TB.tipK, w = btn.dataset.tb === 'tip-ex' ? TB.tipW : tbLexWord(btn.dataset.w), tk = TB.toks[btn.dataset.tb === 'tip-ex' ? TB.tipK : TB.sheetK];
       const s = btn.dataset.tb === 'dup-ex' && TB.dupSent ? TB.dupSent : (tk ? TB.sents[tk.s] : '');
       const r = lexAddSentence(w, s), n = w ? (w.exMore || []).length : 0;
-      if(r === 'ok'){ try{ playCorrectSound(); }catch(e){} tbToast(n ? `➕ Phrase ajoutée à « ${w.fr} » (${n + 1}ᵉ phrase)` : `➕ Phrase ajoutée à « ${w.fr} »`, 2600); }
+      if(r === 'ok'){ try{ playCorrectSound(); }catch(e){} tbToast((n ? `➕ Phrase ajoutée à « ${w.fr} » (${n + 1}ᵉ phrase)` : `➕ Phrase ajoutée à « ${w.fr} »`) + lexEchoNote(w), 3200); }
       else if(r === 'dup') tbToast('Cette phrase est déjà dans sa fiche.');
       if(btn.dataset.tb === 'tip-ex'){ tbTipClose(); if(w && r === 'ok') setTimeout(() => { try{ tbTipOpen(k0, w); }catch(e){} }, 60); }
       else { const box = document.getElementById('tbAddF'); if(box && r === 'ok') box.innerHTML = `<div class="tb-dup">✅ Phrase ajoutée à la fiche de « ${escapeHtml(w.fr)} ».<button type="button" class="tb-btn hl sm" data-tb="see-word" data-w="${tbAttr(w.fr)}">👁 Voir sa fiche</button></div>`; }
@@ -57958,6 +58726,7 @@ function tbAction(id, btn, e){
     case 'sp': { const a = tbAnchorGet(); tbUi().sp = +btn.dataset.v || 0; tbSaveUi(); tbApplyUi(); if(a) tbAnchorSet(a); tbToggleAa(true); return; }
     case 'paper': { const dk = document.documentElement.getAttribute('data-theme') === 'dark'; tbUi()[dk ? 'paperD' : 'paperL'] = btn.dataset.v; tbSaveUi(); tbApplyUi(); tbToggleAa(true); return; }
     case 'hov': { tbUi().hov = btn.dataset.v; tbSaveUi(); tbApplyUi(); tbToggleAa(true); if(btn.dataset.v !== 'off') tbToast('🖊️ Passe ton doigt ou ton stylo sur le texte', 1800); return; }
+    case 'hov-unit': { tbUi().hovUnit = btn.dataset.v === 'phrase' ? 'phrase' : 'mot'; tbSaveUi(); tbToggleAa(true); tbToast(tbUi().hovUnit === 'phrase' ? '📝 La phrase sous ton doigt s\'allume' : '🔤 Le mot sous ton doigt s\'allume', 2000); return; }
     case 'hov-tr': { tbUi().hovTrail = btn.dataset.v === '1'; tbSaveUi(); tbToggleAa(true); tbToast(tbUi().hovTrail ? '🖍 Traînée discrète : les 3 mots d\'avant restent légèrement teintés' : 'Traînée enlevée', 2200); return; }
     case 'kn': { tbUi().kn = btn.dataset.v === '1'; tbSaveUi(); tbPaintKnown(); tbToggleAa(true); return; }
     case 'preset': { const P0 = TB_PRESETS[btn.dataset.v]; if(!P0) return; const a = tbAnchorGet(), u = tbUi(); ['font', 'fs', 'lh', 'fw', 'bio', 'sp'].forEach(x => { u[x] = P0[x]; }); tbSaveUi(); tbApplyUi(); tbRender(true); if(a) tbAnchorSet(a); tbToggleAa(true); tbToast('🅰️ ' + P0.n, 1400); return; }
@@ -60388,7 +61157,7 @@ async function r2ListAll(prefix, max){
     const { text } = await r2Req('GET', '', { query:q });
     const doc = new DOMParser().parseFromString(text, 'application/xml');
     const tx = (el, t) => { const n = el.getElementsByTagName(t)[0]; return n ? n.textContent : ''; };
-    Array.from(doc.getElementsByTagName('Contents')).forEach(c => out.push({ path:tx(c, 'Key'), size:+tx(c, 'Size') || 0, etag:tx(c, 'ETag'), type:'blob', src:'r2' }));
+    Array.from(doc.getElementsByTagName('Contents')).forEach(c => out.push({ path:tx(c, 'Key'), size:+tx(c, 'Size') || 0, etag:tx(c, 'ETag'), mod:Date.parse(tx(c, 'LastModified')) || 0, type:'blob', src:'r2' }));
     if(max) break;
     token = tx(doc, 'NextContinuationToken');
     if(tx(doc, 'IsTruncated') !== 'true' || !token) break;
