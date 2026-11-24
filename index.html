@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- 🏷️ Version de l'appli : augmentée automatiquement par publier-site.cmd à chaque publication -->
-<meta name="app-version" content="1.0.55" data-date="2026-11-24">
+<meta name="app-version" content="1.0.56" data-date="2026-11-24">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <title>VocabVISION — Vocabulaire Français ↔ Arabe</title>
 <script>
@@ -4057,6 +4057,22 @@
   .am-dlg{ width:min(100%,420px); background:var(--surface); color:var(--text); border-radius:24px; padding:18px; box-shadow:0 24px 60px -20px rgba(0,0,0,0.5);
     transform:translateY(20px); transition:transform .22s cubic-bezier(.16,1,.3,1); font-family:'Nunito','Inter',sans-serif; }
   .am-dlg-ov.show .am-dlg{ transform:none; }
+  /* 🧹 1.0.56 : la mémoire de l'appli · ranger Cloudflare (toujours au-dessus de tout) */
+  .am-dlg-ov.vvm-ov{ z-index:2147483000; }
+  .vvm .vvm-u{ font-size:13.5px; font-weight:800; color:var(--text-dim); margin:2px 0 8px; line-height:1.45; }
+  .vvm-bar{ height:10px; border-radius:99px; background:var(--surface-sunken); overflow:hidden; margin:0 0 12px; border:1px solid var(--border); }
+  .vvm-bar > i{ display:block; height:100%; width:0; background:linear-gradient(90deg,#22C55E,#EAB308 70%,#EF4444); border-radius:inherit; transition:width .25s; }
+  .vvm-bar.go > i{ background:linear-gradient(90deg,#6D28D9,#F43F5E); }
+  .vvm-l{ max-height:min(46vh,360px); overflow:auto; margin:0 0 12px; display:flex; flex-direction:column; gap:6px; }
+  .vvm-it{ display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:12px; background:var(--surface-sunken); font-size:13.5px; line-height:1.35; }
+  .vvm-it b{ flex:1; font-weight:800; min-width:0; }
+  .vvm-it small{ display:block; font-weight:700; color:var(--text-dim); font-size:12px; }
+  .vvm-it .vvm-n{ font-weight:900; white-space:nowrap; font-variant-numeric:tabular-nums; }
+  .vvm-it.hot{ box-shadow:inset 0 0 0 2px rgba(234,179,8,.55); }
+  .vvm-msg{ font-size:13.5px; font-weight:800; margin:0 0 10px; color:var(--green-dark,#15803D); line-height:1.45; }
+  .vvm-msg.err{ color:var(--red-dark,#B91C1C); }
+  .vvm-p{ font-size:13px; font-weight:800; color:var(--text-dim); margin:-6px 0 12px; font-variant-numeric:tabular-nums; }
+  .csv-status .vvm-go{ margin-left:8px; padding:3px 10px; border-radius:99px; border:1.5px solid currentColor; background:none; color:inherit; font:inherit; font-size:12px; font-weight:900; cursor:pointer; vertical-align:middle; }
   .am-dlg-t{ font-weight:900; font-size:17px; margin-bottom:8px; word-break:break-word; }
   .am-dlg-x{ font-size:14px; font-weight:700; color:var(--text-dim); margin-bottom:12px; line-height:1.5; }
   .am-dlg .am-in{ margin-bottom:12px; }
@@ -5601,6 +5617,7 @@
     <button class="menu-item" id="importBtn"><span class="mi-ic">⤒</span> Importer un CSV</button>
     <button class="menu-item" id="exportBtn"><span class="mi-ic">⤓</span> Exporter le CSV</button>
     <button class="menu-item" id="syncBtn"><span class="mi-ic">☁️</span> Synchro cloud</button>
+    <button class="menu-item" id="memBtn"><span class="mi-ic">🧹</span> Mémoire de l'appli</button>
     <button class="menu-item danger" id="resetBtn"><span class="mi-ic">↺</span> Lexique par défaut</button>
   </div>
   <div class="menu-group">
@@ -6358,7 +6375,7 @@ function loadCustomBlocks(){
   }catch(e){ return []; }
 }
 function saveCustomBlocks(list){
-  try{ localStorage.setItem(nsKey(CUSTOM_BLOCKS_KEY), JSON.stringify(list)); }catch(e){}
+  try{ vvLsPut(nsKey(CUSTOM_BLOCKS_KEY), JSON.stringify(list)); }catch(e){}
 }
 let customBlocks = loadCustomBlocks();
 
@@ -6420,7 +6437,8 @@ function saveCustomBlockResult(blockId, mode, result){
   const block = getCustomBlock(blockId);
   if(!block) return;
   trackWastedTime(blockId + '::' + mode, result);
-  block.results[mode] = result;
+  const prev = block.results[mode];                                        // 🏅 1.0.56 : le meilleur reste, en version légère
+  block.results[mode] = (prev && result && result.total && blkBetter(prev, result)) ? blkCompact(Object.assign({}, prev, { lastTry:blkLastTry(result) })) : blkCompact(result);
   saveCustomBlocks(customBlocks);
   cloudAutoPush();
 }
@@ -10111,13 +10129,210 @@ function trackWastedTime(key, result){
 function getBlockWastedTime(key){ return blockWastedTime[key] || 0; }
 
 function blkIdOf(w){ return w ? (w.echo ? '↻' + w.fr + '#' + (w.addedAt || 0) : w.fr) : ''; }
+/* 💾 1.0.56 : LA MÉMOIRE DE L'APPLI NE SE REMPLIT PLUS AVEC LES RÉSULTATS DES BLOCS
+   Chaque résultat gardait, pour ses 30 mots, l'arabe, la définition et la catégorie (≈ 4 ko) — déjà dans « tes mots ».
+   Et chaque changement de mots recopiait les résultats sous de nouveaux noms sans effacer les anciens : au fil des mois,
+   la petite mémoire de l'appli (≈ 5 Mo pour tout) se remplissait. Alors : des blocs passés pas gardés, pas reçus de l'autre
+   appareil (« mémoire pleine »), une synchro qui renvoyait tout à chaque fois (« synchro impossible »).
+   Maintenant : un résultat garde seulement ses mots et ce qui s'est passé (≈ 5 fois moins de place) ; un ancien résultat
+   déjà rangé dans les blocs d'aujourd'hui est effacé (ici, puis dans le Google Sheet) ; et pour chaque mode, c'est le
+   MEILLEUR résultat qui reste : un bloc validé reste validé, même raté ensuite (le dernier essai est noté à côté). */
+function blkPctOf(r){ return r && r.total ? (r.correct || 0) / r.total : -1; }
+function blkBetter(a, b){                                                  // a doit-il remplacer b ?
+  if(!a || !a.total) return false;
+  if(!b || !b.total) return true;
+  const pa = blkPctOf(a), pb = blkPctOf(b);
+  if(Math.abs(pa - pb) > 1e-9) return pa > pb;
+  return (a.finishedAt || 0) > (b.finishedAt || 0);                        // à score égal : le plus récent
+}
+function blkCompact(r){
+  if(!r || typeof r !== 'object' || Array.isArray(r)) return r;
+  const o = {};
+  Object.keys(r).forEach(k => {
+    if(k === 'history' || k === 'blockFr' || k === 'lastTry') return;
+    const v = r[k]; if(v == null) return;
+    if(typeof v !== 'object'){ if(String(v).length <= 200) o[k] = v; return; }
+    if(Array.isArray(v) && v.length <= 60 && v.every(x => x == null || typeof x !== 'object')) o[k] = v.slice();   // (ex. « multi » : les blocs joués ensemble)
+  });
+  if(Array.isArray(r.history)){
+    o.history = r.history.filter(h => h && h.fr).map(h => { const x = { fr:String(h.fr) }; if(+h.attempts > 1) x.attempts = +h.attempts; if(h.failed) x.failed = true; return x; });
+  }
+  if(Array.isArray(r.blockFr) && r.blockFr.length){                        // la liste des mots du bloc, seulement si elle dit autre chose
+    const S = new Set((o.history || []).map(h => h.fr));
+    if(r.blockFr.length !== S.size || r.blockFr.some(f => !S.has(f))) o.blockFr = r.blockFr.slice();
+  }
+  if(r.lastTry && typeof r.lastTry === 'object'){ const t = {}; ['correct', 'total', 'finishedAt', 'durationSec'].forEach(k => { if(r.lastTry[k] != null) t[k] = r.lastTry[k]; }); o.lastTry = t; }
+  return o;
+}
+function blkLastTry(result){ return { correct:result.correct || 0, total:result.total || 0, finishedAt:result.finishedAt || Date.now(), durationSec:result.durationSec || 0 }; }
+var VVMEM = { compacted:'', said:0, freed:0, baseTry:0, delBusy:false };
+var VV_LS_MAX = 5200000;
+var VV_MEM_CACHES = ['vocabVision.tbDict3', 'vocabVision.tbDict2', 'vocabVision.tbDict', 'vocabVision.exAr', 'vocabVision.audioLibCache'];
+function vvLsUsed(){ let n = 0; try{ for(let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i) || ''; n += k.length + (localStorage.getItem(k) || '').length; } }catch(e){} return n; }
+function vvKb(n){ return n >= 1e6 ? (n / 1e6).toFixed(1).replace('.', ',') + ' Mo' : Math.max(1, Math.round(n / 1000)) + ' ko'; }
+/* écrire dans la mémoire de l'appli ; pleine → on fait de la place (sans rien perdre), et on réessaie */
+function vvLsPut(k, v){
+  try{ localStorage.setItem(k, v); return true; }catch(e){}
+  try{ memAutoFree(); localStorage.setItem(k, v); return true; }catch(e){}
+  memFullSay();
+  return false;
+}
+function memFullSay(){
+  if(Date.now() - (VVMEM.said || 0) < 5 * 60000) return;
+  VVMEM.said = Date.now();
+  try{ setStatus("⚠️ La mémoire de l'appli est pleine : un résultat n'a pas pu être gardé.", 'err'); }catch(e){}
+}
+/* tous les résultats gardés (blocs et blocs personnalisés) passent en version légère — une fois par séance */
+function blkCompactAll(){
+  if(!storageAvailable) return 0;
+  const uid = getCurrentUserId();
+  if(VVMEM.compacted === uid) return 0;
+  VVMEM.compacted = uid;
+  const re = /^lexiqueQuiz::[^:]+::h[0-9a-z]+_\d+::[a-zA-Z]+::u:/, ks = [];
+  let n = 0;
+  try{ for(let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); if(k && re.test(k)) ks.push(k); } }catch(e){}
+  ks.forEach(k => {
+    try{
+      const v = localStorage.getItem(k); if(!v) return;
+      if(v.length < 1500 && !/"(ar|def|cat)":/.test(v)) return;           // déjà léger
+      const r = JSON.parse(v); if(!r || typeof r !== 'object' || !('finishedAt' in r || 'total' in r)) return;
+      const c = JSON.stringify(blkCompact(r));
+      if(c.length < v.length){ localStorage.setItem(k, c); n++; }
+    }catch(e){}
+  });
+  try{
+    let ch = false;
+    (typeof customBlocks !== 'undefined' && Array.isArray(customBlocks) ? customBlocks : []).forEach(b => {
+      if(!b || !b.results) return;
+      Object.keys(b.results).forEach(m => { const r = b.results[m]; if(!r || typeof r !== 'object') return; const c = blkCompact(r); if(JSON.stringify(c).length < JSON.stringify(r).length){ b.results[m] = c; ch = true; } });
+    });
+    if(ch){ saveCustomBlocks(customBlocks); n++; }
+  }catch(e){}
+  return n;
+}
+/* 🧹 faire de la place sans rien perdre : résultats légers, anciens résultats rangés, petites mémoires qui se refont toutes seules */
+function memAutoFree(o){
+  o = o || {};
+  if(VVMEM.freeing) return 0;                                              // (déjà en train de ranger)
+  VVMEM.freeing = true;
+  const before = vvLsUsed();
+  try{
+    try{ VV_MEM_CACHES.forEach(k => { try{ localStorage.removeItem(k); }catch(e){} }); if(typeof TB !== 'undefined' && TB) TB.dict = null; }catch(e){}
+    try{ VVMEM.compacted = ''; blkCompactAll(); }catch(e){}
+    if(o.rescue){ try{ blockResultsRescue(true); }catch(e){} }
+  }finally{ VVMEM.freeing = false; }
+  const freed = Math.max(0, before - vvLsUsed());
+  VVMEM.freed += freed;
+  return freed;
+}
+/* ce qui remplit la mémoire de l'appli, par famille */
+function memGroups(){
+  const suf = '::u:' + getCurrentUserId(), G = new Map();
+  let cur = null; try{ if(!activeFilterCat) cur = new Set(BLOCKS.map(b => hashWords(b))); }catch(e){}
+  const has = (k, names) => names.some(x => k === x || k.startsWith(x + '::'));
+  const STATS = [WORD_STATS_KEY, DAILY_STATS_KEY, DAILY_LOG_KEY, VERB_STATS_KEY, SUBJECT_LIFETIME_KEY, BLOCK_WASTED_TIME_KEY, XP_TOTAL_KEY, DAILY_CHALLENGE_KEY, SHEET_RESULTS_KEY, BOUQUINAGE_READ_KEY, FROZEN_DAYS_KEY, 'lexiqueQuiz::listResults'];
+  const PDF = ['lexiqueQuiz::pdvCloud', 'lexiqueQuiz::pdvDirs', 'lexiqueQuiz::pdvPos', 'lexiqueQuiz::lrMarks', 'vocabVision.pdv', 'vocabVision.pdvShut', 'lexiqueQuiz::r2Trash'];
+  const L = {
+    res:['🧩 Résultats des blocs', 'ce que tu as réussi, bloc par bloc et mode par mode'],
+    old:['🧩 Anciens résultats (des mots ont bougé)', 'rangés dans tes blocs d\'aujourd\'hui, puis effacés'],
+    words:['📖 Tes mots et leurs phrases', 'ton lexique'],
+    cblk:['🧱 Blocs personnalisés', 'leurs mots et leurs résultats'],
+    stats:['📊 Statistiques, objectifs, fiches faites', 'tes progrès'],
+    sync:['☁️ Mémoire de la synchro', 'ce que contient déjà le cloud (pour n\'envoyer que les nouveautés)'],
+    cache:['🔁 Dictionnaire et traductions déjà cherchés', 'se refont tout seuls : on peut les vider'],
+    tab:['📰 La Tablette (textes, brouillon)', 'les textes eux-mêmes sont dans le grand stockage de l\'appareil'],
+    pdf:['📕 PDF et livres : la liste, la page, le « lu »', 'les fichiers eux-mêmes ne sont pas ici'],
+    trx:['🎙 Transcriptions', 'tes textes d\'audio'],
+    other:['👥 Autres comptes ouverts sur cet appareil', 'les données d\'un autre profil'],
+    misc:['⚙️ Réglages et le reste', ''],
+  };
+  const add = (id, n) => { const g = G.get(id) || { id, label:L[id][0], tip:L[id][1], n:0, c:0 }; g.n += n; g.c++; G.set(id, g); };
+  try{
+    for(let i = 0; i < localStorage.length; i++){
+      const k = localStorage.key(i) || '', n = k.length + (localStorage.getItem(k) || '').length;
+      const m = /^lexiqueQuiz::([^:]+)::(h[0-9a-z]+_\d+)::[a-zA-Z]+::u:/.exec(k);
+      const b = k.replace(/::u:.*$/, '');
+      if(k.includes('::u:') && !k.endsWith(suf)) add('other', n);
+      else if(m) add(m[1] === 'all' && cur && !cur.has(m[2]) ? 'old' : 'res', n);
+      else if(b === CUSTOM_WORDS_KEY || b === WORDS_GONE_KEY || b === WORDS_ORDER_KEY) add('words', n);
+      else if(b === CUSTOM_BLOCKS_KEY || b === BLOCK_TITLES_KEY) add('cblk', n);
+      else if(has(b, STATS)) add('stats', n);
+      else if(k === SYNC_BASE_KEY || k === 'vocabVision.syncSince' || k.startsWith('vocabVision.delQ')) add('sync', n);
+      else if(VV_MEM_CACHES.includes(k)) add('cache', n);
+      else if(/^lexiqueQuiz::tb|^vocabVision\.(tablette|tbDraft|tbOrig|tbImg)/.test(k)) add('tab', n);
+      else if(has(b, PDF)) add('pdf', n);
+      else if(k.startsWith('vocabVision.trx')) add('trx', n);
+      else add('misc', n);
+    }
+  }catch(e){}
+  return [...G.values()].sort((a, b) => b.n - a.n);
+}
+function memPanel(){
+  document.querySelectorAll('.vvm-ov').forEach(x => x.remove());
+  const ov = document.createElement('div'); ov.className = 'am-dlg-ov vvm-ov show';
+  const close = () => { ov.remove(); document.removeEventListener('keydown', key, true); };
+  const key = (e) => { if(e.key === 'Escape'){ e.preventDefault(); e.stopPropagation(); close(); } };
+  const paint = (msg, err) => {
+    const used = vvLsUsed(), pct = Math.min(100, Math.round(used / VV_LS_MAX * 100)), L = memGroups();
+    ov.innerHTML = `<div class="am-dlg vvm" role="dialog" aria-modal="true" aria-label="Mémoire de l'appli">
+      <div class="am-dlg-t">🧹 Mémoire de l'appli</div>
+      <div class="vvm-u">${vvKb(used)} utilisés sur ≈ ${vvKb(VV_LS_MAX)} (${pct} %). Tes PDF, livres, images, audios et les textes de la Tablette ne sont pas ici : ils ont leur grand stockage.</div>
+      <div class="vvm-bar"><i style="width:${pct}%"></i></div>
+      ${msg ? `<div class="vvm-msg${err ? ' err' : ''}" role="status">${msg}</div>` : ''}
+      <div class="vvm-l">${L.map(g => `<div class="vvm-it${(g.id === 'old' || g.id === 'cache') && g.n > 20000 ? ' hot' : ''}" data-g="${g.id}"><b>${g.label}${g.tip ? `<small>${g.tip}</small>` : ''}</b><span class="vvm-n">${vvKb(g.n)}</span></div>`).join('')}</div>
+      <div class="am-dlg-b"><button type="button" class="am-dlg-btn ghost" data-v="x">Fermer</button><button type="button" class="am-dlg-btn" data-v="free">🧹 Libérer de la place</button></div></div>`;
+    ov.querySelector('[data-v="x"]').addEventListener('click', close);
+    ov.querySelector('[data-v="free"]').addEventListener('click', (e) => {
+      const b = e.currentTarget; b.disabled = true; b.textContent = '🧹 Je range…';
+      setTimeout(() => {
+        const before = vvLsUsed();
+        try{ memAutoFree({ rescue:true }); }catch(err){}
+        const fr = Math.max(0, before - vvLsUsed());
+        paint(fr > 1000 ? `✓ ${vvKb(fr)} libérés, sans rien perdre : tes résultats et tes mots sont tous là.` : '✓ Déjà rangé : rien d\'inutile à retirer.');
+        try{ syncSoon(800); }catch(err){}
+      }, 30);
+    });
+  };
+  document.addEventListener('keydown', key, true);
+  ov.addEventListener('click', (e) => { if(e.target === ov) close(); });
+  document.body.appendChild(ov);
+  paint();
+  return ov;
+}
+document.addEventListener('click', (e) => { const t = e.target && e.target.closest && e.target.closest('[data-vvmem]'); if(t){ e.preventDefault(); e.stopPropagation(); memPanel(); } }, true);
+/* les anciens résultats effacés ici partent aussi du Google Sheet (au prochain tour de synchro, par petits paquets) */
+function vvDelQKey(){ return 'vocabVision.delQ::u:' + getCurrentUserId(); }
+function vvDelQ(){ try{ const a = JSON.parse(localStorage.getItem(vvDelQKey()) || '[]'); return Array.isArray(a) ? a : []; }catch(e){ return []; } }
+function vvDelQSave(a){ try{ if(a.length) localStorage.setItem(vvDelQKey(), JSON.stringify(a.slice(-4000))); else localStorage.removeItem(vvDelQKey()); }catch(e){} }
+function vvDelQAdd(keys){ const Q = vvDelQ(), S = new Set(Q); (keys || []).forEach(k => { if(k && !S.has(k)){ S.add(k); Q.push(k); } }); vvDelQSave(Q); }
+async function vvDelPump(){
+  if(VVMEM.delBusy) return 0;
+  const Q = vvDelQ(); if(!Q.length) return 0;
+  // seulement quand tes mots sont les mêmes ici et dans le cloud (sinon les blocs ne sont pas encore les mêmes partout)
+  const base = syncLoadBase(), wk = nsKey(CUSTOM_WORDS_KEY);
+  let wv = null; try{ wv = localStorage.getItem(wk); }catch(e){}
+  if(wv != null && base[wk] !== syncHash(wv)) return 0;
+  const back = Q.filter(k => { try{ return localStorage.getItem(k) != null; }catch(e){ return true; } });   // revenu ici entre-temps : on ne l'efface plus
+  const keys = Q.filter(k => !back.includes(k)).slice(0, 30);
+  VVMEM.delBusy = true;
+  try{
+    if(keys.length){ await cloudRequest({ action:'delete', keys }); keys.forEach(k => { delete base[k]; }); syncSaveBase(); }
+  }finally{ VVMEM.delBusy = false; }
+  const left = Q.filter(k => !keys.includes(k) && !back.includes(k));
+  vvDelQSave(left);
+  if(left.length) cloudPushPending = true;                                 // la suite au prochain tour
+  return keys.length;
+}
 function saveBlockResult(blockIndex, mode, result){
   if(!blockResults[blockIndex]) blockResults[blockIndex] = {};
   try{ if(result && !activeFilterCat && BLOCKS[blockIndex]) result.blockFr = BLOCKS[blockIndex].map(blkIdOf); }catch(e){}   // 🧩 1.0.55 : pour le retrouver si les mots bougent
   trackWastedTime(blockIndex + '::' + mode, result);
-  blockResults[blockIndex][mode] = result;
+  const prev = blockResults[blockIndex][mode];
+  // 🏅 1.0.56 : le meilleur résultat reste (à score égal, le plus récent) ; ce dernier essai, moins bon, est noté à côté
+  const keep = (prev && result && result.total && blkBetter(prev, result)) ? blkCompact(Object.assign({}, prev, { lastTry:blkLastTry(result) })) : blkCompact(result);
+  blockResults[blockIndex][mode] = keep;
   if(!storageAvailable) return;
-  try{ localStorage.setItem(storageKey(blockIndex, mode), JSON.stringify(result)); }catch(e){}
+  vvLsPut(storageKey(blockIndex, mode), JSON.stringify(keep));
 }
 
 function loadBlockResult(blockIndex, mode){
@@ -10164,11 +10379,13 @@ function blockResultsRescue(force){
     const size = BLOCKS[best].length;
     if(bc < Math.ceil(0.6 * size) || bc < Math.ceil(0.7 * known)) continue;          // 1.0.55 : 60 % du bloc d'aujourd'hui
     const ex = blockResults[best] && blockResults[best][o.mode];
-    if(ex && (ex.finishedAt || 0) >= (r.finishedAt || 0)) continue;   // le bloc a déjà un résultat plus récent
-    { const F = new Set(frs); r.blockFr = BLOCKS[best].map(blkIdOf).filter(id => F.has(id)); }   // 1.0.55 : seulement les mots vraiment joués
-    try{ localStorage.setItem(storageKey(best, o.mode), JSON.stringify(r)); }catch(e){ continue; }
+    if(ex && !blkBetter(r, ex)) continue;                              // 🏅 1.0.56 : le bloc a déjà un résultat aussi bon (ou meilleur)
+    // 1.0.56 : il garde la liste de TOUS les mots joués (même ceux partis dans le bloc d'à côté) : après plusieurs changements,
+    // c'est elle qui permet de retrouver un bloc coupé en deux (avant, elle rétrécissait à chaque fois)
+    const c = blkCompact(Object.assign({}, r, { blockFr:frs }));
+    if(!vvLsPut(storageKey(best, o.mode), JSON.stringify(c))) continue;
     if(!blockResults[best]) blockResults[best] = {};
-    blockResults[best][o.mode] = r;
+    blockResults[best][o.mode] = c;
     n++;
   }
   // 🧩 1.0.55 : 2ᵉ passage. Des mots retirés (ou ajoutés) décalent les blocs : un ancien bloc se retrouve coupé en deux,
@@ -10193,13 +10410,49 @@ function blockResultsRescue(force){
       const pct = Math.min(...used.map(o => (o.r.correct || 0) / (o.r.total || 1)));
       const total = blk.length, at = Math.max(...used.map(o => o.r.finishedAt || 0));
       const res = { correct:Math.round(pct * total), total, mode, finishedAt:at, rescued:2, blockFr:ids.filter(id => got.has(id)), history:blk.map(w => ({ fr:w.fr, attempts:1 })), durationSec:0, xp:0 };
-      try{ localStorage.setItem(storageKey(i, mode), JSON.stringify(res)); }catch(e){ return; }
+      const c = blkCompact(res);
+      if(!vvLsPut(storageKey(i, mode), JSON.stringify(c))) return;
       if(!blockResults[i]) blockResults[i] = {};
-      blockResults[i][mode] = res; n++;
+      blockResults[i][mode] = c; n++;
     });
   });
-  BLK_RESCUE.n += n;
-  if(n){ try{ cloudAutoPush(); }catch(e){} }
+  // 🧹 1.0.56 : un ancien résultat ne sert plus quand chacun de ses mots (encore là) est déjà dans la liste des mots joués d'un
+  // résultat d'aujourd'hui (même mode) — ou peut y être ajouté : celui du bloc où le mot se trouve maintenant. Alors il est
+  // effacé ici, et du Google Sheet au prochain tour. Avant, ils s'accumulaient (deux fois plus à chaque mot retiré) et
+  // remplissaient la mémoire. Prudence : il faut qu'au moins la moitié de ses mots soient encore là — sinon on le garde.
+  const plays = new Map(), grow = new Map(), plan = [], anyM = {};
+  const playedOf = (b, m) => {
+    const k = b + '|' + m; if(plays.has(k)) return plays.get(k);
+    const R = blockResults[b] && blockResults[b][m];
+    const S = R && R.total ? new Set((Array.isArray(R.blockFr) && R.blockFr.length ? R.blockFr : (Array.isArray(R.history) ? R.history.map(h => h && h.fr) : [])).filter(Boolean)) : null;
+    plays.set(k, S); return S;
+  };
+  const anyOf = (m) => { if(anyM[m]) return anyM[m]; const A = new Set(); BLOCKS.forEach((_, b) => { const P = playedOf(b, m); if(P) P.forEach(x => A.add(x)); }); return (anyM[m] = A); };
+  orphans.forEach(o => {
+    if(!o.r || !o.frs || !o.frs.length) return;
+    let known = 0, ok = true; const add = [], A = anyOf(o.mode);
+    o.frs.forEach(f => { const b = where.get(f); if(b == null) return; known++; if(A.has(f)) return; const S = playedOf(b, o.mode); if(!S){ ok = false; return; } add.push([b, f]); });
+    if(!ok || known < Math.max(3, Math.ceil(0.5 * o.frs.length))) return;
+    const ks = new Set();
+    add.forEach(([b, f]) => { const k = b + '|' + o.mode; playedOf(b, o.mode).add(f); A.add(f); if(!grow.has(k)) grow.set(k, [b, o.mode]); ks.add(k); });
+    plan.push({ o, ks });
+  });
+  const bad = new Set();
+  grow.forEach(([b, m], k) => {
+    const R = blockResults[b][m], c = blkCompact(Object.assign({}, R, { blockFr:[...playedOf(b, m)] }));
+    if(vvLsPut(storageKey(b, m), JSON.stringify(c))) blockResults[b][m] = c; else bad.add(k);
+  });
+  const dq = []; let gone = 0;
+  plan.forEach(({ o, ks }) => {
+    if([...ks].some(k => bad.has(k))) return;                             // (pas pu noter ses mots : on le garde)
+    try{ localStorage.removeItem(o.k); dq.push(o.k); gone++; }catch(e){}
+  });
+  if(dq.length){                                                            // (seulement ceux que le Google Sheet a reçus)
+    let B = null; try{ B = (typeof syncBase !== 'undefined' && syncBase) ? syncBase : JSON.parse(localStorage.getItem('vocabVision.syncBase') || '{}'); }catch(e){}
+    vvDelQAdd(dq.filter(k => !B || B[k] !== undefined));
+  }
+  BLK_RESCUE.n += n; BLK_RESCUE.gone = (BLK_RESCUE.gone || 0) + gone;
+  if(n || gone){ try{ cloudAutoPush(); }catch(e){} }
   return n;
 }
 /* ➕ 1.0.55 : les phrases ajoutées à un mot déjà connu deviennent aussi des cartes, rangées à la date de leur ajout
@@ -10236,6 +10489,7 @@ function lexEchoNote(w){
   try{ const s = w && w.exMore && w.exMore[w.exMore.length - 1]; const b = s ? lexBlockOf(w, s) : 0; return b ? ` · aussi dans le Bloc ${b}` : ''; }catch(e){ return ''; }
 }
 function rebuildBlocks(){
+  try{ blkCompactAll(); }catch(e){ console.warn('blocs : mémoire', e); }   // 💾 1.0.56
   const pool0 = activeFilterCat ? WORDS.filter(w => w.cat === activeFilterCat) : WORDS;
   const pool = lexPoolWithEchoes(pool0);                                   // ➕ 1.0.55 : les phrases ajoutées, à leur date
   datasetHash = hashWords(pool.length === pool0.length ? WORDS : WORDS.concat(pool.filter(w => w.echo)));
@@ -11565,6 +11819,10 @@ function setStatus(msg, kind){
   const el = document.getElementById('csvStatus');
   el.textContent = msg;
   el.className = 'csv-status' + (kind ? ' ' + kind : '');
+  // 🧹 1.0.56 : « la mémoire de l'appli est pleine » → un bouton pour voir ce qui la remplit et faire de la place
+  if(kind === 'err' && /mémoire de l.appli/i.test(String(msg || ''))){
+    try{ const b = document.createElement('button'); b.type = 'button'; b.className = 'vvm-go'; b.textContent = '🧹 Libérer de la place'; b.addEventListener('click', () => memPanel()); el.appendChild(b); }catch(e){}
+  }
 }
 
 /* ---------- Menu (hamburger mobile) ---------- */
@@ -11612,6 +11870,7 @@ document.getElementById('userChipBtn').addEventListener('click', () => {
 document.getElementById('syncBtn').addEventListener('click', () => {
   renderSyncView();
 });
+document.getElementById('memBtn').addEventListener('click', () => { memPanel(); });   // 🧹 1.0.56
 
 function updateAutoSpeakBtn(){
   const btn = document.getElementById('autoSpeakBtn');
@@ -22534,6 +22793,11 @@ function handleAnswer(i){
 }
 
 function buildRecapTableHtml(history){
+  // 💾 1.0.56 : un résultat gardé n'a plus que les mots : l'arabe et la définition viennent de « tes mots »
+  if((history || []).some(w => w && w.ar == null && w.def == null)){
+    const M = new Map(); (WORDS || []).forEach(x => { if(x && x.fr && !M.has(x.fr)) M.set(x.fr, x); });
+    history = history.map(w => { if(!w || w.ar != null || w.def != null) return w; const x = M.get(w.fr) || {}; return Object.assign({}, w, { ar:x.ar || '', def:x.def || '', cat:x.cat }); });
+  }
   const rows = history.map(w => {
     let statusHtml;
     if(w.failed){
@@ -22589,9 +22853,11 @@ function renderRecapView(blockIndex, result, justFinished){
   const flawlessBanner = flawless
     ? `<div class="pass-banner flawless">🏆 Bloc terminé <b>SANS FAUTE</b> ! Parfait du premier coup 🎉</div>`
     : '';
-  const comboLine = (justFinished && combo >= 3)
+  const comboLine = ((justFinished && combo >= 3)
     ? `<div class="combo-line">🔥 Meilleure série : <b>${combo}</b> bonnes réponses d'affilée</div>`
-    : '';
+    : '') + ((!justFinished && result.lastTry && result.lastTry.total)   // 🏅 1.0.56 : le meilleur reste ; le dernier essai, à côté
+    ? `<div class="combo-line">🕘 Dernier essai : <b>${Math.round(result.lastTry.correct / result.lastTry.total * 100)} %</b>${result.lastTry.finishedAt ? ' le ' + new Date(result.lastTry.finishedAt).toLocaleDateString('fr-FR') : ''} — ton meilleur résultat reste gardé.</div>`
+    : '');
   const passBanner = `
     ${flawlessBanner}
     <div class="pass-banner ${passed ? 'ok' : 'todo'}">
@@ -23388,10 +23654,15 @@ async function cloudRequest(bodyObj){
 
 async function cloudPush(){
   const data = collectLocalData();
-  const out = await cloudRequest({ action: 'push', data });
-  const base = syncLoadBase(); Object.keys(data).forEach(k => { base[k] = syncHash(data[k]); }); syncSaveBase();
+  let left = Object.assign({}, data), saved = 0;
+  for(let g = 0; g < 400 && Object.keys(left).length; g++){                // 📦 1.0.56 : par paquets
+    const S = syncSlice(left, 150, 600000);
+    const out = await cloudRequest({ action: 'push', data:S.part });
+    saved += out.saved || S.n;
+    const base = syncLoadBase(); Object.keys(S.part).forEach(k => { base[k] = syncHash(S.part[k]); delete left[k]; }); syncSaveBase();
+  }
   try{ localStorage.setItem(LAST_SYNC_KEY, String(Date.now())); }catch(e){}
-  return out.saved || Object.keys(data).length;
+  return saved || Object.keys(data).length;
 }
 
 /* ⚡ 1.0.47 : avant, chaque tour (toutes les minutes) retéléchargeait TOUT le Google Sheet (plusieurs Mo avec les textes de la
@@ -23434,7 +23705,13 @@ function mergeRemoteData(remote){
   const mySuffix = '::u:' + getCurrentUserId();
   const failed = new Set(), prev = new Map();
   const getL = (k) => { try{ return tbKvOwns(k) ? tbKvGet(k) : localStorage.getItem(k); }catch(e){ return null; } };
-  const putL = (k, v) => { try{ if(tbKvOwns(k)) tbKvSet(k, v); else localStorage.setItem(k, v); return true; }catch(e){ failed.add(k); return false; } };
+  let freed = false;
+  const putL = (k, v) => {
+    try{ if(tbKvOwns(k)) tbKvSet(k, v); else localStorage.setItem(k, v); return true; }catch(e){}
+    if(!freed){ freed = true; try{ memAutoFree(); }catch(e){} }             // 🧹 1.0.56 : pleine → on fait de la place, et on réessaie
+    try{ localStorage.setItem(k, v); return true; }catch(e){}
+    failed.add(k); return false;
+  };
   const BEST_KEYS = [BLITZ_BEST_KEY, 'lexiqueQuiz::entMissionBest', 'lexiqueQuiz::besConjBest', 'lexiqueQuiz::besMissionBest', 'lexiqueQuiz::besGenreBest', 'lexiqueQuiz::redMissionBest'];
   for(const key of Object.keys(remote)){
     if(key.startsWith('lexiqueQuiz::leaderboard::')) continue;              // le classement n'est pas gardé ici
@@ -23617,9 +23894,9 @@ function mergeRemoteData(remote){
             GAME_MODES.forEach(mode => {
               const rr = rb.results && rb.results[mode];
               const lr = local.results && local.results[mode];
-              if(rr && (!lr || (rr.finishedAt||0) > (lr.finishedAt||0))){
+              if(rr && blkBetter(rr, lr)){                                 // 🏅 1.0.56 : le meilleur (à score égal, le plus récent)
                 local.results = local.results || {};
-                local.results[mode] = rr;
+                local.results[mode] = blkCompact(rr);
                 m = true;
               }
             });
@@ -23684,10 +23961,12 @@ function mergeRemoteData(remote){
       if(m){ putL(key, JSON.stringify(lo)); changed = true; }
 
     } else if(rv.includes('finishedAt')){
-      // résultat de bloc : on garde le plus récent
       const remoteRes = safeParse(rv, null);
       const localRes = lv ? safeParse(lv, null) : null;
-      if(remoteRes && (!localRes || (remoteRes.finishedAt||0) > (localRes.finishedAt||0))){ putL(key, rv); changed = true; }
+      if(/::h[0-9a-z]+_\d+::[a-zA-Z]+$/.test(baseKey) && remoteRes && typeof remoteRes === 'object'){
+        // 🏅 1.0.56 : résultat de bloc : le MEILLEUR des deux appareils (à score égal, le plus récent), en version légère
+        if(blkBetter(remoteRes, localRes)){ if(putL(key, JSON.stringify(blkCompact(remoteRes)))) changed = true; }
+      } else if(remoteRes && (!localRes || (remoteRes.finishedAt||0) > (localRes.finishedAt||0))){ putL(key, rv); changed = true; }
 
     } else if(dirty){
       // modifié ici ET sur l'autre appareil : listes et tableaux fusionnés ; un simple réglage → on garde le nôtre (plus récent)
@@ -23754,7 +24033,20 @@ function syncHash(s){
   return (h >>> 0).toString(36) + '.' + s.length.toString(36);
 }
 function syncLoadBase(){ if(syncBase) return syncBase; try{ syncBase = JSON.parse(localStorage.getItem(SYNC_BASE_KEY) || '{}') || {}; }catch(e){ syncBase = {}; } return syncBase; }
-function syncSaveBase(){ try{ localStorage.setItem(SYNC_BASE_KEY, JSON.stringify(syncBase || {})); }catch(e){} }
+function syncSaveBase(){
+  const s = JSON.stringify(syncBase || {});
+  try{ localStorage.setItem(SYNC_BASE_KEY, s); return true; }catch(e){}
+  try{ if(typeof VVMEM !== 'undefined' && Date.now() - (VVMEM.baseTry || 0) > 60000){ VVMEM.baseTry = Date.now(); memAutoFree(); localStorage.setItem(SYNC_BASE_KEY, s); return true; } }catch(e){}
+  return false;
+}
+/* 📦 1.0.56 : l'ordre d'envoi — d'abord les réglages, tes mots, tes progrès ; puis les résultats des blocs ; la Tablette ; et ce qui peut attendre */
+function syncRank(k){ return SYNC_LAZY.test(k) ? 3 : (/^lexiqueQuiz::tb(Img|Doc|Meta)::/.test(k) ? 2 : (/::h[0-9a-z]+_\d+::[a-zA-Z]+::u:/.test(k) ? 1 : 0)); }
+function syncSlice(d, maxN, maxSz){
+  const keys = Object.keys(d).sort((a, b) => syncRank(a) - syncRank(b)), part = {};
+  let n = 0, sz = 0;
+  for(const k of keys){ const L = k.length + String(d[k]).length; if(n && (n >= maxN || sz + L > maxSz)) break; part[k] = d[k]; n++; sz += L; }
+  return { part, n, all:keys.length };
+}
 function syncTracked(key){ return !!key && key.startsWith('lexiqueQuiz::') && !SYNC_EXCLUDED.includes(key) && !key.startsWith('lexiqueQuiz::leaderboard::'); }
 /* fiches / textes : entrée par entrée, la plus récente gagne (une fiche « défaite » garde sa date : elle ne revient pas) */
 function syncMergeStamped(lo, ro, flag){
@@ -23795,12 +24087,15 @@ function syncDirtyData(){
   return out;
 }
 async function syncPushDirty(){
-  const d = syncDirtyData(), keys = Object.keys(d);
-  if(!keys.length) return 0;
+  const d0 = syncDirtyData();
+  if(!Object.keys(d0).length) return 0;
+  // 📦 1.0.56 : par paquets (≈ 600 ko, 150 données au plus) : un gros envoi ne fait plus échouer la synchro ; la suite part au tour suivant
+  const S = syncSlice(d0, 150, 600000), d = S.part, keys = Object.keys(d);
   await cloudRequest({ action:'push', data:d });
   const base = syncLoadBase();
   keys.forEach(k => { base[k] = syncHash(d[k]); });
   syncSaveBase();
+  if(S.n < S.all) cloudPushPending = true;
   try{ if(typeof tbImgPrune === 'function') tbImgPrune(); }catch(e){}   // 🖼 images envoyées : la copie en texte n'est plus utile ici
   try{ localStorage.setItem(LAST_SYNC_KEY, String(Date.now())); }catch(e){}
   return keys.length;
@@ -23818,6 +24113,7 @@ async function syncCycle(opts){
     if(opts.force || !document.body.classList.contains('quiz-active')){ changed = await cloudPull(opts.full); pulled = true; try{ if(typeof wordsRepairMaybe === 'function') wordsRepairMaybe(); }catch(e){} }
     if(changed) syncAfterRemoteChange();   // l'écran se met à jour tout de suite
     sent = await syncPushDirty();
+    try{ await vvDelPump(); }catch(e){ console.warn('synchro : anciens résultats', e); }   // 🧹 1.0.56
     syncState.lastOk = Date.now();
     if(syncState.errAt){ syncState.errAt = 0; setStatus('☁️ Synchro rétablie.', 'ok'); }
     if(sent && Date.now() - syncState.lastLb > 5 * 60000){ syncState.lastLb = Date.now(); pushLeaderboardEntry(); }
@@ -23880,7 +24176,8 @@ function syncAfterRemoteChange(){
 function syncFlushNow(){
   try{
     const url = getSyncUrl(); if(!url || syncState.merging) return;
-    const d = syncDirtyData(); if(!Object.keys(d).length) return;
+    const d0 = syncDirtyData(); if(!Object.keys(d0).length) return;
+    const d = syncSlice(d0, 60, 60000).part;                               // 📦 1.0.56 : un petit paquet, qui part même en quittant
     const body = JSON.stringify({ action:'push', data:d });
     fetch(url, { method:'POST', headers:{ 'Content-Type':'text/plain;charset=utf-8' }, body, keepalive:body.length < 60000 }).catch(() => {});
   }catch(e){}
@@ -24343,6 +24640,11 @@ const COLOR_PRESETS = {
 /* ============ 🆕 NOUVEAUTÉS — pour que tout ce qui a été ajouté reste découvrable ============ */
 const WHATS_NEW_SECTIONS = [
   { icon:'🆕', title:'Nouveautés', items:[
+    { name:'🧩 Les blocs passés sont gardés et arrivent sur l\'autre appareil', desc:"La mémoire de l'appli était pleine : chaque résultat de bloc gardait l'arabe et la définition de ses 30 mots, et chaque changement de mots en recopiait sans effacer. D'où des blocs passés qui ne restaient pas, ou n'arrivaient pas sur l'autre appareil (« mémoire pleine », « synchro impossible »). Maintenant, un résultat prend 5 fois moins de place, les anciennes copies sont rangées puis effacées, et la synchro envoie par petits paquets." },
+    { name:'🏅 Un bloc validé reste validé', desc:"Pour chaque mode, c'est ton MEILLEUR résultat qui reste, sur tes deux appareils : rejouer un bloc et le rater ne le fait plus repasser en « à faire ». Le dernier essai est noté sous le résultat." },
+    { name:'🧹 Mémoire de l\'appli', desc:"Menu ☰ › 🧹 Mémoire de l'appli : ce qui remplit la mémoire (résultats, mots, statistiques…) et « Libérer de la place », sans rien perdre. Le message « mémoire pleine » a aussi ce bouton." },
+    { name:'☁️ Cloudflare R2 : plus de PDF envoyé en double', desc:"Quand la mémoire de l'appli était pleine, un PDF pouvait repartir vers R2 encore et encore (des centaines de copies). C'est fini : il part une seule fois, et si quelque chose rate, ce qui est parti est retiré. Un PDF de ta liste dont le fichier manque sur R2 est renvoyé tout seul (depuis l'appareil où il est)." },
+    { name:'🧹 « Ranger Cloudflare » : le détail et la progression', desc:"La fenêtre montre ce qui est gardé (tes PDF et livres) et ce qui part, puis une barre de progression et le bilan. Plus prudent : seulement les PDF et livres (jamais les images des textes ni les audios), la liste relue dans le cloud avant, et rien de moins de 48 h." },
     { name:'🔊 Écouter un PDF ou un livre : ce qui est lu reste coloré', desc:"Sur un PDF « tel quel » ou un livre .epub, touche 🔊 : la voix lit à partir de ce que tu vois, phrase par phrase ; la phrase lue est surlignée, puis elle garde une couleur « lu ». Tu vois où tu en es, même en revenant le lendemain, et sur ton autre appareil. ⏮ ⏸ ⏭, la vitesse, ✕ (ou Échap) pour arrêter." },
     { name:'🎤 « Je lis » sur un PDF ou un livre', desc:"Touche 🎤 et lis à voix haute la phrase soulignée : le micro te suit, chaque mot que tu dis prend la couleur « lu » et la garde ; phrase bien lue → on passe à la suivante." },
     { name:'🖍 Le surligneur : le mot ou la phrase, tes couleurs', desc:"Dans un PDF ou un livre, 🖍 règle tout : la souris (ou le doigt) allume le mot entier ou toute la phrase, dans la couleur de ton choix ; la couleur de ce qui est lu, celle de la phrase lue à voix haute ; garder ou non ; et « 🧽 Effacer » pour recommencer un document. Dans la Tablette : Aa › Page › Suivre." },
@@ -50426,7 +50728,7 @@ function tbArtSizes(){
 function tbStoreWarnHtml(){
   const used = tbLsUsed(), pct = Math.round(used / TB_LS_MAX * 100);
   if(pct < 85) return '';
-  return `<div class="tbl-full" role="status"><span>⚠️ <b>La mémoire de l'appli est presque pleine (${Math.min(100, pct)} %)</b> : un texte, un « lu » ou un brouillon risque de ne pas être gardé.</span><button type="button" class="tbl-link" data-tbl="big">📦 Voir ce qui prend le plus de place</button></div>`;
+  return `<div class="tbl-full" role="status"><span>⚠️ <b>La mémoire de l'appli est presque pleine (${Math.min(100, pct)} %)</b> : un texte, un « lu » ou un brouillon risque de ne pas être gardé.</span><button type="button" class="tbl-link" data-vvmem="1">🧹 Libérer de la place</button><button type="button" class="tbl-link" data-tbl="big">📦 Voir ce qui prend le plus de place</button></div>`;
 }
 function tbBigDialog(){
   const by = tbArtSizes(), L = tbLoad().filter(a => by.has(a.id) && !tbArtHidden(a)).map(a => ({ a, n:by.get(a.id) })).sort((x, y) => y.n - x.n).slice(0, 12);
@@ -52201,12 +52503,15 @@ async function pdvRemove(id){
    • Il faut les clés R2 seulement sur l'appareil qui ENVOIE (souvent le PC) ; l'autre lit l'adresse publique.
    • 🗑 supprime partout ; le fichier est retiré de R2 par le premier appareil qui a les clés. */
 var PDV_CLOUD = 'lexiqueQuiz::pdvCloud', PDV_DIRS_S = 'lexiqueQuiz::pdvDirs', PDV_POS = 'lexiqueQuiz::pdvPos';
-var PDVUP = { busy:false, cur:'', frac:0, err:'', skip:new Set(), dl:new Map(), adopting:false };
+var PDVUP = { busy:false, cur:'', frac:0, err:'', skip:new Set(), dl:new Map(), adopting:false, tried:new Set(), checked:false };
 function pdvCloud(){ try{ const L = JSON.parse(localStorage.getItem(nsKey(PDV_CLOUD)) || '[]'); return Array.isArray(L) ? L.filter(x => x && x.id) : []; }catch(e){ return []; } }
 function pdvCloudSave(L){
   const old = Date.now() - 120 * 86400000;
   L = (L || []).filter(x => x && x.id && !(x.gone && !(x.del && x.del.length) && (x.upd || 0) < old)).slice(0, 300);
-  try{ localStorage.setItem(nsKey(PDV_CLOUD), JSON.stringify(L)); return true; }catch(e){ return false; }
+  const s = JSON.stringify(L);
+  try{ localStorage.setItem(nsKey(PDV_CLOUD), s); return true; }catch(e){}
+  try{ memAutoFree(); localStorage.setItem(nsKey(PDV_CLOUD), s); return true; }catch(e){}   // 🧹 1.0.56 : pleine → on fait de la place
+  return false;
 }
 function pdvCloudOf(id){ return pdvCloud().find(x => x.id === id) || null; }
 function pdvCloudPatch(id, p){
@@ -52246,20 +52551,32 @@ function pdvR2Keys(e){ return e && e.r2 ? (e.kind === 'img' ? Array.from({ lengt
 async function pdvCloudUp(id){
   const m = pdvMeta(id); if(!m) return false;
   const ex = pdvCloudOf(id); if(ex) return !ex.gone;
-  const key = await pdvKeyNew(), base = 'vocabvision/pdf/' + pdvRand(26), img = m.kind === 'img', n = img ? (m.n || 1) : 1, types = [];
+  const key = await pdvKeyNew(), base = 'vocabvision/pdf/' + pdvRand(26), img = m.kind === 'img', n = img ? (m.n || 1) : 1, types = [], sent = [];
+  // 🛑 1.0.56 : si quelque chose rate en route, ce qui est déjà parti est retiré de R2 (avant : ces copies restaient sur R2)
+  const undo = async () => { for(const p of sent){ try{ await r2Delete(p); }catch(err){ if(!(err && err.status === 404)) r2TrashAdd(p); } } };
   let size = 0;
-  for(let k = 1; k <= n; k++){
-    const b = await pdvGet(img ? pdvBlobKey(id, k) : pdvBlobKey(id)); if(!b) throw new Error("le fichier n'est plus sur cet appareil");
-    types.push(b.type || (img ? 'image/jpeg' : 'application/pdf'));
-    const sealed = await pdvSeal(b, key.k); size += sealed.size;
-    const q = { file:new File([sealed], 'pdf.vv', { type:'application/octet-stream' }), path:img ? base + '-' + k + '.vv' : base + '.vv' };
-    await r2UploadFile(q, (f) => { PDVUP.frac = (k - 1 + f) / n; pdvUpPaint(); });
-  }
-  if(!pdvMeta(id)) return false;                                                // supprimé pendant l'envoi
+  try{
+    for(let k = 1; k <= n; k++){
+      const b = await pdvGet(img ? pdvBlobKey(id, k) : pdvBlobKey(id)); if(!b) throw new Error("le fichier n'est plus sur cet appareil");
+      types.push(b.type || (img ? 'image/jpeg' : 'application/pdf'));
+      const sealed = await pdvSeal(b, key.k); size += sealed.size;
+      const q = { file:new File([sealed], 'pdf.vv', { type:'application/octet-stream' }), path:img ? base + '-' + k + '.vv' : base + '.vv' };
+      await r2UploadFile(q, (f) => { PDVUP.frac = (k - 1 + f) / n; pdvUpPaint(); });
+      sent.push(q.path);
+    }
+  }catch(e){ await undo(); throw e; }
+  if(!pdvMeta(id)){ await undo(); return false; }                              // supprimé pendant l'envoi
   const c = r2CfgGet() || {}, mm = pdvMeta(id), pos = {};
   const e = { id, kind:mm.kind, title:mm.title, name:mm.name || '', n:mm.n, pages:mm.pages, scan:mm.scan || null, lang:mm.lang || 'fra', at0:mm.at0 || mm.at || Date.now(), dir:mm.dir || '', autoTitle:!!mm.autoTitle,
     last:mm.last || 0, kindle:!!mm.kindle, mark:mm.mark || 0, r2:base, url:String(c.publicUrl || '').replace(/\/+$/, '') + '/' + base, k:key.b64, mt:types, size, upd:Date.now() };
-  const L = pdvCloud().filter(x => x.id !== id); L.unshift(e); pdvCloudSave(L);
+  const L = pdvCloud().filter(x => x.id !== id); L.unshift(e);
+  if(!pdvCloudSave(L)){
+    // 🛑 1.0.56 : la liste n'a pas pu être gardée (mémoire de l'appli pleine). Avant, le PDF repartait aussitôt, encore et encore
+    // (jusqu'à 200 copies sur R2). Maintenant : on retire ce qui vient de partir, et on s'arrête avec un message clair.
+    await undo();
+    const err = new Error("la mémoire de l'appli est pleine : le PDF n'a pas pu être ajouté à ta liste (il reste sur cet appareil). Menu ☰ › 🧹 Mémoire de l'appli, puis 🔁 Réessayer.");
+    err.fatal = true; err.mem = true; throw err;
+  }
   const P = pdvPosAll(); if(!P[id] && mm.last){ P[id] = { p:mm.last, k:!!mm.kindle, m:mm.mark || 0, at:Date.now() }; pdvPosSave(P); }
   pdvPatch(id, { cupd:e.upd });
   return true;
@@ -52298,8 +52615,9 @@ async function pdvCloudPump(){
     if(!pdvR2Ok()) return;
     for(let guard = 0; guard < 200; guard++){
       const C = new Set(pdvCloud().map(x => x.id));
-      const m = pdvList().find(x => !C.has(x.id) && !PDVUP.skip.has(x.id));
+      const m = pdvList().find(x => !C.has(x.id) && !PDVUP.skip.has(x.id) && !PDVUP.tried.has(x.id));
       if(!m) break;
+      PDVUP.tried.add(m.id);                                                    // 🛑 1.0.56 : une seule fois par séance (avant : jusqu'à 200)
       PDVUP.cur = m.id; PDVUP.frac = 0; PDVUP.err = ''; pdvUpPaint();
       try{ await pdvCloudUp(m.id); }
       catch(e){
@@ -52308,8 +52626,36 @@ async function pdvCloudPump(){
       }
       PDVUP.cur = ''; pdvShelfRefresh();
     }
+    // 🩹 1.0.56 : une fois par séance, un PDF de ta liste dont le fichier manque sur R2 est renvoyé d'ici (s'il y est encore)
+    if(!PDVUP.checked && pdvCloud().some(e => !e.gone && e.r2 && pdvMeta(e.id))){
+      PDVUP.checked = true;
+      try{
+        const have = new Set((await r2ListAll('vocabvision/pdf/')).map(o => o.path));
+        const miss = pdvCloud().filter(e => !e.gone && e.r2 && e.k && pdvMeta(e.id) && (e.upd || 0) < Date.now() - 600000 && pdvR2Keys(e).some(k => !have.has(k)));
+        if(miss.length){ const n = await pdvR2Repair(miss, have); if(n) pdvSay(`☁️ ${n} PDF renvoyé${n > 1 ? 's' : ''} sur Cloudflare R2 (son fichier y manquait)`, 4200); }
+      }catch(e){ console.warn('pdv ☁️ réparer', e); }
+    }
   }catch(e){ console.warn('pdv ☁️', e); }
   finally{ PDVUP.busy = false; PDVUP.cur = ''; try{ pdvShelfRefresh(); }catch(e){} }
+}
+/* 🩹 renvoyer sur R2 le fichier d'un PDF de la liste qui y manque — même adresse, même clé : rien ne change pour l'autre appareil */
+async function pdvR2Repair(miss, have, onOne){
+  let n = 0;
+  for(const e of miss || []){
+    if(!pdvMeta(e.id) || !e.k) continue;
+    try{
+      const key = await crypto.subtle.importKey('raw', pdvUnB64(e.k), { name:'AES-GCM' }, false, ['encrypt']);
+      const ks = pdvR2Keys(e), img = e.kind === 'img';
+      for(let i = 0; i < ks.length; i++){
+        if(have && have.has(ks[i])) continue;
+        const b = await pdvGet(img ? pdvBlobKey(e.id, i + 1) : pdvBlobKey(e.id)); if(!b) throw new Error("le fichier n'est plus sur cet appareil");
+        const sealed = await pdvSeal(b, key);
+        await r2UploadFile({ file:new File([sealed], 'pdf.vv', { type:'application/octet-stream' }), path:ks[i] }, () => {});
+      }
+      n++; if(onOne) onOne(e);
+    }catch(err){ console.warn('pdv ☁️ réparer', e.id, err); }
+  }
+  return n;
 }
 function pdvUpPaint(){
   const el = document.querySelector(`#pdvShelf [data-pdv-open="${CSS.escape(PDVUP.cur || '-')}"] .pdv-sh-cl`);
@@ -52462,52 +52808,120 @@ function pdvR2UsePaint(){
   const el = document.getElementById('pdvR2Use'); if(!el || !r2Ready()) return;
   r2Usage().then(b => { if(b == null || !el.isConnected) return; const pct = Math.min(100, b / (10 * 1073741824) * 100); el.innerHTML = `☁️ Cloudflare R2 : <b>${r2FmtGo(b)}</b> utilisés sur 10 Go gratuits <i style="--w:${pct.toFixed(1)}%"></i>`; }).catch(() => {});
 }
-/* 🧹 1.0.55 : les fichiers de R2 que plus rien n'utilise (PDF, livres, images de textes supprimés, envois interrompus).
-   Prudence : on récupère d'abord les nouveautés de tes autres appareils, et un fichier de moins de 24 h n'est jamais retiré
-   (il peut être en train d'arriver d'un autre appareil). Les audios de l'Audiothèque ne sont pas concernés. */
+/* 🧹 1.0.56 : RANGER CLOUDFLARE R2, EN SÉCURITÉ
+   • seulement les PDF et livres (vocabvision/pdf/) : les images des textes ne sont jamais retirées ici (elles partent quand
+     tu supprimes leur texte) — et les audios de l'Audiothèque non plus ;
+   • on garde tout ce que ta liste connaît, ici ET dans le cloud : la liste est relue à l'instant dans le Google Sheet
+     (si elle ne peut pas être relue, on ne retire rien) ;
+   • un fichier de moins de 48 h n'est jamais retiré (il peut être en train d'arriver d'un autre appareil) ;
+   • la fenêtre montre ce qui est gardé et ce qui part, puis la progression (4 à la fois) et le bilan ;
+   • un PDF de ta liste dont le fichier manque sur R2 est renvoyé d'ici (s'il est encore sur cet appareil). */
 async function r2TidyScan(){
   try{ await syncCycle({ force:true }); }catch(e){}
-  const keep = new Set();
-  pdvCloud().forEach(e => { if(!e.gone) pdvR2Keys(e).forEach(k => keep.add(k)); });
-  try{ Object.values(tbImgR2Map()).forEach(k => keep.add(k)); }catch(e){}
-  try{ const re = /^lexiqueQuiz::tbImg::[^~:]+::u:/; const ks = (typeof TBKV !== 'undefined' && TBKV.map) ? [...TBKV.map.keys()] : [];
-    for(let i = 0; i < localStorage.length; i++) ks.push(localStorage.key(i));
-    ks.forEach(k => { if(!k || !re.test(k)) return; try{ const h = JSON.parse(tbKvGet(k) || 'null'); const m = h && h.r2 && /(vocabvision\/img\/[^/?#]+\.vv)$/.exec(h.r2); if(m) keep.add(m[1]); }catch(e){} });
-  }catch(e){}
-  const all = (await r2ListAll('vocabvision/pdf/')).concat(await r2ListAll('vocabvision/img/'));
-  const old = Date.now() - 24 * 3600000;
-  return all.filter(o => o.path && !keep.has(o.path) && (o.mod || 0) < old);
+  let remote = [];
+  try{
+    const out = await cloudRequest({ action:'pull', mine:'::u:' + getCurrentUserId(), prefix:'lexiqueQuiz::pdvCloud::' });
+    const x = out && out.data && out.data[nsKey(PDV_CLOUD)];
+    remote = x && x.v ? (safeParse(x.v, []) || []) : [];
+    if(!Array.isArray(remote)) remote = [];
+  }catch(e){ throw new Error("impossible de relire ta liste de PDF dans le cloud : rien n'est retiré (réessaie plus tard)"); }
+  const keep = new Set(), latest = new Map();
+  [remote, pdvCloud()].forEach(L => L.forEach(e => {
+    if(!e || !e.id) return;
+    if(!e.gone && e.r2) pdvR2Keys(e).forEach(k => keep.add(k));               // gardé s'il est vivant d'un côté ou de l'autre
+    const o = latest.get(e.id); if(!o || (e.upd || 0) >= (o.upd || 0)) latest.set(e.id, e);
+  }));
+  const all = await r2ListAll('vocabvision/pdf/');
+  const have = new Set(all.map(o => o.path)), old = Date.now() - 48 * 3600000;
+  const del = all.filter(o => o.path && !keep.has(o.path) && (o.mod || 0) < old);
+  const kept = all.filter(o => keep.has(o.path));
+  const live = [...latest.values()].filter(e => !e.gone && e.r2);
+  const miss = live.filter(e => e.k && (e.upd || 0) < Date.now() - 600000 && pdvR2Keys(e).some(k => !have.has(k)));
+  let imgs = []; try{ imgs = await r2ListAll('vocabvision/img/'); }catch(e){}
+  return { del, kept, live, miss, have, imgs, recent:all.filter(o => !keep.has(o.path) && (o.mod || 0) >= old) };
 }
 function r2Ask(msg, yes, no){
   return new Promise(res => {
-    const ov = document.createElement('div'); ov.className = 'am-dlg-ov tbl-dlg-ov show';
+    const ov = document.createElement('div'); ov.className = 'am-dlg-ov tbl-dlg-ov vvm-ov show';
     ov.innerHTML = `<div class="am-dlg tbl-dlg" role="dialog" aria-modal="true" aria-label="Cloudflare R2"><div class="am-dlg-t">${escapeHtml(msg)}</div>
-      <div class="am-dlg-b"><button class="am-dlg-btn ghost" data-v="no">${escapeHtml(no || 'Annuler')}</button><button class="am-dlg-btn" data-v="ok">${escapeHtml(yes || 'OK')}</button></div></div>`;
+      <div class="am-dlg-b"><button type="button" class="am-dlg-btn ghost" data-v="no">${escapeHtml(no || 'Annuler')}</button><button type="button" class="am-dlg-btn" data-v="ok">${escapeHtml(yes || 'OK')}</button></div></div>`;
     document.body.appendChild(ov);
     const done = (v) => { ov.remove(); document.removeEventListener('keydown', key, true); res(v); };
     const key = (e) => { if(e.key === 'Escape'){ e.preventDefault(); e.stopPropagation(); done(false); } };
     document.addEventListener('keydown', key, true);
-    ov.addEventListener('click', (e) => { if(e.target === ov || e.target.closest('[data-v="no"]')) done(false); else if(e.target.closest('[data-v="ok"]')) done(true); });
+    ov.querySelector('[data-v="no"]').addEventListener('click', () => done(false));
+    ov.querySelector('[data-v="ok"]').addEventListener('click', () => done(true));
+    ov.addEventListener('click', (e) => { if(e.target === ov) done(false); });
     setTimeout(() => { const b = ov.querySelector('[data-v="ok"]'); if(b) b.focus(); }, 30);
   });
 }
 async function r2Tidy(btn){
   if(!r2Ready()) return;
+  const lbl = '🧹 Ranger Cloudflare';
   if(btn){ btn.disabled = true; btn.textContent = '🧹 Je regarde…'; }
-  let L = [];
-  try{ L = await r2TidyScan(); }
-  catch(e){ pdvSay('⚠️ Cloudflare R2 : ' + ((e && e.message) || 'impossible de lister les fichiers'), 3600); if(btn){ btn.disabled = false; btn.textContent = '🧹 Ranger Cloudflare'; } return; }
-  if(btn){ btn.disabled = false; btn.textContent = '🧹 Ranger Cloudflare'; }
-  const size = L.reduce((s, o) => s + (o.size || 0), 0);
-  if(!L.length){ pdvSay('🧹 Cloudflare R2 est déjà rangé : aucun fichier inutile', 3000); pdvR2UsePaint(); return; }
-  const ok = await r2Ask(`🧹 ${L.length} fichier${L.length > 1 ? 's' : ''} ne ser${L.length > 1 ? 'vent' : 't'} plus à rien sur Cloudflare R2 (${amFmtSize(size)}) : des PDF, livres ou images déjà supprimés. Les retirer ?`, 'Retirer', 'Laisser');
-  if(!ok) return;
-  let n = 0, freed = 0;
-  for(const o of L){ try{ await r2Delete(o.path); n++; freed += o.size || 0; }catch(e){} }
-  R2Q.at = 0;
-  pdvSay(`🧹 ${n} fichier${n > 1 ? 's' : ''} retiré${n > 1 ? 's' : ''} · ${amFmtSize(freed)} libérés sur Cloudflare R2`, 3600);
-  try{ await r2Usage(true); }catch(e){}
-  pdvR2UsePaint();
+  let S = null;
+  try{ S = await r2TidyScan(); }
+  catch(e){ pdvSay('⚠️ Cloudflare R2 : ' + ((e && e.message) || 'impossible de lister les fichiers'), 4200); if(btn){ btn.disabled = false; btn.textContent = lbl; } return; }
+  if(btn){ btn.disabled = false; btn.textContent = lbl; }
+  return r2TidyDlg(S);
+}
+function r2TidyDlg(S){
+  const sz = (L) => L.reduce((s, o) => s + (o.size || 0), 0), pl = (n, a, b) => n > 1 ? b : a;
+  const fix = S.miss.filter(e => pdvMeta(e.id)), far = S.miss.length - fix.length;
+  const nDel = S.del.length, bDel = sz(S.del);
+  document.querySelectorAll('.r2t-ov').forEach(x => x.remove());
+  const ov = document.createElement('div'); ov.className = 'am-dlg-ov tbl-dlg-ov vvm-ov r2t-ov show';
+  const act = nDel || fix.length;
+  ov.innerHTML = `<div class="am-dlg tbl-dlg vvm r2t" role="dialog" aria-modal="true" aria-label="Ranger Cloudflare R2">
+    <div class="am-dlg-t">🧹 Ranger Cloudflare R2</div>
+    <div class="vvm-l">
+      <div class="vvm-it"><b>📖 Gardés : ${S.live.length} PDF et livre${pl(S.live.length, '', 's')} de ta liste<small>sur ce PC et ton téléphone</small></b><span class="vvm-n">${amFmtSize(sz(S.kept))}</span></div>
+      ${nDel ? `<div class="vvm-it hot"><b>🗑 À retirer : ${nDel} fichier${pl(nDel, '', 's')} que plus rien n'utilise<small>des copies en double, des PDF déjà supprimés, des envois interrompus</small></b><span class="vvm-n">${amFmtSize(bDel)}</span></div>` : `<div class="vvm-it"><b>✓ Aucun fichier inutile<small>tout ce qui est sur R2 sert à ta liste</small></b></div>`}
+      ${S.recent.length ? `<div class="vvm-it"><b>⏳ ${S.recent.length} fichier${pl(S.recent.length, '', 's')} de moins de 48 h<small>jamais retirés : ils peuvent être en train d'arriver d'un autre appareil</small></b><span class="vvm-n">${amFmtSize(sz(S.recent))}</span></div>` : ''}
+      ${S.imgs.length ? `<div class="vvm-it"><b>🖼 Images des textes : ${S.imgs.length}<small>jamais retirées ici (elles partent quand tu supprimes leur texte)</small></b><span class="vvm-n">${amFmtSize(sz(S.imgs))}</span></div>` : ''}
+      ${fix.length ? `<div class="vvm-it hot"><b>🩹 ${fix.length} PDF de ta liste n'${pl(fix.length, 'a', 'ont')} plus ${pl(fix.length, 'son', 'leur')} fichier sur R2<small>${pl(fix.length, 'il sera renvoyé', 'ils seront renvoyés')} depuis cet appareil</small></b></div>` : ''}
+      ${far ? `<div class="vvm-it"><b>⚠️ ${far} PDF de ta liste n'${pl(far, 'a', 'ont')} plus ${pl(far, 'son', 'leur')} fichier sur R2<small>ouvre « 🧹 Ranger Cloudflare » sur l'appareil où ${pl(far, 'il est', 'ils sont')} : ${pl(far, 'il sera renvoyé', 'ils seront renvoyés')}</small></b></div>` : ''}
+    </div>
+    <div class="vvm-bar go" hidden><i></i></div><div class="vvm-p" aria-live="polite" hidden></div>
+    <div class="am-dlg-b">${act ? `<button type="button" class="am-dlg-btn ghost" data-v="no">Laisser</button><button type="button" class="am-dlg-btn" data-v="ok">${nDel ? `🗑 Retirer ${nDel} fichier${pl(nDel, '', 's')} (${amFmtSize(bDel)})` : '🩹 Renvoyer'}</button>` : `<button type="button" class="am-dlg-btn" data-v="no">Fermer</button>`}</div></div>`;
+  document.body.appendChild(ov);
+  let running = false;
+  const close = () => { if(running) return; ov.remove(); document.removeEventListener('keydown', key, true); try{ pdvR2UsePaint(); }catch(e){} };
+  const key = (e) => { if(e.key === 'Escape' && !running){ e.preventDefault(); e.stopPropagation(); close(); } };
+  document.addEventListener('keydown', key, true);
+  ov.addEventListener('click', (e) => { if(e.target === ov) close(); });
+  ov.querySelector('[data-v="no"]').addEventListener('click', close);
+  const ok = ov.querySelector('[data-v="ok"]');
+  if(ok) ok.addEventListener('click', async () => {
+    if(running) return;
+    running = true;
+    ov.querySelectorAll('.am-dlg-b button').forEach(b => { b.disabled = true; });
+    ok.textContent = '🧹 Je range…';
+    const bar = ov.querySelector('.vvm-bar'), bi = bar.querySelector('i'), pr = ov.querySelector('.vvm-p');
+    bar.hidden = false; pr.hidden = false;
+    let done = 0, n = 0, freed = 0, bad = 0;
+    const total = nDel + fix.length;
+    const paint = () => { bi.style.width = (total ? Math.round(done / total * 100) : 100) + '%'; pr.textContent = `${done} / ${total} · ${amFmtSize(freed)} libérés`; };
+    paint();
+    const Q = S.del.slice();
+    const worker = async () => { for(let o = Q.shift(); o; o = Q.shift()){ try{ await r2Delete(o.path); n++; freed += o.size || 0; }catch(e){ if(e && e.status === 404) n++; else bad++; } done++; paint(); } };
+    await Promise.all([worker(), worker(), worker(), worker()]);
+    let rep = 0;
+    if(fix.length) rep = await pdvR2Repair(fix, S.have, () => { done++; paint(); });
+    done = total; paint();
+    R2Q.at = 0;
+    try{ await r2Usage(true); }catch(e){}
+    running = false;
+    const msg = [n ? `✓ ${n} fichier${pl(n, '', 's')} retiré${pl(n, '', 's')} · ${amFmtSize(freed)} libérés sur Cloudflare R2.` : '', rep ? `🩹 ${rep} PDF renvoyé${pl(rep, '', 's')}.` : '', bad ? `⚠️ ${bad} fichier${pl(bad, " n'a", "s n'ont")} pas pu être retiré${pl(bad, '', 's')} : réessaie plus tard.` : ''].filter(Boolean).join(' ');
+    pr.textContent = msg || '✓ Rangé.';
+    pr.classList.add('vvm-msg'); if(bad) pr.classList.add('err');
+    const bb = ov.querySelector('.am-dlg-b'); bb.innerHTML = '<button type="button" class="am-dlg-btn" data-v="x">Fermer</button>';
+    bb.querySelector('[data-v="x"]').addEventListener('click', close);
+    try{ pdvR2UsePaint(); }catch(e){}
+    pdvSay(msg || '🧹 Cloudflare R2 rangé', 4200);
+  });
+  setTimeout(() => { const b = ov.querySelector('[data-v="ok"]') || ov.querySelector('[data-v="no"]'); if(b) b.focus(); }, 30);
+  return ov;
 }
 function pdvShelfHint(all){
   if(PDVUP.err && pdvR2Ok()) return `<div class="pdv-sh-hint err" role="status"><span>⚠️ Envoi vers Cloudflare R2 impossible : ${escapeHtml(PDVUP.err)}</span><button type="button" data-pdvs="r2-retry">🔁 Réessayer</button></div>`;
@@ -53030,7 +53444,7 @@ document.addEventListener('click', async (e) => {
     const a = act.dataset.pdvs, dir = act.dataset.dir;
     if(a === 'new-dir'){ await pdvNewDir(); return; }
     if(a === 'r2'){ try{ pdvClose(true); }catch(err){} audioAdmin.showR2 = true; audioAdmin.showGh = false; renderAudioManager(); return; }
-    if(a === 'r2-retry'){ PDVUP.skip.clear(); PDVUP.err = ''; pdvShelfRefresh(); pdvCloudPump(); return; }
+    if(a === 'r2-retry'){ PDVUP.skip.clear(); PDVUP.tried.clear(); PDVUP.err = ''; pdvShelfRefresh(); pdvCloudPump(); return; }
     if(a === 'r2-tidy'){ r2Tidy(act); return; }
     if(a === 'mv'){ pdvMoveMenu(act, act.dataset.id); return; }
     if(a === 'dir-tog'){ const D = pdvDirs(), d = D.find(x => x.id === dir); if(d){ d.open = d.open === false; pdvSaveDirs(D); pdvShelfRefresh(); } return; }
