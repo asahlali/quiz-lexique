@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <!-- 🏷️ Version de l'appli : augmentée automatiquement par publier-site.cmd à chaque publication -->
-<meta name="app-version" content="1.0.57" data-date="2026-11-25">
+<meta name="app-version" content="1.0.58" data-date="2026-11-27">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
-<title>VocabVISION — Vocabulaire Français ↔ Arabe</title>
+<title>AllInOneVision — Lire, écouter, apprendre (FR ↔ AR)</title>
 <script>
   (function(){
     try{
@@ -28,7 +28,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="VocabVISION">
+<meta name="apple-mobile-web-app-title" content="AllInOneVision">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,700;0,7..72,800;1,7..72,400&display=swap" rel="stylesheet">
@@ -2071,6 +2071,16 @@
   .tbw.hint{ text-decoration:underline dotted var(--tb-acc); text-decoration-thickness:.12em; text-underline-offset:.24em; animation:tbHint 1.6s ease-out 1; }
   @keyframes tbHint{ 0%{ background-color:var(--tb-hit); } 100%{ background-color:transparent; } }
   .tbw.ok{ color:var(--tb-ok); }
+  /* ▭ 1.0.58 : tracer un cadre, et la partie encadrée */
+  .vv-frame-ov{ position:fixed; z-index:2147483000; cursor:crosshair; touch-action:none; background:rgba(15,10,40,.08); }
+  .vv-frame-tip{ position:absolute; left:50%; top:12px; transform:translateX(-50%); max-width:calc(100% - 24px); display:flex; align-items:center; gap:10px; padding:9px 12px 9px 14px; border-radius:14px; background:#1B1F27; color:#fff; font:700 13.5px/1.35 'Nunito','Inter',system-ui,sans-serif; box-shadow:0 10px 30px -10px rgba(0,0,0,.5); pointer-events:auto; }
+  .vv-frame-tip button{ flex:none; border:0; border-radius:10px; padding:6px 10px; background:rgba(255,255,255,.16); color:#fff; font:inherit; cursor:pointer; }
+  .vv-frame-box{ position:absolute; border:2.5px dashed #7C3AED; border-radius:10px; background:rgba(124,58,237,.1); box-shadow:0 0 0 9999px rgba(15,10,40,.18); pointer-events:none; }
+  .tbw.tb-zone, .pdv-tl span.lr-zone, .epv-w.lr-zone{ background-color:rgba(124,58,237,.1); box-shadow:0 .14em 0 rgba(124,58,237,.35); border-radius:.15em; }
+  .vv-zone-chip{ position:fixed; left:50%; transform:translateX(-50%); bottom:calc(96px + env(safe-area-inset-bottom, 0px)); z-index:9995; display:flex; align-items:center; gap:6px; padding:6px 6px 6px 12px; border-radius:999px; background:#1B1F27; color:#fff; font:800 13px/1 'Nunito','Inter',system-ui,sans-serif; box-shadow:0 10px 30px -12px rgba(0,0,0,.55); white-space:nowrap; }
+  .vv-zone-chip button{ border:0; border-radius:999px; min-width:34px; height:32px; padding:0 9px; background:rgba(255,255,255,.14); color:#fff; font:inherit; cursor:pointer; }
+  .vv-zone-chip button:hover{ background:rgba(255,255,255,.26); }
+  .tb-fig .tb-ocr-zone{ position:absolute; border:2px dashed rgba(124,58,237,.8); border-radius:6px; pointer-events:none; }
   /* 🎤 1.0.57 : le curseur du micro, ce qui est en train d'être dit, le mot à répéter, le mot validé avec de l'aide */
   .tbw.mic-prov{ color:var(--tb-ok); opacity:.72; }
   .tbw.mic-cur{ box-shadow:inset 0 -.16em 0 var(--tb-acc, #6D28D9); border-radius:.12em; animation:micCur 1.15s ease-in-out infinite; }
@@ -3330,9 +3340,101 @@
   @media (max-width:719px){
     .epv-ov .pdv-top > [data-epv="x"]{ order:0; } .epv-ov .pdv-top > [data-epv="toc"]{ order:2; } .epv-ov .pdv-top > [data-epv="find"]{ order:3; } .epv-ov .pdv-top > [data-epv="carnet"]{ order:4; }
     .epv-ov .pdv-tt{ flex:1 1 calc(100% - 200px); min-width:0; }
-    .epv-ov .pdv-top .pdv-nav{ order:5; } .epv-ov .pdv-top .epv-zm{ order:6; margin-left:auto; } .epv-ov .pdv-top > [data-epv="aa"]{ order:7; } .epv-ov .pdv-top > [data-epv="night"]{ order:8; }
+    .epv-ov .pdv-top .pdv-nav{ order:5; } .epv-ov .pdv-top .epv-zm{ display:none; } .epv-ov .pdv-top > [data-epv="aa"]{ order:7; margin-left:auto; } .epv-ov .pdv-top > [data-epv="night"]{ order:8; }
   }
   @media (prefers-reduced-motion:reduce){ .epv-w.just, .epv-hl.cur{ animation:none; } }
+  html body .epv-ov .epv-book code .epv-w, html body .epv-ov .epv-book pre .epv-w, html body .epv-ov .epv-book kbd .epv-w{ font-family:inherit !important; }
+  /* ============ 📝 1.0.58 : un document .md, façon Notion ============ */
+  .mdv-how-l{ display:flex; flex-direction:column; gap:8px; margin:0 0 4px; }
+  .epv-aa-z .epv-zv2{ font-variant-numeric:tabular-nums; }
+  .md-head{ text-align:left; }
+  .epv-doc{ --epv-bg:#FFFFFF; --epv-fg:#37352F; --epv-dim:#787774; --epv-rule:rgba(55,53,47,.13); --epv-link:#37352F; --epv-sel:rgba(35,131,226,.22);
+    --md-bar:#FFFFFF; --md-fg:#37352F; --md-dim:#91918E; --md-hov:rgba(55,53,47,.07); --md-on:rgba(35,131,226,.12); --md-acc:#2383E2; --md-side:#F7F7F5; --md-side-fg:#5F5E5B; --md-pop:#FFFFFF;
+    --md-code:rgba(135,131,120,.15); --md-code-fg:#C4423B; --md-pre:#F7F6F3; --md-th:#F7F6F3; --md-mark:#FBF3DB; color-scheme:light; }
+  .epv-doc.epv-sepia{ --epv-bg:#F6EFDF; --epv-fg:#3B2E1F; --epv-dim:#7A6649; --epv-rule:rgba(94,70,40,.18); --epv-link:#3B2E1F;
+    --md-bar:#F6EFDF; --md-fg:#3B2E1F; --md-dim:#8A7556; --md-hov:rgba(94,70,40,.08); --md-on:rgba(146,64,14,.12); --md-acc:#A0521B; --md-side:#EEE4CC; --md-side-fg:#5C4A33; --md-pop:#FBF6EA;
+    --md-code:rgba(94,70,40,.12); --md-code-fg:#9C3D1A; --md-pre:#EDE3CA; --md-th:#EDE3CA; --md-mark:#F1DFA4; }
+  .epv-doc.epv-night{ --epv-bg:#191919; --epv-fg:rgba(255,255,255,.84); --epv-dim:#9B9B9B; --epv-rule:rgba(255,255,255,.12); --epv-link:rgba(255,255,255,.84); --epv-sel:rgba(35,131,226,.38);
+    --md-bar:#191919; --md-fg:rgba(255,255,255,.84); --md-dim:#8C8C8C; --md-hov:rgba(255,255,255,.07); --md-on:rgba(35,131,226,.26); --md-acc:#529CCA; --md-side:#202020; --md-side-fg:#A5A5A5; --md-pop:#252525;
+    --md-code:rgba(135,131,120,.22); --md-code-fg:#FF8A80; --md-pre:#252525; --md-th:#252525; --md-mark:#59563B; color-scheme:dark; }
+  /* la barre du haut, claire comme le document */
+  .epv-doc .pdv-top{ background:var(--md-bar); color:var(--md-fg); box-shadow:0 1px 0 var(--epv-rule); }
+  .epv-doc .pdv-ib{ color:var(--md-fg); } .epv-doc .pdv-ib:hover{ background:var(--md-hov); }
+  .epv-doc .pdv-ib.on, .epv-doc .pdv-ib[aria-pressed="true"]{ background:var(--md-on); border-color:transparent; color:var(--md-fg); }
+  .epv-doc .pdv-tt small{ color:var(--md-dim); }
+  .epv-doc .pdv-pn{ background:transparent; color:var(--md-fg); border-color:var(--epv-rule); }
+  .epv-doc .epv-zv{ color:var(--md-fg); }
+  .epv-doc.epv-one .pdv-nav{ display:none; }
+  .epv-doc .pdv-find{ background:var(--md-bar); border-bottom:1px solid var(--epv-rule); }
+  .epv-doc .pdv-fbar input{ background:var(--md-pop); color:var(--md-fg); border-color:var(--epv-rule); }
+  .epv-doc .pdv-fn{ color:var(--md-dim); }
+  .epv-doc .pdv-hit{ color:var(--md-fg); } .epv-doc .pdv-hit:hover{ background:var(--md-hov); } .epv-doc .pdv-hit.on{ background:var(--md-on); } .epv-doc .pdv-hit b{ color:var(--md-dim); }
+  .epv-doc .epv-aa{ background:var(--md-pop); color:var(--md-fg); box-shadow:0 0 0 1px var(--epv-rule), 0 14px 36px rgba(15,15,15,.2); }
+  .epv-doc .epv-aa-l{ color:var(--md-dim); }
+  .epv-doc .epv-aa-r button:not([data-epv-th]){ background:transparent; color:var(--md-fg); border-color:var(--epv-rule); }
+  .epv-doc .epv-aa-r button.on{ border-color:var(--md-acc); box-shadow:0 0 0 1px var(--md-acc); }
+  .epv-doc .epv-aa-r button.on:not([data-epv-th]){ background:var(--md-on); }
+  .epv-doc .epv-prog i{ background:var(--md-acc); }
+  /* ☰ le sommaire, à côté */
+  .epv-doc .epv-toc{ width:268px; background:var(--md-side); border-right:1px solid var(--epv-rule); color:var(--md-fg); }
+  .epv-doc .epv-toc-h{ padding:14px 10px 6px 16px; } .epv-doc .epv-toc-h b{ color:var(--md-dim); font-size:11.5px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; }
+  .epv-doc .epv-toc-l{ padding:2px 8px 40px; }
+  .epv-doc .epv-toc-l button{ color:var(--md-side-fg); font-size:13.5px; line-height:1.4; padding:5px 10px; border-radius:6px; position:relative; }
+  .epv-doc .epv-toc-l button[data-d="0"]{ color:var(--md-fg); font-weight:600; margin-top:4px; }
+  .epv-doc .epv-toc-l button:hover{ background:var(--md-hov); }
+  .epv-doc .epv-toc-l button.on{ background:var(--md-on); color:var(--md-fg); font-weight:600; }
+  .epv-doc .epv-toc-l button.on::before{ content:''; position:absolute; left:2px; top:7px; bottom:7px; width:3px; border-radius:2px; background:var(--md-acc); }
+  .epv-doc .epv-toc-l button:focus-visible{ outline-color:var(--md-acc); }
+  .epv-doc .epv-toc-mk{ border-color:var(--md-acc) !important; color:var(--md-acc) !important; }
+  @media (max-width:719px){ .epv-doc .epv-toc{ width:auto; background:var(--md-side); } }
+  /* la page */
+  .epv-doc .epv-book{ font-size:calc(16.5px * var(--epv-z, 1)); padding:44px 54px 50vh; }
+  @media (max-width:600px){ .epv-doc .epv-book{ font-size:calc(16px * var(--epv-z, 1)); padding:22px 18px 50vh; } }
+  .epv-doc .epv-ch + .epv-ch{ margin-top:0; padding-top:0; border-top:0; }
+  .md-head{ margin:0 0 1.8em; padding:0 0 1.1em; border-bottom:1px solid var(--epv-rule); }
+  .md-ico{ font-size:2.7em; line-height:1; margin:0 0 .3em; }
+  .epv-book .md-head .md-ttl{ font-size:2.35em; line-height:1.18; font-weight:700; margin:0 0 .4em; letter-spacing:-.01em; }
+  .md-meta{ display:flex; flex-wrap:wrap; gap:.35em 1.1em; font-size:.8em; color:var(--epv-dim); }
+  .epv-doc .epv-book p{ margin:0 0 .8em; }
+  .epv-doc .epv-book h1, .epv-doc .epv-book h2, .epv-doc .epv-book h3, .epv-doc .epv-book h4{ line-height:1.3; color:var(--epv-fg); scroll-margin-top:12px; }
+  .epv-doc .epv-book h1{ font-size:1.85em; font-weight:700; margin:1.6em 0 .45em; }
+  .epv-doc .epv-book h2{ font-size:1.45em; font-weight:650; margin:1.5em 0 .4em; }
+  .epv-doc .epv-book h3{ font-size:1.2em; font-weight:600; margin:1.3em 0 .35em; }
+  .epv-doc .epv-book h4, .epv-doc .epv-book h5, .epv-doc .epv-book h6{ font-size:1.02em; font-weight:600; margin:1.2em 0 .3em; }
+  .epv-doc .epv-cc > :first-child{ margin-top:.4em; }
+  .epv-doc .epv-book a{ color:inherit; text-decoration:underline; text-decoration-color:color-mix(in srgb, currentColor 40%, transparent); text-underline-offset:3px; }
+  .epv-doc .epv-book a:hover{ text-decoration-color:currentColor; }
+  .epv-doc .epv-book ul, .epv-doc .epv-book ol{ padding-left:1.55em; margin:0 0 .8em; } .epv-doc .epv-book li{ margin:.22em 0; padding-left:.15em; }
+  .epv-doc .epv-book li > ul, .epv-doc .epv-book li > ol{ margin:.2em 0 .1em; }
+  .epv-doc .epv-book ul ul{ list-style-type:circle; } .epv-doc .epv-book ul ul ul{ list-style-type:square; }
+  .epv-doc .epv-book li[data-task]{ list-style:none; position:relative; }
+  .epv-doc .epv-book li[data-task]::before{ content:''; position:absolute; left:-1.35em; top:calc((var(--epv-lh, 1.62) * 1em - 1em) / 2); width:1em; height:1em; box-sizing:border-box; border:1.5px solid color-mix(in srgb, currentColor 55%, transparent); border-radius:3px; }
+  .epv-doc .epv-book li[data-task="1"]::before{ border-color:var(--md-acc); background:var(--md-acc) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.6 8.4l2.9 2.9 5.9-6.6' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/86% no-repeat; }
+  .epv-doc .epv-book li[data-task="1"]{ color:var(--epv-dim); }
+  .epv-doc .epv-book blockquote{ margin:.9em 0; padding:.05em 0 .05em .95em; border-left:3px solid currentColor; font-size:1.04em; }
+  .epv-doc .epv-book blockquote > :last-child{ margin-bottom:0; }
+  .epv-doc .epv-book [data-call]{ display:block; margin:.95em 0; padding:14px 16px; border:0; border-radius:6px; background:var(--md-cb, rgba(241,241,239,1)); font-size:1em; }
+  .epv-doc .epv-book [data-call] > :last-child{ margin-bottom:0; } .epv-doc .epv-book [data-call] > :first-child{ margin-top:0; }
+  .epv-doc .epv-book [data-call="note"]{ --md-cb:rgba(35,131,226,.08); } .epv-doc .epv-book [data-call="tip"]{ --md-cb:rgba(68,131,97,.09); } .epv-doc .epv-book [data-call="warn"]{ --md-cb:rgba(212,76,71,.08); }
+  .epv-doc .epv-book [data-call="key"]{ --md-cb:rgba(223,171,1,.13); } .epv-doc .epv-book [data-call="ex"]{ --md-cb:rgba(144,101,176,.09); } .epv-doc .epv-book [data-call="rule"]{ --md-cb:rgba(51,126,169,.09); } .epv-doc .epv-book [data-call="q"]{ --md-cb:rgba(193,76,138,.08); }
+  .epv-doc.epv-night .epv-book [data-call]{ background:color-mix(in srgb, var(--md-cb) 100%, rgba(255,255,255,.04)); }
+  .epv-doc .epv-book p[data-call]::before{ margin-right:.45em; }
+  .epv-doc .epv-book p[data-call="key"]::before{ content:'📌'; } .epv-doc .epv-book p[data-call="tip"]::before{ content:'💡'; } .epv-doc .epv-book p[data-call="warn"]::before{ content:'⚠️'; }
+  .epv-doc .epv-book p[data-call="note"]::before{ content:'📝'; } .epv-doc .epv-book p[data-call="ex"]::before{ content:'📎'; } .epv-doc .epv-book p[data-call="rule"]::before{ content:'📏'; }
+  .epv-doc .epv-book code{ font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace; font-size:.85em; background:var(--md-code); color:var(--md-code-fg); padding:.15em .38em; border-radius:4px; }
+  .epv-doc .epv-book pre{ position:relative; white-space:pre; overflow-x:auto; tab-size:4; background:var(--md-pre); border-radius:6px; padding:1.15em 1.3em; margin:.9em 0 1em; font-size:.85em; line-height:1.55; font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  .epv-doc .epv-book pre[data-lang]{ padding-top:2.1em; }
+  .epv-doc .epv-book pre[data-lang]::before{ content:attr(data-lang); position:absolute; left:1.5em; top:.7em; font:600 11px 'Inter', system-ui, sans-serif; color:var(--epv-dim); letter-spacing:.02em; }
+  .epv-doc .epv-book pre code{ background:none; color:inherit; padding:0; font-size:1em; border-radius:0; }
+  .epv-doc .epv-book table{ border-collapse:collapse; display:block; overflow-x:auto; max-width:100%; margin:1em 0 1.1em; font-size:.92em; line-height:1.45; }
+  .epv-doc .epv-book th, .epv-doc .epv-book td{ border:1px solid var(--epv-rule); padding:.5em .75em; vertical-align:top; text-align:left; }
+  .epv-doc .epv-book th{ background:var(--md-th); font-weight:600; }
+  .epv-doc .epv-book th.epv-a-center, .epv-doc .epv-book td.epv-a-center{ text-align:center; } .epv-doc .epv-book th.epv-a-right, .epv-doc .epv-book td.epv-a-right{ text-align:right; }
+  .epv-doc .epv-book hr{ width:100%; margin:1.5em 0; border-top:1px solid var(--epv-rule); }
+  .epv-doc .epv-book img{ border-radius:4px; margin:1.1em auto; }
+  .epv-doc .epv-book mark{ background:var(--md-mark); color:inherit; padding:0 .12em; border-radius:2px; }
+  .epv-doc .md-miss{ display:inline-block; font-size:.85em; color:var(--epv-dim); background:var(--md-pre); padding:.3em .7em; border-radius:6px; margin:.3em 0; }
+  .epv-doc .epv-end{ font-style:normal; font-size:.85em; }
   .pdv-ov{ position:fixed; inset:0; z-index:10040; display:flex; flex-direction:column; background:#525659; color:#fff; font-family:'Inter', system-ui, sans-serif; }
   .pdv-top{ display:flex; align-items:center; gap:6px; padding:6px 10px; padding-top:max(6px, env(safe-area-inset-top)); background:#323639; box-shadow:0 1px 0 rgba(0,0,0,.4), 0 2px 8px rgba(0,0,0,.25); position:relative; z-index:4; }
   .pdv-tt{ flex:1; min-width:80px; } .pdv-tt b{ display:block; font-size:14px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .pdv-tt small{ display:block; font-size:11.5px; color:#BFC4CC; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
@@ -5384,16 +5486,27 @@
 
   /* 📱 téléphone (360 → 440 px) : le mot « VocabVISION » rétrécit en douceur pour ne jamais passer sous les boutons */
   @media (min-width:360px) and (max-width:440px){
-    html body.nav-has-history .navbar .brand-word{ font-size:clamp(15px, calc((100vw - 262px) / 6.4), 20px); }
+    html body.nav-has-history .navbar .brand-word{ font-size:clamp(14px, calc((100vw - 262px) / 8.2), 19px); }
   }
   /* 📱 très petit téléphone (≤ 359 px : Galaxy Fold plié, iPhone SE 1re génération…) : la barre du haut se compacte */
   @media (max-width:359px){
     html body .navbar .theme-toggle, html body .navbar .menu-toggle{ width:34px; height:34px; }
     html body.nav-has-history .navbar{ gap:4px; padding-left:6px; padding-right:6px; }
   }
-  @media (max-width:349px){   /* la place manque pour le mot « VocabVISION » : le petit logo le remplace */
+  @media (max-width:359px){   /* la place manque pour le mot « AllInOneVision » : le petit logo le remplace */
     html body.nav-has-history .navbar .brand-word{ display:none; }
     html body.nav-has-history .navbar .brand-logo{ display:flex; }
+  }
+  /* 🏷️ 1.0.58 : « AllInOneVision » est plus long : sur l'accueil d'un téléphone, il rétrécit un peu, puis le petit logo s'efface */
+  @media (max-width:440px){ html body:not(.nav-has-history) .navbar .brand-word{ font-size:clamp(13px, calc((100vw - 256px) / 7), 19px); } }
+  @media (min-width:441px) and (max-width:640px){
+    html body.nav-has-history .navbar .brand-logo{ display:none; }
+    html body.nav-has-history #userChipBtn .uc-name{ display:none; }
+    html body.nav-has-history #userChipBtn{ padding:7px 9px !important; }
+  }
+  @media (max-width:359px){
+    html body:not(.nav-has-history) .navbar .brand-logo{ display:none; }
+    html body:not(.nav-has-history) .navbar .brand-word{ font-size:clamp(13px, calc((100vw - 213px) / 7), 19px); }
   }
 
   /* 📱 la Tablette (bibliothèque) sur téléphone : boutons sur une ligne, sans texte qui déborde */
@@ -5429,7 +5542,7 @@
   html body .splash-screen.sp4.sp4 .sp-front{ position:absolute; inset:0; z-index:2; pointer-events:none; }
   html body .splash-screen.sp4.sp4.leaving .sp-front{ opacity:0; transition:opacity .3s ease; }
   /* le nom se rassemble : chaque lettre arrive de loin en tournoyant, puis une vague de lumière la parcourt */
-  html body .splash-screen.sp4.sp4 .sp-brand{ font-family:'Nunito','Inter',sans-serif !important; font-size:clamp(38px,11vw,60px) !important; letter-spacing:-.02em !important; }
+  html body .splash-screen.sp4.sp4 .sp-brand{ font-family:'Nunito','Inter',sans-serif !important; font-size:clamp(30px,8.6vw,58px) !important; letter-spacing:-.02em !important; }
   html body .splash-screen.sp4.sp4 .sp-brand span{ opacity:0; color:#FFFFFF !important; font-weight:900 !important; filter:blur(7px);
     transform:translate3d(var(--sx, 0px), var(--sy, -120px), 0) rotate(var(--sr, 0deg)) scale(2.4);
     text-shadow:0 0 18px rgba(165,180,252,.6), 0 3px 0 rgba(8,6,36,.65) !important;
@@ -5477,7 +5590,7 @@
 </style>
 </head>
 <body>
-<div class="splash-screen sp2 sp3 sp4" id="splashScreen" role="img" aria-label="VocabVISION démarre">
+<div class="splash-screen sp2 sp3 sp4" id="splashScreen" role="img" aria-label="AllInOneVision démarre">
   <div class="sp-bg" id="spBg">
     <div class="sp-aurora a1"></div><div class="sp-aurora a2"></div><div class="sp-aurora a3"></div>
     <div class="sp-rays"></div>
@@ -5488,8 +5601,8 @@
   <div class="sp-flash"></div>
   <div class="sp-main">
     <div class="sp-mark" aria-hidden="true"><i></i></div>
-    <div class="sp-brand" aria-hidden="true"><span style="--i:0">V</span><span style="--i:1">o</span><span style="--i:2">c</span><span style="--i:3">a</span><span style="--i:4">b</span><span class="acc" style="--i:5">V</span><span class="acc" style="--i:6">I</span><span class="acc" style="--i:7">S</span><span class="acc" style="--i:8">I</span><span class="acc" style="--i:9">O</span><span class="acc" style="--i:10">N</span></div>
-    <div class="sp-tag">Ton coach de vocabulaire · <span class="ar" lang="ar" dir="rtl">مدرّبك في المفردات</span></div>
+    <div class="sp-brand" aria-hidden="true"><span style="--i:0">A</span><span style="--i:1">l</span><span style="--i:2">l</span><span style="--i:3">I</span><span style="--i:4">n</span><span style="--i:5">O</span><span style="--i:6">n</span><span style="--i:7">e</span><span class="acc" style="--i:8">V</span><span class="acc" style="--i:9">i</span><span class="acc" style="--i:10">s</span><span class="acc" style="--i:11">i</span><span class="acc" style="--i:12">o</span><span class="acc" style="--i:13">n</span></div>
+    <div class="sp-tag">Lire, écouter, apprendre · <span class="ar" lang="ar" dir="rtl">اقرأ، استمع، تعلّم</span></div>
     <div class="sp-stage" id="spStage">
       <div class="sp-beam"></div>
       <div class="sp-portal"><i class="core"></i><i class="r1"></i><i class="r2"></i><i class="r3"></i></div>
@@ -5530,7 +5643,7 @@
     </div>
     <div class="brand" id="brandHome" title="Accueil">
       <span class="brand-logo" aria-hidden="true"><i class="vv-logo" style="--s:34px"></i></span>
-      <span class="brand-word">Vocab<span class="brand-accent">VISION</span></span>
+      <span class="brand-word">AllInOne<span class="brand-accent">Vision</span></span>
     </div>
     <button id="userChipBtn" style="margin-left:8px;border:1px solid var(--border);background:var(--surface-sunken);color:var(--text);padding:5px 12px;border-radius:999px;font-weight:700;font-size:12px;cursor:pointer;white-space:nowrap;">👤</button>
     <span id="syncIndicator" class="sync-indicator" title="Synchronisation en cours..." aria-hidden="true">☁️</span>
@@ -5599,7 +5712,7 @@
         <circle cx="40" cy="40" r="36" fill="none" stroke="#5EEAD4" stroke-width="5" stroke-linecap="round" stroke-dasharray="60 200"/>
       </svg>
     </div>
-    <div class="sync-word">Vocab<span class="brand-accent">VISION</span></div>
+    <div class="sync-word">AllInOne<span class="brand-accent">Vision</span></div>
     <div class="sync-msg" id="syncOverlayMsg">Synchronisation…</div>
   </div>
 </div>
@@ -5635,7 +5748,7 @@
   <div class="menu-head">
     <div class="menu-head-brand">
       <span class="brand-logo" aria-hidden="true"><i class="vv-logo" style="--s:30px"></i></span>
-      <span class="menu-head-title">VocabVISION</span><span class="menu-ver-badge" id="menuVerBadge"></span>
+      <span class="menu-head-title">AllInOneVision</span><span class="menu-ver-badge" id="menuVerBadge"></span>
     </div>
     <button class="menu-close" id="menuClose" aria-label="Fermer">✕</button>
   </div>
@@ -24709,12 +24822,17 @@ const COLOR_PRESETS = {
 /* ============ 🆕 NOUVEAUTÉS — pour que tout ce qui a été ajouté reste découvrable ============ */
 const WHATS_NEW_SECTIONS = [
   { icon:'🆕', title:'Nouveautés', items:[
+    { name:'🏷️ L\'appli s\'appelle AllInOneVision', desc:"Elle fait bien plus que du vocabulaire : lire (textes, PDF, livres, documents), écouter, apprendre. Tes mots, tes textes, tes réglages et l'adresse du site ne changent pas." },
+    { name:'📝 Les .md comme un vrai document', desc:"À l'import d'un .md, « 📖 Tel quel » : il s'ouvre comme dans une liseuse, mis en page proprement (titres, tableaux, encadrés, code, cases à cocher, liens), avec le sommaire à côté sur grand écran (☰ sur téléphone), la recherche, les thèmes jour, sépia, nuit, et touche un mot pour sa définition. Il est rangé avec tes PDF et tes livres. « 📰 En texte, sur la Tablette » reste possible." },
+    { name:'▭ Encadrer la partie à lire', desc:"Dans la Tablette (▭ Cadre), un PDF ou un livre (▭) : trace un cadre au doigt ou à la souris autour d'un article ou d'une colonne. 🔊 et 🎤 lisent seulement ce qui est encadré. ✕ pour l'enlever." },
+    { name:'🎨 Les images en couleurs', desc:"Plus de lecture automatique du texte (OCR) sur une photo ou une affiche en couleurs : touche-la, puis « ▭ Encadrer le texte à lire dans l'image » ; seule la partie encadrée est lue." },
+    { name:'🎤 Le micro ne fait plus répéter', desc:"Un mot que le micro n'a pas compris passe en jaune, et la lecture continue. La voix ne te demande plus de le redire." },
+    { name:'🧑 Les noms propres', desc:"Knesset, Ouarzazate, Tombouctou… : dits à peu près, le micro les accepte. Sinon, jaune, et on continue." },
+    { name:'📱 La liseuse sur téléphone', desc:"La barre du haut tient sur 2 lignes ; la taille du texte est dans « Aa » (ou en pinçant)." },
     { name:'🎤 Le micro : un curseur, et tu choisis où commencer', desc:"Pendant « Je lis », un curseur souligne le mot à lire. Touche un mot pour commencer (ou reprendre) à cet endroit ; au départ, « 👆 Je touche le mot où commencer ». Un appui long sur un mot : la voix le dit." },
-    { name:'✅ Tous les mots, sinon on reste sur la phrase', desc:"La phrase suivante arrive seulement quand tous ses mots sont lus. Pour passer quand même : ⏭." },
-    { name:'🗣️ La voix te corrige', desc:"Un mot sauté ou mal prononcé passe en orange : la voix le dit, tu le répètes, il passe au vert. Après 2 essais, il est validé en jaune (il compte à moitié)." },
     { name:'🎯 Les mots répétés ne s\'allument plus tous', desc:"Quand une phrase contient plusieurs « la » ou « de », seul celui que tu viens de lire s'allume. Le suivi est aussi plus fluide : ce que tu dis apparaît tout de suite, et se valide dès que tu marques une pause." },
     { name:'💶 Les symboles se lisent', desc:"%, €, $, °, &, n°… : la voix les lit (« pour cent », « euros », « degrés ») et le micro les comprend. Les émojis ne sont plus lus à voix haute." },
-    { name:'📕 Le même micro dans les livres et les PDF', desc:"🎤 en un seul geste, avec le même curseur, les mêmes corrections et « toucher un mot pour commencer là » que dans la Tablette." },
+    { name:'📕 Le même micro dans les livres et les PDF', desc:"🎤 en un seul geste, avec le même curseur et « toucher un mot pour commencer là » que dans la Tablette." },
     { name:'📝 Les textes .md bien mis en page', desc:"De vrais tableaux (en-tête, lignes alternées, lisibles sur téléphone), des encadrés colorés pour « À retenir : », « Astuce : », « Attention : », « Règle générale : »…, le code dans un cadre, de vraies cases à cocher et des sous-listes. Réimporte un .md déjà importé pour en profiter. « ✏️ Modifier » garde tout ça." },
     { name:'🧩 Les blocs passés sont gardés et arrivent sur l\'autre appareil', desc:"La mémoire de l'appli était pleine : chaque résultat de bloc gardait l'arabe et la définition de ses 30 mots, et chaque changement de mots en recopiait sans effacer. D'où des blocs passés qui ne restaient pas, ou n'arrivaient pas sur l'autre appareil (« mémoire pleine », « synchro impossible »). Maintenant, un résultat prend 5 fois moins de place, les anciennes copies sont rangées puis effacées, et la synchro envoie par petits paquets." },
     { name:'🏅 Un bloc validé reste validé', desc:"Pour chaque mode, c'est ton MEILLEUR résultat qui reste, sur tes deux appareils : rejouer un bloc et le rater ne le fait plus repasser en « à faire ». Le dernier essai est noté sous le résultat." },
@@ -40947,7 +41065,7 @@ function renderAppSwitcher(){
     <div class="app-switch-grid">
       <button class="app-switch-card" id="chooseVocabBtn">
         <div class="app-switch-icon">📚</div>
-        <div class="app-switch-title">VocabVISION</div>
+        <div class="app-switch-title">AllInOneVision</div>
         <div class="app-switch-sub">Vocabulaire Français ↔ Arabe : blocs, quiz, Radio, jeux rapides...</div>
       </button>
       <button class="app-switch-card qcm" id="chooseQcmBtn">
@@ -41506,14 +41624,14 @@ autoSyncOnLoad();
         const { outcome } = await deferredPrompt.userChoice;
         deferredPrompt = null;
         installBtn.style.display = 'none';
-        if(outcome === 'accepted'){ setStatus('✅ VocabVISION installé !', 'ok'); }
+        if(outcome === 'accepted'){ setStatus('✅ AllInOneVision installé !', 'ok'); }
       } else {
         // iOS / navigateurs sans beforeinstallprompt : instructions manuelles
         const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
         if(isIOS){
-          alert("Pour installer VocabVISION sur iPhone/iPad :\n\n1. Appuie sur le bouton Partager (carré avec une flèche) en bas de Safari\n2. Choisis « Sur l'écran d'accueil »\n3. Appuie sur « Ajouter »");
+          alert("Pour installer AllInOneVision sur iPhone/iPad :\n\n1. Appuie sur le bouton Partager (carré avec une flèche) en bas de Safari\n2. Choisis « Sur l'écran d'accueil »\n3. Appuie sur « Ajouter »");
         } else {
-          alert("Pour installer VocabVISION :\n\nOuvre le menu de ton navigateur (⋮) et choisis « Installer l'application » ou « Ajouter à l'écran d'accueil ».");
+          alert("Pour installer AllInOneVision :\n\nOuvre le menu de ton navigateur (⋮) et choisis « Installer l'application » ou « Ajouter à l'écran d'accueil ».");
         }
       }
     });
@@ -44493,7 +44611,7 @@ function vaDictate(reason){
   const how = coarse ? 'touche le 🎤 de ton clavier et parle' : (/Windows/.test(ua) ? 'appuie sur les touches Windows + H et parle' : (/Mac/.test(ua) ? 'appuie deux fois sur la touche Fn et parle' : 'utilise la dictée de ton clavier'));
   const cap = how.charAt(0).toUpperCase() + how.slice(1);
   let fr;
-  if(reason === 'denied') fr = `Le micro est bloqué pour VocabVISION. Pour l'autoriser : touche 🔒 à côté de l'adresse → Micro → Autoriser. En attendant, ${how}, puis touche ➤.`;
+  if(reason === 'denied') fr = `Le micro est bloqué pour AllInOneVision. Pour l'autoriser : touche 🔒 à côté de l'adresse → Micro → Autoriser. En attendant, ${how}, puis touche ➤.`;
   else if(reason === 'nomic') fr = `Je ne trouve pas de micro… ${cap}, ou touche simplement un bouton 👇`;
   else fr = `Ici, tu me parles par le clavier : ${how}, puis touche ➤. 😊`;
   const ar = coarse ? 'اضغط على 🎤 في لوحة المفاتيح وتكلم، ثم اضغط ➤' : 'استعمل الإملاء الصوتي في لوحة المفاتيح، ثم اضغط ➤';
@@ -50280,20 +50398,26 @@ function tbImgOcrPack(d, W, H){
   return { v:1, W, H, paras, n:paras.reduce((n, pq) => n + pq.reduce((m, l) => m + l.length, 0), 0), at:Date.now() };
 }
 /* lire l'image (une fois) */
-async function tbImgOcrRun(fig, img, key){
+async function tbImgOcrRun(fig, img, key, z){
   TB.imgOcr = TB.imgOcr || {};
-  const chip = document.createElement('div'); chip.className = 'tb-fig-chip'; chip.textContent = '🔎 Je lis le texte de l’image…';
+  const chip = document.createElement('div'); chip.className = 'tb-fig-chip'; chip.textContent = z ? '🔎 Je lis le texte du cadre…' : '🔎 Je lis le texte de l’image…';
   fig.appendChild(chip); fig.dataset.ocr = 'busy';
   let eng = null;
   try{
-    const w0 = img.naturalWidth, h0 = img.naturalHeight, k = Math.max(1, Math.min(2, 1100 / Math.max(w0, h0)));      // un peu agrandie (pas trop : les lettres dessinées se lisent mieux ainsi)
+    const W0 = img.naturalWidth, H0 = img.naturalHeight;
+    const sx = z ? z.x * W0 : 0, sy = z ? z.y * H0 : 0, w0 = z ? Math.max(1, z.w * W0) : W0, h0 = z ? Math.max(1, z.h * H0) : H0;
+    const k = Math.max(1, Math.min(z ? 3 : 2, (z ? 1400 : 1100) / Math.max(w0, h0)));      // un peu agrandie (pas trop : les lettres dessinées se lisent mieux ainsi)
     const cv = document.createElement('canvas'); cv.width = Math.round(w0 * k); cv.height = Math.round(h0 * k);
-    const cx = cv.getContext('2d', { willReadFrequently:true }); cx.fillStyle = '#fff'; cx.fillRect(0, 0, cv.width, cv.height); cx.drawImage(img, 0, 0, cv.width, cv.height);
+    const cx = cv.getContext('2d', { willReadFrequently:true }); cx.fillStyle = '#fff'; cx.fillRect(0, 0, cv.width, cv.height); cx.drawImage(img, sx, sy, w0, h0, 0, 0, cv.width, cv.height);
     try{ cx.getImageData(0, 0, 1, 1); }catch(e){ throw new Error('Cette image vient d’un autre site : je ne peux pas lire son texte.'); }
     eng = await tbOcrWorker((TB.art && TB.art.lang) || 'fra', (m) => { const t = tbOcrStatus(m); if(t) chip.textContent = t; });
     const r = await eng.recognize(cv);
     cv.width = cv.height = 0;
     const d = tbImgOcrPack(r && r.data, Math.round(w0 * k), Math.round(h0 * k));
+    if(z){                                                      // ▭ 1.0.58 : les mots du cadre, replacés sur toute l'image
+      d.paras.forEach(pq => pq.forEach(line => line.forEach(w => { w.x = z.x + w.x * z.w; w.y = z.y + w.y * z.h; w.w *= z.w; w.h *= z.h; })));
+      d.W = W0; d.H = H0; d.z = z;
+    }
     TB.imgOcr[key] = d;
     try{ await pdvPut(tbImgOcrDb(key), d); }catch(e){}
     return d;
@@ -50364,6 +50488,7 @@ async function tbFigTap(fig, e){
   const x = e.clientX, y = e.clientY;
   let d = await tbImgOcrLoad(key);
   if(d && !d.n){ tbImgSheet(bi); return; }                          // déjà lue : pas de texte → ses réglages
+  if(!d && tbImgColorful(img)){ tbImgSheet(bi, true); return; }     // 🖼 1.0.58 : une photo, un dessin en couleurs : on ne lit pas son texte tout seul
   if(!d){
     d = await tbImgOcrRun(fig, img, key); if(!d) return;
     if(!d.n){ tbToast('Pas de texte lisible dans cette image.'); tbImgSheet(bi); return; }
@@ -50388,7 +50513,7 @@ async function tbImgOcrRestore(){
   }
   if(n){ try{ tbPaintTags(); tbPaintKnown(); }catch(e){} }
 }
-function tbImgSheet(bi){
+function tbImgSheet(bi, colorful){
   const b = TB.art && TB.art.blocks && TB.art.blocks[bi]; if(!b || b.t !== 'img') return;
   const sh = document.getElementById('tbSheet'); if(!sh) return;
   TB.sheetK = -5; TB.imgSel = bi;
@@ -50406,7 +50531,9 @@ function tbImgSheet(bi){
       <button type="button" data-tb="img-al" data-v="r" class="${al === 'r' ? 'on' : ''}">À droite ➡</button></div></div>
     <div class="tb-pop-hint">À gauche ou à droite, le texte coule à côté de l'image, comme dans un journal.</div>
     <label class="tb-lbl">Légende<input class="tb-in" id="tbImgCap" maxlength="300" value="${escapeHtml(b.cap || '')}" placeholder="Ce que montre l'image (facultatif)"></label>
-    ${(() => { const d = (TB.imgOcr || {})[tbImgOcrKey(b)]; return d ? `<div class="tb-pop-hint">🔎 ${d.n ? `${d.n} mot${d.n > 1 ? 's' : ''} lu${d.n > 1 ? 's' : ''} dans l'image : touche un mot de l'image pour sa fiche.` : 'Aucun texte lu dans cette image.'} <button type="button" class="tb-link" data-tb="img-ocr">🔁 Relire le texte de l'image</button></div>` : ''; })()}
+    ${(() => { const d = (TB.imgOcr || {})[tbImgOcrKey(b)]; return d ? `<div class="tb-pop-hint">🔎 ${d.n ? `${d.n} mot${d.n > 1 ? 's' : ''} lu${d.n > 1 ? 's' : ''} ${d.z ? 'dans le cadre' : "dans l'image"} : touche un mot de l'image pour sa fiche.` : 'Aucun texte lu dans cette image.'} <button type="button" class="tb-link" data-tb="img-ocr">🔁 Relire tout le texte de l'image</button></div>` : (colorful ? `<div class="tb-pop-hint">🎨 Une image en couleurs (photo, dessin) : je ne lis pas son texte toute seule.</div>` : ''); })()}
+    <button type="button" class="tb-btn" data-tb="img-frame">▭ Encadrer le texte à lire dans l'image</button>
+    ${colorful && !(TB.imgOcr || {})[tbImgOcrKey(b)] ? `<button type="button" class="tb-link" data-tb="img-ocr">🔎 Lire quand même tout le texte de l'image</button>` : ''}
     <button type="button" class="tb-link" data-tb="img-del">🗑 Retirer l'image du texte</button>
   </div>`;
   tbSheetShow(sh);
@@ -51137,20 +51264,23 @@ function tbMdInline(s, refs){
   s = s.replace(/\[\[([^\]|]+?)(?:\|([^\]]+))?\]\]/g, (m, a, b) => b || a);                                   // Obsidian : [[Page|alias]]
   s = s.replace(/\\([\\`*_{}\[\]()#+\-.!|~=>])/g, (m, c) => K(escapeHtml(c)));
   s = s.replace(/(`+)(?!`)([\s\S]*?[^`])\1(?!`)/g, (m, f, c) => K('<code>' + escapeHtml(c.replace(/^ | $/g, '')) + '</code>'));
-  s = s.replace(/<(https?:\/\/[^\s<>]+)>/g, (m, u) => K(escapeHtml(u)));
+  s = s.replace(/<(https?:\/\/[^\s<>]+)>/g, (m, u) => K(TB_MD_DOC ? `<a href="${escapeHtml(u)}">${escapeHtml(u)}</a>` : escapeHtml(u)));
   s = s.replace(/<\/?[a-zA-Z][a-zA-Z0-9-]*(?:\s[^<>]*?)?\/?>/g, m => K(m));                                    // le HTML écrit dans le .md passe tel quel
   s = escapeHtml(s);
   s = s.replace(/!\[([^\]]*)\]\(\s*(?:&lt;)?([^\s)]+?)(?:&gt;)?(?:\s+(?:"[^"]*"|'[^']*'|\([^)]*\)))?\s*\)/g, (m, alt, src) => K(`<img src="${src.replace(/"/g, '%22')}" alt="${alt.replace(/"/g, '&quot;')}">`));
   s = s.replace(/!\[([^\]]*)\]\[([^\]]*)\]/g, (m, alt, ref) => { const u = refs[(ref || alt).toLowerCase()]; return u ? K(`<img src="${tbMdAttr(u)}" alt="${alt.replace(/"/g, '&quot;')}">`) : alt; });
-  s = s.replace(/\[([^\]]+)\]\(\s*[^)]*\)/g, '$1');                 // les liens : on garde le texte
-  s = s.replace(/\[([^\]]+)\]\[[^\]]*\]/g, '$1');
+  // les liens : on garde le texte (📝 1.0.58 : dans un document, un vrai lien — internet, ou un titre du document)
+  const lnk = (t, u) => { u = String(u || '').trim().replace(/^&lt;|&gt;$/g, '').split(/\s+/)[0] || ''; return TB_MD_DOC && (/^https?:\/\//i.test(u) || /^#[^\s#]+$/.test(u)) ? K(`<a href="${u.replace(/"/g, '%22')}">`) + t + K('</a>') : t; };
+  s = s.replace(/\[([^\]]+)\]\(\s*([^)]*)\)/g, (m, t, u) => lnk(t, u));
+  s = s.replace(/\[([^\]]+)\]\[([^\]]*)\]/g, (m, t, r) => lnk(t, TB_MD_DOC ? escapeHtml(refs[String(r || t).toLowerCase()] || '') : ''));
+  if(TB_MD_DOC) s = s.replace(/(^|[\s(])(https?:\/\/[^\s<]*[^\s<.,;:!?)'"&])/g, (m, a, u) => a + K(`<a href="${u.replace(/"/g, '%22')}">${u}</a>`));
   s = s.replace(/\[\^([^\]]+)\]/g, '($1)');                          // notes de bas de page
   s = s.replace(/(\*\*\*|___)(?=\S)([\s\S]*?\S)\1/g, '<b><i>$2</i></b>');
   s = s.replace(/(\*\*|__)(?=\S)([\s\S]*?\S)\1/g, '<b>$2</b>');
   s = s.replace(/\*(?=[^\s*])([\s\S]*?[^\s*])\*/g, '<i>$1</i>');
   s = s.replace(/(^|[^\p{L}\p{N}_])_(?=[^\s_])([\s\S]*?[^\s_])_(?![\p{L}\p{N}_])/gu, '$1<i>$2</i>');
   s = s.replace(/~~(?=\S)([\s\S]*?\S)~~/g, '<s>$1</s>');
-  s = s.replace(/==(?=\S)([\s\S]*?\S)==/g, '<span style="background-color:#FFF3A3">$1</span>');                 // ==surligné==
+  s = s.replace(/==(?=\S)([\s\S]*?\S)==/g, TB_MD_DOC ? '<mark>$1</mark>' : '<span style="background-color:#FFF3A3">$1</span>');                 // ==surligné==
   for(let n = 0; n < 5 && /\u0001\d+\u0002/.test(s); n++) s = s.replace(/\u0001(\d+)\u0002/g, (m, i) => keep[+i]);
   return s;
 }
@@ -51171,6 +51301,15 @@ function tbMdLabelKind(s){
   if(/^(regle|regles|regle generale|la regle|definition|methode)$/.test(t)) return 'rule';
   return '';
 }
+/* 📝 1.0.58 : le même .md, rendu pour la liseuse « document » (de vrais blocs de code, des liens, des titres avec ancre) */
+var TB_MD_DOC = null;
+function tbMdDocHtml(md){ const prev = TB_MD_DOC; TB_MD_DOC = { seen:{} }; try{ return tbMdToHtml(md); }finally{ TB_MD_DOC = prev; } }
+function tbMdSlug(html){
+  let s = String(html || '').replace(/<[^>]*>/g, '').replace(/&(?:[a-z]+|#\d+);/gi, '').toLowerCase().trim().replace(/[^\p{L}\p{N}\s_-]/gu, '').replace(/\s/g, '-') || 'titre';
+  const D = TB_MD_DOC; if(D){ const n = D.seen[s] || 0; D.seen[s] = n + 1; if(n) s += '-' + n; }
+  return s;
+}
+function tbMdH(n, inner){ return TB_MD_DOC ? `<h${n} id="${tbMdSlug(inner)}">${inner}</h${n}>` : `<h${n}>${inner}</h${n}>`; }
 function tbMdBlocks(lines, refs){
   const out = []; let i = 0;
   const blank = (l) => !l || !l.trim();
@@ -51186,10 +51325,15 @@ function tbMdBlocks(lines, refs){
     let m;
     if((m = reFence.exec(l))){                                       // ```code``` : une ligne = un paragraphe
       const f = m[1], end = new RegExp('^ {0,3}' + (f[0] === '`' ? '`' : '~') + '{' + f.length + ',}\\s*$'); i++;
+      if(TB_MD_DOC){                                                 // 📝 1.0.58 : un vrai bloc de code (ses retraits, sa langue)
+        const lang = (l.trim().slice(f.length).trim().split(/\s+/)[0] || '').replace(/[^\w+#.-]/g, '').slice(0, 24), body = [];
+        while(i < lines.length && !end.test(lines[i])){ body.push(lines[i]); i++; }
+        i++; out.push(`<pre${lang ? ` data-lang="${lang}"` : ''}><code>${escapeHtml(body.join('\n'))}</code></pre>`); continue;
+      }
       while(i < lines.length && !end.test(lines[i])){ if(lines[i].trim()) out.push(`<p data-code="1"><code>${escapeHtml(lines[i])}</code></p>`); i++; }   // 📝 1.0.57 : dans un cadre, en police de code
       i++; continue;
     }
-    if(reHs.test(l) && (m = reH.exec(l))){ const n = m[1].length; if((m[2] || '').trim()) out.push(`<h${n}>${tbMdInline(m[2], refs)}</h${n}>`); i++; continue; }
+    if(reHs.test(l) && (m = reH.exec(l))){ const n = m[1].length; if((m[2] || '').trim()) out.push(tbMdH(n, tbMdInline(m[2], refs))); i++; continue; }
     if(reHr.test(l)){ out.push('<hr>'); i++; continue; }
     if(reQ.test(l)){
       const q = [];
@@ -51200,12 +51344,12 @@ function tbMdBlocks(lines, refs){
       out.push(`<blockquote${kind ? ` data-call="${kind}"` : ''}>${tbMdBlocks(q, refs)}</blockquote>`); continue;   // 📝 1.0.57 : un encadré coloré
     }
     if(l.includes('|') && i + 1 < lines.length && reSep.test(lines[i + 1])){   // 📝 1.0.57 : un vrai tableau (avant : « colonne : valeur »)
-      const head = cells(l); i += 2;
+      const head = cells(l), al = TB_MD_DOC ? cells(lines[i + 1]).map(c => /^:-+:$/.test(c) ? 'center' : /^-+:$/.test(c) ? 'right' : '') : []; i += 2;
       const rows = [];
       while(i < lines.length && !blank(lines[i]) && lines[i].includes('|')){ rows.push(cells(lines[i])); i++; }
       const n = Math.min(8, Math.max(head.length, ...rows.map(r => r.length)));
-      const cell = (tag, c) => `<${tag}>${tbMdInline(c || '', refs)}</${tag}>`;
-      out.push(`<table><thead><tr>${Array.from({ length:n }, (_, k) => cell('th', head[k])).join('')}</tr></thead><tbody>${rows.map(r => '<tr>' + Array.from({ length:n }, (_, k) => cell('td', r[k])).join('') + '</tr>').join('')}</tbody></table>`);
+      const cell = (tag, c, k) => `<${tag}${al[k] ? ` style="text-align:${al[k]}"` : ''}>${tbMdInline(c || '', refs)}</${tag}>`;
+      out.push(`<table><thead><tr>${Array.from({ length:n }, (_, k) => cell('th', head[k], k)).join('')}</tr></thead><tbody>${rows.map(r => '<tr>' + Array.from({ length:n }, (_, k) => cell('td', r[k], k)).join('') + '</tr>').join('')}</tbody></table>`);
       continue;
     }
     if((m = reList.exec(l))){
@@ -51237,8 +51381,8 @@ function tbMdBlocks(lines, refs){
     const para = [];
     while(i < lines.length && !blank(lines[i])){
       const x = lines[i];
-      if(para.length && /^ {0,3}=+\s*$/.test(x)){ out.push(`<h1>${tbMdLines(para, refs)}</h1>`); para.length = 0; i++; break; }
-      if(para.length && /^ {0,3}-+\s*$/.test(x)){ out.push(`<h2>${tbMdLines(para, refs)}</h2>`); para.length = 0; i++; break; }
+      if(para.length && /^ {0,3}=+\s*$/.test(x)){ out.push(tbMdH(1, tbMdLines(para, refs))); para.length = 0; i++; break; }
+      if(para.length && /^ {0,3}-+\s*$/.test(x)){ out.push(tbMdH(2, tbMdLines(para, refs))); para.length = 0; i++; break; }
       if(para.length && starts(x)) break;
       para.push(x); i++;
     }
@@ -53208,6 +53352,7 @@ function lrClearDoc(S){
 /* peindre ce qui est lu sur une unité (après son dessin, un zoom, l'arrivée du chapitre…) */
 function lrPaintUnit(S, k){
   const u = lrUnits(S)[k]; if(!u) return;
+  try{ if(S.zone && S.zone.k === k) lrZonePaintUnit(S); }catch(e){}        // ▭ 1.0.58
   if(!u.lrM){ const d = lrDocMarks(S.id); u.lrM = lrRanges((d.u[lrUKey(S, k)] || {}).r); }
   if(!u.lrM.length && !(LR && LR.S === S && LR.k === k)) return;
   const I = lrIdx(S, k); if(!I) return;
@@ -53218,7 +53363,7 @@ function lrPaintUnit(S, k){
 function lrPaintCur(L){
   document.querySelectorAll('.lr-say, .lr-cur').forEach(x => x.classList.remove('lr-say', 'lr-cur'));
   const I = lrIdx(L.S, L.k); if(!I || !I.S[L.s]) return [];
-  const els = lrGroupEls(L.S, L.k, I, I.S[L.s].gs);
+  const els = lrGroupEls(L.S, L.k, I, lrZoneGs(L, I.S[L.s]));
   els.forEach(sp => sp.classList.add(L.kind === 'say' ? 'lr-say' : 'lr-cur'));
   return els;
 }
@@ -53295,6 +53440,7 @@ async function lrStart(S, kind){
   lrStop(true);
   try{ if(TB.sheetK !== -1) tbCloseSheet(); }catch(e){}
   const st = lrVisibleStart(S);
+  if(S.zone){ st.k = S.zone.k; st.s = lrZoneFirst(S); }                    // ▭ 1.0.58 : on lit la partie encadrée
   const L = LR = { S, kind, k:st.k, s:st.s, tok:0, playing:kind === 'say', paused:false, rate:+(tbUi().lrRate || 1) || 1, sr:null, msg:'' };
   if(!(await lrReady(S, L.k))){ lrNote(S, "Je ne trouve pas de texte sur cette page."); LR = null; return; }
   lrApplyVars(S);
@@ -53303,7 +53449,7 @@ async function lrStart(S, kind){
     L.acc = []; lrShow(L); lrSRStart(L);
     clearInterval(L.tick); L.tick = setInterval(() => lrMicTick(L), 500);
     L.msg = 'Lis à voix haute · touche un mot pour commencer ailleurs'; lrDock(L);
-    try{ const u = tbUi(); if(!u.lrMicTip){ u.lrMicTip = 1; tbSaveUi(); lrNote(S, "🎤 Lis à voix haute : les mots passent au vert. Touche un mot pour commencer là. Un mot raté : la voix te le dit, tu le répètes."); } }catch(e){}
+    try{ const u = tbUi(); if(!u.lrMicTip){ u.lrMicTip = 1; tbSaveUi(); lrNote(S, "🎤 Lis à voix haute : les mots passent au vert. Touche un mot pour commencer là. Un mot pas compris par le micro passe en jaune, et tu continues."); } }catch(e){}
   }
 }
 function lrStop(quiet){
@@ -53319,10 +53465,15 @@ function lrStop(quiet){
   try{ const d = L.S.ov.querySelector('#lrDock'); if(d) d.hidden = true; L.S.ov.querySelectorAll('.lr-on').forEach(b => b.classList.remove('lr-on')); }catch(e){}
   if(!quiet) lrNote(L.S, '⏹ Lecture arrêtée');
 }
-function lrSentText(L){ const I = lrIdx(L.S, L.k); const x = I && I.S[L.s]; return x ? I.t.slice(x.a, x.b).replace(/\s+/g, ' ').trim() : ''; }
+function lrSentText(L){
+  const I = lrIdx(L.S, L.k); const x = I && I.S[L.s]; if(!x) return '';
+  if(L.S.zone){ const gs = lrZoneGs(L, x); return gs.map(gi => I.t.slice(I.G[gi].a, I.G[gi].b)).join(' ').replace(/\s+/g, ' ').trim(); }   // ▭ 1.0.58
+  return I.t.slice(x.a, x.b).replace(/\s+/g, ' ').trim();
+}
 function lrSay(L){
   if(LR !== L) return;
   const I = lrIdx(L.S, L.k);
+  if(L.S.zone && !lrZoneSeek(L)) return;                                   // ▭ 1.0.58 : seulement le cadre
   if(!I || L.s >= I.S.length){ lrNextUnit(L, () => lrSay(L)); return; }
   L.playing = true;
   lrShow(L);
@@ -53330,13 +53481,14 @@ function lrSay(L){
   L.own = true;
   try{ tbNarrFr(dxOn() ? dxSpeakText(text) : text, 'fr-FR', () => {
     if(LR !== L || tok !== L.tok || !L.playing) return;
-    if(tbUi().lrKeep !== false){ const x = I.S[L.s]; if(x){ lrMark(L.S, L.k, x.a, x.b); lrGroupEls(L.S, L.k, I, x.gs).forEach(sp => sp.classList.add('lr-rd')); } }
+    if(tbUi().lrKeep !== false){ const x = I.S[L.s]; if(x){ const gs = lrZoneGs(L, x); gs.forEach(gi => lrMark(L.S, L.k, I.G[gi].a, I.G[gi].b)); lrGroupEls(L.S, L.k, I, gs).forEach(sp => sp.classList.add('lr-rd')); } }
     L.s++;
     L.gapT = setTimeout(() => { if(LR === L && tok === L.tok && L.playing) lrSay(L); }, 220);
   }, L.rate * (typeof readingRate === 'number' && readingRate > 0 ? readingRate : 1)); }
   finally{ L.own = false; }
 }
 async function lrNextUnit(L, then){
+  if(L.S.zone){ lrNote(L.S, '✓ Fin du cadre'); lrStop(true); return; }     // ▭ 1.0.58
   const units = lrUnits(L.S);
   if(L.k + 1 >= units.length){ lrNote(L.S, L.kind === 'say' ? '✓ Écouté jusqu\'au bout' : '✓ Lu jusqu\'au bout'); lrStop(true); return; }
   L.k++; L.s = 0;
@@ -53394,7 +53546,8 @@ function lrSRHold(L){ if(L.sr){ L.acc = lrToksF(L).toks; lrSRStop(L); } }
 function lrMicSet(L, from){
   lrMicClear(L);
   const I = lrIdx(L.S, L.k), x = I && I.S[L.s]; if(!x){ L.ms = null; return; }
-  const words = x.gs.map(gi => { const g = I.G[gi]; return { n:g.n, els:lrGroupEls(L.S, L.k, I, [gi]), form:lrFormOf(I.t.slice(g.a, g.b)) || g.n }; });
+  const Z = L.S.zone && L.S.zone.k === L.k ? L.S.zone.gs : null;                // ▭ 1.0.58 : hors du cadre, rien n'est demandé
+  const words = x.gs.map(gi => { const g = I.G[gi]; return { n:(Z && !Z.has(gi)) ? '' : g.n, els:lrGroupEls(L.S, L.k, I, [gi]), form:lrFormOf(I.t.slice(g.a, g.b)) || g.n }; });
   L.ms = micNew(words, from || 0); L.ms.key = L.k + ':' + L.s; L.ms.gs = x.gs.slice();
   micPaint(L.ms, LR_MIC_CLS);
   if(micDone(L.ms)){ const M0 = L.ms; setTimeout(() => { if(L.ms === M0) lrSelfEval(L, false, true); }, 0); }      // (rien à lire dans cette phrase)
@@ -53430,9 +53583,8 @@ function lrMicTick(L){
   const M = L.ms;
   if(Date.now() - M.heardAt >= MIC_SETTLE && M.prov.size) lrSelfEval(L, false, true);
   if(LR !== L || L.ms !== M) return;
-  const a = micTick(M, lrMicHost(L));
-  if(a === 'help'){ const w = M.W.find(x => x.st === 2 && !x.said); if(w){ w.said = 1; L.msg = `💛 « ${w.form} » : validé avec de l'aide`; } lrSelfEval(L, false, true); }
-  else if(a){ micPaint(M, LR_MIC_CLS); }
+  const a = micTick(M, lrMicHost(L), lrToksF(L).toks);
+  if(a === 'help'){ const w = M.W.filter(x => x.st === 2 && !x.said); w.forEach(x => { x.said = 1; }); if(w.length) L.msg = `💛 « ${w.map(x => x.form).join(' ')} » : pas compris, on continue`; lrSelfEval(L, false, true); }
   if(LR === L && L.ms && Date.now() - L.ms.heardAt > 30000 && !L.paused){ lrPause(L); L.msg = "Je n'entends plus rien : touche 🎤 pour reprendre"; lrDock(L); }
 }
 /* 👆 toucher un mot pendant « Je lis » : on (re)commence là ; un mot orange : la voix le dit */
@@ -53471,13 +53623,13 @@ function lrSelfEval(L, fin, settled){
     const sc = micScore(M);
     lrConsume(L, M.anchor);
     try{ playChime([660, 990], { type:'sine', noteDur:0.07, gap:0.02, volume:0.06 }); }catch(e){}
-    L.msg = sc >= 0.99 ? '✓ Parfait !' : `✓ Phrase lue (${Math.round(sc * 100)} %)`;
+    L.msg = sc >= 0.99 ? '✓ Parfait !' : '✓ Phrase lue (en jaune : pas compris par le micro)';
     L.ms = null; L.s++;
-    const go = () => { if(LR !== L) return; lrShow(L); if((L.acc || []).length || (L.sr && micSessionToks(L.sr).t.length > L.sr.consumed)) lrSelfEval(L, false); };
+    const go = () => { if(LR !== L) return; if(L.S.zone && !lrZoneSeek(L)) return; lrShow(L); if((L.acc || []).length || (L.sr && micSessionToks(L.sr).t.length > L.sr.consumed)) lrSelfEval(L, false); };
     if(L.s >= I.S.length) lrNextUnit(L, go); else go();
     return;
   }
-  L.msg = M.fix ? (M.fix.at >= 0 ? `🗣️ À toi : « ${M.W[M.fix.i].form} »` : L.msg) : (M.fixQ.length ? `${M.got} / ${n} mots · en orange : à reprendre` : `${Math.min(n, M.got + M.prov.size)} / ${n} mots`);
+  if(!/^💛/.test(L.msg || '') || M.prov.size) L.msg = `${Math.min(n, M.got + M.prov.size)} / ${n} mots`;
   lrDock(L);
 }
 /* ---------- 🖍 le panneau : survol, couleurs, lecture ---------- */
@@ -53516,6 +53668,8 @@ function lrWire(S){
       const a = b.dataset.lr;
       if(a === 'say' || a === 'self'){ if(L && L.kind === a) lrStop(); else lrStart(S, a); }
       else if(a === 'pan') lrPanShow(S);
+      else if(a === 'frame') lrFrame(S);                                    // ▭ 1.0.58
+      else if(a === 'zone-x'){ if(L) lrStop(true); lrZoneClear(S); }
       else if(a === 'x') lrStop();
       else if(a === 'prev' && L) lrMove(L, -1);
       else if(a === 'next' && L) lrMove(L, 1);
@@ -53628,9 +53782,9 @@ function pdvShelfItem(m){
   const n = (m.pages || []).length || m.n, mo = m.size ? ` (${m.size < 1048576 ? Math.max(1, Math.round(m.size / 1024)) + ' Ko' : (m.size / 1048576).toFixed(1).replace('.', ',') + ' Mo'})` : '';
   const up = PDVUP.cur === m.id, dl = PDVUP.dl.has(m.id);
   const chip = dl ? `<span class="pdv-sh-cl dl">⇣ ${Math.round((PDVUP.dl.get(m.id) || 0) * 100)} %</span>` : up ? `<span class="pdv-sh-cl">☁️ ${Math.round(PDVUP.frac * 100)} %</span>` : '';
-  const sub = m.remote ? `☁️ sur ton autre appareil · touche pour l'avoir ici${mo}` : m.kind === 'epub' ? `📕 livre · ${m.n || 0} chapitre${(m.n || 0) > 1 ? 's' : ''}${m.author ? ' · ' + escapeHtml(m.author) : ''}${m.pct ? ` · lu à ${Math.round(m.pct)} %` : ''}${m.cl ? ' · ☁️' : ''}` : `${n} page${n > 1 ? 's' : ''}${(m.scan || []).length || m.kind === 'img' ? ' · 🔎 scanné' : ''}${m.last ? ` · reprendre p. ${m.last}` : ''}${m.cl ? ' · ☁️' : ''}`;
+  const sub = m.remote ? `☁️ sur ton autre appareil · touche pour l'avoir ici${mo}` : m.kind === 'md' ? `📝 document${(m.n || 1) > 1 ? ` · ${m.n} parties` : ''}${m.pct ? ` · lu à ${Math.round(m.pct)} %` : ''}${m.cl ? ' · ☁️' : ''}` : m.kind === 'epub' ? `📕 livre · ${m.n || 0} chapitre${(m.n || 0) > 1 ? 's' : ''}${m.author ? ' · ' + escapeHtml(m.author) : ''}${m.pct ? ` · lu à ${Math.round(m.pct)} %` : ''}${m.cl ? ' · ☁️' : ''}` : `${n} page${n > 1 ? 's' : ''}${(m.scan || []).length || m.kind === 'img' ? ' · 🔎 scanné' : ''}${m.last ? ` · reprendre p. ${m.last}` : ''}${m.cl ? ' · ☁️' : ''}`;
   return `<div class="pdv-sh-it${m.remote ? ' remote' : ''}" data-pdv-open="${tbAttr(m.id)}" role="button" tabindex="0" draggable="true" data-pdv-drag="${tbAttr(m.id)}" aria-label="${m.remote ? 'Télécharger et ouvrir' : 'Ouvrir'} « ${tbAttr(m.title)} »"${m.cl && !m.remote ? ' title="Aussi sur tes autres appareils (☁️ Cloudflare R2, chiffré)"' : ''}>
-      <span class="pdv-sh-i" aria-hidden="true">${m.kind === 'epub' ? '📕' : m.kind === 'img' ? '📷' : '📄'}</span><span class="pdv-sh-m"><b>${escapeHtml(m.title)}</b><small>${sub}</small>${chip}</span>
+      <span class="pdv-sh-i" aria-hidden="true">${m.kind === 'epub' ? '📕' : m.kind === 'md' ? '📝' : m.kind === 'img' ? '📷' : '📄'}</span><span class="pdv-sh-m"><b>${escapeHtml(m.title)}</b><small>${sub}</small>${chip}</span>
       <button type="button" class="pdv-sh-x pdv-sh-mv" data-pdvs="mv" data-id="${tbAttr(m.id)}" aria-label="Ranger « ${tbAttr(m.title)} » dans un dossier" title="Ranger dans un dossier">📁</button>
       <button type="button" class="pdv-sh-x" data-pdv-del="${tbAttr(m.id)}" aria-label="${m.cl ? `Supprimer « ${tbAttr(m.title)} » (sur tous tes appareils)` : `Retirer « ${tbAttr(m.title)} » de l'appareil`}" title="${m.cl ? 'Supprimer (sur tous tes appareils)' : "Retirer de l'appareil"}">🗑</button></div>`;
 }
@@ -53746,11 +53900,12 @@ document.addEventListener('drop', (e) => { const z = e.target && e.target.closes
 var EPV = null;
 const EPV_FONTS = { serif:"'Literata', Georgia, 'Iowan Old Style', 'Times New Roman', serif", sans:"'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif", dys:"'Atkinson Hyperlegible Next', 'Atkinson Hyperlegible', Verdana, sans-serif" };
 const EPV_W = { s:'32em', m:'40em', l:'52em' };
+var EPV_DOC = false;      // 📝 1.0.58 : la liseuse ouvre un document .md (ses réglages à lui : police moderne, sommaire à côté)
 function epvUi(){
-  const u = tbUi();
-  return { z:Math.max(0.6, Math.min(2.6, +u.epvZ || 1)), font:EPV_FONTS[u.epvFont] ? u.epvFont : 'serif', th:['day', 'sepia', 'night'].includes(u.epvTh) ? u.epvTh : (u.pdvNight ? 'night' : 'day'), w:EPV_W[u.epvW] ? u.epvW : 'm', lh:[1.4, 1.62, 1.85].includes(+u.epvLh) ? +u.epvLh : 1.62 };
+  const u = tbUi(), g = (k) => u[(EPV_DOC ? 'mdv' : 'epv') + k];
+  return { z:Math.max(0.6, Math.min(2.6, +g('Z') || 1)), font:EPV_FONTS[g('Font')] ? g('Font') : (EPV_DOC ? 'sans' : 'serif'), th:['day', 'sepia', 'night'].includes(g('Th')) ? g('Th') : (u.pdvNight ? 'night' : 'day'), w:EPV_W[g('W')] ? g('W') : 'm', lh:[1.4, 1.62, 1.85].includes(+g('Lh')) ? +g('Lh') : 1.62 };
 }
-function epvUiSet(p){ Object.assign(tbUi(), p); tbSaveUi(); }
+function epvUiSet(p){ const u = tbUi(); Object.keys(p).forEach(k => { u[EPV_DOC && /^epv/.test(k) ? 'mdv' + k.slice(3) : k] = p[k]; }); tbSaveUi(); }
 /* ---------- lire le .epub : le sommaire (OPF), l'ordre des chapitres, la table des matières ---------- */
 async function epvParse(blob, name){
   const files = await tbUnzip(blob instanceof File ? blob : new File([blob], name || 'livre.epub'));
@@ -53827,6 +53982,146 @@ async function epvAskHow(file, kind){
     setTimeout(() => { try{ ok.focus(); }catch(e){} }, 40);
   });
 }
+/* ============ 📝 1.0.58 : un .md « tel quel » — un document, comme dans une liseuse ============
+   Le sommaire à côté (ses titres), le style « document » (façon Notion), la recherche, les thèmes, touche un mot.
+   On garde le .md et ses images (en un seul fichier, sur l'appareil, et synchronisé comme les livres). */
+function mdvSplit(root, mt, fb){
+  let title = String(mt || '').replace(/\s+/g, ' ').trim();
+  const first = root.firstElementChild;
+  if(first && first.tagName === 'H1' && first === [...root.childNodes].find(n => n.nodeType === 1 || (n.nodeType === 3 && n.data.trim()))){
+    const t = first.textContent.replace(/\s+/g, ' ').trim();
+    if(t && (!title || t === title)){ title = title || t; first.remove(); }
+  }
+  if(!title) title = String(fb || 'Document').replace(/\.[^.]+$/, '').replace(/[_]+/g, ' ').replace(/\s+/g, ' ').trim() || 'Document';
+  const tops = [...root.childNodes].filter(n => n.nodeType === 1 || (n.nodeType === 3 && n.data.trim()));
+  const n1 = tops.filter(e => e.tagName === 'H1').length, n2 = tops.filter(e => e.tagName === 'H2').length;
+  const lvl = n1 >= 2 ? 1 : n2 >= 2 ? 2 : 0;                       // les parties : aux grands titres
+  const groups = []; let cur = null;
+  tops.forEach(e => { const h = /^H([12])$/.exec(e.tagName || ''), cut = !!(lvl && h && +h[1] <= lvl); if(cut || !cur){ cur = { nodes:[], t:cut ? e.textContent.replace(/\s+/g, ' ').trim() : '' }; groups.push(cur); } cur.nodes.push(e); });
+  if(!groups.length) groups.push({ nodes:[], t:'' });
+  return { title, groups };
+}
+function mdvRoot(md){
+  const r = tbMdDocHtml(md);
+  const doc = new DOMParser().parseFromString(`<div id="mdvRoot">${r.html}</div>`, 'text/html');
+  return { doc, root:doc.getElementById('mdvRoot') || doc.body, meta:r.meta || {} };
+}
+/* à l'import : le texte, ses images (choisies avec, ou dans le .zip), ce qu'il contient */
+async function mdvScan(f, pool){
+  const raw = await tbMdText(f), dir = (f.relPath || '').split('/').slice(0, -1).join('/');
+  const R = mdvRoot(raw), files = [], seen = new Set(); let miss = 0, web = 0;
+  R.root.querySelectorAll('img').forEach(im => {
+    const s = (im.getAttribute('src') || '').trim();
+    if(!s || /^data:/i.test(s)) return;
+    if(/^https?:/i.test(s)){ web++; return; }
+    const fi = tbMdFindImg(pool || [], s, dir);
+    if(!fi){ miss++; return; }
+    if(!seen.has(fi)){ seen.add(fi); files.push(fi); }
+  });
+  const words = tbWordsCount(R.root.textContent);
+  const sp = mdvSplit(R.root, R.meta.title, f.name);
+  return { f, raw, dir, files, info:{ title:sp.title, words, parts:sp.groups.length, heads:R.root.querySelectorAll('h1, h2, h3').length, imgs:files.length, miss, web } };
+}
+function mdvAskHow(list){
+  return new Promise(res => {
+    const ov = document.createElement('div');
+    ov.className = 'am-dlg-ov tbl-dlg-ov';
+    const n = list.length, miss = list.reduce((t, x) => t + x.info.miss, 0);
+    const one = (x) => `<div class="tbl-book"><b>${escapeHtml(x.info.title)}</b><small>${escapeHtml(x.f.name)}</small>
+        <span class="tbl-imp-m"><span>${x.info.words.toLocaleString('fr-FR')} mots</span>${x.info.heads ? `<span>☰ ${x.info.heads} titre${x.info.heads > 1 ? 's' : ''}</span>` : ''}${x.info.imgs ? `<span>🖼 ${x.info.imgs} image${x.info.imgs > 1 ? 's' : ''}</span>` : ''}${x.info.miss ? `<span class="warn">⚠️ ${x.info.miss} image${x.info.miss > 1 ? 's' : ''} manquante${x.info.miss > 1 ? 's' : ''}</span>` : ''}</span></div>`;
+    ov.innerHTML = `<div class="am-dlg tbl-dlg epv-how-dlg mdv-how-dlg" role="dialog" aria-modal="true" aria-label="Ouvrir un document">
+      <div class="am-dlg-t">📝 Ouvrir ${n > 1 ? n + ' documents' : 'un document'}</div>
+      <div class="mdv-how-l">${list.slice(0, 4).map(one).join('')}${n > 4 ? `<div class="tbl-imp-hint">… et ${n - 4} autre${n - 4 > 1 ? 's' : ''}</div>` : ''}</div>
+      ${miss ? `<div class="tbl-imp-hint">⚠️ Des images sont à côté du .md sur ton appareil : choisis-les en même temps que le .md (ou importe le .zip complet).</div>` : ''}
+      <div class="tbp-how" role="radiogroup" aria-label="Comment l'ouvrir">
+        <label class="tbp-hw on"><input type="radio" name="epvH" value="view" checked><span><b>📖 Tel quel : comme un document</b><small>mis en page proprement (titres, tableaux, encadrés, code), avec le sommaire à côté, la recherche et les thèmes jour, sépia, nuit ; touche un mot pour sa définition</small></span></label>
+        <label class="tbp-hw"><input type="radio" name="epvH" value="text"><span><b>📰 En texte, sur la Tablette</b><small>${n > 1 ? 'chaque fichier devient un texte' : 'le fichier devient un texte'} de ta bibliothèque (liaisons, lecture à voix haute, chasse aux mots…)</small></span></label>
+      </div>
+      <div class="am-dlg-b"><button class="am-dlg-btn ghost" data-v="cancel">Annuler</button><button class="am-dlg-btn" data-v="ok" id="epvHowOk">📖 Ouvrir ${n > 1 ? 'les documents' : 'le document'}</button></div>
+    </div>`;
+    document.body.appendChild(ov);
+    requestAnimationFrame(() => ov.classList.add('show'));
+    const ok = ov.querySelector('#epvHowOk');
+    ov.querySelectorAll('input[name="epvH"]').forEach(r => r.addEventListener('change', () => {
+      ov.querySelectorAll('.tbp-hw').forEach(l => l.classList.toggle('on', l.querySelector('input').checked));
+      ok.textContent = r.value === 'view' && r.checked ? '📖 Ouvrir ' + (n > 1 ? 'les documents' : 'le document') : 'Continuer ➜';
+    }));
+    const close = (v) => { document.removeEventListener('keydown', onKey, true); ov.remove(); res(v); };
+    const onKey = (e) => { if(e.key === 'Escape'){ e.preventDefault(); close(null); } };
+    document.addEventListener('keydown', onKey, true);
+    ov.addEventListener('click', (e) => {
+      if(e.target === ov){ close(null); return; }
+      const b = e.target.closest('[data-v]'); if(!b) return;
+      if(b.dataset.v !== 'ok'){ close(null); return; }
+      const r = ov.querySelector('input[name="epvH"]:checked');
+      close(r ? r.value : 'view');
+    });
+    setTimeout(() => { try{ ok.focus(); }catch(e){} }, 40);
+  });
+}
+/* le ranger sur l'appareil : le .md et ses images, en un seul fichier */
+async function mdvSave(x){
+  const imgs = [];
+  for(const fi of x.files){ try{ imgs.push({ p:fi.relPath || fi.name, t:fi.type || tbMdMime(fi.name), d:await tbDataUrlOf(fi) }); }catch(e){} }
+  const name = String(x.f.name || 'document.md');
+  const blob = new Blob([JSON.stringify({ v:1, name, dir:x.dir || '', md:x.raw, imgs })], { type:'application/json' });
+  const id = 'pd' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+  const old = pdvList().find(o => o.kind === 'md' && o.name === name);
+  if(!(await pdvPut(pdvBlobKey(id), blob))) throw new Error("plus de place sur l'appareil pour ce document");
+  if(old) await pdvDelete(old.id);
+  const meta = { id, kind:'md', title:String(x.info.title || name).slice(0, 150), author:'', name, n:x.info.parts, pages:[], scan:null, lang:'fra',
+    at:Date.now(), at0:Date.now(), last:old ? old.last || 0 : 0, mark:old ? old.mark || 0 : 0, pct:old ? old.pct || 0 : 0, dir:old ? old.dir || '' : '', size:blob.size };
+  const L = pdvList(); L.unshift(meta); pdvSaveList(L);
+  setTimeout(() => { try{ pdvCloudPump(); }catch(e){} }, 300);
+  return id;
+}
+/* l'ouvrir : le « livre » de la liseuse (ses parties, son sommaire, ses images) */
+async function mdvBook(blob, m){
+  let J;
+  try{ J = JSON.parse(await blob.text()); }catch(e){ throw new Error('le document est abîmé'); }
+  const files = [];
+  for(const o of (J.imgs || [])){ try{ const b = await (await fetch(o.d)).blob(); const f = new File([b], String(o.p || 'image').split('/').pop(), { type:o.t || b.type }); f.relPath = o.p; files.push(f); }catch(e){} }
+  const R = mdvRoot(J.md || ''), words = tbWordsCount(R.root.textContent);
+  const sp = mdvSplit(R.root, R.meta.title, J.name || m.name);
+  const hs = [];
+  sp.groups.forEach((g, c) => g.nodes.forEach(nd => { if(nd.nodeType === 1 && /^H[1-4]$/.test(nd.tagName)){ if(!nd.id) nd.id = 'h' + hs.length; hs.push({ el:nd, c, l:+nd.tagName[1] }); } }));
+  const lv = [...new Set(hs.map(h => h.l))].sort().slice(0, 3);
+  const toc = hs.filter(h => lv.includes(h.l)).map(h => ({ t:h.el.textContent.replace(/\s+/g, ' ').trim(), path:'c' + h.c, frag:h.el.id, d:lv.indexOf(h.l) })).filter(x => x.t);
+  const dir = J.dir || '';
+  return { md:true, title:sp.title, author:'', lang:'fr', words, nImg:files.length, toc,
+    spine:sp.groups.map((g, c) => ({ href:'c' + c, t:g.t })),
+    get:(p) => files.length ? tbMdFindImg(files, p, dir) : null,
+    chHtml:(c, ctx) => { const w = R.doc.createElement('div'); sp.groups[c].nodes.forEach(n => w.appendChild(n.cloneNode(true))); ctx.c = c; ctx.dir = ''; ctx.path = 'c' + c; return epvSan(w, ctx); } };
+}
+/* l'en-tête du document : son titre, son fichier, sa longueur */
+function mdvHeadHtml(S, B){
+  const w = B.words || 0, min = Math.max(1, Math.round(w / 200));
+  return `<header class="md-head"><div class="md-ico" aria-hidden="true">📝</div><h1 class="md-ttl">${escapeHtml(B.title || S.m.title)}</h1>
+    <div class="md-meta"><span>📄 ${escapeHtml(S.m.name || 'document.md')}</span><span>${w.toLocaleString('fr-FR')} mots</span><span>≈ ${min} min de lecture</span>${B.toc.length ? `<span>☰ ${B.toc.length} titre${B.toc.length > 1 ? 's' : ''}</span>` : ''}</div></header>`;
+}
+/* le sommaire reste ouvert à côté (grand écran), sauf si tu l'as fermé */
+function mdvDocInit(S){
+  S.ov.classList.toggle('epv-one', S.chs.length < 2);
+  if(window.innerWidth >= 900 && tbUi().mdvToc !== false && (S.B.toc || []).length > 1){
+    const el = S.ov.querySelector('#epvToc'); if(el) el.hidden = false;
+    S.ov.querySelectorAll('[data-epv="toc"]').forEach(b => b.setAttribute('aria-pressed', 'true'));
+  }
+}
+function mdvTocMem(S){ if(S.doc && window.innerWidth >= 900) epvUiSet({ mdvToc:!S.ov.querySelector('#epvToc').hidden }); }
+/* 👀 le titre où tu en es s'allume dans le sommaire */
+function mdvSpy(S, pct){
+  const L = [...S.ov.querySelectorAll('#epvToc [data-epv="go"]')]; if(!L.length) return;
+  if(!S.heads || S.heads.length !== L.length) S.heads = L.map(b => { const c = +b.dataset.c, fr = b.dataset.frag; return (fr && S.body.querySelector('#' + CSS.escape(epvId(c, fr)))) || (S.chs[c] && S.chs[c].el) || null; });
+  const line = S.body.getBoundingClientRect().top + Math.min(56, S.body.clientHeight * 0.1);   // un titre arrivé en haut de l'écran
+  let k = -1;
+  for(let i = 0; i < S.heads.length; i++){ const h = S.heads[i]; if(!h) continue; if(h.getBoundingClientRect().top <= line) k = i; else break; }
+  const st = S.ov.querySelector('#epvSt'); if(st) st.textContent = `${k >= 0 ? L[k].textContent + ' · ' : ''}${Math.round(pct || 0)} % lu`;
+  if(S.spy === k) return;
+  S.spy = k;
+  L.forEach((b, i) => b.classList.toggle('on', i === k));
+  const box = S.ov.querySelector('#epvToc .epv-toc-l'), b = L[k];
+  if(box && b && !S.ov.querySelector('#epvToc').hidden){ const lr = box.getBoundingClientRect(), r = b.getBoundingClientRect(); if(r.top < lr.top + 24 || r.bottom > lr.bottom - 24) box.scrollTop += (r.top - lr.top) - lr.height / 3; }
+}
 /* ranger le livre sur l'appareil (avec les PDF « tels quels » : même étagère, mêmes dossiers, même synchro) */
 async function epvSave(file){
   const B = await epvParse(file, file.name);
@@ -53846,7 +54141,7 @@ const EPV_DROP = new Set('script style link meta iframe object embed form input 
 const EPV_MIME = { jpg:'image/jpeg', jpeg:'image/jpeg', png:'image/png', gif:'image/gif', webp:'image/webp', svg:'image/svg+xml', avif:'image/avif', bmp:'image/bmp' };
 function epvId(c, id){ return 'e' + c + '-' + String(id).replace(/[^\w-]/g, '_'); }
 function epvImgUrl(ctx, src){
-  if(!src || /^(data:|https?:)/i.test(src)) return /^data:image\//i.test(src || '') ? src : '';
+  if(!src || /^(data:|https?:)/i.test(src)) return /^data:image\//i.test(src || '') ? src : (ctx.web && /^https:\/\//i.test(src) ? src : '');
   const path = tbPathNorm(tbPathJoin(ctx.dir, String(src).split('#')[0]));
   if(ctx.urls.has(path)) return ctx.urls.get(path);
   const f = ctx.get(path); if(!f){ ctx.urls.set(path, ''); return ''; }
@@ -53870,6 +54165,7 @@ function epvSan(node, ctx){
     if(tag === 'img' || tag === 'image'){
       const u = epvImgUrl(ctx, n.getAttribute('src') || n.getAttribute('xlink:href') || n.getAttribute('href'));
       if(u){ const w = parseInt(n.getAttribute('width') || '', 10), small = w && w <= 40; out += `<img src="${u}" alt="${escapeHtml(n.getAttribute('alt') || '')}" loading="lazy" decoding="async"${small ? ' class="epv-img-in"' : ''}>`; }
+      else if(ctx.md){ const s0 = String(n.getAttribute('src') || ''); let nm = n.getAttribute('alt') || ''; if(!nm){ try{ nm = decodeURIComponent(s0.split(/[?#]/)[0].split('/').pop()); }catch(e){ nm = s0; } } out += `<span class="md-miss">🖼 ${escapeHtml(nm || 'image')}</span>`; }
       return;
     }
     if(tag === 'center') tag = 'div';
@@ -53887,6 +54183,11 @@ function epvSan(node, ctx){
     if(tag === 'td' || tag === 'th') ['colspan', 'rowspan'].forEach(a => { const v = n.getAttribute(a); if(v && /^\d{1,2}$/.test(v)) at += ` ${a}="${v}"`; });
     const lg = n.getAttribute('xml:lang') || n.getAttribute('lang'); if(lg && /^[a-z]{2,3}(-[a-z0-9]{2,8})?$/i.test(lg)) at += ` lang="${lg}"`;
     const dr = n.getAttribute('dir'); if(dr === 'rtl' || dr === 'ltr') at += ` dir="${dr}"`;
+    if(ctx.md){                                                       // 📝 1.0.58 : les encadrés, les cases à cocher, la langue du code
+      const dc = n.getAttribute('data-call'); if(dc && /^(note|tip|warn|ex|q|key|rule)$/.test(dc)) at += ` data-call="${dc}"`;
+      const dt = n.getAttribute('data-task'); if(tag === 'li' && (dt === '0' || dt === '1')) at += ` data-task="${dt}"`;
+      const dl = n.getAttribute('data-lang'); if(tag === 'pre' && dl && /^[\w+#.-]{1,24}$/.test(dl)) at += ` data-lang="${dl}"`;
+    }
     if(tag !== 'a'){
       const st = n.getAttribute('style') || '', cn = String(n.getAttribute('class') || '').toLowerCase(), al = /text-align\s*:\s*(center|right|justify)/i.exec(st);
       const c = al ? 'epv-a-' + al[1].toLowerCase() : (/(^|[\s_-])(center|centre|centered|centrer|aligncenter)([\s_-]|$)/.test(cn) ? 'epv-a-center' : (/(^|[\s_-])(right|alignright|droite)([\s_-]|$)/.test(cn) ? 'epv-a-right' : ''));
@@ -53898,6 +54199,7 @@ function epvSan(node, ctx){
   return out;
 }
 async function epvChapterHtml(B, it, c, ctx){
+  if(B.md) return B.chHtml(c, ctx);                                  // 📝 un document .md
   const f = B.get(it.href); if(!f) return '';
   const raw = await f.text();
   let doc = null;
@@ -53915,9 +54217,10 @@ async function epvOpen(id, at){
   try{ pdvClose(true); }catch(e){}
   epvClose(true);
   try{ wtClose(); }catch(e){}
+  EPV_DOC = m.kind === 'md';
   const U = epvUi();
   const ov = document.createElement('div');
-  ov.className = 'pdv-ov epv-ov epv-' + U.th; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-label', 'Lire « ' + m.title + ' »');
+  ov.className = 'pdv-ov epv-ov epv-' + U.th + (EPV_DOC ? ' epv-doc' : ''); ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-label', 'Lire « ' + m.title + ' »');
   ov.innerHTML = `<div class="pdv-top" role="toolbar" aria-label="Outils du livre">
       <button type="button" class="pdv-ib" data-epv="x" aria-label="Fermer (Échap)" title="Fermer (Échap)">✕</button>
       <button type="button" class="pdv-ib pdv-sidebtn" data-epv="toc" aria-label="Le sommaire" title="Le sommaire (S)" aria-pressed="false">☰</button>
@@ -53927,7 +54230,7 @@ async function epvOpen(id, at){
       <button type="button" class="pdv-ib" data-epv="aa" aria-label="Police, thème, largeur" title="Police, thème, largeur" aria-expanded="false">Aa</button>
       <button type="button" class="pdv-ib ${U.th === 'night' ? 'on' : ''}" data-epv="night" aria-label="Mode nuit (N)" title="Mode nuit (N)" aria-pressed="${U.th === 'night'}">🌙</button>
       <button type="button" class="pdv-ib" data-epv="find" aria-label="Rechercher (Ctrl F)" title="Rechercher (Ctrl F)" aria-pressed="false">🔍</button>
-      <button type="button" class="pdv-ib" data-lr="say" aria-label="Écouter : la voix lit, phrase par phrase" title="🔊 Écouter : la voix lit, phrase par phrase">🔊</button><button type="button" class="pdv-ib" data-lr="self" aria-label="Je lis à voix haute : le micro me suit" title="🎤 Je lis à voix haute : le micro me suit">🎤</button><button type="button" class="pdv-ib" data-lr="pan" aria-label="Surligneur : couleurs, mot ou phrase" title="🖍 Surligneur : couleurs, mot ou phrase" aria-expanded="false">🖍</button>
+      <button type="button" class="pdv-ib" data-lr="say" aria-label="Écouter : la voix lit, phrase par phrase" title="🔊 Écouter : la voix lit, phrase par phrase">🔊</button><button type="button" class="pdv-ib" data-lr="self" aria-label="Je lis à voix haute : le micro me suit" title="🎤 Je lis à voix haute : le micro me suit">🎤</button><button type="button" class="pdv-ib" data-lr="frame" aria-label="Encadrer la partie à lire" title="▭ Encadrer la partie à lire (un article, une colonne)">▭</button><button type="button" class="pdv-ib" data-lr="pan" aria-label="Surligneur : couleurs, mot ou phrase" title="🖍 Surligneur : couleurs, mot ou phrase" aria-expanded="false">🖍</button>
       <button type="button" class="pdv-ib pdv-crb" data-epv="carnet" aria-label="Mon carnet : les mots tagués" title="Mon carnet : les mots tagués">🏷️<b class="pdv-crn" id="pdvCrN"></b></button>
     </div>
     <div class="pdv-find" id="epvFind" hidden role="search">
@@ -53938,6 +54241,7 @@ async function epvOpen(id, at){
       <div class="pdv-fres" id="epvRes" role="list"></div>
     </div>
     <div class="epv-aa" id="epvAa" hidden role="dialog" aria-label="Réglages de lecture">
+      <div class="epv-aa-l">Taille du texte</div><div class="epv-aa-r epv-aa-z"><button type="button" data-epv="zm-" aria-label="Texte plus petit">A−</button><button type="button" data-epv="zm0" class="epv-zv2" title="Taille normale">100 %</button><button type="button" data-epv="zm+" aria-label="Texte plus grand">A+</button></div>
       <div class="epv-aa-l">Police</div><div class="epv-aa-r"><button type="button" data-epv-font="serif" style="font-family:${EPV_FONTS.serif}">Livre</button><button type="button" data-epv-font="sans" style="font-family:${EPV_FONTS.sans}">Moderne</button><button type="button" data-epv-font="dys" style="font-family:${EPV_FONTS.dys}">Lisible</button></div>
       <div class="epv-aa-l">Thème</div><div class="epv-aa-r"><button type="button" data-epv-th="day">Jour</button><button type="button" data-epv-th="sepia">Sépia</button><button type="button" data-epv-th="night">Nuit</button></div>
       <div class="epv-aa-l">Largeur du texte</div><div class="epv-aa-r"><button type="button" data-epv-w="s">Étroite</button><button type="button" data-epv-w="m">Moyenne</button><button type="button" data-epv-w="l">Large</button></div>
@@ -53951,12 +54255,12 @@ async function epvOpen(id, at){
     <div class="tb pdv-tb" id="epvTb"><div class="tb-sheet" id="tbSheet" aria-hidden="true"></div><div class="tb-toast" id="tbToast" role="status" aria-live="polite"></div></div>`;
   document.body.appendChild(ov);
   document.body.classList.add('pdv-on');
-  const S = EPV = { id, m, ov, body:ov.querySelector('#epvBody'), book:null, pages:[], chs:[], cur:0, tok:0, find:{ q:'', hits:[], i:-1 }, urls:[], tbArt:null, tbPage:-1, off:[] };
+  const S = EPV = { id, m, ov, doc:EPV_DOC, body:ov.querySelector('#epvBody'), book:null, pages:[], chs:[], cur:0, tok:0, find:{ q:'', hits:[], i:-1 }, urls:[], tbArt:null, tbPage:-1, off:[] };
   epvApplyUi(S);
   try{ bkPush('epv', () => epvClose()); }catch(e){}
   // 📇 la fiche des mots et le carnet (comme sur la Tablette et les PDF)
   S.tbPrev = { art:TB.art, sents:TB.sents, toks:TB.toks, sentToks:TB.sentToks, spans:TB.spans, nS:TB.nS, blocks:TB.blocks, sBase:TB.sBase };
-  S.tbArt = { id:'epv:' + id, _pdv:id, title:m.title, tags:[], src:'Livre' };
+  S.tbArt = { id:'epv:' + id, _pdv:id, title:m.title, tags:[], src:S.doc ? 'Document' : 'Livre' };
   TB.art = S.tbArt; TB.sents = []; TB.toks = []; TB.sentToks = []; TB.spans = []; TB.nS = 0; TB.sheetK = -1; TB.pick = null; TB.sBase = 0;
   pdvGet(pdvTbKey(id)).then(v => { if(v && Array.isArray(v.tags) && EPV === S){ S.tbArt.tags = v.tags; pdvCrBadge(S); } }).catch(() => {});
   const tbh = ov.querySelector('#epvTb');
@@ -53977,26 +54281,27 @@ async function epvOpen(id, at){
   let B;
   try{
     const blob = await pdvGet(pdvBlobKey(id)); if(!blob) throw new Error("le fichier n'est plus sur cet appareil");
-    B = await epvParse(blob, m.name || 'livre.epub');
-    if(!B.spine.length) throw new Error('aucun chapitre dans ce livre');
-  }catch(e){ if(EPV === S) S.body.innerHTML = `<div class="pdv-load err">⚠️ Impossible d'ouvrir ce livre : ${escapeHtml(e && e.message || 'il est abîmé')}.</div>`; return; }
+    B = S.doc ? await mdvBook(blob, m) : await epvParse(blob, m.name || 'livre.epub');
+    if(!B.spine.length) throw new Error(S.doc ? 'ce document est vide' : 'aucun chapitre dans ce livre');
+  }catch(e){ if(EPV === S) S.body.innerHTML = `<div class="pdv-load err">⚠️ Impossible d'ouvrir ce ${S.doc ? 'document' : 'livre'} : ${escapeHtml(e && e.message || 'il est abîmé')}.</div>`; return; }
   if(EPV !== S) return;
   S.B = B;
-  const ctx = { get:B.get, urls:new Map(), made:S.urls, c:0, dir:'', path:'' };
+  const ctx = { get:B.get, urls:new Map(), made:S.urls, c:0, dir:'', path:'', md:!!B.md, web:!!B.md };
   const parts = [];
   for(let c = 0; c < B.spine.length; c++){
     let h = ''; try{ h = await epvChapterHtml(B, B.spine[c], c, ctx); }catch(e){ h = ''; }
     parts.push(h);
     if(EPV !== S) return;
   }
-  const titleOf = (c) => { const it = B.spine[c], t = B.toc.find(x => x.path === it.href && !x.frag) || B.toc.find(x => x.path === it.href); return t ? t.t : ''; };
-  S.body.innerHTML = `<article class="epv-book" id="epvBook" lang="${tbAttr((B.lang || 'fr').slice(0, 10))}">${parts.map((h, c) => `<section class="epv-ch" data-c="${c}" id="epvC${c}" aria-label="${tbAttr(titleOf(c) || 'Chapitre ' + (c + 1))}"><div class="epv-cc">${h}</div></section>`).join('')}<div class="epv-end">— Fin —</div></article>`;
+  const titleOf = (c) => { if(B.md) return B.spine[c].t || (c === 0 ? B.title : ''); const it = B.spine[c], t = B.toc.find(x => x.path === it.href && !x.frag) || B.toc.find(x => x.path === it.href); return t ? t.t : ''; };
+  S.body.innerHTML = `<article class="epv-book" id="epvBook" lang="${tbAttr((B.lang || 'fr').slice(0, 10))}">${B.md ? mdvHeadHtml(S, B) : ''}${parts.map((h, c) => `<section class="epv-ch" data-c="${c}" id="epvC${c}" aria-label="${tbAttr(titleOf(c) || 'Chapitre ' + (c + 1))}"><div class="epv-cc">${h}</div></section>`).join('')}<div class="epv-end">— Fin —</div></article>`;
   S.book = S.body.querySelector('#epvBook');
   S.chs = [...S.book.querySelectorAll('.epv-ch')].map((el, k) => ({ k, p:k + 1, el, cc:el.querySelector('.epv-cc'), title:titleOf(k), path:B.spine[k].href, armed:false }));
   S.pages = S.chs;
   // les chapitres vides (une page de garde sans texte ni image) restent, sans prendre de place
   S.chs.forEach(ch => { if(!ch.cc.textContent.trim() && !ch.cc.querySelector('img')) ch.el.style.display = 'none'; });
   epvTocPaint(S);
+  if(S.doc) mdvDocInit(S);
   // 👀 un chapitre qui arrive à l'écran : ses mots deviennent touchables
   S.io = new IntersectionObserver(es => es.forEach(e => { if(e.isIntersecting){ const ch = S.chs[+e.target.dataset.c]; if(ch) epvArm(S, ch); } }), { root:S.body, rootMargin:'800px 0px' });
   S.chs.forEach(ch => S.io.observe(ch.el));
@@ -54016,6 +54321,7 @@ function epvApplyUi(S){
   if(U.font === 'dys' && typeof tbFontLoad === 'function'){ try{ tbFontLoad('atkinson'); }catch(e){} }
   S.ov.style.setProperty('--epv-z', U.z); S.ov.style.setProperty('--epv-ff', EPV_FONTS[U.font]); S.ov.style.setProperty('--epv-w', EPV_W[U.w]); S.ov.style.setProperty('--epv-lh', U.lh);
   const zv = S.ov.querySelector('#epvZv'); if(zv) zv.textContent = Math.round(U.z * 100) + ' %';
+  S.ov.querySelectorAll('.epv-zv2').forEach(x => { x.textContent = Math.round(U.z * 100) + ' %'; });
   const nb = S.ov.querySelector('[data-epv="night"]'); if(nb){ nb.classList.toggle('on', U.th === 'night'); nb.setAttribute('aria-pressed', String(U.th === 'night')); }
   S.ov.querySelectorAll('[data-epv-font]').forEach(b => b.classList.toggle('on', b.dataset.epvFont === U.font));
   S.ov.querySelectorAll('[data-epv-th]').forEach(b => b.classList.toggle('on', b.dataset.epvTh === U.th));
@@ -54075,7 +54381,8 @@ function epvSeen(S){
   const st = S.ov.querySelector('#epvSt'), ch = S.chs[c];
   if(st) st.textContent = `${ch && ch.title ? ch.title + ' · ' : ''}${Math.round(pct)} % lu`;
   const pn = S.ov.querySelector('#epvPn'); if(pn) pn.textContent = `${c + 1} / ${S.chs.length}`;
-  S.ov.querySelectorAll('#epvToc [data-epv="go"]').forEach(b => b.classList.toggle('on', +b.dataset.c === c && !b.dataset.frag));
+  if(S.doc) mdvSpy(S, pct);
+  else S.ov.querySelectorAll('#epvToc [data-epv="go"]').forEach(b => b.classList.toggle('on', +b.dataset.c === c && !b.dataset.frag));
   clearTimeout(S.saveT);
   S.saveT = setTimeout(() => { if(EPV === S){ S.pct = pct; pdvPatch(S.id, { last:pos, pct:Math.round(pct) }); } }, 1500);
   if(ch) epvArm(S, ch);
@@ -54086,8 +54393,9 @@ function epvTocPaint(S){
   const idx = (path) => B.spine.findIndex(it => it.href === path);
   let L = B.toc.map(t => ({ t:t.t, c:idx(t.path), frag:t.frag, d:t.d })).filter(x => x.c >= 0);
   if(!L.length) L = S.chs.map(ch => ({ t:ch.title || ('Chapitre ' + (ch.k + 1)), c:ch.k, frag:'', d:0 }));
-  const mk = S.m.mark ? `<button type="button" class="epv-toc-mk" data-epv="mark-go">🔖 Aller au marque-page (chapitre ${Math.floor(S.m.mark)})</button>` : '';
-  el.innerHTML = `<div class="epv-toc-h"><b>☰ Sommaire</b><button type="button" class="pdv-ib" data-epv="toc-x" aria-label="Fermer le sommaire">✕</button></div>${mk}<div class="epv-toc-l" role="list">${L.map(x => `<button type="button" role="listitem" data-epv="go" data-c="${x.c}" data-frag="${tbAttr(x.frag || '')}" style="padding-left:${10 + Math.min(4, x.d) * 16}px">${escapeHtml(x.t)}</button>`).join('')}</div>`;
+  const mk = S.m.mark ? `<button type="button" class="epv-toc-mk" data-epv="mark-go">🔖 Aller au marque-page (${S.doc ? 'partie' : 'chapitre'} ${Math.floor(S.m.mark)})</button>` : '';
+  S.heads = null; S.spy = -2;
+  el.innerHTML = `<div class="epv-toc-h"><b>☰ Sommaire</b><button type="button" class="pdv-ib" data-epv="toc-x" aria-label="Fermer le sommaire">✕</button></div>${mk}<div class="epv-toc-l" role="list">${L.map(x => `<button type="button" role="listitem" data-epv="go" data-c="${x.c}" data-frag="${tbAttr(x.frag || '')}" data-d="${Math.min(4, x.d)}" style="padding-left:${10 + Math.min(4, x.d) * 16}px">${escapeHtml(x.t)}</button>`).join('')}</div>`;
 }
 function epvTocShow(S, on){
   const el = S.ov.querySelector('#epvToc'); if(!el) return;
@@ -54237,8 +54545,11 @@ function epvClick(S, e){
     const a = b.dataset.epv;
     e.preventDefault();
     if(a === 'x') epvClose();
-    else if(a === 'toc') epvTocShow(S, S.ov.querySelector('#epvToc').hidden);
-    else if(a === 'toc-x') epvTocShow(S, false);
+    else if(a === 'toc' || a === 'toc-x'){
+      const on = a === 'toc' && S.ov.querySelector('#epvToc').hidden, side = S.doc && window.innerWidth >= 720, pos = side ? epvPos(S) : 0;
+      epvTocShow(S, on); mdvTocMem(S);
+      if(side) requestAnimationFrame(() => { epvGoPos(S, pos, true); S.spy = -2; epvSeen(S); });   // le texte change de largeur : on reste au même endroit
+    }
     else if(a === 'go'){ if(window.innerWidth < 720) epvTocShow(S, false); epvGoCh(S, +b.dataset.c, b.dataset.frag || ''); }
     else if(a === 'mark-go'){ if(window.innerWidth < 720) epvTocShow(S, false); S.moved = true; epvGoPos(S, S.m.mark, false); }
     else if(a === 'prev' || a === 'next'){ let c = S.cur + (a === 'next' ? 1 : -1); while(S.chs[c] && S.chs[c].el.style.display === 'none') c += a === 'next' ? 1 : -1; if(a === 'prev' && S.chs[S.cur] && S.body.scrollTop - S.chs[S.cur].el.offsetTop > 40) c = S.cur; epvGoCh(S, c); }
@@ -54268,7 +54579,8 @@ function epvClick(S, e){
   const ln = e.target.closest('a[data-epv-go]');
   if(ln){
     e.preventDefault();
-    const [pa, fr] = String(ln.dataset.epvGo).split('#'), c = S.chs.findIndex(ch => ch.path === pa);
+    const [pa, fr0] = String(ln.dataset.epvGo).split('#'); let fr = fr0 || '', c = S.chs.findIndex(ch => ch.path === pa);
+    if(S.doc && fr){ try{ fr = decodeURIComponent(fr); }catch(x){} const k = S.chs.findIndex(ch => ch.el.querySelector('#' + CSS.escape(epvId(ch.k, fr)))); if(k >= 0) c = k; }   // 📝 un lien vers un titre du document
     if(c >= 0){ S.back = S.body.scrollTop; epvGoCh(S, c, fr || ''); const bb = S.ov.querySelector('#epvBack'); if(bb){ bb.hidden = false; clearTimeout(bb.__t); bb.__t = setTimeout(() => { bb.hidden = true; }, 12000); } }
     return;
   }
@@ -54281,6 +54593,7 @@ function epvClick(S, e){
 /* ---------- ⌨ le clavier ---------- */
 function epvKeysWire(S){
   S.onKey = (e) => {
+    if(document.querySelector('.vv-frame-ov')) return;                     // ▭ 1.0.58 : on trace un cadre
     if(EPV !== S) return;
     const typing = e.target && e.target.matches && e.target.matches('input, textarea, select');
     const mod = e.ctrlKey || e.metaKey;
@@ -54433,7 +54746,7 @@ async function pdvOpen(id, at){
   if(!m){ await pdvListLoad(); m = pdvMeta(id); }
   if(!m){ const e = pdvCloudOf(id); if(e && !e.gone && e.url){ if(!(await pdvCloudGet(e))) return; m = pdvMeta(id); } }      // ☁️ 1.0.47
   if(!m){ setStatus("📖 Ce fichier n'est plus sur cet appareil.", 'err'); pdvShelfRefresh(); return; }
-  if(m.kind === 'epub') return epvOpen(id, at);     // 📕 1.0.54 : un livre .epub, dans sa liseuse
+  if(m.kind === 'epub' || m.kind === 'md') return epvOpen(id, at);     // 📕 1.0.54 : un livre .epub, dans sa liseuse (📝 1.0.58 : un document .md aussi)
   pdvClose(true);
   try{ wtClose(); }catch(e){}
   const N = (m.pages || []).length || m.n;
@@ -54452,7 +54765,7 @@ async function pdvOpen(id, at){
       <button type="button" class="pdv-ib pdv-lzb ${tbUi().pdvLz === false ? '' : 'on'}" data-pdv="lz" aria-label="Les liaisons, les pauses et la mélodie sur la page" title="Liaisons ‿, pauses | ‖ et mélodie ↗ ↘ (L)" aria-pressed="${tbUi().pdvLz === false ? 'false' : 'true'}">‿</button>
       <button type="button" class="pdv-ib" data-pdv="find" aria-label="Rechercher (Ctrl F)" title="Rechercher (Ctrl F)" aria-pressed="false">🔍</button>
       <button type="button" class="pdv-ib pdv-crb" data-pdv="carnet" aria-label="Mon carnet : les mots tagués" title="Mon carnet : les mots tagués">🏷️<b class="pdv-crn" id="pdvCrN"></b></button>
-      <button type="button" class="pdv-ib" data-lr="say" aria-label="Écouter : la voix lit, phrase par phrase" title="🔊 Écouter : la voix lit, phrase par phrase">🔊</button><button type="button" class="pdv-ib" data-lr="self" aria-label="Je lis à voix haute : le micro me suit" title="🎤 Je lis à voix haute : le micro me suit">🎤</button><button type="button" class="pdv-ib" data-lr="pan" aria-label="Surligneur : couleurs, mot ou phrase" title="🖍 Surligneur : couleurs, mot ou phrase" aria-expanded="false">🖍</button>
+      <button type="button" class="pdv-ib" data-lr="say" aria-label="Écouter : la voix lit, phrase par phrase" title="🔊 Écouter : la voix lit, phrase par phrase">🔊</button><button type="button" class="pdv-ib" data-lr="self" aria-label="Je lis à voix haute : le micro me suit" title="🎤 Je lis à voix haute : le micro me suit">🎤</button><button type="button" class="pdv-ib" data-lr="frame" aria-label="Encadrer la partie à lire" title="▭ Encadrer la partie à lire (un article, une colonne)">▭</button><button type="button" class="pdv-ib" data-lr="pan" aria-label="Surligneur : couleurs, mot ou phrase" title="🖍 Surligneur : couleurs, mot ou phrase" aria-expanded="false">🖍</button>
       <button type="button" class="pdv-ib pdv-helpb" data-pdv="help" aria-label="Raccourcis clavier (?)" title="Raccourcis clavier (?)">⌨</button>
     </div>
     <div class="pdv-find" id="pdvFind" hidden role="search">
@@ -54714,6 +55027,7 @@ function pdvKeysWire(S){
   const B = S.body, typing = (e) => /input|textarea|select/i.test((e.target && e.target.tagName) || '') || (e.target && e.target.isContentEditable);
   const page = (d) => { const pg = S.pages[S.cur]; if(!pg) return; B.scrollBy({ top:d * B.clientHeight * 0.9, behavior:'smooth' }); };
   S.onKey = (e) => {
+    if(document.querySelector('.vv-frame-ov')) return;                     // ▭ 1.0.58 : on trace un cadre
     if(PDV !== S || document.querySelector('.wcp-ov, .fsa-ov, .am-dlg-ov, .tbpw-ov')) return;
     const k = e.key, mod = e.ctrlKey || e.metaKey, q = S.ov.querySelector('#pdvQ');
     if(e.target === q){
@@ -56557,6 +56871,21 @@ async function tbMdImport(fileList, cat){
     if(ims.length) return tbImgsOcrImport(ims, cat);                // 📷 1.0.38 : des photos de pages → leur texte (OCR)
     setStatus("📥 Choisis un PDF (même scanné), des photos de pages, un document Word (.docx), un fichier .md (Markdown), une page .html, un .zip, un livre .epub ou un .txt.", 'err'); return [];
   }
+  // 📝 1.0.58 : un .md s'ouvre comme un document (la liseuse : le sommaire à côté, une vraie mise en page) — ou en texte sur la Tablette
+  if(docs.every(d => tbMdKind(d) === 'md') && !TB.mdAsText){
+    const ims0 = pool.filter(f => tbMdKind(f) === 'img'), scans = [];
+    for(const d of docs){ try{ scans.push(await mdvScan(d, ims0)); }catch(e){ console.warn('md', e); } }
+    if(scans.length){
+      const how = await mdvAskHow(scans);
+      if(!how){ setStatus('📥 Import annulé.', 'ok'); return []; }
+      if(how === 'view'){
+        let first = null;
+        for(const x of scans){ try{ const id = await mdvSave(x); if(!first) first = id; }catch(e){ console.warn('md', e); setStatus(`📝 Impossible de garder « ${x.f.name} » : ${e && e.message || 'erreur'}.`, 'err'); } }
+        if(first){ setStatus(scans.length > 1 ? `📝 ${scans.length} documents rangés avec tes PDF et tes livres.` : '', 'ok'); pdvShelfRefresh(); epvOpen(first); try{ playCorrectSound(); }catch(e){} }
+        return [];
+      }
+    }
+  }
   setStatus(`📥 Je prépare ${docs.length > 1 ? docs.length + ' fichiers' : '« ' + docs[0].name + ' »'}…`, 'ok');
   const imgs = pool.filter(f => tbMdKind(f) === 'img'), parsed = [];
   for(const d of docs){ try{ parsed.push(await tbMdParseFile(d, imgs)); }catch(e){ console.warn('md', e); parsed.push({ file:d.name, err:true }); } }
@@ -56643,6 +56972,35 @@ function tbDraftRestore(){
   try{ TB.draft = { title:d.title || '', html:tbBlocksToEdHtml(d.blocks), at:d.at }; return TB.draft; }catch(e){ return null; }
 }
 window.addEventListener('pagehide', () => { try{ tbDraftFlush(); }catch(e){} });
+/* 🏷️ 1.0.58 : le nom « AllInOneVision » tient toujours dans la barre du haut : s'il manque de place (téléphone, bouton profil…), il rétrécit */
+function navFitBrand(){
+  const bw = document.querySelector('.navbar .brand-word'); if(!bw) return;
+  bw.style.fontSize = '';
+  if(!bw.offsetParent || getComputedStyle(bw).display === 'none') return;
+  const nb = bw.closest('.navbar'); if(!nb) return;
+  for(let k = 0; k < 4; k++){                  // (les autres boutons bougent quand le nom rétrécit : on mesure à nouveau)
+    const q = bw.getBoundingClientRect();
+    const nx = [...nb.querySelectorAll('button')].filter(x => x.offsetParent && x.getBoundingClientRect().left >= q.left + 4).map(x => x.getBoundingClientRect().left);
+    if(!nx.length) return;
+    const avail = Math.min(...nx) - q.left - 8, need = bw.scrollWidth;
+    if(need <= avail || avail <= 0) return;
+    const f = parseFloat(getComputedStyle(bw).fontSize) || 19, nf = Math.max(12, Math.floor(f * avail / need * 10) / 10);
+    if(nf >= f) return;
+    bw.style.fontSize = nf + 'px';
+  }
+}
+(function(){
+  let rq = 0;
+  const go = () => { if(rq) return; rq = requestAnimationFrame(() => { rq = 0; try{ navFitBrand(); }catch(e){} }); };
+  const wire = () => {
+    window.addEventListener('resize', go);
+    try{ new MutationObserver(go).observe(document.body, { attributes:true, attributeFilter:['class'] }); }catch(e){}
+    try{ const nb = document.querySelector('.navbar'); if(nb && window.ResizeObserver){ const ro = new ResizeObserver(go); ro.observe(nb); nb.querySelectorAll('button').forEach(b => ro.observe(b)); } }catch(e){}
+    try{ document.fonts.ready.then(go); }catch(e){}
+    go(); setTimeout(go, 600);
+  };
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire); else wire();
+})();
 document.addEventListener('visibilitychange', () => { if(document.hidden) try{ tbDraftFlush(); }catch(e){} });
 /* 💾 1.0.42 : un texte modifié est enregistré, et on revient à la bibliothèque, sur ce texte */
 function tbAfterEditSave(art){
@@ -57701,6 +58059,8 @@ function tbRender(keep){
   }
   TB.spans = [];
   document.querySelectorAll('#tbPage .tbw').forEach(sp => { TB.spans[+sp.dataset.k] = sp; });
+  if(TB.zone && (!TB.art || TB.zone.id !== TB.art.id)) TB.zone = null;   // ▭ 1.0.58 : le cadre suit son texte
+  try{ tbZonePaint(); }catch(e){}
   tbRelocateTags();
   tbPaintTags(); tbPaintHits(); if(TB.hintsOn) tbPaintHints(true);
   tbEndHtml();
@@ -57936,6 +58296,7 @@ function tbDock(){
   d.innerHTML = `
     <button type="button" class="tb-dk" data-tb="listen"><span class="tb-dk-i">▶</span><span>Écouter</span></button>
     <button type="button" class="tb-dk" data-tb="self"><span class="tb-dk-i">🎤</span><span>Je lis</span></button>
+    <button type="button" class="tb-dk ${tbZoneOn() ? 'on' : ''}" data-tb="frame" title="Encadrer la partie à lire"><span class="tb-dk-i">▭</span><span>Cadre</span></button>
     <button type="button" class="tb-dk ${dxOn() ? 'on' : ''}" data-tb="marks" aria-pressed="${dxOn()}"><span class="tb-dk-i">🫁</span><span>Liaisons</span></button>
     <button type="button" class="tb-dk ${TB.hunt ? 'on' : ''}" data-tb="hunt" aria-pressed="${TB.hunt}"><span class="tb-dk-i">🖍</span><span>Chasse</span></button>
     <button type="button" class="tb-dk" data-tb="carnet"><span class="tb-dk-i">🏷️<b class="tb-badge" id="tbBadge">${n || ''}</b></span><span>Carnet</span></button>`;
@@ -57962,11 +58323,13 @@ function tbPlay(from){
   tbStopModes();
   TB.mode = 'play'; TB.playing = true;
   tbDock();
-  tbSpeak(from != null ? from : tbFirstVisibleSent());
+  const z = tbZoneSents();
+  tbSpeak(z ? z[0] : (from != null ? from : tbFirstVisibleSent()));
 }
 function tbSpeak(i){
   clearTimeout(TB.gapT);
   if(i < 0) i = 0;
+  if(tbZoneOn()){ const nx = tbZoneNext(i); if(nx < 0){ TB.playing = false; TB.mode = ''; tbHl(-1); tbDock(); tbToast('✓ Fin du cadre'); return; } i = nx; }   // ▭ 1.0.58
   if(i >= tbNS()){
     TB.playing = false; TB.mode = ''; tbHl(-1); tbDock();
     TB.art.done = true; TB.art.pct = 1; tbSaveArt();
@@ -57976,7 +58339,7 @@ function tbSpeak(i){
   const tok = ++TB.token;
   TB.cur = i; tbHl(i, true);
   const n = document.getElementById('tbPlN'); if(n) n.textContent = `${i + 1} / ${tbNS()}`;
-  const s = TB.sents[i];
+  const s = tbZoneOn() ? tbZoneText(i) : TB.sents[i];
   tbNarrFr(dxOn() ? dxSpeakText(s) : s, 'fr-FR', () => {
     if(tok !== TB.token || !TB.playing || !document.getElementById('tbReader')) return;
     TB.gapT = setTimeout(() => { if(tok === TB.token && TB.playing) tbSpeak(i + 1); }, 260);
@@ -58008,17 +58371,164 @@ function tbStopModes(quiet){
    • après un silence, les mots qui manquent passent en orange ;
    • 🎙️ ta voix peut être enregistrée, pour la réécouter ensuite avec la phrase surlignée au fil de l'écoute. */
 var TB_SR_OK = 0.75;
+/* ▭ 1.0.58 : tracer un cadre au-dessus d'une zone (PDF, livre, texte, image) → le rectangle en coordonnées de l'écran (ou null) */
+function vvFrameDraw(host, onDone, hint){
+  document.querySelectorAll('.vv-frame-ov').forEach(x => x.remove());
+  const R = host.getBoundingClientRect();
+  const ov = document.createElement('div'); ov.className = 'vv-frame-ov';
+  Object.assign(ov.style, { left:R.left + 'px', top:R.top + 'px', width:R.width + 'px', height:R.height + 'px' });
+  ov.innerHTML = `<div class="vv-frame-tip" role="status"><span>${escapeHtml(hint || '▭ Trace un cadre autour du passage à lire')}</span><button type="button" data-x="1">✕ Annuler</button></div><div class="vv-frame-box" hidden></div>`;
+  document.body.appendChild(ov);
+  const box = ov.querySelector('.vv-frame-box');
+  let st = null, done = false;
+  const end = (r) => { if(done) return; done = true; ov.remove(); document.removeEventListener('keydown', key, true); try{ onDone(r); }catch(e){ console.warn('cadre', e); } };
+  const key = (e) => { if(e.key === 'Escape'){ e.preventDefault(); e.stopPropagation(); end(null); } };
+  const upd = (e) => {
+    const x0 = Math.max(R.left, Math.min(st.x, e.clientX)), y0 = Math.max(R.top, Math.min(st.y, e.clientY)), x1 = Math.min(R.right, Math.max(st.x, e.clientX)), y1 = Math.min(R.bottom, Math.max(st.y, e.clientY));
+    Object.assign(box.style, { left:(x0 - R.left) + 'px', top:(y0 - R.top) + 'px', width:Math.max(0, x1 - x0) + 'px', height:Math.max(0, y1 - y0) + 'px' });
+    st.r = { left:x0, top:y0, right:x1, bottom:y1 };
+  };
+  ov.querySelector('[data-x]').addEventListener('click', (e) => { e.stopPropagation(); end(null); });
+  ov.addEventListener('pointerdown', (e) => {
+    if(e.target.closest('.vv-frame-tip')) return;
+    e.preventDefault(); st = { x:e.clientX, y:e.clientY, id:e.pointerId }; try{ ov.setPointerCapture(e.pointerId); }catch(err){}
+    box.hidden = false; upd(e);
+  });
+  ov.addEventListener('pointermove', (e) => { if(st && e.pointerId === st.id) upd(e); });
+  ov.addEventListener('pointerup', (e) => { if(!st || e.pointerId !== st.id) return; upd(e); const r = st.r; st = null; if(!r || r.right - r.left < 14 || r.bottom - r.top < 10){ box.hidden = true; return; } end(r); });
+  ov.addEventListener('wheel', (e) => { if(!st) host.scrollBy({ top:e.deltaY }); }, { passive:true });
+  document.addEventListener('keydown', key, true);
+  return ov;
+}
+function vvInRect(el, r){ const q = el.getBoundingClientRect(); if(!q.width && !q.height) return false; const cx = (q.left + q.right) / 2, cy = (q.top + q.bottom) / 2; return cx >= r.left && cx <= r.right && cy >= r.top && cy <= r.bottom; }
+/* ---------- ▭ la Tablette : la partie encadrée ---------- */
+function tbZoneOn(){ return !!(TB.zone && TB.art && TB.zone.id === TB.art.id && TB.zone.ks.size); }
+function tbZoneSents(){ if(!tbZoneOn()) return null; const S = new Set(); TB.zone.ks.forEach(k => { const t = TB.toks[k]; if(t && t.s < tbNS()) S.add(t.s); }); return [...S].sort((a, b) => a - b); }
+function tbZoneNext(i){ const z = tbZoneSents(); if(!z) return i; const n = z.find(x => x >= i); return n == null ? -1 : n; }
+function tbZoneText(i){ return (TB.sentToks[i] || []).filter(k => TB.zone.ks.has(k)).map(k => (TB.toks[k] || {}).raw || '').join(' ').replace(/\s+/g, ' ').trim(); }
+function tbZonePaint(){
+  document.querySelectorAll('#tbBody .tbw.tb-zone').forEach(x => x.classList.remove('tb-zone'));
+  document.querySelectorAll('.vv-zone-chip.tb').forEach(x => x.remove());
+  if(!tbZoneOn()) return;
+  TB.zone.ks.forEach(k => { const sp = TB.spans[k]; if(sp) sp.classList.add('tb-zone'); });
+  const root = document.getElementById('tbReader') || document.body;
+  const c = document.createElement('div'); c.className = 'vv-zone-chip tb'; c.setAttribute('role', 'toolbar'); c.setAttribute('aria-label', 'Partie encadrée');
+  c.innerHTML = `<span>▭ ${TB.zone.ks.size} mots encadrés</span><button type="button" data-tb="listen" aria-label="Écouter la partie encadrée">▶</button><button type="button" data-tb="self" aria-label="Lire la partie encadrée à voix haute">🎤</button><button type="button" data-tb="zone-x" aria-label="Enlever le cadre">✕</button>`;
+  root.appendChild(c);
+}
+function tbZoneClear(quiet){ const was = tbZoneOn(); TB.zone = null; tbZonePaint(); try{ tbDock(); }catch(e){} if(was && !quiet) tbToast('▭ Cadre enlevé : tout le texte se lit de nouveau'); }
+function tbFrame(){
+  tbStopModes(true); try{ tbCloseSheet(); }catch(e){}
+  const sc = document.getElementById('tbScroll'); if(!sc) return;
+  vvFrameDraw(sc, (r) => {
+    if(!r) return;
+    // une image sous le cadre : on lit le texte de cette partie de l'image seulement
+    const area = (r.right - r.left) * (r.bottom - r.top);
+    const fig = [...document.querySelectorAll('#tbBody .tb-fig[data-b]')].find(f => { const im = f.querySelector('img'); if(!im) return false; const q = im.getBoundingClientRect(); const ix = Math.max(0, Math.min(r.right, q.right) - Math.max(r.left, q.left)), iy = Math.max(0, Math.min(r.bottom, q.bottom) - Math.max(r.top, q.top)); return ix * iy > 0.55 * area; });
+    if(fig){ tbImgOcrZone(fig, r); return; }
+    const ks = [...document.querySelectorAll('#tbBody .tbw[data-k]:not(.tb-ow)')].filter(sp => vvInRect(sp, r)).map(sp => +sp.dataset.k).filter(k => TB.toks[k] && TB.toks[k].s < tbNS());
+    if(!ks.length){ tbToast('Aucun mot dans ce cadre : recommence en entourant le passage.', 3000); return; }
+    TB.zone = { id:TB.art.id, ks:new Set(ks) };
+    tbZonePaint(); tbDock();
+    tbToast(`▭ ${ks.length} mots encadrés : ▶ Écouter et 🎤 Je lis lisent seulement eux`, 3600);
+  }, '▭ Trace un cadre autour du passage à lire (ou de la partie d\'une image)');
+}
+/* ---------- ▭ les PDF et les livres : la partie encadrée ---------- */
+function lrInZone(S, k, s){ const Z = S.zone; if(!Z) return true; if(Z.k !== k) return false; const I = lrIdx(S, k), x = I && I.S[s]; return !!(x && x.gs.some(gi => Z.gs.has(gi))); }
+function lrZoneFirst(S){ const Z = S.zone, I = Z && lrIdx(S, Z.k); if(!I) return 0; for(let s = 0; s < I.S.length; s++) if(I.S[s].gs.some(gi => Z.gs.has(gi))) return s; return 0; }
+function lrZoneGs(L, x){ const Z = L.S.zone; return Z ? x.gs.filter(gi => Z.gs.has(gi)) : x.gs; }
+/* la phrase suivante dans le cadre (ou la fin du cadre) */
+function lrZoneSeek(L){
+  const Z = L.S.zone; if(!Z) return true;
+  const I = lrIdx(L.S, L.k);
+  if(L.k === Z.k && I){ while(L.s < I.S.length && !lrInZone(L.S, L.k, L.s)) L.s++; if(L.s < I.S.length) return true; }
+  lrNote(L.S, '✓ Fin du cadre'); lrStop(true); return false;
+}
+function lrZonePaintUnit(S){
+  const Z = S.zone; if(!Z) return;
+  const I = lrIdx(S, Z.k); if(!I) return;
+  lrGroupEls(S, Z.k, I, [...Z.gs]).forEach(el => el.classList.add('lr-zone'));
+}
+function lrZoneChip(S){
+  S.ov.querySelectorAll('.vv-zone-chip').forEach(x => x.remove());
+  if(!S.zone) return;
+  const c = document.createElement('div'); c.className = 'vv-zone-chip'; c.setAttribute('role', 'toolbar'); c.setAttribute('aria-label', 'Partie encadrée');
+  c.innerHTML = `<span>▭ ${S.zone.gs.size} mots encadrés</span><button type="button" data-lr="say" aria-label="Écouter la partie encadrée">🔊</button><button type="button" data-lr="self" aria-label="Lire la partie encadrée à voix haute">🎤</button><button type="button" data-lr="zone-x" aria-label="Enlever le cadre">✕</button>`;
+  S.ov.appendChild(c);
+}
+function lrZoneClear(S, quiet){
+  const was = !!S.zone;
+  S.ov.querySelectorAll('.lr-zone').forEach(x => x.classList.remove('lr-zone'));
+  S.zone = null; lrZoneChip(S);
+  if(was && !quiet) lrNote(S, '▭ Cadre enlevé');
+}
+function lrFrame(S){
+  if(S === PDV && S.pdk && S.pdk.on){ lrNote(S, '📖 Quitte le mode liseuse (📖) pour encadrer une partie de la page'); return; }
+  if(LR && LR.S === S) lrStop(true);
+  vvFrameDraw(S.body, (r) => {
+    if(!r) return;
+    const hits = new Map();
+    S.body.querySelectorAll(S === PDV ? '.pdv-tl span[data-j]' : '.epv-w[data-j]').forEach(sp => {
+      if(!vvInRect(sp, r)) return;
+      const k = lrUnitOf(S, sp); if(k < 0) return;
+      const I = lrIdx(S, k); if(!I) return;
+      const gi = I.gOf[+sp.dataset.j]; if(gi == null || gi < 0) return;
+      if(!hits.has(k)) hits.set(k, new Set());
+      hits.get(k).add(gi);
+    });
+    let best = null; hits.forEach((gs, k) => { if(!best || gs.size > best.gs.size) best = { k, gs }; });
+    if(!best){ lrNote(S, 'Aucun mot dans ce cadre : recommence en entourant le passage.'); return; }
+    lrZoneClear(S, true); S.zone = best; lrZonePaintUnit(S); lrZoneChip(S);
+    lrNote(S, `▭ ${best.gs.size} mots encadrés : 🔊 et 🎤 lisent seulement eux`);
+  }, '▭ Trace un cadre autour du passage à lire');
+}
+/* ---------- 🖼 les images : en couleurs, pas de lecture automatique du texte ; on encadre la partie à lire ---------- */
+function tbImgColorful(img){
+  try{
+    const cv = document.createElement('canvas'); cv.width = cv.height = 48;
+    const cx = cv.getContext('2d', { willReadFrequently:true }); cx.drawImage(img, 0, 0, 48, 48);
+    const d = cx.getImageData(0, 0, 48, 48).data, hues = new Array(12).fill(0);
+    let col = 0, n = 0;
+    for(let i = 0; i < d.length; i += 4){
+      if(d[i + 3] < 40) continue;
+      n++;
+      const r = d[i] / 255, g = d[i + 1] / 255, b = d[i + 2] / 255, mx = Math.max(r, g, b), mn = Math.min(r, g, b), s = mx ? (mx - mn) / mx : 0;
+      if(s > 0.32 && mx > 0.22){
+        col++;
+        let h = 0; const c = mx - mn; if(c){ h = mx === r ? ((g - b) / c) % 6 : mx === g ? (b - r) / c + 2 : (r - g) / c + 4; } hues[Math.floor(((h * 60 + 360) % 360) / 30)]++;
+      }
+    }
+    if(!n) return false;
+    const big = hues.filter(x => x > n * 0.03).length;
+    return col / n > 0.28 || (col / n > 0.12 && big >= 3);
+  }catch(e){ return true; }                                   // (une image d'un autre site : on ne lit pas)
+}
+async function tbImgOcrZone(fig, r){
+  const bi = +fig.dataset.b, b = TB.art && TB.art.blocks && TB.art.blocks[bi], img = fig.querySelector('img'), key = tbImgOcrKey(b);
+  if(!key || !img || !img.naturalWidth) return;
+  const q = img.getBoundingClientRect();
+  const x0 = Math.max(0, (r.left - q.left) / q.width), y0 = Math.max(0, (r.top - q.top) / q.height);
+  const z = { x:x0, y:y0, w:Math.min(1, (r.right - q.left) / q.width) - x0, h:Math.min(1, (r.bottom - q.top) / q.height) - y0 };
+  if(z.w < 0.03 || z.h < 0.02){ tbToast('Le cadre est trop petit : entoure le texte de l’image.'); return; }
+  const o = fig.querySelector('.tb-ocr'); if(o) o.remove();
+  const d = await tbImgOcrRun(fig, img, key, z); if(!d) return;
+  if(!d.n){ tbToast('Pas de texte lisible dans ce cadre : essaie d’entourer seulement les lignes de texte.', 3200); return; }
+  tbImgOcrMount(fig, bi, d); try{ tbPaintTags(); tbPaintKnown(); }catch(err){}
+  tbToast(`📝 ${d.n} mot${d.n > 1 ? 's' : ''} lu${d.n > 1 ? 's' : ''} dans le cadre : touche un mot pour sa fiche`, 3200);
+}
 /* ============ 🎤 1.0.57 : LE MICRO QUI SUIT TA LECTURE — le même pour la Tablette, les PDF et les livres ============
    • ce que tu dis est aligné sur les mots DANS L'ORDRE (le plus de mots possible) : un « la » dit n'allume plus
      tous les « la » de la phrase, et une phrase répétée par la reconnaissance ne trompe plus le suivi ;
    • un curseur montre le mot à lire ; touche un mot pour commencer (ou reprendre) là ;
-   • la phrase suivante vient seulement quand TOUS ses mots sont lus (⏭ pour passer à la main) ;
-   • un mot sauté ou mal dit passe en orange : la voix le dit, tu le répètes ; après 2 essais, il est validé en jaune ;
+   • la phrase suivante vient quand tu es arrivé au bout (⏭ pour passer à la main) ;
+   • 1.0.58 : un mot que le micro n'a pas compris (même bien dit) passe en JAUNE et la lecture continue — plus de répétition ;
+   • les noms propres (Knesset, Ouarzazate…) sont reconnus plus facilement ;
    • ce que tu dis apparaît tout de suite (vert pâle), et se valide dès que tu marques une pause. */
 var MIC_TRIES = 2, MIC_SETTLE = 1100, MIC_STUCK = 4000, MIC_FIXWAIT = 4500;
 function micNew(words, from){
   from = Math.max(0, from || 0);
-  const W = words.map((w, i) => ({ n:w.n || '', els:w.els || [], form:w.form || '', st:(!w.n || i < from) ? 3 : 0, tries:0 }));   // st : 0 à lire · 1 lu · 2 aidé · 3 pas demandé
+  const W = words.map((w, i) => ({ n:w.n || '', els:w.els || [], form:w.form || '', st:(!w.n || i < from) ? 3 : 0, tries:0,
+    loose:!!(w.n && w.form && ((i > 0 && /^\p{Lu}/u.test(w.form)) || /\p{Ll}\p{Lu}/u.test(w.form) || /^\p{Lu}{2,}/u.test(w.form))) }));   // st : 0 à lire · 1 lu · 2 pas compris (jaune) · 3 pas demandé · loose : un nom propre
   const M = { W, pos:0, anchor:0, fixQ:[], fix:null, memo:new Map(), prov:new Set(), heardAt:Date.now(), tokN:0, got:0, from };
   micFwd(M);
   return M;
@@ -58035,12 +58545,29 @@ function micMatch(M, i, toks, k){
     const n = M.W[i].n;
     let L = n ? spMatchAt(n, toks, k, null, false) : 0, f = false;
     if(!L && n){ L = spMatchAt(n, toks, k, null, true); f = !!L; }
+    if(!L && n && M.W[i].loose){ L = micLoose(n, toks, k); f = !!L; }          // 🎤 1.0.58 : un nom propre, à l'oreille
     v = L ? (f ? -L : L) : 0;
     if(M.memo.size > 30000) M.memo.clear();
     M.memo.set(key, v);
   }
   return v;
 }
+/* 🎤 1.0.58 : un nom propre se reconnaît « à l'oreille », plus largement : même première consonne, à peu près les mêmes sons
+   (« Knesset » ≈ « nesset », « Ouarzazate » ≈ « warzazat », « Abdellatif » ≈ « abdel latif ») */
+function micLoose(n, toks, k){
+  const kn = spKey(n); if(!kn || kn.length < 2) return 0;
+  let s = '';
+  for(let L = 1; L <= 3 && k + L <= toks.length; L++){
+    s += toks[k + L - 1];
+    if(s.length > n.length * 1.7 + 3) break;
+    const ks = spKey(s); if(!ks) continue;
+    const a = kn.replace(/v/g, 'u').replace(/^[aeiou]+/, ''), b = ks.replace(/v/g, 'u').replace(/^[aeiou]+/, '');
+    if((a[0] || kn[0]) !== (b[0] || ks[0]) && kn[0] !== ks[0]) continue;
+    if(Math.abs(kn.length - ks.length) <= Math.max(2, Math.ceil(kn.length * 0.5)) && levenshtein(kn, ks) <= Math.max(1, Math.ceil(kn.length * 0.45))) return L;
+  }
+  return 0;
+}
+var MIC_FILLERS = /^(euh|heu|hum|hmm|bah|ben|bon|ah|oh|eh|hein|mmh|mm)$/;
 /* les mots [pos, fin) et les morceaux entendus [a, fin) : le meilleur alignement dans l'ordre → Map(mot → [morceau, longueur]) */
 function micAlign(M, toks, a){
   const i0 = M.pos, ni = M.W.length - i0, mk = Math.max(0, toks.length - a), out = new Map();
@@ -58087,7 +58614,7 @@ function micEval(M, toks, finN, settled){
     for(let i = M.pos; i <= J; i++){
       const w = M.W[i]; if(w.st) continue;
       if(r.has(i)) w.st = 1;
-      else if(!M.fixQ.includes(i) && !(M.fix && M.fix.i === i)) M.fixQ.push(i);     // sauté ou mal dit : on y reviendra
+      else w.st = 2;                                                          // 🎤 1.0.58 : pas compris → jaune, et on continue
     }
     M.pos = J + 1; micFwd(M); M.anchor = Math.max(M.anchor, JE);
     r.forEach((v, i) => { if(i <= J) M.prov.delete(i); });
@@ -58095,21 +58622,21 @@ function micEval(M, toks, finN, settled){
   M.got = M.W.filter(w => w.st === 1 || w.st === 2).length;
   return micDone(M);
 }
-/* toutes les demi-secondes : un mot raté → la voix le dit ; tu bloques → la voix t'aide ; 2 essais → validé (jaune) */
-function micTick(M, host){
+/* toutes les demi-secondes. 🎤 1.0.58 : tu as dit quelque chose que le micro n'a pas reconnu, puis tu t'es arrêté (souvent
+   un nom propre ou le dernier mot) : ces mots passent en jaune — autant de mots que de morceaux entendus — et on continue.
+   Plus de répétition par la voix. Si tu ne dis rien, on attend (⏭ ou toucher un mot pour aller plus loin). */
+function micTick(M, host, toks){
   if(host.busy()) return '';
-  const now = Date.now(), idle = now - M.heardAt;
-  if(M.fix){
-    if(M.fix.at < 0) return '';                                                  // la voix parle encore
-    const heard = M.tokN > M.fix.at;
-    if((heard && idle >= MIC_SETTLE + 300) || now - M.fix.t0 >= MIC_FIXWAIT) return micFixNext(M, host, M.fix.i);
-    return '';
-  }
-  if(M.fixQ.length && (idle >= MIC_SETTLE || M.pos >= M.W.length)) return micFixNext(M, host, M.fixQ[0]);
-  // tu as dit quelque chose qui n'est pas le mot suivant, puis tu t'es arrêté : il est mal dit → la voix te le dit
-  if(idle >= MIC_SETTLE + 700 && M.pos < M.W.length && M.tokN > M.anchor && !M.prov.size){ M.fixQ.push(M.pos); return micFixNext(M, host, M.pos); }
-  if(idle >= MIC_STUCK && M.pos < M.W.length && (M.got > 0 || M.tokN > 0)){ M.fixQ.push(M.pos); return micFixNext(M, host, M.pos); }
-  return '';
+  const idle = Date.now() - M.heardAt;
+  if(idle < MIC_SETTLE + 600 || M.pos >= M.W.length || M.tokN <= M.anchor || M.prov.size) return '';
+  const extra = (toks || []).slice(M.anchor).filter(t => !MIC_FILLERS.test(t)).length;
+  if(!extra){ M.anchor = M.tokN; return ''; }
+  let n = 0;
+  while(M.pos < M.W.length && n < Math.min(3, extra)){ const w = M.W[M.pos]; if(!w.st){ w.st = 2; n++; } M.pos++; }
+  micFwd(M);
+  M.anchor = M.tokN;
+  M.got = M.W.filter(w => w.st === 1 || w.st === 2).length;
+  return n ? 'help' : '';
 }
 function micFixNext(M, host, i){
   M.fix = null;
@@ -58145,7 +58672,7 @@ function micSessionToks(S){
 }
 /* la Tablette */
 var TB_MIC_CLS = { ok:'ok', help:'mic-help', miss:'miss', fix:'mic-fix', cur:'mic-cur', prov:'mic-prov' };
-function tbMicWords(i){ return tbSentSpans(i).map(sp => ({ n:sp.dataset.n || '', els:[sp], form:((TB.toks[+sp.dataset.k] || {}).form) || sp.textContent })); }
+function tbMicWords(i){ const Z = tbZoneOn() ? TB.zone.ks : null; return tbSentSpans(i).map(sp => ({ n:(Z && !Z.has(+sp.dataset.k)) ? '' : (sp.dataset.n || ''), els:[sp], form:((TB.toks[+sp.dataset.k] || {}).form) || sp.textContent })); }
 function tbSelfToksF(){ const S = TB.sr, acc = TB.selfAcc || [], c = S ? S.consumed : 0, q = micSessionToks(S); return { toks:acc.concat(q.t.slice(c)), finN:acc.length + Math.max(0, q.f - c) }; }
 function tbSelfConsume(used){ const S = TB.sr, acc = TB.selfAcc || []; if(used <= acc.length) TB.selfAcc = acc.slice(used); else { if(S) S.consumed += used - acc.length; TB.selfAcc = []; } }
 var TB_MIC_HOST = {
@@ -58183,7 +58710,7 @@ function tbSelfOpen(){
     ? "Lis la phrase surlignée à voix haute, puis touche <b>⏭</b> pour passer à la suivante. Ta voix est enregistrée : tu pourras la réécouter, phrase par phrase."
     : mode === 'echo'
     ? "🔁 <b>Phrase par phrase</b> : la voix lit la phrase surlignée, puis c'est à toi — répète-la à voix haute, les mots s'allument en vert quand tu les dis. Phrase bien dite : on passe tout seul à la suivante (⏭ pour passer, 🔊 pour réécouter)."
-    : "Lis la phrase surlignée à voix haute : les mots s'allument en vert quand tu les dis, le curseur te suit, et on passe à la suivante quand tous les mots sont lus. Un mot raté passe en orange : la voix te le dit, tu le répètes (après 2 essais, il est validé en jaune). Touche un mot pour reprendre à cet endroit.";
+    : "Lis la phrase surlignée à voix haute : les mots s'allument en vert quand tu les dis, le curseur te suit, et on passe à la suivante quand tu es arrivé au bout. Un mot que le micro n'a pas compris passe en jaune, et tu continues. Touche un mot pour reprendre à cet endroit.";
   sh.innerHTML = `<div class="tb-sh-in">
     <div class="tb-grab" aria-hidden="true"></div>
     <div class="tb-sh-top"><div><div class="tb-sh-w">Lire à voix haute</div><div class="tb-sh-ipa">${tbNS()} phrase${tbNS() > 1 ? 's' : ''}</div></div><button type="button" class="tb-ib" data-tb="sheet-x" aria-label="Fermer">✕</button></div>
@@ -58223,6 +58750,7 @@ async function tbSelfStart(from, wordK){
       tbToast("🎙️ Ta voix ne peut pas être gardée ici : on lit sans l'enregistrer.", 3200);
     }
   }
+  if(tbZoneOn() && wordK == null){ const z = tbZoneSents(); if(z && z.length) from = z[0]; }     // ▭ 1.0.58 : on commence au début du cadre
   { const s0 = Math.max(0, Math.min(from || 0, tbNS() - 1)), w0 = wordK != null ? tbSentSpans(s0).findIndex(sp => +sp.dataset.k === wordK) : -1;
     tbSelfSent(s0, Math.max(0, w0)); }
   if(TB.selfKind === 'sr' && !TB.selfEcho) tbSRStart();          // 🔁 en « écoute puis répète », le micro s'ouvre après la voix
@@ -58235,6 +58763,7 @@ function tbSelfHead(){
 }
 function tbSelfSent(i, from){
   if(TB.mode !== 'self') return;
+  if(tbZoneOn()){ const nx = tbZoneNext(i); if(nx < 0) return tbSelfDone(); if(nx !== i){ i = nx; from = 0; } }   // ▭ 1.0.58 : seulement la partie encadrée
   if(i >= tbNS()) return tbSelfDone();
   TB.cur = i; TB.selfRatio = 0; TB.selfStall = false; TB.selfLastHeard = Date.now();
   tbHl(i, true);
@@ -58318,12 +58847,10 @@ function tbSelfEval(hadFinal, settled){
     TB.ms = null;
     try{ playChime([660, 990], { type:'sine', noteDur:0.07, gap:0.02, volume:0.06 }); }catch(e){}
     tbSelfSent(i + 1);
-    if(TB.mode === 'self' && TB.cur === i + 1) tbSelfSay(sc >= 0.99 ? '✓ Parfait ! Phrase suivante' : `✓ Phrase lue (${Math.round(sc * 100)} %, en jaune : avec de l'aide)`);
+    if(TB.mode === 'self' && TB.cur === i + 1) tbSelfSay(sc >= 0.99 ? '✓ Parfait ! Phrase suivante' : `✓ Phrase lue (en jaune : ce que le micro n'a pas compris)`);
     return;
   }
-  if(M.fix){ if(M.fix.at >= 0) tbSelfSay(`🗣️ À toi : « ${M.W[M.fix.i].form} »`); }
-  else if(M.fixQ.length) tbSelfSay(`Continue… (en orange : à reprendre) ${M.got} / ${n} mots`);
-  else if(M.got || M.prov.size) tbSelfSay(`Continue… ${Math.min(n, M.got + M.prov.size)} / ${n} mots`);
+  if(M.got || M.prov.size) tbSelfSay(`Continue… ${Math.min(n, M.got + M.prov.size)} / ${n} mots`);
 }
 /* le micro de la Tablette : reconnaissance continue, relancée toute seule si le navigateur la coupe */
 function tbSRStart(){
@@ -58386,9 +58913,8 @@ function tbSelfTickFn(){
   if(M){                                                                      // 🎤 1.0.57 : tu marques une pause → ce qui est dit est validé ; un mot raté → la voix le dit
     if(Date.now() - M.heardAt >= MIC_SETTLE && M.prov.size) tbSelfEval(false, true);
     if(TB.mode !== 'self' || TB.ms !== M) return;
-    const a = micTick(M, TB_MIC_HOST);
-    if(a === 'help'){ const w = M.W.find(x => x.st === 2 && !x.said); if(w){ w.said = 1; tbSelfSay(`💛 « ${w.form} » : validé avec de l'aide`); } tbSelfEval(false, true); }
-    else if(a) micPaint(M, TB_MIC_CLS);
+    const a = micTick(M, TB_MIC_HOST, tbSelfToksF().toks);
+    if(a === 'help'){ const w = M.W.filter(x => x.st === 2 && !x.said); w.forEach(x => { x.said = 1; }); if(w.length) tbSelfSay(`💛 « ${w.map(x => x.form).join(' ')} » : pas compris par le micro, on continue`); tbSelfEval(false, true); }
     if(TB.mode !== 'self') return;
     TB.selfLastHeard = Math.max(TB.selfLastHeard, (TB.ms || M).heardAt);
   }
@@ -58446,7 +58972,7 @@ function tbSelfDone(){
   try{ playCorrectSound(); }catch(e){}
   try{ if(avg != null && avg >= 80) launchConfetti(); }catch(e){}
   if(hadRec) return;          // la fiche « Ta lecture » s'ouvre quand l'enregistrement est prêt
-  tbToast(avg != null ? `🎉 Texte lu à voix haute en entier : ${avg} % des mots reconnus` : '🎉 Texte lu en entier', 4200);
+  tbToast(tbZoneOn() ? '✓ Fin du cadre : bien lu !' : (avg != null ? `🎉 Texte lu à voix haute en entier : ${avg} % des mots reconnus` : '🎉 Texte lu en entier'), 4200);
 }
 /* ---------- 🎙️ ta voix : enregistrer, garder, réécouter ---------- */
 function tbFmtT(s){ s = Math.max(0, Math.round(s || 0)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
@@ -59509,6 +60035,7 @@ function tbWire(el){
 }
 document.addEventListener('keydown', (e) => {
   if(!document.getElementById('tbReader')) return;
+  if(document.querySelector('.vv-frame-ov')) return;                       // ▭ 1.0.58 : on trace un cadre
   if(e.key === 'Escape'){
     if(document.querySelector('.wcp-ov')) return;                   // d'abord la fiche du mot (elle se ferme toute seule)
     if(TB.tipK >= 0){ tbTipClose(); e.preventDefault(); return; }
@@ -59636,6 +60163,15 @@ function tbAction(id, btn, e){
     case 'drop': { tbUi().drop = btn.dataset.v === '1'; tbSaveUi(); tbRender(true); tbToggleAa(true); return; }
     case 'img-al': { tbImgSet(TB.imgSel, { al:btn.dataset.v }); btn.parentNode.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === btn)); return; }
     case 'img-del': tbImgRemove(TB.imgSel); return;
+    case 'img-frame': {                                // ▭ 1.0.58 : encadrer le texte à lire dans l'image
+      const bi = TB.imgSel, fig = document.querySelector(`#tbBody .tb-fig[data-b="${bi}"]`); tbCloseSheet();
+      if(!fig) return;
+      fig.scrollIntoView({ block:'center' });
+      setTimeout(() => { const sc = document.getElementById('tbScroll'); vvFrameDraw(sc, (r) => { if(r) tbImgOcrZone(fig, r); }, '▭ Entoure le texte à lire dans l\u2019image'); }, 350);
+      return;
+    }
+    case 'frame': tbFrame(); return;
+    case 'zone-x': tbZoneClear(); return;
     case 'img-ocr': {                                  // 🔁 relire le texte de l'image
       const bi = TB.imgSel, b = TB.art.blocks[bi], key = tbImgOcrKey(b), fig = document.querySelector(`#tbBody .tb-fig[data-b="${bi}"]`), img = fig && fig.querySelector('img');
       if(!key || !img) return;
@@ -60026,7 +60562,7 @@ function audioMediaSession(){
   const c = audioCurrent(); if(!c) return;
   try{
     const base = location.href.replace(/[#?].*$/, '').replace(/[^/]*$/, '');
-    navigator.mediaSession.metadata = new MediaMetadata({ title:c.t.title, artist:c.p.title, album:'VocabVISION · Audiothèque',
+    navigator.mediaSession.metadata = new MediaMetadata({ title:c.t.title, artist:c.p.title, album:'AllInOneVision · Audiothèque',
       artwork:[{ src:base + 'icon-192.png', sizes:'192x192', type:'image/png' }, { src:base + 'icon-512.png', sizes:'512x512', type:'image/png' }] });
     const el = () => audioLib.el;
     const h = {
@@ -60858,7 +61394,7 @@ async function apOpen(auto){
   catch(e){ if(!auto) lexSnack('🪟 Impossible d’ouvrir le lecteur flottant (' + String(e && e.message || e).slice(0, 60) + ').'); return; }
   AP.win = w;
   const d = w.document;
-  d.title = 'VocabVISION · lecteur';
+  d.title = 'AllInOneVision · lecteur';
   const st = d.createElement('style');
   st.textContent = `html,body{margin:0;height:100%;}
     body{font-family:'Nunito','Segoe UI',system-ui,sans-serif;background:radial-gradient(120% 90% at 0% 0%,#4C1D95,#1E0B4B 60%,#0D0326);color:#fff;overflow:hidden;user-select:none;}
@@ -60878,7 +61414,7 @@ async function apOpen(auto){
     .ap-cap{font-size:12.5px;line-height:1.35;background:rgba(0,0,0,.25);border-radius:9px;padding:5px 8px;max-height:3.9em;overflow:hidden;}`;
   d.head.appendChild(st);
   let logo = ''; try{ logo = getComputedStyle(document.documentElement).getPropertyValue('--vv-logo').trim(); }catch(e){}
-  d.body.innerHTML = `<div class="ap" role="group" aria-label="Lecteur audio VocabVISION">
+  d.body.innerHTML = `<div class="ap" role="group" aria-label="Lecteur audio AllInOneVision">
     <div class="ap-h"><span class="ap-ic" id="apIc"></span><div class="ap-tt"><div class="ap-t" id="apT"></div><div class="ap-s" id="apS"></div></div></div>
     <div class="ap-bar" id="apBarW" title="Aller à…"><i id="apBar"></i></div><div class="ap-time" id="apTime"></div>
     <div class="ap-b"><button id="apPrev" title="Précédent" aria-label="Précédent">⏮</button><button id="apBack" title="Reculer de 10 s" aria-label="Reculer de 10 secondes">↺10</button><button id="apPlay" class="main" aria-label="Lecture">▶</button><button id="apFwd" title="Avancer de 10 s" aria-label="Avancer de 10 secondes">10↻</button><button id="apNext" title="Suivant" aria-label="Suivant">⏭</button><button id="apStop" title="Arrêter" aria-label="Arrêter">⏹</button></div>
@@ -61433,7 +61969,7 @@ function amConnectHtml(){
     <div class="am-h">🔑 Relie l'appli à ton dépôt GitHub <small>(une seule fois par appareil)</small></div>
     <ol>
       <li>Ouvre <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">github.com › Settings › Fine-grained tokens › <b>Generate new token</b></a>.</li>
-      <li><b>Token name</b> : <i>VocabVISION Audiothèque</i> · <b>Expiration</b> : la durée de ton choix (ex. 1 an).</li>
+      <li><b>Token name</b> : <i>AllInOneVision Audiothèque</i> · <b>Expiration</b> : la durée de ton choix (ex. 1 an).</li>
       <li><b>Repository access</b> → <i>Only select repositories</i> → <b>${AUDIO_SRC.owner}/${AUDIO_SRC.repo}</b>.</li>
       <li><b>Permissions</b> → <i>Repository permissions</i> → <b>Contents</b> → <b>Read and write</b>.</li>
       <li><b>Generate token</b>, copie le code <code>github_pat_…</code> et colle-le ici :</li>

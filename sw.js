@@ -1,9 +1,9 @@
-/* VocabVISION — Service Worker
+/* AllInOneVision — Service Worker
    Met l'application en cache pour un fonctionnement hors-ligne
    et permet l'installation depuis le navigateur (PWA). */
 
 // 🏷️ Version publiée : mise à jour automatiquement par publier-site.cmd (même numéro que dans index.html)
-const VERSION = '1.0.57';
+const VERSION = '1.0.58';
 const CACHE = 'vocabvision-' + VERSION;
 const ASSETS = [
   './',

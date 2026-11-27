@@ -1,7 +1,7 @@
 {
-  "name": "VocabVISION — Vocabulaire FR ↔ AR",
-  "short_name": "VocabVISION",
-  "description": "Apprends le vocabulaire français-arabe avec des quiz, du chrono, la prononciation et des défis quotidiens.",
+  "name": "AllInOneVision — Lire, écouter, apprendre (FR ↔ AR)",
+  "short_name": "AllInOneVision",
+  "description": "Tout-en-un : lis tes textes, PDF, livres et documents, écoute-les, et apprends le vocabulaire français-arabe avec des quiz, la prononciation et des défis quotidiens.",
   "start_url": ".",
   "scope": ".",
   "display": "standalone",
